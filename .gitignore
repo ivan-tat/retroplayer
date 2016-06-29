@@ -31,3 +31,10 @@
 # Debug files
 *.dSYM/
 *.su
+
+# Project specific files
+*.bak
+*.map
+*.lst
+*.tpu
+*.s3m
