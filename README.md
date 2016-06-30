@@ -16,7 +16,9 @@ My interests in this project:
 
 * Just for fun;
 
-* Make it portable: use C without assembler;
+* Clean code: split code, remove all unneeded assembler optimizations and obfuscations;
+
+* Make it portable: completely rewrite in C;
 
 * Practice Git;
 
@@ -35,3 +37,7 @@ My interests in this project:
 * Turbo Pascal 7.0 compiler for DOS (will be dropped)
 
 * Turbo Assembler 3.0 compiler for DOS (will be dropped)
+
+* Sound Blaster Programming Information Version 0.90 (1995) by Andre Baresel & Craig Jackson
+
+* TECH Help! 6.0 (1994) by Flambeaux Software
