@@ -2,24 +2,24 @@
 cls
 set PC=tpc -q
 set AS=tasm -t
-cd blaster
-%PC% blaster.pas
-cd ..\main
+cd dos
 %AS% dosproc.asm
 %AS% ems4fct.asm
+%PC% emstool.pas
+cd ..\blaster
+%PC% blaster.pas
+cd ..\main
 %AS% filldma.asm
 %AS% mixing.asm
 %AS% processo.asm
 %AS% readnote.asm
 %AS% volume.asm
-%PC% emstool.pas
-%PC% -U..\blaster s3mplay.pas
+%PC% -U..\dos;..\blaster s3mplay.pas
 cd ..
-%PC% -Ublaster;main smalls3m
+%PC% -Udos;blaster;main smalls3m
 cd osci
 %AS% lines.asm
-%PC% -U..\blaster;..\main s3m_osci
+%PC% -U..\dos;..\blaster;..\main s3m_osci
 cd ..\player
-%AS% dosproc.asm
-%PC% -U..\blaster;..\main plays3m
+%PC% -U..\dos;..\blaster;..\main plays3m
 cd ..

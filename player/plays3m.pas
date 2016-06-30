@@ -19,7 +19,7 @@ var samplerate:word;
     screen_no:byte;  { current info on screen }
     startchn:byte;
 
-{$L DOSPROC.OBJ}
+{$L ..\dos\dosproc.obj}
 function getfreesize:word; external;
 
 function tohexs(w:word):string;

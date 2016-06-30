@@ -5,6 +5,8 @@ saferm() {
 }
 
 echo "Cleaning project..."
+saferm ./dos/*.obj
+saferm ./dos/*.tpu
 saferm ./blaster/*.tpu
 saferm ./main/*.obj
 saferm ./main/*.tpu

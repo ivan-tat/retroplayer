@@ -177,13 +177,13 @@ VAR S3M_inMemory:BOOLEAN;
     rampwave     :array[0..63] of shortint;
     squarewave   :array[0..63] of byte;
 
-{$L DOSPROC.OBJ}
+{$L ..\dos\dosproc.obj}
 function getdosmem(var p;anz:longint):boolean; external;
 procedure freedosmem(var p); external;
 function getfreesize:word; external;
 function setsize(var p;anz:longint):boolean; external;
 
-{$L EMS4FCT.OBJ}
+{$L ..\dos\ems4fct.obj}
 procedure setEMSnames; near; external;
 
 {$L READNOTE.OBJ}
