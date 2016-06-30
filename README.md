@@ -26,13 +26,15 @@ My interests in this project:
 
 ## Links
 
-* [DOSEMU](http://www.dosemu.org/)
+* [DOSEMU](http://www.dosemu.org/) (DOS emulator with LFN support)
 
-* [DOSBox](http://www.dosbox.com/)
+* [DOSBox](http://www.dosbox.com/) (DOS emulator with good hardware support)
 
 * [DJGPP](http://www.delorie.com/djgpp/) (DOS ports of many GNU development utilities)
 
 * [Open Watcom](http://www.openwatcom.org/) (optimizing C/C++ and assembler compilers for DOS)
+
+* [The Doszip Commander](https://sourceforge.net/projects/doszip/) (good NC clone for DOS with LFN support)
 
 * Turbo Pascal 7.0 compiler for DOS (will be dropped)
 
