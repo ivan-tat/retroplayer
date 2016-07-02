@@ -563,12 +563,15 @@ var a,b,c:string;
         { try to allocate EMS for all patterns : }
         if (EMSfreepages<(patnum+(patperpage-1)) div patperpage) then
           begin
-            Ppagesleft:=EMSfreepages;patEMShandle:=EMSalloc(Ppagesleft);EMSpat:=true;
+            Ppagesleft:=EMSfreepages;
+            patEMShandle:=EMSalloc(Ppagesleft);
+            EMSpat:=true;
           end
         else
           begin
             patEMShandle:=EMSalloc((patnum+(patperpage-1)) div patperpage);
-            Ppagesleft:=(patnum+(patperpage-1)) div patperpage;EMSpat:=true
+            Ppagesleft:=(patnum+(patperpage-1)) div patperpage;
+            EMSpat:=true
           end;
       end;
     if useEMS and EMSpat then
@@ -675,7 +678,7 @@ var a,b,c:string;
     { free buffer : }
     freedosmem(buffer);
     { Just for fun set names for EMS handles (does only work for EMS>= v4.0) }
-    if EMSversion>=4.0 then setEMSnames;
+    if ( EMSVersion.Hi >= 4 ) then setEMSnames;
     S3M_inMemory:=true;
     LOAD_S3M :=TRUE;
   END;

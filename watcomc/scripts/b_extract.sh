@@ -9,4 +9,4 @@
 
 DST=tmp
 mkdir -p "$DST"
-wlib -d="$DST" "$CLIB" '*intr.c' '*dointr'
+wlib -d="$DST" "$CLIB" '*intr.c' '*dointr' '*memcmp.c'

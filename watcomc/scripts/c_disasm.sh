@@ -15,13 +15,14 @@ disasm() {
 	wdis -l="$f_lst" "$f_obj"
 	wdis -a "$f_obj" >"$f_tmp"
 	sed -r -e "s/(^DGROUP[[:space:]]+GROUP[[:space:]]+)CONST,CONST2,(_DATA)/\1\2/;\
-/^CONST[2]?[[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$/d;\
-s/(^_TEXT[[:space:]]+(SEGMENT[[:space:]]+|ENDS[[:space:]]*))/$segname\1/;\
-s/(^[[:space:]]*ASSUME[[:space:]]+.+:)(_TEXT)/\1$segname\2/g" "$f_tmp" >"$f_asm"
+s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$)/_DATA\1/;\
+s/^_TEXT([[:space:]]+(SEGMENT[[:space:]]+|ENDS[[:space:]]*))/$segname\1/;\
+s/(^[[:space:]]*ASSUME[[:space:]]+.+:)_TEXT/\1$segname/g" "$f_tmp" >"$f_asm"
 	rm "$f_tmp" "$f_obj"
 }
 
 DST=tmp
 mkdir -p "$DST"
-disasm "$DST\\intr.obj" INTR
-disasm "$DST\\dointr.obj" DOINTR
+disasm "$DST\\intr.obj" INTR_TEXT
+disasm "$DST\\dointr.obj" DOINTR_TEXT
+disasm "$DST\\memcmp.obj" MEMCMP_TEXT

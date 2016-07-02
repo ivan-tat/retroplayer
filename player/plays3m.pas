@@ -309,6 +309,8 @@ procedure refr_mainscr;
 var i:byte;
 
 begin
+  writeln('S3M-PLAYER for SoundBlasters Version ',version:3:2);
+  writeln('Originally written by Cyder of Green Apple (Andre'' Baresel)');
   { setup defaults: }
   Samplerate:=45454;
   Stereo:=stereo_calc;
@@ -329,28 +331,20 @@ begin
   exitproc:=@local_exit;
   for i:=1 to paramcount do
     check_para(paramstr(i));
-  clrscr;
-  writeln(' S3M-PLAYER for SoundBlasters written by Cyder of Green Apple (Andre'' Baresel) ');
-  writeln(' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-  writeln(' Version : ',version:3:2);
   if (filename='') then display_help;
   writeln;
   {$IFDEF BETATEST}
-  writeln(' Free memory before loading : ',longint(16)*getfreesize);
-  writeln(' Free EMS memory before loading :',getfreeEMS*16,' KB');
+  writeln('Free DOS memory before loading: ',longint(16)*getfreesize, ' B');
+  writeln('Free EMM memory before loading: ',getfreeEMS*16,' KiB');
   {$ENDIF}
   if not load_S3M(filename) then display_errormsg(load_error);
   {$IFDEF BETATEST}
-  writeln(' Free memory after loading : ',longint(16)*getfreesize);
-  writeln(' Free EMS after loading : ',getfreeEMS*16,' KB');
+  writeln('Free DOS memory after loading: ',longint(16)*getfreesize, ' B');
+  writeln('Free EMM memory after loading: ',getfreeEMS*16,' KiB');
   {$ENDIF}
   writeln(' ''',songname,''' loaded ... (was saved with ST',savedunder:4:2,')');
   if not Init_S3Mplayer then display_errormsg(player_error);
-  {$IFDEF BETATEST} writeln(' player init done ... ');
-  display_keys;
-  write(#13#10' press a key to continue...');readkey;clrscr;gotoxy(1,19);{$ENDIF}
   if not init_device(how2input) then begin writeln(' SoundBlaster not found sorry ... ');halt end;
-  {$IFDEF BETATEST} writeln(' init device (SB) done ... '); {$ENDIF}
   if disply_c then
     begin
       display_playercfg;
@@ -436,7 +430,7 @@ begin
   gotoxy(1,8);
   textcolor(white);textbackground(blue);
   {$IFDEF BETATEST}
-  writeln(' Memory after all : ',longint(16)*getfreesize);clreol;
-  writeln(' EMS after all : ',getfreeEMS*16,' KB');clreol;
+  writeln('Free DOS memory after all: ',longint(16)*getfreesize, ' B');clreol;
+  writeln('Free EMM memory after all: ',getfreeEMS*16,' KiB');clreol;
   {$ENDIF}
 end.
