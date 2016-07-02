@@ -15,11 +15,9 @@ $AS processo.asm
 $AS readnote.asm
 $AS volume.asm
 $PC '-U..\dos;..\blaster' s3mplay.pas
-cd ..
-$PC '-Udos;blaster;main' smalls3m
-cd osci
-$AS lines.asm
-$PC '-U..\dos;..\blaster;..\main' s3m_osci
 cd ../player
-$PC '-U..\dos;..\blaster;..\main' plays3m
+$PC '-U..\dos;..\blaster;..\main' plays3m.pas
+$PC '-U..\dos;..\blaster;..\main' smalls3m.pas
+$AS lines.asm
+$PC '-U..\dos;..\blaster;..\main' s3m_osci.pas
 cd ..
