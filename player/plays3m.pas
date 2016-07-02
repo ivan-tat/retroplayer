@@ -1,7 +1,7 @@
 {$M 16000,0,2000}
 program example_for_s3mplay;
 
-uses emstool,S3MPlay,crt,blaster,dos;
+uses emstool,S3MPlay,crt,blaster,dos,dosproc;
 
 const stereo_calc=true;
       _16bit_calc=false;
@@ -18,9 +18,6 @@ var samplerate:word;
     disply_c:boolean;
     screen_no:byte;  { current info on screen }
     startchn:byte;
-
-{$L ..\dos\dosproc.obj}
-function getfreesize:word; external;
 
 function tohexs(w:word):string;
 const s:string='0123456789ABCDEF';

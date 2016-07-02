@@ -124,7 +124,7 @@ FUNCTION load_specialdata(var p):boolean; { allocate memory and load special dat
 
 IMPLEMENTATION
 
-uses EMStool,blaster,crt,dos;
+uses EMStool,blaster,crt,dos,dosproc;
 
 CONST DMAbuffersize=8*1024; { <- maximum size of DMAbuffer }
 
@@ -176,12 +176,6 @@ VAR S3M_inMemory:BOOLEAN;
     sinuswave,
     rampwave     :array[0..63] of shortint;
     squarewave   :array[0..63] of byte;
-
-{$L ..\dos\dosproc.obj}
-function getdosmem(var p;anz:longint):boolean; external;
-procedure freedosmem(var p); external;
-function getfreesize:word; external;
-function setsize(var p;anz:longint):boolean; external;
 
 {$L ..\dos\ems4fct.obj}
 procedure setEMSnames; near; external;

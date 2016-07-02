@@ -15,7 +15,7 @@ public freedosmem         ; free memory
 public getfreesize        ; summary of all free memory blocks
 public setsize            ; change size of an allready allocated memory block
 
-getdosmem PROC NEAR segm:DWORD,len:DWORD
+getdosmem PROC FAR segm:DWORD,len:DWORD
           les di,segm
           mov ebx,len
           add ebx,15
@@ -32,7 +32,7 @@ more:     mov es:[di+2],ax
           ret
 getdosmem ENDP
 
-freedosmem  PROC NEAR segm:DWORD   ; free reserved memory
+freedosmem  PROC FAR segm:DWORD   ; free reserved memory
             les di,segm            ; segm - pointer to pointer variable
             les di,es:[di]         ; load ES with es:[di+2]
             mov ah,49h             ; function 49h - free memory block
@@ -44,7 +44,7 @@ freedosmem  PROC NEAR segm:DWORD   ; free reserved memory
             ret
 freedosmem  ENDP
 
-setsize  PROC NEAR segm:DWORD,len:DWORD   ; change size
+setsize  PROC FAR segm:DWORD,len:DWORD   ; change size
          mov ebx,len
          add ebx,15
          shr ebx,4
@@ -58,7 +58,7 @@ setsize  PROC NEAR segm:DWORD,len:DWORD   ; change size
 ok:      ret
 setsize  ENDP
 
-getfreesize PROC NEAR       ; get length of free memory
+getfreesize PROC FAR       ; get length of free memory
             mov bx,0ffffh
             mov ah,48h      ; function 48h - get 1MB dos memory
                             ; that's not possible, but you'll get free memory

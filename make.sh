@@ -4,6 +4,7 @@ AS="tasm -t"
 PC="tpc -q"
 cd dos
 $AS dosproc.asm
+$PC dosproc.pas
 $AS ems4fct.asm
 $PC emstool.pas
 cd ../blaster
