@@ -16,6 +16,8 @@ function setsize(var p; size: longint): boolean;
 
 implementation
 
+uses intr;
+
 (*$l dosproc.obj*)
 
 function getdosmem(var p; size: longint): boolean; external;
