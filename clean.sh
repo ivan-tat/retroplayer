@@ -13,6 +13,7 @@ cleandir() {
 }
 
 cleandir ./hw
+rm -f ./hw/dma.asm
 cleandir ./blaster
 cleandir ./dos
 rm -f ./dos/dosproc.asm

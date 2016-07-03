@@ -5,7 +5,7 @@ set -e
 AS="tasm -t"
 ASW="wasm -zq"
 PC='tpc -gd -q -v -$d+,e-,g+,n+ -DDEBUG;BETATEST'
-export WCC="-3 -fp3 -ml -na -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu"
+export WCC="-3 -fp3 -ml -na -oi -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu"
 
 compile_c() {
 	local f_c="$1"
@@ -28,10 +28,14 @@ $PC syswrap.pas
 cd ../watcomc
 $ASW dointr.asm
 $PC dointr.pas
+$ASW inp.asm
+$PC inp.pas
 $ASW intr.asm
 $PC intr.pas
 $ASW memcmp.asm
 $PC memcmp.pas
+$ASW outp.asm
+$PC outp.pas
 
 cd ../dos
 compile_c dosproc.c DOSPROC_TEXT
@@ -40,9 +44,11 @@ compile_c emstool.c EMSTOOL_TEXT
 $PC '-u..\pascal;..\watcomc' emstool.pas
 
 cd ../hw
+compile_c dma.c DMA_TEXT
+$PC '-u..\pascal;..\watcomc' dma.pas
 
 cd ../blaster
-$PC '-u..\hw' blaster.pas
+$PC '-u..\pascal;..\watcomc;..\hw' blaster.pas
 
 cd ../main
 $AS filldma.asm

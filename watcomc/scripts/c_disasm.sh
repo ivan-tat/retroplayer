@@ -23,6 +23,10 @@ s/(^[[:space:]]*ASSUME[[:space:]]+.+:)_TEXT/\1$segname/g" "$f_tmp" >"$f_asm"
 
 DST=tmp
 mkdir -p "$DST"
-disasm "$DST\\intr.obj" INTR_TEXT
-disasm "$DST\\dointr.obj" DOINTR_TEXT
-disasm "$DST\\memcmp.obj" MEMCMP_TEXT
+cd $DST
+disasm intr.obj INTR_TEXT
+disasm dointr.obj DOINTR_TEXT
+disasm memcmp.obj MEMCMP_TEXT
+disasm inp.obj INP_TEXT
+disasm outp.obj OUTP_TEXT
+cd $OLDPWD

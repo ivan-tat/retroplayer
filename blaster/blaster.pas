@@ -90,7 +90,7 @@ FUNCTION Get_BlasterVersion:Word;                       (* reads the detected so
 
 procedure check_samplerate(var rate:word;var stereo:boolean); (* check min/max samplerate *)
 
-procedure set_DMAvalues(p:pointer;Length:word;autoinit:boolean);
+procedure set_DMAvalues( p: pointer; count: word; autoinit: boolean );
   (* config DMAcontroller for different transfer modes *)
 procedure play_firstBlock(length:word);
   (* set the SBinterrupt to "interrupt" every "length" bytes
@@ -133,7 +133,7 @@ procedure writelnSBConfig;       (* what do you expect ? - write current setup t
 
 Implementation
 
-uses dos,crt;
+uses dos,crt,dma;
 
 { Flags and variables for detect part : }
 VAR SB_Detect:Boolean;              { Flag if SB is detected }
@@ -291,182 +291,51 @@ function hiword(l:longint):word; assembler;
     mov         ax,word ptr(l+2)
   end;
 
-procedure set_DMAvalues(p:pointer;Length:word;autoinit:boolean);
-{ If you want to know more about how to setup DMA controller, please
-  refer to our documentation SBLASTER.ZIP. }
-const pagetable:array[0..7] of word = ($0087  { channel 0 },
-                                       $0083  { channel 1 },
-                                       $0081  { channel 2 <- not used by SB },
-                                       $0082  { channel 3 },
-                                       $008F  { channel 4 <- not used by SB },
-                                       $008B  { channel 5 },
-                                       $0089  { channel 6 },
-                                       $008A  { channel 7 });
-  begin
-    asm
-                { start : }
-                cmp       [_16Bit],1      { setup 16bit DMA channels 4..7 is
-                                            ab bit different }
-                je        @@higherDMA
-                { first the SBPRO stereo bugfix : }
-                cmp       [stereo],0
-                je        @@nostereo
-                cmp       [sbNo],6
-                jae       @@sbhigher
-                { well ... should be a SB PRO in stereo mode ... }
-                { let's send one byte ! }
-                mov       al,10h
-                call      wr_dsp
-                mov       al,128   { nothin but silence ! }
-                call      wr_dsp
-@@sbhigher:
-@@nostereo:
-                { convert pointer in realadress :
-                  dmapage*65536+dmaoffset = memsegment*16 + memoffset }
-                mov       ax,word ptr(p+2)
-                rol       ax,4
-                mov       cl,al
-                and       al,0f0h
-                and       cl,0fh
-                mov       di,ax         { cl:di - realadress ! }
+(* If you want to know more about how to setup DMA controller, please
+   refer to our documentation SBLASTER.ZIP. *)
+procedure set_DMAvalues( p: pointer; count: word; autoinit: boolean );
+var
+    ch: byte;
+    mode: TDMAMode;
+begin
+    mode := DMA_MODE_TRAN_READ or DMA_MODE_ADDR_INCR or DMA_MODE_SINGLE;
+    if ( autoinit ) then
+        mode := mode or DMA_MODE_INIT_AUTO
+    else
+        mode := mode or DMA_MODE_INIT_SINGLE;
 
-                mov       bh,dma_channel { bh with dma_channel }
-                mov       bl,bh
-                shl       bl,1          { bl with dma_channel*2 }
-                mov       ch,048h       { ch = 010010xx }
-                                         {     \| |+- read
-                                                | +- autoinit flag
-                                                +- singlemode }
-                mov     al,[autoinit]
-                shl     al,4
-                or      ch,al              { set the autoinit flag }
-                add     ch,dma_channel     { prepare for dma_channel }
+    if ( not _16Bit ) then
+    begin
+        (* first the SBPRO stereo bugfix : *)
+        if ( stereo ) then
+            if ( sbNo < 6 ) then
+                (* well ... should be a SB PRO in stereo mode ... *)
+                (* let's send one byte ! *)
+                asm
+                    mov  al,10h
+                    call wr_dsp
+                    mov  al,128   (* nothin but silence ! *)
+                    call wr_dsp
+                end;
+        ch := dma_channel;
+    end else
+        ch := dma_16Bitchannel;
 
-                mov     al,4
-                add     al,bh           { bh = dma_channel }
-                out     0ah,al          { mask the channel }
-
-                xor     al,al
-                out     0ch,al          { clear flipflop }
-
-                mov     al,ch           { ch = DMAmode }
-                out     0bh,al          { set dmatransfer mode }
-                mov     ax,di           { di = DMAbuffer offset }
-                push    bx
-                xor     bh,bh
-                mov     dx,bx           { bx = 2*dma_channel }
-                out     dx,al           { lower adress }
-                mov     al,ah
-                out     dx,al           { higer adress }
-                mov     dx,word ptr (pagetable+bx)
-                mov     al,cl           { cl = DMAbuffer page }
-                out     dx,al           { data page }
-                mov     dx,bx           { bx = 2*dma_channel }
-                mov     ax,Length
-                dec     ax
-                inc     dx              { dx = write base count }
-                out     dx,al           { write lower length }
-                mov     al,ah
-                out     dx,al           { write higer length }
-                pop     bx
-                mov     al,dma_channel
-                out     0ah,al          { demask channel }
-                jmp     @@endofsetauto
-@@higherDMA:    { jump to here if 16bit DMA setup }
-                { convert pointer in realadress : }
-                mov       ax,word ptr(p+2)      { ax = segment of buffer }
-                rol       ax,4                  { attention no offset ! }
-                mov       cl,al
-                and       al,0f1h
-                and       cl,00eh
-                ror       ax,1
-                mov       di,ax                 { cl:di - realadress ! }
-
-                mov     bh,dma_16Bitchannel     { bh with dma_channel }
-                sub     bh,4                    { channel 4-7 to number 0-3 }
-                mov     bl,bh
-                shl     bl,2
-                add     bl,0c0h       { bl = DMA adressport for current DMAchannel }
-                                      { bh = DMA16Bitchannel - 4  (0..3) }
-                mov     ch,048h       { ch = 010010xx }
-                                       {     \| |+-read
-                                              | +-autoinitflag
-                                              +-singlemode }
-                mov     al,[autoinit]
-                shl     al,4
-                or      ch,al          { set the autoinitflag }
-                add     ch,bh          { ch = command for DMAchannel # }
-
-                mov     al,4
-                add     al,bh           { bh = 16bitDMA_channel - 4 }
-                out     0d4h,al         { mask the channel }
-                xor     al,al
-                out     0d8h,al         { clear flipflop }
-                mov     al,ch           { ch = dmamode }
-                out     0d6h,al         { set dmatransfer mode }
-                mov     ax,di           { lower part of adress }
-                push    bx
-                xor     bh,bh           { bx now = c0h/c4h/c8h/cch (0..3) }
-                mov     dx,bx           { bx = addressport for current channel }
-                out     dx,al           { write lower adress }
-                mov     al,ah
-                out     dx,al           { write higer adress }
-                mov     dl,dma_16Bitchannel
-                xor     dh,dh
-                mov     si,dx           { si = dma16Bitchannel }
-                shl     si,1            { si - position in pagetable }
-                mov     dx,word ptr (pagetable+si)
-                mov     al,cl           { dmabuffer page }
-                out     dx,al           { data page }
-                mov     dx,bx           { old dx value ;) c0h/c4h/c8h/cch }
-                mov     ax,Length
-                dec     ax
-                add     dx,2            { seperated by 2 -> dx now DMA base count }
-                out     dx,al           { write lower length }
-                mov     al,ah
-                out     dx,al           { write higer length }
-                pop     bx
-                mov     al,bh
-                out     0d4h,al         { demask channel }
-@@endofsetauto:
-  end;
+    dmaSetup( ch, mode, p, count );
 end;
 
-function get_zaehler:word; assembler;
+function get_zaehler:word;
 { get the dma base counter of dmachannel is used by SB
   you can check if sound transfer does work ;) }
-    asm
-       cmp      [_16Bit],1
-       je       @@get16
-       xor      al,al
-       out      0ch,al           { clear flipflop }
-       mov      dl,dma_channel
-       xor      dh,dh
-       shl      dx,1
-       inc      dx               { dx = channel * 2 + 1 = base counter }
-       in       al,dx            { al = lower byte }
-       mov      bl,al
-       in       al,dx            { al = higher byte }
-       mov      bh,al
-       mov      ax,bx            { AX = high and low part together ;) - return that }
-                                 { bytes left to send = ax + 1 }
-       jmp      @@endofget
-@@get16:
-       xor      al,al
-       out      0d8h,al           { clear flipflop }
-       mov      dl,dma_16Bitchannel
-       xor      dh,dh
-       sub      dl,4              { channel 4..7 to number 0..3 }
-       shl      dx,2
-       add      dx,0c2h           { dx = 0c2h + 4 * (channel-4) = 16bit base counter }
-       in       al,dx             { AL = lower part }
-       mov      bl,al
-       in       al,dx             { AL = higher part }
-       mov      bh,al
-       mov      ax,bx             { AX = 16bit value ;) -
-                                    number WORDS (!) left to send = ax + 1 }
-@@endofget:
-    end;
+var
+    ch: byte;
+begin
+    if ( _16Bit ) then
+        ch := dma_16Bitchannel
+    else
+        ch := dma_channel;
+    get_zaehler := dmaGetCounter( ch );
+end;
 
 procedure write_zaehler;
 { A stupid function I know, but get_zaehler did not exist in testphase
@@ -734,11 +603,8 @@ var oldv:array[1..5] of pointer;
     fr:word;
     ov1,ov2:byte;
   begin
-    asm
-      mov al,0ffh
-      out 0fh,al
-      sti
-    end;
+  port[$0f] := $ff;
+  asm sti end;
     if dmachn_detect then begin detect_DMA_Channel_irq:=true;exit end;
     if prot then writeln(#13#10' Now locating DMA-channel and IRQ :'#13#10);
     detect_dma_channel_irq:=false;
@@ -759,10 +625,7 @@ var oldv:array[1..5] of pointer;
         Check:=0;
         DMA_Channel:=nr;
         fr:=10000;
-        asm
-          mov al,dma_channel        { mask channel - means stop transfer }
-          out 0ah,al
-        end;
+        dmaMask( dma_channel ); (* was outp( 0x0a, dma_channel ) *)
         stop_play;speaker_off;
         Initblaster(fr,false,false);
         play_oneblock(ptr(0,0),1);
@@ -918,10 +781,7 @@ PROCEDURE stop_play;
       call  wr_dsp
     end;
     try_reset(dsp_addr);   { reset is the best way to make sure SB stops playing ! }
-    asm
-      mov   al,dma_channel
-      out   0ah,al
-    end;
+    dmaMask( dma_channel ); (* was outp( 0x0a, dma_channel ) *)
   end;
 
 PROCEDURE pause_play;
