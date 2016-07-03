@@ -177,9 +177,6 @@ VAR S3M_inMemory:BOOLEAN;
     rampwave     :array[0..63] of shortint;
     squarewave   :array[0..63] of byte;
 
-{$L ..\dos\ems4fct.obj}
-procedure setEMSnames; near; external;
-
 {$L READNOTE.OBJ}
 procedure readnewnotes; near; external;
 procedure SetupNewInst; near; external; { don't call it from pascal - has its internal use }
@@ -240,11 +237,13 @@ var i:word;
     if EMSpat then { patterns in EMS }
       begin
         EMSfree(savHandle);
-        EMSfree(patEMShandle);EMSpat:=false;
+        EMSfree(patEMShandle);
+        EMSpat:=false;
       end;
     if EMSsmp then { samples in EMS }
       begin
-        EMSfree(smpEMShandle);EMSsmp:=false;
+        EMSfree(smpEMShandle);
+        EMSsmp:=false;
       end;
     S3M_inMemory:=false;
   END;
@@ -502,26 +501,21 @@ function getSamplerate:word;
     getSamplerate:=Samplerate;
   end;
 
-function handlesize(h:word):word; assembler;
-    asm
-      mov       ah,4ch
-      mov       dx,h
-      int       67h
-      cmp       ah,0
-      jz        @@ok
-      xor       bx,bx
-@@ok: mov       ax,bx
-    end;
-
 function getusedEMSsmp:longint;    { get size of samples in EMS }
-  begin
-    if EMSsmp then getusedEMSsmp:=16*handlesize(smpEMShandle) else getusedEMSsmp:=0;
-  end;
+begin
+    if EMSsmp then
+        getusedEMSsmp:=16*EmsGetHandleSize(smpEMShandle)
+    else
+        getusedEMSsmp:=0;
+end;
 
 function getusedEMSpat:longint;    { get size of patterns in EMS }
-  begin
-    if EMSpat then getusedEMSpat:=16*handlesize(patEMShandle) else getusedEMSpat:=0;
-  end;
+begin
+    if EMSpat then
+        getusedEMSpat:=16*EmsGetHandleSize(patEMShandle)
+    else
+        getusedEMSpat:=0;
+end;
 
 procedure set_ST3order(new:boolean);
 var i:byte;

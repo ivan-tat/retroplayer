@@ -37,7 +37,6 @@ $PC memcmp.pas
 cd ../dos
 compile_c dosproc.c DOSPROC_TEXT
 $PC '-u..\watcomc' dosproc.pas
-$AS ems4fct.asm
 compile_c emstool.c EMSTOOL_TEXT
 $PC '-u..\pascal;..\watcomc' emstool.pas
 

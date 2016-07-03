@@ -1,3 +1,18 @@
+const
+    patname: TEMMHandleName = 'Pattern'#0;
+    smpname: TEMMHandleName = 'Samples'#0;
+    savname: TEMMHandleName = 'saveMAP'#0;
+
+procedure setEMSnames;
+begin
+    if ( EMSpat ) then
+    begin
+        EmsSetHandleName( patEMShandle, patname );
+        EmsSetHandleName( savhandle, savname );
+        if ( EMSsmp ) then EmsSetHandleName( smpEMShandle, smpname );
+    end;
+end;
+
 FUNCTION SCRMtest(var p):boolean; ASSEMBLER; { yeah asm ! :) }
   asm
      xor      ax,ax

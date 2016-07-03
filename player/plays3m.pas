@@ -254,15 +254,17 @@ procedure display_helpscreen;
     window(1,1,80,25);
   end;
 
-function getfreeEMS:longint;
-var Regs : Registers;
+function getFreeDOSMemory: longint;
 begin
-  getfreeEMS:=0;
-  if not EMSinstalled then exit;
-  Regs.ah := $42;                { Fkt.no.: get number of free pages }
-  Intr($67, Regs);
-  if (Regs.ah <>0 ) then exit    { something was not right ... :( }
-  else getfreeEMS := Regs.bx;
+    getFreeDOSMemory := longint(16)*getfreesize;
+end;
+
+function getFreeEMMMemory: longint;
+begin
+    if EMSinstalled then
+        getFreeEMMMemory := EmsFreePages*16
+    else
+        getFreeEMMMemory := 0;
 end;
 
 procedure mainscreen;
@@ -280,9 +282,9 @@ CONST SW_order:array[false..true] of string = ('Extended Order','Normal Order');
     textbackground(blue);textcolor(lightgray);
     gotoxy(1,3);write(' Samplerate: ',getSamplerate:5,'  ',sw_stereo[stereo],', ',sw_res[_16bit],
     ', ',sw_order[ST3order],', ',sw_qual[LQmode]);
-    gotoxy(1,4);write(' Free DOS memory : ',longint(16)*getfreesize:6,' bytes  Free EMS memory : ',getfreeEMS*16:5,' KB');
-    gotoxy(1,5);write(' Used EMS Memory : ',(getusedEMSsmp+getusedEMSpat):5,' KB  <F1> - Help screen',
-                      '':13,'Playerversion: ',version:3:2);
+    gotoxy(1,4);write(' Free DOS memory : ',(getFreeDOSMemory shr 10):6,' KiB   Free EMS memory : ',getFreeEMMMemory:5,' KiB');
+    gotoxy(1,5);write(' Used EMS memory : ',(getusedEMSsmp+getusedEMSpat):6,' KiB   <F1> - Help screen',
+                      '':10,'Playerversion: ',version:3:2);
   end;
 
 procedure refr_mainscr;
@@ -334,13 +336,13 @@ begin
   if (filename='') then display_help;
   writeln;
   {$IFDEF BETATEST}
-  writeln('Free DOS memory before loading: ',longint(16)*getfreesize, ' B');
-  writeln('Free EMM memory before loading: ',getfreeEMS*16,' KiB');
+  writeln('Free DOS memory before loading: ',getFreeDOSMemory shr 10, ' KiB');
+  writeln('Free EMM memory before loading: ',getFreeEMMMemory, ' KiB');
   {$ENDIF}
   if not load_S3M(filename) then display_errormsg(load_error);
   {$IFDEF BETATEST}
-  writeln('Free DOS memory after loading: ',longint(16)*getfreesize, ' B');
-  writeln('Free EMM memory after loading: ',getfreeEMS*16,' KiB');
+  writeln('Free DOS memory after loading: ',getFreeDOSMemory shr 10, ' KiB');
+  writeln('Free EMM memory after loading: ',getFreeEMMMemory, ' KiB');
   {$ENDIF}
   writeln(' ''',songname,''' loaded ... (was saved with ST',savedunder:4:2,')');
   if not Init_S3Mplayer then display_errormsg(player_error);
@@ -430,7 +432,7 @@ begin
   gotoxy(1,8);
   textcolor(white);textbackground(blue);
   {$IFDEF BETATEST}
-  writeln('Free DOS memory after all: ',longint(16)*getfreesize, ' B');clreol;
-  writeln('Free EMM memory after all: ',getfreeEMS*16,' KiB');clreol;
+  writeln('Free DOS memory after all: ',getFreeDOSMemory shr 10, ' KiB');clreol;
+  writeln('Free EMM memory after all: ',getFreeEMMMemory, ' KiB');clreol;
   {$ENDIF}
 end.

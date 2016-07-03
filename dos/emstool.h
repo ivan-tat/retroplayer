@@ -43,6 +43,8 @@ bool __far __pascal EmsFree( EMMHandle_t handle );
 bool __far __pascal EmsMap( EMMHandle_t handle, uint16_t logPage, uint8_t physPage );
 bool __far __pascal EmsSaveMap( EMMHandle_t handle );
 bool __far __pascal EmsRestoreMap( EMMHandle_t handle );
+uint16_t __far __pascal EmsGetHandleSize( EMMHandle_t handle );
+bool __far __pascal EmsSetHandleName( EMMHandle_t handle, EMMHandleName_t *name );
 void __far __pascal EMMInit( void );
 void __far __pascal EMMDone( void );
 

@@ -131,16 +131,8 @@ var i,j:byte;
         lastrow:=0;
         { new pattern }
         w:=pattern[curpattern];
-        if w>=$c000 then { switch EMSpage 0 to curpattern }
-          asm
-            mov         ax,w
-            xor         bx,bx
-            mov         ah,44h
-            mov         bl,al
-            xor         al,al
-            mov         dx,[patEMShandle]
-            int         67h
-          end;
+        (* switch EMSpage zero to curpattern *)
+        if ( w >= $c000 ) then EmsMap( patEMShandle, w, 0 );
       end;
     for i:=lastrow to curline do
       begin

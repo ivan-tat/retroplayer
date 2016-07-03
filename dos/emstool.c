@@ -200,6 +200,34 @@ bool __far __pascal EmsRestoreMap( EMMHandle_t handle ) {
     }
 }
 
+uint16_t __far __pascal EmsGetHandleSize( EMMHandle_t handle ) {
+    union REGPACK regs;
+    regs.w.ax = 0x4c00;
+    regs.w.dx = handle;
+    intr( 0x67, &regs );
+    if ( regs.h.ah ) {
+        EmsEC = regs.h.ah;
+        return 0;
+    } else {
+        return regs.w.bx;
+    }
+}
+
+bool __far __pascal EmsSetHandleName( EMMHandle_t handle, EMMHandleName_t *name ) {
+    union REGPACK regs;
+    regs.w.ax = 0x5301;
+    regs.w.dx = handle;
+    regs.w.si = FP_OFF(name);
+    regs.w.ds = FP_SEG(name);
+    intr( 0x67, &regs );
+    if ( regs.h.ah ) {
+        EmsEC = regs.h.ah;
+        return false;
+    } else {
+        return true;
+    }
+}
+
 void __far __pascal EMMInit( void ) {
     EmsInstalled = CheckEMM();
     if ( EmsInstalled ) {

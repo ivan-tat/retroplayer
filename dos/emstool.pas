@@ -27,6 +27,8 @@ function EmsFree( handle: TEMMHandle ): boolean;
 function EmsMap( handle: TEMMHandle; logPage: word; physPage: byte ): boolean;
 function EmsSaveMap( handle: TEMMHandle ): boolean;
 function EmsRestoreMap( handle: TEMMHandle ): boolean;
+function EmsGetHandleSize( handle: TEMMHandle ): word;
+function EmsSetHandleName( handle: TEMMHandle; name: TEMMHandleName ): boolean;
 procedure EMMInit;
 procedure EMMDone;
 
@@ -45,6 +47,8 @@ function EmsFree( handle: TEMMHandle ): boolean; external;
 function EmsMap( handle: TEMMHandle; logPage: word; physPage: byte ): boolean; external;
 function EmsSaveMap( handle: TEMMHandle ): boolean; external;
 function EmsRestoreMap( handle: TEMMHandle ): boolean; external;
+function EmsGetHandleSize( handle: TEMMHandle ): word; external;
+function EmsSetHandleName( handle: TEMMHandle; name: TEMMHandleName ): boolean; external;
 procedure EMMInit; external;
 procedure EMMDone; external;
 
