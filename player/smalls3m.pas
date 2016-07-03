@@ -32,7 +32,7 @@ begin
   clrscr;
   writeln(' SMART-S3M-PLAYER for SoundBlasters written by Cyder of Green Apple');
   writeln(' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-  writeln(' Version : ',version:3:2);
+  writeln(' Version : ',PLAYER_VERSION);
   filename:=paramstr(1);
   if (filename='') then halt;
   writeln;

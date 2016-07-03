@@ -4,7 +4,10 @@ unit s3mplay;
 
 INTERFACE
 
-CONST version              = 1.70;
+CONST
+    PLAYER_VERSION: PChar = '1.70.1';
+
+CONST
       { Variable ranges }
       MAX_samples          = 100; { 0..99 samples }
       MAX_patterns         = 100; { 1..100 patterns }

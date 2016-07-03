@@ -105,7 +105,7 @@ begin
   clrscr;
   writeln(' OSCI-S3M-PLAYER for SoundBlasters written by Cyder of Green Apple');
   writeln(' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-  writeln(' Version : ',version:3:2);
+  writeln(' Version : ',PLAYER_VERSION);
   if (filename='') then halt;
   writeln;
   Init;

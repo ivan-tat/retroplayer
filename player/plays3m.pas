@@ -284,7 +284,7 @@ CONST SW_order:array[false..true] of string = ('Extended Order','Normal Order');
     ', ',sw_order[ST3order],', ',sw_qual[LQmode]);
     gotoxy(1,4);write(' Free DOS memory : ',(getFreeDOSMemory shr 10):6,' KiB   Free EMS memory : ',getFreeEMMMemory:5,' KiB');
     gotoxy(1,5);write(' Used EMS memory : ',(getusedEMSsmp+getusedEMSpat):6,' KiB   <F1> - Help screen',
-                      '':10,'Playerversion: ',version:3:2);
+                      '':10,'Version : ',PLAYER_VERSION);
   end;
 
 procedure refr_mainscr;
@@ -311,7 +311,7 @@ procedure refr_mainscr;
 var i:byte;
 
 begin
-  writeln('S3M-PLAYER for SoundBlasters Version ',version:3:2);
+  writeln('S3M-PLAYER for SoundBlasters Version ',PLAYER_VERSION);
   writeln('Originally written by Cyder of Green Apple (Andre'' Baresel)');
   { setup defaults: }
   Samplerate:=45454;
