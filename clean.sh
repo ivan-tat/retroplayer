@@ -3,11 +3,13 @@
 cleandir() {
 	local DIR="$1"
 	echo "Cleaning $DIR ..."
-	rm -f "$DIR"/*.err
-	rm -f "$DIR"/*.exe
-	rm -f "$DIR"/*.map
-	rm -f "$DIR"/*.obj
-	rm -f "$DIR"/*.tpu
+    cd $DIR
+	rm -f *.err
+	rm -f *.exe
+	rm -f *.map
+	rm -f *.obj
+	rm -f *.tpu
+    cd $OLDPWD
 }
 
 cleandir ./blaster
