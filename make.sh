@@ -20,7 +20,6 @@ compile_c() {
 s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$)/_DATA\1/;" "$f_tmp" >"$f_asm"
 	rm -f "$f_tmp"
 	$ASW "$f_asm"
-    #rm -f "$f_asm"
 }
 
 cd pascal
@@ -40,8 +39,10 @@ $PC '-u..\watcomc' dosproc.pas
 compile_c emstool.c EMSTOOL_TEXT
 $PC '-u..\pascal;..\watcomc' emstool.pas
 
+cd ../hw
+
 cd ../blaster
-$PC blaster.pas
+$PC '-u..\hw' blaster.pas
 
 cd ../main
 $AS filldma.asm
@@ -49,11 +50,11 @@ $AS mixing.asm
 $AS processo.asm
 $AS readnote.asm
 $AS volume.asm
-$PC '-U..\pascal;..\watcomc;..\dos;..\blaster' s3mplay.pas
+$PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster' s3mplay.pas
 
 cd ../player
-$PC '-U..\pascal;..\watcomc;..\dos;..\blaster;..\main' plays3m.pas
-$PC '-U..\pascal;..\watcomc;..\dos;..\blaster;..\main' smalls3m.pas
+$PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster;..\main' plays3m.pas
+$PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster;..\main' smalls3m.pas
 $AS lines.asm
-$PC '-U..\pascal;..\watcomc;..\dos;..\blaster;..\main' s3m_osci.pas
+$PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster;..\main' s3m_osci.pas
 cd ..

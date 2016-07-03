@@ -12,6 +12,7 @@ cleandir() {
     cd $OLDPWD
 }
 
+cleandir ./hw
 cleandir ./blaster
 cleandir ./dos
 rm -f ./dos/dosproc.asm
