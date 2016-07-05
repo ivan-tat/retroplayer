@@ -28,3 +28,10 @@ void __far __pascal picDisableIRQs( uint16_t mask ) {
         outp( 0xa1, inp( 0xa1 ) & ( uint8_t )( ~( ( mask >> 8 ) & 0xff ) ) );
     }
 }
+
+void __far __pascal picEOI( uint8_t irq ) {
+    if ( irq < 8 )
+        outp( 0x20, 0x20);
+    else
+        outp( 0xa0, 0x20);
+}

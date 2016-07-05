@@ -11,6 +11,7 @@ interface
 
 procedure picEnableIRQs( mask: word );
 procedure picDisableIRQs( mask: word );
+procedure picEOI( irq: byte );
 
 implementation
 
@@ -18,5 +19,6 @@ implementation
 
 procedure picEnableIRQs( mask: word ); external;
 procedure picDisableIRQs( mask: word ); external;
+procedure picEOI( irq: byte ); external;
 
 end.

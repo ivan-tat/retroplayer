@@ -547,10 +547,34 @@ var tc:byte;
 
 { -------------- now the procedures for my old autodetection ------------- }
 { No comments about it - it's old ;)                                       }
-procedure irq2;interrupt;var a:byte; begin check:=2;port[$20]:=$20;a:=port[dsp_addr+$0e] end;
-procedure irq5;interrupt;var a:byte; begin check:=5;port[$20]:=$20;a:=port[dsp_addr+$0e] end;
-procedure irq7;interrupt;var a:byte; begin check:=7;port[$20]:=$20;a:=port[dsp_addr+$0e] end;
-procedure ready_irq; interrupt;var a:byte; begin check:=1;port[$20]:=$20;a:=port[dsp_addr+$0e] end;
+procedure irq2; interrupt;
+var a:byte;
+begin
+    check:=2;
+    picEOI( 2 );
+    a:=port[dsp_addr+$0e]
+end;
+procedure irq5; interrupt;
+var a:byte;
+begin
+    check:=5;
+    picEOI( 5 );
+    a:=port[dsp_addr+$0e]
+end;
+procedure irq7; interrupt;
+var a:byte;
+begin
+    check:=7;
+    picEOI( 7 );
+    a:=port[dsp_addr+$0e]
+end;
+procedure ready_irq; interrupt;
+var a:byte;
+begin
+    check:=1;
+    picEOI( 0 ); (* FIXME *)
+    a:=port[dsp_addr+$0e]
+end;
 
 function hexword(w:word):string;
 const hex:string= '0123456789ABCDEF';
@@ -737,23 +761,21 @@ FUNCTION Get_BlasterVersion:Word;
   end;
 
 PROCEDURE set_ready_irq(p:pointer);
-var b:byte;
-  begin
+begin
     check:=0;
     getintvec(IRQ_Table[irq_no],savvect);
     if p=Nil then p:=addr(ready_irq);
     setintvec(IRQ_Table[irq_no],p);
-    b:=1 shl irq_no;b:=b or 04; { no changes for IRQ2 }
-    port[$21]:=port[$21] and not b; { masking ... }
-  end;
+    (* no changes for IRQ2 *)
+    picDisableIRQs( ( 1 shl irq_no ) and not ( 1 shl 2 ) );
+end;
 
 PROCEDURE restore_irq;
-var b:byte;
-  begin
-    b:=1 shl irq_no;b:=b and not 4; { no mask for IRQ2 }
-    port[$21]:=port[$21] or b;
+begin
+    (* no changes for IRQ2 *)
+    picEnableIRQs( ( 1 shl irq_no ) and not ( 1 shl 2 ) );
     setintvec(IRQ_Table[irq_no],savvect);
-  end;
+end;
 
 FUNCTION ready:boolean;
   begin
