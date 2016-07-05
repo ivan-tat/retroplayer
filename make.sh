@@ -48,6 +48,8 @@ compile_c dma.c DMA_TEXT
 $PC '-u..\pascal;..\watcomc' dma.pas
 
 cd ../blaster
+compile_c sbio.c SBIO_TEXT
+$PC '-u..\pascal;..\watcomc;..\hw' sbio.pas
 $PC '-u..\pascal;..\watcomc;..\hw' blaster.pas
 
 cd ../main

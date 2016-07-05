@@ -15,6 +15,7 @@ cleandir() {
 cleandir ./hw
 rm -f ./hw/dma.asm
 cleandir ./blaster
+rm -f ./blaster/sbio.asm
 cleandir ./dos
 rm -f ./dos/dosproc.asm
 rm -f ./dos/emstool.asm
