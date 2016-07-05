@@ -133,7 +133,7 @@ procedure writelnSBConfig;       (* what do you expect ? - write current setup t
 
 Implementation
 
-uses dos,dma,sbio,crt;
+uses dos,dma,sbio,pic,crt;
 
 { Flags and variables for detect part : }
 VAR SB_Detect:Boolean;              { Flag if SB is detected }
