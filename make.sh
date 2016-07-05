@@ -46,6 +46,8 @@ $PC '-u..\pascal;..\watcomc' emstool.pas
 cd ../hw
 compile_c dma.c DMA_TEXT
 $PC '-u..\pascal;..\watcomc' dma.pas
+compile_c pic.c PIC_TEXT
+$PC '-u..\pascal;..\watcomc' pic.pas
 
 cd ../blaster
 compile_c sbio.c SBIO_TEXT
