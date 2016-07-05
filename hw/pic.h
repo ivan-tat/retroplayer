@@ -10,4 +10,7 @@
 #include <stdint.h>
 #endif
 
+void __far __pascal picEnableIRQs( uint16_t mask );
+void __far __pascal picDisableIRQs( uint16_t mask );
+
 #endif /* _PIC_H */

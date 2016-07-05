@@ -9,6 +9,14 @@ unit pic;
 
 interface
 
+procedure picEnableIRQs( mask: word );
+procedure picDisableIRQs( mask: word );
+
 implementation
+
+(*$l pic.obj*)
+
+procedure picEnableIRQs( mask: word ); external;
+procedure picDisableIRQs( mask: word ); external;
 
 end.

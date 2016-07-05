@@ -617,7 +617,7 @@ var oldv:array[1..5] of pointer;
     setintvec(13,addr(irq5));
     setintvec(15,addr(irq7));
     Detect_DMA_Channel_irq:=false;
-    port[$21]:=port[$21] and $5F;  { 01011111b = 05Fh }
+    picDisableIRQs( ($0004 + $0020 + $0080) and not $0004 );
     nr:=0;
     while (nr<4) and not DMACHN_Detect do
       begin
@@ -643,7 +643,7 @@ var oldv:array[1..5] of pointer;
             else writeln;
           end;
       end;
-    port[$21]:=port[$21] or $A0;  { 10100000b = 0A0h }
+    picEnableIRQs( ($0004 + $0020 + $0080) and not $0004 );
     for i:=1 to 3 do
       setintvec(irqs[i],oldv[i]);
     if not dmachn_detect then exit;
