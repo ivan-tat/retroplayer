@@ -54,6 +54,8 @@ var
     signeddata:boolean;         (* play signed data ? (only on SB16 possible) *)
     stereo:boolean;             (* flag if stereo-play on/off *)
 
+function sbMixerRead( reg: byte ): byte;
+procedure sbMixerWrite( reg, data: byte );
 procedure sbSetupDSPTransfer( len: word; b16, auto: boolean );
 
 implementation
@@ -62,6 +64,8 @@ uses sbio;
 
 (*$l sbctl.obj*)
 
+function sbMixerRead( reg: byte ): byte; external;
+procedure sbMixerWrite( reg, data: byte ); external;
 procedure sbSetupDSPTransfer( len: word; b16, auto: boolean ); external;
 
 end.

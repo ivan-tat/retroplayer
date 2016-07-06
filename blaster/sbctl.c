@@ -13,6 +13,21 @@
 #include "sbio.h"
 #include "sbctl.h"
 
+/* This routine may not work for all registers because of different timings. */
+void __far __pascal sbMixerWrite( uint8_t reg, uint8_t data ) {
+    /* SB 1.0/1.5/2.0/2.5 has no mixer */
+    if ( ! ( sbno == 1 || sbno == 3 ) )
+        sbioMixerWrite( dsp_addr, reg, data );
+}
+
+uint8_t __far __pascal sbMixerRead( uint8_t reg ) {
+    /* SB 1.0/1.5/2.0/2.5 has no mixer */
+    if ( ! ( sbno == 1 || sbno == 3 ) )
+        return sbioMixerRead( dsp_addr, reg );
+    else
+        return 0;
+}
+
 void __far __pascal sbSetupDSPTransfer( uint16_t len, bool b16, bool autoinit ) {
     uint8_t cmd, mode;
     

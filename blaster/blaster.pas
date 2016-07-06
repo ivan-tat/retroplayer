@@ -61,11 +61,6 @@ PROCEDURE play_oneBlock(p:pointer;length:word);
 PROCEDURE Initblaster(var frequ:Word;stereoon,_16Biton:Boolean);
   (* set frequency and stereo/mono and 8/16 Bit mode *)
 
-PROCEDURE sbMixerWrite( reg, data: byte );
-  (* writes something to the mixing chip *)
-FUNCTION  sbMixerRead( reg: byte): byte;
-  (* reads something from the mixing chip *)
-
 PROCEDURE set_ready_irq(p:pointer);
   (* set user irq - (irq if buffer ends !)
      attention look at my default irq !
@@ -119,23 +114,6 @@ begin
     sbioDSPWrite( dsp_addr, $d1 );
     (* needs a bit time to switch it on *)
     Delay( 110 );
-end;
-
-(* This routine may not work for all registers because of different timings. *)
-procedure sbMixerWrite( reg, data: byte );
-begin
-    (* SB 1.0/1.5/2.0/2.5 has no mixer *)
-    if ( not ( SBNo in [ 1, 3 ] ) ) then
-        sbioMixerWrite( dsp_addr, reg, data );
-end;
-
-function sbMixerRead( reg: byte ): byte;
-begin
-    (* SB 1.0/1.5/2.0/2.5 has no mixer *)
-    if ( not ( SBNo in [ 1, 3 ] ) ) then
-        sbMixerRead := sbioMixerRead( dsp_addr, reg )
-    else
-        sbMixerRead := 0;
 end;
 
 { Sorry no cool macro like in C is possible }
