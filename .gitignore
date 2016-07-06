@@ -46,4 +46,5 @@ hw/pic.asm
 dos/dosproc.asm
 dos/emstool.asm
 blaster/sbio.asm
+blaster/sbctl.asm
 watcomc/scripts/tmp/
