@@ -20,9 +20,19 @@ My interests in this project:
 
 * Make it portable: completely rewrite in C;
 
+* Keep it simple for portability;
+
 * Practice Git;
 
 * Practice good programming technics.
+
+Plans for the future:
+
+* Implement more module formats support: MOD, XM (Fast Tracker 2), IT (Impulse Tracker);
+
+* Port to DOS 32-bit protected mode;
+
+* Port to GNU/Linux;
 
 ## Links
 
