@@ -31,53 +31,9 @@ Unit Blaster;
 
 Interface
 
-{ the different SoundBlaster versions and its hardware : }
-{  0. - no soundblaster present
-   1. Soundblaster 1.0/1.5
-        23kHz(mono)                   8bit        no mixer
-
-   2. Soundblaster Pro
-        45kHz(mono)    23kHz(stereo)  8bit        mixer
-
-   3. Soundblaster 2.0/ Audioblaster 2.5
-        45kHz(mono)                   8bit        audiob. with mixer
-
-   4. Soundblaster Pro3/Audioblaster Pro 4.0
-        45kHz(mono)    23kHz(stereo)  8bit        mixer
-
-   5. Soundblaster Pro (Mircochannel)
-        Special version for PS/2 - technical data = 4
-
-   6. Soundblaster 16/16ASP
-        45kHz(mono)    45kHz(stereo)  8/16bit        mixer
-
-   DSP versions :
-
-   SoundBlaster 1.0/1.5        1.xx
-   SoundBlaster 2.0/2.5        2.xx
-   SoundBlaster Pro/PRO3/PRO4  3.xx
-   SoundBlaster 16/ASP         4.xx
-}
-
 CONST defaultvolume=31;    { full power =;) }
       IRQ_TABLE:array[0..15] of byte = ($08,$09,$0a,$0B,$0C,$0D,$0E,$0F,
                                         $70,$71,$72,$73,$74,$75,$76,$77);
-
-VAR
-    stereo_possible:Boolean;    (* flag if stereo is possible on detected SB *)
-    _16Bit_possible:Boolean;    (* flag if 16bit play is possible on detected SB *)
-    maxstereorate:word;         (* max stereo samplerate on detected SB *)
-    maxmonorate:word;           (* max mono samplerate on detected SB *)
-
-    Stereo:Boolean;             (* flag if stereo-play on/off *)
-    _16Bit:Boolean;             (* flag if 16bit-play on/off *)
-    SBNo:byte;                  (* SoundBlaster typ (look some rows above) *)
-    signeddata:boolean;         (* play signed data ? (only on SB16 possible) *)
-
-    IRQ_No:Byte;                (* IRQ detected SB uses *)
-    DSP_Addr:Word;              (* Baseaddress detected SB uses *)
-    DMA_Channel:Byte;           (* DMA channel for 8 Bit play *)
-    DMA_16BitChannel:byte;      (* DMA channel for 16 Bit play *)
 
 PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);     (* force to use these values for playing *)
 FUNCTION UseBlasterEnv:boolean;                         (* use values set in enviroment BLASTER *)
@@ -126,13 +82,16 @@ PROCEDURE set_sign(signed:boolean); (* sets flag to play signed data
 PROCEDURE setvolume(vol:Byte);   (* what do you think ? *)
 PROCEDURE speaker_on;            (* Does not work on SB16 *)
 PROCEDURE speaker_off;
-function  get_zaehler:word;      (* It's for 8 & 16 Bit mode to get the DMA counter *)
+function  sbGetDMACounter:word;      (* It's for 8 & 16 Bit mode to get the DMA counter *)
 procedure writelnSBConfig;       (* what do you expect ? - write current setup to screen,
                                     but detect SB before calling that proc. *)
 
+procedure sbInit;
+procedure sbDone;
+
 Implementation
 
-uses dos,dma,sbio,pic,crt;
+uses dos,dma,sbio,sbctl,pic,crt;
 
 { Flags and variables for detect part : }
 VAR SB_Detect:Boolean;              { Flag if SB is detected }
@@ -221,7 +180,7 @@ begin
     dmaSetup( ch, mode, p, count );
 end;
 
-function get_zaehler:word;
+function sbGetDMACounter:word;
 { get the dma base counter of dmachannel is used by SB
   you can check if sound transfer does work ;) }
 var
@@ -231,64 +190,13 @@ begin
         ch := dma_16Bitchannel
     else
         ch := dma_channel;
-    get_zaehler := dmaGetCounter( ch );
-end;
-
-procedure setupDSPTransfer( length: word; b16, auto: boolean );
-var
-    cmd, mode: byte;
-begin
-    if ( sbno = 6 ) then
-    begin
-        dec( length );
-        if ( b16 ) then
-        begin
-            if ( auto ) then
-                cmd := $b6  (* DSP B6h - use 16bit autoinit *)
-            else
-                cmd := $b2; (* DSP B2h - use 16bit nonautoinit *)
-        end else begin
-            if ( auto ) then
-                cmd := $c6  (* DSP C6h - use 8bit autoinit *)
-            else
-                cmd := $c2; (* DSP c2h - use 8bit nonautoinit *)
-        end;
-        sbioDSPWrite( dsp_addr, cmd );  
-        mode := 0;
-        (* 2nd command byte: bit 4 = 1 - signed data *)
-        if ( signeddata ) then mode := mode or $10;
-        (* 2nd command byte: bit 5 = 1 - stereo data *)
-        if ( stereo ) then mode := mode or $20;
-        sbioDSPWrite( dsp_addr, mode );
-        sbioDSPWrite( dsp_addr, lo( length ) );
-        sbioDSPWrite( dsp_addr, hi( length ) );
-    end else begin
-        dec( length );
-        sbioDSPWrite( dsp_addr, $48 ); (* DSP 48h - setup DMA buffer size *)
-        sbioDSPWrite( dsp_addr, lo( length ) );
-        sbioDSPWrite( dsp_addr, hi( length ) );
-        if ( sbno = 1 ) then
-        begin
-            (* for SB1.0 : *)
-            if ( auto ) then
-                cmd := $1c  (* DSP 1Ch - autoinit normal DMA *)
-            else
-                cmd := $14; (* DSP 14h - nonautoinit normal DMA *)
-        end else begin
-            (* >SB1.0 use highspeed modes *)
-            if ( auto ) then
-                cmd := $90  (* DSP 90h - autoinit highspeed DMA *)
-            else
-                cmd := $91; (* DSP 91h - nonautoinit highspeed DMA *)
-        end;
-        sbioDSPWrite( dsp_addr, cmd );
-    end;
+    sbGetDMACounter := dmaGetCounter( ch );
 end;
 
 (* call this if you want to do continues play *)
 procedure play_firstBlock(length:word);
 begin
-    setupDSPTransfer( length, _16bit, true );
+    sbSetupDSPTransfer( length, _16bit, true );
 end;
 
 PROCEDURE play_oneBlock(p:pointer;length:word);
@@ -298,7 +206,7 @@ PROCEDURE play_oneBlock(p:pointer;length:word);
   'ticks' }
 begin
     setupDMATransfer( p, length, false );
-    setupDSPTransfer( length, _16bit, false );
+    sbSetupDSPTransfer( length, _16bit, false );
 end;
 
 { -------------------- continue commenting here ---------------------- }
@@ -850,6 +758,7 @@ procedure check_samplerate(var rate:word;var stereo:boolean);
       if rate>maxmonorate then rate:=maxmonorate;
   end;
 
+procedure sbInit;
 begin
   SB_Detect:=False;
   DSPIRQ_Detect:=false;
@@ -865,4 +774,12 @@ begin
   DSP_Addr:=$220;
   DMA_Channel:=1;
   DMA_16Bitchannel:=5;
+end;
+
+procedure sbDone;
+begin
+end;
+
+begin
+  sbInit;
 end.

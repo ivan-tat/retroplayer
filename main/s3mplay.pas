@@ -127,7 +127,7 @@ FUNCTION load_specialdata(var p):boolean; { allocate memory and load special dat
 
 IMPLEMENTATION
 
-uses EMStool,blaster,crt,dos,dosproc;
+uses EMStool,sbctl,blaster,crt,dos,dosproc;
 
 CONST DMAbuffersize=8*1024; { <- maximum size of DMAbuffer }
 

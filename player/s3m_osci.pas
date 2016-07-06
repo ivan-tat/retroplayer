@@ -134,10 +134,10 @@ begin
           waitretrace;
           for pos:=0 to usedchannels-1 do
             bar(320*170+pos*15+10,10,channel[pos].sampleVol*ord(channel[pos].enabled));
-          yl:=h^[get_zaehler] shr 1;
+          yl:=h^[sbGetDMACounter] shr 1;
           for pos:=1 to 319 do
             begin
-              i:=get_zaehler; { current position in DMAbuffer }
+              i:=sbGetDMACounter; { current position in DMAbuffer }
               linie(pos-1,scr[pos-1],pos,scr[pos],1);
               scr[pos-1]:=yl;yl:=h^[i] shr 1;
               linie(pos-1,scr[pos-1],pos,yl,14);
@@ -152,11 +152,11 @@ begin
         begin
           for pos:=0 to usedchannels-1 do
             bar(320*170+pos*15+10,10,channel[pos].sampleVol*ord(channel[pos].enabled));
-          i:=get_zaehler and $fffe;
+          i:=sbGetDMACounter and $fffe;
           yl:=h^[i] shr 2;yr:=h^[i+1] shr 2;
           for pos:=1 to 319 do
             begin
-              i:=get_zaehler and $fffe; { current position in DMAbuffer }
+              i:=sbGetDMACounter and $fffe; { current position in DMAbuffer }
               if i>dmarealbufsize[1] then b:=7 else b:=4;
               { left channel : }
               linie(pos-1,36+scr[pos-1],pos,36+scr[pos],1);
