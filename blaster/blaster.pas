@@ -126,7 +126,6 @@ PROCEDURE set_sign(signed:boolean); (* sets flag to play signed data
 PROCEDURE setvolume(vol:Byte);   (* what do you think ? *)
 PROCEDURE speaker_on;            (* Does not work on SB16 *)
 PROCEDURE speaker_off;
-procedure write_zaehler;         (* It's for 8 & 16 Bit mode to get the DMA counter *)
 function  get_zaehler:word;      (* It's for 8 & 16 Bit mode to get the DMA counter *)
 procedure writelnSBConfig;       (* what do you expect ? - write current setup to screen,
                                     but detect SB before calling that proc. *)
@@ -234,14 +233,6 @@ begin
         ch := dma_channel;
     get_zaehler := dmaGetCounter( ch );
 end;
-
-procedure write_zaehler;
-{ A stupid function I know, but get_zaehler did not exist in testphase
-  of my player, that was all in write_zaehler implemented, but later I
-  thought it would be usefull to implement get_zaehler for debugging. }
-  begin
-    write(' ',get_zaehler,' ');
-  end;
 
 procedure setupDSPTransfer( length: word; b16, auto: boolean );
 var
