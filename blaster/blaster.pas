@@ -105,9 +105,9 @@ PROCEDURE play_oneBlock(p:pointer;length:word);
 PROCEDURE Initblaster(var frequ:Word;stereoon,_16Biton:Boolean);
   (* set frequency and stereo/mono and 8/16 Bit mode *)
 
-PROCEDURE wr_mixerreg(reg,wert:byte);
+PROCEDURE sbMixerWrite( reg, data: byte );
   (* writes something to the mixing chip *)
-FUNCTION  rd_mixerreg(reg:byte):byte;
+FUNCTION  sbMixerRead( reg: byte): byte;
   (* reads something from the mixing chip *)
 
 PROCEDURE set_ready_irq(p:pointer);
@@ -149,136 +149,36 @@ VAR SB_Detect:Boolean;              { Flag if SB is detected }
 
 { Soundblaster handling : }
 
-function try_reset(p:word):Boolean; assembler;
-  asm
-        mov        bl,1
-        mov        dx,p
-        add        dx,6
-        mov        al,1         { write 1 to port 2x6 }
-        out        dx,al
-        in         al,dx
-        in         al,dx
-        in         al,dx
-        in         al,dx
-        xor        al,al
-        out        dx,al        { after 3,3 æs write 0 to port 2x6 }
-
-{ And now check the answer }
-        add        dx,8
-        mov        si,200
-@@readloop:
-        mov        cx,0ffffh      { SB2.0/1.0 are that slow :( }
-@@testl:                          { check for data available }
-        in         al,dx
-        dec        cx
-        jz         @@not
-        or         al,al
-        jns        @@testl
-
-        sub        dx,4
-        in         al,dx        { read data comming through }
-        cmp        al,0aah
-        je         @@aSB
-        add        dx,4
-        dec        si
-        jnz        @@readloop
-@@not:  mov        bl,0         { it's not a SB :( }
-@@aSB:  xor        ah,ah
-        mov        al,bl
-  end;
-
-procedure wr_dsp; assembler;
-{ it's WAITWRITE and then WRITE IT }
-  asm
-        push      bx
-        push      cx
-        mov       bh,al
-        mov       dx,dsp_addr
-        add       dx,0ch
-        mov       cx,0ffffh        { ya know, slow SBs }
-        { Wait for writing : }
-@@litl: in        al,dx
-        dec       cx
-        jz        @@ende
-        or        al,al
-        js        @@litl  { check bit 7 if we can write to port 2xC }
-        mov       al,bh
-        out       dx,al   { write it }
-@@ende: pop       cx
-        pop       bx
-  end;
-
 procedure speaker_off;
-  begin
-    asm
-      mov       al,0d3h
-      call      wr_dsp
-      push      220             { needs a bit time to switch it off }
-      call far ptr delay
-    end;
-  end;
+begin
+    sbioDSPWrite( dsp_addr, $d3 );
+    (* needs a bit time to switch it off *)
+    Delay( 220 );
+end;
 
 procedure speaker_on;
-  begin
-    asm
-      mov       al,0d1h
-      call      wr_dsp
-      push      110             { needs a bit time to switch it on }
-      call far ptr delay
-      end;
-  end;
+begin
+    sbioDSPWrite( dsp_addr, $d1 );
+    (* needs a bit time to switch it on *)
+    Delay( 110 );
+end;
 
-function rd_dsp:byte; assembler;
-{ It's WAITREAD and then READ byte }
-  asm
-        mov       dx,dsp_addr
-        add       dx,0eh
-        mov       cx,0ffffh    { ya know - slow SBs. You can believe me ! }
-        { check for data available : }
-@@litl: in        al,dx
-        dec       cx
-        jz        @@ende
-        or        al,al
-        jns       @@litl   { bit 7 set ? if not then wait }
-        sub       dx,0eh-0ah
-        in        al,dx    { write data }
-        xor       ah,ah
-@@ende:
-  end;
+(* This routine may not work for all registers because of different timings. *)
+procedure sbMixerWrite( reg, data: byte );
+begin
+    (* SB 1.0/1.5/2.0/2.5 has no mixer *)
+    if ( not ( SBNo in [ 1, 3 ] ) ) then
+        sbioMixerWrite( dsp_addr, reg, data );
+end;
 
-procedure wr_mixerreg(reg,wert:byte); assembler;
-{ this routine may not work for all registers because of different timings.}
-  asm
-    cmp       [SBNo],1
-    je        @@nomixer                   { SB 1.0/1.5 has no mixer ! }
-    cmp       SBNo,3
-    je        @@nomixer                   { SB 2.0/2.5 has no mixer ! }
-    mov       al,reg
-    mov       dx,dsp_addr
-    add       dx,4
-    out       dx,al
-    inc       dx
-    in        al,dx
-    mov       al,wert
-    out       dx,al
-@@nomixer:
-  end;
-
-function rd_mixerreg(reg:byte):byte; assembler;
-  asm
-    cmp       [SBNo],1
-    je        @@nomixer                   { SB 1.0/1.5 has no mixer ! }
-    cmp       SBNo,3
-    je        @@nomixer                   { SB 2.0/2.5 has no mixer ! }
-    mov     dx,dsp_addr
-    add     dx,4
-    mov     al,reg
-    out     dx,al
-    inc     dx
-    in      al,dx
-    xor     ah,ah
-@@nomixer:
-  end;
+function sbMixerRead( reg: byte ): byte;
+begin
+    (* SB 1.0/1.5/2.0/2.5 has no mixer *)
+    if ( not ( SBNo in [ 1, 3 ] ) ) then
+        sbMixerRead := sbioMixerRead( dsp_addr, reg )
+    else
+        sbMixerRead := 0;
+end;
 
 { Sorry no cool macro like in C is possible }
 function loword(l:longint):word; assembler;
@@ -309,14 +209,12 @@ begin
         (* first the SBPRO stereo bugfix : *)
         if ( stereo ) then
             if ( sbNo < 6 ) then
+            begin
                 (* well ... should be a SB PRO in stereo mode ... *)
-                (* let's send one byte ! *)
-                asm
-                    mov  al,10h
-                    call wr_dsp
-                    mov  al,128   (* nothin but silence ! *)
-                    call wr_dsp
-                end;
+                (* let's send one byte - nothing but silence *)
+                sbioDSPWrite( dsp_addr, $10 );
+                sbioDSPWrite( dsp_addr, $80 );
+            end;
         ch := dma_channel;
     end else
         ch := dma_16Bitchannel;
@@ -345,140 +243,109 @@ procedure write_zaehler;
     write(' ',get_zaehler,' ');
   end;
 
-procedure play_firstBlock(length:word);
-{ call this if you want to do continues play }
-  begin
-    asm
-                cmp       [SBNo],6
-                je        @@sb16init          { use special commands on SB16 }
-
-                mov       bl,90h              { DSP 90h - autoinit highspeed DMA }
-                cmp       [SBNo],1
-                jne       @@highspeed         { >SB1.0 use highspeed modes }
-                { for SB1.0 : }
-                mov       bl,1ch              { DSP 1Ch - autoinit normal DMA }
-@@highspeed:
-                mov       cx,length
-                dec       cx
-                mov       al,048h             { DSP 48h - setup DMA buffer size }
-                call      wr_dsp
-                mov       al,cl               { lower part of size }
-                call      wr_dsp
-                mov       al,ch               { higher part of size }
-                call      wr_dsp
-                mov       al,bl               { DSP command depends on SB }
-                call      wr_dsp
-                jmp       @@ende
-
-@@sb16init:     mov       cx,length
-                dec       cx
-                cmp       [_16Bit],1          { other command for 16bit play ... }
-                je        @@play16Bit
-                mov       al,0c6h             { DSP c6h - use 8bit autoinit }
-                call      wr_dsp
-                mov       al,signeddata
-                shl       al,4                { 2nd command byte: bit 4 = 1 - signed data }
-                cmp       [stereo],0
-                je        @@nostereo
-                or        al,020h             { 2nd command byte: bit 5 = 1 - stereo data }
-@@nostereo:     call      wr_dsp              { write 2nd command byte }
-                mov       al,cl               { lower part of size }
-                call      wr_dsp
-                mov       al,ch               { higher part of size }
-                call      wr_dsp
-                jmp       @@ende
-@@play16Bit:    mov       al,0B6h             { DSP B6h - use 16bit autoinit }
-                call      wr_dsp
-                mov       al,signeddata
-                shl       al,4                { 2nd command byte: bit 4 = 1 - signed data }
-                cmp       [stereo],0
-                je        @@nostereo2
-                or        al,020h             { 2nd command byte: bit 5 = 1 - stereo data }
-@@nostereo2:    call      wr_dsp              { write 2nd command byte }
-                mov       al,cl               { lower part of size }
-                call      wr_dsp
-                mov       al,ch               { higher part of size }
-                call      wr_dsp
-@@ende:
+procedure setupDSPTransfer( length: word; b16, auto: boolean );
+var
+    cmd, mode: byte;
+begin
+    if ( sbno = 6 ) then
+    begin
+        dec( length );
+        if ( b16 ) then
+        begin
+            if ( auto ) then
+                cmd := $b6  (* DSP B6h - use 16bit autoinit *)
+            else
+                cmd := $b2; (* DSP B2h - use 16bit nonautoinit *)
+        end else begin
+            if ( auto ) then
+                cmd := $c6  (* DSP C6h - use 8bit autoinit *)
+            else
+                cmd := $c2; (* DSP c2h - use 8bit nonautoinit *)
+        end;
+        sbioDSPWrite( dsp_addr, cmd );  
+        mode := 0;
+        (* 2nd command byte: bit 4 = 1 - signed data *)
+        if ( signeddata ) then mode := mode or $10;
+        (* 2nd command byte: bit 5 = 1 - stereo data *)
+        if ( stereo ) then mode := mode or $20;
+        sbioDSPWrite( dsp_addr, mode );
+        sbioDSPWrite( dsp_addr, lo( length ) );
+        sbioDSPWrite( dsp_addr, hi( length ) );
+    end else begin
+        dec( length );
+        sbioDSPWrite( dsp_addr, $48 ); (* DSP 48h - setup DMA buffer size *)
+        sbioDSPWrite( dsp_addr, lo( length ) );
+        sbioDSPWrite( dsp_addr, hi( length ) );
+        if ( sbno = 1 ) then
+        begin
+            (* for SB1.0 : *)
+            if ( auto ) then
+                cmd := $1c  (* DSP 1Ch - autoinit normal DMA *)
+            else
+                cmd := $14; (* DSP 14h - nonautoinit normal DMA *)
+        end else begin
+            (* >SB1.0 use highspeed modes *)
+            if ( auto ) then
+                cmd := $90  (* DSP 90h - autoinit highspeed DMA *)
+            else
+                cmd := $91; (* DSP 91h - nonautoinit highspeed DMA *)
+        end;
+        sbioDSPWrite( dsp_addr, cmd );
     end;
-  end;
+end;
+
+(* call this if you want to do continues play *)
+procedure play_firstBlock(length:word);
+begin
+    setupDSPTransfer( length, _16bit, true );
+end;
 
 PROCEDURE play_oneBlock(p:pointer;length:word);
 { call this if you want to play only ONE (!) block - I'm sure you can do
   continues play with this proc. on SBs <SB16 (I have seen that often in
   other sources, but it'll definitly not work on a SB16 ! It'll cause
   'ticks' }
-  begin
+begin
     set_DMAvalues(p,length,false);
-    asm
-                
-                cmp       [SBNo],6
-                je        @@sb16init          { use special commands on SB16 }
-
-                mov       bl,91h              { DSP 91h - nonautoinit highspeed DMA }
-                cmp       [SBNo],1
-                je        @@highspeed         { >SB1.0 use highspeed mode }
-                { On SB1.0 : }
-                mov       bl,14h              { DSP 14h - nonautoinit normal DMA }
-@@highspeed:
-                mov       cx,length
-                dec       cx
-                mov       al,048h             { DSP 48h - setup DMA buffer size }
-                call      wr_dsp
-                mov       al,cl               { lower part of size }
-                call      wr_dsp
-                mov       al,ch               { higher part of size }
-                call      wr_dsp
-                mov       al,bl               { DSP command depends on SB }
-                call      wr_dsp
-                jmp       @@ende
-
-@@sb16init:     mov       cx,length
-                dec       cx
-                cmp       [_16Bit],1          { other command for 16bit play ... }
-                je        @@play16Bit
-                mov       al,0c2h             { DSP c2h - use 8bit nonautoinit }
-                call      wr_dsp
-                mov       al,signeddata
-                shl       al,4                { 2nd command byte: bit 4 = 1 - signed data }
-                cmp       [stereo],0
-                je        @@nostereo
-                or        al,020h             { 2nd command byte: bit 5 = 1 - stereo data }
-@@nostereo:     call      wr_dsp              { write 2nd command byte }
-                mov       al,cl               { lower part of size }
-                call      wr_dsp
-                mov       al,ch               { higher part of size }
-                call      wr_dsp
-                jmp       @@ende
-@@play16Bit:    mov       al,0B2h             { DSP B2h - use 16bit nonautoinit }
-                call      wr_dsp
-                mov       al,signeddata
-                shl       al,4                { 2nd command byte: bit 4 = 1 - signed data }
-                cmp       [stereo],0
-                je        @@nostereo2
-                or        al,020h             { 2nd command byte: bit 5 = 1 - stereo data }
-@@nostereo2:    call      wr_dsp              { write 2nd command byte }
-                mov       al,cl               { lower part of size }
-                call      wr_dsp
-                mov       al,ch               { higher part of size }
-                call      wr_dsp
-@@ende:
-    end;
-  end;
+    setupDSPTransfer( length, _16bit, false );
+end;
 
 { -------------------- continue commenting here ---------------------- }
 
-PROCEDURE SetTimeConst(tc:byte);
-{ Setup samplerate with time constant, take this :
-  TC = 256- TRUNC(1000000/SAMPLERATE) }
-  begin
-    asm
-      mov       al,040h
-      call      wr_dsp
-      mov       al,tc
-      call      wr_dsp
+procedure setDSPTimeConst( tc: byte );
+(* Setup samplerate with time constant, take this:
+   TC = 256 - TRUNC( 1 000 000 / SAMPLERATE ) *)
+begin
+    sbioDSPWrite( dsp_addr, $40 );
+    sbioDSPWrite( dsp_addr, tc );
+end;
+
+procedure setDSPFrequency( freq: word );
+begin
+    sbioDSPWrite( dsp_addr, $41 );
+    sbioDSPWrite( dsp_addr, hi( freq ) );
+    sbioDSPWrite( dsp_addr, lo( freq ) );
+end;
+
+procedure setDSPSampleRate( freq: word; stereo: boolean );
+var
+    tc: byte;
+begin
+    (* calculate timeconstant - pay attention on SB PRO you have to setup
+       2*samplerate in stereo mode (so call it byterate) - on SB16 not ! *)
+    if ( sbno = 6 ) or not stereo then
+    begin
+        tc := 256 - 1000000 div freq;
+        freq := 1000000 div ( 256 - tc );
+    end else begin
+        tc := 256 - 1000000 div ( 2 * freq );
+        freq := ( 1000000 div ( 256 - tc ) ) div 2;
     end;
-  end;
+    if ( sbno < 6 ) then
+        setDSPTimeConst( tc )
+    else
+        setDSPFrequency( freq );
+end;
 
 PROCEDURE Initblaster(var frequ:Word;stereoon,_16Biton:boolean);
 { Initblaster does this :   1. check samplerates for its borders
@@ -488,7 +355,6 @@ PROCEDURE Initblaster(var frequ:Word;stereoon,_16Biton:boolean);
  if you want to play signed data on SB16, call 'set_sign' after Initblaster }
 
 var tc:byte;
-    w:word;
   begin
     { first reset SB : }
     asm
@@ -503,45 +369,13 @@ var tc:byte;
     check_samplerate(frequ,stereoon);
     _16bit:=(SBNo=6) and _16Biton;
     stereo:=stereoon;
-    { calculate timeconstant - pay attention on SB PRO you have to setup
-      2*samplerate in stereo mode (so call it byterate) - on SB16 not ! }
-    if (sbno=6) or not stereo then
-      begin
-        tc:=256-1000000 div frequ;
-        frequ:=1000000 div (256-tc);
-      end
-    else
-      begin
-        tc:=256-1000000 div (2*frequ);
-        frequ:=(1000000 div (256-tc)) div 2;
-      end;
-    w:=frequ;
-    try_reset(dsp_addr);
-    { set sampling rate }
-    if (sbno<6) then
-    asm
-       { on all normal SB's :) }
-       mov      al,040h
-       call     wr_dsp
-       mov      al,tc
-       call     wr_dsp
-    end
-    else
-    asm
-       { on SB16 }
-       mov      al,041h
-       call     wr_dsp
-       mov      ax,w
-       xchg     al,ah
-       call     wr_dsp
-       mov      al,ah
-       call     wr_dsp
-    end;
+    sbioDSPReset( dsp_addr );
+    setDSPSampleRate( frequ, stereo );
     { setup stereo option on SB PRO - on SB16 it's set in DSP command }
     if stereo and (SBNo<>6) then
-      wr_mixerreg($0e,rd_mixerreg($0e) or $02); { stereo option on (only SB PRO) }
+      sbMixerWrite($0e,sbMixerRead($0e) or $02); { stereo option on (only SB PRO) }
     if SBNo in [2,4,5] then
-      wr_mixerreg($0e,rd_mixerreg($0e) or $20); { filter option off (only SB PRO) }
+      sbMixerWrite($0e,sbMixerRead($0e) or $20); { filter option off (only SB PRO) }
     speaker_on;
   end;
 
@@ -592,7 +426,7 @@ var p:word;
     while not dspadr_detect and (p<$290) do
       begin
         if prot then write(' Trying ',hexword(p),' .... ');
-        dspadr_detect:=try_reset(p);
+        dspadr_detect := sbioDSPReset( p );
         if not dspadr_detect then
           begin
             inc(p,$10);
@@ -603,21 +437,6 @@ var p:word;
     if not dspadr_detect then exit;
     dsp_addr:=p;
     detect_dsp_addr:=true;
-  end;
-
-PROCEDURE reset_mixer;
-  begin
-    asm
-      mov    dx,dsp_addr
-      add    dx,4
-      mov    al,0
-      out    dx,al
-      mov    cx,50
-@@loop: loop @@loop
-      inc    dx
-      inc    al
-      out    dx,al
-    end;
   end;
 
 FUNCTION Detect_DMA_Channel_IRQ(prot:boolean):Boolean;
@@ -674,19 +493,38 @@ var oldv:array[1..5] of pointer;
     Detect_DMA_Channel_irq:=true;
     DSPIRQ_detect:=true;
     IRQ_no:=Check;
-    try_reset(dsp_addr);
+    sbioDSPReset( dsp_addr );
   end;
 
-procedure Fix_blastertype;
-  var b1,b2:byte;
-  begin
-    asm
-      mov       al,0E1h        { DSP E1h - get DSP version }
-      call      wr_dsp
+function readDSPVersion: boolean;
+var
+    v_lo, v_hi: byte;
+begin
+    (* DSP 0xE1 - get DSP version *)
+    if ( not sbioDSPWrite( dsp_addr, $e1 ) ) then
+    begin
+        readDSPVersion := false;
+        exit;
     end;
-    sbversHi:=rd_dsp;
-    sbversLo:=rd_dsp;
-  end;
+
+    v_hi := sbioDSPRead( dsp_addr );
+    if ( sbioError <> E_SBIO_SUCCESS ) then
+    begin
+        readDSPVersion := false;
+        exit;
+    end;
+
+    v_lo := sbioDSPRead( dsp_addr );
+    if ( sbioError <> E_SBIO_SUCCESS ) then
+    begin
+        readDSPVersion := false;
+        exit;
+    end;
+
+    sbversLo := v_lo;
+    sbversHi := v_hi;
+    readDSPVersion := true;
+end;
 
 FUNCTION DetectSoundblaster(prot:boolean):Boolean;
   begin
@@ -705,7 +543,12 @@ FUNCTION DetectSoundblaster(prot:boolean):Boolean;
         if prot then writeln(' Can'#39't locate DSP-addresse ! ');
         exit;
       end;
-    fix_blastertype;
+    if ( not readDSPVersion ) then
+    begin
+        if ( prot ) then writeln('ERROR: Unable to get DSP chip version on this base address detected.');
+        SBno := 0;
+        exit;
+    end;
 
     if (sbversHi<1) or (sbversHi>4) then
       begin
@@ -724,7 +567,7 @@ FUNCTION DetectSoundblaster(prot:boolean):Boolean;
         exit;
       end;
 
-    try_reset(dsp_addr);
+    sbioDSPReset( dsp_addr );
 
 {                              SBvers:
    SoundBlaster 1.0/1.5        1.xx
@@ -783,56 +626,35 @@ FUNCTION ready:boolean;
   end;
 
 PROCEDURE stop_play;
-  begin
-    { for 16bit modes : }
-    asm
-      mov   al,0d0h
-      call  wr_dsp
-      mov   al,0d9h
-      call  wr_dsp
-      mov   al,0d0h
-      call  wr_dsp
-    end;
-    { for 8bit modes : }
-    asm
-      mov   al,0d0h
-      call  wr_dsp
-      mov   al,0dah
-      call  wr_dsp
-      mov   al,0d0h
-      call  wr_dsp
-    end;
-    try_reset(dsp_addr);   { reset is the best way to make sure SB stops playing ! }
+begin
+    (* for 16bit modes : *)
+    sbioDSPWrite( dsp_addr, $d0 );
+    sbioDSPWrite( dsp_addr, $d9 );
+    sbioDSPWrite( dsp_addr, $d0 );
+    (* for 8bit modes : *)
+    sbioDSPWrite( dsp_addr, $d0 );
+    sbioDSPWrite( dsp_addr, $da );
+    sbioDSPWrite( dsp_addr, $d0 );
+    (* reset is the best way to make sure SB stops playing *)
+    sbioDSPReset( dsp_addr );
     dmaMask( dma_channel ); (* was outp( 0x0a, dma_channel ) *)
-  end;
+end;
 
 PROCEDURE pause_play;
-  begin
-    if not _16bit then
-    asm
-      mov        al,0D0h
-      call       wr_dsp
-    end
+begin
+    if _16bit then
+        sbioDSPWrite( dsp_addr, $d5 )
     else
-    asm
-      mov        al,0D5h
-      call       wr_dsp
-    end
-  end;
+        sbioDSPWrite( dsp_addr, $d0 );
+end;
 
 PROCEDURE continue_play;
-  begin
-    if not _16bit then
-    asm
-      mov        al,0D4h
-      call       wr_dsp
-    end
+begin
+    if _16bit then
+        sbioDSPWrite( dsp_addr, $d6 )
     else
-    asm
-      mov        al,0D6h
-      call       wr_dsp
-    end
-  end;
+        sbioDSPWrite( dsp_addr, $d4 );
+end;
 
 PROCEDURE set_sign(signed:boolean);
   begin
@@ -842,32 +664,27 @@ PROCEDURE set_sign(signed:boolean);
 procedure setfilter(how:boolean);
 var b:byte;
   begin
-    b:=rd_mixerreg($0e);
+    b:=sbMixerRead($0e);
     if how then { on } b:=b or $20 else b:=b and not $20;
-    wr_mixerreg($0e,b); { switch the filter option }
+    sbMixerWrite($0e,b); { switch the filter option }
   end;
 
 procedure setvolume(vol:byte);
-var b:byte;
-  begin
-    if sbno<6 then
-      begin
-        if vol>=15 then vol:=15;
-        b:=vol;
-        b:=b shl 4;        { the other side }
-        vol:=b+vol;
-        wr_mixerreg($22,vol);
-        wr_mixerreg($04,vol);
-      end
-    else
-      begin
-        { on SB16 the new mixer registers :) }
-        wr_mixerreg($30,vol);  { master left }
-        wr_mixerreg($31,vol);  { master right }
-        wr_mixerreg($32,vol);  { Voice left }
-        wr_mixerreg($33,vol);  { Voice right }
-      end;
-  end;
+var b: byte;
+begin
+    if ( sbno < 6 ) then
+    begin
+        if vol >= 15 then vol := 15;
+        vol := vol + ( vol shl 4 );
+        sbMixerWrite( SBIO_MIXER_MASTER_VOLUME, vol );
+        sbMixerWrite( SBIO_MIXER_DAC_LEVEL, vol );
+    end else begin
+        sbMixerWrite( SBIO_MIXER_MASTER_LEFT, vol );
+        sbMixerWrite( SBIO_MIXER_MASTER_RIGHT, vol );
+        sbMixerWrite( SBIO_MIXER_VOICE_LEFT, vol );
+        sbMixerWrite( SBIO_MIXER_VOICE_RIGHT, vol );
+    end;
+end;
 
 PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);
   begin
