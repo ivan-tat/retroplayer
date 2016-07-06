@@ -10,6 +10,7 @@
 #include <conio.h>
 #endif
 
+#include "..\pascal\crt.h"
 #include "sbio.h"
 #include "sbctl.h"
 
@@ -26,6 +27,18 @@ uint8_t __far __pascal sbMixerRead( uint8_t reg ) {
         return sbioMixerRead( dsp_addr, reg );
     else
         return 0;
+}
+
+void __far __pascal speaker_on( void ) {
+    sbioDSPWrite( dsp_addr, 0xd1 );
+    /* needs a bit time to switch it on */
+    delay( 110 );
+}
+
+void __far __pascal speaker_off( void ) {
+    sbioDSPWrite( dsp_addr, 0xd3 );
+    /* needs a bit time to switch it off */
+    delay( 220 );
 }
 
 void __far __pascal sbSetupDSPTransfer( uint16_t len, bool b16, bool autoinit ) {

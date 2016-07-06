@@ -56,16 +56,20 @@ var
 
 function sbMixerRead( reg: byte ): byte;
 procedure sbMixerWrite( reg, data: byte );
+procedure speaker_on;
+procedure speaker_off;
 procedure sbSetupDSPTransfer( len: word; b16, auto: boolean );
 
 implementation
 
-uses sbio;
+uses crt, sbio;
 
 (*$l sbctl.obj*)
 
 function sbMixerRead( reg: byte ): byte; external;
 procedure sbMixerWrite( reg, data: byte ); external;
+procedure speaker_on; external;
+procedure speaker_off; external;
 procedure sbSetupDSPTransfer( len: word; b16, auto: boolean ); external;
 
 end.

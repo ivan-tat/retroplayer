@@ -75,8 +75,6 @@ PROCEDURE restore_irq;       (* restore old interrupt vector *)
 PROCEDURE set_sign(signed:boolean); (* sets flag to play signed data
                - does only work on SB16 (set it before start playing) *)
 PROCEDURE setvolume(vol:Byte);   (* what do you think ? *)
-PROCEDURE speaker_on;            (* Does not work on SB16 *)
-PROCEDURE speaker_off;
 function  sbGetDMACounter:word;      (* It's for 8 & 16 Bit mode to get the DMA counter *)
 procedure writelnSBConfig;       (* what do you expect ? - write current setup to screen,
                                     but detect SB before calling that proc. *)
@@ -99,22 +97,6 @@ VAR SB_Detect:Boolean;              { Flag if SB is detected }
 
     check:byte;                     { for detecting }
     savvect:pointer;                {  "       "    }
-
-{ Soundblaster handling : }
-
-procedure speaker_off;
-begin
-    sbioDSPWrite( dsp_addr, $d3 );
-    (* needs a bit time to switch it off *)
-    Delay( 220 );
-end;
-
-procedure speaker_on;
-begin
-    sbioDSPWrite( dsp_addr, $d1 );
-    (* needs a bit time to switch it on *)
-    Delay( 110 );
-end;
 
 { Sorry no cool macro like in C is possible }
 function loword(l:longint):word; assembler;
