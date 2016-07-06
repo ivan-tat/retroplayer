@@ -46,8 +46,6 @@ FUNCTION Get_BlasterVersion:Word;                       (* reads the detected so
 
 procedure check_samplerate(var rate:word;var stereo:boolean); (* check min/max samplerate *)
 
-procedure setupDMATransfer( p: pointer; count: word; autoinit: boolean );
-  (* config DMAcontroller for different transfer modes *)
 procedure play_firstBlock(length:word);
   (* set the SBinterrupt to "interrupt" every "length" bytes
      the best way to use it, is to play the half buffersize and then
@@ -108,37 +106,6 @@ function hiword(l:longint):word; assembler;
   asm
     mov         ax,word ptr(l+2)
   end;
-
-(* If you want to know more about how to setup DMA controller, please
-   refer to our documentation SBLASTER.ZIP. *)
-procedure setupDMATransfer( p: pointer; count: word; autoinit: boolean );
-var
-    ch: byte;
-    mode: TDMAMode;
-begin
-    mode := DMA_MODE_TRAN_READ or DMA_MODE_ADDR_INCR or DMA_MODE_SINGLE;
-    if ( autoinit ) then
-        mode := mode or DMA_MODE_INIT_AUTO
-    else
-        mode := mode or DMA_MODE_INIT_SINGLE;
-
-    if ( not _16Bit ) then
-    begin
-        (* first the SBPRO stereo bugfix : *)
-        if ( stereo ) then
-            if ( sbNo < 6 ) then
-            begin
-                (* well ... should be a SB PRO in stereo mode ... *)
-                (* let's send one byte - nothing but silence *)
-                sbioDSPWrite( dsp_addr, $10 );
-                sbioDSPWrite( dsp_addr, $80 );
-            end;
-        ch := dma_channel;
-    end else
-        ch := dma_16Bitchannel;
-
-    dmaSetup( ch, mode, p, count );
-end;
 
 function sbGetDMACounter:word;
 { get the dma base counter of dmachannel is used by SB

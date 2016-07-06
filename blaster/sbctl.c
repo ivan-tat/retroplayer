@@ -11,6 +11,7 @@
 #endif
 
 #include "..\pascal\crt.h"
+#include "..\hw\dma.h"
 #include "sbio.h"
 #include "sbctl.h"
 
@@ -83,4 +84,28 @@ void __far __pascal sbSetupDSPTransfer( uint16_t len, bool b16, bool autoinit ) 
         }
         sbioDSPWrite( dsp_addr, cmd );
     }
+}
+
+void __far __pascal setupDMATransfer( void *p, uint16_t count, bool autoinit ) {
+    uint8_t ch;
+    DMAMode_t mode;
+
+    mode = DMA_MODE_TRAN_READ | DMA_MODE_ADDR_INCR | DMA_MODE_SINGLE;
+    mode |= autoinit ? DMA_MODE_INIT_AUTO : DMA_MODE_INIT_SINGLE;
+
+    if ( ! _16bit ) {
+        /* first the SBPRO stereo bugfix : */
+        if ( stereo ) {
+            if ( sbno < 6 ) {
+                /* well ... should be a SB PRO in stereo mode ... */
+                /* let's send one byte - nothing but silence */
+                sbioDSPWrite( dsp_addr, 0x10 );
+                sbioDSPWrite( dsp_addr, 0x80 );
+            }
+        }
+        ch = dma_channel;
+    } else
+        ch = dma_16bitchannel;
+
+    dmaSetup( ch, mode, p, count );
 }

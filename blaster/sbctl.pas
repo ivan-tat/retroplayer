@@ -58,11 +58,15 @@ function sbMixerRead( reg: byte ): byte;
 procedure sbMixerWrite( reg, data: byte );
 procedure speaker_on;
 procedure speaker_off;
+
+procedure setupDMATransfer( p: pointer; count: word; autoinit: boolean );
+  (* config DMAcontroller for different transfer modes *)
+
 procedure sbSetupDSPTransfer( len: word; b16, auto: boolean );
 
 implementation
 
-uses crt, sbio;
+uses crt, dma, sbio;
 
 (*$l sbctl.obj*)
 
@@ -70,6 +74,6 @@ function sbMixerRead( reg: byte ): byte; external;
 procedure sbMixerWrite( reg, data: byte ); external;
 procedure speaker_on; external;
 procedure speaker_off; external;
+procedure setupDMATransfer( p: pointer; count: word; autoinit: boolean ); external;
 procedure sbSetupDSPTransfer( len: word; b16, auto: boolean ); external;
-
 end.
