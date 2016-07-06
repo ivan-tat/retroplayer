@@ -576,7 +576,8 @@ var key:boolean;
     Initchannels;
     if lqmode then
       begin
-        set_DMAvalues(DMABuffer,2*(numBuffers*DMArealbufsize[1]),true); { loop through whole DMAbuffer }
+        (* loop through whole DMAbuffer *)
+        setupDMATransfer(DMABuffer,2*(numBuffers*DMArealbufsize[1]),true);
 
         DMAhalf:=numbuffers-1;
         lastready:=numbuffers;
@@ -586,7 +587,7 @@ var key:boolean;
       end
     else
       begin
-        set_DMAvalues(DMABuffer,NumBuffers*DMArealbufsize[1],true); { loop through whole DMAbuffer }
+        setupDMATransfer(DMABuffer,NumBuffers*DMArealbufsize[1],true); { loop through whole DMAbuffer }
 
         DMAhalf:=numbuffers-1;
         lastready:=numbuffers;

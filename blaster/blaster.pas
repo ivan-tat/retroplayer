@@ -90,13 +90,13 @@ FUNCTION Get_BlasterVersion:Word;                       (* reads the detected so
 
 procedure check_samplerate(var rate:word;var stereo:boolean); (* check min/max samplerate *)
 
-procedure set_DMAvalues( p: pointer; count: word; autoinit: boolean );
+procedure setupDMATransfer( p: pointer; count: word; autoinit: boolean );
   (* config DMAcontroller for different transfer modes *)
 procedure play_firstBlock(length:word);
   (* set the SBinterrupt to "interrupt" every "length" bytes
      the best way to use it, is to play the half buffersize and then
      write the new data in the allready played part
-     - you have to setup DMA controller by calling set_DMAvalues *)
+     - you have to setup DMA controller by calling setupDMATransfer *)
 PROCEDURE play_oneBlock(p:pointer;length:word);
   (* it's a play routine for playing only one buffer (NOT CONTINOUSLY
      PLAYING ! - it does not work in that way on a SB16 !)
@@ -193,7 +193,7 @@ function hiword(l:longint):word; assembler;
 
 (* If you want to know more about how to setup DMA controller, please
    refer to our documentation SBLASTER.ZIP. *)
-procedure set_DMAvalues( p: pointer; count: word; autoinit: boolean );
+procedure setupDMATransfer( p: pointer; count: word; autoinit: boolean );
 var
     ch: byte;
     mode: TDMAMode;
@@ -306,7 +306,7 @@ PROCEDURE play_oneBlock(p:pointer;length:word);
   other sources, but it'll definitly not work on a SB16 ! It'll cause
   'ticks' }
 begin
-    set_DMAvalues(p,length,false);
+    setupDMATransfer( p, length, false );
     setupDSPTransfer( length, _16bit, false );
 end;
 
