@@ -53,7 +53,7 @@ var
     sdev_caps_stereo_maxrate: word;
 
     _16bit:boolean;             (* flag if 16bit-play on/off *)
-    signeddata:boolean;         (* play signed data ? (only on SB16 possible) *)
+    sdev_mode_sign: boolean;
     stereo:boolean;             (* flag if stereo-play on/off *)
 
 function sbMixerRead( reg: byte ): byte;

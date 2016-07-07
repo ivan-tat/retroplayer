@@ -485,7 +485,7 @@ end;
 
 PROCEDURE set_sign(signed:boolean);
   begin
-    signeddata:=signed;
+    sdev_mode_sign := signed;
   end;
 
 procedure setfilter(how:boolean);
@@ -695,7 +695,9 @@ begin
   MIXER_Detect:=False;
   sdev_caps_stereo := false;
   sdev_caps_16bit := false;
-  STEREO:=False;_16Bit:=False;signeddata:=false;
+  STEREO:=False;
+  _16Bit:=False;
+  sdev_mode_sign := false;
   SBVersHi:=0;SBVersLo:=0;
   sdev_name := '';
   SBno:=0;

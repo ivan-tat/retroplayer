@@ -528,7 +528,8 @@ var a,b,c:string;
       mov        [costumeflag],al
     end;
     savedunder:=(header.cwtv shr 8) and $0f+0.1*((header.cwtv shr 4) and $0f+0.01*(header.cwtv and $0f));
-    signeddata:=(header.ffv=1);if not (header.ffv in [1,2]) then begin load_error:=wrongformat;exit end;
+    signeddata:=(header.ffv=1);
+    if not (header.ffv in [1,2]) then begin load_error:=wrongformat;exit end;
     gvolume:=header.gvolume;
     mvolume:=header.mvolume and $7f;
     stereo :=(header.mvolume shr 7)=1;  { bit 7 is stereo flag ... }

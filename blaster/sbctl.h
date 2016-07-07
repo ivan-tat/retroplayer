@@ -28,7 +28,7 @@ extern uint16_t __pascal sdev_caps_stereo_maxrate;  /* max stereo samplerate */
 /* transfer mode */
 
 extern bool __pascal _16bit;        /* (only on SB16 possible) */
-extern bool __pascal signeddata;    /* (only on SB16 possible) */
+extern bool __pascal sdev_mode_sign;    /* (only on SB16 possible) */
 extern bool __pascal stereo;
 
 void __far __pascal sbMixerWrite( uint8_t reg, uint8_t data );
