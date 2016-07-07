@@ -48,7 +48,7 @@ var
     sbno: byte;                 (* SoundBlaster typ (look some rows above) *)
 
     sdev_caps_stereo: boolean;
-    _16bit_possible:boolean;    (* flag if 16bit play is possible on detected SB *)
+    sdev_caps_16bit: boolean;
     sdev_caps_mono_maxrate: word;
     sdev_caps_stereo_maxrate: word;
 

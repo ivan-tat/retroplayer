@@ -348,7 +348,7 @@ FUNCTION DetectSoundblaster(prot:boolean):Boolean;
     DMACHN_Detect:=False;
     MIXER_Detect:=False;
     sdev_caps_stereo := false;
-    _16Bit_possible:=false;
+    sdev_caps_16bit := false;
     STEREO:=False;_16Bit:=False;
     if not Detect_DSP_Addr(prot) then
       begin
@@ -371,7 +371,7 @@ FUNCTION DetectSoundblaster(prot:boolean):Boolean;
     { for the first set SB1.0 - should work on all SBs }
     SBNo:=1;
     sdev_caps_stereo := false;
-    _16Bit_possible:=false;
+    sdev_caps_16bit := false;
     sdev_caps_mono_maxrate := 22050;
     sdev_caps_stereo_maxrate := 0;
     stop_play;
@@ -394,28 +394,28 @@ FUNCTION DetectSoundblaster(prot:boolean):Boolean;
       1: begin
            SBNo:=1;
            sdev_caps_stereo := false;
-           _16Bit_possible:=false;
+           sdev_caps_16bit := false;
            sdev_caps_mono_maxrate := 22050;
            sdev_caps_stereo_maxrate := 0;
          end;
       2: begin
            SBNo:=3;
            sdev_caps_stereo := false;
-           _16Bit_possible:=false;
+           sdev_caps_16bit := false;
            sdev_caps_mono_maxrate := 44100;
            sdev_caps_stereo_maxrate := 0;
          end;
       3: begin
            SBNo:=2;
            sdev_caps_stereo := true;
-           _16Bit_possible:=false;
+           sdev_caps_16bit := false;
            sdev_caps_mono_maxrate := 44100;
            sdev_caps_stereo_maxrate := 22700;
          end;
       4: begin
            SBNo:=6;
            sdev_caps_stereo := true;
-           _16Bit_possible:=true;
+           sdev_caps_16bit := true;
            sdev_caps_mono_maxrate := 45454;
            sdev_caps_stereo_maxrate := 45454;
          end;
@@ -524,7 +524,7 @@ PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);
 
     MIXER_detect:=typ>1;
     sdev_caps_stereo:=typ in [2,4,5,6];
-    _16Bit_possible:= typ=6;
+    sdev_caps_16bit := typ=6;
     sdev_hw_base := dsp;
     sdev_hw_irq := irq;
     sdev_hw_dma8 := dma;
@@ -694,7 +694,7 @@ begin
   DMACHN_Detect:=False;
   MIXER_Detect:=False;
   sdev_caps_stereo := false;
-  _16Bit_possible:=false;
+  sdev_caps_16bit := false;
   STEREO:=False;_16Bit:=False;signeddata:=false;
   SBVersHi:=0;SBVersLo:=0;
   sdev_name := '';
