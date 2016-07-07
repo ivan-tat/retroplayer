@@ -385,7 +385,7 @@ FUNCTION DetectSoundblaster(prot:boolean):Boolean;
     { for the first set SB1.0 - should work on all SBs }
     SBNo:=1;stereo_possible:=false;_16Bit_possible:=false;
     sdev_caps_mono_maxrate := 22050;
-    maxstereorate:=0;
+    sdev_caps_stereo_maxrate := 0;
     stop_play;
     if not Detect_DMA_Channel_irq(prot) then
       begin
@@ -406,22 +406,22 @@ FUNCTION DetectSoundblaster(prot:boolean):Boolean;
       1: begin
            SBNo:=1;stereo_possible:=false;_16Bit_possible:=false;
            sdev_caps_mono_maxrate := 22050;
-           maxstereorate:=0
+           sdev_caps_stereo_maxrate := 0;
          end;
       2: begin
            SBNo:=3;stereo_possible:=false;_16Bit_possible:=false;
            sdev_caps_mono_maxrate := 44100;
-           maxstereorate:=0
+           sdev_caps_stereo_maxrate := 0;
          end;
       3: begin
            SBNo:=2;stereo_possible:=true;_16Bit_possible:=false;
            sdev_caps_mono_maxrate := 44100;
-           maxstereorate:=22700
+           sdev_caps_stereo_maxrate := 22700;
          end;
       4: begin
            SBNo:=6;stereo_possible:=true;_16Bit_possible:=true;
            sdev_caps_mono_maxrate := 45454;
-           maxstereorate:=45454
+           sdev_caps_stereo_maxrate := 45454;
          end;
       else begin SBNo:=0;exit end;
     end;
@@ -535,12 +535,12 @@ PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);
     sdev_hw_dma16 := dma16;
     SBNo:=typ;
     case typ of
-      1: begin sdev_caps_mono_maxrate:=22050;maxstereorate:=0 end;
-      2: begin sdev_caps_mono_maxrate:=44100;maxstereorate:=22050 end;
-      3: begin sdev_caps_mono_maxrate:=44100;maxstereorate:=0 end;
-      4: begin sdev_caps_mono_maxrate:=44100;maxstereorate:=22050 end;
-      5: begin sdev_caps_mono_maxrate:=44100;maxstereorate:=22050 end;
-      6: begin sdev_caps_mono_maxrate:=45454;maxstereorate:=45454 end;
+      1: begin sdev_caps_mono_maxrate:=22050;sdev_caps_stereo_maxrate:=0; end;
+      2: begin sdev_caps_mono_maxrate:=44100;sdev_caps_stereo_maxrate:=22050 end;
+      3: begin sdev_caps_mono_maxrate:=44100;sdev_caps_stereo_maxrate:=0 end;
+      4: begin sdev_caps_mono_maxrate:=44100;sdev_caps_stereo_maxrate:=22050 end;
+      5: begin sdev_caps_mono_maxrate:=44100;sdev_caps_stereo_maxrate:=22050 end;
+      6: begin sdev_caps_mono_maxrate:=45454;sdev_caps_stereo_maxrate:=45454 end;
     end;
   end;
 
@@ -684,7 +684,7 @@ procedure check_samplerate(var rate:word;var stereo:boolean);
     if rate<4000 then rate:=4000;
     if stereo then
        begin
-         if rate>maxstereorate then rate:=maxstereorate;
+         if ( rate > sdev_caps_stereo_maxrate ) then rate := sdev_caps_stereo_maxrate;
        end
     else
       if ( rate > sdev_caps_mono_maxrate ) then rate := sdev_caps_mono_maxrate;

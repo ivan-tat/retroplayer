@@ -50,7 +50,7 @@ var
     stereo_possible:boolean;    (* flag if stereo is possible on detected SB *)
     _16bit_possible:boolean;    (* flag if 16bit play is possible on detected SB *)
     sdev_caps_mono_maxrate: word;
-    maxstereorate:word;         (* max stereo samplerate on detected SB *)
+    sdev_caps_stereo_maxrate: word;
 
     _16bit:boolean;             (* flag if 16bit-play on/off *)
     signeddata:boolean;         (* play signed data ? (only on SB16 possible) *)
