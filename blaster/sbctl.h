@@ -8,12 +8,15 @@
 
 /* hardware config */
 
-extern char    *__pascal sdev_name;         /* name */
-extern uint8_t  __pascal sbno;              /* type */
+extern char    *__pascal sdev_name[];       /* name */
 extern uint16_t __pascal dsp_addr;          /* base address */
 extern uint8_t  __pascal irq_no;            /* IRQ */
 extern uint8_t  __pascal dma_channel;       /* DMA channel for 8bit play */
 extern uint8_t  __pascal dma_16bitchannel;  /* DMA channel for 16bit play */
+
+/* private */
+
+extern uint8_t  __pascal sbno;              /* type */
 
 /* capabilities */
 
