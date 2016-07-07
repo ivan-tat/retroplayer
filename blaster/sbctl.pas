@@ -64,7 +64,7 @@ procedure speaker_off;
 procedure setupDMATransfer( p: pointer; count: word; autoinit: boolean );
   (* config DMAcontroller for different transfer modes *)
 
-procedure sbSetupDSPTransfer( len: word; b16, auto: boolean );
+procedure sbSetupDSPTransfer( len: word; auto: boolean );
 
 implementation
 
@@ -77,5 +77,5 @@ procedure sbMixerWrite( reg, data: byte ); external;
 procedure speaker_on; external;
 procedure speaker_off; external;
 procedure setupDMATransfer( p: pointer; count: word; autoinit: boolean ); external;
-procedure sbSetupDSPTransfer( len: word; b16, auto: boolean ); external;
+procedure sbSetupDSPTransfer( len: word; auto: boolean ); external;
 end.

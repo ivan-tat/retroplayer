@@ -123,7 +123,7 @@ end;
 (* call this if you want to do continues play *)
 procedure play_firstBlock(length:word);
 begin
-    sbSetupDSPTransfer( length, _16bit, true );
+    sbSetupDSPTransfer( length, true );
 end;
 
 PROCEDURE play_oneBlock(p:pointer;length:word);
@@ -133,7 +133,7 @@ PROCEDURE play_oneBlock(p:pointer;length:word);
   'ticks' }
 begin
     setupDMATransfer( p, length, false );
-    sbSetupDSPTransfer( length, _16bit, false );
+    sbSetupDSPTransfer( length, false );
 end;
 
 { -------------------- continue commenting here ---------------------- }

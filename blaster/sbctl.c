@@ -42,12 +42,12 @@ void __far __pascal speaker_off( void ) {
     delay( 220 );
 }
 
-void __far __pascal sbSetupDSPTransfer( uint16_t len, bool b16, bool autoinit ) {
+void __far __pascal sbSetupDSPTransfer( uint16_t len, bool autoinit ) {
     uint8_t cmd, mode;
     
     if ( sbno == 6 ) {
         len--;
-        if ( b16 ) {
+        if ( _16bit ) {
             /* DSP 0xB6 - use 16bit autoinit */
             /* DSP 0xB2 - use 16bit nonautoinit */
             cmd = autoinit ? 0xb6 : 0xb2;
