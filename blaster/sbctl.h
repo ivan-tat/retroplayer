@@ -22,8 +22,8 @@ extern uint8_t  __pascal sbno;              /* type */
 
 extern bool     __pascal stereo_possible;   /* flag if stereo is possible */
 extern bool     __pascal _16Bit_possible;   /* flag if 16bit play is possible */
+extern uint16_t __pascal sdev_caps_mono_maxrate;    /* max mono samplerate */
 extern uint16_t __pascal maxstereorate;     /* max stereo samplerate */
-extern uint16_t __pascal maxmonorate;       /* max mono samplerate */
 
 /* transfer mode */
 
