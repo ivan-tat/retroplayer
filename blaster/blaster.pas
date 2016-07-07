@@ -347,7 +347,7 @@ FUNCTION DetectSoundblaster(prot:boolean):Boolean;
     DSPADR_Detect:=false;
     DMACHN_Detect:=False;
     MIXER_Detect:=False;
-    stereo_possible:=false;
+    sdev_caps_stereo := false;
     _16Bit_possible:=false;
     STEREO:=False;_16Bit:=False;
     if not Detect_DSP_Addr(prot) then
@@ -369,7 +369,9 @@ FUNCTION DetectSoundblaster(prot:boolean):Boolean;
         exit;
       end;
     { for the first set SB1.0 - should work on all SBs }
-    SBNo:=1;stereo_possible:=false;_16Bit_possible:=false;
+    SBNo:=1;
+    sdev_caps_stereo := false;
+    _16Bit_possible:=false;
     sdev_caps_mono_maxrate := 22050;
     sdev_caps_stereo_maxrate := 0;
     stop_play;
@@ -390,22 +392,30 @@ FUNCTION DetectSoundblaster(prot:boolean):Boolean;
 }
     case sbversHi of
       1: begin
-           SBNo:=1;stereo_possible:=false;_16Bit_possible:=false;
+           SBNo:=1;
+           sdev_caps_stereo := false;
+           _16Bit_possible:=false;
            sdev_caps_mono_maxrate := 22050;
            sdev_caps_stereo_maxrate := 0;
          end;
       2: begin
-           SBNo:=3;stereo_possible:=false;_16Bit_possible:=false;
+           SBNo:=3;
+           sdev_caps_stereo := false;
+           _16Bit_possible:=false;
            sdev_caps_mono_maxrate := 44100;
            sdev_caps_stereo_maxrate := 0;
          end;
       3: begin
-           SBNo:=2;stereo_possible:=true;_16Bit_possible:=false;
+           SBNo:=2;
+           sdev_caps_stereo := true;
+           _16Bit_possible:=false;
            sdev_caps_mono_maxrate := 44100;
            sdev_caps_stereo_maxrate := 22700;
          end;
       4: begin
-           SBNo:=6;stereo_possible:=true;_16Bit_possible:=true;
+           SBNo:=6;
+           sdev_caps_stereo := true;
+           _16Bit_possible:=true;
            sdev_caps_mono_maxrate := 45454;
            sdev_caps_stereo_maxrate := 45454;
          end;
@@ -513,7 +523,7 @@ PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);
     _16Bit:=false;
 
     MIXER_detect:=typ>1;
-    stereo_possible:=typ in [2,4,5,6];
+    sdev_caps_stereo:=typ in [2,4,5,6];
     _16Bit_possible:= typ=6;
     sdev_hw_base := dsp;
     sdev_hw_irq := irq;
@@ -666,7 +676,7 @@ var c:char;
 
 procedure check_samplerate(var rate:word;var stereo:boolean);
   begin
-    stereo:=stereo and stereo_possible;
+    stereo := stereo and sdev_caps_stereo;
     if rate<4000 then rate:=4000;
     if stereo then
        begin
@@ -683,7 +693,7 @@ begin
   DSPADR_Detect:=false;
   DMACHN_Detect:=False;
   MIXER_Detect:=False;
-  stereo_possible:=false;
+  sdev_caps_stereo := false;
   _16Bit_possible:=false;
   STEREO:=False;_16Bit:=False;signeddata:=false;
   SBVersHi:=0;SBVersLo:=0;

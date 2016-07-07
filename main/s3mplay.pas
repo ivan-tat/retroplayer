@@ -550,7 +550,7 @@ var key:boolean;
     startplaying:=false;
     player_error:=0;
     lqmode:=LQ;
-    A_stereo:=A_Stereo and Stereo_possible;
+    A_stereo := A_Stereo and sdev_caps_stereo;
     A_16Bit:=A_16Bit and _16Bit_possible;
     if not sounddevice then begin player_error:=nosounddevice;exit; end; { sorry no device was set }
     if not S3M_inMemory then begin player_error:=noS3Minmemory;exit end; { hmm load it first ;) }
