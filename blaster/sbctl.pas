@@ -11,24 +11,24 @@ interface
 
 (* The different SoundBlaster versions and its hardware :
 
-   0. - no soundblaster present
-   1. Soundblaster 1.0/1.5
-        23kHz(mono)                   8bit        no mixer
+   #  Name                   Mono    Stereo   Bits   Mixer   DSP
+   0. None                       -        -      -       -      -
+   1. Soundblaster 1.0
+      Soundblaster 1.5       23kHz        -      8      no   1.xx
 
-   2. Soundblaster Pro
-        45kHz(mono)    23kHz(stereo)  8bit        mixer
+   2. Soundblaster Pro       45kHz    23kHz      8     yes   3.xx
 
-   3. Soundblaster 2.0/ Audioblaster 2.5
-        45kHz(mono)                   8bit        audiob. with mixer
+   3. Soundblaster 2.0                                 no?
+      Audioblaster 2.5       45kHz        -      8     yes   2.xx
 
-   4. Soundblaster Pro3/Audioblaster Pro 4.0
-        45kHz(mono)    23kHz(stereo)  8bit        mixer
+   4. Soundblaster Pro 3
+      Audioblaster Pro 4.0   45kHz    23kHz      8     yes   3.xx
 
    5. Soundblaster Pro (Mircochannel)
         Special version for PS/2 - technical data = 4
 
-   6. Soundblaster 16/16ASP
-        45kHz(mono)    45kHz(stereo)  8/16bit        mixer
+   6. Soundblaster 16
+      Soundblaster 16 ASP    45kHz    45kHz    8,16    yes   4.xx
 
    DSP versions :
 
