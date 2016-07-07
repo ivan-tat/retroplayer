@@ -576,11 +576,11 @@ var key:boolean;
     TickBytesLeft:=0;       { emmidiately next tick }
     Initchannels;
 
-    count := numBuffers*DMArealbufsize[1];
+    count := DMArealbufsize[1];
     if ( lqmode ) then count := count * 2;
 
     (* loop through whole DMAbuffer *)
-    sbSetupDMATransfer( DMABuffer, count, true );
+    sbSetupDMATransfer( DMABuffer, count * numBuffers, true );
 
     DMAhalf := numbuffers-1;
     lastready := numbuffers;
