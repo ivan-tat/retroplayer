@@ -116,7 +116,7 @@ begin
     if ( _16Bit ) then
         ch := sdev_hw_dma16
     else
-        ch := dma_channel;
+        ch := sdev_hw_dma8;
     sbGetDMACounter := dmaGetCounter( ch );
 end;
 
@@ -292,9 +292,9 @@ var oldv:array[1..5] of pointer;
       begin
         if prot then write(' Trying Channel ',nr,' .... ');
         Check:=0;
-        DMA_Channel:=nr;
+        sdev_hw_dma8 := nr;
         fr:=10000;
-        dmaMask( dma_channel ); (* was outp( 0x0a, dma_channel ) *)
+        dmaMask( sdev_hw_dma8 ); (* was outp( 0x0a, dma_channel ) *)
         stop_play;speaker_off;
         Initblaster(fr,false,false);
         play_oneblock(ptr(0,0),1);
@@ -463,7 +463,7 @@ begin
     sbioDSPWrite( dsp_addr, $d0 );
     (* reset is the best way to make sure SB stops playing *)
     sbioDSPReset( dsp_addr );
-    dmaMask( dma_channel ); (* was outp( 0x0a, dma_channel ) *)
+    dmaMask( sdev_hw_dma8 ); (* was outp( 0x0a, dma_channel ) *)
 end;
 
 PROCEDURE pause_play;
@@ -526,7 +526,7 @@ PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);
     _16Bit_possible:= typ=6;
     IRQ_No:=irq;
     DSP_Addr:=dsp;
-    DMA_Channel:=DMA;
+    sdev_hw_dma8 := dma;
     sdev_hw_dma16 := dma16;
     SBNo:=typ;
     case typ of
@@ -626,7 +626,7 @@ procedure writelnSBConfig;
       6: writeln(' Soundblaster 16/16 ASP (8/16 bit/mono/stereo/max 45kHz)');
     end;
     write(#13#10' SB-Base : 2');write((dsp_addr div 16) mod 16);writeln('0h');
-    writeln(' 8bit DMA : ',dma_channel);
+    writeln( ' 8bit DMA : ', sdev_hw_dma8 );
     if ( SBNo = 6 ) then writeln(' 16bit DMA : ', sdev_hw_dma16);
     writeln(' IRQ : ',IRQ_No,#13#10);
   end;
@@ -657,7 +657,7 @@ var c:char;
     write(#13#10' 8 bit DMA channel (0,1,3) ? ');
     repeat c:=readkey; until (c in ['0','1','3']);
     writeln(c);
-    dma_channel:=ord(c)-ord('0');
+    sdev_hw_dma8 := ord(c)-ord('0');
     if SBNo=6 then
       begin
         write(#13#10' 16 bit DMA (5,6,7) ? ');
@@ -669,7 +669,7 @@ var c:char;
     repeat c:=readkey; until (c in ['2','5','7']);
     writeln(c);
     IRQ_No:=ord(c)-ord('0');
-    forceto( SBNo, dma_channel, sdev_hw_dma16, IRQ_No, dsp_addr );
+    forceto( SBNo, sdev_hw_dma8, sdev_hw_dma16, IRQ_No, dsp_addr );
     InputSoundblasterValues:=true;
   end;
 
@@ -700,7 +700,7 @@ begin
   SBno:=0;
   IRQ_No:=7;
   DSP_Addr:=$220;
-  DMA_Channel:=1;
+  sdev_hw_dma8 := 1;
   sdev_hw_dma16 := 5;
 end;
 
