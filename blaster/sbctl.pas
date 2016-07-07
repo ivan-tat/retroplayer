@@ -44,7 +44,7 @@ var
     dsp_addr:word;              (* Baseaddress detected SB uses *)
     irq_no:byte;                (* IRQ detected SB uses *)
     dma_channel:byte;           (* DMA channel for 8 Bit play *)
-    dma_16bitchannel:byte;      (* DMA channel for 16 Bit play *)
+    sdev_hw_dma16: byte;
 
     stereo_possible:boolean;    (* flag if stereo is possible on detected SB *)
     _16bit_possible:boolean;    (* flag if 16bit play is possible on detected SB *)

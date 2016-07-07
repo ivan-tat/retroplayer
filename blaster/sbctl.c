@@ -105,7 +105,7 @@ void __far __pascal setupDMATransfer( void *p, uint16_t count, bool autoinit ) {
         }
         ch = dma_channel;
     } else
-        ch = dma_16bitchannel;
+        ch = sdev_hw_dma16;
 
     dmaSetup( ch, mode, p, count );
 }

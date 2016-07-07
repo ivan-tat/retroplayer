@@ -114,7 +114,7 @@ var
     ch: byte;
 begin
     if ( _16Bit ) then
-        ch := dma_16Bitchannel
+        ch := sdev_hw_dma16
     else
         ch := dma_channel;
     sbGetDMACounter := dmaGetCounter( ch );
@@ -527,7 +527,7 @@ PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);
     IRQ_No:=irq;
     DSP_Addr:=dsp;
     DMA_Channel:=DMA;
-    DMA_16BitChannel:=dma16;
+    sdev_hw_dma16 := dma16;
     SBNo:=typ;
     case typ of
       1: begin maxmonorate:=22050;maxstereorate:=0 end;
@@ -627,7 +627,7 @@ procedure writelnSBConfig;
     end;
     write(#13#10' SB-Base : 2');write((dsp_addr div 16) mod 16);writeln('0h');
     writeln(' 8bit DMA : ',dma_channel);
-    if SBNo=6 then writeln(' 16bit DMA : ',dma_16Bitchannel);
+    if ( SBNo = 6 ) then writeln(' 16bit DMA : ', sdev_hw_dma16);
     writeln(' IRQ : ',IRQ_No,#13#10);
   end;
 
@@ -663,13 +663,13 @@ var c:char;
         write(#13#10' 16 bit DMA (5,6,7) ? ');
         repeat c:=readkey; until (c in ['5','6','7']);
         writeln(c);
-        DMA_16bitchannel:=ord(c)-ord('0');
+        sdev_hw_dma16 := ord(c)-ord('0');
       end;
     write(#13#10' IRQ (2,5,7) ? ');
     repeat c:=readkey; until (c in ['2','5','7']);
     writeln(c);
     IRQ_No:=ord(c)-ord('0');
-    forceto(SBNo,dma_channel,dma_16bitchannel,IRQ_No,dsp_addr);
+    forceto( SBNo, dma_channel, sdev_hw_dma16, IRQ_No, dsp_addr );
     InputSoundblasterValues:=true;
   end;
 
@@ -701,7 +701,7 @@ begin
   IRQ_No:=7;
   DSP_Addr:=$220;
   DMA_Channel:=1;
-  DMA_16Bitchannel:=5;
+  sdev_hw_dma16 := 5;
 end;
 
 procedure sbDone;
