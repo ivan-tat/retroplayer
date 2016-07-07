@@ -39,6 +39,7 @@ interface
 *)
 
 var
+    sdev_name: PChar;
     sbno:byte;                  (* SoundBlaster typ (look some rows above) *)
     dsp_addr:word;              (* Baseaddress detected SB uses *)
     irq_no:byte;                (* IRQ detected SB uses *)

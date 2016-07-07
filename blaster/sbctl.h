@@ -8,6 +8,7 @@
 
 /* hardware config */
 
+extern char    *__pascal sdev_name;         /* name */
 extern uint8_t  __pascal sbno;              /* type */
 extern uint16_t __pascal dsp_addr;          /* base address */
 extern uint8_t  __pascal irq_no;            /* IRQ */

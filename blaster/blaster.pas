@@ -696,6 +696,7 @@ begin
   _16Bit_possible:=false;
   STEREO:=False;_16Bit:=False;signeddata:=false;
   SBVersHi:=0;SBVersLo:=0;
+  sdev_name := '';
   SBno:=0;
   IRQ_No:=7;
   DSP_Addr:=$220;
