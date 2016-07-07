@@ -73,7 +73,6 @@ PROCEDURE restore_irq;       (* restore old interrupt vector *)
 PROCEDURE set_sign(signed:boolean); (* sets flag to play signed data
                - does only work on SB16 (set it before start playing) *)
 PROCEDURE setvolume(vol:Byte);   (* what do you think ? *)
-function  sbGetDMACounter:word;      (* It's for 8 & 16 Bit mode to get the DMA counter *)
 procedure writelnSBConfig;       (* what do you expect ? - write current setup to screen,
                                     but detect SB before calling that proc. *)
 
@@ -106,19 +105,6 @@ function hiword(l:longint):word; assembler;
   asm
     mov         ax,word ptr(l+2)
   end;
-
-function sbGetDMACounter:word;
-{ get the dma base counter of dmachannel is used by SB
-  you can check if sound transfer does work ;) }
-var
-    ch: byte;
-begin
-    if ( _16Bit ) then
-        ch := sdev_hw_dma16
-    else
-        ch := sdev_hw_dma8;
-    sbGetDMACounter := dmaGetCounter( ch );
-end;
 
 (* call this if you want to do continues play *)
 procedure play_firstBlock(length:word);

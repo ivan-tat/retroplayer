@@ -106,3 +106,7 @@ void __far __pascal sbSetupDMATransfer( void *p, uint16_t count, bool autoinit )
 
     dmaSetup( _16bit ? sdev_hw_dma16 : sdev_hw_dma8, mode, p, count );
 }
+
+uint16_t __far __pascal sbGetDMACounter( void ) {
+    return dmaGetCounter( _16bit ? sdev_hw_dma16 : sdev_hw_dma8 );
+}
