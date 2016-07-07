@@ -424,7 +424,7 @@ var x,y:integer;
       end;
     asm
       { ackknowledge the interrupt on SB : }
-      mov       dx,dsp_addr
+      mov       dx,sdev_hw_base
       add       dx,0eh
       add       dl,[_16Bit]         { in 16Bit mode we have to ackknowledge 22f ;) }
       in        al,dx

@@ -19,25 +19,25 @@
 void __far __pascal sbMixerWrite( uint8_t reg, uint8_t data ) {
     /* SB 1.0/1.5/2.0/2.5 has no mixer */
     if ( ! ( sbno == 1 || sbno == 3 ) )
-        sbioMixerWrite( dsp_addr, reg, data );
+        sbioMixerWrite( sdev_hw_base, reg, data );
 }
 
 uint8_t __far __pascal sbMixerRead( uint8_t reg ) {
     /* SB 1.0/1.5/2.0/2.5 has no mixer */
     if ( ! ( sbno == 1 || sbno == 3 ) )
-        return sbioMixerRead( dsp_addr, reg );
+        return sbioMixerRead( sdev_hw_base, reg );
     else
         return 0;
 }
 
 void __far __pascal speaker_on( void ) {
-    sbioDSPWrite( dsp_addr, 0xd1 );
+    sbioDSPWrite( sdev_hw_base, 0xd1 );
     /* needs a bit time to switch it on */
     delay( 110 );
 }
 
 void __far __pascal speaker_off( void ) {
-    sbioDSPWrite( dsp_addr, 0xd3 );
+    sbioDSPWrite( sdev_hw_base, 0xd3 );
     /* needs a bit time to switch it off */
     delay( 220 );
 }
@@ -56,21 +56,21 @@ void __far __pascal sbSetupDSPTransfer( uint16_t len, bool b16, bool autoinit ) 
             /* DSP 0xC2 - use 8bit nonautoinit */
             cmd = autoinit ? 0xc6 : 0xc2;
         }
-        sbioDSPWrite( dsp_addr, cmd );  
+        sbioDSPWrite( sdev_hw_base, cmd );
         mode = 0;
         /* 2nd command byte: bit 4 = 1 - signed data */
         if ( signeddata ) mode |= 0x10;
         /* 2nd command byte: bit 5 = 1 - stereo data */
         if ( stereo ) mode |= 0x20;
-        sbioDSPWrite( dsp_addr, mode );
-        sbioDSPWrite( dsp_addr, len & 0xff );
-        sbioDSPWrite( dsp_addr, ( len >> 8 ) & 0xff );
+        sbioDSPWrite( sdev_hw_base, mode );
+        sbioDSPWrite( sdev_hw_base, len & 0xff );
+        sbioDSPWrite( sdev_hw_base, ( len >> 8 ) & 0xff );
     } else {
         len--;
         /* DSP 48h - setup DMA buffer size */
-        sbioDSPWrite( dsp_addr, 0x48 );
-        sbioDSPWrite( dsp_addr, len & 0xff );
-        sbioDSPWrite( dsp_addr, ( len >> 8 ) & 0xff );
+        sbioDSPWrite( sdev_hw_base, 0x48 );
+        sbioDSPWrite( sdev_hw_base, len & 0xff );
+        sbioDSPWrite( sdev_hw_base, ( len >> 8 ) & 0xff );
         if ( sbno == 1 ) {
             /* for SB1.0 : */
             /* DSP 0x1C - autoinit normal DMA */
@@ -82,7 +82,7 @@ void __far __pascal sbSetupDSPTransfer( uint16_t len, bool b16, bool autoinit ) 
             /* DSP 0x91 - nonautoinit highspeed DMA */
             cmd = autoinit ? 0x90 : 0x91;
         }
-        sbioDSPWrite( dsp_addr, cmd );
+        sbioDSPWrite( sdev_hw_base, cmd );
     }
 }
 
@@ -98,8 +98,8 @@ void __far __pascal setupDMATransfer( void *p, uint16_t count, bool autoinit ) {
             if ( sbno < 6 ) {
                 /* well ... should be a SB PRO in stereo mode ... */
                 /* let's send one byte - nothing but silence */
-                sbioDSPWrite( dsp_addr, 0x10 );
-                sbioDSPWrite( dsp_addr, 0x80 );
+                sbioDSPWrite( sdev_hw_base, 0x10 );
+                sbioDSPWrite( sdev_hw_base, 0x80 );
             }
         }
     };

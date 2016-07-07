@@ -40,11 +40,12 @@ interface
 
 var
     sdev_name: PChar;
-    sbno:byte;                  (* SoundBlaster typ (look some rows above) *)
-    dsp_addr:word;              (* Baseaddress detected SB uses *)
+    sdev_hw_base: word;
     sdev_hw_irq: byte;
     sdev_hw_dma8: byte;
     sdev_hw_dma16: byte;
+
+    sbno: byte;                 (* SoundBlaster typ (look some rows above) *)
 
     stereo_possible:boolean;    (* flag if stereo is possible on detected SB *)
     _16bit_possible:boolean;    (* flag if 16bit play is possible on detected SB *)

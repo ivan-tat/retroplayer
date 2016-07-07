@@ -9,7 +9,7 @@
 /* hardware config */
 
 extern char    *__pascal sdev_name[];       /* name */
-extern uint16_t __pascal dsp_addr;          /* base address */
+extern uint16_t __pascal sdev_hw_base;      /* base i/o address */
 extern uint8_t  __pascal sdev_hw_irq;       /* IRQ */
 extern uint8_t  __pascal sdev_hw_dma8;      /* DMA channel for 8bit play */
 extern uint8_t  __pascal sdev_hw_dma16;     /* DMA channel for 16bit play */

@@ -142,15 +142,15 @@ procedure setDSPTimeConst( tc: byte );
 (* Setup samplerate with time constant, take this:
    TC = 256 - TRUNC( 1 000 000 / SAMPLERATE ) *)
 begin
-    sbioDSPWrite( dsp_addr, $40 );
-    sbioDSPWrite( dsp_addr, tc );
+    sbioDSPWrite( sdev_hw_base, $40 );
+    sbioDSPWrite( sdev_hw_base, tc );
 end;
 
 procedure setDSPFrequency( freq: word );
 begin
-    sbioDSPWrite( dsp_addr, $41 );
-    sbioDSPWrite( dsp_addr, hi( freq ) );
-    sbioDSPWrite( dsp_addr, lo( freq ) );
+    sbioDSPWrite( sdev_hw_base, $41 );
+    sbioDSPWrite( sdev_hw_base, hi( freq ) );
+    sbioDSPWrite( sdev_hw_base, lo( freq ) );
 end;
 
 procedure setDSPSampleRate( freq: word; stereo: boolean );
@@ -184,7 +184,7 @@ var tc:byte;
   begin
     { first reset SB : }
     asm
-      mov    dx,dsp_addr
+      mov    dx,sdev_hw_base
       add    dx,0eh
       in     al,dx
       inc    dx
@@ -195,7 +195,7 @@ var tc:byte;
     check_samplerate(frequ,stereoon);
     _16bit:=(SBNo=6) and _16Biton;
     stereo:=stereoon;
-    sbioDSPReset( dsp_addr );
+    sbioDSPReset( sdev_hw_base );
     setDSPSampleRate( frequ, stereo );
     { setup stereo option on SB PRO - on SB16 it's set in DSP command }
     if stereo and (SBNo<>6) then
@@ -212,28 +212,28 @@ var a:byte;
 begin
     check:=2;
     picEOI( 2 );
-    a:=port[dsp_addr+$0e]
+    a:=port[sdev_hw_base+$0e]
 end;
 procedure irq5; interrupt;
 var a:byte;
 begin
     check:=5;
     picEOI( 5 );
-    a:=port[dsp_addr+$0e]
+    a:=port[sdev_hw_base+$0e]
 end;
 procedure irq7; interrupt;
 var a:byte;
 begin
     check:=7;
     picEOI( 7 );
-    a:=port[dsp_addr+$0e]
+    a:=port[sdev_hw_base+$0e]
 end;
 procedure ready_irq; interrupt;
 var a:byte;
 begin
     check:=1;
     picEOI( 0 ); (* FIXME *)
-    a:=port[dsp_addr+$0e]
+    a:=port[sdev_hw_base+$0e]
 end;
 
 function hexword(w:word):string;
@@ -261,7 +261,7 @@ var p:word;
         if prot then writeln('succesfull ');
       end;
     if not dspadr_detect then exit;
-    dsp_addr:=p;
+    sdev_hw_base := p;
     detect_dsp_addr:=true;
   end;
 
@@ -319,7 +319,7 @@ var oldv:array[1..5] of pointer;
     Detect_DMA_Channel_irq:=true;
     DSPIRQ_detect:=true;
     sdev_hw_irq := Check;
-    sbioDSPReset( dsp_addr );
+    sbioDSPReset( sdev_hw_base );
   end;
 
 function readDSPVersion: boolean;
@@ -327,20 +327,20 @@ var
     v_lo, v_hi: byte;
 begin
     (* DSP 0xE1 - get DSP version *)
-    if ( not sbioDSPWrite( dsp_addr, $e1 ) ) then
+    if ( not sbioDSPWrite( sdev_hw_base, $e1 ) ) then
     begin
         readDSPVersion := false;
         exit;
     end;
 
-    v_hi := sbioDSPRead( dsp_addr );
+    v_hi := sbioDSPRead( sdev_hw_base );
     if ( sbioError <> E_SBIO_SUCCESS ) then
     begin
         readDSPVersion := false;
         exit;
     end;
 
-    v_lo := sbioDSPRead( dsp_addr );
+    v_lo := sbioDSPRead( sdev_hw_base );
     if ( sbioError <> E_SBIO_SUCCESS ) then
     begin
         readDSPVersion := false;
@@ -393,7 +393,7 @@ FUNCTION DetectSoundblaster(prot:boolean):Boolean;
         exit;
       end;
 
-    sbioDSPReset( dsp_addr );
+    sbioDSPReset( sdev_hw_base );
 
 {                              SBvers:
    SoundBlaster 1.0/1.5        1.xx
@@ -454,32 +454,32 @@ FUNCTION ready:boolean;
 PROCEDURE stop_play;
 begin
     (* for 16bit modes : *)
-    sbioDSPWrite( dsp_addr, $d0 );
-    sbioDSPWrite( dsp_addr, $d9 );
-    sbioDSPWrite( dsp_addr, $d0 );
+    sbioDSPWrite( sdev_hw_base, $d0 );
+    sbioDSPWrite( sdev_hw_base, $d9 );
+    sbioDSPWrite( sdev_hw_base, $d0 );
     (* for 8bit modes : *)
-    sbioDSPWrite( dsp_addr, $d0 );
-    sbioDSPWrite( dsp_addr, $da );
-    sbioDSPWrite( dsp_addr, $d0 );
+    sbioDSPWrite( sdev_hw_base, $d0 );
+    sbioDSPWrite( sdev_hw_base, $da );
+    sbioDSPWrite( sdev_hw_base, $d0 );
     (* reset is the best way to make sure SB stops playing *)
-    sbioDSPReset( dsp_addr );
+    sbioDSPReset( sdev_hw_base );
     dmaMask( sdev_hw_dma8 ); (* was outp( 0x0a, dma_channel ) *)
 end;
 
 PROCEDURE pause_play;
 begin
     if _16bit then
-        sbioDSPWrite( dsp_addr, $d5 )
+        sbioDSPWrite( sdev_hw_base, $d5 )
     else
-        sbioDSPWrite( dsp_addr, $d0 );
+        sbioDSPWrite( sdev_hw_base, $d0 );
 end;
 
 PROCEDURE continue_play;
 begin
     if _16bit then
-        sbioDSPWrite( dsp_addr, $d6 )
+        sbioDSPWrite( sdev_hw_base, $d6 )
     else
-        sbioDSPWrite( dsp_addr, $d4 );
+        sbioDSPWrite( sdev_hw_base, $d4 );
 end;
 
 PROCEDURE set_sign(signed:boolean);
@@ -524,7 +524,7 @@ PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);
     MIXER_detect:=typ>1;
     stereo_possible:=typ in [2,4,5,6];
     _16Bit_possible:= typ=6;
-    DSP_Addr:=dsp;
+    sdev_hw_base := dsp;
     sdev_hw_irq := irq;
     sdev_hw_dma8 := dma;
     sdev_hw_dma16 := dma16;
@@ -625,7 +625,7 @@ procedure writelnSBConfig;
       5: writeln(' Soundblaster Pro<microchannel> (8 bit/mono-max 44kHz/stereo-max 22kHz)');
       6: writeln(' Soundblaster 16/16 ASP (8/16 bit/mono/stereo/max 45kHz)');
     end;
-    write(#13#10' SB-Base : 2');write((dsp_addr div 16) mod 16);writeln('0h');
+    writeln( #13#10' SB-Base : 2', ( sdev_hw_base div 16 ) mod 16, '0h');
     writeln( ' 8bit DMA : ', sdev_hw_dma8 );
     if ( SBNo = 6 ) then writeln(' 16bit DMA : ', sdev_hw_dma16);
     writeln( ' IRQ : ', sdev_hw_irq, #13#10 );
@@ -653,7 +653,7 @@ var c:char;
     write(' X = ');
     repeat c:=readkey; until (c in ['0'..'9']);
     writeln(c);
-    dsp_addr:=$200+$10*(ord(c)-ord('0'));
+    sdev_hw_base := $200 + $10*( ord(c) - ord('0') );
     write(#13#10' 8 bit DMA channel (0,1,3) ? ');
     repeat c:=readkey; until (c in ['0','1','3']);
     writeln(c);
@@ -669,7 +669,7 @@ var c:char;
     repeat c:=readkey; until (c in ['2','5','7']);
     writeln(c);
     sdev_hw_irq := ord(c) - ord('0');
-    forceto( SBNo, sdev_hw_dma8, sdev_hw_dma16, sdev_hw_irq, dsp_addr );
+    forceto( SBNo, sdev_hw_dma8, sdev_hw_dma16, sdev_hw_irq, sdev_hw_base );
     InputSoundblasterValues:=true;
   end;
 
@@ -698,7 +698,7 @@ begin
   SBVersHi:=0;SBVersLo:=0;
   sdev_name := '';
   SBno:=0;
-  DSP_Addr:=$220;
+  sdev_hw_base := $220;
   sdev_hw_irq := 7;
   sdev_hw_dma8 := 1;
   sdev_hw_dma16 := 5;
