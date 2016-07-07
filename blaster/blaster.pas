@@ -50,7 +50,7 @@ procedure play_firstBlock(length:word);
   (* set the SBinterrupt to "interrupt" every "length" bytes
      the best way to use it, is to play the half buffersize and then
      write the new data in the allready played part
-     - you have to setup DMA controller by calling setupDMATransfer *)
+     - you have to setup DMA controller by calling sbSetupDMATransfer *)
 PROCEDURE play_oneBlock(p:pointer;length:word);
   (* it's a play routine for playing only one buffer (NOT CONTINOUSLY
      PLAYING ! - it does not work in that way on a SB16 !)
@@ -132,7 +132,7 @@ PROCEDURE play_oneBlock(p:pointer;length:word);
   other sources, but it'll definitly not work on a SB16 ! It'll cause
   'ticks' }
 begin
-    setupDMATransfer( p, length, false );
+    sbSetupDMATransfer( p, length, false );
     sbSetupDSPTransfer( length, false );
 end;
 

@@ -86,7 +86,7 @@ void __far __pascal sbSetupDSPTransfer( uint16_t len, bool autoinit ) {
     }
 }
 
-void __far __pascal setupDMATransfer( void *p, uint16_t count, bool autoinit ) {
+void __far __pascal sbSetupDMATransfer( void *p, uint16_t count, bool autoinit ) {
     DMAMode_t mode;
 
     mode = DMA_MODE_TRAN_READ | DMA_MODE_ADDR_INCR | DMA_MODE_SINGLE;

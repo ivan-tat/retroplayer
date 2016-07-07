@@ -35,7 +35,7 @@ void __far __pascal sbMixerWrite( uint8_t reg, uint8_t data );
 uint8_t __far __pascal sbMixerRead( uint8_t reg );
 void __far __pascal speaker_on( void ); /* Does not work on SB16 */
 void __far __pascal speaker_off( void );
-void __far __pascal setupDMATransfer( void *p, uint16_t count, bool autoinit );
+void __far __pascal sbSetupDMATransfer( void *p, uint16_t count, bool autoinit );
 void __far __pascal sbSetupDSPTransfer( uint16_t len, bool autoinit );
 
 #endif /* _SBCTL_H */

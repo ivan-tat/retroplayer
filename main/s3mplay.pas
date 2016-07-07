@@ -545,6 +545,7 @@ var i:byte;
 FUNCTION startplaying(var A_stereo,A_16Bit:boolean;LQ:Boolean):boolean;
 var key:boolean;
     p:parray;
+    count: word;
   begin
     startplaying:=false;
     player_error:=0;
@@ -574,28 +575,23 @@ var key:boolean;
     EndOfSong:=false;toslow:=false;
     TickBytesLeft:=0;       { emmidiately next tick }
     Initchannels;
-    if lqmode then
-      begin
-        (* loop through whole DMAbuffer *)
-        setupDMATransfer(DMABuffer,2*(numBuffers*DMArealbufsize[1]),true);
 
-        DMAhalf:=numbuffers-1;
-        lastready:=numbuffers;
-        fill_dmabuffer; { calc all buffer parts ... }
+    count := numBuffers*DMArealbufsize[1];
+    if ( lqmode ) then count := count * 2;
 
-        play_firstblock(2*dmarealbufsize[1]); { double buffering  }
-      end
-    else
-      begin
-        setupDMATransfer(DMABuffer,NumBuffers*DMArealbufsize[1],true); { loop through whole DMAbuffer }
+    (* loop through whole DMAbuffer *)
+    sbSetupDMATransfer( DMABuffer, count, true );
 
-        DMAhalf:=numbuffers-1;
-        lastready:=numbuffers;
-        fill_dmabuffer; { calc all buffer parts ... }
+    DMAhalf := numbuffers-1;
+    lastready := numbuffers;
 
-        play_firstblock(dmarealbufsize[1]); { double buffering  }
-      end;
-    { ok, now everything works in background ... }
+    (* calc all buffer parts *)
+    fill_dmabuffer;
+
+    (* double buffering *)
+    play_firstblock( count );
+
+    (* ok, now everything works in background *)
     startplaying:=true;
   end;
 
