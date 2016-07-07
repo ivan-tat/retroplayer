@@ -318,7 +318,7 @@ var oldv:array[1..5] of pointer;
     if not dmachn_detect then exit;
     Detect_DMA_Channel_irq:=true;
     DSPIRQ_detect:=true;
-    IRQ_no:=Check;
+    sdev_hw_irq := Check;
     sbioDSPReset( dsp_addr );
   end;
 
@@ -432,18 +432,18 @@ FUNCTION Get_BlasterVersion:Word;
 PROCEDURE set_ready_irq(p:pointer);
 begin
     check:=0;
-    getintvec(IRQ_Table[irq_no],savvect);
+    getintvec( IRQ_Table[ sdev_hw_irq ], savvect );
     if p=Nil then p:=addr(ready_irq);
-    setintvec(IRQ_Table[irq_no],p);
+    setintvec( IRQ_Table[ sdev_hw_irq ], p );
     (* no changes for IRQ2 *)
-    picDisableIRQs( ( 1 shl irq_no ) and not ( 1 shl 2 ) );
+    picDisableIRQs( ( 1 shl sdev_hw_irq ) and not ( 1 shl 2 ) );
 end;
 
 PROCEDURE restore_irq;
 begin
     (* no changes for IRQ2 *)
-    picEnableIRQs( ( 1 shl irq_no ) and not ( 1 shl 2 ) );
-    setintvec(IRQ_Table[irq_no],savvect);
+    picEnableIRQs( ( 1 shl sdev_hw_irq ) and not ( 1 shl 2 ) );
+    setintvec( IRQ_Table[ sdev_hw_irq ], savvect );
 end;
 
 FUNCTION ready:boolean;
@@ -524,8 +524,8 @@ PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);
     MIXER_detect:=typ>1;
     stereo_possible:=typ in [2,4,5,6];
     _16Bit_possible:= typ=6;
-    IRQ_No:=irq;
     DSP_Addr:=dsp;
+    sdev_hw_irq := irq;
     sdev_hw_dma8 := dma;
     sdev_hw_dma16 := dma16;
     SBNo:=typ;
@@ -628,7 +628,7 @@ procedure writelnSBConfig;
     write(#13#10' SB-Base : 2');write((dsp_addr div 16) mod 16);writeln('0h');
     writeln( ' 8bit DMA : ', sdev_hw_dma8 );
     if ( SBNo = 6 ) then writeln(' 16bit DMA : ', sdev_hw_dma16);
-    writeln(' IRQ : ',IRQ_No,#13#10);
+    writeln( ' IRQ : ', sdev_hw_irq, #13#10 );
   end;
 
 FUNCTION InputSoundblasterValues:Boolean;
@@ -668,8 +668,8 @@ var c:char;
     write(#13#10' IRQ (2,5,7) ? ');
     repeat c:=readkey; until (c in ['2','5','7']);
     writeln(c);
-    IRQ_No:=ord(c)-ord('0');
-    forceto( SBNo, sdev_hw_dma8, sdev_hw_dma16, IRQ_No, dsp_addr );
+    sdev_hw_irq := ord(c) - ord('0');
+    forceto( SBNo, sdev_hw_dma8, sdev_hw_dma16, sdev_hw_irq, dsp_addr );
     InputSoundblasterValues:=true;
   end;
 
@@ -698,8 +698,8 @@ begin
   SBVersHi:=0;SBVersLo:=0;
   sdev_name := '';
   SBno:=0;
-  IRQ_No:=7;
   DSP_Addr:=$220;
+  sdev_hw_irq := 7;
   sdev_hw_dma8 := 1;
   sdev_hw_dma16 := 5;
 end;

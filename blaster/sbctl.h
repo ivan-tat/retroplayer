@@ -10,7 +10,7 @@
 
 extern char    *__pascal sdev_name[];       /* name */
 extern uint16_t __pascal dsp_addr;          /* base address */
-extern uint8_t  __pascal irq_no;            /* IRQ */
+extern uint8_t  __pascal sdev_hw_irq;       /* IRQ */
 extern uint8_t  __pascal sdev_hw_dma8;      /* DMA channel for 8bit play */
 extern uint8_t  __pascal sdev_hw_dma16;     /* DMA channel for 16bit play */
 
