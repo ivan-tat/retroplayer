@@ -122,8 +122,8 @@ begin
     end;
     stop_play;
     { Now init : }
-    sbAdjustMode(frequ,stereoon);
-    _16bit:=(SBNo=6) and _16Biton;
+    sbAdjustMode(frequ,stereoon,_16Biton);
+    _16bit:=_16Biton;
     stereo:=stereoon;
     sbSetupSampleRate( frequ, stereo );
     speaker_on;

@@ -57,8 +57,21 @@ void __far __pascal speaker_off( void ) {
     delay( 220 );
 }
 
-void __far __pascal sbAdjustMode( uint16_t *rate, bool *stereo ) {
+void adjustRate( uint16_t *rate, bool stereo, uint8_t *tc ) {
+    if ( ( sbno == 6 ) || ! stereo ) {
+        *tc = 256 - 1000000 / *rate;
+        *rate = 1000000 / ( 256 - *tc );
+    } else {
+        *tc = 256 - 1000000 / ( 2 * *rate );
+        *rate = ( 1000000 / ( 256 - *tc ) ) / 2;
+    }
+}
+
+void __far __pascal sbAdjustMode( uint16_t *rate, bool *stereo, bool *_16bit ) {
+    uint8_t tc;
+
     *stereo = *stereo & sdev_caps_stereo;
+    *_16bit = *_16bit & sdev_caps_16bit;
     if ( *stereo ) {
         if ( *rate < 4000 ) *rate = 4000;
         if ( *rate > sdev_caps_stereo_maxrate ) *rate = sdev_caps_stereo_maxrate;
@@ -66,6 +79,7 @@ void __far __pascal sbAdjustMode( uint16_t *rate, bool *stereo ) {
         if ( *rate < 4000 ) *rate = 4000;
         if ( *rate > sdev_caps_mono_maxrate ) *rate = sdev_caps_mono_maxrate;
     }
+    adjustRate( rate, *stereo, &tc );
 }
 
 void sbSetDSPTimeConst( const uint8_t tc ) {
@@ -84,15 +98,9 @@ void __far __pascal sbSetupSampleRate( uint16_t freq, bool stereo ) {
 
     sbioDSPReset( sdev_hw_base );
 
-    /* Calculate time constant
+    /* Calculate time constant and adjust rate
        For SB PRO we have to setup double samplerate in stereo mode */
-    if ( ( sbno == 6 ) || ! stereo ) {
-        tc = 256 - 1000000 / freq;
-        freq = 1000000 / ( 256 - tc );
-    } else {
-        tc = 256 - 1000000 / ( 2 * freq );
-        freq = ( 1000000 / ( 256 - tc ) ) / 2;
-    }
+    adjustRate( &freq, stereo, &tc );
     
     /* Set DSP time constant or frequency */
     if ( sbno == 6 )

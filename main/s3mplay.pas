@@ -357,7 +357,7 @@ PROCEDURE setSampleRate(var SR:word;stereo:boolean);
 var w:word;
     i,j:byte;
   begin
-    sbAdjustMode(SR,stereo);
+    (*sbAdjustMode(SR,stereo);*)
     Samplerate :=SR;
 
     if LQmode then
