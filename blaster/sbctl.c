@@ -71,8 +71,10 @@ void sbSetDSPFrequency( const uint16_t freq ) {
 void __far __pascal sbSetupSampleRate( uint16_t freq, bool stereo ) {
     uint8_t tc;
 
-    /* Calculate time constant:
-       for SB PRO we have to setup double samplerate in stereo mode */
+    sbioDSPReset( sdev_hw_base );
+
+    /* Calculate time constant
+       For SB PRO we have to setup double samplerate in stereo mode */
     if ( ( sbno == 6 ) || ! stereo ) {
         tc = 256 - 1000000 / freq;
         freq = 1000000 / ( 256 - tc );
@@ -80,16 +82,19 @@ void __far __pascal sbSetupSampleRate( uint16_t freq, bool stereo ) {
         tc = 256 - 1000000 / ( 2 * freq );
         freq = ( 1000000 / ( 256 - tc ) ) / 2;
     }
+    
+    /* Set DSP time constant or frequency */
     if ( sbno == 6 )
         sbSetDSPFrequency( freq );
     else
         sbSetDSPTimeConst( tc );
 
-    /* setup stereo option for SB PRO - for SB16 it's set in DSP command */
+    /* Setup stereo option for SB PRO
+       For SB16 it's set in DSP command */
     if ( stereo & ( sbno != 6 ) )
         sbMixerWrite( 0x0e, sbMixerRead( 0x0e ) || 0x02 );
 
-    /* switch filter option off for SB PRO */
+    /* Switch filter option off for SB PRO */
     if ( sbno == 2 || sbno == 4 || sbno == 5 )
         sbMixerWrite( 0x0e, sbMixerRead( 0x0e ) || 0x20 );
 }
