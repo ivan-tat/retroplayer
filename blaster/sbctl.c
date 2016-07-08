@@ -57,6 +57,17 @@ void __far __pascal speaker_off( void ) {
     delay( 220 );
 }
 
+void __far __pascal sbAdjustMode( uint16_t *rate, bool *stereo ) {
+    *stereo = *stereo & sdev_caps_stereo;
+    if ( *stereo ) {
+        if ( *rate < 4000 ) *rate = 4000;
+        if ( *rate > sdev_caps_stereo_maxrate ) *rate = sdev_caps_stereo_maxrate;
+    } else {
+        if ( *rate < 4000 ) *rate = 4000;
+        if ( *rate > sdev_caps_mono_maxrate ) *rate = sdev_caps_mono_maxrate;
+    }
+}
+
 void sbSetDSPTimeConst( const uint8_t tc ) {
     sbioDSPWrite( sdev_hw_base, 0x40 );
     sbioDSPWrite( sdev_hw_base, tc );
