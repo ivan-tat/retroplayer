@@ -93,17 +93,6 @@ VAR SB_Detect:Boolean;              { Flag if SB is detected }
     check:byte;                     { for detecting }
     savvect:pointer;                {  "       "    }
 
-{ Sorry no cool macro like in C is possible }
-function loword(l:longint):word; assembler;
-  asm
-    mov         ax,word ptr(l)
-  end;
-
-function hiword(l:longint):word; assembler;
-  asm
-    mov         ax,word ptr(l+2)
-  end;
-
 (* call this if you want to do continues play *)
 procedure play_firstBlock(length:word);
 begin
