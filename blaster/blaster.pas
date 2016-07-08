@@ -32,8 +32,6 @@ Unit Blaster;
 Interface
 
 CONST defaultvolume=31;    { full power =;) }
-      IRQ_TABLE:array[0..15] of byte = ($08,$09,$0a,$0B,$0C,$0D,$0E,$0F,
-                                        $70,$71,$72,$73,$74,$75,$76,$77);
 
 PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);     (* force to use these values for playing *)
 FUNCTION UseBlasterEnv:boolean;                         (* use values set in enviroment BLASTER *)
@@ -251,60 +249,73 @@ var p:word;
     detect_dsp_addr:=true;
   end;
 
+const
+    HW_IRQ_MAX = 3;
+    HW_IRQ_NUM: array[0..HW_IRQ_MAX-1] of byte = ( 2, 5, 7 );
+    HW_IRQ: array[0..HW_IRQ_MAX-1] of pointer = (
+        addr(irq2), addr(irq5), addr(irq7)
+    );
+    HW_DMA_MAX = 3;
+    HW_DMA_NUM: array[0..HW_DMA_MAX-1] of byte = ( 0, 1, 3 );
+
 FUNCTION Detect_DMA_Channel_IRQ(prot:boolean):Boolean;
-const irqs:array[1..3] of byte = (10,13,15); (* IRQ 2,5,7 *)
-var oldv:array[1..5] of pointer;
-    i,nr:byte;
-    fr:word;
-    ov1,ov2:byte;
-  begin
-  port[$0f] := $ff;
-  asm sti end;
+var
+    oldv: array[0..HW_IRQ_MAX-1] of pointer;
+    i, fr: word;
+    irqmask: word;
+begin
+    port[$0f] := $ff;
+    asm sti end;
     if dmachn_detect then begin detect_DMA_Channel_irq:=true;exit end;
     if prot then writeln(#13#10' Now locating DMA-channel and IRQ :'#13#10);
-    detect_dma_channel_irq:=false;
+
+    detect_dma_channel_irq := false;
+
     if not dspadr_detect then exit;
-    for i:=1 to 3 do
-      begin
-        getintvec(irqs[i],oldv[i]);
-      end;
-    setintvec(10,addr(irq2));
-    setintvec(13,addr(irq5));
-    setintvec(15,addr(irq7));
-    Detect_DMA_Channel_irq:=false;
-    picDisableIRQs( ($0004 + $0020 + $0080) and not $0004 );
-    nr:=0;
-    while (nr<4) and not DMACHN_Detect do
-      begin
-        if prot then write(' Trying Channel ',nr,' .... ');
+
+    irqmask := 0;
+    for i := 0 to HW_IRQ_MAX-1 do
+    begin
+        oldv[i] := picGetIntVec( HW_IRQ_NUM[ i ] );
+        picSetIntVec( HW_IRQ_NUM[ i ], HW_IRQ[ i ]);
+        irqmask := irqmask or ( 1 shl HW_IRQ_NUM[ i ] );
+    end;
+    (* no changes for IRQ 2 *)
+    irqmask := irqmask and not ( 1 shl 2 );
+
+    picDisableIRQs( irqmask );
+
+    i := 0;
+    while ( ( i <= HW_DMA_MAX) and not DMACHN_Detect ) do
+    begin
+        if prot then write( ' Trying Channel ', HW_DMA_NUM[ i ], ' .... ' );
         Check:=0;
-        sdev_hw_dma8 := nr;
+        sdev_hw_dma8 := HW_DMA_NUM[ i ];
         fr:=10000;
         dmaMask( sdev_hw_dma8 ); (* was outp( 0x0a, dma_channel ) *)
-        stop_play;speaker_off;
+        stop_play;
+        speaker_off;
         Initblaster(fr,false,false);
         play_oneblock(ptr(0,0),1);
         delay(10);
         DMACHN_Detect:=check<>0;
-        if not DMACHN_Detect then
-          begin
-            inc(nr);if nr=2 then nr:=3;
-            if prot then write('not ');
-          end;
         if prot then
-          begin
-            write('sucessful');
-            if DMACHN_Detect then writeln(' with Interrupt ',IRQ_Table[check],' - IRQ ',check)
-            else writeln;
-          end;
-      end;
-    picEnableIRQs( ($0004 + $0020 + $0080) and not $0004 );
-    for i:=1 to 3 do
-      setintvec(irqs[i],oldv[i]);
+        begin
+            if DMACHN_Detect then writeln( 'sucessful with IRQ ', check )
+            else writeln('not successful');
+        end;
+        inc( i );
+    end;
+
+    picEnableIRQs( irqmask );
+
+    for i := 0 to HW_IRQ_MAX-1 do picSetIntVec( HW_IRQ_NUM[i], oldv[i] );
+
     if not dmachn_detect then exit;
+
+    sdev_hw_irq := Check;
     Detect_DMA_Channel_irq:=true;
     DSPIRQ_detect:=true;
-    sdev_hw_irq := Check;
     sbioDSPReset( sdev_hw_base );
   end;
 
@@ -419,9 +430,9 @@ FUNCTION Get_BlasterVersion:Word;
 PROCEDURE set_ready_irq(p:pointer);
 begin
     check:=0;
-    getintvec( IRQ_Table[ sdev_hw_irq ], savvect );
+    savvect := picGetIntVec( sdev_hw_irq );
     if p=Nil then p:=addr(ready_irq);
-    setintvec( IRQ_Table[ sdev_hw_irq ], p );
+    picSetIntVec( sdev_hw_irq, p );
     (* no changes for IRQ2 *)
     picDisableIRQs( ( 1 shl sdev_hw_irq ) and not ( 1 shl 2 ) );
 end;
@@ -430,7 +441,7 @@ PROCEDURE restore_irq;
 begin
     (* no changes for IRQ2 *)
     picEnableIRQs( ( 1 shl sdev_hw_irq ) and not ( 1 shl 2 ) );
-    setintvec( IRQ_Table[ sdev_hw_irq ], savvect );
+    picSetIntVec( sdev_hw_irq, savvect );
 end;
 
 FUNCTION ready:boolean;

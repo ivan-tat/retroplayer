@@ -10,6 +10,12 @@
 #endif
 
 #include "pic.h"
+#include "..\pascal\dos.h"
+
+static const uint8_t IRQTAB[16] = {
+    0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
+    0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77
+};
 
 /* PIC1: IRQ 0-7 */
 /* PIC2: IRQ 8-15 */
@@ -84,4 +90,14 @@ void __far __pascal picDisableIRQs( uint16_t mask ) {
 
 void __far __pascal picEOI( uint8_t irq ) {
     outp( ( irq < 8 ) ? PIC1_IO_OCW2 : PIC2_IO_OCW2, OCW2_COMMAND_OCW2 | OCW2_CMD_NONSPEC_EOI );
+}
+
+void * __far __pascal picGetIntVec( uint8_t irq ) {
+    void *p;
+    getintvec( IRQTAB[irq], &p );
+    return p;
+}
+
+void __far __pascal picSetIntVec( uint8_t irq, void *p ) {
+    setintvec( IRQTAB[irq], p );
 }

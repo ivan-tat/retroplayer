@@ -13,5 +13,7 @@
 void __far __pascal picEnableIRQs( uint16_t mask );
 void __far __pascal picDisableIRQs( uint16_t mask );
 void __far __pascal picEOI( uint8_t irq );
+void * __far __pascal picGetIntVec( uint8_t irq );
+void __far __pascal picSetIntVec( uint8_t irq, void *p );
 
 #endif /* _PIC_H */

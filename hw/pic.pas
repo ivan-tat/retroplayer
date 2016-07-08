@@ -12,13 +12,19 @@ interface
 procedure picEnableIRQs( mask: word );
 procedure picDisableIRQs( mask: word );
 procedure picEOI( irq: byte );
+function picGetIntVec( irq: byte ): pointer;
+procedure picSetIntVec( irq: byte; p: pointer );
 
 implementation
+
+uses dos;
 
 (*$l pic.obj*)
 
 procedure picEnableIRQs( mask: word ); external;
 procedure picDisableIRQs( mask: word ); external;
 procedure picEOI( irq: byte ); external;
+function picGetIntVec( irq: byte ): pointer; external;
+procedure picSetIntVec( irq: byte; p: pointer ); external;
 
 end.
