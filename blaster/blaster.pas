@@ -112,12 +112,7 @@ end;
 { -------------------- continue commenting here ---------------------- }
 
 PROCEDURE Initblaster(var frequ:Word;stereoon,_16Biton:boolean);
-{ Initblaster does this :   1. check samplerates for its borders
-                            2. Reset DSP chip
-                            3. setup samplerate
-                            4. setup stereo/mono mode
- if you want to play signed data on SB16, call 'set_sign' after Initblaster }
-
+(* If you want to play signed data on SB16, call 'set_sign' after Initblaster *)
 begin
     { first reset SB : }
     asm
@@ -132,7 +127,6 @@ begin
     check_samplerate(frequ,stereoon);
     _16bit:=(SBNo=6) and _16Biton;
     stereo:=stereoon;
-    sbioDSPReset( sdev_hw_base );
     sbSetupSampleRate( frequ, stereo );
     speaker_on;
 end;
