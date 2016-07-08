@@ -58,12 +58,11 @@ var
 
 function sbMixerRead( reg: byte ): byte;
 procedure sbMixerWrite( reg, data: byte );
+function sbReadDSPVersion: word;
 procedure speaker_on;
 procedure speaker_off;
-
 procedure sbSetupDMATransfer( p: pointer; count: word; autoinit: boolean );
 function sbGetDMACounter: word;
-
 procedure sbSetupDSPTransfer( len: word; auto: boolean );
 
 implementation
@@ -74,6 +73,7 @@ uses crt, dma, sbio;
 
 function sbMixerRead( reg: byte ): byte; external;
 procedure sbMixerWrite( reg, data: byte ); external;
+function sbReadDSPVersion: word; external;
 procedure speaker_on; external;
 procedure speaker_off; external;
 procedure sbSetupDMATransfer( p: pointer; count: word; autoinit: boolean ); external;

@@ -30,6 +30,21 @@ uint8_t __far __pascal sbMixerRead( uint8_t reg ) {
         return 0;
 }
 
+uint16_t __far __pascal sbReadDSPVersion( void ) {
+    uint8_t v_lo, v_hi;
+
+    /* DSP 0xE1 - get DSP version */
+    if ( ! sbioDSPWrite( sdev_hw_base, 0xe1 ) ) return 0;
+
+    v_hi = sbioDSPRead( sdev_hw_base );
+    if ( sbioError != E_SBIO_SUCCESS ) return 0;
+
+    v_lo = sbioDSPRead( sdev_hw_base );
+    if ( sbioError != E_SBIO_SUCCESS ) return 0;
+
+    return v_lo + ( v_hi << 8 );
+}
+
 void __far __pascal speaker_on( void ) {
     sbioDSPWrite( sdev_hw_base, 0xd1 );
     /* needs a bit time to switch it on */

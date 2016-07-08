@@ -310,31 +310,17 @@ var oldv:array[1..5] of pointer;
 
 function readDSPVersion: boolean;
 var
-    v_lo, v_hi: byte;
+    version: word;
 begin
-    (* DSP 0xE1 - get DSP version *)
-    if ( not sbioDSPWrite( sdev_hw_base, $e1 ) ) then
-    begin
-        readDSPVersion := false;
-        exit;
-    end;
-
-    v_hi := sbioDSPRead( sdev_hw_base );
+    version := sbReadDSPVersion;
     if ( sbioError <> E_SBIO_SUCCESS ) then
     begin
         readDSPVersion := false;
         exit;
     end;
-
-    v_lo := sbioDSPRead( sdev_hw_base );
-    if ( sbioError <> E_SBIO_SUCCESS ) then
-    begin
-        readDSPVersion := false;
-        exit;
-    end;
-
-    sbversLo := v_lo;
-    sbversHi := v_hi;
+    
+    sbverslo := lo(version);
+    sbvershi := hi(version);
     readDSPVersion := true;
 end;
 
