@@ -29,4 +29,5 @@ disasm dointr.obj DOINTR_TEXT
 disasm memcmp.obj MEMCMP_TEXT
 disasm inp.obj INP_TEXT
 disasm outp.obj OUTP_TEXT
+disasm i4d.obj I4D_TEXT
 cd $OLDPWD

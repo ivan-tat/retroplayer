@@ -57,6 +57,43 @@ void __far __pascal speaker_off( void ) {
     delay( 220 );
 }
 
+void sbSetDSPTimeConst( const uint8_t tc ) {
+    sbioDSPWrite( sdev_hw_base, 0x40 );
+    sbioDSPWrite( sdev_hw_base, tc );
+}
+
+void sbSetDSPFrequency( const uint16_t freq ) {
+    sbioDSPWrite( sdev_hw_base, 0x41 );
+    sbioDSPWrite( sdev_hw_base, freq >> 8 );
+    sbioDSPWrite( sdev_hw_base, freq & 0xff );
+}
+
+void __far __pascal sbSetupSampleRate( uint16_t freq, bool stereo ) {
+    uint8_t tc;
+
+    /* Calculate time constant:
+       for SB PRO we have to setup double samplerate in stereo mode */
+    if ( ( sbno == 6 ) || ! stereo ) {
+        tc = 256 - 1000000 / freq;
+        freq = 1000000 / ( 256 - tc );
+    } else {
+        tc = 256 - 1000000 / ( 2 * freq );
+        freq = ( 1000000 / ( 256 - tc ) ) / 2;
+    }
+    if ( sbno == 6 )
+        sbSetDSPFrequency( freq );
+    else
+        sbSetDSPTimeConst( tc );
+
+    /* setup stereo option for SB PRO - for SB16 it's set in DSP command */
+    if ( stereo & ( sbno != 6 ) )
+        sbMixerWrite( 0x0e, sbMixerRead( 0x0e ) || 0x02 );
+
+    /* switch filter option off for SB PRO */
+    if ( sbno == 2 || sbno == 4 || sbno == 5 )
+        sbMixerWrite( 0x0e, sbMixerRead( 0x0e ) || 0x20 );
+}
+
 void __far __pascal sbSetupDSPTransfer( uint16_t len, bool autoinit ) {
     uint8_t cmd, mode;
     
@@ -82,7 +119,7 @@ void __far __pascal sbSetupDSPTransfer( uint16_t len, bool autoinit ) {
         sbioDSPWrite( sdev_hw_base, ( len >> 8 ) & 0xff );
     } else {
         len--;
-        /* DSP 48h - setup DMA buffer size */
+        /* DSP 0x48 - setup DMA buffer size */
         sbioDSPWrite( sdev_hw_base, 0x48 );
         sbioDSPWrite( sdev_hw_base, len & 0xff );
         sbioDSPWrite( sdev_hw_base, ( len >> 8 ) & 0xff );

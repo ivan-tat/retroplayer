@@ -36,6 +36,8 @@ $ASW memcmp.asm
 $PC memcmp.pas
 $ASW outp.asm
 $PC outp.pas
+$ASW i4d.asm
+$PC i4d.pas
 
 cd ../dos
 compile_c dosproc.c DOSPROC_TEXT

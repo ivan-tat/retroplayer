@@ -61,13 +61,14 @@ procedure sbMixerWrite( reg, data: byte );
 function sbReadDSPVersion: word;
 procedure speaker_on;
 procedure speaker_off;
+procedure sbSetupSampleRate( freq: word; stereo: boolean );
 procedure sbSetupDMATransfer( p: pointer; count: word; autoinit: boolean );
 function sbGetDMACounter: word;
 procedure sbSetupDSPTransfer( len: word; auto: boolean );
 
 implementation
 
-uses crt, dma, sbio;
+uses crt, dma, sbio, i4d;
 
 (*$l sbctl.obj*)
 
@@ -76,6 +77,7 @@ procedure sbMixerWrite( reg, data: byte ); external;
 function sbReadDSPVersion: word; external;
 procedure speaker_on; external;
 procedure speaker_off; external;
+procedure sbSetupSampleRate( freq: word; stereo: boolean ); external;
 procedure sbSetupDMATransfer( p: pointer; count: word; autoinit: boolean ); external;
 function sbGetDMACounter: word; external;
 procedure sbSetupDSPTransfer( len: word; auto: boolean ); external;

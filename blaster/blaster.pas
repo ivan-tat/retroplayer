@@ -122,41 +122,6 @@ end;
 
 { -------------------- continue commenting here ---------------------- }
 
-procedure setDSPTimeConst( tc: byte );
-(* Setup samplerate with time constant, take this:
-   TC = 256 - TRUNC( 1 000 000 / SAMPLERATE ) *)
-begin
-    sbioDSPWrite( sdev_hw_base, $40 );
-    sbioDSPWrite( sdev_hw_base, tc );
-end;
-
-procedure setDSPFrequency( freq: word );
-begin
-    sbioDSPWrite( sdev_hw_base, $41 );
-    sbioDSPWrite( sdev_hw_base, hi( freq ) );
-    sbioDSPWrite( sdev_hw_base, lo( freq ) );
-end;
-
-procedure setDSPSampleRate( freq: word; stereo: boolean );
-var
-    tc: byte;
-begin
-    (* calculate timeconstant - pay attention on SB PRO you have to setup
-       2*samplerate in stereo mode (so call it byterate) - on SB16 not ! *)
-    if ( sbno = 6 ) or not stereo then
-    begin
-        tc := 256 - 1000000 div freq;
-        freq := 1000000 div ( 256 - tc );
-    end else begin
-        tc := 256 - 1000000 div ( 2 * freq );
-        freq := ( 1000000 div ( 256 - tc ) ) div 2;
-    end;
-    if ( sbno < 6 ) then
-        setDSPTimeConst( tc )
-    else
-        setDSPFrequency( freq );
-end;
-
 PROCEDURE Initblaster(var frequ:Word;stereoon,_16Biton:boolean);
 { Initblaster does this :   1. check samplerates for its borders
                             2. Reset DSP chip
@@ -164,8 +129,7 @@ PROCEDURE Initblaster(var frequ:Word;stereoon,_16Biton:boolean);
                             4. setup stereo/mono mode
  if you want to play signed data on SB16, call 'set_sign' after Initblaster }
 
-var tc:byte;
-  begin
+begin
     { first reset SB : }
     asm
       mov    dx,sdev_hw_base
@@ -180,14 +144,9 @@ var tc:byte;
     _16bit:=(SBNo=6) and _16Biton;
     stereo:=stereoon;
     sbioDSPReset( sdev_hw_base );
-    setDSPSampleRate( frequ, stereo );
-    { setup stereo option on SB PRO - on SB16 it's set in DSP command }
-    if stereo and (SBNo<>6) then
-      sbMixerWrite($0e,sbMixerRead($0e) or $02); { stereo option on (only SB PRO) }
-    if SBNo in [2,4,5] then
-      sbMixerWrite($0e,sbMixerRead($0e) or $20); { filter option off (only SB PRO) }
+    sbSetupSampleRate( frequ, stereo );
     speaker_on;
-  end;
+end;
 
 { -------------- now the procedures for my old autodetection ------------- }
 { No comments about it - it's old ;)                                       }
