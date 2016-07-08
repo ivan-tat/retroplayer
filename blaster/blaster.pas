@@ -42,7 +42,7 @@ FUNCTION Detect_DSP_Addr(prot:boolean):Boolean;         (* detects DSP ADDR *)
 FUNCTION Detect_DMA_Channel_IRQ(prot:boolean):Boolean;  (* detects DMA Channel,DSPIRQ *)
 FUNCTION Get_BlasterVersion:Word;                       (* reads the detected soundblaster version *)
 
-procedure check_samplerate(var rate:word;var stereo:boolean); (* check min/max samplerate *)
+procedure sbAdjustMode(var rate:word;var stereo:boolean); (* check min/max samplerate *)
 
 procedure play_firstBlock(length:word);
   (* set the SBinterrupt to "interrupt" every "length" bytes
@@ -124,7 +124,7 @@ begin
     end;
     stop_play;
     { Now init : }
-    check_samplerate(frequ,stereoon);
+    sbAdjustMode(frequ,stereoon);
     _16bit:=(SBNo=6) and _16Biton;
     stereo:=stereoon;
     sbSetupSampleRate( frequ, stereo );
@@ -613,7 +613,7 @@ var c:char;
     InputSoundblasterValues:=true;
   end;
 
-procedure check_samplerate(var rate:word;var stereo:boolean);
+procedure sbAdjustMode(var rate:word;var stereo:boolean);
   begin
     stereo := stereo and sdev_caps_stereo;
     if rate<4000 then rate:=4000;
