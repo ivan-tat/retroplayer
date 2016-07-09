@@ -233,7 +233,6 @@ begin
         fr:=10000;
         dmaMask( sdev_hw_dma8 ); (* was outp( 0x0a, dma_channel ) *)
         stop_play;
-        sbSetSpeaker( false );
         Initblaster(fr,false,false);
         play_oneblock(ptr(0,0),1);
         delay(10);
@@ -401,6 +400,8 @@ begin
     (* reset is the best way to make sure SB stops playing *)
     sbioDSPReset( sdev_hw_base );
     dmaMask( sdev_hw_dma8 ); (* was outp( 0x0a, dma_channel ) *)
+
+    sbSetSpeaker( false );
 end;
 
 PROCEDURE pause_play;
