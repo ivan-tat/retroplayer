@@ -1,7 +1,7 @@
 {$M 16000,0,1000}
 program example_for_s3mplay;
 
-uses S3MPlay,crt,blaster,dos;
+uses S3MPlay,crt,sbctl,blaster,dos;
 
 const stereo_calc=true;
       _16bit_calc=false;        { 16bit play not yet possible }

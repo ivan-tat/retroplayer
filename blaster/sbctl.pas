@@ -65,6 +65,7 @@ procedure sbSetupMode( freq: word; stereo: boolean );
 procedure sbSetupDMATransfer( p: pointer; count: word; autoinit: boolean );
 function sbGetDMACounter: word;
 procedure sbSetupDSPTransfer( len: word; auto: boolean );
+procedure stop_play;
 
 implementation
 
@@ -81,5 +82,6 @@ procedure sbSetupMode( freq: word; stereo: boolean ); external;
 procedure sbSetupDMATransfer( p: pointer; count: word; autoinit: boolean ); external;
 function sbGetDMACounter: word; external;
 procedure sbSetupDSPTransfer( len: word; auto: boolean ); external;
+procedure stop_play; external;
 
 end.

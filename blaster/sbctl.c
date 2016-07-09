@@ -189,3 +189,20 @@ void __far __pascal sbSetupDMATransfer( void *p, uint16_t count, bool autoinit )
 uint16_t __far __pascal sbGetDMACounter( void ) {
     return dmaGetCounter( _16bit ? sdev_hw_dma16 : sdev_hw_dma8 );
 }
+
+void __far __pascal stop_play( void ) {
+    /* for 16bit modes : */
+    sbioDSPWrite( sdev_hw_base, 0xd0 );
+    sbioDSPWrite( sdev_hw_base, 0xd9 );
+    sbioDSPWrite( sdev_hw_base, 0xd0 );
+    /* for 8bit modes : */
+    sbioDSPWrite( sdev_hw_base, 0xd0 );
+    sbioDSPWrite( sdev_hw_base, 0xda );
+    sbioDSPWrite( sdev_hw_base, 0xd0 );
+    /* reset is the best way to make sure SB stops playing */
+    sbioDSPReset( sdev_hw_base );
+
+    dmaMask( sdev_hw_dma8 ); /* was outp( 0x0a, dma_channel ) */
+
+    sbSetSpeaker( false );
+}

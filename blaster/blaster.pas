@@ -61,7 +61,7 @@ PROCEDURE set_ready_irq(p:pointer);
      You need those two port commands you'll find there !
      And pay attention to 16bit/8bit mode on SB16 (different
      ackknowledgement ports) *)
-PROCEDURE stop_play;         (* stops playing ! *)
+
 PROCEDURE pause_play;        (* stops playing, but you can continue
                                 with "continue_play" *)
 PROCEDURE continue_play;     (* continues playing after pause play *)
@@ -386,23 +386,6 @@ FUNCTION ready:boolean;
   begin
     ready:=check>0;
   end;
-
-PROCEDURE stop_play;
-begin
-    (* for 16bit modes : *)
-    sbioDSPWrite( sdev_hw_base, $d0 );
-    sbioDSPWrite( sdev_hw_base, $d9 );
-    sbioDSPWrite( sdev_hw_base, $d0 );
-    (* for 8bit modes : *)
-    sbioDSPWrite( sdev_hw_base, $d0 );
-    sbioDSPWrite( sdev_hw_base, $da );
-    sbioDSPWrite( sdev_hw_base, $d0 );
-    (* reset is the best way to make sure SB stops playing *)
-    sbioDSPReset( sdev_hw_base );
-    dmaMask( sdev_hw_dma8 ); (* was outp( 0x0a, dma_channel ) *)
-
-    sbSetSpeaker( false );
-end;
 
 PROCEDURE pause_play;
 begin
