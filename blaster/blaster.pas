@@ -63,8 +63,6 @@ PROCEDURE set_ready_irq(p:pointer);
      ackknowledgement ports) *)
 
 PROCEDURE restore_irq;       (* restore old interrupt vector *)
-PROCEDURE set_sign(signed:boolean); (* sets flag to play signed data
-               - does only work on SB16 (set it before start playing) *)
 PROCEDURE setvolume(vol:Byte);   (* what do you think ? *)
 procedure writelnSBConfig;       (* what do you expect ? - write current setup to screen,
                                     but detect SB before calling that proc. *)
@@ -107,7 +105,6 @@ end;
 { -------------------- continue commenting here ---------------------- }
 
 PROCEDURE Initblaster(var frequ:Word;stereoon,_16Biton:boolean);
-(* If you want to play signed data on SB16, call 'set_sign' after Initblaster *)
 begin
     { first reset SB : }
     asm
@@ -382,11 +379,6 @@ end;
 FUNCTION ready:boolean;
   begin
     ready:=check>0;
-  end;
-
-PROCEDURE set_sign(signed:boolean);
-  begin
-    sdev_mode_sign := signed;
   end;
 
 procedure setfilter(how:boolean);
