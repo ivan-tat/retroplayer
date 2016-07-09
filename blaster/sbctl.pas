@@ -59,7 +59,6 @@ var
 function sbMixerRead( reg: byte ): byte;
 procedure sbMixerWrite( reg, data: byte );
 function sbReadDSPVersion: word;
-procedure sbSetSpeaker( state: boolean );
 procedure sbAdjustMode( var rate: word; var stereo: boolean; var _16bit: boolean );
 procedure sbSetupMode( freq: word; stereo: boolean );
 procedure sbSetupDMATransfer( p: pointer; count: word; autoinit: boolean );
@@ -78,7 +77,6 @@ uses crt, dma, sbio, i4d;
 function sbMixerRead( reg: byte ): byte; external;
 procedure sbMixerWrite( reg, data: byte ); external;
 function sbReadDSPVersion: word; external;
-procedure sbSetSpeaker( state: boolean ); external;
 procedure sbAdjustMode( var rate: word; var stereo: boolean; var _16bit: boolean ); external;
 procedure sbSetupMode( freq: word; stereo: boolean ); external;
 procedure sbSetupDMATransfer( p: pointer; count: word; autoinit: boolean ); external;

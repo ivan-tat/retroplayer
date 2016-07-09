@@ -45,7 +45,7 @@ uint16_t __far __pascal sbReadDSPVersion( void ) {
     return v_lo + ( v_hi << 8 );
 }
 
-void __far __pascal sbSetSpeaker( bool state ) {
+void setSpeaker( bool state ) {
     if ( state ) {
         /* Does not work on SB16 */
         sbioDSPWrite( sdev_hw_base, 0xd1 );
@@ -118,7 +118,7 @@ void __far __pascal sbSetupMode( uint16_t freq, bool stereo ) {
     if ( sbno == 2 || sbno == 4 || sbno == 5 )
         sbMixerWrite( 0x0e, sbMixerRead( 0x0e ) || 0x20 );
 
-    sbSetSpeaker( true );
+    setSpeaker( true );
 }
 
 void __far __pascal sbSetupDSPTransfer( uint16_t len, bool autoinit ) {
@@ -218,5 +218,5 @@ void __far __pascal stop_play( void ) {
 
     dmaMask( sdev_hw_dma8 ); /* was outp( 0x0a, dma_channel ) */
 
-    sbSetSpeaker( false );
+    setSpeaker( false );
 }
