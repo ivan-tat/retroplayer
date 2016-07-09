@@ -62,8 +62,6 @@ PROCEDURE set_ready_irq(p:pointer);
      And pay attention to 16bit/8bit mode on SB16 (different
      ackknowledgement ports) *)
 
-PROCEDURE pause_play;        (* stops playing, but you can continue
-                                with "continue_play" *)
 PROCEDURE continue_play;     (* continues playing after pause play *)
 PROCEDURE restore_irq;       (* restore old interrupt vector *)
 PROCEDURE set_sign(signed:boolean); (* sets flag to play signed data
@@ -386,14 +384,6 @@ FUNCTION ready:boolean;
   begin
     ready:=check>0;
   end;
-
-PROCEDURE pause_play;
-begin
-    if _16bit then
-        sbioDSPWrite( sdev_hw_base, $d5 )
-    else
-        sbioDSPWrite( sdev_hw_base, $d0 );
-end;
 
 PROCEDURE continue_play;
 begin

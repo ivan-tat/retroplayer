@@ -190,6 +190,13 @@ uint16_t __far __pascal sbGetDMACounter( void ) {
     return dmaGetCounter( _16bit ? sdev_hw_dma16 : sdev_hw_dma8 );
 }
 
+void __far __pascal pause_play( void ) {
+    if ( _16bit )
+        sbioDSPWrite( sdev_hw_base, 0xd5 );
+    else
+        sbioDSPWrite( sdev_hw_base, 0xd0 );
+}
+
 void __far __pascal stop_play( void ) {
     /* for 16bit modes : */
     sbioDSPWrite( sdev_hw_base, 0xd0 );
