@@ -41,6 +41,7 @@ void     __far __pascal sbSetupDMATransfer( void *p, uint16_t count, bool autoin
 uint16_t __far __pascal sbGetDMACounter( void );
 void     __far __pascal sbSetupDSPTransfer( uint16_t len, bool autoinit );
 void     __far __pascal pause_play( void );
+void     __far __pascal continue_play( void );
 void     __far __pascal stop_play( void );
 
 #endif /* _SBCTL_H */
