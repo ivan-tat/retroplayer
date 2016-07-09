@@ -45,16 +45,17 @@ uint16_t __far __pascal sbReadDSPVersion( void ) {
     return v_lo + ( v_hi << 8 );
 }
 
-void __far __pascal speaker_on( void ) {
-    sbioDSPWrite( sdev_hw_base, 0xd1 );
-    /* needs a bit time to switch it on */
-    delay( 110 );
-}
-
-void __far __pascal speaker_off( void ) {
-    sbioDSPWrite( sdev_hw_base, 0xd3 );
-    /* needs a bit time to switch it off */
-    delay( 220 );
+void __far __pascal sbSetSpeaker( bool state ) {
+    if ( state ) {
+        /* Does not work on SB16 */
+        sbioDSPWrite( sdev_hw_base, 0xd1 );
+        /* Needs a bit time to switch it on */
+        delay( 110 );
+    } else {
+        sbioDSPWrite( sdev_hw_base, 0xd3 );
+        /* Needs a bit time to switch it off */
+        delay( 220 );
+    }
 }
 
 void adjustRate( uint16_t *rate, bool stereo, uint8_t *tc ) {

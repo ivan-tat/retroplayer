@@ -126,7 +126,7 @@ begin
     _16bit:=_16Biton;
     stereo:=stereoon;
     sbSetupSampleRate( frequ, stereo );
-    speaker_on;
+    sbSetSpeaker( true );
 end;
 
 { -------------- now the procedures for my old autodetection ------------- }
@@ -234,7 +234,7 @@ begin
         fr:=10000;
         dmaMask( sdev_hw_dma8 ); (* was outp( 0x0a, dma_channel ) *)
         stop_play;
-        speaker_off;
+        sbSetSpeaker( false );
         Initblaster(fr,false,false);
         play_oneblock(ptr(0,0),1);
         delay(10);

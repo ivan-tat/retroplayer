@@ -265,7 +265,7 @@ PROCEDURE Done_S3Mplayer;
 PROCEDURE NewExitRoutine; Far;
   begin
     stop_play; { halt SB :) }
-    speaker_off; { switch it off ... }
+    sbSetSpeaker( false );
     if S3M_inMemory then done_module;
     if buffersreserved then done_S3Mplayer else restore_irq;
     exitproc:=oldexitproc;

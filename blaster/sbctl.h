@@ -34,8 +34,7 @@ extern bool __pascal stereo;
 uint8_t  __far __pascal sbMixerRead( uint8_t reg );
 void     __far __pascal sbMixerWrite( uint8_t reg, uint8_t data );
 uint16_t __far __pascal sbReadDSPVersion( void );
-void     __far __pascal speaker_on( void ); /* Does not work on SB16 */
-void     __far __pascal speaker_off( void );
+void     __far __pascal sbSetSpeaker( bool state );
 void     __far __pascal sbAdjustMode( uint16_t *rate, bool *stereo, bool *_16bit );
 void     __far __pascal sbSetupSampleRate( uint16_t freq, bool stereo );
 void     __far __pascal sbSetupDMATransfer( void *p, uint16_t count, bool autoinit );
