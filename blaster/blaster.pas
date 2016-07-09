@@ -85,6 +85,28 @@ VAR SB_Detect:Boolean;              { Flag if SB is detected }
     check:byte;                     { for detecting }
     savvect:pointer;                {  "       "    }
 
+procedure set_hw( name: pchar; _type: byte; mixer, _16bit, stereo: boolean; m_max, s_max: word );
+begin
+    sdev_name := name;
+    sbno := _type;
+    MIXER_Detect := mixer;
+    sdev_caps_16bit := _16bit;
+    sdev_caps_stereo := stereo;
+    sdev_caps_mono_maxrate := m_max;
+    sdev_caps_stereo_maxrate := s_max;
+end;
+
+procedure set_hw_dsp( version: byte );
+begin
+    case version of
+      1: set_hw( 'SoundBlaster 1.0 / 1.5', 1, false, false, false, 22050, 0 );
+      2: set_hw( 'SoundBlaster 2.0 / 2.5', 3, true, false, false, 44100, 0 );
+      3: set_hw( 'SoundBlaster Pro', 2, true, true, false, 44100, 22700 );
+      4: set_hw( 'SoundBlaster 16 / ASP', 6, true, true, true, 45454, 45454 );
+    else set_hw( '', 0, false, false, false, 0, 0 );
+    end;
+end;
+
 (* call this if you want to do continues play *)
 procedure play_firstBlock(length:word);
 begin
@@ -288,23 +310,13 @@ begin
     sbioDSPReset( sdev_hw_base );
   end;
 
-procedure set_hw_caps( _type: byte; _16bit, stereo: boolean; m_max, s_max: word );
-begin
-    sbno := _type;
-    sdev_caps_16bit := _16bit;
-    sdev_caps_stereo := stereo;
-    sdev_caps_mono_maxrate := m_max;
-    sdev_caps_stereo_maxrate := s_max;
-end;
-
 function DetectSoundblaster( prot: boolean): boolean;
 begin
     SB_Detect := false;
     DSPIRQ_Detect := false;
     DSPADR_Detect := false;
     DMACHN_Detect := false;
-    MIXER_Detect := false;
-    set_hw_caps( 0, false, false, 0, 0 );
+    set_hw_dsp( 0 );
     stereo := false;
     _16bit := false;
 
@@ -316,7 +328,7 @@ begin
     end;
 
     { for the first set SB1.0 - should work on all SBs }
-    set_hw_caps( 1, false, false, 22050, 0 );
+    set_hw_dsp( 1 );
 
     stop_play;
 
@@ -330,22 +342,12 @@ begin
 
     sbioDSPReset( sdev_hw_base );
 
-{                              SBvers:
-   SoundBlaster 1.0/1.5        1.xx
-   SoundBlaster 2.0/2.5        2.xx
-   SoundBlaster Pro/PRO3/PRO4  3.xx
-   SoundBlaster 16/ASP         4.xx
-}
-    case sbversHi of
-      1: set_hw_caps( 1, false, false, 22050, 0 );
-      2: set_hw_caps( 3, false, false, 44100, 0 );
-      3: set_hw_caps( 2, true, false, 44100, 22700 );
-      4: set_hw_caps( 6, true, true, 45454, 45454 );
-    else begin
-        set_hw_caps( 0, false, false, 0, 0 );
+    set_hw_dsp( sbvershi );
+
+    if ( sbno = 0 ) then
+    begin
         DetectSoundblaster := false;
         exit;
-    end;
     end;
 
     DetectSoundblaster := true;
@@ -380,6 +382,7 @@ FUNCTION ready:boolean;
 
 PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);
 var
+    caps_mixer: boolean;
     caps_16bit: boolean;
     caps_stereo: boolean;
 begin
@@ -390,20 +393,17 @@ begin
     stereo:=false;
     _16Bit:=false;
 
-    MIXER_detect := typ > 1;
-    caps_16bit := typ = 6;
-    caps_stereo := ( typ = 2 ) or ( typ = 4 ) or ( typ = 5 ) or ( typ = 6 );
     sdev_hw_base := dsp;
     sdev_hw_irq := irq;
     sdev_hw_dma8 := dma;
     sdev_hw_dma16 := dma16;
+
     case typ of
-        1: set_hw_caps( typ, caps_16bit, caps_stereo, 22050, 0 );
-        2: set_hw_caps( typ, caps_16bit, caps_stereo, 44100, 22050 );
-        3: set_hw_caps( typ, caps_16bit, caps_stereo, 44100, 0 );
-        4: set_hw_caps( typ, caps_16bit, caps_stereo, 44100, 22050 );
-        5: set_hw_caps( typ, caps_16bit, caps_stereo, 44100, 22050 );
-        6: set_hw_caps( typ, caps_16bit, caps_stereo, 45454, 45454 );
+        1: set_hw_dsp( 1 );
+        3: set_hw_dsp( 2 );
+        2,4,5:
+           set_hw_dsp( 3 );
+        6: set_hw_dsp( 4 );
     end;
   end;
 
@@ -548,10 +548,8 @@ begin
     DSPIRQ_Detect :=false;
     DSPADR_Detect := false;
     DMACHN_Detect := false;
-    MIXER_Detect := false;
     (* hw *)
-    sdev_name := '';
-    set_hw_caps( 0, false, false, 0, 0 );
+    set_hw_dsp( 0 );
     sbvershi := 0;
     sbverslo := 0;
     sdev_hw_base := $220;
