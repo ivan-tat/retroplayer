@@ -160,25 +160,63 @@ const hex:string= '0123456789ABCDEF';
 
 FUNCTION Detect_DSP_Addr(prot:boolean):Boolean;
 var p:word;
-  begin
-    if dspadr_detect then begin detect_dsp_addr:=true; exit end;
-    if prot then writeln(' Now locating DSP-Adresse :'#13#10);
-    detect_dsp_addr:=false;
-    p:=$210;
-    while not dspadr_detect and (p<$290) do
-      begin
-        if prot then write(' Trying ',hexword(p),' .... ');
+    version: word;
+begin
+    if ( dspadr_detect ) then
+    begin
+        detect_dsp_addr := true;
+        exit;
+    end;
+
+    if ( prot ) then writeln('Detecting DSP base address...');
+
+    p := $210;
+
+    while ( ( p < $290 ) and not dspadr_detect ) do
+    begin
+        if ( prot ) then write( '- probing ', hexword( p ), '...' );
+
         dspadr_detect := sbioDSPReset( p );
-        if not dspadr_detect then
-          begin
-            inc(p,$10);
-            if prot then write('not ');
-          end;
-        if prot then writeln('succesfull ');
+
+        if ( not dspadr_detect ) then inc(p,$10);
+
+        if ( prot ) then
+            if ( dspadr_detect ) then
+                writeln(' found')
+            else
+                writeln(' not found');
       end;
-    if not dspadr_detect then exit;
+
+    if not dspadr_detect then
+    begin
+        detect_dsp_addr := false;
+        exit;
+    end;
+
     sdev_hw_base := p;
-    detect_dsp_addr:=true;
+
+    if ( prot ) then writeln('Checking DSP version...');
+
+    (* Read DSP version *)
+    version := sbReadDSPVersion;
+    if ( sbioError <> E_SBIO_SUCCESS ) then
+    begin
+        if ( prot ) then writeln('ERROR: Unable to get DSP chip version.');
+        detect_dsp_addr := false;
+        exit;
+    end;
+
+    sbverslo := lo(version);
+    sbvershi := hi(version);
+
+    if ( ( sbvershi < 1) or ( sbvershi > 4 ) ) then
+    begin
+        if ( prot ) then writeln('ERROR: Unknown DSP chip version.');
+        detect_dsp_addr := false;
+        exit;
+    end;
+
+    detect_dsp_addr := true;
   end;
 
 const
@@ -250,65 +288,45 @@ begin
     sbioDSPReset( sdev_hw_base );
   end;
 
-function readDSPVersion: boolean;
-var
-    version: word;
+procedure set_hw_caps( _type: byte; _16bit, stereo: boolean; m_max, s_max: word );
 begin
-    version := sbReadDSPVersion;
-    if ( sbioError <> E_SBIO_SUCCESS ) then
-    begin
-        readDSPVersion := false;
-        exit;
-    end;
-    
-    sbverslo := lo(version);
-    sbvershi := hi(version);
-    readDSPVersion := true;
+    sbno := _type;
+    sdev_caps_16bit := _16bit;
+    sdev_caps_stereo := stereo;
+    sdev_caps_mono_maxrate := m_max;
+    sdev_caps_stereo_maxrate := s_max;
 end;
 
-FUNCTION DetectSoundblaster(prot:boolean):Boolean;
-  begin
-    SBNo:=0;
-    DetectSoundblaster:=false;
-    SB_Detect:=False;
-    DSPIRQ_Detect:=false;
-    DSPADR_Detect:=false;
-    DMACHN_Detect:=False;
-    MIXER_Detect:=False;
-    sdev_caps_stereo := false;
-    sdev_caps_16bit := false;
-    STEREO:=False;_16Bit:=False;
-    if not Detect_DSP_Addr(prot) then
-      begin
-        if prot then writeln(' Can'#39't locate DSP-addresse ! ');
-        exit;
-      end;
-    if ( not readDSPVersion ) then
+function DetectSoundblaster( prot: boolean): boolean;
+begin
+    SB_Detect := false;
+    DSPIRQ_Detect := false;
+    DSPADR_Detect := false;
+    DMACHN_Detect := false;
+    MIXER_Detect := false;
+    set_hw_caps( 0, false, false, 0, 0 );
+    stereo := false;
+    _16bit := false;
+
+    if ( not Detect_DSP_Addr( prot ) ) then
     begin
-        if ( prot ) then writeln('ERROR: Unable to get DSP chip version on this base address detected.');
-        SBno := 0;
+        if ( prot ) then writeln( 'ERROR: Failed to find DSP base address.' );
+        DetectSoundblaster := false;
         exit;
     end;
 
-    if (sbversHi<1) or (sbversHi>4) then
-      begin
-        if prot then writeln(' Sorry, unknown DSP chip version on this base address detected.');
-        SBno:=0;
-        exit;
-      end;
     { for the first set SB1.0 - should work on all SBs }
-    SBNo:=1;
-    sdev_caps_stereo := false;
-    sdev_caps_16bit := false;
-    sdev_caps_mono_maxrate := 22050;
-    sdev_caps_stereo_maxrate := 0;
+    set_hw_caps( 1, false, false, 22050, 0 );
+
     stop_play;
-    if not Detect_DMA_Channel_irq(prot) then
-      begin
-        if prot then writeln(' Can'#39't locate DMA-channel and IRQ ! ');
-        sbNo:=0;
+
+    if ( not Detect_DMA_Channel_irq( prot ) ) then
+    begin
+        if ( prot ) then writeln( 'ERROR: Failed to find DMA channel and IRQ.' );
+        sbno := 0;
+        DetectSoundblaster := false;
         exit;
-      end;
+    end;
 
     sbioDSPReset( sdev_hw_base );
 
@@ -319,39 +337,19 @@ FUNCTION DetectSoundblaster(prot:boolean):Boolean;
    SoundBlaster 16/ASP         4.xx
 }
     case sbversHi of
-      1: begin
-           SBNo:=1;
-           sdev_caps_stereo := false;
-           sdev_caps_16bit := false;
-           sdev_caps_mono_maxrate := 22050;
-           sdev_caps_stereo_maxrate := 0;
-         end;
-      2: begin
-           SBNo:=3;
-           sdev_caps_stereo := false;
-           sdev_caps_16bit := false;
-           sdev_caps_mono_maxrate := 44100;
-           sdev_caps_stereo_maxrate := 0;
-         end;
-      3: begin
-           SBNo:=2;
-           sdev_caps_stereo := true;
-           sdev_caps_16bit := false;
-           sdev_caps_mono_maxrate := 44100;
-           sdev_caps_stereo_maxrate := 22700;
-         end;
-      4: begin
-           SBNo:=6;
-           sdev_caps_stereo := true;
-           sdev_caps_16bit := true;
-           sdev_caps_mono_maxrate := 45454;
-           sdev_caps_stereo_maxrate := 45454;
-         end;
-      else begin SBNo:=0;exit end;
+      1: set_hw_caps( 1, false, false, 22050, 0 );
+      2: set_hw_caps( 3, false, false, 44100, 0 );
+      3: set_hw_caps( 2, true, false, 44100, 22700 );
+      4: set_hw_caps( 6, true, true, 45454, 45454 );
+    else begin
+        set_hw_caps( 0, false, false, 0, 0 );
+        DetectSoundblaster := false;
+        exit;
+    end;
     end;
 
-    DetectSoundblaster:=true;
-  end;
+    DetectSoundblaster := true;
+end;
 
 FUNCTION Get_BlasterVersion:Word;
   begin
@@ -381,7 +379,10 @@ FUNCTION ready:boolean;
   end;
 
 PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);
-  begin
+var
+    caps_16bit: boolean;
+    caps_stereo: boolean;
+begin
     SB_Detect:=true;
     DSPIRQ_Detect:=true;
     DSPADR_Detect:=true;
@@ -389,21 +390,20 @@ PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);
     stereo:=false;
     _16Bit:=false;
 
-    MIXER_detect:=typ>1;
-    sdev_caps_stereo:=typ in [2,4,5,6];
-    sdev_caps_16bit := typ=6;
+    MIXER_detect := typ > 1;
+    caps_16bit := typ = 6;
+    caps_stereo := ( typ = 2 ) or ( typ = 4 ) or ( typ = 5 ) or ( typ = 6 );
     sdev_hw_base := dsp;
     sdev_hw_irq := irq;
     sdev_hw_dma8 := dma;
     sdev_hw_dma16 := dma16;
-    SBNo:=typ;
     case typ of
-      1: begin sdev_caps_mono_maxrate:=22050;sdev_caps_stereo_maxrate:=0; end;
-      2: begin sdev_caps_mono_maxrate:=44100;sdev_caps_stereo_maxrate:=22050 end;
-      3: begin sdev_caps_mono_maxrate:=44100;sdev_caps_stereo_maxrate:=0 end;
-      4: begin sdev_caps_mono_maxrate:=44100;sdev_caps_stereo_maxrate:=22050 end;
-      5: begin sdev_caps_mono_maxrate:=44100;sdev_caps_stereo_maxrate:=22050 end;
-      6: begin sdev_caps_mono_maxrate:=45454;sdev_caps_stereo_maxrate:=45454 end;
+        1: set_hw_caps( typ, caps_16bit, caps_stereo, 22050, 0 );
+        2: set_hw_caps( typ, caps_16bit, caps_stereo, 44100, 22050 );
+        3: set_hw_caps( typ, caps_16bit, caps_stereo, 44100, 0 );
+        4: set_hw_caps( typ, caps_16bit, caps_stereo, 44100, 22050 );
+        5: set_hw_caps( typ, caps_16bit, caps_stereo, 44100, 22050 );
+        6: set_hw_caps( typ, caps_16bit, caps_stereo, 45454, 45454 );
     end;
   end;
 
@@ -543,23 +543,25 @@ var c:char;
 
 procedure sbInit;
 begin
-  SB_Detect:=False;
-  DSPIRQ_Detect:=false;
-  DSPADR_Detect:=false;
-  DMACHN_Detect:=False;
-  MIXER_Detect:=False;
-  sdev_caps_stereo := false;
-  sdev_caps_16bit := false;
-  STEREO:=False;
-  _16Bit:=False;
-  sdev_mode_sign := false;
-  SBVersHi:=0;SBVersLo:=0;
-  sdev_name := '';
-  SBno:=0;
-  sdev_hw_base := $220;
-  sdev_hw_irq := 7;
-  sdev_hw_dma8 := 1;
-  sdev_hw_dma16 := 5;
+    (* flags *)
+    SB_Detect := false;
+    DSPIRQ_Detect :=false;
+    DSPADR_Detect := false;
+    DMACHN_Detect := false;
+    MIXER_Detect := false;
+    (* hw *)
+    sdev_name := '';
+    set_hw_caps( 0, false, false, 0, 0 );
+    sbvershi := 0;
+    sbverslo := 0;
+    sdev_hw_base := $220;
+    sdev_hw_irq := 7;
+    sdev_hw_dma8 := 1;
+    sdev_hw_dma16 := 5;
+    (* mode *)
+    stereo := false;
+    _16Bit := false;
+    sdev_mode_sign := false;
 end;
 
 procedure sbDone;
