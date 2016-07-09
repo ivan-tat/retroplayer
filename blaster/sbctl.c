@@ -30,6 +30,22 @@ uint8_t __far __pascal sbMixerRead( uint8_t reg ) {
         return 0;
 }
 
+void __far __pascal setvolume( uint8_t vol ) {
+    uint8_t b;
+
+    if ( sbno == 6 ) {
+        sbMixerWrite( SBIO_MIXER_MASTER_LEFT, vol );
+        sbMixerWrite( SBIO_MIXER_MASTER_RIGHT, vol );
+        sbMixerWrite( SBIO_MIXER_VOICE_LEFT, vol );
+        sbMixerWrite( SBIO_MIXER_VOICE_RIGHT, vol );
+    } else {
+        if ( vol > 15 ) vol = 15;
+        vol |= vol << 4;
+        sbMixerWrite( SBIO_MIXER_MASTER_VOLUME, vol );
+        sbMixerWrite( SBIO_MIXER_DAC_LEVEL, vol );
+    }
+}
+
 uint16_t __far __pascal sbReadDSPVersion( void ) {
     uint8_t v_lo, v_hi;
 

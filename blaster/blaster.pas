@@ -63,7 +63,6 @@ PROCEDURE set_ready_irq(p:pointer);
      ackknowledgement ports) *)
 
 PROCEDURE restore_irq;       (* restore old interrupt vector *)
-PROCEDURE setvolume(vol:Byte);   (* what do you think ? *)
 procedure writelnSBConfig;       (* what do you expect ? - write current setup to screen,
                                     but detect SB before calling that proc. *)
 
@@ -380,23 +379,6 @@ FUNCTION ready:boolean;
   begin
     ready:=check>0;
   end;
-
-procedure setvolume(vol:byte);
-var b: byte;
-begin
-    if ( sbno < 6 ) then
-    begin
-        if vol >= 15 then vol := 15;
-        vol := vol + ( vol shl 4 );
-        sbMixerWrite( SBIO_MIXER_MASTER_VOLUME, vol );
-        sbMixerWrite( SBIO_MIXER_DAC_LEVEL, vol );
-    end else begin
-        sbMixerWrite( SBIO_MIXER_MASTER_LEFT, vol );
-        sbMixerWrite( SBIO_MIXER_MASTER_RIGHT, vol );
-        sbMixerWrite( SBIO_MIXER_VOICE_LEFT, vol );
-        sbMixerWrite( SBIO_MIXER_VOICE_RIGHT, vol );
-    end;
-end;
 
 PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);
   begin
