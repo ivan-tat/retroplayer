@@ -47,6 +47,7 @@ var
 
     sbno: byte;                 (* SoundBlaster typ (look some rows above) *)
 
+    sdev_caps_mixer: boolean;
     sdev_caps_stereo: boolean;
     sdev_caps_16bit: boolean;
     sdev_caps_mono_maxrate: word;

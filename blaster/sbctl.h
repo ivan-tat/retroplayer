@@ -20,6 +20,7 @@ extern uint8_t  __pascal sbno;              /* type */
 
 /* capabilities */
 
+extern bool     __pascal sdev_caps_mixer;
 extern bool     __pascal sdev_caps_stereo;          /* stereo play is possible */
 extern bool     __pascal sdev_caps_16bit;           /* 16bit play is possible */
 extern uint16_t __pascal sdev_caps_mono_maxrate;    /* max mono samplerate */

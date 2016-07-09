@@ -17,14 +17,11 @@
 
 /* This routine may not work for all registers because of different timings. */
 void __far __pascal sbMixerWrite( uint8_t reg, uint8_t data ) {
-    /* SB 1.0/1.5/2.0/2.5 has no mixer */
-    if ( ! ( sbno == 1 || sbno == 3 ) )
-        sbioMixerWrite( sdev_hw_base, reg, data );
+    if ( sdev_caps_mixer ) sbioMixerWrite( sdev_hw_base, reg, data );
 }
 
 uint8_t __far __pascal sbMixerRead( uint8_t reg ) {
-    /* SB 1.0/1.5/2.0/2.5 has no mixer */
-    if ( ! ( sbno == 1 || sbno == 3 ) )
+    if ( sdev_caps_mixer )
         return sbioMixerRead( sdev_hw_base, reg );
     else
         return 0;
@@ -33,16 +30,18 @@ uint8_t __far __pascal sbMixerRead( uint8_t reg ) {
 void __far __pascal setvolume( uint8_t vol ) {
     uint8_t b;
 
-    if ( sbno == 6 ) {
-        sbMixerWrite( SBIO_MIXER_MASTER_LEFT, vol );
-        sbMixerWrite( SBIO_MIXER_MASTER_RIGHT, vol );
-        sbMixerWrite( SBIO_MIXER_VOICE_LEFT, vol );
-        sbMixerWrite( SBIO_MIXER_VOICE_RIGHT, vol );
-    } else {
-        if ( vol > 15 ) vol = 15;
-        vol |= vol << 4;
-        sbMixerWrite( SBIO_MIXER_MASTER_VOLUME, vol );
-        sbMixerWrite( SBIO_MIXER_DAC_LEVEL, vol );
+    if ( sdev_caps_mixer ) {
+        if ( sbno == 6 ) {
+            sbMixerWrite( SBIO_MIXER_MASTER_LEFT, vol );
+            sbMixerWrite( SBIO_MIXER_MASTER_RIGHT, vol );
+            sbMixerWrite( SBIO_MIXER_VOICE_LEFT, vol );
+            sbMixerWrite( SBIO_MIXER_VOICE_RIGHT, vol );
+        } else {
+            if ( vol > 15 ) vol = 15;
+            vol |= vol << 4;
+            sbMixerWrite( SBIO_MIXER_MASTER_VOLUME, vol );
+            sbMixerWrite( SBIO_MIXER_DAC_LEVEL, vol );
+        }
     }
 }
 
@@ -131,7 +130,7 @@ void __far __pascal sbSetupMode( uint16_t freq, bool stereo ) {
         sbMixerWrite( 0x0e, sbMixerRead( 0x0e ) || 0x02 );
 
     /* Switch filter option off for SB PRO */
-    if ( sbno == 2 || sbno == 4 || sbno == 5 )
+    if ( sdev_caps_mixer )
         sbMixerWrite( 0x0e, sbMixerRead( 0x0e ) || 0x20 );
 
     setSpeaker( true );

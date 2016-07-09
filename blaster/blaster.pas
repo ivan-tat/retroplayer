@@ -78,7 +78,6 @@ VAR SB_Detect:Boolean;              { Flag if SB is detected }
     DSPIRQ_Detect:Boolean;          { Flag if IRQ number is detected }
     DSPADR_Detect:Boolean;          { Flag if Baseaddress is detected }
     DMACHN_Detect:Boolean;          { Flag if DMAchannel is detected }
-    MIXER_Detect:Boolean;           { Flag if Mixerchip is detected }
     SBVersHi:Byte;                  { Soundblaster version major }
     SBVersLo:Byte;                  { Soundblaster version minor }
 
@@ -89,7 +88,7 @@ procedure set_hw( name: pchar; _type: byte; mixer, _16bit, stereo: boolean; m_ma
 begin
     sdev_name := name;
     sbno := _type;
-    MIXER_Detect := mixer;
+    sdev_caps_mixer := mixer;
     sdev_caps_16bit := _16bit;
     sdev_caps_stereo := stereo;
     sdev_caps_mono_maxrate := m_max;
