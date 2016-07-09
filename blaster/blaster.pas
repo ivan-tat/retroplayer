@@ -381,14 +381,6 @@ FUNCTION ready:boolean;
     ready:=check>0;
   end;
 
-procedure setfilter(how:boolean);
-var b:byte;
-  begin
-    b:=sbMixerRead($0e);
-    if how then { on } b:=b or $20 else b:=b and not $20;
-    sbMixerWrite($0e,b); { switch the filter option }
-  end;
-
 procedure setvolume(vol:byte);
 var b: byte;
 begin
