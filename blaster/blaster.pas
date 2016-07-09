@@ -125,7 +125,7 @@ begin
     sbAdjustMode(frequ,stereoon,_16Biton);
     _16bit:=_16Biton;
     stereo:=stereoon;
-    sbSetupSampleRate( frequ, stereo );
+    sbSetupMode( frequ, stereo );
     sbSetSpeaker( true );
 end;
 

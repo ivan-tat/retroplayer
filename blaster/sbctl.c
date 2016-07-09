@@ -94,7 +94,7 @@ void sbSetDSPFrequency( const uint16_t freq ) {
     sbioDSPWrite( sdev_hw_base, freq & 0xff );
 }
 
-void __far __pascal sbSetupSampleRate( uint16_t freq, bool stereo ) {
+void __far __pascal sbSetupMode( uint16_t freq, bool stereo ) {
     uint8_t tc;
 
     sbioDSPReset( sdev_hw_base );
