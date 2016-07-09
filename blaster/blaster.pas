@@ -126,7 +126,6 @@ begin
     _16bit:=_16Biton;
     stereo:=stereoon;
     sbSetupMode( frequ, stereo );
-    sbSetSpeaker( true );
 end;
 
 { -------------- now the procedures for my old autodetection ------------- }

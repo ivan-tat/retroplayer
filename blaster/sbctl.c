@@ -117,6 +117,8 @@ void __far __pascal sbSetupMode( uint16_t freq, bool stereo ) {
     /* Switch filter option off for SB PRO */
     if ( sbno == 2 || sbno == 4 || sbno == 5 )
         sbMixerWrite( 0x0e, sbMixerRead( 0x0e ) || 0x20 );
+
+    sbSetSpeaker( true );
 }
 
 void __far __pascal sbSetupDSPTransfer( uint16_t len, bool autoinit ) {
