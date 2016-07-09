@@ -57,8 +57,6 @@ var
     sdev_mode_sign: boolean;
     stereo:boolean;             (* flag if stereo-play on/off *)
 
-function sbMixerRead( reg: byte ): byte;
-procedure sbMixerWrite( reg, data: byte );
 procedure setvolume( vol: byte );
 function sbReadDSPVersion: word;
 procedure sbAdjustMode( var rate: word; var stereo: boolean; var _16bit: boolean );
@@ -76,8 +74,6 @@ uses crt, dma, sbio, i4d;
 
 (*$l sbctl.obj*)
 
-function sbMixerRead( reg: byte ): byte; external;
-procedure sbMixerWrite( reg, data: byte ); external;
 procedure setvolume( vol: byte ); external;
 function sbReadDSPVersion: word; external;
 procedure sbAdjustMode( var rate: word; var stereo: boolean; var _16bit: boolean ); external;

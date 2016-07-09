@@ -16,11 +16,11 @@
 #include "sbctl.h"
 
 /* This routine may not work for all registers because of different timings. */
-void __far __pascal sbMixerWrite( uint8_t reg, uint8_t data ) {
+void sbMixerWrite( uint8_t reg, uint8_t data ) {
     if ( sdev_caps_mixer ) sbioMixerWrite( sdev_hw_base, reg, data );
 }
 
-uint8_t __far __pascal sbMixerRead( uint8_t reg ) {
+uint8_t sbMixerRead( uint8_t reg ) {
     if ( sdev_caps_mixer )
         return sbioMixerRead( sdev_hw_base, reg );
     else

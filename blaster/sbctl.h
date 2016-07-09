@@ -32,8 +32,6 @@ extern bool __pascal _16bit;        /* (only on SB16 possible) */
 extern bool __pascal sdev_mode_sign;    /* (only on SB16 possible) */
 extern bool __pascal stereo;
 
-uint8_t  __far __pascal sbMixerRead( uint8_t reg );
-void     __far __pascal sbMixerWrite( uint8_t reg, uint8_t data );
 void     __far __pascal setvolume( uint8_t vol );
 uint16_t __far __pascal sbReadDSPVersion( void );
 void     __far __pascal sbAdjustMode( uint16_t *rate, bool *stereo, bool *_16bit );
