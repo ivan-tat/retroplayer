@@ -197,6 +197,13 @@ void __far __pascal pause_play( void ) {
         sbioDSPWrite( sdev_hw_base, 0xd0 );
 }
 
+void __far __pascal continue_play( void ) {
+    if ( _16bit )
+        sbioDSPWrite( sdev_hw_base, 0xd6 );
+    else
+        sbioDSPWrite( sdev_hw_base, 0xd4 );
+}
+
 void __far __pascal stop_play( void ) {
     /* for 16bit modes : */
     sbioDSPWrite( sdev_hw_base, 0xd0 );
