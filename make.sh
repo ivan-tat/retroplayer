@@ -71,6 +71,8 @@ $PC $PASINC types.pas
 $PC $PASINC s3mtypes.pas
 compile_c voltab.c VOLTAB_TEXT
 $PC $PASINC voltab.pas
+compile_c posttab.c POSTTAB_TEXT
+$PC $PASINC posttab.pas
 $PC $PASINC s3mplay.pas
 
 cd ../player

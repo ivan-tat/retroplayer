@@ -4,7 +4,7 @@ unit s3mplay;
 
 INTERFACE
 
-uses types,s3mtypes,voltab;
+uses types,s3mtypes,voltab,posttab;
 
 CONST
     PLAYER_VERSION: PChar = '1.70.1';
@@ -166,10 +166,6 @@ VAR S3M_inMemory:BOOLEAN;
     { some saved values for correct restoring former status : }
     oldexitproc  :pointer;
     { tables for mixing : }
-
-    post8bit     :array[0..4095] of byte;
-    post16bit    :array[0..4095] of word;
-
     sinuswave,
     rampwave     :array[0..63] of shortint;
     squarewave   :array[0..63] of byte;
@@ -256,7 +252,7 @@ PROCEDURE Done_S3Mplayer;
 PROCEDURE NewExitRoutine; Far;
   begin
     stop_play; { halt SB :) }
-    if S3M_inMemory then done_module;
+    done_module;
     if buffersreserved then done_S3Mplayer else restore_irq;
     exitproc:=oldexitproc;
   end;
@@ -439,29 +435,6 @@ var x,y:integer;
       end;
   end;
 
-procedure calcposttable(use16bit:boolean);
-var z,i:integer;
-    a,b,c:real;
-    p:pointer;
-  begin
-    if use16bit then
-      begin { not implemented yet }
-      end
-    else
-      begin
-        z:=mvolume and 127;
-        c:=256*127/z;
-        a:=2048-c/2;
-        b:=2048+c/2;
-        for i:=0 to 4095 do
-          begin
-            if (i<a) then post8bit[i]:=0 else
-            if (i>b) then post8bit[i]:=255 else
-            post8bit[i]:=trunc((i-a)*z/128);
-          end;
-      end;
-  end;
-
 procedure Initchannels;
 var i:byte;
   begin
@@ -476,7 +449,7 @@ procedure set_mastervolume(vol:byte);
   begin
     if vol>127 then vol:=127;
     mvolume:=vol;
-    calcposttable(_16bit);
+    calcposttable(mvolume,_16bit);
   end;
 
 function get_mvolume:byte;
@@ -548,7 +521,7 @@ var key:boolean;
     Initblaster(Samplerate,a_stereo,a_16Bit);
     setSamplerate(Samplerate,a_stereo);
     calcVolumeTable( signeddata ); { <- now after loading we know if signed data or not }
-    calcposttable(A_16bit);
+    calcposttable(mvolume,A_16bit);
     curtick:=1; { last tick -> goto next note ! }
     curLine:=0; { <- next line to read from }
     {$IFDEF BETATEST}

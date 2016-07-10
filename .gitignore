@@ -48,4 +48,5 @@ dos/emstool.asm
 blaster/sbio.asm
 blaster/sbctl.asm
 main/voltab.asm
+main/posttab.asm
 watcomc/scripts/tmp/
