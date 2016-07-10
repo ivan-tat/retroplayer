@@ -1,7 +1,7 @@
 {$M 16000,0,2000}
 program example_for_s3mplay;
 
-uses emstool,S3MPlay,crt,sbctl,blaster,dos,dosproc;
+uses types,emstool,s3mtypes,S3MPlay,crt,sbctl,blaster,dos,dosproc;
 
 const stereo_calc=true;
       _16bit_calc=false;

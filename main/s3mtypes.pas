@@ -1,12 +1,17 @@
-TYPE  { look also for assembler structurs in 'GENERAL.DEF' - must be equal !! }
+unit s3mtypes;
 
-      DWord= record      { you can access dword values now in different ways :
-                          however it's never used :) for some action }
-              case integer of
-                0: (DD:Longint);
-                1: (LX,HX:word);
-                2: (Rea,Int:Word);
-            end;
+interface
+
+uses types;
+
+const
+      MAX_samples  = 100; { 0..99 samples }
+      MAX_patterns = 100; { 1..100 patterns }
+      MAX_orders   = 255; { 0..255 orders }
+      MAX_channels =  32; { 0..31 channels }
+
+type  { look also for assembler structurs in 'GENERAL.DEF' - must be equal !! }
+
       THeader = record name:array[0..27] of char;
                       charEOF:char;  { should be 1Ah }
                       filetyp:byte;
@@ -119,5 +124,7 @@ TYPE  { look also for assembler structurs in 'GENERAL.DEF' - must be equal !! }
      TPatternSarray = array[0..MAX_patterns]  of word;         { segment for every pattern }
      TOrderArray    = array[0..MAX_orders]    of byte;         { song arrangement }
      TchannelArray  = array[0..MAX_channels-1] of Tchannel;    { all public/private data for every channel }
-     PArray         = ^TArray;
-     TArray         = array[0..65532] of byte;
+
+implementation
+
+end.

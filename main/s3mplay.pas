@@ -4,15 +4,12 @@ unit s3mplay;
 
 INTERFACE
 
+uses types,s3mtypes;
+
 CONST
     PLAYER_VERSION: PChar = '1.70.1';
 
 CONST
-      { Variable ranges }
-      MAX_samples          = 100; { 0..99 samples }
-      MAX_patterns         = 100; { 1..100 patterns }
-      MAX_orders           = 255; { 0..255 orders }
-      MAX_channels         =  32; { 0..31 channels }
       { error constants }
       noerror              = 0;
       notenoughmem         = -1;
@@ -33,8 +30,6 @@ CONST
                                     loop in readnotes if you try to play it }
       internal_failure     = -11; { I'm sorry if this happend :( }
       sample2large         = -12; { I can't handle samples >64511 }
-
-{$I TYPDEF.INC}
 
 { variables for public }
 VAR load_Error:integer;

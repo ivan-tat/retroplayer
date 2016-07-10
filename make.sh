@@ -64,6 +64,8 @@ $AS mixing.asm
 $AS processo.asm
 $AS readnote.asm
 $AS volume.asm
+$PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster' types.pas
+$PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster' s3mtypes.pas
 $PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster' s3mplay.pas
 
 cd ../player
