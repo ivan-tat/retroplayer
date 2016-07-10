@@ -27,7 +27,9 @@ cd $DST
 disasm intr.obj INTR_TEXT
 disasm dointr.obj DOINTR_TEXT
 disasm memcmp.obj MEMCMP_TEXT
+disasm memset.obj MEMSET_TEXT
 disasm inp.obj INP_TEXT
 disasm outp.obj OUTP_TEXT
 disasm i4d.obj I4D_TEXT
+disasm i4m.obj I4M_TEXT
 cd $OLDPWD

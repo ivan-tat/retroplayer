@@ -26,51 +26,57 @@ cd pascal
 $PC syswrap.pas
 
 cd ../watcomc
-$ASW dointr.asm
-$PC dointr.pas
-$ASW inp.asm
-$PC inp.pas
-$ASW intr.asm
-$PC intr.pas
-$ASW memcmp.asm
-$PC memcmp.pas
-$ASW outp.asm
-$PC outp.pas
-$ASW i4d.asm
-$PC i4d.pas
+for f in \
+dointr \
+intr \
+inp \
+outp \
+memcmp \
+memset \
+i4d \
+i4m; do
+    $ASW $f.asm
+    $PC $f.pas
+done
 
 cd ../dos
+PASINC='-u..\pascal;..\watcomc'
 compile_c dosproc.c DOSPROC_TEXT
-$PC '-u..\watcomc' dosproc.pas
+$PC $PASINC dosproc.pas
 compile_c emstool.c EMSTOOL_TEXT
-$PC '-u..\pascal;..\watcomc' emstool.pas
+$PC $PASINC emstool.pas
 
 cd ../hw
+PASINC='-u..\pascal;..\watcomc'
 compile_c dma.c DMA_TEXT
-$PC '-u..\pascal;..\watcomc' dma.pas
+$PC $PASINC dma.pas
 compile_c pic.c PIC_TEXT
-$PC '-u..\pascal;..\watcomc' pic.pas
+$PC $PASINC pic.pas
 
 cd ../blaster
+PASINC='-u..\pascal;..\watcomc;..\hw'
 compile_c sbio.c SBIO_TEXT
-$PC '-u..\pascal;..\watcomc;..\hw' sbio.pas
+$PC $PASINC sbio.pas
 compile_c sbctl.c SBCTL_TEXT
-$PC '-u..\pascal;..\watcomc;..\hw' sbctl.pas
-$PC '-u..\pascal;..\watcomc;..\hw' blaster.pas
+$PC $PASINC sbctl.pas
+$PC $PASINC blaster.pas
 
 cd ../main
+PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster'
 $AS filldma.asm
 $AS mixing.asm
 $AS processo.asm
 $AS readnote.asm
-$AS volume.asm
-$PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster' types.pas
-$PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster' s3mtypes.pas
-$PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster' s3mplay.pas
+$PC $PASINC types.pas
+$PC $PASINC s3mtypes.pas
+compile_c voltab.c VOLTAB_TEXT
+$PC $PASINC voltab.pas
+$PC $PASINC s3mplay.pas
 
 cd ../player
-$PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster;..\main' plays3m.pas
-$PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster;..\main' smalls3m.pas
+PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster;..\main'
+$PC $PASINC plays3m.pas
+$PC $PASINC smalls3m.pas
 $AS lines.asm
-$PC '-U..\pascal;..\watcomc;..\dos;..\hw;..\blaster;..\main' s3m_osci.pas
+$PC $PASINC s3m_osci.pas
 cd ..

@@ -4,7 +4,7 @@ unit s3mplay;
 
 INTERFACE
 
-uses types,s3mtypes;
+uses types,s3mtypes,voltab;
 
 CONST
     PLAYER_VERSION: PChar = '1.70.1';
@@ -139,7 +139,6 @@ VAR S3M_inMemory:BOOLEAN;
     DMAbuffer   :pointer;  { DMA and SB loop inside ... and we copy data into that buffer }
     AllocBuffer :pointer;  { position where we allocate DMA buffer - remember that we may use second half ... }
     lastready   :byte;     { last ready calculated DMAbuffer part }
-    volumetablePTR : pointer; { pointer to volumetable (see CALCVolumetable) }
     { S3M flags : }
     st2vibrato  :boolean; { not supported }
     st2tempo    :boolean; { not supported }
@@ -183,9 +182,6 @@ procedure SetnewNote;   near; external; { don't call it from pascal - has its in
 {$L MIXING.OBJ}
 procedure calc_mono_tick; near; external;
 procedure calc_stereo_tick; near; external;
-
-{$L VOLUME.OBJ}
-procedure calcVolumeTable; near; external;
 
 {$L PROCESSO.OBJ}
 function check386:boolean; near; external;
@@ -249,7 +245,7 @@ var i:word;
 PROCEDURE Done_S3Mplayer;
   begin
     restore_irq;
-    if volumetablePtr<>Nil then freeDOSmem(volumetableptr);
+    freeVolumeTable;
     if AllocBuffer<>Nil then freeDOSmem(AllocBuffer);
     if Tickbuffer<>Nil then freeDOSmem(TickBuffer);
     buffersreserved:=false;
@@ -304,7 +300,7 @@ var p:pArray;
     if not proc386 then begin player_error:=nota386orhigher;exit end;
     if buffersreserved then begin player_error:=Allreadyallocbuffers;Init_S3Mplayer:=true;exit end;
     { buffersreserved = false ! }
-    if not getdosmem(volumetablePTR,65*256*2) then begin player_error:=notenoughmem;exit end;
+    if ( not allocVolumeTable ) then begin player_error:=notenoughmem;exit end;
     if not getdosmem(Allocbuffer,(DMABuffersize+15)*2) then begin player_error:=notenoughmem;exit end;
     { ok and now check for DMA page overrides }
     if checkoverride(Allocbuffer^,DMAbuffersize) then
@@ -334,7 +330,7 @@ var p:pArray;
     if not getdosmem(Tickbuffer,DMAbuffersize) then
       begin
         freedosmem(Allocbuffer);
-        freedosmem(VolumetablePTR);
+        freeVolumeTable;
         player_error:=notenoughmem;
         exit
       end;
@@ -343,7 +339,6 @@ var p:pArray;
     { clear those buffers : }
     fillchar(dmabuffer^,dmabuffersize,0);
     fillchar(tickbuffer^,dmabuffersize,0);
-    fillchar(volumetablePtr^,65*256*2,0);
     Init_S3Mplayer:=true;
   end;
 
@@ -552,7 +547,7 @@ var key:boolean;
     set_ready_irq(@play_irq);
     Initblaster(Samplerate,a_stereo,a_16Bit);
     setSamplerate(Samplerate,a_stereo);
-    calcVolumetable; { <- now after loading we know if signed data or not }
+    calcVolumeTable( signeddata ); { <- now after loading we know if signed data or not }
     calcposttable(A_16bit);
     curtick:=1; { last tick -> goto next note ! }
     curLine:=0; { <- next line to read from }
@@ -604,15 +599,13 @@ procedure calcwaves;
 
 BEGIN
   inside:=false;
-
-
   PROC386:=check386;
   calcwaves;
   buffersreserved:=false;
   sounddevice:=false;
   oldexitproc:=exitproc;
   exitproc:=@newExitRoutine;
-  volumetablePTR:=Nil;
+  initVolumeTable;
   DMAbuffer:=Nil;
   AllocBuffer:=Nil;
   playBuffer:=Nil;

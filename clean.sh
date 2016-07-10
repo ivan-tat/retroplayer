@@ -22,6 +22,7 @@ cleandir ./dos
 rm -f ./dos/dosproc.asm
 rm -f ./dos/emstool.asm
 cleandir ./main
+rm -f ./main/voltab.asm
 cleandir ./pascal
 cleandir ./player
 cleandir ./watcomc
