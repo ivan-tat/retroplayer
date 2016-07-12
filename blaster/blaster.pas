@@ -255,7 +255,7 @@ var
     i, fr: word;
     irqmask: word;
 begin
-    port[$0f] := $ff;
+    dmaMaskMulti( $ff );
     asm sti end;
     if dmachn_detect then begin detect_DMA_Channel_irq:=true;exit end;
     if prot then writeln(#13#10' Now locating DMA-channel and IRQ :'#13#10);

@@ -37,7 +37,9 @@ typedef uint8_t DMAMode_t;
 #define DMA_MODE_BLOCK        0x80
 #define DMA_MODE_CASCADE      0xc0
 
+void __far __pascal dmaMaskMulti( uint8_t mask );
 void __far __pascal dmaMask( uint8_t ch );
+void __far __pascal dmaEnableMulti( uint8_t mask );
 void __far __pascal dmaEnable( uint8_t ch );
 void __far __pascal dmaSetup( uint8_t ch, DMAMode_t mode, void *p, uint16_t count );
 uint16_t __far __pascal dmaGetCounter( uint8_t ch );
