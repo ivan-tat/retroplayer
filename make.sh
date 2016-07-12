@@ -55,6 +55,9 @@ $PC $PASINC pic.pas
 
 cd ../blaster
 PASINC='-u..\pascal;..\watcomc;..\hw'
+$ASW detisr_.asm
+compile_c detisr.c DETISR_TEXT
+$PC $PASINC detisr.pas
 compile_c sbio.c SBIO_TEXT
 $PC $PASINC sbio.pas
 compile_c sbctl.c SBCTL_TEXT

@@ -45,6 +45,7 @@ hw/dma.asm
 hw/pic.asm
 dos/dosproc.asm
 dos/emstool.asm
+blaster/detisr.asm
 blaster/sbio.asm
 blaster/sbctl.asm
 main/voltab.asm

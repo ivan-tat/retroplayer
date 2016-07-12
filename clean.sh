@@ -16,6 +16,7 @@ cleandir ./hw
 rm -f ./hw/dma.asm
 rm -f ./hw/pic.asm
 cleandir ./blaster
+rm -f ./blaster/detisr.asm
 rm -f ./blaster/sbio.asm
 rm -f ./blaster/sbctl.asm
 cleandir ./dos

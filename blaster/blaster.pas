@@ -71,7 +71,17 @@ procedure sbDone;
 
 Implementation
 
-uses dos,dma,sbio,sbctl,pic,crt;
+uses dos,dma,sbio,sbctl,pic,detisr,crt;
+
+const
+    HW_BASE_MAX = 8;
+    HW_BASE_NUM: array[0..HW_BASE_MAX-1] of word = (
+        $210, $220, $230, $240, $250, $260, $270, $280
+    );
+    HW_IRQ_MAX = 5;
+    HW_IRQ_NUM: array[0..HW_IRQ_MAX-1] of byte = ( 2, 3, 5, 7, 10 );
+    HW_DMA_MAX = 5;
+    HW_DMA_NUM: array[0..HW_DMA_MAX-1] of byte = ( 0, 1, 3, 5, 7 );
 
 { Flags and variables for detect part : }
 VAR SB_Detect:Boolean;              { Flag if SB is detected }
@@ -142,29 +152,16 @@ begin
     sbSetupMode( frequ, stereo );
 end;
 
-{ -------------- now the procedures for my old autodetection ------------- }
-{ No comments about it - it's old ;)                                       }
-procedure irq2; interrupt;
-var a:byte;
+(* hardware base i/o port, IRQ, DMA detection *)
+
+procedure ISRCallback( irq: byte ); far;
+var tmp: byte;
 begin
-    check:=2;
-    picEOI( 2 );
-    a:=port[sdev_hw_base+$0e]
+    check := irq;
+    picEOI( irq );
+    tmp := port[sdev_hw_base+$0e];
 end;
-procedure irq5; interrupt;
-var a:byte;
-begin
-    check:=5;
-    picEOI( 5 );
-    a:=port[sdev_hw_base+$0e]
-end;
-procedure irq7; interrupt;
-var a:byte;
-begin
-    check:=7;
-    picEOI( 7 );
-    a:=port[sdev_hw_base+$0e]
-end;
+
 procedure ready_irq; interrupt;
 var a:byte;
 begin
@@ -180,8 +177,9 @@ const hex:string= '0123456789ABCDEF';
   end;
 
 FUNCTION Detect_DSP_Addr(prot:boolean):Boolean;
-var p:word;
+var p: word;
     version: word;
+    i: word;
 begin
     if ( dspadr_detect ) then
     begin
@@ -191,32 +189,34 @@ begin
 
     if ( prot ) then writeln('Detecting DSP base address...');
 
-    p := $210;
-
-    while ( ( p < $290 ) and not dspadr_detect ) do
+    i := 0;
+    while ( ( i < HW_BASE_MAX) and not dspadr_detect ) do
     begin
-        if ( prot ) then write( '- probing ', hexword( p ), '...' );
+        p := HW_BASE_NUM[ i ];
+        if ( prot ) then write( '- probing ', hexword( p ), '... ' );
 
-        dspadr_detect := sbioDSPReset( p );
-
-        if ( not dspadr_detect ) then inc(p,$10);
+        if ( sbioDSPReset( p ) ) then
+        begin
+            sdev_hw_base := p;
+            dspadr_detect := true;
+        end;
 
         if ( prot ) then
             if ( dspadr_detect ) then
                 writeln(' found')
             else
                 writeln(' not found');
+
+        inc( i );
       end;
 
-    if not dspadr_detect then
+    if ( not dspadr_detect ) then
     begin
         detect_dsp_addr := false;
         exit;
     end;
 
-    sdev_hw_base := p;
-
-    if ( prot ) then writeln('Checking DSP version...');
+    if ( prot ) then writeln( 'Checking DSP version...' );
 
     (* Read DSP version *)
     version := sbReadDSPVersion;
@@ -238,38 +238,75 @@ begin
     end;
 
     detect_dsp_addr := true;
-  end;
+end;
 
-const
-    HW_IRQ_MAX = 3;
-    HW_IRQ_NUM: array[0..HW_IRQ_MAX-1] of byte = ( 2, 5, 7 );
-    HW_IRQ: array[0..HW_IRQ_MAX-1] of pointer = (
-        addr(irq2), addr(irq5), addr(irq7)
-    );
-    HW_DMA_MAX = 3;
-    HW_DMA_NUM: array[0..HW_DMA_MAX-1] of byte = ( 0, 1, 3 );
+function tryDetectIRQ( dmac: byte; m16bits: boolean ): boolean;
+var
+    fr: word;
+begin
+    check := 0;
+
+    if ( m16bits ) then
+        sdev_hw_dma16 := dmac
+    else
+        sdev_hw_dma8 := dmac;
+
+    fr := 8000;
+    dmaMask( dmac );
+    stop_play;
+    Initblaster( fr, false, false );
+    play_oneblock( ptr( 0, 0 ), 1 );
+    delay( 10 );
+
+    if ( check <> 0 ) then
+    begin
+        DMACHN_Detect := true;
+        sdev_hw_irq := check;
+        DSPIRQ_detect := true;
+        tryDetectIRQ := true;
+    end else
+        tryDetectIRQ := false;
+end;
 
 FUNCTION Detect_DMA_Channel_IRQ(prot:boolean):Boolean;
 var
     oldv: array[0..HW_IRQ_MAX-1] of pointer;
-    i, fr: word;
+    i: word;
+    dmac: byte;
+    dmamask: byte;
+    irq: byte;
     irqmask: word;
 begin
-    dmaMaskMulti( $ff );
+    if ( dmachn_detect ) then
+    begin
+        detect_DMA_Channel_irq := true;
+        exit;
+    end;
+    if ( not dspadr_detect ) then
+    begin
+        detect_dma_channel_irq := false;
+        exit;
+    end;
+
+    if ( prot ) then writeln( 'Detecting DMA channel and IRQ ...' );
+
+    dmamask := 0;
+    for i := 0 to HW_DMA_MAX-1 do
+        dmamask := dmamask or ( 1 shl HW_DMA_NUM[ i ] );
+
+    dmaMaskMulti( dmamask );
+
     asm sti end;
-    if dmachn_detect then begin detect_DMA_Channel_irq:=true;exit end;
-    if prot then writeln(#13#10' Now locating DMA-channel and IRQ :'#13#10);
 
-    detect_dma_channel_irq := false;
-
-    if not dspadr_detect then exit;
+    SetDetISRCallback( @ISRCallback );
 
     irqmask := 0;
     for i := 0 to HW_IRQ_MAX-1 do
     begin
-        oldv[i] := picGetIntVec( HW_IRQ_NUM[ i ] );
-        picSetIntVec( HW_IRQ_NUM[ i ], HW_IRQ[ i ]);
-        irqmask := irqmask or ( 1 shl HW_IRQ_NUM[ i ] );
+        irq := HW_IRQ_NUM[ i ];
+        irqmask := irqmask or ( 1 shl irq );
+        oldv[i] := picGetIntVec( irq );
+        picSetIntVec( irq, GetDetISR( irq ));
     end;
     (* no changes for IRQ 2 *)
     irqmask := irqmask and not ( 1 shl 2 );
@@ -277,36 +314,40 @@ begin
     picDisableIRQs( irqmask );
 
     i := 0;
-    while ( ( i <= HW_DMA_MAX) and not DMACHN_Detect ) do
+    while ( ( i < HW_DMA_MAX) and not DMACHN_Detect ) do
     begin
-        if prot then write( ' Trying Channel ', HW_DMA_NUM[ i ], ' .... ' );
-        Check:=0;
-        sdev_hw_dma8 := HW_DMA_NUM[ i ];
-        fr:=10000;
-        dmaMask( sdev_hw_dma8 ); (* was outp( 0x0a, dma_channel ) *)
-        stop_play;
-        Initblaster(fr,false,false);
-        play_oneblock(ptr(0,0),1);
-        delay(10);
-        DMACHN_Detect:=check<>0;
-        if prot then
+        dmac := HW_DMA_NUM[ i ];
+
+        if ( prot ) then
+            write( '- trying channel ', dmac, '... ' );
+
+        tryDetectIRQ( dmac, false );
+
+        if ( prot ) then
         begin
-            if DMACHN_Detect then writeln( 'sucessful with IRQ ', check )
-            else writeln('not successful');
+            if ( DMACHN_Detect and DSPIRQ_Detect ) then
+                writeln( 'found with IRQ ', check )
+            else
+                writeln( 'not found' );
         end;
+
         inc( i );
     end;
 
+    for i := 0 to HW_IRQ_MAX-1 do
+        picSetIntVec( HW_IRQ_NUM[i], oldv[i] );
+
     picEnableIRQs( irqmask );
 
-    for i := 0 to HW_IRQ_MAX-1 do picSetIntVec( HW_IRQ_NUM[i], oldv[i] );
+    if ( not dmachn_detect ) then
+    begin
+        Detect_DMA_Channel_irq := false;
+        exit;
+    end;
 
-    if not dmachn_detect then exit;
-
-    sdev_hw_irq := Check;
-    Detect_DMA_Channel_irq:=true;
-    DSPIRQ_detect:=true;
     sbioDSPReset( sdev_hw_base );
+    
+    Detect_DMA_Channel_irq := true;
   end;
 
 function DetectSoundblaster( prot: boolean): boolean;
@@ -343,13 +384,7 @@ begin
 
     set_hw_dsp( sbvershi );
 
-    if ( sbno = 0 ) then
-    begin
-        DetectSoundblaster := false;
-        exit;
-    end;
-
-    DetectSoundblaster := true;
+    DetectSoundblaster := ( sbno <> 0 );
 end;
 
 FUNCTION Get_BlasterVersion:Word;
