@@ -21,16 +21,17 @@ extern uint8_t  __pascal sbno;              /* type */
 /* capabilities */
 
 extern bool     __pascal sdev_caps_mixer;
-extern bool     __pascal sdev_caps_stereo;          /* stereo play is possible */
 extern bool     __pascal sdev_caps_16bit;           /* 16bit play is possible */
+extern bool     __pascal sdev_caps_stereo;          /* stereo play is possible */
 extern uint16_t __pascal sdev_caps_mono_maxrate;    /* max mono samplerate */
 extern uint16_t __pascal sdev_caps_stereo_maxrate;  /* max stereo samplerate */
 
 /* transfer mode */
 
-extern bool __pascal _16bit;        /* (only on SB16 possible) */
-extern bool __pascal sdev_mode_sign;    /* (only on SB16 possible) */
-extern bool __pascal stereo;
+extern uint16_t __pascal sdev_mode_rate;
+extern bool     __pascal _16bit;
+extern bool     __pascal sdev_mode_signed;
+extern bool     __pascal stereo;
 
 void     __far __pascal setvolume( uint8_t vol );
 uint16_t __far __pascal sbReadDSPVersion( void );

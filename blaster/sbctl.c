@@ -153,7 +153,7 @@ void __far __pascal sbSetupDSPTransfer( uint16_t len, bool autoinit ) {
         sbioDSPWrite( sdev_hw_base, cmd );
         mode = 0;
         /* 2nd command byte: bit 4 = 1 - signed data */
-        if ( sdev_mode_sign ) mode |= 0x10;
+        if ( sdev_mode_signed ) mode |= 0x10;
         /* 2nd command byte: bit 5 = 1 - stereo data */
         if ( stereo ) mode |= 0x20;
         sbioDSPWrite( sdev_hw_base, mode );

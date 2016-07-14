@@ -53,8 +53,9 @@ var
     sdev_caps_mono_maxrate: word;
     sdev_caps_stereo_maxrate: word;
 
+    sdev_mode_rate: word;
     _16bit:boolean;             (* flag if 16bit-play on/off *)
-    sdev_mode_sign: boolean;
+    sdev_mode_signed: boolean;
     stereo:boolean;             (* flag if stereo-play on/off *)
 
 procedure setvolume( vol: byte );

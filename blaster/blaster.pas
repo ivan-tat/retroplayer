@@ -83,16 +83,17 @@ const
     HW_DMA_MAX = 5;
     HW_DMA_NUM: array[0..HW_DMA_MAX-1] of byte = ( 0, 1, 3, 5, 7 );
 
-{ Flags and variables for detect part : }
-VAR SB_Detect:Boolean;              { Flag if SB is detected }
-    DSPIRQ_Detect:Boolean;          { Flag if IRQ number is detected }
-    DSPADR_Detect:Boolean;          { Flag if Baseaddress is detected }
-    DMACHN_Detect:Boolean;          { Flag if DMAchannel is detected }
-    SBVersHi:Byte;                  { Soundblaster version major }
-    SBVersLo:Byte;                  { Soundblaster version minor }
+(* Flags and variables for detect part *)
+var
+    sdev_configured: boolean;    (* sound card is detected *)
+    sdev_hwflags_base: boolean;  (* base i/o address is detected *)
+    sdev_hwflags_irq: boolean;   (* IRQ is detected *)
+    sdev_hwflags_dma8: boolean;  (* DMA 8-bit channel is detected *)
+    sdev_hwflags_dma16: boolean; (* DMA 8-bit channel is detected *)
+    sdev_hw_dspv: word;          (* DSP chip version *)
 
-    check:byte;                     { for detecting }
-    savvect:pointer;                {  "       "    }
+    check: byte;       (* for detecting *)
+    savvect: pointer;  (*  "       "    *)
 
 procedure set_hw( name: pchar; _type: byte; mixer, _16bit, stereo: boolean; m_max, s_max: word );
 begin
@@ -114,6 +115,30 @@ begin
       4: set_hw( 'SoundBlaster 16 / ASP', 6, true, true, true, 45454, 45454 );
     else set_hw( '', 0, false, false, false, 0, 0 );
     end;
+end;
+
+procedure set_hwflags( base, irq, dma8, dma16: boolean );
+begin
+    sdev_hwflags_base := base;
+    sdev_hwflags_irq := irq;
+    sdev_hwflags_dma8 := dma8;
+    sdev_hwflags_dma16 := dma16;
+end;
+
+procedure set_hwconfig( base: word; irq, dma8, dma16: byte );
+begin
+    sdev_hw_base := base;
+    sdev_hw_irq := irq;
+    sdev_hw_dma8 := dma8;
+    sdev_hw_dma16 := dma16;
+end;
+
+procedure set_mode( m_rate: word; m_16bits, m_signed, m_stereo: boolean );
+begin
+    sdev_mode_rate := m_rate;
+    _16Bit := m_16bits;
+    sdev_mode_signed := m_signed;
+    stereo := m_stereo;
 end;
 
 (* call this if you want to do continues play *)
@@ -146,10 +171,9 @@ begin
     end;
     stop_play;
     { Now init : }
-    sbAdjustMode(frequ,stereoon,_16Biton);
-    _16bit:=_16Biton;
-    stereo:=stereoon;
-    sbSetupMode( frequ, stereo );
+    sbAdjustMode(frequ,stereoon,_16Biton); (* FIXME: +signed *)
+    set_mode( frequ, _16biton, false, stereoon ); (* FIXME: *signed *)
+    sbSetupMode( frequ, stereo ); (* FIXME: +16bits, +signed *)
 end;
 
 (* hardware base i/o port, IRQ, DMA detection *)
@@ -178,10 +202,9 @@ const hex:string= '0123456789ABCDEF';
 
 FUNCTION Detect_DSP_Addr(prot:boolean):Boolean;
 var p: word;
-    version: word;
     i: word;
 begin
-    if ( dspadr_detect ) then
+    if ( sdev_hwflags_base ) then
     begin
         detect_dsp_addr := true;
         exit;
@@ -190,7 +213,7 @@ begin
     if ( prot ) then writeln('Detecting DSP base address...');
 
     i := 0;
-    while ( ( i < HW_BASE_MAX) and not dspadr_detect ) do
+    while ( ( i < HW_BASE_MAX) and not sdev_hwflags_base ) do
     begin
         p := HW_BASE_NUM[ i ];
         if ( prot ) then write( '- probing ', hexword( p ), '... ' );
@@ -198,11 +221,11 @@ begin
         if ( sbioDSPReset( p ) ) then
         begin
             sdev_hw_base := p;
-            dspadr_detect := true;
+            sdev_hwflags_base := true;
         end;
 
         if ( prot ) then
-            if ( dspadr_detect ) then
+            if ( sdev_hwflags_base ) then
                 writeln(' found')
             else
                 writeln(' not found');
@@ -210,7 +233,7 @@ begin
         inc( i );
       end;
 
-    if ( not dspadr_detect ) then
+    if ( not sdev_hwflags_base ) then
     begin
         detect_dsp_addr := false;
         exit;
@@ -219,7 +242,7 @@ begin
     if ( prot ) then writeln( 'Checking DSP version...' );
 
     (* Read DSP version *)
-    version := sbReadDSPVersion;
+    sdev_hw_dspv := sbReadDSPVersion;
     if ( sbioError <> E_SBIO_SUCCESS ) then
     begin
         if ( prot ) then writeln('ERROR: Unable to get DSP chip version.');
@@ -227,10 +250,7 @@ begin
         exit;
     end;
 
-    sbverslo := lo(version);
-    sbvershi := hi(version);
-
-    if ( ( sbvershi < 1) or ( sbvershi > 4 ) ) then
+    if ( ( hi( sdev_hw_dspv ) < 1 ) or ( hi( sdev_hw_dspv ) > 4 ) ) then
     begin
         if ( prot ) then writeln('ERROR: Unknown DSP chip version.');
         detect_dsp_addr := false;
@@ -260,9 +280,9 @@ begin
 
     if ( check <> 0 ) then
     begin
-        DMACHN_Detect := true;
+        sdev_hwflags_dma8 := true;
         sdev_hw_irq := check;
-        DSPIRQ_detect := true;
+        sdev_hwflags_irq := true;
         tryDetectIRQ := true;
     end else
         tryDetectIRQ := false;
@@ -277,12 +297,12 @@ var
     irq: byte;
     irqmask: word;
 begin
-    if ( dmachn_detect ) then
+    if ( sdev_hwflags_dma8 ) then
     begin
         detect_DMA_Channel_irq := true;
         exit;
     end;
-    if ( not dspadr_detect ) then
+    if ( not sdev_hwflags_base ) then
     begin
         detect_dma_channel_irq := false;
         exit;
@@ -314,7 +334,7 @@ begin
     picDisableIRQs( irqmask );
 
     i := 0;
-    while ( ( i < HW_DMA_MAX) and not DMACHN_Detect ) do
+    while ( ( i < HW_DMA_MAX) and not sdev_hwflags_dma8 ) do
     begin
         dmac := HW_DMA_NUM[ i ];
 
@@ -325,7 +345,7 @@ begin
 
         if ( prot ) then
         begin
-            if ( DMACHN_Detect and DSPIRQ_Detect ) then
+            if ( sdev_hwflags_dma8 and sdev_hwflags_irq ) then
                 writeln( 'found with IRQ ', check )
             else
                 writeln( 'not found' );
@@ -339,7 +359,7 @@ begin
 
     picEnableIRQs( irqmask );
 
-    if ( not dmachn_detect ) then
+    if ( not sdev_hwflags_dma8 ) then
     begin
         Detect_DMA_Channel_irq := false;
         exit;
@@ -352,10 +372,8 @@ begin
 
 function DetectSoundblaster( prot: boolean): boolean;
 begin
-    SB_Detect := false;
-    DSPIRQ_Detect := false;
-    DSPADR_Detect := false;
-    DMACHN_Detect := false;
+    sdev_configured := false;
+    set_hwflags( false, false, false, false );
     set_hw_dsp( 0 );
     stereo := false;
     _16bit := false;
@@ -382,14 +400,14 @@ begin
 
     sbioDSPReset( sdev_hw_base );
 
-    set_hw_dsp( sbvershi );
+    set_hw_dsp( hi( sdev_hw_dspv ) );
 
     DetectSoundblaster := ( sbno <> 0 );
 end;
 
 FUNCTION Get_BlasterVersion:Word;
   begin
-    Get_BlasterVersion:=word(SBVersHi)*256+SBVersLo;
+    Get_BlasterVersion := sdev_hw_dspv;
   end;
 
 PROCEDURE set_ready_irq(p:pointer);
@@ -420,17 +438,11 @@ var
     caps_16bit: boolean;
     caps_stereo: boolean;
 begin
-    SB_Detect:=true;
-    DSPIRQ_Detect:=true;
-    DSPADR_Detect:=true;
-    DMACHN_Detect:=true;
-    stereo:=false;
-    _16Bit:=false;
-
-    sdev_hw_base := dsp;
-    sdev_hw_irq := irq;
-    sdev_hw_dma8 := dma;
-    sdev_hw_dma16 := dma16;
+    sdev_configured := true;
+    set_hwflags( true, true, true, false );
+    set_hwconfig( dsp, irq, dma, dma16 );
+    stereo := false;
+    _16Bit := false;
 
     case typ of
         1: set_hw_dsp( 1 );
@@ -460,7 +472,8 @@ var count,i:byte;
     er:integer;
 
   begin
-    typ:=255;dma:=255;dma16:=255;irq:=255;dsp:=$ffff;
+    typ:=255;
+    set_hwconfig( $ffff, $ff, $ff, $ff );
     { default values (totally crap), but if you get them after calling Use....}
     { you'll know that this value is not/wrong defined in the BLASTER env. }
     UseBlasterEnv:=false;
@@ -577,23 +590,12 @@ var c:char;
 
 procedure sbInit;
 begin
-    (* flags *)
-    SB_Detect := false;
-    DSPIRQ_Detect :=false;
-    DSPADR_Detect := false;
-    DMACHN_Detect := false;
-    (* hw *)
+    sdev_configured := false;
+    set_hwflags( false, false, false, false );
+    set_hwconfig( $220, 7, 1, 5 );
     set_hw_dsp( 0 );
-    sbvershi := 0;
-    sbverslo := 0;
-    sdev_hw_base := $220;
-    sdev_hw_irq := 7;
-    sdev_hw_dma8 := 1;
-    sdev_hw_dma16 := 5;
-    (* mode *)
-    stereo := false;
-    _16Bit := false;
-    sdev_mode_sign := false;
+    sdev_hw_dspv := 0;
+    set_mode( 0, false, false, false );
 end;
 
 procedure sbDone;
