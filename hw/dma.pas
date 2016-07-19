@@ -35,6 +35,7 @@ procedure dmaMaskMulti( mask: byte );
 procedure dmaMask( ch: byte );
 procedure dmaEnableMulti( mask: byte );
 procedure dmaEnable( ch: byte );
+function dmaGetLinearAddress( p: pointer ): longint;
 procedure dmaSetup( ch: byte; mode: TDMAMode; p: pointer; count: word );
 function dmaGetCounter( ch: byte ): word;
 
@@ -46,6 +47,7 @@ procedure dmaMaskMulti( mask: byte ); external;
 procedure dmaMask( ch: byte ); external;
 procedure dmaEnableMulti( mask: byte ); external;
 procedure dmaEnable( ch: byte ); external;
+function dmaGetLinearAddress( p: pointer ): longint; external;
 procedure dmaSetup( ch: byte; mode: TDMAMode; p: pointer; count: word ); external;
 function dmaGetCounter( ch: byte ): word; external;
 

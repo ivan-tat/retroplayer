@@ -76,12 +76,12 @@ void __far __pascal dmaEnable( uint8_t ch ) {
     outp( DMAIO[ch].mask, ch & MASK_CHAN );
 }
 
-uint32_t dmaGetLinearAddr( void *p ) {
+uint32_t __far __pascal dmaGetLinearAddress( void *p ) {
     return ( ( uint32_t )( FP_SEG( p ) ) << 4 ) + FP_OFF( p );
 }
 
 void __far __pascal dmaSetup( uint8_t ch, DMAMode_t mode, void *p, uint16_t count ) {
-    uint32_t linear = dmaGetLinearAddr( p );
+    uint32_t linear = dmaGetLinearAddress( p );
     uint16_t addr;
     uint8_t page;
 
