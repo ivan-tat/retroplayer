@@ -41,6 +41,73 @@ begin
     end;
 end;
 
+procedure unpackPattern( src, dst: parray );
+var
+    i, maxrow, row: integer;
+    maxchn, chn: byte;
+    srcoff, dstoff: word;
+    a: byte;
+begin
+    maxrow := 64;
+    maxchn := usedchannels;
+
+    (* clear pattern *)
+    dstoff := 0;
+    for i := 0 to maxrow*maxchn-1 do
+    begin
+        dst^[ dstoff   ] := $ff; (* note *)
+        dst^[ dstoff+1 ] := $00; (* instrument *)
+        dst^[ dstoff+2 ] := $ff; (* volume *)
+        dst^[ dstoff+3 ] := $ff; (* command *)
+        dst^[ dstoff+4 ] := $00; (* parameters *)
+        inc( dstoff, 5 );
+    end;
+
+    row := 0;
+    srcoff := 0;
+    while ( row < maxrow ) do
+    begin
+        a := src^[ srcoff ];
+        inc( srcoff );
+        if ( a = 0 ) then
+            inc( row )
+        else begin
+            chn := a and $1f;
+            if ( chn < maxchn ) then
+            begin
+                dstoff := ( row * maxchn + chn ) * 5;
+                (* note, instrument *)
+                if ( a and $20 <> 0 ) then
+                begin
+                    dst^[ dstoff   ] := src^[ srcoff   ];
+                    dst^[ dstoff+1 ] := src^[ srcoff+1 ];
+                    inc( srcoff, 2 );
+                end;
+                (* volume *)
+                if ( a and $40 <> 0 ) then
+                begin
+                    dst^[ dstoff+2 ] := src^[ srcoff ];
+                    inc( srcoff );
+                end;
+                (* command, parameters *)
+                if ( a and $80 <> 0 ) then
+                begin
+                    dst^[ dstoff+3 ] := src^[ srcoff   ];
+                    dst^[ dstoff+4 ] := src^[ srcoff+1 ];
+                    inc( srcoff, 2 );
+                end;
+            end else begin
+                (* note, instrument *)
+                if ( a and $20 <> 0 ) then inc( srcoff, 2 );
+                (* volume *)
+                if ( a and $40 <> 0 ) then inc( srcoff );
+                (* command, parameters *)
+                if ( a and $80 <> 0 ) then inc( srcoff, 2 );
+            end;
+        end;
+    end;
+end;
+
 FUNCTION  LOAD_S3M(name:string):BOOLEAN;
 var f:file;
     header:Theader;
@@ -256,7 +323,6 @@ var f:file;
   var row:byte;
       crunch:byte;
       chn:byte;
-      hp,hp2:pointer;
       length:word;
       linecount:byte;
     BEGIN
@@ -308,93 +374,9 @@ var f:file;
           if not getdosmem(p,longint(64*5)*usedchannels) then begin load_error:=notenoughmem;exit end;
           setPattern( patpos-1, seg( p^ ) );
         end;
-      { we decrunc it now to full size - not all 32 channels,but all used channels }
-      hp:=p;hp2:=buffer;
-      asm
-        { first setup default values. It looks difficult, but it isn't :
-          set note FFh,instrument 00,command ffh, options ffh }
-        les      di,hp
-        xor      ch,ch
-        mov      cl,[usedchannels]
-        shl      cx,6             ;{ do it for every channel and every row :
-                                  ;  usedchannels * 64 }
-@@loop: mov      word ptr es:[di  ],00ffh
-        mov      word ptr es:[di+2],0ffffh
-        mov      byte ptr es:[di+4],0
-        add      di,5
-        loop     @@loop
-        ; { yo and now decrunch it ... }
-        push     ds
-        push     bp
-        mov      al,[usedchannels]
-        mov      dh,al
-        les      di,hp          ;{ es:[di] ... pointer to destination }
-        lds      si,hp2         ;{ ds:[si] ... pointer to packed data }
 
-        xor      ah,ah
-        mov      bp,ax
-        shl      bp,2
-        add      bp,ax          ;{ bp = usedchannels*5 = size of one row }
+      unpackPattern( buffer, p );
 
-        mov      dl,64 ;{ 64 rows to decrunch }
-
-@@rowloop:
-        { read first 'crunch' byte for this channel : }
-        lodsb                   ;{ I know "mov,inc" would be faster but we }
-                                ;{ don't need speed here }
-        cmp      al,0
-        jz       @@endofrow
-@@dloop:
-        mov      cl,al
-        xor      bh,bh
-        mov      bl,cl
-        and      bl,$1f          ;{ bl = channel to write to }
-        cmp      bl,dh          ;{ bl<usedchannels }
-        jae      @@overread
-@@ok:   mov      ax,bx
-        shl      bx,2
-        add      bx,ax          ;{ bx = offset from row start to channel to write to }
-        test     cl,$20
-        je       @@nonew_note_instrument
-        lodsw
-        mov      es:[di+bx],ax
-@@nonew_note_instrument:
-        test     cl,$40
-        jz       @@nonew_volume
-        lodsb
-        mov      es:[di+bx+2],al
-@@nonew_volume:
-        test     cl,$80
-        jz       @@nonew_cmd_info
-        lodsw
-        mov      es:[di+bx+3],ax
-@@nonew_cmd_info:
-        ;{ read next 'crunch' byte : }
-        lodsb
-        cmp      al,0
-        jnz      @@dloop        ; { if zero then EOR is reached ... }
-@@endofrow:  ;{ =EOR :) }
-        add      di,bp                  ;{ to next row ...}
-        dec      dl
-        jnz      @@rowloop
-        pop      bp
-        pop      ds
-        jmp      @@done
-@@overread:
-        test     cl,$20
-        je       @@ov1
-        lodsw
-@@ov1:
-        test     cl,$40
-        jz       @@ov2
-        lodsb
-@@ov2:
-        test     cl,$80
-        jz       @@ov3
-        lodsw
-@@ov3:  jmp      @@nonew_cmd_info
-@@done:
-      end;
       if ( isPatternInEM( patpos-1 ) ) then
         begin
           {$IFDEF LOADINFO}
