@@ -13,18 +13,6 @@ begin
     end;
 end;
 
-FUNCTION SCRMtest(var p):boolean; ASSEMBLER; { yeah asm ! :) }
-  asm
-     xor      ax,ax
-     les      di,p
-     cmp      word ptr es:[di],'CS'
-     jne      @@endoftest
-     cmp      word ptr es:[di+2],'MR'
-     jne      @@endoftest
-     mov      ax,0101h
-@@endoftest:
-  end;
-
 FUNCTION ST3test(var p):boolean; ASSEMBLER; { I love this :) }
   asm
     xor       ax,ax
@@ -481,7 +469,11 @@ var a,b,c:string;
     IF IORESULT<>0 THEN begin load_error:=wrongformat;exit end;
     { check if it's really a S3M ... }
     IF header.filetyp<>16 then begin load_error:=wrongformat;exit end;
-    IF not SCRMtest(header.SCRM_ID) then begin load_error:=wrongformat;exit end;
+    if ( header.SCRM_ID <> $4d524353 ) then
+    begin
+        load_error := wrongformat;
+        exit;
+    end;
     IF not ST3test(header.CWTV) then begin load_error:=wrongformat;exit end;
     { set some variables : }
     convert2pas(header.name,songname,28);
