@@ -294,7 +294,7 @@ procedure refr_mainscr;
     gotoxy(11,1);write(lastorder:2);
     gotoxy(20,1);write(curline:2);
     gotoxy(29,1);write(curtick:2);
-    gotoxy(63,1);write(curpattern:2,' (',tohexs(pattern[curpattern]),')');
+    gotoxy(63,1);write(curpattern:2,' (',tohexs( seg( getPattern( curpattern )^ ) ),')');
     textbackground(green);textcolor(black);
     gotoxy(76,6);write(switch[loopS3M]);
     gotoxy(1,2);

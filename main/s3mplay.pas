@@ -120,6 +120,14 @@ function getusedEMSpat:longint;    { get size of patterns in EMS }
 FUNCTION getuseddevice(var typ:byte;var base:word;var dma8,dma16:byte;var irq:byte):byte;
 FUNCTION load_specialdata(var p):boolean; { allocate memory and load special data from file }
 
+(* Patterns *)
+procedure setPattern( index: integer; p_seg: word );
+procedure setPatternInEM( index: integer; logpage, part: byte );
+function getPattern( index: integer ): pointer;
+function isPatternInEM( index: integer ): boolean;
+function getPatternLogPageInEM( index: integer ): byte;
+function getPatternPartInEM( index: integer ): byte;
+
 IMPLEMENTATION
 
 uses EMStool,sbctl,blaster,crt,dos,dosproc;
@@ -192,6 +200,46 @@ FUNCTION getuseddevice(var typ:byte;var base:word;var dma8,dma16:byte; var irq:b
 { typ ... up2now only SB typ - look at BLASTER.PAS }
 begin end;
 
+(* Patterns >> *)
+
+procedure setPattern( index: integer; p_seg: word );
+begin
+    PATTERN[ index ] := p_seg;
+end;
+
+procedure setPatternInEM( index: integer; logpage, part: byte );
+begin
+    PATTERN[ index ] := $C000 + ( ( part and $3f ) shl 8 ) + logpage;
+end;
+
+function getPattern( index: integer ): pointer;
+var
+    p_seg: word;
+begin
+    p_seg := PATTERN[ index ];
+    if ( p_seg >= $C000 ) then
+        getPattern := ptr( FrameSEG[0], ( ( p_seg shr 8 ) and $3f ) * patlength )
+    else
+        getPattern := ptr( p_seg, 0 );
+end;
+
+function isPatternInEM( index: integer ): boolean;
+begin
+    isPatternInEM := PATTERN[ index ] >= $C000;
+end;
+
+function getPatternLogPageInEM( index: integer ): byte;
+begin
+    getPatternLogPageInEM := PATTERN[ index ] and $ff;
+end;
+
+function getPatternPartInEM( index: integer ): byte;
+begin
+    getPatternPartInEM := ( PATTERN[ index ] shr 8 ) and $3f;
+end;
+
+(* << Patterns *)
+
 PROCEDURE done_module;
 var i:word;
     p:pointer;
@@ -216,12 +264,11 @@ var i:word;
     { Free patterns : }
     for i:=0 to MAX_patterns do
       begin
-        if pattern[i]<$C000 then
+        if ( not isPatternInEM( i ) ) then
           begin
-            { pattern in normal memory - it's a shame :) }
-            p:=ptr(PATTERN[i],0);
+            p := getPattern( i );
             if p<>Nil then freedosmem(p);
-            Pattern[i]:=0;
+            setPattern( i, 0 );
           end;
       end;
     if EMSpat then { patterns in EMS }
@@ -603,10 +650,7 @@ BEGIN
     BEGIN
       Instruments^[i,0]:=0;
     END;
-  FOR i:=0 TO MAX_patterns-1 DO
-    BEGIN
-      PATTERN[i]:=0;
-    END;
+  for i := 0 to MAX_patterns-1 do setPattern( i, 0 );
   FPS:=70;
   LQmode:=false;
 END.

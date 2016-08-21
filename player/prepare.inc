@@ -16,18 +16,10 @@ var w:word;
     for w:=0 to 1 do begin gotoxy(w*28+20,1);write('    Chn ',2*w+1+startchn:2,'    '); end;
     window(1,1,80,25);
     lastrow:=curline;
-    w:=pattern[curpattern];
-    if w>=$c000 then { switch EMSpage 0 to curpattern }
-      asm
-        mov         ax,w
-        xor         bx,bx
-        mov         ah,44h
-        mov         bl,al
-        xor         al,al
-        mov         dx,[patEMShandle]
-        int         67h
-      end;
+    if ( isPatternInEM( curpattern ) ) then { switch EMSpage 0 to curpattern }
+        EmsMap( patEMShandle, getPatternLogPageInEM( curpattern ), 0 );
   end;
+
 
 procedure prep_inst;
 var i,l:word;

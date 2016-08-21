@@ -10,13 +10,8 @@ procedure display_row(ordr,row:byte);
 const hex:string[16] = '0123456789ABCDEF';
 var pA:Parray;
     i,b:byte;
-    w:word;
   begin
-    w:=PATTERN[ORDER[ordr]];
-    if w>=$c000 then
-      pA:=ptr(FrameSEG[0],((w shr 8) and $3F)*patlength)
-    else
-      pA:=ptr(w,0);
+    pA := getPattern( ORDER[ordr] );
     write(row:2,'   ');
     for i:=startchn-1 to startchn+3 do
       begin
@@ -118,7 +113,6 @@ var lastrow:byte;
 
 procedure refr_patterns;
 var i,j:byte;
-    w:word;
   begin
     window(1,9,80,25);textbackground(white);textcolor(black);
     if curline+1<lastrow then
@@ -130,9 +124,9 @@ var i,j:byte;
           end;
         lastrow:=0;
         { new pattern }
-        w:=pattern[curpattern];
         (* switch EMSpage zero to curpattern *)
-        if ( w >= $c000 ) then EmsMap( patEMShandle, w, 0 );
+        if ( isPatternInEM( curpattern ) ) then
+            EmsMap( patEMShandle, getPatternLogPageInEM( curpattern ), 0 );
       end;
     for i:=lastrow to curline do
       begin

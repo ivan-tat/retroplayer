@@ -267,7 +267,12 @@ var f:file;
       linecount:byte;
     BEGIN
       load_decrunc_pattern:=false;
-      if nextpat=0 then begin load_decrunc_pattern:=true;PATTERN[patpos-1]:=0;exit end;
+      if nextpat=0 then
+      begin
+        load_decrunc_pattern := true;
+        setPattern( patpos-1, 0 );
+        exit;
+      end;
       { first jump to position }
       if (fileposit>nextpat*16) then
         { shit tables not sorted - more dsik access :( }
@@ -300,14 +305,14 @@ var f:file;
       { first get memory : (if useEMS than try to put it into the EMS ... }
       if useEMS and EMSpat and (curpart<patperpage) then
         begin
-          PATTERN[patpos-1]:=$C000+256*curpart+curPpage;
+          setPatternInEM( patpos-1, curPpage, curpart );
           if not EMSmap(patEMShandle,curPpage,0) then write('<EMS-ERROR>');
           p:=ptr(frameseg[0]+(patlength div 16)*word(curpart),0);
         end
       else
         begin
           if not getdosmem(p,longint(64*5)*usedchannels) then begin load_error:=notenoughmem;exit end;
-          PATTERN[patpos-1]:=seg(p^);
+          setPattern( patpos-1, seg( p^ ) );
         end;
       { we decrunc it now to full size - not all 32 channels,but all used channels }
       hp:=p;hp2:=buffer;
@@ -349,23 +354,23 @@ var f:file;
         mov      cl,al
         xor      bh,bh
         mov      bl,cl
-        and      bl,31          ;{ bl = channel to write to }
+        and      bl,$1f          ;{ bl = channel to write to }
         cmp      bl,dh          ;{ bl<usedchannels }
         jae      @@overread
 @@ok:   mov      ax,bx
         shl      bx,2
         add      bx,ax          ;{ bx = offset from row start to channel to write to }
-        test     cl,32
+        test     cl,$20
         je       @@nonew_note_instrument
         lodsw
         mov      es:[di+bx],ax
 @@nonew_note_instrument:
-        test     cl,64
+        test     cl,$40
         jz       @@nonew_volume
         lodsb
         mov      es:[di+bx+2],al
 @@nonew_volume:
-        test     cl,128
+        test     cl,$80
         jz       @@nonew_cmd_info
         lodsw
         mov      es:[di+bx+3],ax
@@ -382,21 +387,21 @@ var f:file;
         pop      ds
         jmp      @@done
 @@overread:
-        test     cl,32
+        test     cl,$20
         je       @@ov1
         lodsw
 @@ov1:
-        test     cl,64
+        test     cl,$40
         jz       @@ov2
         lodsb
 @@ov2:
-        test     cl,128
+        test     cl,$80
         jz       @@ov3
         lodsw
 @@ov3:  jmp      @@nonew_cmd_info
 @@done:
       end;
-      if pattern[patpos-1]>=$C000 then
+      if ( isPatternInEM( patpos-1 ) ) then
         begin
           {$IFDEF LOADINFO}
           write('E(',curPpage,',',curpart,')');
