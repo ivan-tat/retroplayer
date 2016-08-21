@@ -19,7 +19,7 @@ var samplerate:word;
       _16bit:=_16bit_calc;
       { end of default ... }
       if not load_S3M(filename) then halt;
-      writeln(' ''',songname,''' loaded ... (was saved with ST',savedunder:4:2,')');
+      writeln(' ''',songname,''' loaded ... (was saved with ',modTrackerName,')');
       if not Init_S3Mplayer then halt;
       if not init_device(1) then begin writeln(' SoundBlaster not found sorry ... ');halt end;
       setsamplerate(samplerate,stereo);

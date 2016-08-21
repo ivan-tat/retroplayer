@@ -20,7 +20,7 @@ var samplerate:word;
   procedure init;
     begin
       if not load_S3M(filename) then halt;
-      writeln(' ''',songname,''' loaded ... (was saved with ST',savedunder:4:2,')');
+      writeln(' ''',songname,''' loaded ... (was saved with ',modTrackerName,')');
       if not Init_S3Mplayer then halt;
       if not init_device(2) then begin writeln(' Blaster enviroment not found sorry ... ');halt end;
       setsamplerate(samplerate,stereo);

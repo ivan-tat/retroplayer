@@ -10,6 +10,8 @@ const
       MAX_orders   = 255; { 0..255 orders }
       MAX_channels =  32; { 0..31 channels }
 
+      MOD_MAX_TRACKER_NAME_LENGTH = 31;
+
 type  { look also for assembler structurs in 'GENERAL.DEF' - must be equal !! }
 
       THeader = record name:array[0..27] of char;
@@ -124,6 +126,9 @@ type  { look also for assembler structurs in 'GENERAL.DEF' - must be equal !! }
      TPatternSarray = array[0..MAX_patterns]  of word;         { segment for every pattern }
      TOrderArray    = array[0..MAX_orders]    of byte;         { song arrangement }
      TchannelArray  = array[0..MAX_channels-1] of Tchannel;    { all public/private data for every channel }
+
+    TMODTrackerName = string [MOD_MAX_TRACKER_NAME_LENGTH];
+    PMODTrackerName = ^TMODTrackerName;
 
 implementation
 

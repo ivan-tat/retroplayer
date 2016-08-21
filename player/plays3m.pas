@@ -344,7 +344,7 @@ begin
   writeln('Free DOS memory after loading: ',getFreeDOSMemory shr 10, ' KiB');
   writeln('Free EMM memory after loading: ',getFreeEMMMemory, ' KiB');
   {$ENDIF}
-  writeln(' ''',songname,''' loaded ... (was saved with ST',savedunder:4:2,')');
+  writeln(' ''',songname,''' loaded ... (was saved with ',modTrackerName,')');
   if not Init_S3Mplayer then display_errormsg(player_error);
   if not init_device(how2input) then begin writeln(' SoundBlaster not found sorry ... ');halt end;
   if disply_c then

@@ -47,7 +47,7 @@ VAR load_Error:integer;
     Patnum:word;
     usedchannels:byte;  { possible values : 1..32 (kill all Adlib) }
     patlength   :word;    { length of one pattern }
-    savedunder:real;    { ST version file was created with }
+    modTrackerName: TMODTrackerName;    (* tracker version file was created with *)
     { songposition : (you can change them while playing to jump arround) }
     curorder   :word;   { position in song arrangement }
     curpattern :byte;   { current pattern - is specified also by [curorder] - so it's only for the user ... }

@@ -13,19 +13,6 @@ begin
     end;
 end;
 
-FUNCTION ST3test(var p):boolean; ASSEMBLER; { I love this :) }
-  asm
-    xor       ax,ax
-    les       di,p
-    mov       ax,es:[di]
-    cmp       ax,01300h         { saved by ST3.00 }
-    jb        @@endoftest
-    cmp       ax,01303h         { saved by ST3.01 }
-    ja        @@endoftest
-    mov       ax,0101h
-@@endoftest:
-  end;
-
 procedure convert2pas(var from,topas;maxchars:byte); ASSEMBLER; { yeah assembler strikes again }
   asm
     push     ds
@@ -474,7 +461,11 @@ var a,b,c:string;
         load_error := wrongformat;
         exit;
     end;
-    IF not ST3test(header.CWTV) then begin load_error:=wrongformat;exit end;
+    if ( ( header.CWTV shr 8 ) and $ff <> $13 ) then
+    begin
+        load_error := wrongformat;
+        exit;
+    end;
     { set some variables : }
     convert2pas(header.name,songname,28);
     ordnum:=header.ordnum;
@@ -519,7 +510,11 @@ var a,b,c:string;
       rcl        al,1
       mov        [costumeflag],al
     end;
-    savedunder:=(header.cwtv shr 8) and $0f+0.1*((header.cwtv shr 4) and $0f+0.01*(header.cwtv and $0f));
+    modTrackerName := 'Scream Tracker ' +
+        chr( ord('0') + ( ( header.cwtv shr 8 ) and $0f ) ) +
+        '.' +
+        chr( ord('0') + ( ( header.cwtv shr 4 ) and $0f ) ) +
+        chr( ord('0') + ( header.cwtv and $0f ) );
     signeddata:=(header.ffv=1);
     if not (header.ffv in [1,2]) then begin load_error:=wrongformat;exit end;
     gvolume:=header.gvolume;
