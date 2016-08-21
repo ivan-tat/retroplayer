@@ -456,44 +456,13 @@ var a,b,c:string;
     insnum:=header.insnum;
     patnum:=header.patnum;
     { setup flags }
-    asm
-      mov        bx,[header.flags]
-      { flag bit 0 }
-      xor        al,al
-      shr        bx,1
-      rcl        al,1
-      mov        [st2vibrato],al
-      { flag bit 1 }
-      xor        al,al
-      shr        bx,1
-      rcl        al,1
-      mov        [st2tempo],al
-      { flag bit 2 }
-      xor        al,al
-      shr        bx,1
-      rcl        al,1
-      mov        [amigaslides],al
-      { flag bit 3 }
-      xor        al,al
-      shr        bx,1
-      rcl        al,1
-      mov        [vol0opti],al
-      { flag bit 4 }
-      xor        al,al
-      shr        bx,1
-      rcl        al,1
-      mov        [amigalimits],al
-      { flag bit 5 }
-      xor        al,al
-      shr        bx,1
-      rcl        al,1
-      mov        [SBfilter],al
-      { flag bit 7 }
-      xor        al,al
-      shr        bx,2
-      rcl        al,1
-      mov        [costumeflag],al
-    end;
+    st2vibrato  := header.flags and $01 <> 0;
+    st2tempo    := header.flags and $02 <> 0;
+    amigaslides := header.flags and $04 <> 0;
+    vol0opti    := header.flags and $08 <> 0;
+    amigalimits := header.flags and $10 <> 0;
+    SBfilter    := header.flags and $20 <> 0;
+    costumeflag := header.flags and $80 <> 0;
     modTrackerName := 'Scream Tracker ' +
         chr( ord('0') + ( ( header.cwtv shr 8 ) and $0f ) ) +
         '.' +
