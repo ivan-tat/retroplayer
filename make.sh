@@ -28,6 +28,7 @@ cd pascal
 $PC syswrap.pas
 
 cd ../watcomc
+PASINC='-u..\pascal'
 for f in \
 dointr \
 intr \
@@ -40,6 +41,8 @@ i4m; do
     $ASW $f.asm
     $PC $f.pas
 done
+compile_c printf.c
+$PC $PASINC printf.pas
 
 cd ../dos
 PASINC='-u..\pascal;..\watcomc'
