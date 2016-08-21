@@ -13,27 +13,21 @@ begin
     end;
 end;
 
-procedure convert2pas(var from,topas;maxchars:byte); ASSEMBLER; { yeah assembler strikes again }
-  asm
-    push     ds
-    lds      si,from
-    les      di,topas
-    mov      bx,di
-    xor      ch,ch
-    mov      cl,[maxchars]
-    xor      dl,dl              ;{ count of chars in string }
-    inc      di                 ;{ first char ... }
-@@loop:
-    lodsb                       ;{ I know it's slow, but here we don't need speed here ;) }
-    test     al,al
-    jz       @@nomorechar
-    inc      dl                 ;{ copy now one char }
-    stosb                       ;{ put it into the destination string }
-    loop     @@loop
-@@nomorechar:
-    mov      es:[bx],dl         ;{ save count of chars }
-    pop      ds
-  end;
+procedure convert2pas(var from,topas;maxchars:byte);
+var
+    i: integer;
+    src, dst: parray;
+begin
+    src := @from;
+    dst := @topas;
+    i := 0;
+    while ( ( i < maxchars ) and ( src^[i] <> 0 ) ) do
+    begin
+        dst^[ i+1 ] := src^[ i ];
+        inc( i );
+    end;
+    dst^[0] := i;
+end;
 
 function getchtyp(b:byte):byte;
 begin
