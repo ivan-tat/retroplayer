@@ -24,7 +24,7 @@ type  { look also for assembler structurs in 'GENERAL.DEF' - must be equal !! }
                                     { bit 11..0  -> tracker version:
                                       11..8 = major version,7..0 = minor version }
                       FFv    :word; { fileformatversion }
-                      SCRM_ID:array[0..3] of char; { should be 'SCRM' }
+                      SCRM_ID:longint; { should be 'SCRM' }
                       gvolume:byte;       { global volume }
                       initialspeed:byte;
                       initialtempo:byte;
