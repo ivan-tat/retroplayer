@@ -35,33 +35,17 @@ procedure convert2pas(var from,topas;maxchars:byte); ASSEMBLER; { yeah assembler
     pop      ds
   end;
 
-function getchtyp(b:byte):byte; ASSEMBLER; { :) what else ... }
-  asm
-    xor     ah,ah
-    mov     al,b
-    cmp     al,7
-    ja      @@notleft
-    mov     al,1        ;{ left }
-    jmp     @@endofget
-@@notleft:
-    cmp     al,15
-    ja      @@notright
-    mov     al,2        ;{ right }
-    jmp     @@endofget
-@@notright:
-    cmp     al,23
-    ja      @@notadlib1
-    mov     al,3        ;{ adlib melody }
-    jmp     @@endofget
-@@notadlib1:
-    cmp     al,31
-    ja      @@notadlib2
-    mov     al,4        ;{ adlib drums }
-    jmp     @@endofget
-@@notadlib2:
-    xor     al,al       ;{ channel off :) }
-@@endofget:
-  end;
+function getchtyp(b:byte):byte;
+begin
+    case b of
+    0..7: getchtyp := 1; (* left *)
+    8..15: getchtyp := 2; (* right *)
+    16..23: getchtyp := 3; (* adlib melody *)
+    24..31: getchtyp := 4; (* adlib drums *)
+    else
+        getchtyp := 0;
+    end;
+end;
 
 FUNCTION  LOAD_S3M(name:string):BOOLEAN;
 var f:file;
