@@ -129,9 +129,7 @@ is16bit:     ; do nothing :) ... is not written yet !
 fill_DMAbuffer ENDP
 
 fill_8bit PROC NEAR  ; New routine (faster ?)
-          ; save these values (we are in an interrupt !)
-
-          push    eax ebx ecx edx ebp esi edi ds es fs gs
+        push    ds
 
           ; check if we are allready in calculation routines
           ; if we are the PC is to slow -> how you wanna handle it ?
@@ -196,10 +194,8 @@ outside:
           mov     [justinfill],0
 endoffill:
           setborder 0
-          pop     gs fs es ds edi esi ebp edx ecx ebx eax
-          ret
-          ; bye bye C ya later
-
+        pop     ds
+        ret
 
 slow:     ; sorry your PC is to slow - maincode may ignore this flag
           ; but it'll sound ugly :(
