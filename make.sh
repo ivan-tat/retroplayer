@@ -5,7 +5,11 @@ set -e
 AS="tasm -t"
 ASW="wasm -zq"
 PC='tpc -gd -q -v -$d+,e-,g+,n+ -DDEBUG;BETATEST'
-export WCC="-3 -fp3 -ml -na -oi -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu"
+export WCC="-3 -fp3 -ml -na -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu"
+# disable optimization:
+# "-oc" - disable <call followed by return> to jump optimization;
+# reason: "wdis" incorrectly writes "je near ptr <near_extern_label>"
+#   (without "near ptr")
 
 compile_c() {
 	local f_c="$1"
@@ -71,6 +75,9 @@ $PC $PASINC blaster.pas
 
 cd ../main
 PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster'
+$ASW sndisr_.asm
+compile_c sndisr.c
+$PC $PASINC sndisr.pas
 $AS filldma.asm
 $AS mixing.asm
 $AS processo.asm

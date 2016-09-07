@@ -130,7 +130,16 @@ function getPatternPartInEM( index: integer ): byte;
 
 IMPLEMENTATION
 
-uses EMStool,sbctl,blaster,crt,dos,dosproc;
+uses
+    memset,
+    pic,
+    EMStool,
+    sbctl,
+    blaster,
+    sndisr,
+    crt,
+    dos,
+    dosproc;
 
 CONST DMAbuffersize=8*1024; { <- maximum size of DMAbuffer }
 
@@ -428,59 +437,47 @@ function gettempo:byte;
 
 var inside:boolean;
 
-PROCEDURE PLAY_IRQ; interrupt;
-var x,y:integer;
-  begin
-    asm
-      cli
-    @wait:
-      cmp       [inside],1
-      je        @wait
-      mov       [inside],1
-      { change DMAhalf: }
-      mov       ah,[numbuffers]
-      dec       ah
-      inc       [DMAhalf]
-      and       [DMAhalf],ah
-      mov       [inside],0
+procedure SoundPlaybackISR; far;
+begin
+    asm cli end;
+
+    while ( inside ) do
+    begin
+        (* wait *)
     end;
-    if rastertime then
-      asm
-        { set screen border, if user wants to know testing ... }
-        mov             dx,03dah
-        in              al,dx
-        mov             dx,03c0h
-        mov             al,31h
-        out             dx,al
-        mov             al,1
-        out             dx,al
-      end;
+
+    inside := true;
+    DMAhalf := ( DMAhalf+1 ) and ( numbuffers-1 );
+    inside := false;
+
+    if ( rastertime ) then
+    begin
+        (* TODO *)
+    end;
+
+    (* ackknowledge the interrupt on SB: *)
     asm
-      { ackknowledge the interrupt on SB : }
       mov       dx,sdev_hw_base
       add       dx,0eh
       add       dl,[_16Bit]         { in 16Bit mode we have to ackknowledge 22f ;) }
       in        al,dx
-      { ackknowledge the hardwareinterrupt : }
-      mov       al,20h
-      out       0A0h,al
-      out       020h,al
-      { now new hardware interrupts are allowed ! }
     end;
+
+    (* ackknowledge PICs: *)
+    picEOI( 8 );    (* secondary *)
+    picEOI( 0 );    (* primary *)
+
+    (* now new hardware interrupts are allowed *)
+
     fill_dmabuffer;
-    if rastertime then
-      asm
-        { screen border back to black ... }
-        mov             dx,03dah
-        in              al,dx
-        mov             dx,03c0h
-        mov             al,31h
-        out             dx,al
-        mov             al,0
-        out             dx,al
-        sti
-      end;
-  end;
+
+    if ( rastertime ) then
+    begin
+        (* TODO *)
+    end;
+
+    asm sti end;
+end;
 
 procedure Initchannels;
 var i:byte;
@@ -564,7 +561,8 @@ var key:boolean;
     A_16Bit := A_16Bit and sdev_caps_16bit;
     if not sounddevice then begin player_error:=nosounddevice;exit; end; { sorry no device was set }
     if not S3M_inMemory then begin player_error:=noS3Minmemory;exit end; { hmm load it first ;) }
-    set_ready_irq(@play_irq);
+    SetSoundHWISRCallback( @SoundPlaybackISR );
+    set_ready_irq( GetSoundHWISR );
     Initblaster(Samplerate,a_stereo,a_16Bit);
     setSamplerate(Samplerate,a_stereo);
     calcVolumeTable( signeddata ); { <- now after loading we know if signed data or not }
