@@ -22,6 +22,8 @@
 #define DSP_RESET               0x06 // Read/Write
 #define DSP_DATA_READ           0x0a // Read
 #define DSP_DATA_AVAILABLE      0x0e // Read
+#define DSP_ACKNOWLEDGE_IRQ8    0x0e // Read
+#define DSP_ACKNOWLEDGE_IRQ16   0x0f // Read
 #define DSP_WRITE_BUFFER_STATUS 0x0c // Read
 #define DSP_WRITE_DATA          0x0c // Write
 
@@ -100,4 +102,13 @@ bool __far __pascal sbioDSPWrite( uint16_t base, uint8_t data ) {
 
     sbioError = E_SBIO_DSP_WRITE_FAILED;
     return false;
+}
+
+void __far __pascal sbioDSPAcknowledgeIRQ( uint16_t base, bool mode16bit ) {
+    unsigned char tmp;
+
+    if ( mode16bit )
+        tmp = inp( base + DSP_ACKNOWLEDGE_IRQ16 );
+    else
+        tmp = inp( base + DSP_ACKNOWLEDGE_IRQ8 );
 }

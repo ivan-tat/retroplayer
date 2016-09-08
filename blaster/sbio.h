@@ -26,14 +26,18 @@ extern __pascal sbioError;
 #define SBIO_MIXER_VOICE_LEFT    0x32
 #define SBIO_MIXER_VOICE_RIGHT   0x33
 
-void __far __pascal sbioMixerReset( uint16_t base );
+void    __far __pascal sbioMixerReset( uint16_t base );
 uint8_t __far __pascal sbioMixerRead( uint16_t base, uint8_t reg );
-void __far __pascal sbioMixerWrite( uint16_t base, uint8_t reg, uint8_t data );
+void    __far __pascal sbioMixerWrite( uint16_t base, uint8_t reg, uint8_t data );
 
 /* DSP */
 
-bool __far __pascal sbioDSPReset( uint16_t base );
+bool    __far __pascal sbioDSPReset( uint16_t base );
 uint8_t __far __pascal sbioDSPRead( uint16_t base );
-bool __far __pascal sbioDSPWrite( uint16_t base, uint8_t data );
+bool    __far __pascal sbioDSPWrite( uint16_t base, uint8_t data );
+
+/* IRQ */
+
+void __far __pascal sbioDSPAcknowledgeIRQ( uint16_t base, bool mode16bit );
 
 #endif /* _SBIO_H */

@@ -30,21 +30,23 @@ const
     SBIO_MIXER_VOICE_RIGHT   = $33;
 
 procedure sbioMixerReset( base: word );
-function sbioMixerRead( base: word; reg: byte ): byte;
+function  sbioMixerRead( base: word; reg: byte ): byte;
 procedure sbioMixerWrite( base: word; reg, data: byte );
-function sbioDSPReset( base: word ): boolean;
-function sbioDSPRead( base: word ): byte;
-function sbioDSPWrite( base: word; data: byte ): boolean;
+function  sbioDSPReset( base: word ): boolean;
+function  sbioDSPRead( base: word ): byte;
+function  sbioDSPWrite( base: word; data: byte ): boolean;
+procedure sbioDSPAcknowledgeIRQ( base: word; mode16bit: boolean );
 
 implementation
 
 (*$l sbio.obj*)
 
 procedure sbioMixerReset( base: word ); external;
-function sbioMixerRead( base: word; reg: byte ): byte; external;
+function  sbioMixerRead( base: word; reg: byte ): byte; external;
 procedure sbioMixerWrite( base: word; reg, data: byte ); external;
-function sbioDSPReset( base: word ): boolean; external;
-function sbioDSPRead( base: word ): byte; external;
-function sbioDSPWrite( base: word; data: byte ): boolean; external;
+function  sbioDSPReset( base: word ): boolean; external;
+function  sbioDSPRead( base: word ): byte; external;
+function  sbioDSPWrite( base: word; data: byte ): boolean; external;
+procedure sbioDSPAcknowledgeIRQ( base: word; mode16bit: boolean ); external;
 
 end.

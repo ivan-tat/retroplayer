@@ -173,16 +173,11 @@ end;
 
 PROCEDURE Initblaster(var frequ:Word;stereoon,_16Biton:boolean);
 begin
-    { first reset SB : }
-    asm
-      mov    dx,sdev_hw_base
-      add    dx,0eh
-      in     al,dx
-      inc    dx
-      in     al,dx
-    end;
+    (* first reset SB: *)
+    sbioDSPAcknowledgeIRQ( sdev_hw_base, false );
+    sbioDSPAcknowledgeIRQ( sdev_hw_base, true );
     stop_play;
-    { Now init : }
+    (* Now init: *)
     sbAdjustMode(frequ,stereoon,_16Biton); (* FIXME: +signed *)
     set_mode( frequ, _16biton, false, stereoon ); (* FIXME: *signed *)
     sbSetupMode( frequ, stereo ); (* FIXME: +16bits, +signed *)
@@ -191,11 +186,10 @@ end;
 (* hardware base i/o port, IRQ, DMA detection *)
 
 procedure ISRDetectCallback( irq: byte ); far;
-var tmp: byte;
 begin
     check := irq;
     picEOI( irq );
-    tmp := port[sdev_hw_base+$0e];
+    sbioDSPAcknowledgeIRQ( sdev_hw_base, false );
 end;
 
 function hexword(w:word):string;
@@ -418,13 +412,8 @@ procedure ISRSoundPlayback; far;
 begin
     asm cli end;
 
-    (* ackknowledge the interrupt on SB: *)
-    asm
-      mov       dx,sdev_hw_base
-      add       dx,0eh
-      add       dl,[_16Bit]         { in 16Bit mode we have to ackknowledge 22f ;) }
-      in        al,dx
-    end;
+    (* acknowledge the interrupt on SB: *)
+    sbioDSPAcknowledgeIRQ( sdev_hw_base, _16Bit );
 
     (* ackknowledge PICs: *)
     picEOI( 8 );    (* secondary *)
