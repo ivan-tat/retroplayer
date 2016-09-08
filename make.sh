@@ -67,6 +67,9 @@ PASINC='-u..\pascal;..\watcomc;..\hw'
 $ASW detisr_.asm
 compile_c detisr.c
 $PC $PASINC detisr.pas
+$ASW sndisr_.asm
+compile_c sndisr.c
+$PC $PASINC sndisr.pas
 compile_c sbio.c
 $PC $PASINC sbio.pas
 compile_c sbctl.c
@@ -75,9 +78,6 @@ $PC $PASINC blaster.pas
 
 cd ../main
 PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster'
-$ASW sndisr_.asm
-compile_c sndisr.c
-$PC $PASINC sndisr.pas
 $AS filldma.asm
 $AS mixing.asm
 $AS processo.asm

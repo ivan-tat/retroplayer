@@ -71,7 +71,15 @@ procedure sbDone;
 
 Implementation
 
-uses dos,dma,sbio,sbctl,pic,detisr,crt;
+uses
+    dos,
+    dma,
+    sbio,
+    sbctl,
+    pic,
+    detisr,
+    sndisr,
+    crt;
 
 const
     HW_BASE_MAX = 8;
@@ -94,6 +102,10 @@ var
 
     check: byte;       (* for detecting *)
     savvect: pointer;  (*  "       "    *)
+
+(* ISR *)
+var
+    ISRUserCallback: PSoundHWISRCallback;
 
 procedure set_hw( name: pchar; _type: byte; mixer, _16bit, stereo: boolean; m_max, s_max: word );
 begin
@@ -178,20 +190,12 @@ end;
 
 (* hardware base i/o port, IRQ, DMA detection *)
 
-procedure ISRCallback( irq: byte ); far;
+procedure ISRDetectCallback( irq: byte ); far;
 var tmp: byte;
 begin
     check := irq;
     picEOI( irq );
     tmp := port[sdev_hw_base+$0e];
-end;
-
-procedure ready_irq; interrupt;
-var a:byte;
-begin
-    check:=1;
-    picEOI( 0 ); (* FIXME *)
-    a:=port[sdev_hw_base+$0e]
 end;
 
 function hexword(w:word):string;
@@ -318,7 +322,7 @@ begin
 
     asm sti end;
 
-    SetDetISRCallback( @ISRCallback );
+    SetDetISRCallback( @ISRDetectCallback );
 
     irqmask := 0;
     for i := 0 to HW_IRQ_MAX-1 do
@@ -410,12 +414,35 @@ FUNCTION Get_BlasterVersion:Word;
     Get_BlasterVersion := sdev_hw_dspv;
   end;
 
+procedure ISRSoundPlayback; far;
+begin
+    asm cli end;
+
+    (* ackknowledge the interrupt on SB: *)
+    asm
+      mov       dx,sdev_hw_base
+      add       dx,0eh
+      add       dl,[_16Bit]         { in 16Bit mode we have to ackknowledge 22f ;) }
+      in        al,dx
+    end;
+
+    (* ackknowledge PICs: *)
+    picEOI( 8 );    (* secondary *)
+    picEOI( 0 );    (* primary *)
+
+    (* now new hardware interrupts are allowed *)
+
+    if ( ISRUserCallback <> nil ) then asm call dword ptr [ISRUserCallback] end;
+
+    asm sti end;
+end;
+
 PROCEDURE set_ready_irq(p:pointer);
 begin
-    check:=0;
+    ISRUserCallback := p;
+    SetSoundHWISRCallback( @ISRSoundPlayback );
     savvect := picGetIntVec( sdev_hw_irq );
-    if p=Nil then p:=addr(ready_irq);
-    picSetIntVec( sdev_hw_irq, p );
+    picSetIntVec( sdev_hw_irq, GetSoundHWISR );
     (* no changes for IRQ2 *)
     picDisableIRQs( ( 1 shl sdev_hw_irq ) and not ( 1 shl 2 ) );
 end;
@@ -596,6 +623,7 @@ begin
     set_hw_dsp( 0 );
     sdev_hw_dspv := 0;
     set_mode( 0, false, false, false );
+    ISRUserCallback := nil;
 end;
 
 procedure sbDone;

@@ -136,7 +136,6 @@ uses
     EMStool,
     sbctl,
     blaster,
-    sndisr,
     crt,
     dos,
     dosproc;
@@ -437,10 +436,8 @@ function gettempo:byte;
 
 var inside:boolean;
 
-procedure SoundPlaybackISR; far;
+procedure PlaySoundCallback; far;
 begin
-    asm cli end;
-
     while ( inside ) do
     begin
         (* wait *)
@@ -455,28 +452,12 @@ begin
         (* TODO *)
     end;
 
-    (* ackknowledge the interrupt on SB: *)
-    asm
-      mov       dx,sdev_hw_base
-      add       dx,0eh
-      add       dl,[_16Bit]         { in 16Bit mode we have to ackknowledge 22f ;) }
-      in        al,dx
-    end;
-
-    (* ackknowledge PICs: *)
-    picEOI( 8 );    (* secondary *)
-    picEOI( 0 );    (* primary *)
-
-    (* now new hardware interrupts are allowed *)
-
     fill_dmabuffer;
 
     if ( rastertime ) then
     begin
         (* TODO *)
     end;
-
-    asm sti end;
 end;
 
 procedure Initchannels;
@@ -561,8 +542,7 @@ var key:boolean;
     A_16Bit := A_16Bit and sdev_caps_16bit;
     if not sounddevice then begin player_error:=nosounddevice;exit; end; { sorry no device was set }
     if not S3M_inMemory then begin player_error:=noS3Minmemory;exit end; { hmm load it first ;) }
-    SetSoundHWISRCallback( @SoundPlaybackISR );
-    set_ready_irq( GetSoundHWISR );
+    set_ready_irq( @PlaySoundCallback );
     Initblaster(Samplerate,a_stereo,a_16Bit);
     setSamplerate(Samplerate,a_stereo);
     calcVolumeTable( signeddata ); { <- now after loading we know if signed data or not }

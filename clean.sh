@@ -17,6 +17,7 @@ rm -f ./hw/dma.asm
 rm -f ./hw/pic.asm
 cleandir ./blaster
 rm -f ./blaster/detisr.asm
+rm -f ./blaster/sndisr.asm
 rm -f ./blaster/sbio.asm
 rm -f ./blaster/sbctl.asm
 cleandir ./dos
@@ -25,7 +26,6 @@ rm -f ./dos/emstool.asm
 cleandir ./main
 rm -f ./main/voltab.asm
 rm -f ./main/posttab.asm
-rm -f ./main/sndisr.asm
 cleandir ./pascal
 cleandir ./player
 cleandir ./watcomc
