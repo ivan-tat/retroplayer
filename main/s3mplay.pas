@@ -198,7 +198,7 @@ procedure calc_stereo_tick; near; external;
 {$L PROCESSO.OBJ}
 function check386:boolean; near; external;
 
-{$L FILLDMA.OBJ}
+(*$l filldma.obj*)
 procedure fill_DMAbuffer; near; external;
 procedure mixroutines; near; external;
 

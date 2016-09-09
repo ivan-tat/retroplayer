@@ -78,7 +78,7 @@ $PC $PASINC blaster.pas
 
 cd ../main
 PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster'
-$AS filldma.asm
+compile_c filldma.c
 $AS mixing.asm
 $AS processo.asm
 $AS readnote.asm

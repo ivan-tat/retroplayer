@@ -23,7 +23,7 @@ calc_mono_tick PROC NEAR
                ; just only for 8bit play mode
                mov           ax,word ptr [offset tickbuffer +2]
                mov           es,ax
-               mov           ax,2048+offset post8bit
+               mov           ax,2048
                xor           di,di
                mov           cx,[DMArealBufsize+2]
                setborder     3
