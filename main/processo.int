@@ -1,0 +1,4 @@
+(* Pascal declarations for processo.asm. *)
+
+(*$l processo.obj*)
+function check386: boolean; near; external;

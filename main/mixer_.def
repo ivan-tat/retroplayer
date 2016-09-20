@@ -1,0 +1,9 @@
+; Assembler declarations for mixer_.
+;
+; This is free and unencumbered software released into the public domain.
+; For more information, please refer to <http://unlicense.org>.
+
+.code mixer__text
+extrn MixSampleMono8: far
+extrn MixSampleStereo8: far
+ends

@@ -2,6 +2,8 @@ model large,pascal
 
 noeffect EQU    dw offset no_effect
 
+include mixer_.def
+
 .DATA
 INCLUDE GENERAL.DEF
 EXTRN tickbuffer  :DWORD
@@ -85,27 +87,6 @@ special_cmd2nd     noeffect                   ; S0? - nothin
                    dw offset Notedelay
                    noeffect                   ; Pattern delay
                    noeffect                   ; funkrepeat
-
-dwofs macro name, no
-      dw offset &name&no
-endm
-
-; stereo innerloop table:
-zaehler = 0
-st_innerloop_tbl LABEL WORD
-rept 32
-   dwofs st_inner, %zaehler
-   zaehler = zaehler + 1
-endm
-
-; mono innerloop table:
-zaehler = 0
-mn_innerloop_tbl LABEL WORD
-rept 32
-   dwofs mn_inner, %zaehler
-   zaehler = zaehler + 1
-endm
-
 ENDS
 
 .CODE

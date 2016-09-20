@@ -137,81 +137,14 @@ _noEMSsample:  mov           gs,ax
                mov           cx,[sample2calc]
                shr           cx,1               ; stereo :)
 
-               ; ES:SI - pointer to tickbuffer
-               ; GS:DI - pointer to sampledata
-               ; FS:BX - pointer to volumetable
-               ; DX    - decision part of current position in sample
-               ; DI    - integer part of current position in sample
-               ; BH    - volume of instrument
-               ; CX    - number of values to calc
-               ; DS,BP - under use, but not in inner loop <- not optimized (hey come on, I just started to code this)
-
                ; first check for correct position inside sample
-
-               
-
                ; oh well - now stereo position
                cmp           ds:[channel.channeltyp+bp],1
                je            _leftside
                add           si,2
 _leftside:
 
-               ; jump into innerloop :
-               push          bp
-               mov           bp,cx
-               and           bp,31
-               shr           cx,5
-               inc           cx
-
-               neg           bp
-               add           bp,32
-
-               cmp           bp,32  ; <- that cost me some minutes to think about :(
-               jne           _no0
-
-               dec           cx
-               xor           bp,bp
-
-_no0:          shl           bp,1
-               sub           si,bp
-               sub           si,bp
-
-               add           bp,offset st_innerloop_tbl
-
-               ; before jump arround =) swap fs,ds
-               push         ds fs
-               mov          ax,ds
-               mov          fs,ax
-               pop          ds
-               push         ds
-
-               jmp          word ptr fs:[bp]
-
-macro_stinner  MACRO no
-st_inner&no:   mov           bl,gs:[di]         ; byte out of the sample
-
-               add           edi,edx            ; next position in sample
-               adc           di,0               ; <- I need this !!
-
-               mov           ax,ds:[ebx+ebx]    ; convert samplevalue with volumetable
-
-               add           es:[si+pos],ax     ; mix value to other channels
-ENDM
-
-_tickloop:
-z = 0
-pos = 0
-rept 32        ; I know I'm crazy :) but what we do for fast inner loops ...
-macro_stinner %z
-pos = pos + 4
-z = z + 1
-endm
-               add           si,32*4
-               dec           cx
-               jnz           _tickloop
-               pop           fs
-               pop           ds
-               pop           bp
+        call    MixSampleStereo8
 
 _aftercalc:    cmp           di,ds:[channel.sLoopend+bp]
                jae           _sampleends

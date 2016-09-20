@@ -186,21 +186,11 @@ VAR S3M_inMemory:BOOLEAN;
     rampwave     :array[0..63] of shortint;
     squarewave   :array[0..63] of byte;
 
-{$L READNOTE.OBJ}
-procedure readnewnotes; near; external;
-procedure SetupNewInst; near; external; { don't call it from pascal - has its internal use }
-procedure SetnewNote;   near; external; { don't call it from pascal - has its internal use }
-
-{$L MIXING.OBJ}
-procedure calc_mono_tick; near; external;
-procedure calc_stereo_tick; near; external;
-
-{$L PROCESSO.OBJ}
-function check386:boolean; near; external;
-
-(*$l filldma.obj*)
-procedure fill_DMAbuffer; near; external;
-procedure mixroutines; near; external;
+(*$i readnote.int*)
+(*$i mixer_.int*)
+(*$i mixing.int*)
+(*$i processo.int*)
+(*$i filldma.int*)
 
 { getuseddevice is not implemented yet }
 FUNCTION getuseddevice(var typ:byte;var base:word;var dma8,dma16:byte; var irq:byte):byte;

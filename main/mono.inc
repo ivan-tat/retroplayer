@@ -116,71 +116,7 @@ noEMSsample:   mov           gs,ax
                cmp           di,ds:[channel.sLoopend+bp]
                jae           sampleends1
 back2calc1:
-               ; ES:SI - pointer to tickbuffer
-               ; GS:DI - pointer to sampledata
-               ; FS:BX - pointer to volumetable
-               ; DX    - decision part of current position in sample
-               ; DI    - integer part of current position in sample
-               ; BH    - volume of instrument
-               ; CX    - number of values to calc
-               ; DS,BP - under use, but not in inner loop <- not optimized (hey come on, I just started to code this)
-
-               ; jump into innerloop :
-               push          bp
-               mov           bp,cx
-               and           bp,31
-               shr           cx,5
-               inc           cx
-
-               neg           bp
-               add           bp,32
-
-               cmp           bp,32  ; <- that cost me some minutes to think about :(
-               jne           no0
-
-               dec           cx
-               xor           bp,bp
-
-no0:           shl           bp,1
-               sub           si,bp
-               ;sub           si,bp
-
-               add           bp,offset mn_innerloop_tbl
-               ; before jump arround =) swap fs,ds
-               push         ds fs
-               mov          ax,ds
-               mov          fs,ax
-               pop          ds
-               push         ds
-               jmp          word ptr fs:[bp]
-
-macro_mninner  MACRO no
-align 2
-mn_inner&no:   mov           bl,gs:[di]
-
-               add           edi,edx
-               adc           di,0
-
-               mov           ax,ds:[ebx+ebx]  ; convert samplevalue with volumetable
-
-               add           es:[si+pos],ax     ; mix value to other channels
-ENDM
-
-tickloop:
-z = 0
-pos = 0
-rept 32        ; I know I'm crazy :) but what we do for fast inner loops ...
-macro_mninner %z
-z = z + 1
-pos = pos + 2
-endm
-               add           si,32*2
-               dec           cx
-               jnz           tickloop
-
-               pop           fs
-               pop           ds
-               pop           bp
+        call    MixSampleMono8
 
 aftercalc:     rol           edi,16
                mov           ds:[channel.sCurpos+bp],edi

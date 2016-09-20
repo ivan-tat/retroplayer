@@ -1,0 +1,5 @@
+(* Pascal declarations for mixing.asm. *)
+
+(*$l mixing.obj*)
+procedure calc_mono_tick;   near; external; (* internal use *)
+procedure calc_stereo_tick; near; external; (* internal use *)
