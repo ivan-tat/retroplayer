@@ -1,8 +1,9 @@
 model large,pascal
 
+include mixer_.def
+include s3mplay.def
+
 .DATA
-noeffect  EQU    dw offset checkonlyPara  ; no effect
-noeffect2 EQU    dw offset handlenothing  ; nothing to do for this effect here ...
 
 INCLUDE GENERAL.DEF
 EXTRN ORDER      : BYTE
@@ -15,7 +16,6 @@ EXTRN curOrder     : BYTE
 EXTRN curPattern   : BYTE
 EXTRN curtick      : BYTE
 EXTRN curspeed     : BYTE
-EXTRN Userate   : WORD
 EXTRN loopS3M      : BYTE
 EXTRN lastorder    : BYTE
 EXTRN EndOfSong    : BYTE
@@ -39,6 +39,9 @@ EXTRN patlength    : WORD
                    ; 'random wave' is not a table, but a call for a random number !
 
       st3periods   dw 1712,1616,1524,1440,1356,1280,1208,1140,1076,1016, 960, 907
+
+noeffect  EQU    dw offset checkonlyPara  ; no effect
+noeffect2 EQU    dw offset handlenothing  ; nothing to do for this effect here ...
 
       ; we have to init all the effects :
       initeffects  noeffect
@@ -195,27 +198,6 @@ PUBLIC SetNewNote
 EXTRN  SET_TEMPO
 EXTRN  EMSMAP : FAR       ; <- somehow that does not work (assembler creats:
                           ;    "push cs" + "near call", but that's wrong !!!
-
-CalcFrequStep  MACRO
-; IN: ax = period
-; OUT: destroys EDX,EBX
-
-             and     eax,0ffffh      ; clear upper 16bit
-             xor     edx,edx
-             mov     dx,[Userate]
-             mul     edx             ; EAX = Userate*Period
-             mov     ebx,eax
-
-             xor     edx,edx
-             mov     dx,0dah
-             mov     eax,77900000h   ; EDX:EAX = 1712*8363*10000h
-
-             div     ebx
-
-             ;        1712 * 8363 * 10000h
-             ; EAX = ----------------------
-             ;        Userate * Period
-ENDM
 
 CalcPeriod   macro
 local notbelow,notabove
@@ -374,7 +356,7 @@ SetNewNote   PROC NEAR
              mov     [channel.speriod+si],ax
 
              ; now step calculations :
-             CalcFrequStep
+             call    mixCalcSampleStep
 
              mov     [channel.sStep+si],EAX
 
@@ -489,7 +471,7 @@ vibend:      push    ax
              mov     [channel.sPeriod+si],ax
              cmp     ax,0
              je      novibcalc
-             CalcFrequStep
+             call    mixCalcSampleStep
              mov     [channel.sStep+si],EAX
 novibcalc:   pop     ax
 novibend:    cmp     ax,2*18             ; Tremolo ...
@@ -992,7 +974,7 @@ Finepitch_down:
               mov       ax,[channel.upper_border+si]
 ptok:         ; now calc new frequency step for this period
               mov       [channel.sPeriod+si],ax
-              CalcFrequStep
+              call    mixCalcSampleStep
               mov       ds:[channel.sStep+si],EAX
               jmp       handlenothing
 XFinepitch_down:
@@ -1101,7 +1083,7 @@ arpok2:        or       bh,bl
 calcpart:      calcperiod
                cmp       ax,0
                je        nostep
-               calcfrequStep
+               call    mixCalcSampleStep
                retn
 nostep:        xor       eax,eax
                retn

@@ -1,8 +1,7 @@
 model large,pascal
 
-noeffect EQU    dw offset no_effect
-
 include mixer_.def
+include s3mplay.def
 
 .DATA
 INCLUDE GENERAL.DEF
@@ -16,7 +15,6 @@ EXTRN EndOfSong   :BYTE
 EXTRN usedchannels:BYTE
 EXTRN volumetableptr :DWORD
 EXTRN CHANNEL        :TChannel
-EXTRN Userate     :WORD
 EXTRN gvolume        :BYTE
 EXTRN patterndelay   :BYTE
 EXTRN smpEMShandle   :WORD
@@ -27,6 +25,8 @@ nextPosition      DW ?
 sample2calc       DW ?     ; in mono number of bytes/ in stereo number of words
 curchannel        DB ?
 calleffects       DB ?
+
+noeffect EQU    dw offset no_effect
 
 effects            noeffect
                    noeffect
@@ -98,27 +98,6 @@ EXTRN  readnewnotes
 EXTRN  SetupNewInst
 EXTRN  SetNewNote
 
-CalcFrequStep  MACRO
-; IN: ax = period
-; OUT: destroys EDX,EBX
-
-             and     eax,0ffffh      ; clear upper 16bit
-             xor     edx,edx
-             mov     dx,[Userate]
-             mul     edx             ; EAX = Userate*Period
-             mov     ebx,eax
-
-             xor     edx,edx
-             mov     dx,0dah
-             mov     eax,77900000h   ; EDX:EAX = 1712*8363*10000h
-
-             div     ebx
-
-             ;        1712 * 8363 * 10000h
-             ; EAX = ----------------------
-             ;        Userate * Period
-ENDM
-
 INCLUDE BORDER.INC
 
 INCLUDE STEREO.INC
@@ -160,13 +139,16 @@ Pitchdown:     ; we pitch down, but increase period ! (so check upper_border)
                cmp       ax,ds:[channel.upper_border+bp]
                jb        calcnewSF
                mov       ax,ds:[channel.upper_border+bp]
-calcnewSF:     ; now calc new frequency step for this period
-               mov       ds:[channel.sPeriod+bp],ax
-               cmp       ax,0
-               je        donotcalc
-               CalcFrequStep
-               mov     ds:[channel.sStep+bp],EAX
-donotcalc:     retn
+calcnewSF:
+; now calc new frequency step for this period
+        mov     ds:[channel.sPeriod+bp],ax
+        cmp     ax,0
+        je      donotcalc
+        call    mixCalcSampleStep
+        mov     ds:[channel.sStep+bp],eax
+donotcalc:
+        retn
+
 Pitchups:      ; effect 'F'
                mov       bx,ds:[channel.cmd2nd+bp]
                jmp       [pitup_cmd2nd+bx]

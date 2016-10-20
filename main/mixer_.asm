@@ -1,5 +1,7 @@
 .model large,pascal
 
+include s3mplay.def
+
 .data
 
 dwofs macro name, no
@@ -32,6 +34,26 @@ ends
 
 .code
 .386
+
+public mixCalcSampleStep
+mixCalcSampleStep:
+; IN: ax = period
+; OUT: eax = sample step
+        push    ecx
+        push    edx
+        movzx   eax,ax              ; clear upper 16bit
+        movzx   edx,[Userate]
+        mul     edx                 ; EAX = Userate*Period
+        mov     ecx,eax
+        mov     edx,0dah
+        mov     eax,77900000h       ; EDX:EAX = 1712*8363*10000h
+        div     ecx
+        ;        1712 * 8363 * 10000h
+        ; EAX = ----------------------
+        ;        Userate * Period
+        pop     edx
+        pop     ecx
+        retf
 
 public MixSampleMono8
 MixSampleMono8:
