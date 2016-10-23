@@ -1,5 +1,6 @@
 model large,pascal
 
+include ..\dos\emstool.def
 include mixer_.def
 include s3mplay.def
 
@@ -29,8 +30,6 @@ EXTRN patterndelay : BYTE
 EXTRN Ploop_on     : BYTE
 EXTRN Ploop_no     : BYTE
 EXTRN Ploop_to     : BYTE
-EXTRN patEMShandle : WORD
-EXTRN FrameSeg     : WORD
 EXTRN patlength    : WORD
 
       wavetab      DW offset sinuswave
@@ -196,8 +195,6 @@ PUBLIC READNEWNOTES
 PUBLIC SetupNewInst
 PUBLIC SetNewNote
 EXTRN  SET_TEMPO
-EXTRN  EMSMAP : FAR       ; <- somehow that does not work (assembler creats:
-                          ;    "push cs" + "near call", but that's wrong !!!
 
 CalcPeriod   macro
 local notbelow,notabove

@@ -5,4 +5,7 @@
 
 _DATA segment word public use16 'DATA'
 extrn UseRate: word
+extrn patEMShandle: word
+extrn smpEMShandle: word
+extrn savHandle: word
 _DATA ends

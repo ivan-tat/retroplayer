@@ -74,47 +74,71 @@ noeff_forfirst:
                cmp           ds:[channel.enabled+bp],0
                je            nextchannel
 
-               mov           ax,ds:[channel.SampleSEG+bp]
-               ; well now check if in EMS :
-               cmp           ax,0f000h
-               jb            noEMSsample
-               and           ax,0fffh
-               mov           bx,ax
-               mov           di,ds:[channel.sLoopend+bp]
-               mov           ax,04400h
-               mov           dx,[smpEMShandle]  ; dx = handle
-onemorepage:   push          bp bx ax dx di
-               ; Set page number:
-               int     67h
-               cmp     ah,0
-               je      noemsprob
-               mov     dl,0
-               div     dl         ; <- cause a "div by 0" because EMSdriver does not work correct
-noemsprob:     pop           di dx ax bx bp
-               inc           al
-               inc           bx
-               sub           di,16*1024
-               jnc           onemorepage
-               mov           ax,[frameseg]
-noEMSsample:   mov           gs,ax
+        ; well now check if in EMS :
+        mov     ax,ds:[channel.SampleSEG+bp]
+        cmp     ax,0f000h
+        jb      noEMSsample
 
-               xor           ebx,ebx
-               mov           bh,ds:[channel.SampleVol+bp]
+        and     ax,0fffh
+        xor     bx,bx
+        mov     cx,ds:[channel.sLoopend+bp]
+onemorepage:
+        push    ax
+        push    bx
+        push    cx
+        push    bp
+comment #
+; somehow this does not work properly...
+        push    word ptr [smpEMShandle] ; handle
+        push    ax  ; logical page
+        push    bx  ; physical page
+        call    EmsMap
+        test    al,al
+        jnz     noemsprob
+#
+;comment #
+        xchg    bx,ax
+        mov     ah,044h
+        mov     dx,[smpEMShandle]
+        int     67h
+        test    ah,ah
+        jz      noemsprob
+;#
+        ; cause an exception "division by zero" because EMS driver does not work correct
+        xor     dl,dl
+        div     dl
+noemsprob:
+        pop     bp
+        pop     cx
+        pop     bx
+        pop     ax
+        inc     ax
+        inc     bl
+        sub     cx,16*1024
+        jnc     onemorepage
+        mov     ax,[frameseg]
 
-               lfs           si,[volumetableptr]
+noEMSsample:
+        mov     gs,ax
 
-               mov           si,[nextPosition]
-               shl           si,1
-               mov           cx,[sample2calc]
+        lfs     si,[volumetableptr]
 
-               mov           edi,ds:[channel.sCurpos+bp]
-               rol           edi,16
+        xor     ebx,ebx
+        mov     bh,ds:[channel.SampleVol+bp]
 
-               mov           edx,ds:[channel.sStep+bp]
-               rol           edx,16
+        mov     si,[nextPosition]
+        shl     si,1
+        mov     cx,[sample2calc]
+        shr     cx,1
 
-               cmp           di,ds:[channel.sLoopend+bp]
-               jae           sampleends1
+        mov     edi,ds:[channel.sCurpos+bp]
+        rol     edi,16
+
+        mov     edx,ds:[channel.sStep+bp]
+        rol     edx,16
+
+        cmp     di,ds:[channel.sLoopend+bp]
+        jae     sampleends1
 back2calc1:
         call    MixSampleMono8
 

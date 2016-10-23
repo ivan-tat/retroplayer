@@ -75,75 +75,78 @@ _noeff_forfirst:
                cmp           ds:[channel.enabled+bp],0
                je            _nextchannel
 
-               mov           ax,ds:[channel.SampleSEG+bp]
+        ; well now check if in EMS :
+        mov     ax,ds:[channel.SampleSEG+bp]
+        cmp     ax,0f000h
+        jb      _noEMSsample
 
-               ; well now check if in EMS :
-               cmp           ax,0f000h
-               jb            _noEMSsample
+        and     ax,0fffh
+        xor     bx,bx
+        mov     cx,ds:[channel.sLoopend+bp]
+_onemorepage:
+        push    ax
+        push    bx
+        push    cx
+        push    bp
+comment #
+; somehow this does not work properly...
+        push    word ptr [smpEMShandle] ; handle
+        push    ax  ; logical page
+        push    bx  ; physical page
+        call    EmsMap
+        test    al,al
+        jnz     _noemsprob
+#
+;comment #
+        xchg    bx,ax
+        mov     ah,044h
+        mov     dx,[smpEMShandle]
+        int     67h
+        test    ah,ah
+        jz      _noemsprob
+;#
+        ; cause an exception "division by zero" because EMS driver does not work correct
+        xor     dl,dl
+        div     dl
+_noemsprob:
+        pop     bp
+        pop     cx
+        pop     bx
+        pop     ax
+        inc     ax
+        inc     bl
+        sub     cx,16*1024
+        jnc     _onemorepage
+        mov     ax,[frameseg]
 
-               mov           edi,ds:[channel.sCurpos+bp]   ; load it for EMS optim.
-               rol           edi,16
+_noEMSsample:
+        mov     gs,ax
 
-               mov           si,ds:[channel.sLoopend+bp]
+        lfs     si,[volumetableptr]
 
-               and           ax,0fffh
-               mov           bx,ax
-               mov           ax,04400h
-               mov           dx,[smpEMShandle]  ; dx = handle
-               ; EMS access optimization (switch on only pages we really need !)
-EMSoptim2:     cmp           di,16*1024
-               jb            EMSoptim1
-               setborder 9
-               sub           di,16*1024
-               sub           si,16*1024
-               inc           bx
-               inc           al                         ; don't need this page !
-               jmp           EMSoptim2
-EMSoptim1:     mov           cx,1
-               cmp           di,16*1024-2*1024
-               jb            _onemorepage
-               cmp           si,16*1026
-               jbe           _onemorepage
-               inc           cx                         ; need two pages ...
-_onemorepage:  push          bp bx ax dx cx
-               ; Set page number:
-               int           67h
-               cmp           ah,0
-               je            _noEMSprob
-               mov           dl,0
-               div           dl         ; <- cause a "div by 0", if EMSdriver does not work correct
-_noEMSprob:    pop           cx dx ax bx bp
-               inc           al
-               inc           bx
-               dec           cx
-               jnz           _onemorepage
-               mov           ax,[frameseg]
-               setborder 1
-_noEMSsample:  mov           gs,ax
+        xor     ebx,ebx
+        mov     bh,ds:[channel.SampleVol+bp]
 
-               lfs           si,[volumetableptr]
+        mov     si,[nextPosition]
+        shl     si,1
+        mov     cx,[sample2calc]
+        cmp     [stereo],0
+        je      _skip_stereo_0
+        shr     cx,1
+_skip_stereo_0:
 
-               mov           edi,ds:[channel.sCurpos+bp]   ; need to load this before EMS handling ...
-               rol           edi,16
+        mov     edi,ds:[channel.sCurpos+bp]
+        rol     edi,16
 
-               mov           edx,ds:[channel.sStep+bp]
-               rol           edx,16
+        mov     edx,ds:[channel.sStep+bp]
+        rol     edx,16
 
-               xor           ebx,ebx
-               mov           bh,ds:[channel.SampleVol+bp]
-
-               mov           si,[nextPosition]
-               shl           si,1
-               mov           cx,[sample2calc]
-               shr           cx,1               ; stereo :)
-
-               ; first check for correct position inside sample
-               ; oh well - now stereo position
-               cmp           ds:[channel.channeltyp+bp],1
-               je            _leftside
-               add           si,2
+        ; first check for correct position inside sample
+        ; oh well - now stereo position
+        cmp     ds:[channel.channeltyp+bp],1
+        je      _leftside
+        add     si,2
 _leftside:
-
         call    MixSampleStereo8
 
 _aftercalc:    cmp           di,ds:[channel.sLoopend+bp]

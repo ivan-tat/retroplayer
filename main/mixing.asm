@@ -1,5 +1,6 @@
 model large,pascal
 
+include ..\dos\emstool.def
 include mixer_.def
 include s3mplay.def
 
@@ -17,8 +18,6 @@ EXTRN volumetableptr :DWORD
 EXTRN CHANNEL        :TChannel
 EXTRN gvolume        :BYTE
 EXTRN patterndelay   :BYTE
-EXTRN smpEMShandle   :WORD
-EXTRN frameseg       :WORD
 EXTRN DMArealBufsize :WORD
 EXTRN TickBytesLeft  :WORD
 nextPosition      DW ?
