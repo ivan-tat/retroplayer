@@ -130,10 +130,7 @@ _noEMSsample:
         mov     si,[nextPosition]
         shl     si,1
         mov     cx,[sample2calc]
-        cmp     [stereo],0
-        je      _skip_stereo_0
         shr     cx,1
-_skip_stereo_0:
 
         mov     edi,ds:[channel.sCurpos+bp]
         rol     edi,16
