@@ -1,0 +1,11 @@
+; Assembler declarations for emstool.
+;
+; This is free and unencumbered software released into the public domain.
+
+_DATA segment word public use16 'DATA'
+extrn FrameSEG: word
+_DATA ends
+
+EMSTOOL_TEXT segment byte public use16 'CODE'
+extrn EmsMap: far
+EMSTOOL_TEXT ends
