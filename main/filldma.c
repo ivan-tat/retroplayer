@@ -38,8 +38,7 @@ extern uint16_t __pascal savHandle;
 
 /* other */
 
-extern void __near __pascal calc_mono_tick( void );
-extern void __near __pascal calc_stereo_tick( void );
+extern void __near __pascal calc_tick( void );
 
 /* locals */
 
@@ -47,15 +46,9 @@ static bool errorsav = false;
 
 // public
 void __near __pascal mixroutines( void ) {
-    if ( stereo ) {
-        __asm "push ds";    // FIXME
-        calc_stereo_tick();
-        __asm "pop ds";     // FIXME
-    } else {
-        __asm "push ds";    // FIXME
-        calc_mono_tick();
-        __asm "pop ds";     // FIXME
-    }
+    __asm "push ds";    // FIXME
+    calc_tick();
+    __asm "pop ds";     // FIXME
 }
 
 void __near convert_8( void *outbuf, void *mixbuf, uint16_t count ) {

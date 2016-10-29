@@ -1,6 +1,7 @@
 model large,pascal
 
 include ..\dos\emstool.def
+include ..\blaster\sbctl.def
 include mixer_.def
 include s3mplay.def
 
@@ -91,17 +92,13 @@ ENDS
 .CODE
 .386
 
-PUBLIC calc_stereo_tick
-PUBLIC calc_mono_tick
 EXTRN  readnewnotes
 EXTRN  SetupNewInst
 EXTRN  SetNewNote
 
 INCLUDE BORDER.INC
 
-INCLUDE STEREO.INC
-
-INCLUDE MONO.INC
+include tick.inc
 
 ; for stereo and mono the same :
 

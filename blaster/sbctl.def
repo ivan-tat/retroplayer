@@ -1,0 +1,10 @@
+; Assembler declarations for sbctl.
+;
+; This is free and unencumbered software released into the public domain.
+
+_DATA segment word public use16 'DATA'
+extrn sdev_mode_rate: word
+extrn _16bit: byte
+extrn sdev_mode_signed: byte
+extrn stereo: byte
+_DATA ends
