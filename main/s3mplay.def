@@ -3,9 +3,39 @@
 ; This is free and unencumbered software released into the public domain.
 ; For more information, please refer to <http://unlicense.org>.
 
+include general.def
+
 _DATA segment word public use16 'DATA'
+extrn Order: byte
+extrn LastOrder: byte
+extrn Pattern: word
+extrn PatLength: word
+extrn Instruments: word
+extrn InsNum: word
+extrn Channel: TChannel
+extrn UsedChannels: byte
+extrn curOrder: byte
+extrn curPattern: byte
+extrn curline: byte
+extrn curtick: byte
+extrn curspeed: byte
+extrn patterndelay: byte
+extrn Ploop_on: byte
+extrn Ploop_no: byte
+extrn Ploop_to: byte
+extrn EndOfSong: byte
+extrn gvolume: byte
+extrn loopS3M: byte
+extrn amigalimits: byte
+extrn sinuswave: byte
+extrn rampwave: byte
+extrn Squarewave: byte
 extrn UseRate: word
 extrn patEMShandle: word
 extrn smpEMShandle: word
 extrn savHandle: word
 _DATA ends
+
+S3MPLAY_TEXT segment byte public use16 'CODE'
+extrn set_tempo: far
+S3MPLAY_TEXT ends

@@ -3,6 +3,7 @@ model large,pascal
 include ..\dos\emstool.def
 include ..\blaster\sbctl.def
 include mixer_.def
+include readnote.def
 include s3mplay.def
 
 .DATA
@@ -91,10 +92,6 @@ ENDS
 
 .CODE
 .386
-
-EXTRN  readnewnotes
-EXTRN  SetupNewInst
-EXTRN  SetNewNote
 
 INCLUDE BORDER.INC
 
@@ -335,7 +332,7 @@ StartNewNote:  ; Ok now we have to calc things for the new note/instr ...
                cmp      al,00
                je       nonewinst
                mov      [channel.InstrNo+si],al
-               call near ptr SetupNewInst
+               call    SetupNewInst
 nonewinst:     mov      al,[channel.savNote+si]
                cmp      al,0ffh
                je       no_newnote
@@ -345,7 +342,7 @@ nonewinst:     mov      al,[channel.savNote+si]
                jmp      no_newnote
 normal_note:   mov      [channel.enabled+si],1     ; yo do mixing
                mov      [channel.Note+si],al
-               call near ptr SetNewNote
+               call    SetNewNote
 no_newnote:    mov      al,[channel.savVol+si]
                cmp      al,0ffh
                je       no_vol

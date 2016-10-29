@@ -1,36 +1,11 @@
 model large,pascal
 
+include general.def
 include ..\dos\emstool.def
 include mixer_.def
 include s3mplay.def
 
 .DATA
-
-INCLUDE GENERAL.DEF
-EXTRN ORDER      : BYTE
-EXTRN CHANNEL    : TCHANNEL
-EXTRN PATTERN    : WORD
-EXTRN INSTRUMENTs : WORD
-EXTRN usedchannels : BYTE
-EXTRN curline      : BYTE
-EXTRN curOrder     : BYTE
-EXTRN curPattern   : BYTE
-EXTRN curtick      : BYTE
-EXTRN curspeed     : BYTE
-EXTRN loopS3M      : BYTE
-EXTRN lastorder    : BYTE
-EXTRN EndOfSong    : BYTE
-EXTRN gvolume      : BYTE
-EXTRN amigalimits  : BYTE
-EXTRN sinuswave    : BYTE
-EXTRN rampwave     : BYTE
-EXTRN Squarewave   : BYTE
-EXTRN Insnum       : WORD
-EXTRN patterndelay : BYTE
-EXTRN Ploop_on     : BYTE
-EXTRN Ploop_no     : BYTE
-EXTRN Ploop_to     : BYTE
-EXTRN patlength    : WORD
 
       wavetab      DW offset sinuswave
                    DW offset rampwave
@@ -63,7 +38,7 @@ noeffect2 EQU    dw offset handlenothing  ; nothing to do for this effect here .
                    dw offset Retrigg        ; effect 'Q'  ok !
                    dw offset Tremolo        ; effect 'R'  ok !
                    dw offset Specialsets    ; effect 'S'  look at special 1
-                   dw offset setTempo       ; effect 'T'  ok !
+                   dw offset EffInit_T_SetTempo
                    dw offset vibrato        ; effect 'U'  ok ! (here equal to vibrato)
                    dw offset globalvolume   ; effect 'V'  ok !
 
@@ -191,46 +166,63 @@ ENDS
 .CODE
 .386
 
-PUBLIC READNEWNOTES
-PUBLIC SetupNewInst
-PUBLIC SetNewNote
-EXTRN  SET_TEMPO
-
-CalcPeriod   macro
-local notbelow,notabove
+calcNotePeriod proc near
 ; IN:  AL - Note (higher 4=name,lower 4=octave)
 ;      FS - Segment of instrument
 ; OUT: AX = Period
-; DESTROYs: BX,CL
-             ; calc speriod (with st3 finetune) :
-             mov     bl,al
-             mov     cl,al
-             shr     cl,4
-             xor     bh,bh
-             and     bl,0fh
-             shl     bl,1
-             ; ok calculate the period
-             mov     ax,[st3periods+bx]
-             shl     ax,4                 ; period(note)*16
-             shr     ax,cl                ; period(note)*16 >> octave(note)
-             mov     dx,8363
-             mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
-             mov     bx,fs:[TInstrument.c2speed]
-             div     bx
+        push    bx
+        push    cx
+        ; calc speriod (with st3 finetune) :
+        mov     bl,al
+        mov     cl,al
+        shr     cl,4
+        and     bx,0fh
+        shl     bx,1
+        ; ok calculate the period
+        mov     ax,[st3periods+bx]
+        shl     ax,4                 ; period(note)*16
+        shr     ax,cl                ; period(note)*16 >> octave(note)
+        mov     dx,8363
+        mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
+        mov     bx,fs:[TInstrument.c2speed]
+        div     bx
 
-             ;       8363*(period(note)*16 shr octave(note))
-             ; ax = --------------------------------------
-             ;            C2Speed of current Sample
+        ;       8363*(period(note)*16 shr octave(note))
+        ; ax = --------------------------------------
+        ;            C2Speed of current Sample
 
-             ; Now check borders :
-             cmp     ax,[channel.lower_border+si]
-             jnb     notbelow
-             mov     ax,[channel.lower_border+si]
-notbelow:    cmp     ax,[channel.upper_border+si]
-             jna     notabove
-             mov     ax,[channel.upper_border+si]
+        ; Now check borders :
+        cmp     ax,[channel.lower_border+si]
+        jnb     notbelow
+
+        mov     ax,[channel.lower_border+si]
+
+notbelow:
+        cmp     ax,[channel.upper_border+si]
+        jna     notabove
+
+        mov     ax,[channel.upper_border+si]
+
 notabove:
-endM
+        pop     cx
+        pop     bx
+        ret
+calcNotePeriod endp
+
+calcpart proc near
+        call    calcNotePeriod
+        test    ax,ax
+        jz      calcpart_nostep
+
+        call    mixCalcSampleStep
+        jmp     calcpart_done
+
+calcpart_nostep:
+        xor    eax,eax
+
+calcpart_done:
+        ret
+calcpart endp
 
 CheckPara0 MACRO
 local cp
@@ -248,7 +240,8 @@ local cp
 cp:
 ENDM
 
-SetupNewInst PROC NEAR
+public SetupNewInst
+SetupNewInst proc far
 ; IN : AL = number of new instrument
 ;      SI = offset to channel
 ;      DS = Dataseg
@@ -328,9 +321,10 @@ takeamigalimits:
 after1:      mov     al,[curInst]
 
              ret
-ENDP
+endp
 
-SetNewNote   PROC NEAR
+public SetNewNote
+SetNewNote proc far
 ; IN: AL = note & octave
 ;     SI = offset to channel
 ;
@@ -348,8 +342,7 @@ SetNewNote   PROC NEAR
              cmp     fs:[TInstrument.Typ],1  ; only calc if instrument does exist
              jne     after2
 
-             calcperiod
-
+             call    calcNotePeriod
              mov     [channel.speriod+si],ax
 
              ; now step calculations :
@@ -366,10 +359,11 @@ SetNewNote   PROC NEAR
              mov     [channel.sCurpos+si],ebx
              mov     [channel.enabled+si],1
 after2:      ret
-ENDP
+endp
 
 ; put next notes into channels
-READNEWNOTES PROC NEAR
+public readnewnotes
+readnewnotes proc far
              mov     [jump2flag],0
              mov     [breakflag],0
              mov     [gvolFlag],0
@@ -539,7 +533,7 @@ dontrestart:
              #
 
              mov     [channel.InstrNo+si],al
-             call near ptr SetupNewInst
+             call    SetupNewInst
 no_newinstr: ; read note ...
              ; ~~~~~~~~~~~~~
              mov     al,[curNote]
@@ -550,7 +544,7 @@ no_newinstr: ; read note ...
              mov     [channel.enabled+si],0     ; stop mixing
              jmp     no_newnote
 normal_note: mov     [channel.Note+si],al
-             call near ptr SetNewNote
+             call    SetNewNote
 no_newnote:  ; read volume - last but not least ;)
              ; ~~~~~~~~~~~
              mov     al,[curVol]
@@ -917,14 +911,21 @@ InitPatdelay:  cmp      [inpatterndly],1
                mov      al,[channel.parameter+si]
                mov      [sav_para],al
                jmp      back2reality
-setTempo:      ; effect 'T'
-               checkPara0not
-               xor      ah,ah
-               push     si di fs es
-               push     ax
-               call far ptr SET_TEMPO
-               pop      es fs di si
-               jmp      back2reality
+
+EffInit_T_SetTempo:
+        checkPara0not
+        xor     ah,ah
+        push    si
+        push    di
+        push    fs
+        push    es
+        push    ax  ; arg
+        call    set_tempo
+        pop     es
+        pop     fs
+        pop     di
+        pop     si
+        jmp     back2reality
 
 globalvolume:  ; effect 'V'
                checkPara0not
@@ -1067,23 +1068,15 @@ arpok2:        or       bh,bl
                mov     ax,[channel.instrSEG+si]
                mov     fs,ax
                mov      al,[channel.Note+si]
-               call near ptr calcpart
+               call    calcpart
                mov      [channel.Step0+si],eax
                mov      al,[channel.Note1+si]
-               call near ptr calcpart
+               call    calcpart
                mov      [channel.Step1+si],eax
                mov      al,[channel.Note2+si]
-               call near ptr calcpart
+               call    calcpart
                mov      [channel.Step2+si],eax
                jmp      handlenothing
-
-calcpart:      calcperiod
-               cmp       ax,0
-               je        nostep
-               call    mixCalcSampleStep
-               retn
-nostep:        xor       eax,eax
-               retn
 
 Hdl_Vib_Vol:   cmp      [channel.continueEf+si],1
                je       Hdl_Volfx
@@ -1132,7 +1125,7 @@ Hdl_patterndly: mov       al,[sav_para]
                 mov       [channel.cmd2nd+si],0
                 jmp       handlenothing
 
-READNEWNOTES ENDP
+readnewnotes endp
 
 ENDS
 

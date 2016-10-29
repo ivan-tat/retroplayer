@@ -4,7 +4,7 @@ calc_tick proc near
         ; first fill tickbuffer with ZERO = 2048+offset post8bit
         ; for 16bit play then ofcourse a bit different value ...
         ; just only for 8bit play mode
-        mov     ax,word ptr [offset tickbuffer +2]
+        mov     ax,word ptr [offset tickbuffer+2]
         mov     es,ax
         mov     ax,2048
         xor     di,di
@@ -34,7 +34,7 @@ calc_tick_anewtick:
 
 calc_tick_nodelay:
         setborder 4
-        call    near ptr [READNEWNOTES]
+        call    readnewnotes
         setborder 1
         jmp     _continuecalc
 
