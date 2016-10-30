@@ -1,8 +1,11 @@
 .model large,pascal
+.386
+
+DGROUP group _DATA
 
 include s3mplay.def
 
-.data
+_DATA segment word public use16 'DATA'
 
 dwofs macro name, no
         dw      offset &name&no
@@ -30,10 +33,10 @@ rept LOOP_STEREO_LENGTH
         counter = counter + 1
 endm
 
-ends
+_DATA ends
 
-.code
-.386
+MIXER__TEXT segment word public use16 'CODE'
+assume cs:MIXER__TEXT,ds:DGROUP,ss:DGROUP
 
 public mixCalcSampleStep
 mixCalcSampleStep:
@@ -181,6 +184,6 @@ endm
         pop     ds
         retf
 
-ends
+MIXER__TEXT ends
 
 end

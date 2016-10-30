@@ -1,35 +1,27 @@
-model large,pascal
+.model large,pascal
+.386
 
+DGROUP group _DATA
+
+include general.def
 include ..\dos\emstool.def
 include ..\blaster\sbctl.def
 include mixer_.def
+include voltab.def
 include readnote.def
 include s3mplay.def
 
-.DATA
-INCLUDE GENERAL.DEF
-EXTRN tickbuffer  :DWORD
-EXTRN post8bit    :WORD
-EXTRN curtick     :BYTE
-EXTRN curspeed    :BYTE
-EXTRN curline     :BYTE
-EXTRN BPT         :WORD
-EXTRN EndOfSong   :BYTE
-EXTRN usedchannels:BYTE
-EXTRN volumetableptr :DWORD
-EXTRN CHANNEL        :TChannel
-EXTRN gvolume        :BYTE
-EXTRN patterndelay   :BYTE
-EXTRN DMArealBufsize :WORD
-EXTRN TickBytesLeft  :WORD
+_DATA segment word public use16 'DATA'
+
 nextPosition      DW ?
 sample2calc       DW ?     ; in mono number of bytes/ in stereo number of words
 curchannel        DB ?
 calleffects       DB ?
 
-noeffect EQU    dw offset no_effect
+noeffect equ dw offset no_effect
 
-effects            noeffect
+effects label word
+                   noeffect
                    noeffect
                    noeffect
                    noeffect
@@ -53,17 +45,21 @@ effects            noeffect
                    dw offset fineVibrato    ; effect 'U'
                    noeffect
 
-vol_cmd2nd         dw offset volslidedown
+vol_cmd2nd label word
+                   dw offset volslidedown
                    dw offset volslideup
                    noeffect
                    noeffect
-pitdwn_cmd2nd      dw offset pitchdown
+pitdwn_cmd2nd label word
+                   dw offset pitchdown
                    noeffect
                    noeffect
-pitup_cmd2nd       dw offset pitchup
+pitup_cmd2nd label word
+                   dw offset pitchup
                    noeffect
                    noeffect
-retrig_cmd2nd      noeffect
+retrig_cmd2nd label word
+                   noeffect
                    dw offset slddown
                    dw offset use2div3
                    dw offset use1div2
@@ -72,7 +68,8 @@ retrig_cmd2nd      noeffect
                    dw offset use2times
 
       ; and for all special commands :
-special_cmd2nd     noeffect                   ; S0? - nothin
+special_cmd2nd label word
+                   noeffect                   ; S0? - nothin
                    noeffect                   ; set filter
                    noeffect                   ; set glissando
                    noeffect                   ; set finetune
@@ -88,12 +85,12 @@ special_cmd2nd     noeffect                   ; S0? - nothin
                    dw offset Notedelay
                    noeffect                   ; Pattern delay
                    noeffect                   ; funkrepeat
-ENDS
+_DATA ends
 
-.CODE
-.386
+MIXING_TEXT segment word public use16 'CODE'
+assume cs:MIXING_TEXT,ds:DGROUP,ss:DGROUP
 
-INCLUDE BORDER.INC
+include border.inc
 
 include tick.inc
 
@@ -378,5 +375,6 @@ f_endoftest:
                add       ax,bx
                jmp       calcnewSF
 
-ENDS
-END
+MIXING_TEXT ends
+
+end

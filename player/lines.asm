@@ -1,14 +1,16 @@
-
-MODEL large,pascal
-
-.DATA
-col       db (?)
-dabklein_ dw (?)
-extrn     drawseg:word
-ENDS
-
-.CODE
+.model large,pascal
 .386
+
+DGROUP group _DATA
+
+_DATA segment word public use16 'DATA'
+col       db ?
+dabklein_ dw ?
+extrn     drawseg: word
+_DATA ends
+
+LINES_TEXT segment word public use16 'CODE'
+assume cs:LINES_TEXT,ds:DGROUP
 
 ; think about to creat different parts for
 ;    1.  deltax>deltay
@@ -19,10 +21,9 @@ ENDS
 ; ist mir eben (29.4) noch eingefallen:
 ; weitere optimierung fuer seknrechte und waagerechte linien
 
-PUBLIC linie
-
-linie PROC NEAR x1:WORD,y1:WORD,x2:WORD,y2:WORD,farbe:BYTE
-      push   bp
+public linie
+linie proc near x1:WORD,y1:WORD,x2:WORD,y2:WORD,farbe:BYTE
+;      push   bp
       mov    ax,drawseg
       mov    es,ax
       mov    al,farbe
@@ -131,8 +132,10 @@ dabgr:
       add    bx,dx
       loop   sl
 ende:
-      pop    bp
+;      pop    bp
       ret
-linie ENDP
+linie endp
+
+LINES_TEXT ends
 
 end

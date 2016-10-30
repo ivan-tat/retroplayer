@@ -1,24 +1,30 @@
-model large,pascal
+.model large,pascal
+.386
+
+DGROUP group _DATA
 
 include general.def
 include ..\dos\emstool.def
 include mixer_.def
 include s3mplay.def
 
-.DATA
+_DATA segment word public use16 'DATA'
 
-      wavetab      DW offset sinuswave
-                   DW offset rampwave
-                   DW offset squarewave   ; looks not like a square but anyway
-                   ; 'random wave' is not a table, but a call for a random number !
+wavetab label word
+        dw offset sinuswave
+        dw offset rampwave
+        dw offset squarewave    ; looks not like a square but anyway
+        ; 'random wave' is not a table, but a call for a random number !
 
-      st3periods   dw 1712,1616,1524,1440,1356,1280,1208,1140,1076,1016, 960, 907
+st3periods label word
+        dw 1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
 
-noeffect  EQU    dw offset checkonlyPara  ; no effect
-noeffect2 EQU    dw offset handlenothing  ; nothing to do for this effect here ...
+noeffect  equ dw offset checkonlyPara   ; no effect
+noeffect2 equ dw offset handlenothing   ; nothing to handle for this effect
 
-      ; we have to init all the effects :
-      initeffects  noeffect
+; we have to init all the effects :
+initeffects label word
+                   noeffect
                    dw offset setspeed       ; effect 'A'  ok !
                    dw offset jump2order     ; effect 'B'  ok !
                    dw offset patternbreak2  ; effect 'C'  ok !
@@ -42,9 +48,10 @@ noeffect2 EQU    dw offset handlenothing  ; nothing to do for this effect here .
                    dw offset vibrato        ; effect 'U'  ok ! (here equal to vibrato)
                    dw offset globalvolume   ; effect 'V'  ok !
 
-      ; Ok now some tables for multichoise effects (e.g. 'Syx' but also 'Dxy',E,F)
-      ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      special1     noeffect                   ; S0? - nothin
+; Ok now some tables for multichoise effects (e.g. 'Syx' but also 'Dxy',E,F)
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+special1 label word
+                   noeffect                   ; S0? - nothin
                    noeffect                   ; set filter -> not implemented (by ST3)
                    noeffect                   ; set glissando -> not implemented (by ST3)
                    noeffect                   ; set finetune -> not here ! look special2
@@ -61,7 +68,8 @@ noeffect2 EQU    dw offset handlenothing  ; nothing to do for this effect here .
                    dw offset InitPatdelay  ;
                    noeffect                   ; funkrepeat -> not implemented
 
-      retrig_dif   dw offset nosld            ; all done ...
+retrig_dif label word
+                   dw offset nosld            ; all done ...
                    dw offset slddown
                    dw offset slddown
                    dw offset slddown
@@ -78,10 +86,11 @@ noeffect2 EQU    dw offset handlenothing  ; nothing to do for this effect here .
                    dw offset use3div2
                    dw offset use2times
 
-      ; and some effects we have to handle after reading vol/inst/note
-      ; maybe refresh etc. - remember MODplayer ...
-      ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      handleeffects  noeffect2              ; really no effect ;)
+; and some effects we have to handle after reading vol/inst/note
+; maybe refresh etc. - remember MODplayer ...
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+handleeffects label word
+                     noeffect2              ; really no effect ;)
                      noeffect2
                      noeffect2
                      noeffect2
@@ -107,18 +116,22 @@ noeffect2 EQU    dw offset handlenothing  ; nothing to do for this effect here .
 
       ; Ok now some tables for multichoise effects (e.g. 'Syx' but also 'Dxy',E,F)
       ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-      Vol_cmd2nd     noeffect2
+Vol_cmd2nd label word
+                     noeffect2
                      noeffect2
                      dw offset FineVSlideDwn
                      dw offset FineVSlideUp
-      Pitdwn_cmd2nd  noeffect2
+Pitdwn_cmd2nd label word
+                     noeffect2
                      dw offset Finepitch_down
                      dw offset XFinepitch_down
-      Pitup_cmd2nd   noeffect2
+Pitup_cmd2nd label word
+                     noeffect2
                      dw offset Finepitch_up
                      dw offset XFinepitch_up
 
-      special2     noeffect2                  ; S0? - nothin
+special2 label word
+                   noeffect2                  ; S0? - nothin
                    noeffect2                  ; set filter -> not implemented (by ST3)
                    noeffect2                  ; set glissando -> not implemented (by ST3)
                    dw offset Hdl_finetune
@@ -161,10 +174,10 @@ noeffect2 EQU    dw offset handlenothing  ; nothing to do for this effect here .
       curinst      db ?   ; the same thing for instrument
       curVol       db ?   ; and for volume
 
-ENDS
+_DATA ends
 
-.CODE
-.386
+READNOTE_TEXT segment word public use16 'CODE'
+assume cs:READNOTE_TEXT,ds:DGROUP
 
 calcNotePeriod proc near
 ; IN:  AL - Note (higher 4=name,lower 4=octave)
@@ -321,7 +334,7 @@ takeamigalimits:
 after1:      mov     al,[curInst]
 
              ret
-endp
+SetupNewInst endp
 
 public SetNewNote
 SetNewNote proc far
@@ -359,7 +372,7 @@ SetNewNote proc far
              mov     [channel.sCurpos+si],ebx
              mov     [channel.enabled+si],1
 after2:      ret
-endp
+SetNewNote endp
 
 ; put next notes into channels
 public readnewnotes
@@ -563,7 +576,7 @@ no_vol:      ; ok now the effect handling after reading vol/instr/note
 handlenothing:
 
 donothing:   add     di,5                ; to next channel in pattern
-             add     si,size Channel     ; to next channel in channel mix info
+             add     si,size TChannel    ; to next channel in channel mix info
              dec     [chnCounter]        ; one channel done
              jnz     chnLoop
              cmp     [gvolFlag],0
@@ -1127,6 +1140,6 @@ Hdl_patterndly: mov       al,[sav_para]
 
 readnewnotes endp
 
-ENDS
+READNOTE_TEXT ends
 
-END
+end

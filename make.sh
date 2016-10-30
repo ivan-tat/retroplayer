@@ -79,9 +79,9 @@ $PC $PASINC blaster.pas
 cd ../main
 PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster'
 compile_c filldma.c
-$AS mixer_.asm
-$AS mixing.asm
-$AS processo.asm
+$ASW mixer_.asm
+$ASW mixing.asm
+$ASW processo.asm
 $AS readnote.asm
 $PC $PASINC types.pas
 $PC $PASINC s3mtypes.pas
@@ -95,6 +95,6 @@ cd ../player
 PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster;..\main'
 $PC $PASINC plays3m.pas
 $PC $PASINC smalls3m.pas
-$AS lines.asm
+$ASW lines.asm
 $PC $PASINC s3m_osci.pas
 cd ..

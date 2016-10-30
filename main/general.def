@@ -1,3 +1,6 @@
+ifndef general_def_included
+general_def_included equ 1
+
 TCHANNEL STRUC
            ; general switches :
            enabled     DB     ?   ; flag if =0 then nothing to mix at the moment
@@ -74,3 +77,5 @@ TINSTRUMENT STRUC
               IName         DB 28 DUP (?)
               SCRS_ID       DB  4 DUP (?)
 TINSTRUMENT ENDS
+
+endif

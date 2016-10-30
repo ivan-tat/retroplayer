@@ -203,7 +203,7 @@ _back2main:
         mov     ds:[channel.sCurpos+bp],edi
 
 _nextchannel:
-        add     bp,size channel
+        add     bp,size TChannel
         dec     [curchannel]
         jnz     _chnLoop
 

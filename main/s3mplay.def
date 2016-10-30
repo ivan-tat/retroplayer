@@ -31,6 +31,10 @@ extrn sinuswave: byte
 extrn rampwave: byte
 extrn Squarewave: byte
 extrn UseRate: word
+extrn DMArealbufsize: word
+extrn TickBuffer: dword
+extrn BPT: word
+extrn TickBytesLeft: word
 extrn patEMShandle: word
 extrn smpEMShandle: word
 extrn savHandle: word
