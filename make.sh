@@ -80,7 +80,8 @@ cd ../main
 PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster'
 compile_c filldma.c
 $ASW mixer_.asm
-$ASW mixing.asm
+compile_c effects.c
+$AS mixing.asm
 $ASW processo.asm
 $AS readnote.asm
 $PC $PASINC types.pas

@@ -277,7 +277,7 @@ SetupNewInst proc far
              mov     al,63
 volwell:     mul     [gvolume]
              shr     ax,6
-             mov     [channel.SampleVol+si],al
+             mov     [channel.bSampleVol+si],al
              mov     ax,fs:[TInstrument.memseg]
              mov     [channel.sampleSEG+si],ax
              mov     al,fs:[TInstrument.flags]
@@ -370,7 +370,7 @@ SetNewNote proc far
              mov     bx,[channel.sSmpstart+si]
              shl     ebx,16
              mov     [channel.sCurpos+si],ebx
-             mov     [channel.enabled+si],1
+             mov     [channel.bEnabled+si],1
 after2:      ret
 SetNewNote endp
 
@@ -434,7 +434,7 @@ noemsprob:   pop     di
 noemspattern:mov     es,ax
              ; ES:DI - pointer to current position in current pattern
              xor     si,si               ; extra channel offset (running through the channels)
-chnLoop:     cmp     [channel.channeltyp+si],2
+chnLoop:     cmp     [Channel.bChannelType+si],2
              ja      donothing           ; <- for adlib channels
              mov     [portaFlag],0      ; <- set Flag back
              ; ok first do read current note,inst,vol -> if in patterndelay then ignore them !
@@ -534,7 +534,7 @@ effectdone:  ; read instrument
 instok:      pop     ax
 
              comment #
-             cmp     [channel.enabled+si],0       ; if channel is disabled then restart definitly
+             cmp     [channel.bEnabled+si],0       ; if channel is disabled then restart definitly
              je      restart
              cmp     [channel.InstrNo+si],al      ; but if it's enabled & same instrno then don't restart
              je      dontrestart
@@ -554,7 +554,7 @@ no_newinstr: ; read note ...
              je      no_newnote
              cmp     al,0feh
              jne     normal_note
-             mov     [channel.enabled+si],0     ; stop mixing
+             mov     [channel.bEnabled+si],0     ; stop mixing
              jmp     no_newnote
 normal_note: mov     [channel.Note+si],al
              call    SetNewNote
@@ -568,7 +568,7 @@ no_newnote:  ; read volume - last but not least ;)
              mov     al,63
 volok:       mul     [gvolume]
              shr     ax,6
-             mov     [channel.SampleVol+si],al
+             mov     [channel.bSampleVol+si],al
 
 no_vol:      ; ok now the effect handling after reading vol/instr/note
              mov     bx,[channel.command+si]
@@ -746,7 +746,7 @@ Portamento:    ; effect 'G'
                mov      [channel.PortPara+si],al
 nonewPortpara: mov      [portaFlag],1
                ; check first if portamento really possible:
-               cmp      [channel.enabled+si],0
+               cmp      [channel.bEnabled+si],0
                je       stopporta
                cmp      [curNote],0feh
                jae      back2reality    ; <- continue portamento
@@ -795,7 +795,7 @@ Vib_Vol:       ; effect 'K'
 Port_Vol:      ; effect 'L'
                mov      [portaFlag],1
                ; check first if portamento really possible:
-               cmp      [channel.enabled+si],0
+               cmp      [channel.bEnabled+si],0
                je       stopporta             ; <- channel plays nothing -> no porta and volfx usefull ;)
                cmp      [curNote],0feh
                jae      volumeefcts           ; <- continue portamento
@@ -958,16 +958,16 @@ Hdl_Volfx:    ; effect 'D'
               jmp       [vol_cmd2nd+bx]
 FineVSlideDwn:mov       al,[channel.Parameter+si]
               and       al,0fh
-              sub       [channel.SampleVol+si],al
+              sub       [channel.bSampleVol+si],al
               jnc       handlenothing
-              mov       [channel.SampleVol+si],0
+              mov       [channel.bSampleVol+si],0
               jmp       handlenothing
 FineVSlideUp: mov       al,[channel.Parameter+si]
               shr       al,4
-              add       [channel.SampleVol+si],al
-              cmp       [channel.SampleVol+si],64
+              add       [channel.bSampleVol+si],al
+              cmp       [channel.bSampleVol+si],64
               jb        handlenothing
-              mov       [channel.SampleVol+si],63
+              mov       [channel.bSampleVol+si],63
               jmp       handlenothing
 Hdl_pitchdwn: ; effect 'E'
               mov       bx,[channel.cmd2nd + si]
@@ -1124,7 +1124,7 @@ Hdl_tremolo:  ; effect 'R' (Tremolo)
                cmp      [channel.continueEf+si],1
                je       handlenothing                ; continue this effect !
               ; save volume
-savevol:      mov       al,[channel.SampleVol+si]
+savevol:      mov       al,[channel.bSampleVol+si]
               mov       [channel.OldVolume+si],al
               jmp       handlenothing
 Hdl_Special:  ; effect 'S'

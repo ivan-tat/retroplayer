@@ -52,5 +52,6 @@ blaster/sbctl.asm
 main/voltab.asm
 main/posttab.asm
 main/filldma.asm
+main/effects.asm
 watcomc/scripts/tmp/
 watcomc/printf.asm

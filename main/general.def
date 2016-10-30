@@ -2,16 +2,16 @@ ifndef general_def_included
 general_def_included equ 1
 
 TCHANNEL STRUC
-           ; general switches :
-           enabled     DB     ?   ; flag if =0 then nothing to mix at the moment
-           channeltyp  DB     ?   ; 0=off,1=left,2=right,3,4=adlib ... if 0,3,4 -> everything ignored !
-           ; current Instrument :
+    ; general switches :
+        bEnabled db ?           ; flag if =0 then nothing to mix at the moment
+        bChannelType db ?       ; 0=off,1=left,2=right,3,4=adlib ... if 0,3,4 -> everything ignored !
+    ; current Instrument :
            InstrSEG    DW     ?   ; DOS segment of current instrument data
            SampleSEG   DW     ?   ; DOS segment of current sample data
            InstrNo     DB     ?   ; number of instrument is currently playing
            Note        DB     ?   ; we don't need it really for playing, but let's store it anyway
-           ; copy of sampledata (maybe it differs a bit):
-           SampleVol   DB     ?   ; current sample volume
+    ; copy of sampledata (maybe it differs a bit):
+        bSampleVol db ?         ; current sample volume
            sLoopflag   DB     ?   ; flag if we have to loop sample
            sSmpstart   DW     ?   ; start offset of sample
            sLoopstart  DW     ?   ; loop start of current sample =0ffffh if no loop
@@ -23,11 +23,11 @@ TCHANNEL STRUC
                                   ; period does no influence playing a sample direct, but it's for sliding etc.
            lower_border DW    ?   ; B-7 or B-5 period for current instrument to check limits
            upper_border DW    ?   ; C-0 or C-3 period for current instrument to check limits
-           ; effect info :
+    ; effect info :
            command     DW     ?   ; 2 times effectnumber (for using a jmptable)
            cmd2nd      DW     ?   ; -> 2nd command part - for multiple effects
            parameter   DB     ?   ; just the command parameters
-           ; extra effect data :
+    ; extra effect data :
            continueEf  DB     ?   ; Flag if we should continue effect - vibrato,tremolo
            VibtabOfs   DW     ?   ; yo for each channel its own choise (default = OFS sinuswave)
            TrmtabOfs   DW     ?   ; = Offset of wavetable for tremolo
