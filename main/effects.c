@@ -274,8 +274,7 @@ effTickProc( effTick_S_Special )
 
 effTickProc( effTick_S_Special_NoteCut )
 {
-    chn->ndTick--;
-    if ( ! chn->ndTick-- ) chn->bEnabled = 0;  // disable it
+    if ( ! --chn->ndTick ) chn->bEnabled = 0;  // disable it
 }
 
 effTickProc( effTick_S_Special_NoteDelay )
