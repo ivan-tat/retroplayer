@@ -41,7 +41,8 @@ outp \
 memcmp \
 memset \
 i4d \
-i4m; do
+i4m \
+i8d086; do
     $ASW $f.asm
     $PC $f.pas
 done
@@ -80,6 +81,7 @@ cd ../main
 PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster'
 compile_c filldma.c
 $ASW mixer_.asm
+compile_c mixer.c
 compile_c effects.c
 $AS mixing.asm
 $ASW processo.asm

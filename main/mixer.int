@@ -1,0 +1,4 @@
+(* Pascal declarations for mixer.c. *)
+
+(*$l mixer.obj*)
+procedure mixCalcSampleStep; far; external;

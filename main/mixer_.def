@@ -4,7 +4,7 @@
 ; For more information, please refer to <http://unlicense.org>.
 
 MIXER__TEXT segment word public use16 'CODE'
-extrn mixCalcSampleStep: far
-extrn MixSampleMono8: far
-extrn MixSampleStereo8: far
+extrn _mixCalcSampleStep: far
+extrn _MixSampleMono8: far
+extrn _MixSampleStereo8: far
 MIXER__TEXT ends

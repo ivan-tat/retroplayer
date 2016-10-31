@@ -53,5 +53,6 @@ main/voltab.asm
 main/posttab.asm
 main/filldma.asm
 main/effects.asm
+main/mixer.asm
 watcomc/scripts/tmp/
 watcomc/printf.asm

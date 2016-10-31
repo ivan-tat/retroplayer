@@ -227,7 +227,7 @@ calcpart proc near
         test    ax,ax
         jz      calcpart_nostep
 
-        call    mixCalcSampleStep
+        call    _mixCalcSampleStep
         jmp     calcpart_done
 
 calcpart_nostep:
@@ -359,7 +359,7 @@ SetNewNote proc far
              mov     [channel.speriod+si],ax
 
              ; now step calculations :
-             call    mixCalcSampleStep
+             call    _mixCalcSampleStep
 
              mov     [channel.sStep+si],EAX
 
@@ -475,7 +475,7 @@ vibend:      push    ax
              mov     [channel.sPeriod+si],ax
              cmp     ax,0
              je      novibcalc
-             call    mixCalcSampleStep
+             call    _mixCalcSampleStep
              mov     [channel.sStep+si],EAX
 novibcalc:   pop     ax
 novibend:    cmp     ax,2*18             ; Tremolo ...
@@ -985,7 +985,7 @@ Finepitch_down:
               mov       ax,[channel.upper_border+si]
 ptok:         ; now calc new frequency step for this period
               mov       [channel.sPeriod+si],ax
-              call    mixCalcSampleStep
+              call    _mixCalcSampleStep
               mov       ds:[channel.sStep+si],EAX
               jmp       handlenothing
 XFinepitch_down:

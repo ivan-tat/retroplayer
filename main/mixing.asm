@@ -285,11 +285,11 @@ _skip_5:
         cmp     [stereo],0
         je      _skip_3
 
-        call    MixSampleStereo8
+        call    _MixSampleStereo8
         jmp     _skip_4
 
 _skip_3:
-        call    MixSampleMono8
+        call    _MixSampleMono8
 
 _skip_4:
 _aftercalc:
@@ -348,7 +348,7 @@ calcnewSF proc near
         mov     CHANOFF[TChannel.sPeriod],ax
         cmp     ax,0
         je      donotcalc
-        call    mixCalcSampleStep
+        call    _mixCalcSampleStep
         mov     CHANOFF[TChannel.sStep],eax
 donotcalc:
         ret

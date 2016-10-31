@@ -28,6 +28,7 @@ rm -f ./main/voltab.asm
 rm -f ./main/posttab.asm
 rm -f ./main/filldma.asm
 rm -f ./main/effects.asm
+rm -f ./main/mixer.asm
 cleandir ./pascal
 cleandir ./player
 cleandir ./watcomc

@@ -32,4 +32,5 @@ disasm inp.obj INP_TEXT
 disasm outp.obj OUTP_TEXT
 disasm i4d.obj I4D_TEXT
 disasm i4m.obj I4M_TEXT
+disasm i8d086.obj I8D086_TEXT
 cd $OLDPWD

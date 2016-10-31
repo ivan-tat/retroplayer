@@ -38,8 +38,8 @@ _DATA ends
 MIXER__TEXT segment word public use16 'CODE'
 assume cs:MIXER__TEXT,ds:DGROUP,ss:DGROUP
 
-public mixCalcSampleStep
-mixCalcSampleStep:
+public _mixCalcSampleStep
+_mixCalcSampleStep:
 ; IN: ax = period
 ; OUT: eax = sample step
         push    ecx
@@ -58,8 +58,8 @@ mixCalcSampleStep:
         pop     ecx
         retf
 
-public MixSampleMono8
-MixSampleMono8:
+public _MixSampleMono8
+_MixSampleMono8:
         ; ES:SI - pointer to tickbuffer
         ; GS:DI - pointer to sampledata
         ; FS:BX - pointer to volumetable
@@ -121,8 +121,8 @@ endm
         pop     ds
         retf
 
-public MixSampleStereo8
-MixSampleStereo8:
+public _MixSampleStereo8
+_MixSampleStereo8:
         ; ES:SI - pointer to tickbuffer
         ; GS:DI - pointer to sampledata
         ; FS:BX - pointer to volumetable

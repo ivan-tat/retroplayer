@@ -6,8 +6,8 @@
 #include <stdint.h>
 #endif
 
-extern uint32_t __far __pascal mixCalcSampleStep( void );
-extern void     __far __pascal MixSampleMono8( void );
-extern void     __far __pascal MixSampleStereo8( void );
+extern uint32_t __far __pascal _mixCalcSampleStep( void );
+extern void     __far __pascal _MixSampleMono8( void );
+extern void     __far __pascal _MixSampleStereo8( void );
 
 #endif /* _mixer__h_included */
