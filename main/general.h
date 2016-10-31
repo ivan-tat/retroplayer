@@ -31,7 +31,7 @@ typedef struct channel_t {
   // effect info :
     uint16_t command;       // 2 times effectnumber (for using a jmptable)
     uint16_t cmd2nd;        // 2nd command part - for multiple effects
-    uint8_t  parameter;     // just the command parameters
+    uint8_t  bParameter;    // just the command parameters
   // extra effect data :
     uint8_t  continueEf;    // Flag if we should continue effect - vibrato,tremolo
     uint16_t VibtabOfs;     // for each channel its own choise (default = OFS sinuswave)

@@ -8,6 +8,8 @@
 #endif
 
 #include "general.h"
+#include "mixer.h"
+#include "s3mplay.h"
 
 #define effTickProc( name ) void __near name( struct channel_t *chn )
 
@@ -114,6 +116,12 @@ const static effTickProc_t *effTick_S_Special_tab[] = {
     effTick_none    // funkrepeat
 };
 
+void __near calcnewSF( struct channel_t *chn, uint16_t period )
+{
+    chn->sPeriod = period;
+    if ( period ) chn->sStep = mixCalcSampleStep( period );
+}
+
 void __near voltest( struct channel_t *chn, uint8_t vol )
 {
     chn->bSampleVol = ( vol <= 63 ? vol : 63 );
@@ -131,14 +139,15 @@ effTickProc( effTick_D_VolumeSlide )
 
 effTickProc( effTick_D_VolumeSlide_Down )
 {
-    // TODO
-    return;
+    int vol = chn->bSampleVol - ( chn->bParameter & 0x0f );
+    chn->bSampleVol = ( vol >= 0 ? vol : 0 );
 }
 
 effTickProc( effTick_D_VolumeSlide_Up )
 {
-    // TODO
-    return;
+    int vol = chn->bSampleVol + ( chn->bParameter >> 4 );
+    if ( vol > 63 ) vol = 63;
+    chn->bSampleVol = ( vol * GVolume >> 6 );
 }
 
 effTickProc( effTick_E_PitchDown )
@@ -148,8 +157,9 @@ effTickProc( effTick_E_PitchDown )
 
 effTickProc( effTick_E_PitchDown_Down )
 {
-    // TODO
-    return;
+    uint16_t period = chn->sPeriod + ( chn->bParameter << 2 );
+    if ( period > chn->upper_border ) period = chn->upper_border;
+    calcnewSF( chn, period );
 }
 
 effTickProc( effTick_F_PitchUp )
@@ -159,14 +169,23 @@ effTickProc( effTick_F_PitchUp )
 
 effTickProc( effTick_F_PitchUp_Up )
 {
-    // TODO
-    return;
+    uint16_t period = chn->sPeriod - ( chn->bParameter << 2 );
+    if ( period > chn->lower_border ) period = chn->lower_border;
+    calcnewSF( chn, period );
 }
 
 effTickProc( effTick_G_Portamento )
 {
-    // TODO
-    return;
+    uint16_t period = chn->sPeriod;
+    uint16_t slide = chn->PortPara << 2; // <- use amiga slide = para*4
+    if ( period > chn->WantedPeri ) {
+        period -= slide;
+        if ( period < chn->WantedPeri ) period = chn->WantedPeri;
+    } else {
+        period += slide;
+        if ( period > chn->WantedPeri ) period = chn->WantedPeri;
+    };
+    calcnewSF( chn, period );
 }
 
 effTickProc( effTick_H_Vibrato )
@@ -255,8 +274,8 @@ effTickProc( effTick_S_Special )
 
 effTickProc( effTick_S_Special_NoteCut )
 {
-    // TODO
-    return;
+    chn->ndTick--;
+    if ( ! chn->ndTick-- ) chn->bEnabled = 0;  // disable it
 }
 
 effTickProc( effTick_S_Special_NoteDelay )
