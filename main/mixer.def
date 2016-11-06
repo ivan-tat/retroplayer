@@ -1,0 +1,10 @@
+; Assembler declarations for mixer.c.
+;
+; This is free and unencumbered software released into the public domain.
+; For more information, please refer to <http://unlicense.org>.
+
+MIXER_TEXT segment word public use16 'CODE'
+
+extrn mixCalcSampleStep: far
+
+MIXER_TEXT ends

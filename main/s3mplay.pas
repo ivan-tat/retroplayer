@@ -4,7 +4,11 @@ unit s3mplay;
 
 INTERFACE
 
-uses types,s3mtypes,voltab,posttab;
+uses
+    types,
+    s3mtypes,
+    voltab,
+    posttab;
 
 CONST
     PLAYER_VERSION: PChar = '1.70.1';
@@ -136,6 +140,9 @@ uses
     EMStool,
     sbctl,
     blaster,
+    mixvars,
+    mixer_,
+    mixer,
     crt,
     dos,
     dosproc;
@@ -149,7 +156,6 @@ VAR S3M_inMemory:BOOLEAN;
     buffersreserved:boolean;
     sounddevice :boolean;
     Samplerate  :word;
-    Userate     :word;
     { mixing variables : }
     tickbuffer  :pointer;  { the well known buffer for one tick - size depends on _currennt_tempo_ }
     DMAbuffer   :pointer;  { DMA and SB loop inside ... and we copy data into that buffer }
@@ -187,7 +193,6 @@ VAR S3M_inMemory:BOOLEAN;
     squarewave   :array[0..63] of byte;
 
 (*$i readnote.int*)
-(*$i mixer_.int*)
 (*$i mixing.int*)
 (*$i processo.int*)
 (*$i filldma.int*)

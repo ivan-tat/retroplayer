@@ -30,7 +30,6 @@ extrn amigalimits: byte
 extrn sinuswave: byte
 extrn rampwave: byte
 extrn Squarewave: byte
-extrn UseRate: word
 extrn DMArealbufsize: word
 extrn TickBuffer: dword
 extrn BPT: word

@@ -3,7 +3,7 @@
 
 DGROUP group _DATA
 
-include s3mplay.def
+include mixvars.def
 
 _DATA segment word public use16 'DATA'
 

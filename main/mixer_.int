@@ -1,6 +1,0 @@
-(* Pascal declarations for mixer_.asm. *)
-
-(*$l mixer_.obj*)
-procedure _mixCalcSampleStep; far; external;
-procedure _MixSampleMono8;    far; external;
-procedure _MixSampleStereo8;  far; external;

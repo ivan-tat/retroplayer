@@ -80,8 +80,11 @@ $PC $PASINC blaster.pas
 cd ../main
 PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster'
 compile_c filldma.c
+$PC $PASINC mixvars.pas
 $ASW mixer_.asm
+$PC $PASINC mixer_.pas
 compile_c mixer.c
+$PC $PASINC mixer.pas
 compile_c effects.c
 $AS mixing.asm
 $ASW processo.asm

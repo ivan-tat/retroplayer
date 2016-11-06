@@ -7,6 +7,5 @@
 #endif
 
 extern uint8_t  __pascal GVolume;
-extern uint16_t __pascal UseRate;
 
 #endif /* _s3mplay_h_included */

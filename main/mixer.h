@@ -1,6 +1,13 @@
-#ifndef _mixer_h_included
-#define _mixer_h_included
+#ifndef MIXER_H
+#define MIXER_H 1
 
-extern uint32_t __far __pascal mixCalcSampleStep( uint16_t period );
+#ifdef __WATCOMC__
+#include <stdbool.h>
+#include <stdint.h>
+#endif
 
-#endif /* _mixer_h_included */
+#include "..\pascal\pascal.h"
+
+extern uint32_t PUBLIC_CODE mixCalcSampleStep(uint16_t period);
+
+#endif /* MIXER_H */
