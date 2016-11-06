@@ -135,6 +135,7 @@ function getPatternPartInEM( index: integer ): byte;
 IMPLEMENTATION
 
 uses
+    cpu,
     memset,
     pic,
     EMStool,
@@ -143,6 +144,8 @@ uses
     mixvars,
     mixer_,
     mixer,
+    filldma,
+    mixing,
     crt,
     dos,
     dosproc;
@@ -192,10 +195,8 @@ VAR S3M_inMemory:BOOLEAN;
     rampwave     :array[0..63] of shortint;
     squarewave   :array[0..63] of byte;
 
-(*$i readnote.int*)
-(*$i mixing.int*)
 (*$i processo.int*)
-(*$i filldma.int*)
+(*$i readnote.int*)
 
 { getuseddevice is not implemented yet }
 FUNCTION getuseddevice(var typ:byte;var base:word;var dma8,dma16:byte; var irq:byte):byte;
@@ -592,7 +593,7 @@ procedure calcwaves;
 
 BEGIN
   inside:=false;
-  PROC386:=check386;
+  PROC386:=isCPU_i386;
   calcwaves;
   buffersreserved:=false;
   sounddevice:=false;
