@@ -1,6 +1,7 @@
-; Assembler declarations for emstool.
+; emstool.def -- Assembler declarations for emstool.c.
 ;
 ; This is free and unencumbered software released into the public domain.
+; For more information, please refer to <http://unlicense.org>.
 
 _DATA segment word public use16 'DATA'
 extrn FrameSEG: word

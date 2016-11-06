@@ -1,10 +1,15 @@
-; Assembler declarations for readnote.
+; readnote.def -- Assembler declarations for readnote.asm.
 ;
 ; This is free and unencumbered software released into the public domain.
 ; For more information, please refer to <http://unlicense.org>.
 
 READNOTE_TEXT segment byte public use16 'CODE'
+
+; declared in readnote.pas
+extrn set_tempo: far
+
 extrn readnewnotes: far
 extrn SetupNewInst: far
 extrn SetNewNote: far
+
 READNOTE_TEXT ends

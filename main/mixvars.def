@@ -1,11 +1,14 @@
-; Assembler declarations for mixvars.c.
+; mixvars.def -- Assembler declarations for mixvars.c/mixvars.pas.
 ;
 ; This is free and unencumbered software released into the public domain.
 ; For more information, please refer to <http://unlicense.org>.
 
 _DATA segment word public use16 'DATA'
 
+extrn ST3Periods: word
+
 extrn UseRate: word
+extrn BPT: word
+extrn TickBytesLeft: word
 
 _DATA ends
-

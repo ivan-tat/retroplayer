@@ -7,8 +7,10 @@ INTERFACE
 uses
     types,
     s3mtypes,
+    s3mvars,
     voltab,
-    posttab;
+    posttab,
+    fillvars;
 
 CONST
     PLAYER_VERSION: PChar = '1.70.1';
@@ -38,63 +40,6 @@ CONST
 { variables for public }
 VAR load_Error:integer;
     player_Error:integer;
-    { Tables : }
-    Instruments:^TInstrArray;         { pointer to data for all instruments }
-    PATTERN   :TPatternSarray;        { segment for every pattern }
-                                      { $Fxyy -> at EMS page YY on Offset X*5120 }
-    ORDER     :TOrderArray;           { song arrangement }
-    Channel   :TchannelArray;         { all public/private data for every channel }
-    songname:string[28];              { name given by the musician }
-    { numbers of ? }
-    ordnum:word;
-    insnum:word;
-    Patnum:word;
-    usedchannels:byte;  { possible values : 1..32 (kill all Adlib) }
-    patlength   :word;    { length of one pattern }
-    modTrackerName: TMODTrackerName;    (* tracker version file was created with *)
-    { songposition : (you can change them while playing to jump arround) }
-    curorder   :word;   { position in song arrangement }
-    curpattern :byte;   { current pattern - is specified also by [curorder] - so it's only for the user ... }
-    curline    :byte;   { current line in pattern }
-    curtick    :byte;   { current tick  - we only calc one tick per call (look at MIXING.ASM) }
-    lastorder  :byte;   { -> last order to play ... }
-    Ploop_on   :boolean;{ in a Pattern loop? }
-    Ploop_no   :byte;   { number of loops left }
-    Ploop_to    :byte;   { position to loop to }
-    patterndelay:byte;
-
-    gVolume    :byte;    { global volume -> usedvol = instrvol*gvolume/255 }
-    loopS3M    :boolean; { flag if restart if we reach the end of the S3M module }
-    EndOfSong  :boolean;
-    toslow     :boolean;
-    justinfill :boolean;
-    rastertime :boolean;
-    useEMS     :boolean;
-    FPS        :byte;     { frames per second ... default is about 70Hz }
-    LQmode     :boolean;  { flag if lowquality mode }
-
-    DMArealbufsize:array[0..63] of word; { e.g. 0,128,256,384 <- positions of dmabuffer parts (changes with samplerate) }
-
-    TickBytesLeft:word;    { Bytes left to next Tick }
-
-    {$IFDEF BETATEST}
-    startorder :word;
-    {$ENDIF}
-
-    playbuffer :pointer; { pointer to DMAbuffer - for public use, but don't write into it !!!
-                           - it's never used for any action while mixing !
-                           - while playing you can read the DMA base counter
-                           and find out in that way what sample value the
-                           SB currently plays ... refer to DMA Controller }
-    DMAhalf     :byte;     { last DMAbuffer part to calculate }
-    numBuffers  :byte;     { number of parts in DMAbuffer }
-    { EMS things : }
-    patEMShandle :WORD;    { handle to access EMS for patterns }
-    smpEMShandle :WORD;    { hanlde to access EMS for samples <- I seperated them, but that does not matter, well ? }
-    savHandle    :WORD;    { EMS handle for saving mapping while playing }
-    EMSpat       :boolean; { patterns in EMS ? }
-    EMSsmp       :boolean; { samples in EMS ? }
-    PatperPage   :byte;    { count of patterns per page (<64!!!) }
 
 FUNCTION  load_s3m(name:string):BOOLEAN;        { load S3M module into memory }
 PROCEDURE done_module;                          { free memory used by S3M }
@@ -137,66 +82,34 @@ IMPLEMENTATION
 uses
     cpu,
     memset,
+    crt,
+    dos,
+    dosproc,
     pic,
     EMStool,
     sbctl,
     blaster,
+    effvars,
     mixvars,
     mixer_,
     mixer,
     filldma,
     mixing,
-    crt,
-    dos,
-    dosproc;
+    readnote;
 
 CONST DMAbuffersize=8*1024; { <- maximum size of DMAbuffer }
 
 { Internal variables : }
-VAR S3M_inMemory:BOOLEAN;
+VAR
     PROC386:boolean;      { A 386 processor ? }
-    filename:string;      { name of file currently in memory }
-    buffersreserved:boolean;
-    sounddevice :boolean;
-    Samplerate  :word;
-    { mixing variables : }
-    tickbuffer  :pointer;  { the well known buffer for one tick - size depends on _currennt_tempo_ }
-    DMAbuffer   :pointer;  { DMA and SB loop inside ... and we copy data into that buffer }
-    AllocBuffer :pointer;  { position where we allocate DMA buffer - remember that we may use second half ... }
-    lastready   :byte;     { last ready calculated DMAbuffer part }
+(* UNUSED: filename: string; (* name of file currently in memory *)
+    buffersreserved: boolean;
+    sounddevice: boolean;
+    Samplerate: word;
     { S3M flags : }
-    st2vibrato  :boolean; { not supported }
-    st2tempo    :boolean; { not supported }
-    amigaslides :boolean; { not supported }
-    SBfilter    :boolean; { not supported }
-    costumeflag :boolean; { not supported - set if costumedata }
-    vol0opti    :boolean; { PSIs volume 0 optimization }
-    amigalimits :boolean; { check for amiga limits }
-    stereoflag  :boolean; { not supported - we do what's possible on detected SB }
-    signeddata  :boolean; { signed/unsigned data (only volumetable differs in those modes) }
-    { options : }
-    mvolume      :byte;   { master volume -> calc posttables }
-    initspeed    :byte;   { initial speed }
-    inittempo    :byte;   { initial tempo }
-    curspeed     :byte;   { current speed - length of one tick }
-    curtempo     :byte;   { current tempo - count of ticks per note }
     { own Flags : }
-    ST3order   :boolean; { if true then handle order like ST3 - if a "--"=255 is found -
-                           stop or loop to the song start (look loopS3M) }
-                         { if false - play the whole order and simply skip the "--"
-                           if curorder=ordnum then stop or loop to the beginning }
-    
-    BPT          :word;   { bytes per tick - depends on samplerate + tempo }
-
     { some saved values for correct restoring former status : }
     oldexitproc  :pointer;
-    { tables for mixing : }
-    sinuswave,
-    rampwave     :array[0..63] of shortint;
-    squarewave   :array[0..63] of byte;
-
-(*$i processo.int*)
-(*$i readnote.int*)
 
 { getuseddevice is not implemented yet }
 FUNCTION getuseddevice(var typ:byte;var base:word;var dma8,dma16:byte; var irq:byte):byte;
@@ -249,9 +162,9 @@ var i:word;
     p:pointer;
     psmp:PsmpHeader;
   BEGIN
-    if not S3M_inMemory then exit;
+    if not mod_isLoaded then exit;
     { Free samples & instruments : }
-    for i:=1 to MAX_Samples do
+    for i:=1 to MAX_INSTRUMENTS do
       begin
         psmp:=addr(Instruments^[i]);
         if (psmp^.typ=1) then
@@ -286,7 +199,7 @@ var i:word;
         EMSfree(smpEMShandle);
         EMSsmp:=false;
       end;
-    S3M_inMemory:=false;
+    mod_isLoaded:=false;
   END;
 
 PROCEDURE Done_S3Mplayer;
@@ -410,16 +323,6 @@ var w:word;
     NumBuffers:=j;
   end;
 
-procedure set_tempo(tempo:byte); far;
-  begin
-    if (tempo>=32) then
-      begin
-        curtempo:=tempo;
-      end
-    else tempo:=curtempo;
-    if curtempo<>0 then BPT:=trunc(Userate/50*125/curtempo);
-  end;
-
 function getspeed:byte;
   begin
     getspeed:=curspeed;
@@ -507,7 +410,7 @@ end;
 procedure set_ST3order(new:boolean);
 var i:byte;
   begin
-    ST3order:=new;
+    playOption_ST3Order:=new;
     if new then
       begin
         { search for first '--' }
@@ -537,11 +440,14 @@ var key:boolean;
     A_stereo := A_Stereo and sdev_caps_stereo;
     A_16Bit := A_16Bit and sdev_caps_16bit;
     if not sounddevice then begin player_error:=nosounddevice;exit; end; { sorry no device was set }
-    if not S3M_inMemory then begin player_error:=noS3Minmemory;exit end; { hmm load it first ;) }
+    if not mod_isLoaded then begin player_error:=noS3Minmemory;exit end; { hmm load it first ;) }
     set_ready_irq( @PlaySoundCallback );
     Initblaster(Samplerate,a_stereo,a_16Bit);
     setSamplerate(Samplerate,a_stereo);
-    calcVolumeTable( signeddata ); { <- now after loading we know if signed data or not }
+
+    (* now after loading we know if signed data or not *)
+    calcVolumeTable( modOption_SignedData );
+
     calcposttable(mvolume,A_16bit);
     curtick:=1; { last tick -> goto next note ! }
     curLine:=0; { <- next line to read from }
@@ -555,8 +461,8 @@ var key:boolean;
     Ploop_on:=false;
     Ploop_to:=0;
     curspeed:=initspeed;set_tempo(inittempo);
-    set_ST3order(ST3order); { <- don't remove this ! it's important ! (setup lastorder) }
-    EndOfSong:=false;toslow:=false;
+    set_ST3order(playOption_ST3Order); { <- don't remove this ! it's important ! (setup lastorder) }
+    EndOfSong:=false;TooSlow:=false;
     TickBytesLeft:=0;       { emmidiately next tick }
     Initchannels;
 
@@ -606,11 +512,11 @@ BEGIN
   Tickbuffer:=Nil;
   Samplerate:=22000; { not the highest but nice sounding samplerate :) }
   Userate:=22000;
-  loopS3M:=false;
-  ST3order:=false;   { Ok let's hear all patterns are saved ... }
+  playOption_LoopSong:=false;
+  playOption_ST3Order:=false;   { Ok let's hear all patterns are saved ... }
   rastertime:=false;
   useEMS:=EMSinstalled;      { more space for Modules ! }
-  if not getdosmem(instruments,5*16*max_samples) then
+  if not getdosmem(instruments,MAX_INSTRUMENTS*sizeof(TInstr)) then
     begin
       asm
         mov     ax,3
@@ -620,7 +526,7 @@ BEGIN
       halt(1);
     end;
 
-  FOR i:=1 TO MAX_Samples DO
+  FOR i:=1 TO MAX_INSTRUMENTS DO
     BEGIN
       Instruments^[i,0]:=0;
     END;

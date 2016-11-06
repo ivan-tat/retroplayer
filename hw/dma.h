@@ -1,14 +1,19 @@
-/* Declarations for dma.
+/* dma.h -- declarations for dma.c.
 
-   This is free and unencumbered software released into the public domain */
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
 
-#ifndef _DMA_H
-#define _DMA_H 1
+#ifndef DMA_H
+#define DMA_H 1
 
 #ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
 #endif
+
+// TODO: remove PUBLIC_CODE macros when done.
+
+#include "..\pascal\pascal.h"
 
 /* DMA transfer mode register */
 
@@ -37,12 +42,12 @@ typedef uint8_t DMAMode_t;
 #define DMA_MODE_BLOCK        0x80
 #define DMA_MODE_CASCADE      0xc0
 
-void     __far __pascal dmaMaskMulti( uint8_t mask );
-void     __far __pascal dmaMask( uint8_t ch );
-void     __far __pascal dmaEnableMulti( uint8_t mask );
-void     __far __pascal dmaEnable( uint8_t ch );
-uint32_t __far __pascal dmaGetLinearAddress( void *p );
-void     __far __pascal dmaSetup( uint8_t ch, DMAMode_t mode, void *p, uint16_t count );
-uint16_t __far __pascal dmaGetCounter( uint8_t ch );
+void     PUBLIC_CODE dmaMaskMulti(uint8_t mask);
+void     PUBLIC_CODE dmaMask(uint8_t ch);
+void     PUBLIC_CODE dmaEnableMulti(uint8_t mask);
+void     PUBLIC_CODE dmaEnable(uint8_t ch);
+uint32_t PUBLIC_CODE dmaGetLinearAddress(void *p);
+void     PUBLIC_CODE dmaSetup(uint8_t ch, DMAMode_t mode, void *p, uint16_t count);
+uint16_t PUBLIC_CODE dmaGetCounter(uint8_t ch);
 
-#endif /* _DMA_H */
+#endif /* DMA_H */

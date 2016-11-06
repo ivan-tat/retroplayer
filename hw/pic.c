@@ -1,6 +1,7 @@
 /* pic.c -- Intel 8259A Programmable Interrupt Controller interface.
 
-   This is free and unencumbered software released into the public domain */
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
 
 #ifdef __WATCOMC__
 #include <i86.h>
@@ -9,8 +10,12 @@
 #include <conio.h>
 #endif
 
-#include "pic.h"
+// TODO: remove PUBLIC_CODE macros when done.
+
+#include "..\pascal\pascal.h"
 #include "..\pascal\dos.h"
+
+#include "pic.h"
 
 static const uint8_t IRQTAB[16] = {
     0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -70,34 +75,39 @@ static const uint8_t IRQTAB[16] = {
 #define OCW3_SPEC_RST_MASK 0x40
 #define OCW3_SPEC_SET_MASK 0x60
 
-void __far __pascal picEnableIRQs( uint16_t mask ) {
-    if ( mask & 0xff ) {
-        outp( PIC1_IO_OCW1, inp( PIC1_IO_OCW1 ) | ( uint8_t )( mask & 0xff ) );
+void PUBLIC_CODE picEnableIRQs(uint16_t mask)
+{
+    if (mask & 0xff) {
+        outp(PIC1_IO_OCW1, inp(PIC1_IO_OCW1) | (uint8_t)(mask & 0xff));
     }
-    if ( mask & 0xff00 ) {
-        outp( PIC2_IO_OCW1, inp( PIC2_IO_OCW1 ) | ( uint8_t )( mask >> 8 ) );
-    }
-}
-
-void __far __pascal picDisableIRQs( uint16_t mask ) {
-    if ( mask & 0xff ) {
-        outp( PIC1_IO_OCW1, inp( PIC1_IO_OCW1 ) & ( uint8_t )( ~( mask & 0xff ) ) );
-    }
-    if ( mask & 0xff00 ) {
-        outp( PIC2_IO_OCW1, inp( PIC2_IO_OCW1 ) & ( uint8_t )( ~( mask >> 8 ) ) );
+    if (mask & 0xff00) {
+        outp(PIC2_IO_OCW1, inp(PIC2_IO_OCW1) | (uint8_t)(mask >> 8));
     }
 }
 
-void __far __pascal picEOI( uint8_t irq ) {
-    outp( ( irq < 8 ) ? PIC1_IO_OCW2 : PIC2_IO_OCW2, OCW2_COMMAND_OCW2 | OCW2_CMD_NONSPEC_EOI );
+void PUBLIC_CODE picDisableIRQs(uint16_t mask)
+{
+    if (mask & 0xff) {
+        outp(PIC1_IO_OCW1, inp(PIC1_IO_OCW1) & (uint8_t)(~(mask & 0xff)));
+    }
+    if (mask & 0xff00) {
+        outp(PIC2_IO_OCW1, inp(PIC2_IO_OCW1) & (uint8_t)(~(mask >> 8)));
+    }
 }
 
-void * __far __pascal picGetIntVec( uint8_t irq ) {
+void PUBLIC_CODE picEOI(uint8_t irq)
+{
+    outp((irq < 8) ? PIC1_IO_OCW2 : PIC2_IO_OCW2, OCW2_COMMAND_OCW2 | OCW2_CMD_NONSPEC_EOI);
+}
+
+void *PUBLIC_CODE picGetIntVec(uint8_t irq)
+{
     void *p;
-    getintvec( IRQTAB[irq], &p );
+    getintvec(IRQTAB[irq], &p);
     return p;
 }
 
-void __far __pascal picSetIntVec( uint8_t irq, void *p ) {
-    setintvec( IRQTAB[irq], p );
+void PUBLIC_CODE picSetIntVec(uint8_t irq, void *p)
+{
+    setintvec(IRQTAB[irq], p);
 }

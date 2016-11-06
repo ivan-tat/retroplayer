@@ -1,8 +1,7 @@
-/* Declarations for detisr.
+/* detisr.c -- hardware IRQ detection library.
 
-   Hardware IRQ detection library.
-
-   This is free and unencumbered software released into the public domain */
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
 
 #ifdef __WATCOMC__
 #include <stdbool.h>

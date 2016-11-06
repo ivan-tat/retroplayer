@@ -1,0 +1,10 @@
+; mixing.def -- Assembler declarations for mixing.c/mixing.pas.
+;
+; This is free and unencumbered software released into the public domain.
+; For more information, please refer to <http://unlicense.org>.
+
+MIXING_TEXT segment word public use16 'CODE'
+
+extrn calc_tick: far
+
+MIXING_TEXT ends

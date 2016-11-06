@@ -1,15 +1,22 @@
 /* effects.c -- effects handling.
 
-   This is free and unencumbered software released into the public domain. */
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
 
 #ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
 #endif
 
-#include "general.h"
+// TODO: remove PUBLIC_CODE macros when done.
+
+#include "..\pascal\pascal.h"
+
+#include "s3mtypes.h"
+#include "s3mvars.h"
+#include "effvars.h"
+#include "mixvars.h"
 #include "mixer.h"
-#include "s3mplay.h"
 
 #define effTickProc( name ) void __near name( struct channel_t *chn )
 

@@ -1,4 +1,4 @@
-(* Declarations for DETISR.
+(* detisr.pas -- Pascal declarations for detisr.asm/detisr_.asm.
 
    This file is for linking compiled object files with Pascal linker.
    It will be deleted in future when we rewrite the project in C.

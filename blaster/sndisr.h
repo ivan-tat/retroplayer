@@ -1,3 +1,8 @@
+/* sndisr.h -- declarations for sndisr.c.
+
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
+
 #ifndef _SNDISR_H
 #define _SNDISR_H 1
 

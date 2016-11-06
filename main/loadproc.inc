@@ -112,9 +112,9 @@ FUNCTION  LOAD_S3M(name:string):BOOLEAN;
 var f:file;
     header:Theader;
     maxused:byte;
-    inspara:array[1..Max_samples] of word;
+    inspara:array[1..MAX_INSTRUMENTS] of word;
     patpara:TPatternSarray;
-    smppara:ARRAY[0..MAX_samples] OF LONGINT;
+    smppara:array[0..MAX_INSTRUMENTS] of longint;
     i:byte;
     inspos,patpos,smppos,smpnum:byte;
     nextins,nextpat,nextsmp:longint;
@@ -432,24 +432,24 @@ var a,b,c:string;
         exit;
     end;
     { set some variables : }
-    convert2pas(header.name,songname,28);
+    convert2pas(header.name,mod_Title,28);
     ordnum:=header.ordnum;
     insnum:=header.insnum;
     patnum:=header.patnum;
     { setup flags }
-    st2vibrato  := header.flags and $01 <> 0;
-    st2tempo    := header.flags and $02 <> 0;
-    amigaslides := header.flags and $04 <> 0;
-    vol0opti    := header.flags and $08 <> 0;
-    amigalimits := header.flags and $10 <> 0;
-    SBfilter    := header.flags and $20 <> 0;
-    costumeflag := header.flags and $80 <> 0;
-    modTrackerName := 'Scream Tracker ' +
+    modOption_ST2Vibrato := header.flags and $01 <> 0;
+    modOption_ST2Tempo := header.flags and $02 <> 0;
+    modOption_AmigaSlides := header.flags and $04 <> 0;
+    modOption_VolZeroOptim := header.flags and $08 <> 0;
+    modOption_AmigaLimits := header.flags and $10 <> 0;
+    modOption_SBFilter := header.flags and $20 <> 0;
+    modOption_CostumeFlag := header.flags and $80 <> 0;
+    mod_TrackerName := 'Scream Tracker ' +
         chr( ord('0') + ( ( header.cwtv shr 8 ) and $0f ) ) +
         '.' +
         chr( ord('0') + ( ( header.cwtv shr 4 ) and $0f ) ) +
         chr( ord('0') + ( header.cwtv and $0f ) );
-    signeddata:=(header.ffv=1);
+    modOption_SignedData := (header.ffv = 1);
     if not (header.ffv in [1,2]) then begin load_error:=wrongformat;exit end;
     gvolume:=header.gvolume;
     mvolume:=header.mvolume and $7f;
@@ -516,7 +516,7 @@ var a,b,c:string;
         curpart:=0;curPpage:=0;
       end;
     { clear all samples }
-    fillchar(instruments^,max_samples*5*16,0);
+    fillchar(instruments^,MAX_INSTRUMENTS*sizeof(TInstr),0);
     { Now try to load everything in a row }
     {$IFDEF LOADINFO}
     writeln(#10#13'load report :');
@@ -616,7 +616,7 @@ var a,b,c:string;
     freedosmem(buffer);
     { Just for fun set names for EMS handles (does only work for EMS>= v4.0) }
     if ( EMSVersion.Hi >= 4 ) then setEMSnames;
-    S3M_inMemory:=true;
+    mod_isLoaded := true;
     LOAD_S3M :=TRUE;
   END;
 

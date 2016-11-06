@@ -1,6 +1,7 @@
 /* dma.c -- Intel 8237 DMA controller interface.
 
-   This is free and unencumbered software released into the public domain */
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
 
 #ifdef __WATCOMC__
 #include <i86.h>
@@ -8,6 +9,10 @@
 #include <stdint.h>
 #include <conio.h>
 #endif
+
+// TODO: remove PUBLIC_CODE macros when done.
+
+#include "..\pascal\pascal.h"
 
 #include "dma.h"
 
@@ -54,79 +59,86 @@ const static struct DMAIO_t DMAIO[8] = {
 #define MASK_CHAN 0x03
 #define MASK_MASK 0x04
 
-void __far __pascal dmaMaskMulti( uint8_t mask ) {
+void PUBLIC_CODE dmaMaskMulti(uint8_t mask)
+{
     /* mask channels */
-    if ( mask & 0x0f ) outp( DMAIO_MASKMULTI_0, mask & 0x0f );
-    if ( mask & 0xf0 ) outp( DMAIO_MASKMULTI_1, mask >> 4 );
+    if (mask & 0x0f) outp(DMAIO_MASKMULTI_0, mask & 0x0f);
+    if (mask & 0xf0) outp(DMAIO_MASKMULTI_1, mask >> 4);
 }
 
-void __far __pascal dmaMask( uint8_t ch ) {
+void PUBLIC_CODE dmaMask(uint8_t ch)
+{
     /* mask channel */
-    outp( DMAIO[ch].mask, ( ch & MASK_CHAN ) | MASK_MASK );
+    outp(DMAIO[ch].mask, (ch & MASK_CHAN) | MASK_MASK);
 }
 
-void __far __pascal dmaEnableMulti( uint8_t mask ) {
+void PUBLIC_CODE dmaEnableMulti(uint8_t mask)
+{
     /* enable channels */
-    if ( mask & 0x0f ) outp( DMAIO_ENABLEMULTI_0, mask & 0x0f );
-    if ( mask & 0xf0 ) outp( DMAIO_ENABLEMULTI_1, mask >> 4 );
+    if (mask & 0x0f) outp(DMAIO_ENABLEMULTI_0, mask & 0x0f);
+    if (mask & 0xf0) outp(DMAIO_ENABLEMULTI_1, mask >> 4);
 }
 
-void __far __pascal dmaEnable( uint8_t ch ) {
+void PUBLIC_CODE dmaEnable(uint8_t ch)
+{
     /* enable channel */
-    outp( DMAIO[ch].mask, ch & MASK_CHAN );
+    outp(DMAIO[ch].mask, ch & MASK_CHAN);
 }
 
-uint32_t __far __pascal dmaGetLinearAddress( void *p ) {
-    return ( ( uint32_t )( FP_SEG( p ) ) << 4 ) + FP_OFF( p );
+uint32_t PUBLIC_CODE dmaGetLinearAddress(void *p)
+{
+    return ((uint32_t)(FP_SEG(p)) << 4) + FP_OFF(p);
 }
 
-void __far __pascal dmaSetup( uint8_t ch, DMAMode_t mode, void *p, uint16_t count ) {
-    uint32_t linear = dmaGetLinearAddress( p );
+void PUBLIC_CODE dmaSetup(uint8_t ch, DMAMode_t mode, void *p, uint16_t count)
+{
+    uint32_t linear = dmaGetLinearAddress(p);
     uint16_t addr;
     uint8_t page;
 
-    dmaMask( ch );
+    dmaMask(ch);
     
     /* clear flip-flop */
-    outp( DMAIO[ch].clear, 0 );
+    outp(DMAIO[ch].clear, 0);
 
     /* set mode */
-    outp( DMAIO[ch].mode, ( mode & ( ~DMA_MODE_CHAN_MASK ) | ( ch & DMA_MODE_CHAN_MASK ) ) );
+    outp(DMAIO[ch].mode, (mode & (~DMA_MODE_CHAN_MASK) | (ch & DMA_MODE_CHAN_MASK)));
 
-    if ( ch < 4 ) {
+    if (ch < 4) {
         addr = linear & 0xffff;
-        page = ( linear >> 16 ) & 0xff;
+        page = (linear >> 16) & 0xff;
     } else {
         /* addr is in 16-bit values */
-        addr = ( linear >> 1 ) & 0xffff;
+        addr = (linear >> 1) & 0xffff;
         /* page address is the same but now it accesses 128 KiB continously */
-        page = ( linear >> 16 ) & 0xfe;
+        page = (linear >> 16) & 0xfe;
     }
     count--;
 
     /* set memory addr */
-    outp( DMAIO[ch].addr, addr & 0xff );
-    outp( DMAIO[ch].addr, ( addr >> 8 ) & 0xff );
+    outp(DMAIO[ch].addr, addr & 0xff);
+    outp(DMAIO[ch].addr, (addr >> 8) & 0xff);
 
     /* set memory page */
-    outp( DMAIO[ch].page, page );
+    outp(DMAIO[ch].page, page);
 
     /* set count */
-    outp( DMAIO[ch].count, count & 0xff );
-    outp( DMAIO[ch].count, ( count >> 8 ) & 0xff );
+    outp(DMAIO[ch].count, count & 0xff);
+    outp(DMAIO[ch].count, (count >> 8) & 0xff);
 
-    dmaEnable( ch );
+    dmaEnable(ch);
 }
 
-uint16_t __far __pascal dmaGetCounter( uint8_t ch ) {
+uint16_t PUBLIC_CODE dmaGetCounter(uint8_t ch)
+{
     uint8_t lo, hi;
 
     /* clear flip-flop */
-    outp( DMAIO[ch].clear, 0 );
+    outp(DMAIO[ch].clear, 0);
 
-    lo = inp( DMAIO[ch].count );
-    hi = inp( DMAIO[ch].count );
+    lo = inp(DMAIO[ch].count);
+    hi = inp(DMAIO[ch].count);
     /* bytes|words left to send = result + 1 */
 
-    return lo + ( hi << 8 );
+    return lo + (hi << 8);
 }

@@ -1,3 +1,13 @@
+/* posttab.c -- functions to handle amplify table.
+
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
+
+#ifdef __WATCOMC__
+#include <stdbool.h>
+#include <stdint.h>
+#endif
+
 #include "posttab.h"
 
 void __far __pascal calcPostTable( uint8_t vol, bool use16bit )

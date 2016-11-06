@@ -1,6 +1,7 @@
-/* Declarations for CRT unit.
+/* crt.h -- declarations for Pascal CRT unit.
 
-   This is free and unencumbered software released into the public domain */
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
 
 #ifndef _PASCAL_CRT_H
 #define _PASCAL_CRT_H 1

@@ -3,21 +3,17 @@
 
 DGROUP group _DATA
 
-include general.def
 include ..\dos\emstool.def
+include s3mtypes.def
+include s3mvars.def
+include effvars.def
+include mixvars.def
 include mixer_.def
-include s3mplay.def
+
+; declared in readnote.pas
+extrn set_tempo: far
 
 _DATA segment word public use16 'DATA'
-
-wavetab label word
-        dw offset sinuswave
-        dw offset rampwave
-        dw offset squarewave    ; looks not like a square but anyway
-        ; 'random wave' is not a table, but a call for a random number !
-
-st3periods label word
-        dw 1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
 
 noeffect  equ dw offset checkonlyPara   ; no effect
 noeffect2 equ dw offset handlenothing   ; nothing to handle for this effect
@@ -192,7 +188,7 @@ calcNotePeriod proc near
         and     bx,0fh
         shl     bx,1
         ; ok calculate the period
-        mov     ax,[st3periods+bx]
+        mov     ax,[ST3Periods+bx]
         shl     ax,4                 ; period(note)*16
         shr     ax,cl                ; period(note)*16 >> octave(note)
         mov     dx,8363
@@ -267,7 +263,7 @@ SetupNewInst proc far
              shl     bx,2
              xor     ah,ah
              add     bx,ax
-             mov     ax,ds:[Instruments+2]
+             mov     ax,word ptr ds:[Instruments+2]
              add     bx,ax
              mov     fs,bx
              mov     [channel.instrSEG+si],bx
@@ -297,7 +293,7 @@ weLoop:      mov     [channel.sLoopend+si],ax
              ; c2speed = 0 -> don't play it !! it's wrong !
              mov     [channel.InstrNo+si],0
 c2speedok:   mov     [channel.ssmpstart+si],0  ; reset start value
-             cmp     [amigalimits],1
+             cmp     [modOption_AmigaLimits],1
              je      takeamigalimits
              ; B-7 :
              mov     ax,907 * 16 / 128   ; period(note)*16 >> 7
@@ -522,7 +518,7 @@ effectdone:  ; read instrument
              shl     bx,2
              xor     ah,ah
              add     bx,ax
-             mov     ax,ds:[Instruments+2]
+             mov     ax,word ptr ds:[Instruments+2]
              add     bx,ax
              mov     fs,bx
              cmp     fs:[TInstrument.typ],1
@@ -629,7 +625,7 @@ patloopends: mov     al,[curline]
              mov     [Ploop_on],0
              jmp     nopatloop
 
-end_reached: cmp     [loopS3M],1
+end_reached: cmp     [playOption_LoopSong],1
              jne     donotloop
              mov     [curorder],0
              jmp     doloop

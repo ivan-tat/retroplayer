@@ -1,6 +1,7 @@
-/* Declarations for DOS unit.
+/* dos.h -- declarations for Pascal DOS unit.
 
-   This is free and unencumbered software released into the public domain */
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
 
 #ifndef _PASCAL_DOS_H
 #define _PASCAL_DOS_H 1

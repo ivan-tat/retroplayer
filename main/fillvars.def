@@ -1,0 +1,31 @@
+; fillvars.def -- Assembler declarations for fillvars.c/fillvars.pas.
+;
+; This is free and unencumbered software released into the public domain.
+; For more information, please refer to <http://unlicense.org>.
+
+_DATA segment word public use16 'DATA'
+
+; DMA buffer
+
+extrn AllocBuffer: dword
+extrn DMAbuffer: dword
+extrn PlayBuffer: dword
+extrn NumBuffers: byte
+extrn LastReady: byte
+extrn DMAHalf: byte
+extrn DMARealBufSize: word
+
+; mixer
+
+extrn TickBuffer: dword
+extrn LQMode: byte
+extrn TooSlow: byte
+extrn JustInFill: byte
+extrn RasterTime: byte
+extrn FPS: byte
+
+; EMM
+
+extrn savHandle: word
+
+_DATA ends

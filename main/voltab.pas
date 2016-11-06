@@ -1,3 +1,11 @@
+(* voltab.pas -- Pascal declarations for voltab.c.
+
+   This file is for linking compiled object files with Pascal linker.
+   It will be deleted in future when we rewrite the project in C.
+
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. *)
+
 unit voltab;
 
 interface
@@ -10,7 +18,7 @@ var
     VolumeTablePtr: voltab_p;
 
 procedure initVolumeTable;
-function allocVolumeTable: boolean;
+function  allocVolumeTable: boolean;
 procedure calcVolumeTable( sign: boolean );
 procedure freeVolumeTable;
 
@@ -22,7 +30,7 @@ uses
 (*$l voltab.obj*)
 
 procedure initVolumeTable; external;
-function allocVolumeTable: boolean; external;
+function  allocVolumeTable: boolean; external;
 procedure calcVolumeTable( sign: boolean ); external;
 procedure freeVolumeTable; external;
 

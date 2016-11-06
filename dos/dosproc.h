@@ -1,6 +1,7 @@
-/* Declarations for dosproc.
+/* dosproc.h -- declarations for dosproc.c.
 
-   This is free and unencumbered software released into the public domain */
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
 
 #ifndef _DOSPROC_H
 #define _DOSPROC_H 1

@@ -1,0 +1,102 @@
+; s3mvars.def -- Assembler declarations for s3mvars.c/s3mvars.pas.
+;
+; This is free and unencumbered software released into the public domain.
+; For more information, please refer to <http://unlicense.org>.
+
+ifndef S3MVARS_DEF
+S3MVARS_DEF equ 1
+
+include s3mtypes.def
+
+_DATA segment word public use16 'DATA'
+
+; general module information
+
+extrn mod_isLoaded: byte
+extrn mod_Title: byte
+extrn mod_TrackerName: byte
+
+; module options
+
+extrn modOption_ST2Vibrato: byte
+extrn modOption_ST2Tempo: byte
+extrn modOption_AmigaSlides: byte
+extrn modOption_SBfilter: byte
+extrn modOption_CostumeFlag: byte
+extrn modOption_VolZeroOptim: byte
+extrn modOption_AmigaLimits: byte
+extrn modOption_SignedData: byte
+
+; play options
+
+extrn playOption_ST3Order: byte
+extrn playOption_LoopSong: byte
+
+; instruments
+
+extrn Instruments: dword
+extrn InsNum: word
+
+; patterns
+
+extrn Pattern: word
+extrn PatNum: word
+extrn PatLength: word
+
+; song arrangment
+
+extrn Order: byte
+extrn OrdNum: word
+extrn LastOrder: byte
+
+ifdef BETATEST
+extrn StartOrder: word
+endif
+
+; channels
+
+extrn Channel: TChannel
+extrn UsedChannels: byte
+
+; initial state
+
+extrn InitTempo: byte
+extrn InitSpeed: byte
+
+; play state
+
+extrn EndOfSong: byte
+extrn CurTempo: byte
+extrn CurSpeed: byte
+extrn GVolume: byte
+extrn MVolume: byte
+
+; position in song - you can change it while playing to jump arround
+
+extrn CurOrder: byte
+extrn CurPattern: byte
+extrn CurLine: byte
+extrn CurTick: byte
+
+; pattern loop
+
+extrn PLoop_On: byte
+extrn PLoop_No: byte
+extrn PLoop_To: byte
+
+; pattern delay
+
+extrn PatternDelay: byte
+
+; EMM
+
+extrn UseEMS: byte
+extrn PatEMSHandle: word
+extrn SmpEMSHandle: word
+extrn EMSPat: byte
+extrn EMSSmp: byte
+extrn PatPerPage: byte
+
+_DATA ends
+
+endif   ; S3MVARS_DEF

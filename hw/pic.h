@@ -1,19 +1,24 @@
-/* Declarations for pic.
+/* pic.h -- declarations for pic.c.
 
-   This is free and unencumbered software released into the public domain */
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
 
-#ifndef _PIC_H
-#define _PIC_H 1
+#ifndef PIC_H
+#define PIC_H 1
 
 #ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
 #endif
 
-void __far __pascal picEnableIRQs( uint16_t mask );
-void __far __pascal picDisableIRQs( uint16_t mask );
-void __far __pascal picEOI( uint8_t irq );
-void * __far __pascal picGetIntVec( uint8_t irq );
-void __far __pascal picSetIntVec( uint8_t irq, void *p );
+// TODO: remove PUBLIC_CODE macros when done.
 
-#endif /* _PIC_H */
+#include "..\pascal\pascal.h"
+
+void  PUBLIC_CODE picEnableIRQs(uint16_t mask);
+void  PUBLIC_CODE picDisableIRQs(uint16_t mask);
+void  PUBLIC_CODE picEOI(uint8_t irq);
+void *PUBLIC_CODE picGetIntVec(uint8_t irq);
+void  PUBLIC_CODE picSetIntVec(uint8_t irq, void *p);
+
+#endif /* PIC_H */

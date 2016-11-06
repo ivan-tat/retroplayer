@@ -1,6 +1,0 @@
-(* Pascal declarations for readnote.asm. *)
-
-(*$l readnote.obj*)
-procedure readnewnotes; far; external;
-procedure SetupNewInst; far; external; (* internal use *)
-procedure SetnewNote;   far; external; (* internal use *)

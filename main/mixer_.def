@@ -1,10 +1,12 @@
-; Assembler declarations for mixer_.
+; mixer_.def -- Assembler declarations for mixer_.asm.
 ;
 ; This is free and unencumbered software released into the public domain.
 ; For more information, please refer to <http://unlicense.org>.
 
 MIXER__TEXT segment word public use16 'CODE'
+
 extrn _mixCalcSampleStep: far
 extrn _MixSampleMono8: far
 extrn _MixSampleStereo8: far
+
 MIXER__TEXT ends

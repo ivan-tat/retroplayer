@@ -1,9 +1,10 @@
-(* Declarations for DMA.
+(* dma.pas -- declarations for dma.c.
 
    This file is for linking compiled object files with Pascal linker.
    It will be deleted in future when we rewrite the project in C.
 
-   This is free and unencumbered software released into the public domain. *)
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. *)
 
 unit dma;
 
@@ -31,24 +32,23 @@ const
     DMA_MODE_BLOCK        = $80;
     DMA_MODE_CASCADE      = $c0;
 
-procedure dmaMaskMulti( mask: byte );
-procedure dmaMask( ch: byte );
-procedure dmaEnableMulti( mask: byte );
-procedure dmaEnable( ch: byte );
-function dmaGetLinearAddress( p: pointer ): longint;
-procedure dmaSetup( ch: byte; mode: TDMAMode; p: pointer; count: word );
-function dmaGetCounter( ch: byte ): word;
+procedure dmaMaskMulti(mask: byte);
+procedure dmaMask(ch: byte);
+procedure dmaEnableMulti(mask: byte);
+procedure dmaEnable(ch: byte);
+function  dmaGetLinearAddress(p: pointer): longint;
+procedure dmaSetup(ch: byte; mode: TDMAMode; p: pointer; count: word);
+function  dmaGetCounter(ch: byte): word;
 
 implementation
 
 (*$l dma.obj*)
-
-procedure dmaMaskMulti( mask: byte ); external;
-procedure dmaMask( ch: byte ); external;
-procedure dmaEnableMulti( mask: byte ); external;
-procedure dmaEnable( ch: byte ); external;
-function dmaGetLinearAddress( p: pointer ): longint; external;
-procedure dmaSetup( ch: byte; mode: TDMAMode; p: pointer; count: word ); external;
-function dmaGetCounter( ch: byte ): word; external;
+procedure dmaMaskMulti(mask: byte); external;
+procedure dmaMask(ch: byte); external;
+procedure dmaEnableMulti(mask: byte); external;
+procedure dmaEnable(ch: byte); external;
+function  dmaGetLinearAddress(p: pointer): longint; external;
+procedure dmaSetup(ch: byte; mode: TDMAMode; p: pointer; count: word); external;
+function  dmaGetCounter(ch: byte): word; external;
 
 end.

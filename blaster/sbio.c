@@ -1,8 +1,7 @@
-/* Declarations for sbio.
+/* sbio.c -- Sound Blaster hardware i/o library.
 
-   Sound Blaster hardware i/o library.
-
-   This is free and unencumbered software released into the public domain */
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
 
 #ifdef __WATCOMC__
 #include <stdbool.h>

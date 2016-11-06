@@ -1,3 +1,8 @@
+/* detisr.h -- declarations for detisr.asm.
+
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
+
 #ifndef _DETISR_H
 #define _DETISR_H 1
 

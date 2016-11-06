@@ -58,25 +58,33 @@ $PC $PASINC emstool.pas
 
 cd ../hw
 PASINC='-u..\pascal;..\watcomc'
+
 $ASW cpu.asm
 $PC $PASINC cpu.pas
+
 compile_c dma.c
 $PC $PASINC dma.pas
+
 compile_c pic.c
 $PC $PASINC pic.pas
 
 cd ../blaster
 PASINC='-u..\pascal;..\watcomc;..\hw'
+
 $ASW detisr_.asm
 compile_c detisr.c
 $PC $PASINC detisr.pas
+
 $ASW sndisr_.asm
 compile_c sndisr.c
 $PC $PASINC sndisr.pas
+
 compile_c sbio.c
 $PC $PASINC sbio.pas
+
 compile_c sbctl.c
 $PC $PASINC sbctl.pas
+
 $PC $PASINC blaster.pas
 
 cd ../main
@@ -84,16 +92,33 @@ PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster'
 $PC $PASINC types.pas
 $PC $PASINC s3mtypes.pas
 $PC $PASINC mixvars.pas
+$PC $PASINC s3mvars.pas
+$PC $PASINC fillvars.pas
+
+compile_c voltab.c
+$PC $PASINC voltab.pas
+
+compile_c posttab.c
+$PC $PASINC posttab.pas
+
 $ASW mixer_.asm
 $PC $PASINC mixer_.pas
+
 compile_c mixer.c
 $PC $PASINC mixer.pas
+
+$PC $PASINC effvars.pas
 compile_c effects.c
+
 $AS readnote.asm
+$PC $PASINC readnote.pas
+
 $AS mixing.asm
 $PC $PASINC mixing.pas
+
 compile_c filldma.c
 $PC $PASINC filldma.pas
+
 $PC $PASINC s3mplay.pas
 
 cd ../player

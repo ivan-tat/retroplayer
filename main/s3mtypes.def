@@ -1,5 +1,10 @@
-ifndef general_def_included
-general_def_included equ 1
+; s3mtypes.def -- Assembler declarations for s3mtypes.h/s3mtypes.pas.
+;
+; This is free and unencumbered software released into the public domain.
+; For more information, please refer to <http://unlicense.org>.
+
+ifndef S3MTYPES_DEF
+S3MTYPES_DEF equ 1
 
 TCHANNEL STRUC
     ; general switches :
@@ -78,4 +83,4 @@ TINSTRUMENT STRUC
               SCRS_ID       DB  4 DUP (?)
 TINSTRUMENT ENDS
 
-endif
+endif   ; S3MTYPES_DEF

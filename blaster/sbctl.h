@@ -1,3 +1,8 @@
+/* sbctl.h -- declarations for sbctl.c.
+
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
+
 #ifndef _SBCTL_H
 #define _SBCTL_H 1
 

@@ -1,15 +1,23 @@
+; mixing.asm -- mixer functions.
+;
+; This is free and unencumbered software released into the public domain.
+; For more information, please refer to <http://unlicense.org>.
+
 .model large,pascal
 .386
 
 DGROUP group _DATA
 
-include general.def
 include ..\dos\emstool.def
 include ..\blaster\sbctl.def
-include mixer_.def
+include s3mtypes.def
+include s3mvars.def
+include effvars.def
+include mixvars.def
+include fillvars.def
 include voltab.def
+include mixer_.def
 include readnote.def
-include s3mplay.def
 
 _DATA segment word public use16 'DATA'
 
@@ -97,7 +105,7 @@ CHANOFF equ ds:[bp][channel]
 include border.inc
 
 public calc_tick
-calc_tick proc near
+calc_tick proc far
         push    bp
         ; first fill tickbuffer with ZERO = 2048+offset post8bit
         ; for 16bit play then ofcourse a bit different value ...

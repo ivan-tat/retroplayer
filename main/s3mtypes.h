@@ -1,59 +1,32 @@
-#ifndef general_h_included
-#define general_h_included 1
+/* s3mtypes.h -- generic s3m types.
+
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
+
+#ifndef S3MTYPES_H
+#define S3MTYPES_H 1
 
 #ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
 #endif
 
-typedef struct channel_t {
-  // general switches :
-    uint8_t  bEnabled;      // flag if =0 then nothing to mix at the moment
-    uint8_t  bChannelType;  // 0=off,1=left,2=right,3,4=adlib ... if 0,3,4 -> everything ignored !
-  // current Instrument :
-    uint16_t InstrSEG;      // DOS segment of current instrument data
-    uint16_t SampleSEG;     // DOS segment of current sample data
-    uint8_t  InstrNo;       // number of instrument is currently playing
-    uint8_t  Note;          // we don't need it really for playing, but let's store it anyway
-  // copy of sampledata (maybe it differs a bit):
-    uint8_t  bSampleVol;    // current sample volume
-    uint8_t  sLoopflag;     // flag if we have to loop sample
-    uint16_t sSmpstart;     // start offset of sample
-    uint16_t sLoopstart;    // loop start of current sample =0ffffh if no loop
-    uint16_t sLoopend;      // loop end/normal end of current sample
-    uint32_t sCurPos;       // fixed point value for current position in sample
-    uint32_t sStep;         // fixed point value of frequency step (distance of one step
-                            // depends on period we play currently)
-    uint16_t sPeriod;       // st3 period ... you know these amiga values (look at tech.doc of ST3)
-                            // period does no influence playing a sample direct, but it's for sliding etc.
-    uint16_t lower_border;  // B-7 or B-5 period for current instrument to check limits
-    uint16_t upper_border;  // C-0 or C-3 period for current instrument to check limits
-  // effect info :
-    uint16_t command;       // 2 times effectnumber (for using a jmptable)
-    uint16_t cmd2nd;        // 2nd command part - for multiple effects
-    uint8_t  bParameter;    // just the command parameters
-  // extra effect data :
-    uint8_t  continueEf;    // Flag if we should continue effect - vibrato,tremolo
-    uint16_t VibtabOfs;     // for each channel its own choise (default = OFS sinuswave)
-    uint16_t TrmtabOfs;     // Offset of wavetable for tremolo
-    uint8_t  tablepos;      // <-- we reset this if a effect starts uses such a table
-    uint8_t  VibPara;       // <-- for dual command Vib + Vol
-    uint8_t  PortPara;      // <-- for dual command Port + Vol
-    uint16_t OldPeriod;     // save that value for some effects
-    uint8_t  Oldvolume;     // save that value for tremolo
-    uint16_t WantedPeri;    // <- period to slide to with Portamento
-    uint8_t  ArpegPos;      // which of thoses 3 notes we currently play ...
-    uint8_t  note1;         //--.
-    uint8_t  note2;         //---- +note - 3 notes we do arpeggio between
-    uint32_t Step0;         //--.
-    uint32_t Step1;         //  |- the 3 step values we switch between in arpeggio effect (0 is start value <- we have to refesh after arpeggio)
-    uint32_t Step2;         //--'
-    uint8_t  cTick;         //---- ticks left to retrigg note
-    uint8_t  savNote;       //--.
-    uint8_t  savInst;       //  | - new values for notedelay ...
-    uint8_t  SavVol;        //  |
-    uint8_t  ndTick;        //--' <- also used for Notecut (ticks left to cut)
-};
+/* generic module information */
+
+#define MOD_MAX_TITLE_LENGTH 29
+    /* including trailing zero */
+
+typedef char modTitle_t[MOD_MAX_TITLE_LENGTH];
+
+#define MOD_MAX_TRACKER_NAME_LENGTH 32
+    /* including trailing zero */
+
+typedef char modTrackerName_t[MOD_MAX_TRACKER_NAME_LENGTH];
+
+/* instrument */
+
+#define MAX_INSTRUMENTS 99
+    /* 1..99 samples */
 
 typedef struct instrument_t {
     uint8_t  bType;         // 1: instrument
@@ -77,4 +50,80 @@ typedef struct instrument_t {
     uint32_t SCRS_ID;
 };
 
-#endif
+typedef struct instrument_t instrumentsList_t[MAX_INSTRUMENTS];
+
+/* patterns */
+
+#define MAX_PATTERNS 100
+    /* 0..99 patterns */
+
+typedef uint16_t pattern_t;
+
+typedef pattern_t patternsList_t[MAX_PATTERNS];
+
+/* song arrangement */
+
+#define MAX_ORDERS 255
+    /* 0..254 orders */
+
+typedef uint8_t order_t;
+
+typedef order_t ordersList_t[MAX_ORDERS];
+
+/* channels */
+
+#define MAX_CHANNELS 32
+    /* 0..31 channels */
+
+typedef struct channel_t {
+    // general switches :
+    uint8_t  bEnabled;      // flag if =0 then nothing to mix at the moment
+    uint8_t  bChannelType;  // 0=off,1=left,2=right,3,4=adlib ... if 0,3,4 -> everything ignored !
+    // current Instrument :
+    uint16_t InstrSEG;      // DOS segment of current instrument data
+    uint16_t SampleSEG;     // DOS segment of current sample data
+    uint8_t  InstrNo;       // number of instrument is currently playing
+    uint8_t  Note;          // we don't need it really for playing, but let's store it anyway
+    // copy of sampledata (maybe it differs a bit):
+    uint8_t  bSampleVol;    // current sample volume
+    uint8_t  sLoopflag;     // flag if we have to loop sample
+    uint16_t sSmpstart;     // start offset of sample
+    uint16_t sLoopstart;    // loop start of current sample =0ffffh if no loop
+    uint16_t sLoopend;      // loop end/normal end of current sample
+    uint32_t sCurPos;       // fixed point value for current position in sample
+    uint32_t sStep;         // fixed point value of frequency step (distance of one step
+                            // depends on period we play currently)
+    uint16_t sPeriod;       // st3 period ... you know these amiga values (look at tech.doc of ST3)
+                            // period does no influence playing a sample direct, but it's for sliding etc.
+    uint16_t lower_border;  // B-7 or B-5 period for current instrument to check limits
+    uint16_t upper_border;  // C-0 or C-3 period for current instrument to check limits
+    // effect info :
+    uint16_t command;       // 2 times effectnumber (for using a jmptable)
+    uint16_t cmd2nd;        // 2nd command part - for multiple effects
+    uint8_t  bParameter;    // just the command parameters
+    // extra effect data :
+    uint8_t  continueEf;    // Flag if we should continue effect - vibrato,tremolo
+    uint16_t VibtabOfs;     // for each channel its own choise (default = OFS sinuswave)
+    uint16_t TrmtabOfs;     // Offset of wavetable for tremolo
+    uint8_t  tablepos;      // <-- we reset this if a effect starts uses such a table
+    uint8_t  VibPara;       // <-- for dual command Vib + Vol
+    uint8_t  PortPara;      // <-- for dual command Port + Vol
+    uint16_t OldPeriod;     // save that value for some effects
+    uint8_t  Oldvolume;     // save that value for tremolo
+    uint16_t WantedPeri;    // <- period to slide to with Portamento
+    uint8_t  ArpegPos;      // which of thoses 3 notes we currently play ...
+    uint8_t  note1;         //--.
+    uint8_t  note2;         //---- +note - 3 notes we do arpeggio between
+    uint32_t Step0;         //--.
+    uint32_t Step1;         //  |- the 3 step values we switch between in arpeggio effect (0 is start value <- we have to refesh after arpeggio)
+    uint32_t Step2;         //--'
+    uint8_t  cTick;         //---- ticks left to retrigg note
+    uint8_t  savNote;       //--.
+    uint8_t  savInst;       //  | - new values for notedelay ...
+    uint8_t  SavVol;        //  |
+    uint8_t  ndTick;        //--' <- also used for Notecut (ticks left to cut)
+};
+
+typedef struct channel_t channelsList_t[MAX_CHANNELS];
+
+#endif  /* S3MTYPES_H */

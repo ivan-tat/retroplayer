@@ -1,3 +1,8 @@
+/* mixer.h -- declarations for mixer.c.
+
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
+
 #ifndef MIXER_H
 #define MIXER_H 1
 
@@ -5,6 +10,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #endif
+
+// TODO: remove PUBLIC_CODE macros when done.
 
 #include "..\pascal\pascal.h"
 

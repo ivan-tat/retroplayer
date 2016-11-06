@@ -1,7 +1,13 @@
 {$M 16000,0,1000}
 program example_for_s3mplay;
 
-uses S3MPlay,crt,sbctl,blaster,dos;
+uses
+    crt,
+    dos,
+    sbctl,
+    blaster,
+    s3mvars,
+    s3mplay;
 
 const stereo_calc=true;
       _16bit_calc=false;        { 16bit play not yet possible }
@@ -19,12 +25,12 @@ var samplerate:word;
       _16bit:=_16bit_calc;
       { end of default ... }
       if not load_S3M(filename) then halt;
-      writeln(' ''',songname,''' loaded ... (was saved with ',modTrackerName,')');
+      writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');
       if not Init_S3Mplayer then halt;
       if not init_device(1) then begin writeln(' SoundBlaster not found sorry ... ');halt end;
       setsamplerate(samplerate,stereo);
       set_ST3order(true);
-      loopS3M:=true;
+      playOption_LoopSong:=true;
     end;
 
 begin
