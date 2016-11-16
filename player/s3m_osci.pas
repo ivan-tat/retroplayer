@@ -140,7 +140,7 @@ begin
         begin
           waitretrace;
           for pos:=0 to usedchannels-1 do
-            bar(320*170+pos*15+10,10,channel[pos].sampleVol*ord(channel[pos].enabled));
+            bar(320*170+pos*15+10,10,channel[pos].bSmpVol*ord(channel[pos].bEnabled));
           yl:=h^[sbGetDMACounter] shr 1;
           for pos:=1 to 319 do
             begin
@@ -158,7 +158,7 @@ begin
       while not keypressed do
         begin
           for pos:=0 to usedchannels-1 do
-            bar(320*170+pos*15+10,10,channel[pos].sampleVol*ord(channel[pos].enabled));
+            bar(320*170+pos*15+10,10,channel[pos].bSmpVol*ord(channel[pos].bEnabled));
           i:=sbGetDMACounter and $fffe;
           yl:=h^[i] shr 2;yr:=h^[i+1] shr 2;
           for pos:=1 to 319 do

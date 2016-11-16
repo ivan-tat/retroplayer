@@ -65,13 +65,13 @@ var filename:string;
 procedure save_chntyps;
 var i:byte;
   begin
-    for i:=0 to 15 do savchn[i]:=channel[i].channeltyp;
+    for i:=0 to 15 do savchn[i]:=channel[i].bChannelType;
   end;
 
 procedure revers(n:byte);
   begin
-    if channel[n].channeltyp=0 then channel[n].channeltyp:=savchn[n]
-    else channel[n].channeltyp:=0
+    if channel[n].bChannelType=0 then channel[n].bChannelType:=savchn[n]
+    else channel[n].bChannelType:=0
   end;
 
 procedure hide_cursor; assembler;
@@ -115,7 +115,7 @@ procedure disable_all;
 var i:byte;
   begin
     for i:=0 to usedchannels-1 do
-      channel[i].enabled:=false;    { <- use this if you jump to previous order ... }
+      channel[i].bEnabled:=false;    { <- use this if you jump to previous order ... }
   end;
 
 function prevorder(nr:byte):byte;

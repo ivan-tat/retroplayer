@@ -78,50 +78,47 @@ typedef order_t ordersList_t[MAX_ORDERS];
 typedef struct channel_t {
     // general switches :
     uint8_t  bEnabled;      // flag if =0 then nothing to mix at the moment
-    uint8_t  bChannelType;  // 0=off,1=left,2=right,3,4=adlib ... if 0,3,4 -> everything ignored !
+    uint8_t  bChannelType;  // 0=off, 1=left, 2=right, 3,4=adlib (if 0,3,4 -> everything ignored !)
     // current Instrument :
-    uint16_t InstrSEG;      // DOS segment of current instrument data
-    uint16_t SampleSEG;     // DOS segment of current sample data
-    uint8_t  InstrNo;       // number of instrument is currently playing
-    uint8_t  Note;          // we don't need it really for playing, but let's store it anyway
+    uint16_t wInsSeg;       // DOS segment of current instrument data
+    uint16_t wSmpSeg;       // DOS segment of current sample data
+    uint8_t  bIns;          // number of instrument is currently playing
+    uint8_t  bNote;         // we don't need it really for playing, but let's store it anyway
     // copy of sampledata (maybe it differs a bit):
-    uint8_t  bSampleVol;    // current sample volume
-    uint8_t  sLoopflag;     // flag if we have to loop sample
-    uint16_t sSmpstart;     // start offset of sample
-    uint16_t sLoopstart;    // loop start of current sample =0ffffh if no loop
-    uint16_t sLoopend;      // loop end/normal end of current sample
-    uint32_t sCurPos;       // fixed point value for current position in sample
-    uint32_t sStep;         // fixed point value of frequency step (distance of one step
-                            // depends on period we play currently)
-    uint16_t sPeriod;       // st3 period ... you know these amiga values (look at tech.doc of ST3)
-                            // period does no influence playing a sample direct, but it's for sliding etc.
-    uint16_t lower_border;  // B-7 or B-5 period for current instrument to check limits
-    uint16_t upper_border;  // C-0 or C-3 period for current instrument to check limits
+    uint8_t  bSmpVol;       // current sample volume
+    uint8_t  bSmpFlags;     // flags (looped sample)
+    uint16_t wSmpStart;     // start offset of sample
+    uint16_t wSmpLoopStart; // loop start of current sample (0xffff if no loop)
+    uint16_t wSmpLoopEnd;   // normal or loop end of current sample
+    uint32_t dSmpPos;       // fixed point 16:16 value for current position in sample
+    uint32_t dSmpStep;      // fixed point 16:16 value of frequency step
+                            // (distance of one step depends on period we play currently)
+    uint16_t wSmpPeriod;    // st3 period ... you know these amiga values (look at tech.doc of ST3)
+                            // ( period does no influence playing a sample direct, but it's for sliding etc.)
+    uint16_t wSmpPeriodLow; // B-7 or B-5 period for current instrument to check limits
+    uint16_t wSmpPeriodHigh;// C-0 or C-3 period for current instrument to check limits
     // effect info :
-    uint16_t command;       // 2 times effectnumber (for using a jmptable)
-    uint16_t cmd2nd;        // 2nd command part - for multiple effects
+    uint16_t wCommand;      // 2 times effectnumber (for using a jmptable)
+    uint16_t wCommand2;     // 2nd command part - for multiple effects
     uint8_t  bParameter;    // just the command parameters
     // extra effect data :
-    uint8_t  continueEf;    // Flag if we should continue effect - vibrato,tremolo
-    uint16_t VibtabOfs;     // for each channel its own choise (default = OFS sinuswave)
-    uint16_t TrmtabOfs;     // Offset of wavetable for tremolo
-    uint8_t  tablepos;      // <-- we reset this if a effect starts uses such a table
-    uint8_t  VibPara;       // <-- for dual command Vib + Vol
-    uint8_t  PortPara;      // <-- for dual command Port + Vol
-    uint16_t OldPeriod;     // save that value for some effects
-    uint8_t  Oldvolume;     // save that value for tremolo
-    uint16_t WantedPeri;    // <- period to slide to with Portamento
-    uint8_t  ArpegPos;      // which of thoses 3 notes we currently play ...
-    uint8_t  note1;         //--.
-    uint8_t  note2;         //---- +note - 3 notes we do arpeggio between
-    uint32_t Step0;         //--.
-    uint32_t Step1;         //  |- the 3 step values we switch between in arpeggio effect (0 is start value <- we have to refesh after arpeggio)
-    uint32_t Step2;         //--'
-    uint8_t  cTick;         //---- ticks left to retrigg note
-    uint8_t  savNote;       //--.
-    uint8_t  savInst;       //  | - new values for notedelay ...
-    uint8_t  SavVol;        //  |
-    uint8_t  ndTick;        //--' <- also used for Notecut (ticks left to cut)
+    uint8_t  bEffFlags;     // multiple effects: flags (continue for Vibrato and Tremolo)
+    uint16_t wVibTab;       // Vibrato: offset of wavetable (default: sinuswave)
+    uint16_t wTrmTab;       // Tremolo: offset of wavetable (default: sinuswave)
+    uint8_t  bTabPos;       // multiple effects: we reset this if an effect starts uses such a table
+    uint8_t  bVibParam;     // Vibrato   +VolSlide: parameter
+    uint8_t  bPortParam;    // Portamento+VolSlide: parameter
+    uint16_t wSmpPeriodOld; // multiple effects: save that value
+    uint8_t  bSmpVolOld;    // Tremolo: save that value
+    uint16_t wSmpPeriodDest;// Portamento: period to slide to
+    uint8_t  bArpPos;       // Arpeggio: which of thoses 3 notes we currently play
+    uint8_t  bArpNotes[2];  // Arpeggio: +note - 3 notes we do arpeggio between
+    uint32_t dArpSmpSteps[3];// Arpeggio: 3 step values we switch between (0 is start value <- we have to refesh after Arpeggio)
+    uint8_t  bRetrigTicks;  // Retrigger: ticks left to retrigg note
+    uint8_t  bSavNote;      // NoteDelay: new value
+    uint8_t  bSavIns;       // NoteDelay: new value
+    uint8_t  bSavVol;       // NoteDelay: new value
+    uint8_t  bDelayTicks;   // NoteDelay: new value | NoteCut: ticks left to cut
 };
 
 typedef struct channel_t channelsList_t[MAX_CHANNELS];

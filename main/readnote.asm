@@ -181,7 +181,7 @@ calcNotePeriod proc near
 ; OUT: AX = Period
         push    bx
         push    cx
-        ; calc speriod (with st3 finetune) :
+        ; calc wSmpPeriod (with st3 finetune) :
         mov     bl,al
         mov     cl,al
         shr     cl,4
@@ -201,16 +201,16 @@ calcNotePeriod proc near
         ;            C2Speed of current Sample
 
         ; Now check borders :
-        cmp     ax,[channel.lower_border+si]
+        cmp     ax,[channel.wSmpPeriodLow+si]
         jnb     notbelow
 
-        mov     ax,[channel.lower_border+si]
+        mov     ax,[channel.wSmpPeriodLow+si]
 
 notbelow:
-        cmp     ax,[channel.upper_border+si]
+        cmp     ax,[channel.wSmpPeriodHigh+si]
         jna     notabove
 
-        mov     ax,[channel.upper_border+si]
+        mov     ax,[channel.wSmpPeriodHigh+si]
 
 notabove:
         pop     cx
@@ -237,15 +237,15 @@ CheckPara0 MACRO
 local cp
            cmp      al,0
            jnz      cp
-           mov      al,[channel.parameter+si]
-cp:        mov      [channel.parameter+si],al
+           mov      al,[channel.bParameter+si]
+cp:        mov      [channel.bParameter+si],al
 ENDM
 
 CheckPara0not MACRO
 local cp
               cmp      al,0
               je       cp
-              mov      [channel.parameter+si],al
+              mov      [channel.bParameter+si],al
 cp:
 ENDM
 
@@ -266,33 +266,33 @@ SetupNewInst proc far
              mov     ax,word ptr ds:[Instruments+2]
              add     bx,ax
              mov     fs,bx
-             mov     [channel.instrSEG+si],bx
+             mov     [channel.wInsSeg+si],bx
              mov     al,fs:[TInstrument.vol]
              cmp     al,64
              jb      volwell
              mov     al,63
 volwell:     mul     [gvolume]
              shr     ax,6
-             mov     [channel.bSampleVol+si],al
+             mov     [channel.bSmpVol+si],al
              mov     ax,fs:[TInstrument.memseg]
-             mov     [channel.sampleSEG+si],ax
+             mov     [channel.wSmpSeg+si],ax
              mov     al,fs:[TInstrument.flags]
              and     al,00000001b       ; bit 0 - loop sample ?
-             mov     [channel.sLoopflag+si],al
+             mov     [channel.bSmpFlags+si],al
              mov     ax,fs:[TInstrument.loopbeg]
-             mov     [channel.sLoopstart+si],ax
+             mov     [channel.wSmpLoopStart+si],ax
              mov     ax,fs:[TInstrument.loopend]
-             cmp     [channel.sLoopflag+si],1
+             cmp     [channel.bSmpFlags+si],1
              je      weloop                            ; =:)
              mov     ax,fs:[TInstrument.slength]     ; <- we don't loop :( anyway ...
-weLoop:      mov     [channel.sLoopend+si],ax
+weLoop:      mov     [channel.wSmpLoopEnd+si],ax
              ; calc period borders
              mov     bx,fs:[TInstrument.c2speed]
              cmp     bx,0
              jne     c2speedok
              ; c2speed = 0 -> don't play it !! it's wrong !
-             mov     [channel.InstrNo+si],0
-c2speedok:   mov     [channel.ssmpstart+si],0  ; reset start value
+             mov     [channel.bIns+si],0
+c2speedok:   mov     [channel.wSmpStart+si],0  ; reset start value
              cmp     [modOption_AmigaLimits],1
              je      takeamigalimits
              ; B-7 :
@@ -300,7 +300,7 @@ c2speedok:   mov     [channel.ssmpstart+si],0  ; reset start value
              mov     dx,8363
              mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
              div     bx
-             mov     [channel.lower_border+si],ax
+             mov     [channel.wSmpPeriodLow+si],ax
              ; C-0 :
              mov     ax,1712 * 16         ; period(note)*16 >> 0
              mov     dx,8363
@@ -308,11 +308,11 @@ c2speedok:   mov     [channel.ssmpstart+si],0  ; reset start value
              cmp     bx,3500
              jb      c2below
              div     bx
-             mov     [channel.upper_border+si],ax
+             mov     [channel.wSmpPeriodHigh+si],ax
              jmp     after1
 c2below:     mov     bx,3500
              div     bx
-             mov     [channel.upper_border+si],ax
+             mov     [channel.wSmpPeriodHigh+si],ax
              jmp     after1
 takeamigalimits:
              ; first C-3 :
@@ -320,13 +320,13 @@ takeamigalimits:
              mov     dx,8363
              mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
              div     bx
-             mov     [channel.upper_border+si],ax
+             mov     [channel.wSmpPeriodHigh+si],ax
              ; then B-5 :
              mov     ax,907 * 16 / 32     ; period(note)*16 >> 5
              mov     dx,8363
              mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
              div     bx
-             mov     [channel.lower_border+si],ax
+             mov     [channel.wSmpPeriodLow+si],ax
 after1:      mov     al,[curInst]
 
              ret
@@ -340,32 +340,32 @@ SetNewNote proc far
 ; DESTROYs: EAX,EBX,EDX,FS,CX
 ;
              ; clear it first - just to make sure we really set it
-             mov     [channel.speriod+si],0
-             cmp     [channel.instrNo+si],0
+             mov     word ptr [channel.wSmpPeriod+si],0
+             cmp     byte ptr [channel.bIns+si],0
              je      after2                  ; if there's no instrumnet
              ; set pointer to instrument
              push    ax
-             mov     ax,[channel.instrSEG+si]
+             mov     ax,[channel.wInsSeg+si]
              mov     fs,ax
              pop     ax
-             cmp     fs:[TInstrument.Typ],1  ; only calc if instrument does exist
+             cmp     byte ptr fs:[TInstrument.Typ],1  ; only calc if instrument does exist
              jne     after2
 
              call    calcNotePeriod
-             mov     [channel.speriod+si],ax
+             mov     [channel.wSmpPeriod+si],ax
 
              ; now step calculations :
              call    _mixCalcSampleStep
 
-             mov     [channel.sStep+si],EAX
+             mov     [channel.dSmpStep+si],EAX
 
              cmp     [portaFlag],1
              je      after2             ; it's porta, do not restart !
              ; restart instrument
              xor     ebx,ebx
-             mov     bx,[channel.sSmpstart+si]
+             mov     bx,[channel.wSmpStart+si]
              shl     ebx,16
-             mov     [channel.sCurpos+si],ebx
+             mov     [channel.dSmpPos+si],ebx
              mov     [channel.bEnabled+si],1
 after2:      ret
 SetNewNote endp
@@ -450,7 +450,7 @@ ignorethem:  ; read effects - it may change the read instr/note !
              mov     al,es:[di+3]        ; read effect number
              xor     ah,ah
              shl     ax,1
-             mov     [channel.continueEf+si],0
+             mov     [channel.bEffFlags+si],0
              cmp     ax,2*8              ; Vibrato ...
              je      checkifcontV
              cmp     ax,2*11             ; Vibrato Volefcs
@@ -458,45 +458,45 @@ ignorethem:  ; read effects - it may change the read instr/note !
              cmp     ax,2*21             ; fine Vibrato
              je      checkifcontV
              ; -> no vibrato effect, so check if last row there was one ...
-             ; if there was - do refresh sStep
-             cmp     [channel.command+si],2*8      ; was vibrato
+             ; if there was - do refresh dSmpStep
+             cmp     [channel.wCommand+si],2*8      ; was vibrato
              je      Vibend
-             cmp     [channel.command+si],2*21     ; was fine vibrato
+             cmp     [channel.wCommand+si],2*21     ; was fine vibrato
              je      Vibend
-             cmp     [channel.command+si],2*11     ; was vibrato+volef
+             cmp     [channel.wCommand+si],2*11     ; was vibrato+volef
              jne     noVibend
              ; refresh frequency
 vibend:      push    ax
-             mov     ax,[channel.OldPeriod+si]
-             mov     [channel.sPeriod+si],ax
+             mov     ax,[channel.wSmpPeriodOld+si]
+             mov     [channel.wSmpPeriod+si],ax
              cmp     ax,0
              je      novibcalc
              call    _mixCalcSampleStep
-             mov     [channel.sStep+si],EAX
+             mov     [channel.dSmpStep+si],EAX
 novibcalc:   pop     ax
 novibend:    cmp     ax,2*18             ; Tremolo ...
              je      checkifcontTrm
              cmp     ax,2*10             ; Arpeggio ...
              je      checkifcontA
              ; - currently no arpeggio, but arpeggio was last row ?
-             ; if there was - set sStep = Step0 (refresh frequ)
-             cmp     [channel.command+si],2*10
+             ; if there was - set dSmpStep = dArpSmpSteps[0] (refresh frequ)
+             cmp     [channel.wCommand+si],2*10
              jne     noarpegend
              ; arpeggio ends :
              push    ax
-             mov     eax,[channel.step0+si]
-             mov     [channel.sStep+si],eax
+             mov     eax,[channel.dArpSmpSteps+si]
+             mov     [channel.dSmpStep+si],eax
              pop     ax
 noarpegend:  cmp     ax,2*17               ; Note retrigg
              je      checkifcontRetr
 aftercontcheck:
-             mov     bx,[channel.command+si]
+             mov     bx,[channel.wCommand+si]
              mov     [sav_cmd],bx               ; to save it for pattern delay ...
-             mov     [channel.command+si],ax
-             mov     [channel.cmd2nd+si],0
+             mov     [channel.wCommand+si],ax
+             mov     word ptr [channel.wCommand2+si],0
              cmp     al,44
              jbe     noproblem
-             mov     [channel.command+si],0
+             mov     [channel.wCommand+si],0
              xor     ax,ax
 noproblem:   mov     bx,ax
              mov     al,es:[di+4]        ; read effect parameter
@@ -532,16 +532,16 @@ instok:      pop     ax
              comment #
              cmp     [channel.bEnabled+si],0       ; if channel is disabled then restart definitly
              je      restart
-             cmp     [channel.InstrNo+si],al      ; but if it's enabled & same instrno then don't restart
+             cmp     [channel.bIns+si],al      ; but if it's enabled & same instrno then don't restart
              je      dontrestart
 restart:     cmp     [portaFlag],1                ; and if portamento then don't restart ;)
              je      dontrestart
-             mov     bx,[channel.sSmpstart+si]
-             mov     [channel.sCurpos+si],bx
+             mov     bx,[channel.wSmpStart+si]
+             mov     [channel.dSmpPos+si],bx
 dontrestart:
              #
 
-             mov     [channel.InstrNo+si],al
+             mov     [channel.bIns+si],al
              call    SetupNewInst
 no_newinstr: ; read note ...
              ; ~~~~~~~~~~~~~
@@ -552,7 +552,7 @@ no_newinstr: ; read note ...
              jne     normal_note
              mov     [channel.bEnabled+si],0     ; stop mixing
              jmp     no_newnote
-normal_note: mov     [channel.Note+si],al
+normal_note: mov     [channel.bNote+si],al
              call    SetNewNote
 no_newnote:  ; read volume - last but not least ;)
              ; ~~~~~~~~~~~
@@ -564,10 +564,10 @@ no_newnote:  ; read volume - last but not least ;)
              mov     al,63
 volok:       mul     [gvolume]
              shr     ax,6
-             mov     [channel.bSampleVol+si],al
+             mov     [channel.bSmpVol+si],al
 
 no_vol:      ; ok now the effect handling after reading vol/instr/note
-             mov     bx,[channel.command+si]
+             mov     bx,[channel.wCommand+si]
              jmp     [handleeffects+bx]
 handlenothing:
 
@@ -635,13 +635,13 @@ donotloop:   mov     [EndOfSong],1
 checkifcontV:  ; check if continue Vib/Vib_vol
              cmp     [curNote],0feh
              jb      aftercontcheck
-             cmp     [channel.command+si],11*2  ; command before was vibrato
+             cmp     [channel.wCommand+si],11*2  ; command before was vibrato
              je      checkok1
-             cmp     [channel.command+si],21*2  ; command before was fine vibrato
+             cmp     [channel.wCommand+si],21*2  ; command before was fine vibrato
              je      checkok1
-             cmp     [channel.command+si],8*2   ; command before was vibrato+volef
+             cmp     [channel.wCommand+si],8*2   ; command before was vibrato+volef
              jne     aftercontcheck
-checkok1:    mov     [channel.continueEf+si],1
+checkok1:    mov     [channel.bEffFlags+si],1
              jmp     aftercontcheck
 
 checkifcontA:     ; check if continue Arpeg
@@ -649,9 +649,9 @@ checkifcontA:     ; check if continue Arpeg
              jb      aftercontcheck
 checkifcontTrm:   ; check if continue a tremolo
 checkifcontRetr:  ; check if continue a note retrig
-             cmp     [channel.command+si],ax
+             cmp     [channel.wCommand+si],ax
              jne     aftercontcheck
-             mov     [channel.continueEf+si],1
+             mov     [channel.bEffFlags+si],1
              jmp     aftercontcheck
 
 ; Effects :
@@ -689,7 +689,7 @@ VolumeEfcts:   ; effect 'D' or jump from dual commands ...
                cmp      al,0f0h
                je       volup
                ; normal fine volume down   DFx
-               mov      [channel.cmd2nd + si],04
+               mov      [channel.wCommand2 + si],04
                jmp      back2reality
 nofinevoldown: mov      ah,al
                and      ah,0fh
@@ -698,48 +698,48 @@ nofinevoldown: mov      ah,al
                cmp      al,0fh
                je       voldown
                ; normal fine volume up     DxF
-               mov      [channel.cmd2nd + si],06
+               mov      [channel.wCommand2 + si],06
                jmp      back2reality
 nofinevolup:   mov      ah,al
                and      ah,00fh
                jz       notVslidedown
                ; normale slide down effect D0x
-voldown:       mov      [channel.cmd2nd + si],00
+voldown:       mov      [channel.wCommand2 + si],00
                jmp      back2reality
 notVslidedown: ; normal slide up effect    Dx0
-volup:         mov      [channel.cmd2nd + si],02
+volup:         mov      [channel.wCommand2 + si],02
                jmp      back2reality
 Pitchdowns:    ; effect 'E'
                checkPara0
                cmp      al,0DFh      ; al is parameter
                ja       extraptdowns
-               mov      [channel.cmd2nd + si],00
+               mov      [channel.wCommand2 + si],00
                jmp      back2reality
 extraptdowns:  cmp      al,0EFh
                ja       Finepitchdown
                ; extra fine slides
-               mov      [channel.cmd2nd + si],04
+               mov      [channel.wCommand2 + si],04
                jmp      back2reality
-Finepitchdown: mov      [channel.cmd2nd + si],02
+Finepitchdown: mov      [channel.wCommand2 + si],02
                jmp      back2reality
 Pitchups:      ; effect 'F'
                checkPara0
                cmp      al,0DFh      ; al is parameter
                ja       extraptups
-               mov      [channel.cmd2nd + si],00
+               mov      [channel.wCommand2 + si],00
                jmp      back2reality
 extraptups:    cmp      al,0EFh
                ja       Finepitchup
                ; extra fine slides
-               mov      [channel.cmd2nd + si],04
+               mov      [channel.wCommand2 + si],04
                jmp      back2reality
-Finepitchup:   mov      [channel.cmd2nd + si],02
+Finepitchup:   mov      [channel.wCommand2 + si],02
                jmp      back2reality
 Portamento:    ; effect 'G'
                checkPara0not
                cmp      al,0
                je       nonewPortpara
-               mov      [channel.PortPara+si],al
+               mov      [channel.bPortParam+si],al
 nonewPortpara: mov      [portaFlag],1
                ; check first if portamento really possible:
                cmp      [channel.bEnabled+si],0
@@ -747,30 +747,30 @@ nonewPortpara: mov      [portaFlag],1
                cmp      [curNote],0feh
                jae      back2reality    ; <- continue portamento
                ; now save some values (we wanna slide from ...)
-               mov      eax,[channel.sStep+si]
+               mov      eax,[channel.dSmpStep+si]
                mov      [sStep_old],eax
-               mov      ax,[channel.sPeriod+si]
+               mov      ax,[channel.wSmpPeriod+si]
                mov      [Period_old],ax
                jmp      back2reality
-stopporta:     mov      [channel.command+si],0   ;<-noeffect
+stopporta:     mov      [channel.wCommand+si],0   ;<-noeffect
                mov      [portaFlag],0
                jmp      back2reality
 Vibrato:       ; effect 'H'
                checkpara0not
-               cmp      [channel.continueEf+si],1
+               cmp      [channel.bEffFlags+si],1
                je       norestart
-               mov      [channel.Tablepos+si],0
+               mov      [channel.bTabPos+si],0
 norestart:     cmp      al,0
                jne      newVibvalue
-               mov      al,[channel.VibPara+si]
+               mov      al,[channel.bVibParam+si]
 newVibValue:   mov      ah,al
                shr      ah,4
                cmp      ah,0
                jne      Vibspeedok
-               mov      ah,[channel.VibPara+si]
+               mov      ah,[channel.bVibParam+si]
                and      ah,0f0h
                or       al,ah
-VibspeedOk:    mov      [channel.VibPara+si],al
+VibspeedOk:    mov      [channel.bVibParam+si],al
                jmp      back2reality
 Tremor:        ; effect 'I'
                checkPara0
@@ -779,14 +779,14 @@ Arpeggio:      ; effect 'J'
                cmp      al,0
                je       uselastPara
                mov      [arp_chg],1
-               mov      [channel.parameter+si],al
+               mov      [channel.bParameter+si],al
                jmp      back2reality
 uselastPara:   mov      [arp_chg],0
                jmp      back2reality
 Vib_Vol:       ; effect 'K'
-               cmp      [channel.continueEf+si],1
+               cmp      [channel.bEffFlags+si],1
                je       volumeefcts
-               mov      [channel.Tablepos+si],0
+               mov      [channel.bTabPos+si],0
                jmp      volumeefcts
 Port_Vol:      ; effect 'L'
                mov      [portaFlag],1
@@ -797,9 +797,9 @@ Port_Vol:      ; effect 'L'
                jae      volumeefcts           ; <- continue portamento
                ; now save some values (we wanna slide from ...)
                push     ax
-               mov      eax,[channel.sStep+si]
+               mov      eax,[channel.dSmpStep+si]
                mov      [sStep_old],eax
-               mov      ax,[channel.sPeriod+si]
+               mov      ax,[channel.wSmpPeriod+si]
                mov      [Period_old],ax
                pop      ax
                jmp      volumeefcts    ; <- and now volume effects
@@ -807,51 +807,51 @@ Port_Vol:      ; effect 'L'
 Retrigg:       ; effect 'Q'
                cmp      al,0
                jne      newretrPara
-               mov      al,[channel.parameter+si]
+               mov      al,[channel.bParameter+si]
                jmp      aftersetretr
-newretrPara:   mov      [channel.parameter+si],al
+newretrPara:   mov      [channel.bParameter+si],al
                mov      ah,al
                and      ah,0fh
                cmp      ah,0
                je       noretrigg
                dec      ah
-               mov      [channel.ctick+si],ah
+               mov      [channel.bRetrigTicks+si],ah
 aftersetretr:  mov      bl,al
                shr      bl,4
                shl      bl,1
                xor      bh,bh
                jmp      [retrig_dif+bx]
-nosld:         mov      [channel.cmd2nd+si],0
+nosld:         mov      [channel.wCommand2+si],0
                jmp      back2reality
-slddown:       mov      [channel.cmd2nd+si],2
+slddown:       mov      [channel.wCommand2+si],2
                jmp      back2reality
-use2div3:      mov      [channel.cmd2nd+si],4
+use2div3:      mov      [channel.wCommand2+si],4
                jmp      back2reality
-use1div2:      mov      [channel.cmd2nd+si],6
+use1div2:      mov      [channel.wCommand2+si],6
                jmp      back2reality
-sldup:         mov      [channel.cmd2nd+si],8
+sldup:         mov      [channel.wCommand2+si],8
                jmp      back2reality
-use3div2:      mov      [channel.cmd2nd+si],10
+use3div2:      mov      [channel.wCommand2+si],10
                jmp      back2reality
-use2times:     mov      [channel.cmd2nd+si],12
+use2times:     mov      [channel.wCommand2+si],12
                jmp      back2reality
-noretrigg:     mov      [channel.command+si],0
+noretrigg:     mov      [channel.wCommand+si],0
                jmp      back2reality
 Tremolo:       ; effect 'R'
-               cmp      [channel.continueEf+si],1
+               cmp      [channel.bEffFlags+si],1
                je       noTrmrestart
-               mov      [channel.Tablepos+si],0
+               mov      [channel.bTabPos+si],0
 noTrmrestart:  cmp      al,0
                jne      newTrmvalue
-               mov      al,[channel.Parameter+si]
+               mov      al,[channel.bParameter+si]
 newTrmValue:   mov      ah,al
                shr      ah,4
                cmp      ah,0
                jne      Trmspeedok
-               mov      ah,[channel.Parameter+si]
+               mov      ah,[channel.bParameter+si]
                and      ah,0f0h
                or       al,ah
-TrmspeedOk:    mov      [channel.Parameter+si],al
+TrmspeedOk:    mov      [channel.bParameter+si],al
                jmp      back2reality               
 Specialsets:   ; effect 'S'
                checkPara0
@@ -859,7 +859,7 @@ Specialsets:   ; effect 'S'
                mov      bl,al
                shr      bl,4
                shl      bx,1
-               mov      [channel.cmd2nd+si],bx
+               mov      [channel.wCommand2+si],bx
                ; do effects we have to check before reading note/vol/instr
                jmp      [special1+bx]
 setvibwav:     ; for every channel a seperate choise !
@@ -869,7 +869,7 @@ setvibwav:     ; for every channel a seperate choise !
                mov      bx,ax
                shl      bx,1
                mov      ax,[wavetab+bx]
-               mov      [channel.VibTabOfs+si],ax
+               mov      [channel.wVibTab+si],ax
                jmp      back2reality
 settremwav:    ; for every channel a seperate choise !
                and      al,3
@@ -878,7 +878,7 @@ settremwav:    ; for every channel a seperate choise !
                mov      bx,ax
                shl      bx,1
                mov      ax,[wavetab+bx]
-               mov      [channel.TrmTabOfs+si],ax
+               mov      [channel.wTrmTab+si],ax
                jmp      back2reality
 cmdPatloop:    and      al,0fh
                cmp      al,0
@@ -897,27 +897,27 @@ InitNotecut:   and      al,0fh
                cmp      al,0
                je       noCut
                ;inc      al
-               mov      [channel.ndtick+si],al
+               mov      [channel.bDelayTicks+si],al
                jmp      back2reality
-noCut:         mov      [channel.command+si],9
+noCut:         mov      [channel.wCommand+si],9
                jmp      back2reality
 InitNotedelay: and      al,0fh
-               mov      [channel.ndTick+si],al
+               mov      [channel.bDelayTicks+si],al
                cmp      [inpatterndly],1
                je       donothing
                mov      al,[curNote]      ; new note for later
-               mov      [channel.savnote+si],al
+               mov      [channel.bSavNote+si],al
                mov      al,[curInst]    ; new instrument for later
-               mov      [channel.savInst+si],al
+               mov      [channel.bSavIns+si],al
                mov      al,[curVol]    ; new volume for later
-               mov      [channel.savVol+si],al
+               mov      [channel.bSavVol+si],al
                jmp      donothing       ; setup note/instr/vol later while mixing !
 InitPatdelay:  cmp      [inpatterndly],1
                je       back2reality            ; <- hehe we are allread in this patterndelay ...
                and      al,0fh
                inc      al
                mov      [patterndelay],al
-               mov      al,[channel.parameter+si]
+               mov      al,[channel.bParameter+si]
                mov      [sav_para],al
                jmp      back2reality
 
@@ -950,99 +950,99 @@ gvolok:        mov      [newgvol],al
 ;  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Hdl_Volfx:    ; effect 'D'
-              mov       bx,[channel.cmd2nd + si]
+              mov       bx,[channel.wCommand2 + si]
               jmp       [vol_cmd2nd+bx]
-FineVSlideDwn:mov       al,[channel.Parameter+si]
+FineVSlideDwn:mov       al,[channel.bParameter+si]
               and       al,0fh
-              sub       [channel.bSampleVol+si],al
+              sub       [channel.bSmpVol+si],al
               jnc       handlenothing
-              mov       [channel.bSampleVol+si],0
+              mov       [channel.bSmpVol+si],0
               jmp       handlenothing
-FineVSlideUp: mov       al,[channel.Parameter+si]
+FineVSlideUp: mov       al,[channel.bParameter+si]
               shr       al,4
-              add       [channel.bSampleVol+si],al
-              cmp       [channel.bSampleVol+si],64
+              add       [channel.bSmpVol+si],al
+              cmp       [channel.bSmpVol+si],64
               jb        handlenothing
-              mov       [channel.bSampleVol+si],63
+              mov       [channel.bSmpVol+si],63
               jmp       handlenothing
 Hdl_pitchdwn: ; effect 'E'
-              mov       bx,[channel.cmd2nd + si]
+              mov       bx,[channel.wCommand2 + si]
               jmp       [pitdwn_cmd2nd+bx]
 Finepitch_down:
-              ; we pitch down, but increase period ! (so check upper_border)
-              mov       ax,[channel.sPeriod+si]
-              mov       bl,[channel.Parameter+si]
+              ; we pitch down, but increase period ! (so check wSmpPeriodHigh)
+              mov       ax,[channel.wSmpPeriod+si]
+              mov       bl,[channel.bParameter+si]
               and       bl,0fh
               xor       bh,bh
               shl       bx,2
               add       ax,bx
-              cmp       ax,[channel.upper_border+si]
+              cmp       ax,[channel.wSmpPeriodHigh+si]
               jb        ptok
-              mov       ax,[channel.upper_border+si]
+              mov       ax,[channel.wSmpPeriodHigh+si]
 ptok:         ; now calc new frequency step for this period
-              mov       [channel.sPeriod+si],ax
+              mov       [channel.wSmpPeriod+si],ax
               call    _mixCalcSampleStep
-              mov       ds:[channel.sStep+si],EAX
+              mov       ds:[channel.dSmpStep+si],EAX
               jmp       handlenothing
 XFinepitch_down:
-              ; we pitch down, but increase period ! (so check upper_border)
-              mov       ax,[channel.sPeriod+si]
-              mov       bl,[channel.Parameter+si]
+              ; we pitch down, but increase period ! (so check wSmpPeriodHigh)
+              mov       ax,[channel.wSmpPeriod+si]
+              mov       bl,[channel.bParameter+si]
               and       bl,0fh
               xor       bh,bh
               add       ax,bx
-              cmp       ax,[channel.upper_border+si]
+              cmp       ax,[channel.wSmpPeriodHigh+si]
               jb        ptok
-              mov       ax,[channel.upper_border+si]
+              mov       ax,[channel.wSmpPeriodHigh+si]
               jmp       ptok
 Hdl_pitchup:  ; effect 'F'
-              mov       bx,[channel.cmd2nd + si]
+              mov       bx,[channel.wCommand2 + si]
               jmp       [pitup_cmd2nd+bx]
-Finepitch_up: ; we pitch up, but decrease period ! (so check lower_border)
-              mov       ax,[channel.sPeriod+si]
-              mov       bl,[channel.Parameter+si]
+Finepitch_up: ; we pitch up, but decrease period ! (so check wSmpPeriodLow)
+              mov       ax,[channel.wSmpPeriod+si]
+              mov       bl,[channel.bParameter+si]
               and       bl,0fh
               xor       bh,bh
               shl       bx,2
               sub       ax,bx
-              cmp       ax,[channel.lower_border+si]
+              cmp       ax,[channel.wSmpPeriodLow+si]
               ja        ptok
-              mov       ax,[channel.lower_border+si]
+              mov       ax,[channel.wSmpPeriodLow+si]
               jmp       ptok
-XFinepitch_up:; we pitch up, but decrease period ! (so check lower_border)
-              mov       ax,[channel.sPeriod+si]
-              mov       bl,[channel.Parameter+si]
+XFinepitch_up:; we pitch up, but decrease period ! (so check wSmpPeriodLow)
+              mov       ax,[channel.wSmpPeriod+si]
+              mov       bl,[channel.bParameter+si]
               and       bl,0fh
               xor       bh,bh
               sub       ax,bx
-              cmp       ax,[channel.lower_border+si]
+              cmp       ax,[channel.wSmpPeriodLow+si]
               ja        ptok
-              mov       ax,[channel.lower_border+si]
+              mov       ax,[channel.wSmpPeriodLow+si]
               jmp       ptok
 Hdl_porta:     ; effect 'G'
                cmp      [curNote],0feh
                jae      handlenothing         ; <- is a portamento continue
                mov      ax,[Period_Old]
-               xchg     ax,[channel.sPeriod+si]
-               mov      [channel.wantedPeri+si],ax
+               xchg     ax,[channel.wSmpPeriod+si]
+               mov      [channel.wSmpPeriodDest+si],ax
                mov      eax,[sStep_old]
-               mov      [channel.sStep+si],eax
+               mov      [channel.dSmpStep+si],eax
                jmp      handlenothing
 Hdl_Vibrato:   ; effect 'H'
-               cmp      [channel.continueEf+si],1
+               cmp      [channel.bEffFlags+si],1
                je       handlenothing                ; continue this effect !
-               mov      ax,[channel.sPeriod+si]
-               mov      [channel.OldPeriod+si],ax
+               mov      ax,[channel.wSmpPeriod+si]
+               mov      [channel.wSmpPeriodOld+si],ax
                jmp      handlenothing
 Hdl_arpeggio:  ; effect 'J'
                cmp      [arp_chg],1
                je       newPara
-               cmp      [channel.continueEf+si],1
+               cmp      [channel.bEffFlags+si],1
                je       handlenothing                ; no new note !
                ; start arpeggio:
-               mov      [channel.ArpegPos+si],0
-newPara:       mov      al,[channel.parameter+si]
-               mov      ah,[channel.note+si]
+               mov      [channel.bArpPos+si],0
+newPara:       mov      al,[channel.bParameter+si]
+               mov      ah,[channel.bNote+si]
                ; calc note 1:
                mov      bl,ah
                mov      bh,al
@@ -1057,7 +1057,7 @@ arpt1:         cmp      bl,12
                add      bh,10h
                jmp      arpt1
 arpok1:        or       bh,bl
-               mov      [channel.note1+si],bh
+               mov      [channel.bArpNotes+si],bh
                ; now note 2:
                mov      bl,ah
                mov      bh,al
@@ -1072,25 +1072,25 @@ arpt2:         cmp      bl,12
                add      bh,10h
                jmp      arpt2
 arpok2:        or       bh,bl
-               mov      [channel.note2+si],bh
+               mov      [channel.bArpNotes+1+si],bh
                ; now calc the Steps:
-               mov     ax,[channel.instrSEG+si]
+               mov     ax,[channel.wInsSeg+si]
                mov     fs,ax
-               mov      al,[channel.Note+si]
+               mov      al,[channel.bNote+si]
                call    calcpart
-               mov      [channel.Step0+si],eax
-               mov      al,[channel.Note1+si]
+               mov      [channel.dArpSmpSteps+si],eax
+               mov      al,[channel.bArpNotes+si]
                call    calcpart
-               mov      [channel.Step1+si],eax
-               mov      al,[channel.Note2+si]
+               mov      [channel.dArpSmpSteps+4*1+si],eax
+               mov      al,[channel.bArpNotes+1+si]
                call    calcpart
-               mov      [channel.Step2+si],eax
+               mov      [channel.dArpSmpSteps+4*2+si],eax
                jmp      handlenothing
 
-Hdl_Vib_Vol:   cmp      [channel.continueEf+si],1
+Hdl_Vib_Vol:   cmp      [channel.bEffFlags+si],1
                je       Hdl_Volfx
-               mov      ax,[channel.sPeriod+si]
-               mov      [channel.OldPeriod+si],ax
+               mov      ax,[channel.wSmpPeriod+si]
+               mov      [channel.wSmpPeriodOld+si],ax
                jmp      Hdl_Volfx
 
 Hdl_Port_Vol:  ; effect 'L'
@@ -1098,40 +1098,40 @@ Hdl_Port_Vol:  ; effect 'L'
                cmp      [curNote],0feh
                jae      Hdl_Volfx
                mov      ax,[Period_Old]
-               xchg     ax,[channel.sPeriod+si]
-               mov      [channel.wantedPeri+si],ax
+               xchg     ax,[channel.wSmpPeriod+si]
+               mov      [channel.wSmpPeriodDest+si],ax
                mov      eax,[sStep_old]
-               mov      [channel.sStep+si],eax
+               mov      [channel.dSmpStep+si],eax
                jmp       Hdl_Volfx
 Hdl_setsmpofs:; effect 'O'
                xor       eax,eax
-               mov       ah,[channel.parameter+si]
-               mov       [channel.ssmpstart+si],ax
+               mov       ah,[channel.bParameter+si]
+               mov       [channel.wSmpStart+si],ax
                shl       eax,16
                cmp       [curnote],0ffh
                je        handlenothing
-               mov       [channel.sCurPos+si],eax
+               mov       [channel.dSmpPos+si],eax
                jmp       handlenothing
 Hdl_tremolo:  ; effect 'R' (Tremolo)
                cmp      [curInst],0
                jne      savevol                      ; new instrument
                cmp      [curVol],0ffh
                jne      savevol                      ; new volume
-               cmp      [channel.continueEf+si],1
+               cmp      [channel.bEffFlags+si],1
                je       handlenothing                ; continue this effect !
               ; save volume
-savevol:      mov       al,[channel.bSampleVol+si]
-              mov       [channel.OldVolume+si],al
+savevol:      mov       al,[channel.bSmpVol+si]
+              mov       [channel.bSmpVolOld+si],al
               jmp       handlenothing
 Hdl_Special:  ; effect 'S'
-              mov       bx,[channel.cmd2nd+si]
+              mov       bx,[channel.wCommand2+si]
               jmp       [special2+bx]
 Hdl_finetune: jmp       handlenothing
 Hdl_patterndly: mov       al,[sav_para]
-                mov       [channel.parameter+si],al
+                mov       [channel.bParameter+si],al
                 mov       ax,[sav_cmd]
-                mov       [channel.command+si],ax
-                mov       [channel.cmd2nd+si],0
+                mov       [channel.wCommand+si],ax
+                mov       word ptr [channel.wCommand2+si],0
                 jmp       handlenothing
 
 readnewnotes endp

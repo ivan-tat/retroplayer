@@ -193,7 +193,7 @@ _chnLoop:
         je      _noeff_forfirst
 
 _doeff:
-        mov     bx,CHANOFF[TChannel.command]
+        mov     bx,CHANOFF[TChannel.wCommand]
         cmp     bx,255*2
         je      _noeff
 
@@ -206,13 +206,13 @@ _noeff_forfirst:
         je      _nextchannel
 
         ; well now check if in EMS :
-        mov     ax,CHANOFF[TChannel.SampleSEG]
+        mov     ax,CHANOFF[TChannel.wSmpSeg]
         cmp     ax,0f000h
         jb      _noEMSsample
 
         and     ax,0fffh
         xor     bx,bx
-        mov     cx,CHANOFF[TChannel.sLoopend]
+        mov     cx,CHANOFF[TChannel.wSmpLoopEnd]
 
 _onemorepage:
         push    ax
@@ -258,7 +258,7 @@ _noEMSsample:
         lfs     si,[volumetableptr]
 
         xor     ebx,ebx
-        mov     bh,CHANOFF[TChannel.bSampleVol]
+        mov     bh,CHANOFF[TChannel.bSmpVol]
 
         mov     si,[nextPosition]
         shl     si,1
@@ -280,14 +280,14 @@ _skip_2:
         shr     cx,1    ; only in stereo
 
 _skip_5:
-        mov     edi,CHANOFF[TChannel.sCurpos]
+        mov     edi,CHANOFF[TChannel.dSmpPos]
         rol     edi,16
 
-        mov     edx,CHANOFF[TChannel.sStep]
+        mov     edx,CHANOFF[TChannel.dSmpStep]
         rol     edx,16
 
         ; first check for correct position inside sample
-        cmp     di,CHANOFF[TChannel.sLoopend]
+        cmp     di,CHANOFF[TChannel.wSmpLoopEnd]
         jae     _sampleends
 
         cmp     [stereo],0
@@ -301,12 +301,12 @@ _skip_3:
 
 _skip_4:
 _aftercalc:
-        cmp     di,CHANOFF[TChannel.sLoopend]
+        cmp     di,CHANOFF[TChannel.wSmpLoopEnd]
         jae     _sampleends
 
 _back2main:
         rol     edi,16
-        mov     CHANOFF[TChannel.sCurpos],edi
+        mov     CHANOFF[TChannel.dSmpPos],edi
 
 _nextchannel:
         add     bp,size TChannel
@@ -331,13 +331,13 @@ _afterall:
         ret
 
 _sampleends:
-        cmp     byte ptr CHANOFF[TChannel.sloopflag],0
+        cmp     byte ptr CHANOFF[TChannel.bSmpFlags],0
         je      _no_loopflag
 
 _tryagain:
-        sub     di,CHANOFF[TChannel.sloopEnd]
-        add     di,CHANOFF[TChannel.sloopstart]
-        cmp     di,CHANOFF[TChannel.sloopEnd]
+        sub     di,CHANOFF[TChannel.wSmpLoopEnd]
+        add     di,CHANOFF[TChannel.wSmpLoopStart]
+        cmp     di,CHANOFF[TChannel.wSmpLoopEnd]
         jae     _tryagain
 
         jmp     _back2main
@@ -353,11 +353,11 @@ calcnewSF proc near
 ;     bp = channel offset
 ;     ds = _DATA
         ; now calc new frequency step for this period
-        mov     CHANOFF[TChannel.sPeriod],ax
+        mov     CHANOFF[TChannel.wSmpPeriod],ax
         cmp     ax,0
         je      donotcalc
         call    _mixCalcSampleStep
-        mov     CHANOFF[TChannel.sStep],eax
+        mov     CHANOFF[TChannel.dSmpStep],eax
 donotcalc:
         ret
 calcnewSF endp
@@ -368,7 +368,7 @@ voltest proc near
         jb       voltest_done
         mov      al,63
 voltest_done:
-        mov      CHANOFF[TChannel.bSampleVol],al
+        mov      CHANOFF[TChannel.bSmpVol],al
         ret
 voltest endp
 
@@ -377,95 +377,95 @@ eff_none proc near
 eff_none endp
 
 eff_D_VolumeSlide proc near
-        mov     bx,CHANOFF[TChannel.cmd2nd]
+        mov     bx,CHANOFF[TChannel.wCommand2]
         call    [eff_D_VolumeSlide_tab+bx]
         ret
 eff_D_VolumeSlide endp
 
 eff_D_VolumeSlide_Down proc near
-        mov     al,CHANOFF[TChannel.Parameter]
+        mov     al,CHANOFF[TChannel.bParameter]
         and     al,0fh
-        sub     CHANOFF[TChannel.bSampleVol],al
+        sub     CHANOFF[TChannel.bSmpVol],al
         jnc     eff_D_VolumeSlide_Down_exit
-        mov     byte ptr CHANOFF[TChannel.bSampleVol],0
+        mov     byte ptr CHANOFF[TChannel.bSmpVol],0
 eff_D_VolumeSlide_Down_exit:
         ret
 eff_D_VolumeSlide_Down endp
 
 eff_D_VolumeSlide_Up proc near
-        mov     al,CHANOFF[TChannel.Parameter]
+        mov     al,CHANOFF[TChannel.bParameter]
         shr     al,4
-        add     CHANOFF[TChannel.bSampleVol],al
-        cmp     byte ptr CHANOFF[TChannel.bSampleVol],64
+        add     CHANOFF[TChannel.bSmpVol],al
+        cmp     byte ptr CHANOFF[TChannel.bSmpVol],64
         jb      eff_D_VolumeSlide_Up_done
-        mov     byte ptr CHANOFF[TChannel.bSampleVol],63
+        mov     byte ptr CHANOFF[TChannel.bSmpVol],63
 eff_D_VolumeSlide_Up_done:
-        mov     al,CHANOFF[TChannel.bSampleVol]
+        mov     al,CHANOFF[TChannel.bSmpVol]
         mul     [gvolume]
         shr     ax,6
-        mov     CHANOFF[TChannel.bSampleVol],al
+        mov     CHANOFF[TChannel.bSmpVol],al
         ret
 eff_D_VolumeSlide_Up endp
 
 eff_E_PitchDown proc near
-        mov     bx,CHANOFF[TChannel.cmd2nd]
+        mov     bx,CHANOFF[TChannel.wCommand2]
         call    [eff_E_PitchDown_tab+bx]
         ret
 eff_E_PitchDown endp
 
 eff_E_PitchDown_Down proc near
-        ; we pitch down, but increase period ! (so check upper_border)
-        mov     ax,CHANOFF[TChannel.sPeriod]
-        mov     bl,CHANOFF[TChannel.Parameter]
+        ; we pitch down, but increase period ! (so check wSmpPeriodHigh)
+        mov     ax,CHANOFF[TChannel.wSmpPeriod]
+        mov     bl,CHANOFF[TChannel.bParameter]
         xor     bh,bh
         shl     bx,2
         add     ax,bx
-        cmp     ax,CHANOFF[TChannel.upper_border]
+        cmp     ax,CHANOFF[TChannel.wSmpPeriodHigh]
         jb      eff_E_PitchDown_Down_1
-        mov     ax,CHANOFF[TChannel.upper_border]
+        mov     ax,CHANOFF[TChannel.wSmpPeriodHigh]
 eff_E_PitchDown_Down_1:
         call    calcnewSF
         ret
 eff_E_PitchDown_Down endp
 
 eff_F_PitchUp proc near
-        mov     bx,CHANOFF[TChannel.cmd2nd]
+        mov     bx,CHANOFF[TChannel.wCommand2]
         call    [eff_F_PitchUp_tab+bx]
         ret
 eff_F_PitchUp endp
 
 eff_F_PitchUp_Up proc near
-        ; we pitch up, but decrease period ! (so check lower_border)
-        mov     ax,CHANOFF[TChannel.sPeriod]
-        mov     bl,CHANOFF[TChannel.Parameter]
+        ; we pitch up, but decrease period ! (so check wSmpPeriodLow)
+        mov     ax,CHANOFF[TChannel.wSmpPeriod]
+        mov     bl,CHANOFF[TChannel.bParameter]
         xor     bh,bh
         shl     bx,2
         sub     ax,bx
-        cmp     ax,CHANOFF[TChannel.lower_border]
+        cmp     ax,CHANOFF[TChannel.wSmpPeriodLow]
         ja      eff_F_PitchUp_Up_1
-        mov     ax,CHANOFF[TChannel.lower_border]
+        mov     ax,CHANOFF[TChannel.wSmpPeriodLow]
 eff_F_PitchUp_Up_1:
         call    calcnewSF
         ret
 eff_F_PitchUp_Up endp
 
 eff_G_Portamento proc near
-        mov       bl,CHANOFF[TChannel.PortPara]
+        mov       bl,CHANOFF[TChannel.bPortParam]
         xor       bh,bh
         shl       bx,2    ; <- use amiga slide = para*4
-        mov       ax,CHANOFF[TChannel.sPeriod]
-        cmp       ax,CHANOFF[TChannel.wantedPeri]
+        mov       ax,CHANOFF[TChannel.wSmpPeriod]
+        cmp       ax,CHANOFF[TChannel.wSmpPeriodDest]
         jg        porta_down
         add       ax,bx
-        cmp       ax,CHANOFF[TChannel.wantedPeri]
+        cmp       ax,CHANOFF[TChannel.wSmpPeriodDest]
         jle       eff_G_Portamento_done
-        mov       ax,CHANOFF[TChannel.wantedPeri]
+        mov       ax,CHANOFF[TChannel.wSmpPeriodDest]
         jmp       eff_G_Portamento_done
 porta_down:
         sub       ax,bx
-        cmp       ax,CHANOFF[TChannel.wantedPeri]
+        cmp       ax,CHANOFF[TChannel.wSmpPeriodDest]
         jge       eff_G_Portamento_done
-        mov       ax,CHANOFF[TChannel.wantedPeri]
+        mov       ax,CHANOFF[TChannel.wSmpPeriodDest]
 eff_G_Portamento_done:
         call      calcnewSF
         ret
@@ -475,23 +475,23 @@ eff_H_Vibrato proc near
         cmp       byte ptr CHANOFF[TChannel.bEnabled],0
         je        eff_H_Vibrato_exit
         ; next position in table:
-        mov       al,CHANOFF[TChannel.VibPara]
+        mov       al,CHANOFF[TChannel.bVibParam]
         mov       dl,al
         and       dl,0fh
         shr       al,4
-        mov       bl,CHANOFF[TChannel.Tablepos]
+        mov       bl,CHANOFF[TChannel.bTabPos]
         add       bl,al
         cmp       bl,64
         jb        endoftest
         sub       bl,64
 endoftest:
-        mov       CHANOFF[TChannel.Tablepos],bl
+        mov       CHANOFF[TChannel.bTabPos],bl
         xor       bh,bh
-        add       bx,CHANOFF[TChannel.VibTabOfs]
+        add       bx,CHANOFF[TChannel.wVibTab]
         mov       al,ds:[bx]
         imul      dl
         sar       ax,4
-        mov       bx,CHANOFF[TChannel.Oldperiod]
+        mov       bx,CHANOFF[TChannel.wSmpPeriodOld]
         add       ax,bx
         call      calcnewSF
 eff_H_Vibrato_exit:
@@ -503,19 +503,19 @@ eff_I_Tremor proc near
 eff_I_Tremor endp
 
 eff_J_Arpeggio proc near
-        mov     bl,CHANOFF[TChannel.ArpegPos]
+        mov     bl,CHANOFF[TChannel.bArpPos]
         xor     bh,bh
         inc     bx
         cmp     bx,3
         jb      inside
         xor     bx,bx
 inside:
-        mov     CHANOFF[TChannel.ArpegPos],bl
+        mov     CHANOFF[TChannel.bArpPos],bl
         shl     bx,2
         add     bp,bx
-        mov     eax,CHANOFF[TChannel.step0]
+        mov     eax,CHANOFF[TChannel.dArpSmpSteps]
         sub     bp,bx
-        mov     CHANOFF[TChannel.sStep],eax
+        mov     CHANOFF[TChannel.dSmpStep],eax
         ret
 eff_J_Arpeggio endp
 
@@ -532,63 +532,63 @@ eff_L_PortamentoVolSlide proc near
 eff_L_PortamentoVolSlide endp
 
 eff_Q_Retrigger proc near
-        cmp     byte ptr CHANOFF[TChannel.ctick],0
+        cmp     byte ptr CHANOFF[TChannel.bRetrigTicks],0
         jz      doretrigg
-        dec     byte ptr CHANOFF[TChannel.ctick]
+        dec     byte ptr CHANOFF[TChannel.bRetrigTicks]
         jnz     eff_Q_Retrigger_exit
 doretrigg:
         xor     eax,eax
-        mov     CHANOFF[TChannel.sCurPos],eax
-        mov     al,CHANOFF[TChannel.Parameter]
+        mov     CHANOFF[TChannel.dSmpPos],eax
+        mov     al,CHANOFF[TChannel.bParameter]
         and     al,0fh
         jz      eff_Q_Retrigger_exit
-        mov     CHANOFF[TChannel.ctick],al
-        mov     bx,CHANOFF[TChannel.cmd2nd]
+        mov     CHANOFF[TChannel.bRetrigTicks],al
+        mov     bx,CHANOFF[TChannel.wCommand2]
         call    [eff_Q_Retrigger_tab+bx]
 eff_Q_Retrigger_exit:
         ret
 eff_Q_Retrigger endp
 
 eff_Q_Retrigger_SlideDown proc near
-        mov     cl,CHANOFF[TChannel.parameter]
+        mov     cl,CHANOFF[TChannel.bParameter]
         shr     cl,4
         mov     al,1
         shl     al,cl
-        sub     CHANOFF[TChannel.bSampleVol],al
+        sub     CHANOFF[TChannel.bSmpVol],al
         jnc     eff_Q_Retrigger_SlideDown_exit
-        mov     byte ptr CHANOFF[TChannel.bSampleVol],0
+        mov     byte ptr CHANOFF[TChannel.bSmpVol],0
 eff_Q_Retrigger_SlideDown_exit:
         ret
 eff_Q_Retrigger_SlideDown endp
 
 eff_Q_Retrigger_Use2div3 proc near
 ; (it's 5/8 in real life ;)
-        mov      al,CHANOFF[TChannel.bSampleVol]
+        mov      al,CHANOFF[TChannel.bSmpVol]
         mov      ah,al
         shl      al,2             ; al = 4*volume , ah = volume
         add      al,ah            ; al = 5*volume
         shr      al,3             ; al = 5*volume/8
-        mov      CHANOFF[TChannel.bSampleVol],al
+        mov      CHANOFF[TChannel.bSmpVol],al
         ret
 eff_Q_Retrigger_Use2div3 endp
 
 eff_Q_Retrigger_Use1div2 proc near
-        shr      byte ptr CHANOFF[TChannel.bSampleVol],1
+        shr      byte ptr CHANOFF[TChannel.bSmpVol],1
         ret
 eff_Q_Retrigger_Use1div2 endp
 
 eff_Q_Retrigger_SlideUp proc near
-        mov     cl,CHANOFF[TChannel.parameter]
+        mov     cl,CHANOFF[TChannel.bParameter]
         shr     cl,4
         mov     al,1
         shl     al,cl
-        add     al,CHANOFF[TChannel.bSampleVol]
+        add     al,CHANOFF[TChannel.bSmpVol]
         call    voltest
         ret
 eff_Q_Retrigger_SlideUp endp
 
 eff_Q_Retrigger_Use3div2 proc near
-        mov     al,CHANOFF[TChannel.bSampleVol]
+        mov     al,CHANOFF[TChannel.bSmpVol]
         mov     ah,al
         add     al,al            ; al = 2*volume , ah = volume
         add     al,ah            ; al = 3*volume
@@ -598,7 +598,7 @@ eff_Q_Retrigger_Use3div2 proc near
 eff_Q_Retrigger_Use3div2 endp
 
 eff_Q_Retrigger_Use2div1 proc near
-        mov     al,CHANOFF[TChannel.bSampleVol]
+        mov     al,CHANOFF[TChannel.bSmpVol]
         shl     al,1
         call    voltest
         ret
@@ -606,23 +606,23 @@ eff_Q_Retrigger_Use2div1 endp
 
 eff_R_Tremolo proc near
         ; next position in table:
-        mov       al,CHANOFF[TChannel.Parameter]
+        mov       al,CHANOFF[TChannel.bParameter]
         mov       dl,al
         and       dl,0fh
         shr       al,4
-        mov       bl,CHANOFF[TChannel.Tablepos]
+        mov       bl,CHANOFF[TChannel.bTabPos]
         add       bl,al
         cmp       bl,64
         jb        endoftest2
         sub       bl,64
 endoftest2:
-        mov       CHANOFF[TChannel.Tablepos],bl
+        mov       CHANOFF[TChannel.bTabPos],bl
         xor       bh,bh
-        add       bx,CHANOFF[TChannel.TrmTabOfs]
+        add       bx,CHANOFF[TChannel.wTrmTab]
         mov       al,ds:[bx]
         imul      dl
         sar       ax,6
-        mov       bl,CHANOFF[TChannel.oldvolume]
+        mov       bl,CHANOFF[TChannel.bSmpVolOld]
         xor       bh,bh
         add       bx,ax
         cmp       bx,63
@@ -633,18 +633,18 @@ ok1:
         jnl       ok2
         mov       bl,0
 ok2:
-        mov       CHANOFF[TChannel.bSampleVol],bl
+        mov       CHANOFF[TChannel.bSmpVol],bl
         ret
 eff_R_Tremolo endp
 
 eff_S_Special proc near
-        mov     bx,CHANOFF[TChannel.cmd2nd]
+        mov     bx,CHANOFF[TChannel.wCommand2]
         call    [eff_S_Special_tab+bx]
         ret
 eff_S_Special endp
 
 eff_S_Special_NoteCut proc near
-        dec     byte ptr CHANOFF[TChannel.ndTick]
+        dec     byte ptr CHANOFF[TChannel.bDelayTicks]
         jnz     eff_S_Special_NoteCut_exit
         mov     byte ptr CHANOFF[TChannel.bEnabled],0       ;disable it ...
 eff_S_Special_NoteCut_exit:
@@ -653,18 +653,18 @@ eff_S_Special_NoteCut endp
 
 eff_S_Special_NoteDelay proc near
         push    fs  ; segment to volumetable, but we may destroy it here ...
-        dec     byte ptr CHANOFF[TChannel.ndTick]
+        dec     byte ptr CHANOFF[TChannel.bDelayTicks]
         jnz     eff_S_Special_NoteDelay_exit
         ; Ok now we have to calc things for the new note/instr ...
         ; 1. Setup Instrument
         mov     si,bp
-        mov     al,[channel.savInst+si]
+        mov     al,[channel.bSavIns+si]
         cmp     al,00
         je      nonewinst
-        mov     [channel.InstrNo+si],al
+        mov     [channel.bIns+si],al
         call    SetupNewInst
 nonewinst:
-        mov     al,[channel.savNote+si]
+        mov     al,[channel.bSavNote+si]
         cmp     al,0ffh
         je      no_newnote
         cmp     al,0feh
@@ -673,17 +673,17 @@ nonewinst:
         jmp     no_newnote
 normal_note:
         mov     byte ptr [channel.bEnabled+si],1     ; yo do mixing
-        mov     [channel.Note+si],al
+        mov     [channel.bNote+si],al
         call    SetNewNote
 no_newnote:
-        mov     al,[channel.savVol+si]
+        mov     al,[channel.bSavVol+si]
         cmp     al,0ffh
         je      no_vol
         mul     [gvolume]
         shr     ax,6
-        mov     ds:[channel.bSampleVol+si],al
+        mov     [channel.bSmpVol+si],al
 no_vol:
-        mov     ds:[channel.command+si],0       ; <- no more Notedelay
+        mov     word ptr [channel.wCommand+si],0    ; <- no more Notedelay
 eff_S_Special_NoteDelay_exit:
         pop     fs
         ret
@@ -694,23 +694,23 @@ eff_U_FineVibrato proc near
         cmp     byte ptr CHANOFF[TChannel.bEnabled],0
         je      eff_U_FineVibrato_exit
         ; next position in table:
-        mov     al,CHANOFF[TChannel.VibPara]
+        mov     al,CHANOFF[TChannel.bVibParam]
         mov     dl,al
         and     dl,0fh
         shr     al,4
-        mov     bl,CHANOFF[TChannel.Tablepos]
+        mov     bl,CHANOFF[TChannel.bTabPos]
         add     bl,al
         cmp     bl,64
         jb      f_endoftest
         sub     bl,64
 f_endoftest:
-        mov     CHANOFF[TChannel.Tablepos],bl
+        mov     CHANOFF[TChannel.bTabPos],bl
         xor     bh,bh
-        add     bx,CHANOFF[TChannel.VibTabOfs]
+        add     bx,CHANOFF[TChannel.wVibTab]
         mov     al,ds:[bx]
         imul    dl
         sar     ax,8
-        mov     bx,CHANOFF[TChannel.Oldperiod]
+        mov     bx,CHANOFF[TChannel.wSmpPeriodOld]
         add     ax,bx
         call    calcnewSF
 eff_U_FineVibrato_exit:

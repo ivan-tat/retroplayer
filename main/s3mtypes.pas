@@ -134,53 +134,42 @@ const
 
 type
     TChannel = record
-        { general switches : }
-        enabled     :boolean;  { byte: flag if =0 then nothing to mix at the moment }
-        channeltyp  :byte;     { 0=off,1=left,2=right,3,4=adlib ... if 0,3,4 -> everything ignored ! }
-        { current sampledata : }
-        InstrSEG    :word;     { pointer to current instrument data }
-        SampleSEG   :word;     { DOS segment of current sampledata }
-        InstrNo    :byte;      { number of instrument is currently playing }
-        Note        :byte;     { Notenumber is currently playing (except if effects change it...) }
-        { copy of sampledata (maybe it differs a bit): }
-        SampleVol   :byte;     { current sample volume }
-        sLoopflag   :boolean;  { flag if we have to loop sample }
-        sSmpstart   :word;     { default is 0, but if there's a set sample offset, it changes }
-        sLoopstart  :word;     { loop start of current sample =0ffffh if no loop }
-        sLoopend    :word;     { loop end of current sample }
-        sCurPos     :dword;    { fixed point value for current position in sample }
-        sStep       :dword;    { fixed point value of frequency step (distance of one step
-                                depends on period we play currently) }
-        sPeriod     :word;     { st3 period ... you know these amiga values (look at tech.doc of ST3) }
-                              { period does no influence playing a sample direct, but it's for sliding etc. }
-        lower_border:word;     { B-7 or B-5 period for current instrument to check limits }
-        upper_border:word;     { C-0 or C-3 period for current instrument to check limits }
-        { effect info : }
-        command     :word;     { 2 times effectnumber (for using a jmptable) }
-        cmd2nd      :word;     { 2 times additional command for multiple effects }
-        parameter   :byte;     { just the parameters }
-        { data for handling effects : }
-        continueEf  :boolean;  { Flag if we should continue effect - vibrato,tremolo }
-        VibtabOfs   :word;     { yo for each channel its own choise (default = OFS sinuswave) }
-        TrmtabOfs   :word;     { = Offset of wavetable for tremolo }
-        tablepos    :byte;     { <- we reset this if a effect starts uses such a table }
-        VibPara     :byte;     { <- for dual command Vib + Vol }
-        PortPara    :byte;     { <- for dual command Port + Vol }
-        OldPeriod   :word;     { save that value for some effects }
-        Oldvolume   :byte;     { save that value for tremolo }
-        WantedPeri  :word;     { <- period to slide to with Portamento }
-        ArpegPos    :byte;     { which of those 3 notes we currently play ... }
-        note1       :byte;     { \ }
-        note2       :byte;     { -+ note : 3 notes we do arpeggio between }
-        Step0       :dword;    { \ }
-        Step1       :dword;    {  |- the 3 step values we switch between in arpeggio effect (0 is start value
-                                 <- we have to refesh after arpeggio) }
-        Step2       :dword;    { / }
-        ctick       :byte;     { ticks left to retrigg not }
-        savNote     :byte;     { \  }
-        savInst     :byte;     {  | - new values for notedelay ... }
-        SavVol      :byte;     {  | }
-        ndTick      :byte;     { /  }
+        bEnabled:       boolean;
+        bChannelType:   byte;
+        wInsSeg:        word;
+        wSmpSeg:        word;
+        bIns:           byte;
+        bNote:          byte;
+        bSmpVol:        byte;
+        bSmpFlags:      boolean;
+        wSmpStart:      word;
+        wSmpLoopStart:  word;
+        wSmpLoopEnd:    word;
+        dSmpPos:        dword;
+        dSmpStep:       dword;
+        wSmpPeriod:     word;
+        wSmpPeriodLow:  word;
+        wSmpPeriodHigh: word;
+        wCommand:       word;
+        wCommand2:      word;
+        bParameter:     byte;
+        bEffFlags:      boolean;
+        wVibTab:        word;
+        wTrmTab:        word;
+        bTabPos:        byte;
+        bVibParam:      byte;
+        bPortParam:     byte;
+        wSmpPeriodOld:  word;
+        bSmpVolOld:     byte;
+        wSmpPeriodDest: word;
+        bArpPos:        byte;
+        bArpNotes:      array [0..1] of byte;
+        dArpSmpSteps:   array [0..2] of dword;
+        bRetrigTicks:   byte;
+        bSavNote:       byte;
+        bSavIns:        byte;
+        bSavVol:        byte;
+        bDelayTicks:    byte;
     end;
 
 type

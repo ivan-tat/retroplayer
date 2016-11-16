@@ -364,8 +364,8 @@ var i:byte;
   begin
     for i:=0 to usedchannels-1 do
       begin
-        channel[i].VibTabOfs:=ofs(sinuswave);
-        channel[i].TrmTabOfs:=ofs(sinuswave);
+        channel[i].wVibTab:=ofs(sinuswave);
+        channel[i].wTrmTab:=ofs(sinuswave);
       end;
   end;
 

@@ -460,9 +460,9 @@ var a,b,c:string;
     maxused:=0;
     for i:=0 to 31 do
       begin
-        channel[i].enabled:=(header.channelset[i] and 128=0);
-        channel[i].channeltyp:=getchtyp(header.channelset[i] and 31);
-        if channel[i].enabled and (channel[i].channeltyp>0) and (channel[i].channeltyp<3) then maxused:=i+1;
+        channel[i].bEnabled:=(header.channelset[i] and 128=0);
+        channel[i].bChannelType:=getchtyp(header.channelset[i] and 31);
+        if channel[i].bEnabled and (channel[i].bChannelType>0) and (channel[i].bChannelType<3) then maxused:=i+1;
       end;
     usedchannels:=maxused;
     {$IFDEF BETATEST}

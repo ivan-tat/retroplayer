@@ -75,33 +75,33 @@ var i:byte;
     i:=0;j:=0;
     while i<usedchannels do
       begin
-        if (channel[i].channeltyp<3) and
-           ((usedchannels<17) or (channel[i].channeltyp>0)) then
+        if (channel[i].bChannelType<3) and
+           ((usedchannels<17) or (channel[i].bChannelType>0)) then
             { display only sample channels }
           begin
             inc(j);
-            write(' Chn ',(i+1):2,' (',types[channel[i].channeltyp]:5,') ');
-            if channel[i].enabled then write('*') else write(' ');
-            if channel[i].sloopflag then write('!') else write(' ');
-            if channel[i].continueEf then write('c') else write(' ');
-            write('(',channel[i].InstrNo:2,') ');
+            write(' Chn ',(i+1):2,' (',types[channel[i].bChannelType]:5,') ');
+            if channel[i].bEnabled then write('*') else write(' ');
+            if channel[i].bSmpFlags then write('!') else write(' ');
+            if channel[i].bEffFlags then write('c') else write(' ');
+            write('(',channel[i].bIns:2,') ');
             write('[');
-            if channel[i].enabled then
+            if channel[i].bEnabled then
               begin
-                write_note(channel[i].Note);
+                write_note(channel[i].bNote);
                 { Arpeggio test : }
-                {write(',');write_note(channel[i].Note1);write(',');write_note(channel[i].Note2);}
+                {write(',');write_note(channel[i].bArpNotes[0]);write(',');write_note(channel[i].bArpNotes[1]);}
               end
             else write('...');
             write('] ');
-            write('<',channel[i].sPeriod:5,'>');
-            write(' ',channel[i].sStep.DD/64/1024:7:4);
+            write('<',channel[i].wSmpPeriod:5,'>');
+            write(' ',channel[i].dSmpStep.DD/64/1024:7:4);
             { Arpeggio test : }
-            {write(' ',channel[i].Step1.DD/64/1024:7:4);
-            write(' ',channel[i].Step2.DD/64/1024:7:4);}
-            write(' ',channel[i].SampleVol:2);
-            if channel[i].command<=44 then
-            write(' ',get_effectname(i,channel[i].command div 2,channel[i].cmd2nd div 2,channel[i].parameter));clreol;
+            {write(' ',channel[i].dArpSmpSteps[1].DD/64/1024:7:4);
+            write(' ',channel[i].dArpSmpSteps[2].DD/64/1024:7:4);}
+            write(' ',channel[i].bSmpVol:2);
+            if channel[i].wCommand<=44 then
+            write(' ',get_effectname(i,channel[i].wCommand shr 1,channel[i].wCommand2 shr 1,channel[i].bParameter));clreol;
             write(#13#10);
           end;
         inc(i);
@@ -151,7 +151,7 @@ var i:byte;
     if useEMS then window(1,11,80,25) else window(1,10,80,25);
     for i:=0 to usedchannels-1 do
       begin
-        n:=ord(channel[i].enabled)* channel[i].InstrNo*ord(channel[i].channeltyp>0);
+        n:=ord(channel[i].bEnabled)* channel[i].bIns*ord(channel[i].bChannelType>0);
         if (chnlastinst[i]<>n) and (chnlastinst[i]>0) then
           begin textcolor(white);textbackground(blue);write_no(chnlastinst[i]-1) end;
         chnlastinst[i]:=n;if n<>0 then begin textcolor(blue);textbackground(white);write_no(n-1) end;
@@ -167,7 +167,7 @@ var i,n:byte;
   begin
     for i:=0 to usedchannels-1 do
       begin
-        n:=ord(channel[i].enabled)* channel[i].InstrNo*ord(channel[i].channeltyp>0);
+        n:=ord(channel[i].bEnabled)* channel[i].bIns*ord(channel[i].bChannelType>0);
         if (chnlastinst[i]<>n) and (chnlastinst[i]>0) and
            (samplepage*18<chnlastinst[i]) and (samplepage*18+19>chnlastinst[i]) then
           begin

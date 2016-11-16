@@ -125,13 +125,13 @@ const static effTickProc_t *effTick_S_Special_tab[] = {
 
 void __near calcnewSF( struct channel_t *chn, uint16_t period )
 {
-    chn->sPeriod = period;
-    if ( period ) chn->sStep = mixCalcSampleStep( period );
+    chn->wSmpPeriod = period;
+    if ( period ) chn->dSmpStep = mixCalcSampleStep( period );
 }
 
 void __near voltest( struct channel_t *chn, uint8_t vol )
 {
-    chn->bSampleVol = ( vol <= 63 ? vol : 63 );
+    chn->bSmpVol = ( vol <= 63 ? vol : 63 );
 }
 
 effTickProc( effTick_none )
@@ -141,56 +141,56 @@ effTickProc( effTick_none )
 
 effTickProc( effTick_D_VolumeSlide )
 {
-    effTick_D_VolumeSlide_tab[ chn->cmd2nd ]( chn );
+    effTick_D_VolumeSlide_tab[ chn->wCommand2 ]( chn );
 }
 
 effTickProc( effTick_D_VolumeSlide_Down )
 {
-    int vol = chn->bSampleVol - ( chn->bParameter & 0x0f );
-    chn->bSampleVol = ( vol >= 0 ? vol : 0 );
+    int vol = chn->bSmpVol - ( chn->bParameter & 0x0f );
+    chn->bSmpVol = ( vol >= 0 ? vol : 0 );
 }
 
 effTickProc( effTick_D_VolumeSlide_Up )
 {
-    int vol = chn->bSampleVol + ( chn->bParameter >> 4 );
+    int vol = chn->bSmpVol + ( chn->bParameter >> 4 );
     if ( vol > 63 ) vol = 63;
-    chn->bSampleVol = ( vol * GVolume >> 6 );
+    chn->bSmpVol = ( vol * GVolume >> 6 );
 }
 
 effTickProc( effTick_E_PitchDown )
 {
-    effTick_E_PitchDown_tab[ chn->cmd2nd ]( chn );
+    effTick_E_PitchDown_tab[ chn->wCommand2 ]( chn );
 }
 
 effTickProc( effTick_E_PitchDown_Down )
 {
-    uint16_t period = chn->sPeriod + ( chn->bParameter << 2 );
-    if ( period > chn->upper_border ) period = chn->upper_border;
+    uint16_t period = chn->wSmpPeriod + ( chn->bParameter << 2 );
+    if ( period > chn->wSmpPeriodHigh ) period = chn->wSmpPeriodHigh;
     calcnewSF( chn, period );
 }
 
 effTickProc( effTick_F_PitchUp )
 {
-    effTick_F_PitchUp_tab[ chn->cmd2nd ]( chn );
+    effTick_F_PitchUp_tab[ chn->wCommand2 ]( chn );
 }
 
 effTickProc( effTick_F_PitchUp_Up )
 {
-    uint16_t period = chn->sPeriod - ( chn->bParameter << 2 );
-    if ( period > chn->lower_border ) period = chn->lower_border;
+    uint16_t period = chn->wSmpPeriod - ( chn->bParameter << 2 );
+    if ( period > chn->wSmpPeriodLow ) period = chn->wSmpPeriodLow;
     calcnewSF( chn, period );
 }
 
 effTickProc( effTick_G_Portamento )
 {
-    uint16_t period = chn->sPeriod;
-    uint16_t slide = chn->PortPara << 2; // <- use amiga slide = para*4
-    if ( period > chn->WantedPeri ) {
+    uint16_t period = chn->wSmpPeriod;
+    uint16_t slide = chn->bPortParam << 2; // <- use amiga slide = param*4
+    if ( period > chn->wSmpPeriodDest ) {
         period -= slide;
-        if ( period < chn->WantedPeri ) period = chn->WantedPeri;
+        if ( period < chn->wSmpPeriodDest ) period = chn->wSmpPeriodDest;
     } else {
         period += slide;
-        if ( period > chn->WantedPeri ) period = chn->WantedPeri;
+        if ( period > chn->wSmpPeriodDest ) period = chn->wSmpPeriodDest;
     };
     calcnewSF( chn, period );
 }
@@ -276,12 +276,12 @@ effTickProc( effTick_R_Tremolo )
 
 effTickProc( effTick_S_Special )
 {
-    effTick_S_Special_tab[ chn->cmd2nd ]( chn );
+    effTick_S_Special_tab[ chn->wCommand2 ]( chn );
 }
 
 effTickProc( effTick_S_Special_NoteCut )
 {
-    if ( ! --chn->ndTick ) chn->bEnabled = 0;  // disable it
+    if ( ! --chn->bDelayTicks ) chn->bEnabled = 0;  // disable it
 }
 
 effTickProc( effTick_S_Special_NoteDelay )
