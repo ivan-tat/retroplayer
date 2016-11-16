@@ -82,7 +82,7 @@ var i:byte;
             inc(j);
             write(' Chn ',(i+1):2,' (',types[channel[i].bChannelType]:5,') ');
             if channel[i].bEnabled then write('*') else write(' ');
-            if channel[i].bSmpFlags then write('!') else write(' ');
+            if channel[i].bSmpFlags and SMPFLAG_LOOP <> 0 then write('!') else write(' ');
             if channel[i].bEffFlags then write('c') else write(' ');
             write('(',channel[i].bIns:2,') ');
             write('[');

@@ -331,8 +331,8 @@ _afterall:
         ret
 
 _sampleends:
-        cmp     byte ptr CHANOFF[TChannel.bSmpFlags],0
-        je      _no_loopflag
+        test    byte ptr CHANOFF[TChannel.bSmpFlags],SMPFLAG_LOOP
+        jz      _no_loopflag
 
 _tryagain:
         sub     di,CHANOFF[TChannel.wSmpLoopEnd]

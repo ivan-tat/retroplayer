@@ -277,13 +277,17 @@ volwell:     mul     [gvolume]
              mov     ax,fs:[TInstrument.memseg]
              mov     [channel.wSmpSeg+si],ax
              mov     al,fs:[TInstrument.flags]
-             and     al,00000001b       ; bit 0 - loop sample ?
-             mov     [channel.bSmpFlags+si],al
+             xor     ah,ah
+             test    al,000000001b  ; bit 0 - loop sample ?
+             jz      @_noLoop
+             or      ah,SMPFLAG_LOOP
+@_noLoop:
+             mov     [channel.bSmpFlags+si],ah
              mov     ax,fs:[TInstrument.loopbeg]
              mov     [channel.wSmpLoopStart+si],ax
              mov     ax,fs:[TInstrument.loopend]
-             cmp     [channel.bSmpFlags+si],1
-             je      weloop                            ; =:)
+             test    byte ptr [channel.bSmpFlags+si],SMPFLAG_LOOP
+             jnz     weloop
              mov     ax,fs:[TInstrument.slength]     ; <- we don't loop :( anyway ...
 weLoop:      mov     [channel.wSmpLoopEnd+si],ax
              ; calc period borders

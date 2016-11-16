@@ -6,6 +6,8 @@
 ifndef S3MTYPES_DEF
 S3MTYPES_DEF equ 1
 
+SMPFLAG_LOOP equ 001h
+
 TCHANNEL STRUC
     bEnabled        db ?
     bChannelType    db ?

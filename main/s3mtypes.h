@@ -28,6 +28,8 @@ typedef char modTrackerName_t[MOD_MAX_TRACKER_NAME_LENGTH];
 #define MAX_INSTRUMENTS 99
     /* 1..99 samples */
 
+#define SMPFLAG_LOOP 0x01
+
 typedef struct instrument_t {
     uint8_t  bType;         // 1: instrument
     uint8_t  DOSname[12];

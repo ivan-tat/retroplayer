@@ -60,6 +60,9 @@ type
 
 (* instrument / sample *)
 
+const
+    SMPFLAG_LOOP = $01;
+
 type
     PSmpHeader = ^TSmpHeader;
     TSmpHeader = record typ:byte;
@@ -141,7 +144,7 @@ type
         bIns:           byte;
         bNote:          byte;
         bSmpVol:        byte;
-        bSmpFlags:      boolean;
+        bSmpFlags:      byte;
         wSmpStart:      word;
         wSmpLoopStart:  word;
         wSmpLoopEnd:    word;
