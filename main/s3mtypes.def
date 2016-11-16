@@ -8,6 +8,8 @@ S3MTYPES_DEF equ 1
 
 SMPFLAG_LOOP equ 001h
 
+EFFFLAG_CONTINUE equ 001h
+
 TCHANNEL STRUC
     bEnabled        db ?
     bChannelType    db ?

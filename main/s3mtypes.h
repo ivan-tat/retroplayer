@@ -77,6 +77,8 @@ typedef order_t ordersList_t[MAX_ORDERS];
 #define MAX_CHANNELS 32
     /* 0..31 channels */
 
+#define EFFFLAG_CONTINUE 0x01
+
 typedef struct channel_t {
     // general switches :
     uint8_t  bEnabled;      // flag if =0 then nothing to mix at the moment

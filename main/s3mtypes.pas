@@ -135,6 +135,9 @@ type
 const
     MAX_CHANNELS = 32; (* 0..31 channels *)
 
+const
+    EFFFLAG_CONTINUE = $01;
+
 type
     TChannel = record
         bEnabled:       boolean;
@@ -156,7 +159,7 @@ type
         wCommand:       word;
         wCommand2:      word;
         bParameter:     byte;
-        bEffFlags:      boolean;
+        bEffFlags:      byte;
         wVibTab:        word;
         wTrmTab:        word;
         bTabPos:        byte;

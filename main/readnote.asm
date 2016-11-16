@@ -454,7 +454,7 @@ ignorethem:  ; read effects - it may change the read instr/note !
              mov     al,es:[di+3]        ; read effect number
              xor     ah,ah
              shl     ax,1
-             mov     [channel.bEffFlags+si],0
+             mov     byte ptr [channel.bEffFlags+si],0
              cmp     ax,2*8              ; Vibrato ...
              je      checkifcontV
              cmp     ax,2*11             ; Vibrato Volefcs
@@ -645,7 +645,7 @@ checkifcontV:  ; check if continue Vib/Vib_vol
              je      checkok1
              cmp     [channel.wCommand+si],8*2   ; command before was vibrato+volef
              jne     aftercontcheck
-checkok1:    mov     [channel.bEffFlags+si],1
+checkok1:    mov     byte ptr [channel.bEffFlags+si],EFFFLAG_CONTINUE
              jmp     aftercontcheck
 
 checkifcontA:     ; check if continue Arpeg
@@ -655,7 +655,7 @@ checkifcontTrm:   ; check if continue a tremolo
 checkifcontRetr:  ; check if continue a note retrig
              cmp     [channel.wCommand+si],ax
              jne     aftercontcheck
-             mov     [channel.bEffFlags+si],1
+             mov     byte ptr [channel.bEffFlags+si],EFFFLAG_CONTINUE
              jmp     aftercontcheck
 
 ; Effects :
@@ -761,8 +761,8 @@ stopporta:     mov      [channel.wCommand+si],0   ;<-noeffect
                jmp      back2reality
 Vibrato:       ; effect 'H'
                checkpara0not
-               cmp      [channel.bEffFlags+si],1
-               je       norestart
+               test     byte ptr [channel.bEffFlags+si],EFFFLAG_CONTINUE
+               jnz      norestart
                mov      [channel.bTabPos+si],0
 norestart:     cmp      al,0
                jne      newVibvalue
@@ -788,8 +788,8 @@ Arpeggio:      ; effect 'J'
 uselastPara:   mov      [arp_chg],0
                jmp      back2reality
 Vib_Vol:       ; effect 'K'
-               cmp      [channel.bEffFlags+si],1
-               je       volumeefcts
+               test     byte ptr [channel.bEffFlags+si],EFFFLAG_CONTINUE
+               jnz      volumeefcts
                mov      [channel.bTabPos+si],0
                jmp      volumeefcts
 Port_Vol:      ; effect 'L'
@@ -842,8 +842,8 @@ use2times:     mov      [channel.wCommand2+si],12
 noretrigg:     mov      [channel.wCommand+si],0
                jmp      back2reality
 Tremolo:       ; effect 'R'
-               cmp      [channel.bEffFlags+si],1
-               je       noTrmrestart
+               test     byte ptr [channel.bEffFlags+si],EFFFLAG_CONTINUE
+               jnz      noTrmrestart
                mov      [channel.bTabPos+si],0
 noTrmrestart:  cmp      al,0
                jne      newTrmvalue
@@ -856,7 +856,7 @@ newTrmValue:   mov      ah,al
                and      ah,0f0h
                or       al,ah
 TrmspeedOk:    mov      [channel.bParameter+si],al
-               jmp      back2reality               
+               jmp      back2reality
 Specialsets:   ; effect 'S'
                checkPara0
                xor      bh,bh
@@ -1033,16 +1033,16 @@ Hdl_porta:     ; effect 'G'
                mov      [channel.dSmpStep+si],eax
                jmp      handlenothing
 Hdl_Vibrato:   ; effect 'H'
-               cmp      [channel.bEffFlags+si],1
-               je       handlenothing                ; continue this effect !
+               test     byte ptr [channel.bEffFlags+si],EFFFLAG_CONTINUE
+               jnz      handlenothing                ; continue this effect !
                mov      ax,[channel.wSmpPeriod+si]
                mov      [channel.wSmpPeriodOld+si],ax
                jmp      handlenothing
 Hdl_arpeggio:  ; effect 'J'
                cmp      [arp_chg],1
                je       newPara
-               cmp      [channel.bEffFlags+si],1
-               je       handlenothing                ; no new note !
+               test     byte ptr [channel.bEffFlags+si],EFFFLAG_CONTINUE
+               jnz      handlenothing                ; no new note !
                ; start arpeggio:
                mov      [channel.bArpPos+si],0
 newPara:       mov      al,[channel.bParameter+si]
@@ -1091,8 +1091,8 @@ arpok2:        or       bh,bl
                mov      [channel.dArpSmpSteps+4*2+si],eax
                jmp      handlenothing
 
-Hdl_Vib_Vol:   cmp      [channel.bEffFlags+si],1
-               je       Hdl_Volfx
+Hdl_Vib_Vol:   test     [channel.bEffFlags+si],EFFFLAG_CONTINUE
+               jnz      Hdl_Volfx
                mov      ax,[channel.wSmpPeriod+si]
                mov      [channel.wSmpPeriodOld+si],ax
                jmp      Hdl_Volfx
@@ -1121,8 +1121,8 @@ Hdl_tremolo:  ; effect 'R' (Tremolo)
                jne      savevol                      ; new instrument
                cmp      [curVol],0ffh
                jne      savevol                      ; new volume
-               cmp      [channel.bEffFlags+si],1
-               je       handlenothing                ; continue this effect !
+               test     [channel.bEffFlags+si],EFFFLAG_CONTINUE
+               jnz      handlenothing                ; continue this effect !
               ; save volume
 savevol:      mov       al,[channel.bSmpVol+si]
               mov       [channel.bSmpVolOld+si],al
