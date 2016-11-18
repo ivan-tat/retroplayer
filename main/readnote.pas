@@ -14,7 +14,7 @@ procedure set_tempo(tempo: byte);
 
 procedure readnewnotes;
 procedure SetupNewInst(dChn: pointer; bInsNum: byte); (* internal use *)
-procedure SetNewNote; (* internal use *)
+procedure SetNewNote(dChn: pointer; bNote: byte; bKeep: boolean); (* internal use *)
 
 implementation
 
@@ -38,6 +38,6 @@ end;
 (*$l readnote.obj*)
 procedure readnewnotes; external;
 procedure SetupNewInst(dChn: pointer; bInsNum: byte); external;
-procedure SetNewNote; external;
+procedure SetNewNote(dChn: pointer; bNote: byte; bKeep: boolean); external;
 
 end.

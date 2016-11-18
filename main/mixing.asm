@@ -343,17 +343,23 @@ _no_loopflag:
 
 calc_tick endp
 
-calcnewSF proc near
-; In: ax = period
-;     si = channel offset
-;     ds = _DATA
+calcnewSF proc near _dChn: dword, _wPeriod: word
+; IN: DS = _DATA
+        push    si
+        push    es
+        les     si,[_dChn]
+        mov     ax,[_wPeriod]
         ; now calc new frequency step for this period
-        mov     [SI][TChannel.wSmpPeriod],ax
+        mov     es:[si][TChannel.wSmpPeriod],ax
         cmp     ax,0
-        je      donotcalc
+        je      calcnewSF@_donotcalc
+        push    ax
         call    _mixCalcSampleStep
-        mov     [SI][TChannel.dSmpStep],eax
-donotcalc:
+        mov     word ptr es:[si][TChannel.dSmpStep],ax
+        mov     word ptr es:[si][TChannel.dSmpStep+2],dx
+calcnewSF@_donotcalc:
+        pop     es
+        pop     si
         ret
 calcnewSF endp
 
@@ -419,6 +425,9 @@ eff_E_PitchDown_Down proc near
         jb      eff_E_PitchDown_Down_1
         mov     ax,[SI][TChannel.wSmpPeriodHigh]
 eff_E_PitchDown_Down_1:
+        push    ds
+        push    si
+        push    ax
         call    calcnewSF
         ret
 eff_E_PitchDown_Down endp
@@ -440,6 +449,9 @@ eff_F_PitchUp_Up proc near
         ja      eff_F_PitchUp_Up_1
         mov     ax,[SI][TChannel.wSmpPeriodLow]
 eff_F_PitchUp_Up_1:
+        push    ds
+        push    si
+        push    ax
         call    calcnewSF
         ret
 eff_F_PitchUp_Up endp
@@ -462,6 +474,9 @@ porta_down:
         jge       eff_G_Portamento_done
         mov       ax,[SI][TChannel.wSmpPeriodDest]
 eff_G_Portamento_done:
+        push    ds
+        push    si
+        push    ax
         call      calcnewSF
         ret
 eff_G_Portamento endp
@@ -488,6 +503,9 @@ endoftest:
         sar       ax,4
         mov       bx,[SI][TChannel.wSmpPeriodOld]
         add       ax,bx
+        push    ds
+        push    si
+        push    ax
         call      calcnewSF
 eff_H_Vibrato_exit:
         ret
@@ -672,6 +690,10 @@ nonewinst:
 normal_note:
         mov     byte ptr [SI][TChannel.bEnabled],1     ; yo do mixing
         mov     [SI][TChannel.bNote],al
+        push    ds
+        push    si
+        push    ax
+        push    0
         call    SetNewNote
 no_newnote:
         mov     al,[SI][TChannel.bSavVol]
@@ -710,6 +732,9 @@ f_endoftest:
         sar     ax,8
         mov     bx,[SI][TChannel.wSmpPeriodOld]
         add     ax,bx
+        push    ds
+        push    si
+        push    ax
         call    calcnewSF
 eff_U_FineVibrato_exit:
         ret

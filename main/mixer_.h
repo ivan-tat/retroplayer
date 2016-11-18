@@ -13,7 +13,7 @@
 
 #include "..\pascal\pascal.h"
 
-extern uint32_t PUBLIC_CODE _mixCalcSampleStep(void);
+extern uint32_t PUBLIC_CODE _mixCalcSampleStep(uint16_t wPeriod);
 extern void     PUBLIC_CODE _MixSampleMono8(void);
 extern void     PUBLIC_CODE _MixSampleStereo8(void);
 

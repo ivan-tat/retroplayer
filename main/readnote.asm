@@ -174,12 +174,20 @@ _DATA ends
 READNOTE_TEXT segment word public use16 'CODE'
 assume cs:READNOTE_TEXT,ds:DGROUP
 
-calcNotePeriod proc near
-; IN:  AL - Note (higher 4=name,lower 4=octave)
-;      FS - Segment of instrument
+; Local
+calcNotePeriod proc near _dChn: dword, _dIns: dword, _bNote: byte
+; IN:  DS = _DATA
+;      _bNote = Note: (name << 4) + ocatve
 ; OUT: AX = Period
         push    bx
         push    cx
+        push    si
+        push    di
+        push    es
+        push    fs
+        les     si,[_dChn]
+        lfs     di,[_dIns]
+        movzx   ax,[_bNote]
         ; calc wSmpPeriod (with st3 finetune) :
         mov     bl,al
         mov     cl,al
@@ -192,43 +200,60 @@ calcNotePeriod proc near
         shr     ax,cl                ; period(note)*16 >> octave(note)
         mov     dx,8363
         mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
-        mov     bx,fs:[TInstrument.c2speed]
+        mov     bx,fs:[di][TInstrument.c2speed]
         div     bx
-
         ;       8363*(period(note)*16 shr octave(note))
         ; ax = --------------------------------------
         ;            C2Speed of current Sample
-
         ; Now check borders :
-        cmp     ax,[SI][TChannel.wSmpPeriodLow]
-        jnb     notbelow
-
-        mov     ax,[SI][TChannel.wSmpPeriodLow]
-
-notbelow:
-        cmp     ax,[SI][TChannel.wSmpPeriodHigh]
-        jna     notabove
-
-        mov     ax,[SI][TChannel.wSmpPeriodHigh]
-
-notabove:
+        cmp     ax,es:[si][TChannel.wSmpPeriodLow]
+        jnb     calcNotePeriod@_notbelow
+        mov     ax,es:[si][TChannel.wSmpPeriodLow]
+calcNotePeriod@_notbelow:
+        cmp     ax,es:[si][TChannel.wSmpPeriodHigh]
+        jna     calcNotePeriod@_notabove
+        mov     ax,es:[si][TChannel.wSmpPeriodHigh]
+calcNotePeriod@_notabove:
+        pop     fs
+        pop     es
+        pop     di
+        pop     si
         pop     cx
         pop     bx
         ret
 calcNotePeriod endp
 
-calcpart proc near
+; Local
+calcpart proc near _dChn: dword, _dIns: dword, _bNote: byte
+; IN:  DS = _DATA
+;      _bNote = Note: (name << 4) + ocatve
+; OUT: DX:AX = step
+        push    si
+        push    di
+        push    es
+        push    fs
+        les     si,[_dChn]
+        lfs     di,[_dIns]
+        movzx   ax,[_bNote]
+        push    ds
+        push    si
+        push    fs
+        push    di
+        push    ax
         call    calcNotePeriod
         test    ax,ax
-        jz      calcpart_nostep
-
+        jz      calcpart@_nostep
+        push    ax
         call    _mixCalcSampleStep
-        jmp     calcpart_done
-
-calcpart_nostep:
-        xor    eax,eax
-
-calcpart_done:
+        jmp     calcpart@_done
+calcpart@_nostep:
+        xor     ax,ax
+        xor     dx,dx
+calcpart@_done:
+        pop     fs
+        pop     es
+        pop     di
+        pop     si
         ret
 calcpart endp
 
@@ -250,7 +275,7 @@ ENDM
 
 public SetupNewInst
 SetupNewInst proc far _dChn: dword, _bInsNum: byte
-; IN : DS = _DATA
+; IN: DS = _DATA
         push    bx
         push    cx
         push    dx
@@ -346,41 +371,59 @@ SetupNewInst@_after1:
 SetupNewInst endp
 
 public SetNewNote
-SetNewNote proc far
-; IN: AL = note & octave
-;     SI = offset to channel
-;
-; DESTROYs: EAX,EBX,EDX,FS,CX
-;
-             ; clear it first - just to make sure we really set it
-             mov     word ptr [SI][TChannel.wSmpPeriod],0
-             cmp     byte ptr [SI][TChannel.bIns],0
-             je      after2                  ; if there's no instrumnet
-             ; set pointer to instrument
-             push    ax
-             mov     ax,[SI][TChannel.wInsSeg]
-             mov     fs,ax
-             pop     ax
-             cmp     byte ptr fs:[TInstrument.Typ],1  ; only calc if instrument does exist
-             jne     after2
-
-             call    calcNotePeriod
-             mov     [SI][TChannel.wSmpPeriod],ax
-
-             ; now step calculations :
-             call    _mixCalcSampleStep
-
-             mov     [SI][TChannel.dSmpStep],EAX
-
-             cmp     [portaFlag],1
-             je      after2             ; it's porta, do not restart !
-             ; restart instrument
-             xor     ebx,ebx
-             mov     bx,[SI][TChannel.wSmpStart]
-             shl     ebx,16
-             mov     [SI][TChannel.dSmpPos],ebx
-             mov     byte ptr [SI][TChannel.bEnabled],1
-after2:      ret
+SetNewNote proc far _dChn: dword, _bNote: byte, _bKeep: byte
+; IN: DS = _DATA
+;     _bNote = Note: (name << 4) + ocatve
+        push    eax
+        push    ebx
+        push    ecx
+        push    edx
+        push    si
+        push    di
+        push    es
+        push    fs
+        les     si,[_dChn]
+        movzx   ax,[_bNote]
+        ; clear it first - just to make sure we really set it
+        mov     word ptr es:[si][TChannel.wSmpPeriod],0
+        cmp     byte ptr es:[si][TChannel.bIns],0
+        je      SetNewNote@_after2  ; if there's no instrumnet
+        ; set pointer to instrument
+        push    ax
+        mov     ax,es:[si][TChannel.wInsSeg]
+        mov     fs,ax
+        pop     ax
+        xor     di,di
+        cmp     byte ptr fs:[di][TInstrument.Typ],1 ; only calc if instrument does exist
+        jne     SetNewNote@_after2
+        push    es
+        push    si
+        push    fs
+        push    di
+        push    ax
+        call    calcNotePeriod
+        mov     es:[si][TChannel.wSmpPeriod],ax
+        push    ax
+        call    _mixCalcSampleStep
+        mov     word ptr es:[si][TChannel.dSmpStep],ax
+        mov     word ptr es:[si][TChannel.dSmpStep+2],dx
+        cmp     [_bKeep],0
+        jne     SetNewNote@_after2  ; do not restart
+        ; restart instrument
+        movzx   ebx,word ptr es:[si][TChannel.wSmpStart]
+        shl     ebx,16
+        mov     es:[si][TChannel.dSmpPos],ebx
+        mov     byte ptr es:[si][TChannel.bEnabled],1
+SetNewNote@_after2:
+        pop     fs
+        pop     es
+        pop     di
+        pop     si
+        pop     edx
+        pop     ecx
+        pop     ebx
+        pop     eax
+        ret
 SetNewNote endp
 
 ; put next notes into channels
@@ -485,8 +528,10 @@ vibend:      push    ax
              mov     [SI][TChannel.wSmpPeriod],ax
              cmp     ax,0
              je      novibcalc
+             push    ax
              call    _mixCalcSampleStep
-             mov     [SI][TChannel.dSmpStep],EAX
+             mov     word ptr [SI][TChannel.dSmpStep],ax
+             mov     word ptr [SI][TChannel.dSmpStep+2],dx
 novibcalc:   pop     ax
 novibend:    cmp     ax,2*18             ; Tremolo ...
              je      checkifcontTrm
@@ -571,6 +616,11 @@ no_newinstr: ; read note ...
              mov     byte ptr [SI][TChannel.bEnabled],0    ; stop mixing
              jmp     no_newnote
 normal_note: mov     [SI][TChannel.bNote],al
+             push    ds
+             push    si
+             push    ax
+             mov     al,[portaFlag]
+             push    ax
              call    SetNewNote
 no_newnote:  ; read volume - last but not least ;)
              ; ~~~~~~~~~~~
@@ -999,8 +1049,10 @@ Finepitch_down:
               mov       ax,[SI][TChannel.wSmpPeriodHigh]
 ptok:         ; now calc new frequency step for this period
               mov       [SI][TChannel.wSmpPeriod],ax
+              push    ax
               call    _mixCalcSampleStep
-              mov       [SI][TChannel.dSmpStep],EAX
+              mov     word ptr [SI][TChannel.dSmpStep],ax
+              mov     word ptr [SI][TChannel.dSmpStep+2],dx
               jmp       handlenothing
 XFinepitch_down:
               ; we pitch down, but increase period ! (so check wSmpPeriodHigh)
@@ -1095,14 +1147,35 @@ arpok2:        or       bh,bl
                mov     ax,[SI][TChannel.wInsSeg]
                mov     fs,ax
                mov      al,[SI][TChannel.bNote]
+               push     ds
+               push     si
+               push     fs
+               xor      bx,bx
+               push     bx
+               push     ax
                call    calcpart
-               mov      [SI][TChannel.dArpSmpSteps],eax
+               mov      word ptr [SI][TChannel.dArpSmpSteps],ax
+               mov      word ptr [SI][TChannel.dArpSmpSteps+2],dx
                mov      al,[SI][TChannel.bArpNotes]
+               push     ds
+               push     si
+               push     fs
+               xor      bx,bx
+               push     bx
+               push     ax
                call    calcpart
-               mov      [SI][TChannel.dArpSmpSteps+4*1],eax
+               mov      word ptr [SI][TChannel.dArpSmpSteps+4*1],ax
+               mov      word ptr [SI][TChannel.dArpSmpSteps+4*1+2],dx
                mov      al,[SI][TChannel.bArpNotes+1]
+               push     ds
+               push     si
+               push     fs
+               xor      bx,bx
+               push     bx
+               push     ax
                call    calcpart
-               mov      [SI][TChannel.dArpSmpSteps+4*2],eax
+               mov      word ptr [SI][TChannel.dArpSmpSteps+4*2],ax
+               mov      word ptr [SI][TChannel.dArpSmpSteps+4*2+2],dx
                jmp      handlenothing
 
 Hdl_Vib_Vol:   test     [SI][TChannel.bEffFlags],EFFFLAG_CONTINUE

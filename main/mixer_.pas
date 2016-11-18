@@ -10,7 +10,7 @@ unit mixer_;
 
 interface
 
-procedure _mixCalcSampleStep;
+function  _mixCalcSampleStep(wPeriod: word): longint;
 procedure _MixSampleMono8;
 procedure _MixSampleStereo8;
 
@@ -20,7 +20,7 @@ uses
     mixvars;
 
 (*$l mixer_.obj*)
-procedure _mixCalcSampleStep; external;
+function  _mixCalcSampleStep(wPeriod: word): longint; external;
 procedure _MixSampleMono8; external;
 procedure _MixSampleStereo8; external;
 
