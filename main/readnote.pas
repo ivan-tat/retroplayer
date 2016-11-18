@@ -13,7 +13,7 @@ interface
 procedure set_tempo(tempo: byte);
 
 procedure readnewnotes;
-procedure SetupNewInst; (* internal use *)
+procedure SetupNewInst(dChn: pointer; bInsNum: byte); (* internal use *)
 procedure SetNewNote; (* internal use *)
 
 implementation
@@ -37,7 +37,7 @@ end;
 
 (*$l readnote.obj*)
 procedure readnewnotes; external;
-procedure SetupNewInst; external;
+procedure SetupNewInst(dChn: pointer; bInsNum: byte); external;
 procedure SetNewNote; external;
 
 end.

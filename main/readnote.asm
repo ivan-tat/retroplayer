@@ -144,7 +144,6 @@ special2 label word
                    dw offset Hdl_patterndly
                    noeffect2                  ; funkrepeat -> not implemented
 
-      chnCounter   db ?
       jump2flag    db ?
       jump2where   db ?
       breakflag    db ?
@@ -250,90 +249,100 @@ cp:
 ENDM
 
 public SetupNewInst
-SetupNewInst proc far
-; IN : AL = number of new instrument
-;      SI = offset to channel
-;      DS = Dataseg
-;
-; DESTROYs FS,BX,AX,DX
-;
-             dec     al
-             mov     bl,al
-             xor     bh,bh
-             shl     bx,2
-             xor     ah,ah
-             add     bx,ax
-             mov     ax,word ptr ds:[Instruments+2]
-             add     bx,ax
-             mov     fs,bx
-             mov     [SI][TChannel.wInsSeg],bx
-             mov     al,fs:[TInstrument.vol]
-             cmp     al,64
-             jb      volwell
-             mov     al,63
-volwell:     mul     [gvolume]
-             shr     ax,6
-             mov     [SI][TChannel.bSmpVol],al
-             mov     ax,fs:[TInstrument.memseg]
-             mov     [SI][TChannel.wSmpSeg],ax
-             mov     al,fs:[TInstrument.flags]
-             xor     ah,ah
-             test    al,000000001b  ; bit 0 - loop sample ?
-             jz      @_noLoop
-             or      ah,SMPFLAG_LOOP
-@_noLoop:
-             mov     [SI][TChannel.bSmpFlags],ah
-             mov     ax,fs:[TInstrument.loopbeg]
-             mov     [SI][TChannel.wSmpLoopStart],ax
-             mov     ax,fs:[TInstrument.loopend]
-             test    byte ptr [SI][TChannel.bSmpFlags],SMPFLAG_LOOP
-             jnz     weloop
-             mov     ax,fs:[TInstrument.slength]     ; <- we don't loop :( anyway ...
-weLoop:      mov     [SI][TChannel.wSmpLoopEnd],ax
-             ; calc period borders
-             mov     bx,fs:[TInstrument.c2speed]
-             cmp     bx,0
-             jne     c2speedok
-             ; c2speed = 0 -> don't play it !! it's wrong !
-             mov     byte ptr [SI][TChannel.bIns],0
-c2speedok:   mov     word ptr [SI][TChannel.wSmpStart],0  ; reset start value
-             cmp     [modOption_AmigaLimits],1
-             je      takeamigalimits
-             ; B-7 :
-             mov     ax,907 * 16 / 128   ; period(note)*16 >> 7
-             mov     dx,8363
-             mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
-             div     bx
-             mov     [SI][TChannel.wSmpPeriodLow],ax
-             ; C-0 :
-             mov     ax,1712 * 16         ; period(note)*16 >> 0
-             mov     dx,8363
-             mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
-             cmp     bx,3500
-             jb      c2below
-             div     bx
-             mov     [SI][TChannel.wSmpPeriodHigh],ax
-             jmp     after1
-c2below:     mov     bx,3500
-             div     bx
-             mov     [SI][TChannel.wSmpPeriodHigh],ax
-             jmp     after1
-takeamigalimits:
-             ; first C-3 :
-             mov     ax,1712 * 16 / 8     ; period(note)*16 >> 3
-             mov     dx,8363
-             mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
-             div     bx
-             mov     [SI][TChannel.wSmpPeriodHigh],ax
-             ; then B-5 :
-             mov     ax,907 * 16 / 32     ; period(note)*16 >> 5
-             mov     dx,8363
-             mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
-             div     bx
-             mov     [SI][TChannel.wSmpPeriodLow],ax
-after1:      mov     al,[curInst]
-
-             ret
+SetupNewInst proc far _dChn: dword, _bInsNum: byte
+; IN : DS = _DATA
+        push    bx
+        push    cx
+        push    dx
+        push    si
+        push    es
+        push    fs
+        les     si,[_dChn]
+        movzx   ax,[_bInsNum]
+        dec     ax
+        mov     bx,ax
+        shl     bx,2
+        add     bx,ax
+        mov     ax,word ptr ds:[Instruments+2]
+        add     bx,ax
+        mov     fs,bx
+        mov     es:[si][TChannel.wInsSeg],bx
+        mov     al,fs:[TInstrument.vol]
+        cmp     al,64
+        jb      SetupNewInst@_volwell
+        mov     al,63
+SetupNewInst@_volwell:
+        mul     [gvolume]
+        shr     ax,6
+        mov     es:[si][TChannel.bSmpVol],al
+        mov     ax,fs:[TInstrument.memseg]
+        mov     es:[si][TChannel.wSmpSeg],ax
+        mov     al,fs:[TInstrument.flags]
+        xor     ah,ah
+        test    al,000000001b   ; bit 0 - loop sample
+        jz      SetupNewInst@_noLoop
+        or      ah,SMPFLAG_LOOP
+SetupNewInst@_noLoop:
+        mov     es:[si][TChannel.bSmpFlags],ah
+        mov     ax,fs:[TInstrument.loopbeg]
+        mov     es:[si][TChannel.wSmpLoopStart],ax
+        mov     ax,fs:[TInstrument.loopend]
+        test    byte ptr es:[si][TChannel.bSmpFlags],SMPFLAG_LOOP
+        jnz     SetupNewInst@_weloop
+        mov     ax,fs:[TInstrument.slength] ; do not loop
+SetupNewInst@_weLoop:
+        mov     es:[si][TChannel.wSmpLoopEnd],ax
+        ; calc period borders
+        mov     bx,fs:[TInstrument.c2speed]
+        test    bx,bx
+        jnz     SetupNewInst@_c2speedok
+        ; c2speed = 0 -> don't play it !! it's wrong !
+        mov     byte ptr es:[si][TChannel.bIns],0
+SetupNewInst@_c2speedok:
+        mov     word ptr es:[si][TChannel.wSmpStart],0  ; reset start value
+        cmp     [modOption_AmigaLimits],0
+        jne     SetupNewInst@_takeamigalimits
+        ; B-7 :
+        mov     ax,907 * 16 / 128   ; period(note)*16 >> 7
+        mov     dx,8363
+        mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
+        div     bx
+        mov     es:[si][TChannel.wSmpPeriodLow],ax
+        ; C-0 :
+        mov     ax,1712 * 16         ; period(note)*16 >> 0
+        mov     dx,8363
+        mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
+        cmp     bx,3500
+        jb      SetupNewInst@_c2below
+        div     bx
+        mov     es:[SI][TChannel.wSmpPeriodHigh],ax
+        jmp     SetupNewInst@_after1
+SetupNewInst@_c2below:
+        mov     bx,3500
+        div     bx
+        mov     es:[si][TChannel.wSmpPeriodHigh],ax
+        jmp     SetupNewInst@_after1
+SetupNewInst@_takeamigalimits:
+        ; first C-3 :
+        mov     ax,1712 * 16 / 8    ; period(note)*16 >> 3
+        mov     dx,8363
+        mul     dx                  ; dx:ax = 8363*period(note)*16 >> octave(note)
+        div     bx
+        mov     es:[si][TChannel.wSmpPeriodHigh],ax
+        ; then B-5 :
+        mov     ax,907 * 16 / 32    ; period(note)*16 >> 5
+        mov     dx,8363
+        mul     dx                  ; dx:ax = 8363*period(note)*16 >> octave(note)
+        div     bx
+        mov     es:[si][TChannel.wSmpPeriodLow],ax
+SetupNewInst@_after1:
+        pop     fs
+        pop     es
+        pop     si
+        pop     dx
+        pop     cx
+        pop     bx
+        ret
 SetupNewInst endp
 
 public SetNewNote
@@ -377,6 +386,7 @@ SetNewNote endp
 ; put next notes into channels
 public readnewnotes
 readnewnotes proc far
+local chnCounter: byte
              mov     [jump2flag],0
              mov     [breakflag],0
              mov     [gvolFlag],0
@@ -546,6 +556,10 @@ dontrestart:
              #
 
              mov     [SI][TChannel.bIns],al
+             push    ds
+             push    si
+             xor     ah,ah
+             push    ax
              call    SetupNewInst
 no_newinstr: ; read note ...
              ; ~~~~~~~~~~~~~

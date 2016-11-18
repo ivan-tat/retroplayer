@@ -21,11 +21,6 @@ include readnote.def
 
 _DATA segment word public use16 'DATA'
 
-nextPosition dw ?
-sample2calc  dw ?     ; in mono number of bytes/ in stereo number of words
-curchannel   db ?
-calleffects  db ?
-
 EffectsTable label word
         dw offset eff_none
         dw offset eff_none
@@ -104,7 +99,11 @@ include border.inc
 
 public calc_tick
 calc_tick proc far
-        push    bp  ; HINT: remove
+local nextPosition: word
+local sample2calc:  word    ; in mono number of bytes/ in stereo number of words
+local curchannel:   byte
+local calleffects:  byte
+
         ; first fill tickbuffer with ZERO = 2048
         ; for 16bit play then ofcourse a bit different value ...
         ; just only for 8bit play mode
@@ -306,7 +305,7 @@ _back2main:
         mov     [SI][TChannel.dSmpPos],edi
 
 _nextchannel:
-        add     si,size TChannel    ; HINT
+        add     si,size TChannel
         dec     [curchannel]
         jnz     _chnLoop
 
@@ -324,7 +323,6 @@ _skip_1:
         jb      calc_tick_anewtick
 
 _afterall:
-        pop     bp  ; HINT: remove
         ret
 
 _sampleends:
@@ -509,9 +507,9 @@ eff_J_Arpeggio proc near
 inside:
         mov     [SI][TChannel.bArpPos],bl
         shl     bx,2
-        add     si,bx   ; HINT
+        add     si,bx
         mov     eax,[SI][TChannel.dArpSmpSteps]
-        sub     si,bx   ; HINT
+        sub     si,bx
         mov     [SI][TChannel.dSmpStep],eax
         ret
 eff_J_Arpeggio endp
@@ -658,6 +656,10 @@ eff_S_Special_NoteDelay proc near
         cmp     al,00
         je      nonewinst
         mov     [SI][TChannel.bIns],al
+        push    ds
+        push    si
+        xor     ah,ah
+        push    ax
         call    SetupNewInst
 nonewinst:
         mov     al,[SI][TChannel.bSavNote]
