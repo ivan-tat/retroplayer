@@ -10,7 +10,7 @@ unit mixer;
 
 interface
 
-function  mixCalcSampleStep(period: word): longint;
+function  mixCalcSampleStep(wPeriod: word): longint;
 
 implementation
 
@@ -20,6 +20,6 @@ uses
     mixvars;
 
 (*$l mixer.obj*)
-function  mixCalcSampleStep(period: word): longint; external;
+function  mixCalcSampleStep(wPeriod: word): longint; external;
 
 end.

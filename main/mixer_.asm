@@ -43,33 +43,6 @@ _DATA ends
 MIXER__TEXT segment word public use16 'CODE'
 assume cs:MIXER__TEXT,ds:DGROUP,ss:DGROUP
 
-public _mixCalcSampleStep
-_mixCalcSampleStep proc far _wPeriod: word
-local Result: dword
-; IN  : DS = _DATA
-; OUT : DX:AX = sample step
-        push    eax
-        push    ecx
-        push    edx
-        movzx   eax,[_wPeriod]
-        movzx   edx,[Userate]
-        mul     edx                 ; EAX = Userate*Period
-        mov     ecx,eax
-        mov     edx,0dah
-        mov     eax,77900000h       ; EDX:EAX = 1712*8363*10000h
-        div     ecx
-        ;        1712 * 8363 * 10000h
-        ; EAX = ----------------------
-        ;        Userate * Period
-        mov     [Result],eax
-        pop     edx
-        pop     ecx
-        pop     eax
-        mov     ax,word ptr [Result]
-        mov     dx,word ptr [Result+2]
-        ret
-_mixCalcSampleStep endp
-
 public _MixSampleMono8
 _MixSampleMono8:
         ; ES:SI - pointer to tickbuffer

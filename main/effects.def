@@ -1,0 +1,14 @@
+; effects.def -- Assembler declarations for effects.c/effects.pas.
+;
+; This is free and unencumbered software released into the public domain.
+; For more information, please refer to <http://unlicense.org>.
+
+EFFECTS_TEXT segment word public use16 'CODE'
+
+extrn chn_setSamplePeriod: far
+extrn chn_setSampleVolume: far
+extrn chn_setupInstrument: far
+extrn chn_setupNote: far
+extrn chn_effTick: far
+
+EFFECTS_TEXT ends

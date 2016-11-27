@@ -22,7 +22,9 @@ uses
     effvars,
     mixvars,
     fillvars,
+    mixer,
     mixer_,
+    effects,
     readnote;
 
 (*$l mixing.obj*)

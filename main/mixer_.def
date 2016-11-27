@@ -5,7 +5,6 @@
 
 MIXER__TEXT segment word public use16 'CODE'
 
-extrn _mixCalcSampleStep: far
 extrn _MixSampleMono8: far
 extrn _MixSampleStereo8: far
 

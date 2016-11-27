@@ -7,6 +7,7 @@
 #define S3MTYPES_H 1
 
 #ifdef __WATCOMC__
+#include <i86.h>
 #include <stdbool.h>
 #include <stdint.h>
 #endif
@@ -51,6 +52,16 @@ typedef struct instrument_t {
     uint8_t  IName[28];
     uint32_t SCRS_ID;
 };
+
+//#define insList_get(num) (Instruments[(num)-1])
+//#define insList_get(num) (struct instrument_t *)(MK_FP(FP_SEG(*Instruments), FP_OFF(*Instruments) + ((num) - 1) * sizeof(struct instrument_t)))
+#define insList_get(num) (struct instrument_t *)MK_FP(FP_SEG(Instruments[0]) + ((num) - 1) * 5, 0)
+#define ins_isSample(ins) (ins->bType == 1)
+#define ins_isSampleLooped(ins) (ins->flags & 0x01 != 0)
+#define ins_getSampleLoopStart(ins) (ins->loopbeg)
+#define ins_getSampleLoopEnd(ins) (ins->flags & 0x01 ? ins->loopend : ins->slength)
+#define ins_getSampleRate(ins) (ins->c2speed)
+#define ins_getSampleData(ins) (void *)MK_FP(ins->memseg, 0)
 
 typedef struct instrument_t instrumentsList_t[MAX_INSTRUMENTS];
 
@@ -126,5 +137,9 @@ typedef struct channel_t {
 };
 
 typedef struct channel_t channelsList_t[MAX_CHANNELS];
+
+#define chn_getInstrument(chn) (struct instrument_t *)MK_FP(chn->wInsSeg, 0)
+#define chn_setInstrument(chn, p) chn->wInsSeg = FP_SEG((void __far *)p)
+#define chn_setSampleData(chn, p) chn->wSmpSeg = FP_SEG((void __far *)p)
 
 #endif  /* S3MTYPES_H */

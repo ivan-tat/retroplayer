@@ -8,6 +8,7 @@ include s3mtypes.def
 include s3mvars.def
 include effvars.def
 include mixvars.def
+include mixer.def
 include mixer_.def
 
 ; declared in readnote.pas
@@ -243,8 +244,8 @@ calcpart proc near _dChn: dword, _dIns: dword, _bNote: byte
         call    calcNotePeriod
         test    ax,ax
         jz      calcpart@_nostep
-        push    ax
-        call    _mixCalcSampleStep
+        push    ax  ; uint16 wPeriod
+        call    mixCalcSampleStep
         jmp     calcpart@_done
 calcpart@_nostep:
         xor     ax,ax
@@ -403,8 +404,8 @@ SetNewNote proc far _dChn: dword, _bNote: byte, _bKeep: byte
         push    ax
         call    calcNotePeriod
         mov     es:[si][TChannel.wSmpPeriod],ax
-        push    ax
-        call    _mixCalcSampleStep
+        push    ax  ; uint16 wPeriod
+        call    mixCalcSampleStep
         mov     word ptr es:[si][TChannel.dSmpStep],ax
         mov     word ptr es:[si][TChannel.dSmpStep+2],dx
         cmp     [_bKeep],0
@@ -528,8 +529,8 @@ vibend:      push    ax
              mov     [SI][TChannel.wSmpPeriod],ax
              cmp     ax,0
              je      novibcalc
-             push    ax
-             call    _mixCalcSampleStep
+             push    ax  ; uint16 wPeriod
+             call    mixCalcSampleStep
              mov     word ptr [SI][TChannel.dSmpStep],ax
              mov     word ptr [SI][TChannel.dSmpStep+2],dx
 novibcalc:   pop     ax
@@ -1049,8 +1050,8 @@ Finepitch_down:
               mov       ax,[SI][TChannel.wSmpPeriodHigh]
 ptok:         ; now calc new frequency step for this period
               mov       [SI][TChannel.wSmpPeriod],ax
-              push    ax
-              call    _mixCalcSampleStep
+              push    ax  ; uint16 wPeriod
+              call    mixCalcSampleStep
               mov     word ptr [SI][TChannel.dSmpStep],ax
               mov     word ptr [SI][TChannel.dSmpStep+2],dx
               jmp       handlenothing

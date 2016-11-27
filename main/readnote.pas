@@ -24,6 +24,7 @@ uses
     s3mvars,
     effvars,
     mixvars,
+    mixer,
     mixer_;
 
 procedure set_tempo(tempo: byte);

@@ -15,6 +15,9 @@
 
 #include "..\pascal\pascal.h"
 
-extern uint32_t PUBLIC_CODE mixCalcSampleStep(uint16_t period);
+extern uint32_t PUBLIC_CODE mixCalcSampleStep(uint16_t wPeriod);
+#ifdef __WATCOMC__
+#pragma aux mixCalcSampleStep modify [ bx cx ];
+#endif
 
 #endif /* MIXER_H */

@@ -89,38 +89,50 @@ $PC $PASINC blaster.pas
 
 cd ../main
 PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster'
+echo '*** types and variables'
 $PC $PASINC types.pas
 $PC $PASINC s3mtypes.pas
 $PC $PASINC mixvars.pas
 $PC $PASINC s3mvars.pas
 $PC $PASINC fillvars.pas
 
+echo '*** voltab.c'
 compile_c voltab.c
 $PC $PASINC voltab.pas
 
+echo '*** posttab.c'
 compile_c posttab.c
 $PC $PASINC posttab.pas
 
+echo '*** mixer_.asm'
 $ASW mixer_.asm
 $PC $PASINC mixer_.pas
 
+echo '*** mixer.c'
 compile_c mixer.c
 $PC $PASINC mixer.pas
 
+echo '*** effects.c'
 $PC $PASINC effvars.pas
 compile_c effects.c
+$PC $PASINC effects.pas
 
+echo '*** readnote.asm'
 $AS readnote.asm
 $PC $PASINC readnote.pas
 
+echo '*** mixing.asm'
 $AS mixing.asm
 $PC $PASINC mixing.pas
 
+echo '*** filldma.c'
 compile_c filldma.c
 $PC $PASINC filldma.pas
 
+echo '*** s3mplay.pas'
 $PC $PASINC s3mplay.pas
 
+echo '*** player'
 cd ../player
 PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster;..\main'
 $PC $PASINC plays3m.pas
