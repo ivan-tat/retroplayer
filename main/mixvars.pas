@@ -17,10 +17,8 @@ const
 
 var
     UseRate: word;
-    BPT: word;
-        (* bytes per tick - depends on samplerate + tempo *)
-    TickBytesLeft: word;
-        (* Bytes left to next Tick *)
+    mixTickSamplesPerChannel: word;
+    mixTickSamplesPerChannelLeft: word;
 
 implementation
 

@@ -13,7 +13,5 @@ uint16_t ST3Periods[12] = {
 };
 
 uint16_t UseRate;
-uint16_t BPT;
-    /* bytes per tick - depends on samplerate + tempo */
-uint16_t TickBytesLeft;
-    /* Bytes left to next Tick */
+uint16_t mixTickSamplesPerChannel;
+uint16_t mixTickSamplesPerChannelLeft;

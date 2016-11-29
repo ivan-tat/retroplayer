@@ -28,9 +28,11 @@ s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$)/_DATA\1/;" 
 	$ASW "$f_asm"
 }
 
+echo '*** pascal'
 cd pascal
 $PC syswrap.pas
 
+echo '*** watcom'
 cd ../watcomc
 PASINC='-u..\pascal'
 for f in \
@@ -49,13 +51,17 @@ done
 compile_c printf.c
 $PC $PASINC printf.pas
 
+echo '*** dos'
 cd ../dos
 PASINC='-u..\pascal;..\watcomc'
+
 compile_c dosproc.c
 $PC $PASINC dosproc.pas
+
 compile_c emstool.c
 $PC $PASINC emstool.pas
 
+echo '*** hw'
 cd ../hw
 PASINC='-u..\pascal;..\watcomc'
 
@@ -68,6 +74,7 @@ $PC $PASINC dma.pas
 compile_c pic.c
 $PC $PASINC pic.pas
 
+echo '*** blaster'
 cd ../blaster
 PASINC='-u..\pascal;..\watcomc;..\hw'
 
@@ -89,9 +96,13 @@ $PC $PASINC blaster.pas
 
 cd ../main
 PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster'
-echo '*** types and variables'
+
+echo '*** types'
 $PC $PASINC types.pas
+$PC $PASINC mixtypes.pas
 $PC $PASINC s3mtypes.pas
+
+echo '*** variables'
 $PC $PASINC mixvars.pas
 $PC $PASINC s3mvars.pas
 $PC $PASINC fillvars.pas

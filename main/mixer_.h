@@ -11,9 +11,13 @@
 #include <stdint.h>
 #endif
 
+// TODO: remove PUBLIC_CODE macros when done.
+
 #include "..\pascal\pascal.h"
 
-extern void PUBLIC_CODE _MixSampleMono8(void);
-extern void PUBLIC_CODE _MixSampleStereo8(void);
+#include "mixtypes.h"
 
-#endif /* MIXER__H */
+extern void PUBLIC_CODE _MixSampleMono8(uint16_t count);
+extern void PUBLIC_CODE _MixSampleStereo8(uint16_t count);
+
+#endif  /* MIXER__H */

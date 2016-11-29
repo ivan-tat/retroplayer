@@ -16,9 +16,13 @@
 extern uint16_t PUBLIC_DATA ST3Periods[12];
 
 extern uint16_t PUBLIC_DATA UseRate;
-extern uint16_t PUBLIC_DATA BPT;
-    /* bytes per tick - depends on samplerate + tempo */
-extern uint16_t PUBLIC_DATA TickBytesLeft;
-    /* Bytes left to next Tick */
+extern uint16_t PUBLIC_DATA mixTickSamplesPerChannel;
+    /* Samples per channel per tick - depends on samplerate + tempo
+     *   - for 8bits play it is "N of bytes per channel per tick"
+     *   - for 16bits play it is "N of words per channel per tick" */
+extern uint16_t PUBLIC_DATA mixTickSamplesPerChannelLeft;
+    /* Samples per channel left to next Tick
+     *   - for 8bits play it is "N of bytes per channel left for next tick"
+     *   - for 16bits play it is "N of words per channel left for next tick" */
 
 #endif /* MIXVARS_H */

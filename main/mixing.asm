@@ -11,6 +11,7 @@ DGROUP group _DATA
 include ..\dos\emstool.def
 include ..\blaster\sbctl.def
 include s3mtypes.def
+include mixtypes.def
 include s3mvars.def
 include effvars.def
 include mixvars.def
@@ -58,10 +59,42 @@ mapData@_ok:
         jnc     mapData@_nextPage
         mov     ax,[frameseg]
 mapData@_exit:
+        mov     dx,ax
+        xor     ax,ax
         pop     es
         pop     si
         ret
 mapData endp
+
+getBufPosFromCount proc near
+; IN:  ax = number of samples
+;      ds = _DATA
+; OUT: ax = buffer offset (in bytes)
+        cmp     [_16bit],0
+        je      getBufPosFromCount@_no16bit
+        shl     ax,1
+getBufPosFromCount@_no16bit:
+        cmp     [stereo],0
+        je      getBufPosFromCount@_noStereo
+        shl     ax,1
+getBufPosFromCount@_noStereo:
+        ret
+getBufPosFromCount endp
+
+getCountFromBufPos proc near
+; IN:  ax = buffer offset (in bytes)
+;      ds = _DATA
+; OUT: ax = number of samples
+        cmp     [_16bit],0
+        je      getCountFromBufPos@_no16bit
+        shr     ax,1
+getCountFromBufPos@_no16bit:
+        cmp     [stereo],0
+        je      getCountFromBufPos@_noStereo
+        shr     ax,1
+getCountFromBufPos@_noStereo:
+        ret
+getCountFromBufPos endp
 
 public calc_tick
 calc_tick proc far
@@ -69,26 +102,26 @@ local nextPosition: word
 local sample2calc:  word    ; in mono number of bytes/ in stereo number of words
 local curchannel:   byte
 local calleffects:  byte
+local _outBufOff: word
+local _smpInfo: TPlaySampleInfo
 
-        ; first fill tickbuffer with ZERO = 2048
-        ; for 16bit play then ofcourse a bit different value ...
-        ; just only for 8bit play mode
-        mov     ax,word ptr [offset tickbuffer+2]
-        mov     es,ax
-        mov     ax,2048
+        ; first fill tickbuffer with zero
         xor     di,di
+        mov     ax,word ptr [tickbuffer+2]
+        mov     es,ax
+        xor     ax,ax
         mov     cx,[DMArealBufsize+2]
         setborder     3
         rep stosw
         setborder     1
         mov     [nextPosition],0
         mov     [calleffects],0
-        cmp     [TickBytesLeft],0
+        cmp     [mixTickSamplesPerChannelLeft],0
         jnz     _continuecalc
 
 calc_tick_anewtick:
-        mov     ax,[BPT]
-        mov     [TickBytesLeft],ax
+        mov     ax,[mixTickSamplesPerChannel]
+        mov     [mixTickSamplesPerChannelLeft],ax
         mov     [calleffects],1
         cmp     [curtick],1
         ja      calc_tick_decrtick
@@ -111,32 +144,26 @@ calc_tick_decrtick:
         dec     [curtick]
 
 _continuecalc:
-        mov     ax,word ptr [offset tickbuffer+2]
-        mov     es,ax
         cmp     [EndOfSong],1
         je      _afterall
 
         mov     al,[usedchannels]
         mov     [curchannel],al
-        ; number of bytes (?) we calc for every tick:
-        mov     ax,[TickBytesLeft]
-        cmp     [stereo],0
-        je      _skip_0
 
-        shl     ax,1    ; only in stereo
-
-_skip_0:
+        mov     ax,[mixTickSamplesPerChannelLeft]
+        call    getBufPosFromCount
         mov     cx,[DMArealBufsize+2]
         sub     cx,[nextPosition]
         cmp     cx,ax
         jbe     _cantfinishtick
-
-        mov     cx,ax     ; finish that Tick and loop to fill the whole tickbuffer
-
+        mov     cx,ax   ; finish that Tick and loop to fill the whole tickbuffer
 _cantfinishtick:
-        mov     [sample2calc],cx
-        cmp     cx,0
-        je      _afterall
+        mov     ax,cx
+        call    getCountFromBufPos
+        mov     [sample2calc],ax
+
+        test    ax,ax
+        jz      _afterall
 
         lea     si,[Channel]
 
@@ -156,11 +183,9 @@ _chnLoop:
         je      _noeff_forfirst
 
 _doeff:
-        push    es  ; save
         push    ds  ; FP_SEG(channel_t *)
         push    si  ; FP_OFF(channel_t *)
         call    chn_effTick
-        pop     es  ; restore
 _noeff:
 _noeff_forfirst:
         ; check if mixing :
@@ -170,60 +195,59 @@ _noeff_forfirst:
         push    [SI][TChannel.wSmpSeg]
         push    [SI][TChannel.wSmpLoopEnd]
         call    mapData
-        mov     gs,ax
-
-        lfs     ax,[volumetableptr]
-
-        xor     ebx,ebx
-        mov     bh,[SI][TChannel.bSmpVol]
+        mov     word ptr [_smpInfo.dData],ax
+        mov     word ptr [_smpInfo.dData+2],dx
 
         mov     ax,[nextPosition]
         shl     ax,1
         cmp     [stereo],0
         je      _skip_2
-
         ; oh well - now stereo position
         cmp     byte ptr [SI][TChannel.bChannelType],1
         je      _leftside
-
         add     ax,2
-
 _leftside:
 _skip_2:
-        mov     cx,[sample2calc]
-        cmp     [stereo],0
-        je      _skip_5
+        mov     [_outBufOff],ax
 
-        shr     cx,1    ; only in stereo
-
-_skip_5:
         mov     edi,[SI][TChannel.dSmpPos]
+        mov     [_smpInfo.dPos],edi
         rol     edi,16
 
         mov     edx,[SI][TChannel.dSmpStep]
+        mov     [_smpInfo.dStep],edx
         rol     edx,16
 
         ; first check for correct position inside sample
         cmp     di,[SI][TChannel.wSmpLoopEnd]
         jae     _sampleends
 
+        mov     ax,word ptr [tickbuffer+2]
+        push    ax  ; FP_SEG(outbuf)
+        mov     ax,word ptr [tickbuffer]
+        add     ax,[_outBufOff]
+        push    ax  ; FP_OFF(outbuf)
+        lea     ax,[_smpInfo]
+        push    ax  ; FP_OFF(smpInfo)
+        mov     ax,word ptr [volumetableptr+2]
+        push    ax  ; FP_SEG(volTab)
+        movzx   ax,[SI][TChannel.bSmpVol]
+        push    ax  ; uint16 vol
+        mov     ax,[sample2calc]
+        push    ax  ; uint16 count
+
         cmp     [stereo],0
         je      _skip_3
 
-        push    si
-        mov     si,ax
         call    _MixSampleStereo8
-        pop     si
         jmp     _skip_4
 
 _skip_3:
-        push    si
-        mov     si,ax
         call    _MixSampleMono8
-        pop     si
 
 _skip_4:
-_aftercalc:
+        mov     edi,[_smpInfo.dPos]
+        rol     edi,16
         cmp     di,[SI][TChannel.wSmpLoopEnd]
         jae     _sampleends
 
@@ -237,14 +261,11 @@ _nextchannel:
         jnz     _chnLoop
 
         mov     ax,[sample2calc]
+        sub     [mixTickSamplesPerChannelLeft],ax
+
+        call    getBufPosFromCount
         add     [nextPosition],ax
-        cmp     [stereo],0
-        je      _skip_1
 
-        shr     ax,1    ; only in stereo
-
-_skip_1:
-        sub     [TickBytesLeft],ax
         mov     ax,[DMArealBufsize+2]
         cmp     [nextPosition],ax
         jb      calc_tick_anewtick

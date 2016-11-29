@@ -10,8 +10,11 @@ unit mixer_;
 
 interface
 
-procedure _MixSampleMono8;
-procedure _MixSampleStereo8;
+uses
+    mixtypes;
+
+procedure _MixSampleMono8(outBuf: pointer; smpInfo, volTab: word; vol: byte; count: word);
+procedure _MixSampleStereo8(outBuf: pointer; smpInfo, volTab: word; vol: byte; count: word);
 
 implementation
 
@@ -19,7 +22,7 @@ uses
     mixvars;
 
 (*$l mixer_.obj*)
-procedure _MixSampleMono8; external;
-procedure _MixSampleStereo8; external;
+procedure _MixSampleMono8(outBuf: pointer; smpInfo, volTab: word; vol: byte; count: word); external;
+procedure _MixSampleStereo8(outBuf: pointer; smpInfo, volTab: word; vol: byte; count: word); external;
 
 end.

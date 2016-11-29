@@ -8,7 +8,7 @@ _DATA segment word public use16 'DATA'
 extrn ST3Periods: word
 
 extrn UseRate: word
-extrn BPT: word
-extrn TickBytesLeft: word
+extrn mixTickSamplesPerChannel: word
+extrn mixTickSamplesPerChannelLeft: word
 
 _DATA ends

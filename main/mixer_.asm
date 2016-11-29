@@ -8,6 +8,7 @@
 
 DGROUP group _DATA
 
+include mixtypes.def
 include mixvars.def
 
 _DATA segment word public use16 'DATA'
@@ -44,18 +45,21 @@ MIXER__TEXT segment word public use16 'CODE'
 assume cs:MIXER__TEXT,ds:DGROUP,ss:DGROUP
 
 public _MixSampleMono8
-_MixSampleMono8:
-        ; ES:SI - pointer to tickbuffer
-        ; GS:DI - pointer to sampledata
-        ; FS:BX - pointer to volumetable
-        ; DX    - decision part of current position in sample
-        ; DI    - integer part of current position in sample
-        ; BH    - volume of instrument
-        ; CX    - number of values to calc
-        ; BP    - under use, but not in inner loop <- not optimized
+_MixSampleMono8 proc far _dOutBuf: dword, _wSmpInfo: word, _wVolTabSeg: word, _bVol: byte, _wCount: word
+local _count: word
+local _step: dword
+        push    si
+        push    di
         push    ds
         push    fs
-        push    bp
+        mov     bx,[_wSmpInfo]
+        mov     gs,word ptr ss:[bx][TPlaySampleInfo.dData+2]
+        mov     edi,ss:[bx][TPlaySampleInfo.dPos]
+        rol     edi,16
+        add     di,word ptr ss:[bx][TPlaySampleInfo.dData]
+        mov     edx,ss:[bx][TPlaySampleInfo.dStep]
+        rol     edx,16
+        mov     cx,[_wCount]
         mov     ax,cx
         and     ax,LOOP_MONO_LENGTH-1
         shr     cx,LOOP_MONO_SHIFT
@@ -63,16 +67,20 @@ _MixSampleMono8:
         neg     ax
         add     ax,LOOP_MONO_LENGTH
         cmp     ax,LOOP_MONO_LENGTH
-        jne     no0
+        jne     _MixSampleMono8@_no0
         dec     cx
         xor     ax,ax
-no0:
+_MixSampleMono8@_no0:
+        mov     [_count],cx
         shl     ax,1
+        les     si,[_dOutBuf]
         sub     si,ax
         ;sub     si,ax
-        xchg    ax,bx
-        mov     bx,ds:[innerloop_mono_tab+bx]
-        xchg    ax,bx
+        mov     bx,ax
+        mov     ax,ds:[innerloop_mono_tab+bx]
+        xor     ebx,ebx
+        mov     bh,[_bVol]
+        mov     fs,[_wVolTabSeg]
         ; before jump arround - swap fs,ds
         push    fs
         push    ds
@@ -84,11 +92,11 @@ align 2
 
 innerloop_mono macro no
 innerloop_mono&no:
-        mov     bl,gs:[di]
-        add     edi,edx
-        adc     di,0
-        mov     ax,ds:[ebx+ebx]  ; convert samplevalue with volumetable
-        add     es:[si+pos],ax     ; mix value to other channels
+        mov     bl,gs:[di]      ; get PCM value
+        add     edi,[_step]     ; next sample pos
+        adc     di,0            ; next sample pos (carry flag into account)
+        mov     ax,ds:[ebx+ebx] ; convert PCM value with volumetable
+        add     es:[si+pos],ax  ; mix result to out buffer
 endm
 
 z = 0
@@ -99,26 +107,38 @@ rept LOOP_MONO_LENGTH
     pos = pos + 2
 endm
         add     si,LOOP_MONO_LENGTH*2
-        dec     cx
+        dec     [_count]
         jnz     innerloop_mono0
-        pop     bp
+
+        mov     bx,[_wSmpInfo]
+        sub     di,word ptr ss:[bx][TPlaySampleInfo.dData]
+        rol     edi,16
+        mov     ss:[bx][TPlaySampleInfo.dPos],edi
+
         pop     fs
         pop     ds
-        retf
+        pop     di
+        pop     si
+        ret
+_MixSampleMono8 endp
 
 public _MixSampleStereo8
-_MixSampleStereo8:
-        ; ES:SI - pointer to tickbuffer
-        ; GS:DI - pointer to sampledata
-        ; FS:BX - pointer to volumetable
-        ; DX    - decision part of current position in sample
-        ; DI    - integer part of current position in sample
-        ; BH    - volume of instrument
-        ; CX    - number of values to calc
-        ; BP    - under use, but not in inner loop <- not optimized
+_MixSampleStereo8 proc far _dOutBuf: dword, _wSmpInfo: word, _wVolTabSeg: word, _bVol: byte, _wCount: word
+local _count: word
+local _step: dword
+        push    si
+        push    di
         push    ds
         push    fs
-        push    bp
+        mov     bx,[_wSmpInfo]
+        mov     gs,word ptr ss:[bx][TPlaySampleInfo.dData+2]
+        mov     edi,ss:[bx][TPlaySampleInfo.dPos]
+        rol     edi,16
+        add     di,word ptr ss:[bx][TPlaySampleInfo.dData]
+        mov     edx,ss:[bx][TPlaySampleInfo.dStep]
+        rol     edx,16
+        mov     [_step],edx
+        mov     cx,[_wCount]
         mov     ax,cx
         and     ax,LOOP_STEREO_LENGTH-1
         shr     cx,LOOP_STEREO_SHIFT
@@ -126,16 +146,20 @@ _MixSampleStereo8:
         neg     ax
         add     ax,LOOP_STEREO_LENGTH
         cmp     ax,LOOP_STEREO_LENGTH
-        jne     _no0
+        jne     _MixSampleStereo8@_no0
         dec     cx
         xor     ax,ax
-_no0:
+_MixSampleStereo8@_no0:
+        mov     [_count],cx
         shl     ax,1
+        les     si,[_dOutBuf]
         sub     si,ax
         sub     si,ax
-        xchg    ax,bx
-        mov     bx,ds:[innerloop_stereo_tab+bx]
-        xchg    ax,bx
+        mov     bx,ax
+        mov     ax,ds:[innerloop_stereo_tab+bx]
+        xor     ebx,ebx
+        mov     bh,[_bVol]
+        mov     fs,[_wVolTabSeg]
         ; before jump arround - swap fs,ds
         push    ds
         push    fs
@@ -147,11 +171,11 @@ align 2
 
 innerloop_stereo macro no
 innerloop_stereo&no:
-        mov     bl,gs:[di]          ; byte out of the sample
-        add     edi,edx             ; next position in sample
-        adc     di,0                ; <- I need this !!
-        mov     ax,ds:[ebx+ebx]     ; convert samplevalue with volumetable
-        add     es:[si+pos],ax      ; mix value to other channels
+        mov     bl,gs:[di]      ; get PCM value
+        add     edi,[_step]     ; next sample pos
+        adc     di,0            ; next sample pos (carry flag into account)
+        mov     ax,ds:[ebx+ebx] ; convert PCM value with volumetable
+        add     es:[si+pos],ax  ; mix result to out buffer
 endm
 
 z = 0
@@ -162,12 +186,20 @@ rept LOOP_STEREO_LENGTH
     pos = pos + 4
 endm
         add     si,LOOP_STEREO_LENGTH*4
-        dec     cx
+        dec     [_count]
         jnz     innerloop_stereo0
-        pop     bp
+
+        mov     bx,[_wSmpInfo]
+        sub     di,word ptr ss:[bx][TPlaySampleInfo.dData]
+        rol     edi,16
+        mov     ss:[bx][TPlaySampleInfo.dPos],edi
+
         pop     fs
         pop     ds
-        retf
+        pop     di
+        pop     si
+        ret
+_MixSampleStereo8 endp
 
 MIXER__TEXT ends
 

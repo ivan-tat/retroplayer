@@ -463,7 +463,7 @@ var key:boolean;
     curspeed:=initspeed;set_tempo(inittempo);
     set_ST3order(playOption_ST3Order); { <- don't remove this ! it's important ! (setup lastorder) }
     EndOfSong:=false;TooSlow:=false;
-    TickBytesLeft:=0;       { emmidiately next tick }
+    mixTickSamplesPerChannelLeft:=0;    (* emmidiately next tick *)
     Initchannels;
 
     count := DMArealbufsize[1];

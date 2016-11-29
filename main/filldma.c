@@ -38,7 +38,7 @@ void convert_8(void *outbuf, void *mixbuf, uint16_t count)
     dst = (uint8_t *)outbuf;
 
     do {
-        *dst = post8bit[*src];
+        *dst = post8bit[*src+2048];
         src++;
         dst++;
         count--;
@@ -57,8 +57,8 @@ void LQconvert_8(void *outbuf, void *mixbuf, uint16_t count)
     if (stereo) {
         count >>= 1;
         do {
-            samp[0] = post8bit[*src[0]];
-            samp[1] = post8bit[*src[1]];
+            samp[0] = post8bit[*src[0]+2048];
+            samp[1] = post8bit[*src[1]+2048];
             *dst[0] = samp[0];
             *dst[1] = samp[1];
             *dst[2] = samp[0];
@@ -69,7 +69,7 @@ void LQconvert_8(void *outbuf, void *mixbuf, uint16_t count)
         } while (count);
     } else {
         do {
-            samp[0] = post8bit[*src[0]];
+            samp[0] = post8bit[*src[0]+2048];
             *dst[0] = samp[0];
             *dst[1] = samp[0];
             src++;
