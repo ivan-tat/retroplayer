@@ -49,9 +49,9 @@ mapData@_nextPage:
         call    EmsMap
         test    al,al
         jnz     mapData@_ok
-        ; cause an exception "division by zero" because EMS driver does not work correct
-        xor     dl,dl
-        div     dl
+        ; return NULL pointer because EMS driver does not work correct
+        xor     ax,ax
+        jmp     mapData@_exit
 mapData@_ok:
         inc     [_wLogPage]
         inc     [_wPhysPage]
@@ -99,7 +99,7 @@ getCountFromBufPos endp
 public calc_tick
 calc_tick proc far
 local nextPosition: word
-local sample2calc:  word    ; in mono number of bytes/ in stereo number of words
+local sample2calc:  word    ; N of samples per channel (mono/left/right) to calculate
 local curchannel:   byte
 local calleffects:  byte
 local _outBufOff: word
@@ -195,6 +195,9 @@ _noeff_forfirst:
         push    [SI][TChannel.wSmpSeg]
         push    [SI][TChannel.wSmpLoopEnd]
         call    mapData
+        mov     bx,ax
+        or      bx,dx
+        jz      _nextchannel    ; skip channel if EMS driver does not work correct
         mov     word ptr [_smpInfo.dData],ax
         mov     word ptr [_smpInfo.dData+2],dx
 
@@ -227,6 +230,7 @@ _skip_2:
         mov     ax,word ptr [tickbuffer]
         add     ax,[_outBufOff]
         push    ax  ; FP_OFF(outbuf)
+        push    ss  ; FP_SEG(smpInfo)
         lea     ax,[_smpInfo]
         push    ax  ; FP_OFF(smpInfo)
         mov     ax,word ptr [volumetableptr+2]
