@@ -1,4 +1,4 @@
-/* mixing.h -- declarations for mixing.asm.
+/* mixing.h -- declarations for mixing.c.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -12,8 +12,9 @@
 #include <stdint.h>
 #endif
 
-#include "..\pascal\pascal.h"
+void    *PUBLIC_CODE mapSampleData(uint16_t seg, uint16_t len);
+uint16_t PUBLIC_CODE getBufOffFromCount(uint16_t count);
+uint16_t PUBLIC_CODE getCountFromBufOff(uint16_t bufOff);
+void     PUBLIC_CODE calcTick(void);
 
-extern void PUBLIC_CODE calc_tick(void);
-
-#endif /* MIXING_H */
+#endif  /* MIXING_H */

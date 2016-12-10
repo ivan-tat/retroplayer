@@ -18,9 +18,7 @@
 
 #include "mixtypes.h"
 
-extern void PUBLIC_CODE _MixSampleMono8(void *outBuf, struct playSampleInfo_t *smpInfo,
-    uint16_t volTab, uint8_t vol, uint16_t count);
-extern void PUBLIC_CODE _MixSampleStereo8(void *outBuf, struct playSampleInfo_t *smpInfo,
-    uint16_t volTab, uint8_t vol, uint16_t count);
+extern void PUBLIC_CODE _MixSampleMono8(void *outBuf, struct playSampleInfo_t *smpInfo, uint16_t volTab, uint8_t vol, uint16_t count);
+extern void PUBLIC_CODE _MixSampleStereo8(void *outBuf, struct playSampleInfo_t *smpInfo, uint16_t volTab, uint8_t vol, uint16_t count);
 
 #endif  /* MIXER__H */

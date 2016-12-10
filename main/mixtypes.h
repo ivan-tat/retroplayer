@@ -24,4 +24,4 @@ typedef struct playSampleInfo_t {
     uint16_t wFlags;
 };
 
-endif   /* MIXTYPES_H */
+#endif  /* MIXTYPES_H */

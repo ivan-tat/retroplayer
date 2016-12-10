@@ -63,6 +63,9 @@ typedef struct instrument_t {
 #define ins_getSampleRate(ins) (ins->c2speed)
 #define ins_getSampleData(ins) (void *)MK_FP(ins->memseg, 0)
 
+#define isSampleDataInEM(seg) (seg >= 0xf000)
+#define getSampleDataLogPageInEM(seg) (seg & 0x0fff)
+
 typedef struct instrument_t instrumentsList_t[MAX_INSTRUMENTS];
 
 /* patterns */

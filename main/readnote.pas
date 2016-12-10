@@ -13,8 +13,6 @@ interface
 procedure set_tempo(tempo: byte);
 
 procedure readnewnotes;
-procedure SetupNewInst(dChn: pointer; bInsNum: byte); (* internal use *)
-procedure SetNewNote(dChn: pointer; bNote: byte; bKeep: boolean); (* internal use *)
 
 implementation
 
@@ -24,6 +22,7 @@ uses
     s3mvars,
     effvars,
     mixvars,
+    effects,
     mixer,
     mixer_;
 
@@ -38,7 +37,5 @@ end;
 
 (*$l readnote.obj*)
 procedure readnewnotes; external;
-procedure SetupNewInst(dChn: pointer; bInsNum: byte); external;
-procedure SetNewNote(dChn: pointer; bNote: byte; bKeep: boolean); external;
 
 end.

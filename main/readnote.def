@@ -9,7 +9,5 @@ READNOTE_TEXT segment byte public use16 'CODE'
 extrn set_tempo: far
 
 extrn readnewnotes: far
-extrn SetupNewInst: far
-extrn SetNewNote: far
 
 READNOTE_TEXT ends

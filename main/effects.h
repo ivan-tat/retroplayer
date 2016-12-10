@@ -18,8 +18,8 @@
 
 #include "s3mtypes.h"
 
-void PUBLIC_CODE chn_setSamplePeriod(struct channel_t *chn, int32_t period)
-void PUBLIC_CODE chn_setSampleVolume(struct channel_t *chn, int16_t vol)
+void PUBLIC_CODE chn_setSamplePeriod(struct channel_t *chn, int32_t period);
+void PUBLIC_CODE chn_setSampleVolume(struct channel_t *chn, int16_t vol);
 void PUBLIC_CODE chn_setupInstrument(struct channel_t *chn, uint8_t insNum);
 void PUBLIC_CODE chn_setupNote(struct channel_t *chn, uint8_t note, bool keep);
 void PUBLIC_CODE chn_effTick(struct channel_t *chn);

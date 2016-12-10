@@ -10,7 +10,8 @@ unit mixing;
 
 interface
 
-procedure calc_tick; (* internal use *)
+function  mapSampleData(wSeg: word; wLen: word): pointer;
+procedure calcTick;
 
 implementation
 
@@ -28,6 +29,7 @@ uses
     readnote;
 
 (*$l mixing.obj*)
-procedure calc_tick; external;
+function  mapSampleData(wSeg: word; wLen: word): pointer; external;
+procedure calcTick; external;
 
 end.

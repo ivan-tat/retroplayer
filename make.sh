@@ -132,8 +132,8 @@ echo '*** readnote.asm'
 $AS readnote.asm
 $PC $PASINC readnote.pas
 
-echo '*** mixing.asm'
-$AS mixing.asm
+echo '*** mixing.c'
+compile_c mixing.c
 $PC $PASINC mixing.pas
 
 echo '*** filldma.c'

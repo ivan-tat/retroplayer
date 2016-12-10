@@ -8,6 +8,7 @@ include s3mtypes.def
 include s3mvars.def
 include effvars.def
 include mixvars.def
+include effects.def
 include mixer.def
 include mixer_.def
 
@@ -274,159 +275,6 @@ local cp
 cp:
 ENDM
 
-public SetupNewInst
-SetupNewInst proc far _dChn: dword, _bInsNum: byte
-; IN: DS = _DATA
-        push    bx
-        push    cx
-        push    dx
-        push    si
-        push    es
-        push    fs
-        les     si,[_dChn]
-        movzx   ax,[_bInsNum]
-        dec     ax
-        mov     bx,ax
-        shl     bx,2
-        add     bx,ax
-        mov     ax,word ptr ds:[Instruments+2]
-        add     bx,ax
-        mov     fs,bx
-        mov     es:[si][TChannel.wInsSeg],bx
-        mov     al,fs:[TInstrument.vol]
-        cmp     al,64
-        jb      SetupNewInst@_volwell
-        mov     al,63
-SetupNewInst@_volwell:
-        mul     [gvolume]
-        shr     ax,6
-        mov     es:[si][TChannel.bSmpVol],al
-        mov     ax,fs:[TInstrument.memseg]
-        mov     es:[si][TChannel.wSmpSeg],ax
-        mov     al,fs:[TInstrument.flags]
-        xor     ah,ah
-        test    al,000000001b   ; bit 0 - loop sample
-        jz      SetupNewInst@_noLoop
-        or      ah,SMPFLAG_LOOP
-SetupNewInst@_noLoop:
-        mov     es:[si][TChannel.bSmpFlags],ah
-        mov     ax,fs:[TInstrument.loopbeg]
-        mov     es:[si][TChannel.wSmpLoopStart],ax
-        mov     ax,fs:[TInstrument.loopend]
-        test    byte ptr es:[si][TChannel.bSmpFlags],SMPFLAG_LOOP
-        jnz     SetupNewInst@_weloop
-        mov     ax,fs:[TInstrument.slength] ; do not loop
-SetupNewInst@_weLoop:
-        mov     es:[si][TChannel.wSmpLoopEnd],ax
-        ; calc period borders
-        mov     bx,fs:[TInstrument.c2speed]
-        test    bx,bx
-        jnz     SetupNewInst@_c2speedok
-        ; c2speed = 0 -> don't play it !! it's wrong !
-        mov     byte ptr es:[si][TChannel.bIns],0
-SetupNewInst@_c2speedok:
-        mov     word ptr es:[si][TChannel.wSmpStart],0  ; reset start value
-        cmp     [modOption_AmigaLimits],0
-        jne     SetupNewInst@_takeamigalimits
-        ; B-7 :
-        mov     ax,907 * 16 / 128   ; period(note)*16 >> 7
-        mov     dx,8363
-        mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
-        div     bx
-        mov     es:[si][TChannel.wSmpPeriodLow],ax
-        ; C-0 :
-        mov     ax,1712 * 16         ; period(note)*16 >> 0
-        mov     dx,8363
-        mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
-        cmp     bx,3500
-        jb      SetupNewInst@_c2below
-        div     bx
-        mov     es:[SI][TChannel.wSmpPeriodHigh],ax
-        jmp     SetupNewInst@_after1
-SetupNewInst@_c2below:
-        mov     bx,3500
-        div     bx
-        mov     es:[si][TChannel.wSmpPeriodHigh],ax
-        jmp     SetupNewInst@_after1
-SetupNewInst@_takeamigalimits:
-        ; first C-3 :
-        mov     ax,1712 * 16 / 8    ; period(note)*16 >> 3
-        mov     dx,8363
-        mul     dx                  ; dx:ax = 8363*period(note)*16 >> octave(note)
-        div     bx
-        mov     es:[si][TChannel.wSmpPeriodHigh],ax
-        ; then B-5 :
-        mov     ax,907 * 16 / 32    ; period(note)*16 >> 5
-        mov     dx,8363
-        mul     dx                  ; dx:ax = 8363*period(note)*16 >> octave(note)
-        div     bx
-        mov     es:[si][TChannel.wSmpPeriodLow],ax
-SetupNewInst@_after1:
-        pop     fs
-        pop     es
-        pop     si
-        pop     dx
-        pop     cx
-        pop     bx
-        ret
-SetupNewInst endp
-
-public SetNewNote
-SetNewNote proc far _dChn: dword, _bNote: byte, _bKeep: byte
-; IN: DS = _DATA
-;     _bNote = Note: (name << 4) + ocatve
-        push    eax
-        push    ebx
-        push    ecx
-        push    edx
-        push    si
-        push    di
-        push    es
-        push    fs
-        les     si,[_dChn]
-        movzx   ax,[_bNote]
-        ; clear it first - just to make sure we really set it
-        mov     word ptr es:[si][TChannel.wSmpPeriod],0
-        cmp     byte ptr es:[si][TChannel.bIns],0
-        je      SetNewNote@_after2  ; if there's no instrumnet
-        ; set pointer to instrument
-        push    ax
-        mov     ax,es:[si][TChannel.wInsSeg]
-        mov     fs,ax
-        pop     ax
-        xor     di,di
-        cmp     byte ptr fs:[di][TInstrument.Typ],1 ; only calc if instrument does exist
-        jne     SetNewNote@_after2
-        push    es
-        push    si
-        push    fs
-        push    di
-        push    ax
-        call    calcNotePeriod
-        mov     es:[si][TChannel.wSmpPeriod],ax
-        push    ax  ; uint16 wPeriod
-        call    mixCalcSampleStep
-        mov     word ptr es:[si][TChannel.dSmpStep],ax
-        mov     word ptr es:[si][TChannel.dSmpStep+2],dx
-        cmp     [_bKeep],0
-        jne     SetNewNote@_after2  ; do not restart
-        ; restart instrument
-        movzx   ebx,word ptr es:[si][TChannel.wSmpStart]
-        shl     ebx,16
-        mov     es:[si][TChannel.dSmpPos],ebx
-        mov     byte ptr es:[si][TChannel.bEnabled],1
-SetNewNote@_after2:
-        pop     fs
-        pop     es
-        pop     di
-        pop     si
-        pop     edx
-        pop     ecx
-        pop     ebx
-        pop     eax
-        ret
-SetNewNote endp
-
 ; put next notes into channels
 public readnewnotes
 readnewnotes proc far
@@ -601,12 +449,15 @@ restart:     cmp     [portaFlag],1                ; and if portamento then don't
 dontrestart:
              #
 
-             mov     [SI][TChannel.bIns],al
-             push    ds
-             push    si
-             xor     ah,ah
-             push    ax
-             call    SetupNewInst
+;        mov     [SI][TChannel.bIns],al
+        push    es  ; save
+        push    ds  ; FP_SEG(channel_t *)
+        push    si  ; FP_OFF(channel_t *)
+        xor     ah,ah
+        push    ax  ; uint8 insNum
+;        call    SetupNewInst
+        call    chn_setupInstrument
+        pop     es  ; restore
 no_newinstr: ; read note ...
              ; ~~~~~~~~~~~~~
              mov     al,[curNote]
@@ -616,13 +467,16 @@ no_newinstr: ; read note ...
              jne     normal_note
              mov     byte ptr [SI][TChannel.bEnabled],0    ; stop mixing
              jmp     no_newnote
-normal_note: mov     [SI][TChannel.bNote],al
-             push    ds
-             push    si
-             push    ax
-             mov     al,[portaFlag]
-             push    ax
-             call    SetNewNote
+normal_note:
+        push    es  ; save
+        push    ds  ; FP_SEG(channel_t *)
+        push    si  ; FP_OFF(channel_t *)
+        xor     ah,ah
+        push    ax  ; uint8 note
+        mov     al,[portaFlag]
+        push    ax  ; bool keep
+        call    chn_setupNote
+        pop     es  ; restore
 no_newnote:  ; read volume - last but not least ;)
              ; ~~~~~~~~~~~
              mov     al,[curVol]

@@ -24,9 +24,13 @@ static bool errorsav = false;
 
 void mixroutines(void)
 {
+    calcTick();
+/**/
+/**
     __asm "push ds";    // FIXME
     calc_tick();
     __asm "pop ds";     // FIXME
+/**/
 }
 
 void convert_8(void *outbuf, void *mixbuf, uint16_t count)

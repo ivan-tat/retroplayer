@@ -12,23 +12,24 @@ cleandir() {
     cd $OLDPWD
 }
 
-cleandir ./hw
-rm -f ./hw/dma.asm
-rm -f ./hw/pic.asm
 cleandir ./blaster
 rm -f ./blaster/detisr.asm
-rm -f ./blaster/sndisr.asm
-rm -f ./blaster/sbio.asm
 rm -f ./blaster/sbctl.asm
+rm -f ./blaster/sbio.asm
+rm -f ./blaster/sndisr.asm
 cleandir ./dos
 rm -f ./dos/dosproc.asm
 rm -f ./dos/emstool.asm
+cleandir ./hw
+rm -f ./hw/dma.asm
+rm -f ./hw/pic.asm
 cleandir ./main
-rm -f ./main/voltab.asm
-rm -f ./main/posttab.asm
-rm -f ./main/filldma.asm
 rm -f ./main/effects.asm
+rm -f ./main/filldma.asm
 rm -f ./main/mixer.asm
+rm -f ./main/mixing.asm
+rm -f ./main/posttab.asm
+rm -f ./main/voltab.asm
 cleandir ./pascal
 cleandir ./player
 cleandir ./watcomc
