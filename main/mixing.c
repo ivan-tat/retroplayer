@@ -15,7 +15,6 @@
 #include "..\pascal\pascal.h"
 
 #include "..\dos\emstool.h"
-#include "..\blaster\sbctl.h"
 #include "s3mtypes.h"
 #include "mixtypes.h"
 #include "s3mvars.h"
@@ -27,14 +26,6 @@
 #include "mixer.h"
 #include "mixer_.h"
 #include "readnote.h"
-
-/* Returns the length of mixing buffer in sample units:
- * SamplesPerChannel * ChannelsCount */
-#define getMixBufLength() (_16bit ? DMARealBufSize[1] >> 1 : DMARealBufSize[1])
-
-/* Returns the size of mixing buffer in bytes:
- * SamplesPerChannel * ChannelsCount */
-#define getMixBufSize() (_16bit ? DMARealBufSize[1] : DMARealBufSize[1] << 1)
 
 void *PUBLIC_CODE mapSampleData(uint16_t seg, uint16_t len)
 {
@@ -53,20 +44,6 @@ void *PUBLIC_CODE mapSampleData(uint16_t seg, uint16_t len)
         return MK_FP(seg, 0);
     };
 }
-
-uint16_t PUBLIC_CODE getMixBufOffFromCount(uint16_t count)
-{
-    unsigned int bufOff = count;
-    if (stereo) bufOff <<= 1;
-    return bufOff << 1; /* int16_t (*TickBuffer)[]*/
-};
-
-uint16_t PUBLIC_CODE getCountFromMixBufOff(uint16_t bufOff)
-{
-    unsigned int count = bufOff >> 1;   /* int16_t (*TickBuffer)[]*/
-    if (stereo) count >>= 1;
-    return count;
-};
 
 void __near newTick(void)
 {
@@ -105,7 +82,7 @@ void __near calcChannel(struct channel_t *chnInfo, bool callEffects, uint16_t co
 
     /* first check for correct position inside sample */
     if (smpPos < chnInfo->wSmpLoopEnd) {
-        if (stereo)
+        if (mixChannels == 2)
             _MixSampleStereo8(outBuf, &smpInfo, FP_SEG(*volumetableptr), chnInfo->bSmpVol, count);
         else
             _MixSampleMono8(outBuf, &smpInfo, FP_SEG(*volumetableptr), chnInfo->bSmpVol, count);
@@ -124,16 +101,18 @@ void __near calcChannel(struct channel_t *chnInfo, bool callEffects, uint16_t co
     chnInfo->dSmpPos = (chnInfo->dSmpPos & 0xffff) + ((unsigned long)smpPos << 16);
 }
 
-void PUBLIC_CODE calcTick(void)
+void PUBLIC_CODE calcTick(void *outBuf, uint16_t len)
 {
+    uint16_t bufSize;
     uint16_t bufOff;
     uint16_t count;   /* N of samples per channel (mono/left/right) to calculate */
-    uint8_t curChannel;
+    uint8_t ch;
     bool callEffects;
     struct channel_t *chnInfo;
 
-    /* first fill mixing buffer with zero */
-    memset(TickBuffer, 0, getMixBufSize());
+    /* clear mixing buffer */
+    bufSize = getMixBufOffFromCount(len);
+    memset(outBuf, 0, bufSize);
 
     bufOff = 0;
 
@@ -145,23 +124,23 @@ void PUBLIC_CODE calcTick(void)
     };
 
     while (! EndOfSong) {
-        count = getCountFromMixBufOff(getMixBufSize() - bufOff);
+        count = getCountFromMixBufOff(bufSize - bufOff);
         if (count > mixTickSamplesPerChannelLeft) count = mixTickSamplesPerChannelLeft;
             /* finish that tick and loop to fill the whole mixing buffer */
 
         if (count == 0) break;
 
-        for (curChannel = 0; curChannel < UsedChannels; curChannel++) {
-            chnInfo = &(Channel[curChannel]);
+        for (ch = 0; ch < UsedChannels; ch++) {
+            chnInfo = &(Channel[ch]);
             calcChannel(chnInfo, callEffects, count,
-                MK_FP(FP_SEG(TickBuffer), FP_OFF(TickBuffer) + (bufOff << 0) +
-                (stereo && chnInfo->bChannelType == 1 ? 0 : 2)));
+                MK_FP(FP_SEG(outBuf), FP_OFF(outBuf) + bufOff +
+                (mixChannels == 2 && chnInfo->bChannelType == 2 ? 2 : 0)));
         };
 
         mixTickSamplesPerChannelLeft -= count;
         bufOff += getMixBufOffFromCount(count);
 
-        if (bufOff < getMixBufSize()) {
+        if (bufOff < bufSize) {
             callEffects = true;
             newTick();
         } else {

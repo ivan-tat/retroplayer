@@ -7,22 +7,20 @@ _DATA segment word public use16 'DATA'
 
 ; DMA buffer
 
-extrn AllocBuffer: dword
-extrn DMAbuffer: dword
-extrn PlayBuffer: dword
-extrn NumBuffers: byte
-extrn LastReady: byte
-extrn DMAHalf: byte
-extrn DMARealBufSize: word
+extrn DMABufUnaligned: dword
+extrn DMABuf: dword
+extrn DMABufSize: dword
+extrn DMABufFrameSize: word
+extrn DMABufFramesCount: byte
+extrn DMABufFrameLast: byte
+extrn DMABufFrameActive: byte
+extrn DMAFlags_JustInFill: byte
+extrn DMAFlags_Slow: byte
 
-; mixer
+; player
 
-extrn TickBuffer: dword
-extrn LQMode: byte
-extrn TooSlow: byte
-extrn JustInFill: byte
-extrn RasterTime: byte
-extrn FPS: byte
+extrn playOption_FPS: byte
+extrn playOption_LowQuality: byte
 
 ; EMM
 

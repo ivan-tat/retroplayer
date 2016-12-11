@@ -1,13 +1,15 @@
+(* Channels *)
+
 procedure write_Note(b:byte);
-const nname:array[0..11] of string[2] = ('C-','C#','D-','D#','E-','F-',
-                                         'F#','G-','G#','A-','A#','B-');
-  begin
+const
+    nname: array[0..11] of string[2] =
+        ('C-','C#','D-','D#','E-','F-', 'F#','G-','G#','A-','A#','B-');
+begin
     if b<254 then write(nname[b and $0f],b shr 4)
         else if b=254 then write('^^.') else write('...');
-  end;
+end;
 
 procedure display_row(ordr,row:byte);
-const hex:string[16] = '0123456789ABCDEF';
 var pA:Parray;
     i,b:byte;
   begin
@@ -32,8 +34,7 @@ var pA:Parray;
             b:=pA^[row*usedchannels*5+i*5+3];
             if b<255 then write(' ',chr(ord('A')+b-1)) else write(' .');
             b:=pA^[row*usedchannels*5+i*5+4];
-            write(hex[b div 16+1],hex[b mod 16+1]);
-            write(' ');
+            write(hexb(b), ' ');
           end
         else
           write('              ');
@@ -43,24 +44,6 @@ var pA:Parray;
 procedure display_currow;
   begin
     display_row(curorder,curline);writeln;
-  end;
-
-function b2hs(b:byte):string;
-const hexs:string='0123456789ABCDEF';
-  begin
-    b2hs:=hexs[b div 16+1] + hexs[b mod 16+1];
-  end;
-
-function w2hs(w:word):string;
-  begin
-    w2hs:=b2hs(w div 256)+b2hs(w mod 256);
-  end;
-
-function b2ds(b:byte):string;
-var s:string;
-  begin
-    str(b:3,s);
-    b2ds:=s;
   end;
 
 {$I EFX_NAME.INC}
@@ -109,7 +92,7 @@ var i:byte;
     if j=0 then writeln(' No digital channels to mix ...     :( ');
   end;
 
-var lastrow:byte;
+(* Patterns *)
 
 procedure refr_patterns;
 var i,j:byte;
@@ -133,10 +116,10 @@ var i,j:byte;
         gotoxy(1,17);writeln;gotoxy(1,17);display_row(curorder,i);
       end;
     lastrow:=curline+1;
-    window(1,1,80,25);
+    scrLeave;
   end;
 
-var chnlastinst:array[0..max_channels-1] of byte;
+(* Instruments *)
 
 procedure refr_inst;
 var i:byte;
@@ -156,11 +139,10 @@ var i:byte;
           begin textcolor(white);textbackground(blue);write_no(chnlastinst[i]-1) end;
         chnlastinst[i]:=n;if n<>0 then begin textcolor(blue);textbackground(white);write_no(n-1) end;
       end;
-    window(1,1,80,25);
+    scrLeave;
   end;
 
-var samplepage:byte;
-    wassmp_scr:boolean;
+(* Samples *)
 
 procedure refr_sample;
 var i,n:byte;
@@ -185,6 +167,58 @@ var i,n:byte;
       end;
   end;
 
+(* Debug *)
+
+procedure refr_debug;
+begin
+    if (isWindowCreated(DebugWindow)) then
+    begin
+        focusWindow(DebugWindow);
+        gotoxy(1, 1);
+        write('Mix. buf. channels:                      ', mixChannels:3);
+        clreol;
+        gotoxy(1, 2);
+        write('Mix. buf. rate:                          ', mixSampleRate:5);
+        clreol;
+        gotoxy(1, 3);
+        write('Mix. buf. samples per channel:           ', mixBufSamplesPerChannel:5);
+        clreol;
+        gotoxy(1, 4);
+        write('Mix. buf. samples:                       ', mixBufSamples:5);
+        clreol;
+        gotoxy(1, 5);
+        write('Mix. buf. tick samples per channel:      ', mixTickSamplesPerChannel:5);
+        clreol;
+        gotoxy(1, 6);
+        write('Mix. buf. tick samples per channel left: ', mixTickSamplesPerChannelLeft:5);
+        clreol;
+        gotoxy(1, 7);
+        write('DMA buf. allocated:         ', hexw(seg(DMABufUnaligned^)), ':', hexw(ofs(DMABufUnaligned^)));
+        clreol;
+        gotoxy(1, 8);
+        write('DMA buf. aligned:           ', hexw(seg(DMABuf^)), ':', hexw(ofs(DMABuf^)));
+        clreol;
+        gotoxy(1, 9);
+        write('DMA buf. frame size:        ', DMABufFrameSize:5);
+        clreol;
+        gotoxy(1, 10);
+        write('DMA buf. frames count:      ', DMABufFramesCount:3);
+        clreol;
+        gotoxy(1, 11);
+        write('DMA buf. last frame:        ', DMABufFrameLast:3);
+        clreol;
+        gotoxy(1, 12);
+        write('DMA buf. current frame:     ', DMABufFrameActive:3);
+        clreol;
+        gotoxy(1, 13);
+        write('DMA buf. frames per second: ', playOption_FPS:3);
+        clreol;
+        leaveWindow(DebugWindow);
+    end;
+end;
+
+(* Router *)
+
 procedure refresh_scr;
   begin
     case screen_no of
@@ -193,5 +227,6 @@ procedure refresh_scr;
       2: { pattern view }     refr_patterns;
       3: { Instrument infos } refr_inst;
       4: { sample infos }     refr_sample;
+      5: (* DEBUG *)          refr_debug;
     end;
   end;

@@ -52,7 +52,7 @@ PROCEDURE play_oneBlock(p:pointer;length:word);
      PLAYING ! - it does not work in that way on a SB16 !)
      we use non autoinit mode here for all SBs...
      this proc. setup DMA controller *)
-PROCEDURE Initblaster(var frequ:Word;stereoon,_16Biton:Boolean);
+PROCEDURE Initblaster(var m16bits, mStereo: boolean; var mRate: word);
   (* set frequency and stereo/mono and 8/16 Bit mode *)
 
 PROCEDURE set_ready_irq(p:pointer);
@@ -72,6 +72,7 @@ procedure sbDone;
 Implementation
 
 uses
+    strutils,
     dos,
     dma,
     sbio,
@@ -148,9 +149,9 @@ end;
 procedure set_mode( m_rate: word; m_16bits, m_signed, m_stereo: boolean );
 begin
     sdev_mode_rate := m_rate;
-    _16Bit := m_16bits;
+    sdev_mode_16bit := m_16bits;
     sdev_mode_signed := m_signed;
-    stereo := m_stereo;
+    sdev_mode_stereo := m_stereo;
 end;
 
 (* call this if you want to do continues play *)
@@ -171,16 +172,16 @@ end;
 
 { -------------------- continue commenting here ---------------------- }
 
-PROCEDURE Initblaster(var frequ:Word;stereoon,_16Biton:boolean);
+PROCEDURE Initblaster(var m16bits, mStereo: boolean; var mRate: word);
 begin
     (* first reset SB: *)
-    sbioDSPAcknowledgeIRQ( sdev_hw_base, false );
-    sbioDSPAcknowledgeIRQ( sdev_hw_base, true );
+    sbioDSPAcknowledgeIRQ(sdev_hw_base, false);
+    sbioDSPAcknowledgeIRQ(sdev_hw_base, true);
     stop_play;
     (* Now init: *)
-    sbAdjustMode(frequ,stereoon,_16Biton); (* FIXME: +signed *)
-    set_mode( frequ, _16biton, false, stereoon ); (* FIXME: *signed *)
-    sbSetupMode( frequ, stereo ); (* FIXME: +16bits, +signed *)
+    sbAdjustMode(mRate, mStereo, m16bits);      (* FIXME: +signed *)
+    set_mode(mRate, m16bits, false, mStereo );  (* FIXME: *signed *)
+    sbSetupMode(mRate, mStereo);                (* FIXME: +16bits, +signed *)
 end;
 
 (* hardware base i/o port, IRQ, DMA detection *)
@@ -191,12 +192,6 @@ begin
     picEOI( irq );
     sbioDSPAcknowledgeIRQ( sdev_hw_base, false );
 end;
-
-function hexword(w:word):string;
-const hex:string= '0123456789ABCDEF';
-  begin
-   hexword:=hex[hi(w) div 16+1]+hex[hi(w) mod 16+1]+hex[lo(w) div 16+1]+hex[lo(w) mod 16+1];
-  end;
 
 FUNCTION Detect_DSP_Addr(prot:boolean):Boolean;
 var p: word;
@@ -214,7 +209,7 @@ begin
     while ( ( i < HW_BASE_MAX) and not sdev_hwflags_base ) do
     begin
         p := HW_BASE_NUM[ i ];
-        if ( prot ) then write( '- probing ', hexword( p ), '... ' );
+        if ( prot ) then write( '- probing ', hexw( p ), '... ' );
 
         if ( sbioDSPReset( p ) ) then
         begin
@@ -260,7 +255,8 @@ end;
 
 function tryDetectIRQ( dmac: byte; m16bits: boolean ): boolean;
 var
-    fr: word;
+    mRate: word;
+    mStereo: boolean;
 begin
     check := 0;
 
@@ -269,10 +265,11 @@ begin
     else
         sdev_hw_dma8 := dmac;
 
-    fr := 8000;
+    mRate := 8000;
+    mStereo := false;
     dmaMask( dmac );
     stop_play;
-    Initblaster( fr, false, false );
+    Initblaster(m16bits, mStereo, mRate);
     play_oneblock( ptr( 0, 0 ), 1 );
     delay( 10 );
 
@@ -364,7 +361,7 @@ begin
     end;
 
     sbioDSPReset( sdev_hw_base );
-    
+
     Detect_DMA_Channel_irq := true;
   end;
 
@@ -373,8 +370,8 @@ begin
     sdev_configured := false;
     set_hwflags( false, false, false, false );
     set_hw_dsp( 0 );
-    stereo := false;
-    _16bit := false;
+    sdev_mode_stereo := false;
+    sdev_mode_16bit := false;
 
     if ( not Detect_DSP_Addr( prot ) ) then
     begin
@@ -413,7 +410,7 @@ begin
     asm cli end;
 
     (* acknowledge the interrupt on SB: *)
-    sbioDSPAcknowledgeIRQ( sdev_hw_base, _16Bit );
+    sbioDSPAcknowledgeIRQ( sdev_hw_base, sdev_mode_16bit );
 
     (* ackknowledge PICs: *)
     picEOI( 8 );    (* secondary *)
@@ -457,8 +454,8 @@ begin
     sdev_configured := true;
     set_hwflags( true, true, true, false );
     set_hwconfig( dsp, irq, dma, dma16 );
-    stereo := false;
-    _16Bit := false;
+    sdev_mode_stereo := false;
+    sdev_mode_16bit := false;
 
     case typ of
         1: set_hw_dsp( 1 );

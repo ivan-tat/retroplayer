@@ -44,16 +44,12 @@ VAR load_Error:integer;
 FUNCTION  load_s3m(name:string):BOOLEAN;        { load S3M module into memory }
 PROCEDURE done_module;                          { free memory used by S3M }
 FUNCTION  Init_device(input:byte):boolean;       { = false if set device failed }
-FUNCTION  Init_S3Mplayer:boolean;                { init DMAbuffer,tickbuffer,volumetable and some variables }
+FUNCTION  Init_S3Mplayer:boolean;                { init DMABuf,mixBuf,volumetable and some variables }
 PROCEDURE Done_S3Mplayer;                       { free buffers used by player }
-PROCEDURE setSampleRate(var SR:word;stereo:boolean); { set SampleRate for playing mono/stereo - higher frequency
-                                                           means more processor time for calc sound
-                                                           stereo question is because possible stereo/mono rates may differ }
+PROCEDURE playSetMode(m16bits, mStereo: boolean; mRate: word);
 FUNCTION  startplaying(var A_stereo,A_16Bit:boolean;LQ:Boolean):Boolean;
-                                                              (* play totaly in background - you have nothin else to do
-                                                                 for continue playing !
-                                                                 It'll interrupt your program itself and calculate
-                                                                 the next data is required *)
+    (* play totaly in background - you have nothin else to do for continue playing !
+        It'll interrupt your program itself and calculate the next data is required *)
 procedure set_mastervolume(vol:byte);
 procedure set_ST3order(new:boolean);             (* look at ST3order *)
 { To get some infos : }
@@ -82,6 +78,7 @@ IMPLEMENTATION
 uses
     cpu,
     memset,
+    strutils,
     crt,
     dos,
     dosproc,
@@ -96,8 +93,6 @@ uses
     filldma,
     mixing,
     readnote;
-
-CONST DMAbuffersize=8*1024; { <- maximum size of DMAbuffer }
 
 { Internal variables : }
 VAR
@@ -206,11 +201,9 @@ PROCEDURE Done_S3Mplayer;
   begin
     restore_irq;
     freeVolumeTable;
-    if AllocBuffer<>Nil then freeDOSmem(AllocBuffer);
-    if Tickbuffer<>Nil then freeDOSmem(TickBuffer);
+    doneDMABuf;
+    if mixBuf<>Nil then freeDOSmem(mixBuf);
     buffersreserved:=false;
-    playbuffer:=Nil;
-    DMABuffer:=Nil;
   end;
 
 PROCEDURE NewExitRoutine; Far;
@@ -240,19 +233,6 @@ FUNCTION Init_device(input:byte):boolean;
     Init_device:=Sounddevice;
   end;
 
-function checkoverride(var p;l:word):boolean; assembler;
-  asm
-    mov     bx,1
-    mov     ax,word ptr [p+2]
-    rol     ax,4
-    and     al,00fh
-    add     ax,l
-    jc      @@anoverride
-    xor     bx,bx
-@@anoverride:
-    mov     ax,bx
-  end;
-
 FUNCTION Init_S3Mplayer:boolean;
 var p:pArray;
   begin
@@ -261,67 +241,58 @@ var p:pArray;
     if buffersreserved then begin player_error:=Allreadyallocbuffers;Init_S3Mplayer:=true;exit end;
     { buffersreserved = false ! }
     if ( not allocVolumeTable ) then begin player_error:=notenoughmem;exit end;
-    if not getdosmem(Allocbuffer,(DMABuffersize+15)*2) then begin player_error:=notenoughmem;exit end;
-    { ok and now check for DMA page overrides }
-    if checkoverride(Allocbuffer^,DMAbuffersize) then
-      { it's a page override in first DMAbuffer - use second }
-      begin
-        { Can't free the first part - sorry it's not possible with a DOS function }
-        { I know I can creat my own PSP etc., maybe later, ok ? - it's a problem  }
-        { for final activities. }
-        p:=allocBuffer;
-        DMAbuffer:=ptr(seg(p^)+Dmabuffersize div 16,0);
-        {$IFDEF BETATEST}
-        write(' Use second part of DMAbuffer ... at ',seg(Dmabuffer^));
-        {$ENDIF}
-      end
-    else
-      begin
-        { use first buffer and free the rest }
-        {setsize(Allocbuffer,DMABuffersize);}
-        DMAbuffer:=AllocBuffer;
-        {$IFDEF BETATEST}
-        write(' Use first part of DMAbuffer ... at ',seg(DMAbuffer^));
-        {$ENDIF}
-      end;
+
+    if (not allocDMABuf(DMA_BUF_SIZE_MAX)) then
+    begin
+        player_error := notenoughmem;
+        exit;
+    end;
     {
-      in tick buffer we calc one DMA buffer half - that are dmabuffersize/2 words
+      in tick buffer we calc one DMA buffer half - that are DMA_BUF_SIZE_MAX/2 words
     }
-    if not getdosmem(Tickbuffer,DMAbuffersize) then
+    if (not getdosmem(mixBuf, DMABufSize)) then
       begin
-        freedosmem(Allocbuffer);
+        freeDMABuf;
         freeVolumeTable;
         player_error:=notenoughmem;
         exit
       end;
-    playBuffer:=DMABuffer;
     buffersreserved:=true;
     { clear those buffers : }
-    fillchar(dmabuffer^,dmabuffersize,0);
-    fillchar(tickbuffer^,dmabuffersize,0);
+    fillchar(mixBuf^,DMA_BUF_SIZE_MAX,0);
     Init_S3Mplayer:=true;
   end;
 
-PROCEDURE setSampleRate(var SR:word;stereo:boolean);
-var w:word;
-    i,j:byte;
-  begin
-    (*sbAdjustMode(SR,stereo);*)
-    Samplerate :=SR;
+PROCEDURE playSetMode(m16bits, mStereo: boolean; mRate: word);
+var
+    rate, tmp: word;
+    channels, i: byte;
+begin
+    (*sbAdjustMode(mRate,mStereo,m16bits);*)
+    SampleRate := mRate;
 
-    if LQmode then
-      Userate:=SR div 2
+    rate := mRate;
+    if (playOption_LowQuality) then rate := rate shr 1;
+
+    if (mStereo) then
+        channels := 2
     else
-      Userate:=SR;
+        channels := 1;
 
-    w:=(1+ord(stereo))*(trunc(1000000/(trunc(1000000/Userate))/FPS)+1);
-    i:=DMAbuffersize div w;
-    j:=1;while j<i do j:=j shl 1;j:=j shr 1;
-    if LQmode then j:=j shr 1;
-    for i:=0 to j-1 do
-      dmarealbufsize[i]:=i*w;
-    NumBuffers:=j;
-  end;
+    (*tmp := longint(1000000) div rate;
+    setMixMode(channels, rate, ((longint(1000000) div tmp) div playOption_FPS)+1);*)
+    setMixMode(channels, rate, trunc(trunc(1000000/trunc(1000000/rate))/playOption_FPS)+1);
+
+    DMABufFrameSize := mixBufSamplesPerChannel;
+    if (m16bits) then DMABufFrameSize := DMABufFrameSize shl 1;
+    if (mStereo) then DMABufFrameSize := DMABufFrameSize shl 1;
+
+    i := DMABufSize div DMABufFrameSize;
+    DMABufFramesCount := 1;
+    while DMABufFramesCount < i do DMABufFramesCount := DMABufFramesCount shl 1;
+    DMABufFramesCount := DMABufFramesCount shr 1;
+    if (playOption_LowQuality) then DMABufFramesCount := DMABufFramesCount shr 1;
+end;
 
 function getspeed:byte;
   begin
@@ -343,20 +314,10 @@ begin
     end;
 
     inside := true;
-    DMAhalf := ( DMAhalf+1 ) and ( numbuffers-1 );
+    DMABufFrameActive := (DMABufFrameActive + 1) and (DMABufFramesCount - 1);
     inside := false;
 
-    if ( rastertime ) then
-    begin
-        (* TODO *)
-    end;
-
     fill_dmabuffer;
-
-    if ( rastertime ) then
-    begin
-        (* TODO *)
-    end;
 end;
 
 procedure Initchannels;
@@ -373,7 +334,7 @@ procedure set_mastervolume(vol:byte);
   begin
     if vol>127 then vol:=127;
     mvolume:=vol;
-    calcposttable(mvolume,_16bit);
+    calcposttable(mvolume, sdev_mode_16bit);
   end;
 
 function get_mvolume:byte;
@@ -436,14 +397,14 @@ var key:boolean;
   begin
     startplaying:=false;
     player_error:=0;
-    lqmode:=LQ;
+    playOption_LowQuality := LQ;
     A_stereo := A_Stereo and sdev_caps_stereo;
     A_16Bit := A_16Bit and sdev_caps_16bit;
     if not sounddevice then begin player_error:=nosounddevice;exit; end; { sorry no device was set }
     if not mod_isLoaded then begin player_error:=noS3Minmemory;exit end; { hmm load it first ;) }
     set_ready_irq( @PlaySoundCallback );
-    Initblaster(Samplerate,a_stereo,a_16Bit);
-    setSamplerate(Samplerate,a_stereo);
+    Initblaster(a_16Bit,a_stereo,Samplerate);
+    playSetMode(a_16bit,a_stereo,Samplerate);
 
     (* now after loading we know if signed data or not *)
     calcVolumeTable( modOption_SignedData );
@@ -462,18 +423,19 @@ var key:boolean;
     Ploop_to:=0;
     curspeed:=initspeed;set_tempo(inittempo);
     set_ST3order(playOption_ST3Order); { <- don't remove this ! it's important ! (setup lastorder) }
-    EndOfSong:=false;TooSlow:=false;
+    EndOfSong:=false;
+    DMAFlags_Slow := false;
     mixTickSamplesPerChannelLeft:=0;    (* emmidiately next tick *)
     Initchannels;
 
-    count := DMArealbufsize[1];
-    if ( lqmode ) then count := count * 2;
+    count := DMABufFrameSize;
+    if (playOption_LowQuality) then count := count * 2;
 
-    (* loop through whole DMAbuffer *)
-    sbSetupDMATransfer( DMABuffer, count * numBuffers, true );
+    (* loop through whole DMA buffer *)
+    sbSetupDMATransfer(DMABuf, count * DMABufFramesCount, true);
 
-    DMAhalf := numbuffers-1;
-    lastready := numbuffers;
+    DMABufFrameActive := DMABufFramesCount - 1;
+    DMABufFrameLast := DMABufFramesCount;
 
     (* calc all buffer parts *)
     fill_dmabuffer;
@@ -506,15 +468,15 @@ BEGIN
   oldexitproc:=exitproc;
   exitproc:=@newExitRoutine;
   initVolumeTable;
-  DMAbuffer:=Nil;
-  AllocBuffer:=Nil;
-  playBuffer:=Nil;
-  Tickbuffer:=Nil;
+  initDMABuf;
+  mixBuf:=Nil;  (* FIXME: initMixBuf() *)
   Samplerate:=22000; { not the highest but nice sounding samplerate :) }
-  Userate:=22000;
+  mixSampleRate := Samplerate;
+  (* TODO: +mixChannels, +mixBufSamplesPerChannel *)
   playOption_LoopSong:=false;
   playOption_ST3Order:=false;   { Ok let's hear all patterns are saved ... }
-  rastertime:=false;
+  playOption_FPS := 70;
+  playOption_LowQuality := false;
   useEMS:=EMSinstalled;      { more space for Modules ! }
   if not getdosmem(instruments,MAX_INSTRUMENTS*sizeof(TInstr)) then
     begin
@@ -531,6 +493,4 @@ BEGIN
       Instruments^[i,0]:=0;
     END;
   for i := 0 to MAX_patterns-1 do setPattern( i, 0 );
-  FPS:=70;
-  LQmode:=false;
 END.

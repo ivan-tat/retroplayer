@@ -32,7 +32,7 @@ begin
         curtempo := tempo
     else
         tempo := curtempo;
-    if (tempo <> 0) then mixTickSamplesPerChannel := longint(UseRate)*5 div (2*tempo);
+    if (tempo <> 0) then mixTickSamplesPerChannel := longint(mixSampleRate)*5 div (2*tempo);
 end;
 
 (*$l readnote.obj*)

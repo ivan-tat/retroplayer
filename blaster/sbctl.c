@@ -116,7 +116,7 @@ void __far __pascal sbSetupMode( uint16_t freq, bool stereo ) {
     /* Calculate time constant and adjust rate
        For SB PRO we have to setup double samplerate in stereo mode */
     adjustRate( &freq, stereo, &tc );
-    
+
     /* Set DSP time constant or frequency */
     if ( sbno == 6 )
         sbSetDSPFrequency( freq );
@@ -137,10 +137,10 @@ void __far __pascal sbSetupMode( uint16_t freq, bool stereo ) {
 
 void __far __pascal sbSetupDSPTransfer( uint16_t len, bool autoinit ) {
     uint8_t cmd, mode;
-    
+
     if ( sbno == 6 ) {
         len--;
-        if ( _16bit ) {
+        if ( sdev_mode_16bit ) {
             /* DSP 0xB6 - use 16bit autoinit */
             /* DSP 0xB2 - use 16bit nonautoinit */
             cmd = autoinit ? 0xb6 : 0xb2;
@@ -154,7 +154,7 @@ void __far __pascal sbSetupDSPTransfer( uint16_t len, bool autoinit ) {
         /* 2nd command byte: bit 4 = 1 - signed data */
         if ( sdev_mode_signed ) mode |= 0x10;
         /* 2nd command byte: bit 5 = 1 - stereo data */
-        if ( stereo ) mode |= 0x20;
+        if ( sdev_mode_stereo ) mode |= 0x20;
         sbioDSPWrite( sdev_hw_base, mode );
         sbioDSPWrite( sdev_hw_base, len & 0xff );
         sbioDSPWrite( sdev_hw_base, ( len >> 8 ) & 0xff );
@@ -185,9 +185,9 @@ void __far __pascal sbSetupDMATransfer( void *p, uint16_t count, bool autoinit )
     mode = DMA_MODE_TRAN_READ | DMA_MODE_ADDR_INCR | DMA_MODE_SINGLE;
     mode |= autoinit ? DMA_MODE_INIT_AUTO : DMA_MODE_INIT_SINGLE;
 
-    if ( ! _16bit ) {
+    if ( ! sdev_mode_16bit ) {
         /* first the SBPRO stereo bugfix : */
-        if ( stereo ) {
+        if ( sdev_mode_stereo ) {
             if ( sbno < 6 ) {
                 /* well ... should be a SB PRO in stereo mode ... */
                 /* let's send one byte - nothing but silence */
@@ -197,22 +197,22 @@ void __far __pascal sbSetupDMATransfer( void *p, uint16_t count, bool autoinit )
         }
     };
 
-    dmaSetup( _16bit ? sdev_hw_dma16 : sdev_hw_dma8, mode, p, count );
+    dmaSetup( sdev_mode_16bit ? sdev_hw_dma16 : sdev_hw_dma8, mode, p, count );
 }
 
 uint16_t __far __pascal sbGetDMACounter( void ) {
-    return dmaGetCounter( _16bit ? sdev_hw_dma16 : sdev_hw_dma8 );
+    return dmaGetCounter( sdev_mode_16bit ? sdev_hw_dma16 : sdev_hw_dma8 );
 }
 
 void __far __pascal pause_play( void ) {
-    if ( _16bit )
+    if ( sdev_mode_16bit )
         sbioDSPWrite( sdev_hw_base, 0xd5 );
     else
         sbioDSPWrite( sdev_hw_base, 0xd0 );
 }
 
 void __far __pascal continue_play( void ) {
-    if ( _16bit )
+    if ( sdev_mode_16bit )
         sbioDSPWrite( sdev_hw_base, 0xd6 );
     else
         sbioDSPWrite( sdev_hw_base, 0xd4 );

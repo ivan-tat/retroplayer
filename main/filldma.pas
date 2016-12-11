@@ -20,6 +20,7 @@ uses
     posttab,
     s3mvars,
     fillvars,
+    mixvars,
     mixing;
 
 (*$l filldma.obj*)

@@ -30,7 +30,7 @@ var samplerate:word;
       writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');
       if not Init_S3Mplayer then halt;
       if not init_device(2) then begin writeln(' Blaster enviroment not found sorry ... ');halt end;
-      setsamplerate(samplerate,stereo);
+      playSetMode(_16bit,stereo,samplerate);
       set_ST3order(true);
       playOption_LoopSong:=true;
     end;
@@ -117,7 +117,7 @@ begin
   writeln;
   Init;
   if not startplaying(stereo,_16bit,false) then halt;
-  writeln(#13#10' dmabuflength :',DMArealbufsize[1]);
+  writeln(#13#10' DMA buffer frame size: ', DMABufFrameSize);
   writeln(#13#10' Stop playing and exit with <ESC> ');
   writeln('press any key to switch to oscillator ... ');
   readkey;
@@ -135,7 +135,7 @@ begin
   { DIsplay Oscilator : }
   if not stereo then
     begin
-      h:=playbuffer;
+      h:=DMABuf;
       while not keypressed do
         begin
           waitretrace;
@@ -144,7 +144,7 @@ begin
           yl:=h^[sbGetDMACounter] shr 1;
           for pos:=1 to 319 do
             begin
-              i:=sbGetDMACounter; { current position in DMAbuffer }
+              i:=sbGetDMACounter; { current position in DMA buffer }
               linie(pos-1,scr[pos-1],pos,scr[pos],1);
               scr[pos-1]:=yl;yl:=h^[i] shr 1;
               linie(pos-1,scr[pos-1],pos,yl,14);
@@ -154,7 +154,7 @@ begin
     end
   else { in stereo mode : }
     begin
-      h:=playbuffer;
+      h:=DMABuf;
       while not keypressed do
         begin
           for pos:=0 to usedchannels-1 do
@@ -163,8 +163,8 @@ begin
           yl:=h^[i] shr 2;yr:=h^[i+1] shr 2;
           for pos:=1 to 319 do
             begin
-              i:=sbGetDMACounter and $fffe; { current position in DMAbuffer }
-              if i>dmarealbufsize[1] then b:=7 else b:=4;
+              i:=sbGetDMACounter and $fffe; { current position in DMA buffer }
+              if i>DMABufFrameSize then b:=7 else b:=4;
               { left channel : }
               linie(pos-1,36+scr[pos-1],pos,36+scr[pos],1);
               scr[pos-1]:=yl;yl:=h^[i] shr 2;

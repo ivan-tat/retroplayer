@@ -6,7 +6,12 @@
 #ifndef PASCAL_H
 #define PASCAL_H 1
 
+#ifdef __WATCOMC__
+#pragma once
+#endif
+
 #define PUBLIC_DATA __pascal
 #define PUBLIC_CODE __far __pascal
+#define EXTERN_LINK extern
 
 #endif  /* PASCAL_H */

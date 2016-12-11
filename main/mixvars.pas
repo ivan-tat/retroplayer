@@ -16,10 +16,29 @@ const
     );
 
 var
-    UseRate: word;
+    mixBuf: pointer;
+    mixSampleRate: word;
+    mixChannels: byte;
+    mixBufSamplesPerChannel: word;
+    mixBufSamples: word;
     mixTickSamplesPerChannel: word;
     mixTickSamplesPerChannelLeft: word;
 
+procedure setMixSampleRate(rate: word);
+procedure setMixChannels(channels: byte);
+procedure setMixBufSamplesPerChannel(count: word);
+procedure setMixMode(channels: byte; rate, count: word);
+function  getMixBufOffFromCount(count: word): word;
+function  getCountFromMixBufOff(bufOff: word): word;
+
 implementation
+
+(*$l mixvars.obj*)
+procedure setMixSampleRate(rate: word); external;
+procedure setMixChannels(channels: byte); external;
+procedure setMixBufSamplesPerChannel(count: word); external;
+procedure setMixMode(channels: byte; rate, count: word); external;
+function  getMixBufOffFromCount(count: word): word; external;
+function  getCountFromMixBufOff(bufOff: word): word; external;
 
 end.

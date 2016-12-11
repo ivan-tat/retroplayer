@@ -15,14 +15,23 @@
 
 extern uint16_t PUBLIC_DATA ST3Periods[12];
 
-extern uint16_t PUBLIC_DATA UseRate;
+extern uint16_t (*PUBLIC_DATA mixBuf)[];
+    /* Mixing buffer for one frame.
+       Size depends on: sample rate, channels count, tempo, FPS (almost as DMA frame) */
+extern uint16_t PUBLIC_DATA mixSampleRate;
+extern uint8_t  PUBLIC_DATA mixChannels;
+extern uint16_t PUBLIC_DATA mixBufSamplesPerChannel;
+extern uint16_t PUBLIC_DATA mixBufSamples;
 extern uint16_t PUBLIC_DATA mixTickSamplesPerChannel;
-    /* Samples per channel per tick - depends on samplerate + tempo
-     *   - for 8bits play it is "N of bytes per channel per tick"
-     *   - for 16bits play it is "N of words per channel per tick" */
+    /* Samples per channel per tick - depends on sample rate and tempo */
 extern uint16_t PUBLIC_DATA mixTickSamplesPerChannelLeft;
-    /* Samples per channel left to next Tick
-     *   - for 8bits play it is "N of bytes per channel left for next tick"
-     *   - for 16bits play it is "N of words per channel left for next tick" */
+    /* Samples per channel left to next tick */
 
-#endif /* MIXVARS_H */
+extern void     PUBLIC_CODE setMixChannels(uint8_t channels);
+extern void     PUBLIC_CODE setMixSampleRate(uint16_t rate);
+extern void     PUBLIC_CODE setMixBufSamplesPerChannel(uint16_t count);
+extern void     PUBLIC_CODE setMixMode(uint8_t channels, uint16_t rate, uint16_t count);
+extern uint16_t PUBLIC_CODE getMixBufOffFromCount(uint16_t count);
+extern uint16_t PUBLIC_CODE getCountFromMixBufOff(uint16_t bufOff);
+
+#endif  /* MIXVARS_H */

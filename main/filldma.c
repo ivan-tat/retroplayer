@@ -18,20 +18,10 @@
 #include "posttab.h"
 #include "s3mvars.h"
 #include "fillvars.h"
+#include "mixvars.h"
 #include "mixing.h"
 
 static bool errorsav = false;
-
-void mixroutines(void)
-{
-    calcTick();
-/**/
-/**
-    __asm "push ds";    // FIXME
-    calc_tick();
-    __asm "pop ds";     // FIXME
-/**/
-}
 
 void convert_8(void *outbuf, void *mixbuf, uint16_t count)
 {
@@ -58,7 +48,7 @@ void LQconvert_8(void *outbuf, void *mixbuf, uint16_t count)
     src = (uint16_t *)mixbuf;
     dst = (uint8_t *)outbuf;
 
-    if (stereo) {
+    if (sdev_mode_stereo) {
         count >>= 1;
         do {
             samp[0] = post8bit[*src[0]+2048];
@@ -85,29 +75,32 @@ void LQconvert_8(void *outbuf, void *mixbuf, uint16_t count)
 
 void fill_8bit(void)
 {
-    uint16_t wait, bufsize, srcoff, dstoff;
+    uint16_t wait, bufsize, buflen, srcoff, dstoff;
     uint8_t (*buf)[1];
 
     /* check if we are allready in calculation routines
        if we are the PC is too slow -> how you wanna handle it ? */
 
-    buf = DMAbuffer;
-    bufsize = DMARealBufSize[1]; // we have to calc. DMARealBufSize bytes
+    buf = DMABuf;
+    bufsize = DMABufFrameSize;
+        // size to fill
+    buflen = getCountFromDMABufOff(bufsize);
+        // samples per channel to fill
 
-    if (JustInFill) {
+    if (DMAFlags_JustInFill) {
         wait = 0xffff;
-        while (wait && JustInFill) {
+        while (wait && DMAFlags_JustInFill) {
             wait--;
         }
-        if (JustInFill) {
+        if (DMAFlags_JustInFill) {
             /* sorry your PC is to slow - maincode may ignore this flag */
             /* but it'll sound ugly :( */
-            TooSlow = true;
+            DMAFlags_Slow = true;
 
             /* simply fill the half with last correct mixed value */
-            dstoff = DMARealBufSize[DMAHalf];
-            DMAHalf = 1-DMAHalf;
-            srcoff = DMARealBufSize[DMAHalf];
+            dstoff = getDMABufFrameOff(DMABufFrameActive);
+            DMABufFrameActive = 1 - DMABufFrameActive;
+            srcoff = getDMABufFrameOff(DMABufFrameActive);
             // FIXME: 8-bits stereo is two byte fill, not one
             memset(&(buf[dstoff]), *buf[srcoff + bufsize - 1], bufsize);
             return;
@@ -115,43 +108,44 @@ void fill_8bit(void)
     }
     /* for check if too slow set a variable (flag that we are allready in calc) */
 
-    JustInFill = true;
+    DMAFlags_JustInFill = true;
 
     if (EndOfSong) {
-        // clear DMAbuffer
-        memset(&(buf[DMARealBufSize[DMAHalf]]), 0, bufsize);
-        DMAHalf = 1 - DMAHalf;
+        // clear DMA buffer
+        memset(&(buf[getDMABufFrameOff(DMABufFrameActive)]), 0, bufsize);
+        DMABufFrameActive = 1 - DMABufFrameActive;
     } else {
-        // before calling mixroutines: save EMM mapping !
+        // before calling mixing routines: save EMM mapping !
         if (UseEMS) {
             errorsav = true;
             if (EmsSaveMap(SavHandle)) errorsav = false;
         }
 
-        mixroutines(); // calc 'DMARealBufSize' bytes into the TickBuffer
+        // mix into the mixing buffer
+        calcTick(mixBuf, buflen);
 
         // now restore EMM mapping:
         if (UseEMS) {
             if (! errorsav) EmsRestoreMap(SavHandle);
         }
 
-        LastReady = (LastReady + 1) & (NumBuffers - 1);
-        dstoff = DMARealBufSize[LastReady];
+        DMABufFrameLast = (DMABufFrameLast + 1) & (DMABufFramesCount - 1);
+        dstoff = getDMABufFrameOff(DMABufFrameLast);
 
-        if (LQMode)
-            LQconvert_8(&(buf[dstoff << 1]), TickBuffer, bufsize);
+        if (playOption_LowQuality)
+            LQconvert_8(&(buf[dstoff << 1]), mixBuf, bufsize);
         else
-            convert_8(&(buf[dstoff]), TickBuffer, bufsize);
+            convert_8(&(buf[dstoff]), mixBuf, bufsize);
     }
 
-    JustInFill = false;
+    DMAFlags_JustInFill = false;
 }
 
 void PUBLIC_CODE fill_DMAbuffer(void)
 {
-    if (! _16bit) {
+    if (! sdev_mode_16bit) {
         do {
             fill_8bit();
-        } while (LastReady != DMAHalf);
+        } while (DMABufFrameLast != DMABufFrameActive);
     }
 }

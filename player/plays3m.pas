@@ -3,6 +3,7 @@ program example_for_s3mplay;
 
 uses
     types,
+    strutils,
     crt,
     dos,
     dosproc,
@@ -12,6 +13,7 @@ uses
     s3mtypes,
     s3mvars,
     fillvars,
+    mixvars,
     s3mplay;
 
 const stereo_calc=true;
@@ -30,12 +32,6 @@ var samplerate:word;
     screen_no:byte;  { current info on screen }
     startchn:byte;
 
-function tohexs(w:word):string;
-const s:string='0123456789ABCDEF';
-  begin
-    tohexs:=s[(w shr 12)+1] + s[((w shr 8) and $0f)+1] + s[(w and $00ff) shr 4+1] + s[(w and $000f)+1];
-  end;
-
 procedure display_errormsg(err:integer);
   begin
     { I know case is stupid - like my code allways is :) }
@@ -44,7 +40,7 @@ procedure display_errormsg(err:integer);
       -1: begin
           if load_error=-1 then write(' Not enough memory for this module. ') else
           if player_error=-1 then write(' Not enough memory for internal buffers. ');
-          write('PROGRAMMERS INFO: Try to lower PascalHeap or DMAbuffer. ');
+          write('PROGRAMMERS INFO: Try to lower Pascal heap or DMA buffer. ');
           end;
       -2: write(' Wrong file format. Not a S3M ? ');
       -3: write(' File corrupt. ');
@@ -169,7 +165,6 @@ var t:string;
     if upcase(p[2])='M' then { Mono - because default is stereo } stereo:=false;
     if p[2]='8' then { 8bit - default is 16bit } _16bit:=false;
     if upcase(p[2])='C' then { display SB config } disply_c:=true;
-    if upcase(p[2])='R' then { show rastertime } rastertime:=true;
     if upcase(p[2])='O' then { use ST3 order } ST3order:=true;
     if upstr(copy(p,2,5))='NOEMS' then { don't use EMS } useEMS:=false;
     if upstr(copy(p,2,3))='ENV' then { read Blaster enviroment } how2input:=2;
@@ -186,7 +181,7 @@ var t:string;
       begin
         t:=copy(p,3,length(p)-2);
         val(t,b,i);
-        if i=0 then FPS:=b;
+        if i=0 then playOption_FPS:=b;
       end;
     {$ENDIF}
   end;
@@ -206,6 +201,7 @@ procedure display_keys;
     writeln(' <F3> ... Display current pattern');
     writeln(' <F4> ... Display instrument infos');
     writeln(' <F5> ... Display sample memory positions');
+    writeln(' <F6> ... Display debug information');
   end;
 
 procedure display_help;
@@ -236,7 +232,6 @@ procedure display_help;
     writeln('         /O       ... handle order like ST3 does');
     writeln('                      (default is my own way - play ALL patterns are defined');
     writeln('                      in Order)');
-    writeln('         /R       ... display raster time');
     writeln('         /NOEMS   ... don''t use EMS for playing (player won''t use any EMS ');
     writeln('                      after this) - if there''s no free EMS, player''ll set');
     writeln('                      also <don''t use EMS>');
@@ -292,7 +287,7 @@ CONST SW_order:array[false..true] of string = ('Extended Order','Normal Order');
     gotoxy(50,6);write('EMS usage: ',switch[useEMS],' Loop S3M : ');
     textbackground(blue);textcolor(lightgray);
     gotoxy(1,3);write(' Samplerate: ',getSamplerate:5,'  ',sw_stereo[stereo],', ',sw_res[_16bit],
-    ', ',sw_order[ST3order],', ',sw_qual[LQmode]);
+    ', ',sw_order[ST3order],', ',sw_qual[playOption_LowQuality]);
     gotoxy(1,4);write(' Free DOS memory : ',(getFreeDOSMemory shr 10):6,' KiB   Free EMS memory : ',getFreeEMMMemory:5,' KiB');
     gotoxy(1,5);write(' Used EMS memory : ',(getusedEMSsmp+getusedEMSpat):6,' KiB   <F1> - Help screen',
                       '':10,'Version : ',PLAYER_VERSION);
@@ -305,7 +300,7 @@ procedure refr_mainscr;
     gotoxy(11,1);write(lastorder:2);
     gotoxy(20,1);write(curline:2);
     gotoxy(29,1);write(curtick:2);
-    gotoxy(63,1);write(curpattern:2,' (',tohexs( seg( getPattern( curpattern )^ ) ),')');
+    gotoxy(63,1);write(curpattern:2,' (',hexw( seg( getPattern( curpattern )^ ) ),')');
     textbackground(green);textcolor(black);
     gotoxy(76,6);write(switch[playOption_LoopSong]);
     gotoxy(1,2);
@@ -316,8 +311,8 @@ procedure refr_mainscr;
     clreol;
   end;
 
-{$I REFRESH.INC}  { refresh the different screens }
 {$I PREPARE.INC}  { prepare the different screens }
+{$I REFRESH.INC}  { refresh the different screens }
 
 var i:byte;
 
@@ -365,7 +360,7 @@ begin
     end;
   { And here we go :) }
   if volume>0 then set_mastervolume(volume);
-  setsamplerate(samplerate,stereo);
+  playSetMode(_16bit,stereo,samplerate);
   set_ST3order(ST3order);
   save_chntyps;
   playOption_LoopSong:=true;
@@ -381,7 +376,8 @@ begin
     {if c<>#0 then write(ord(c));}
     if (c>='x') and (c<=chr(ord('x')+16)) then begin revers(ord(c)-ord('x'));c:=#0 end;
     if (ord(c)>=16) and (ord(c)<=19) then begin revers(ord(c)-4);c:=#0 end;
-    if (c>=#59) { F1 } and (c<=#63) { F5 } then
+    (* F1-F6 *)
+    if (c>=#59) and (c<=#64)  then
       begin
         screen_no:=ord(c)-59;
         prepare_scr;c:=#0;
@@ -434,8 +430,8 @@ begin
       end;
     if (c=#77) and (startchn<usedchannels) then begin inc(startchn);if screen_no=2 then prepare_scr; end;
     if (c=#75) and (startchn>1) then begin dec(startchn);if screen_no=2 then prepare_scr; end;
-  until (TooSlow or (c=#27) or EndOfSong);
-  if (TooSlow) then writeln(' Sorry your PC is to slow ... ');
+  until (DMAFlags_Slow or (c=#27) or EndOfSong);
+  if (DMAFlags_Slow) then writeln(' Sorry your PC is to slow ... ');
   view_cursor;
   stop_play;
   done_module;

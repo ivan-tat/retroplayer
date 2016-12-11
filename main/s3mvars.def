@@ -26,6 +26,7 @@ extrn modOption_CostumeFlag: byte
 extrn modOption_VolZeroOptim: byte
 extrn modOption_AmigaLimits: byte
 extrn modOption_SignedData: byte
+extrn modOption_Stereo: byte
 
 ; play options
 

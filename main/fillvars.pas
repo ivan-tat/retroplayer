@@ -10,43 +10,55 @@ unit fillvars;
 
 interface
 
+const
+    DMA_BUF_SIZE_MAX = 8*1024;
+
 (* DMA buffer *)
 var
-    AllocBuffer: pointer;
-        (* position where we allocate DMA buffer - remember that we may use second half ... *)
-    DMAbuffer: pointer;
-    PlayBuffer: pointer;
-        (* pointer to DMAbuffer - for public use, but don't write into it !!!
-           - it's never used for any action while mixing !
-           - while playing you can read the DMA base counter
-           and find out in that way what sample value the
-           SB currently plays ... refer to DMA Controller *)
-    NumBuffers: byte;
-        (* number of parts in DMAbuffer *)
-    LastReady: byte;
-        (* last ready calculated DMAbuffer part *)
-    DMAHalf: byte;
-        (* last DMAbuffer part to calculate *)
-    DMARealBufSize: array [0..63] of word;
-        (* e.g. 0,128,256,384 <- positions of dmabuffer parts (changes with samplerate) *)
+    DMABufUnaligned: pointer;
+    DMABuf: pointer;
+    DMABufSize: longint;
+    DMABufFrameSize: word;
+    DMABufFramesCount: byte;
+    DMABufFrameLast: byte;
+    DMABufFrameActive: byte;
+    DMAFlags_JustInFill: boolean;
+    DMAFlags_Slow: boolean;
 
-(* mixer *)
+(* player *)
 var
-    TickBuffer: pointer;
-        (* the well known buffer for one tick - size depends on _currennt_tempo_ *)
-    LQMode: boolean;
-        (* flag if lowquality mode *)
-    TooSlow: boolean;
-    JustInFill: boolean;
-    RasterTime: boolean;
-    FPS: byte;
-        (* frames per second ... default is about 70Hz *)
+    playOption_FPS: byte;
+    playOption_LowQuality: boolean;
 
 (* EMM *)
 var
     SavHandle: word;
-        (* EMS handle for saving mapping while playing *)
+
+function  getDMABufFrameOff(index: byte): word;
+function  getDMABufOffFromCount(count: word): word;
+function  getCountFromDMABufOff(bufOff: word): word;
+procedure initDMABuf;
+function  allocDMABuf(dmaSize: longint): boolean;
+procedure freeDMABuf;
+procedure doneDMABuf;
 
 implementation
+
+uses
+    memset,
+    strutils,
+    printf,
+    dosproc,
+    sbctl;
+
+(*$l fillvars.obj*)
+
+function  getDMABufFrameOff(index: byte): word; external;
+function  getDMABufOffFromCount(count: word): word; external;
+function  getCountFromDMABufOff(bufOff: word): word; external;
+procedure initDMABuf; external;
+function  allocDMABuf(dmaSize: longint): boolean; external;
+procedure freeDMABuf; external;
+procedure doneDMABuf; external;
 
 end.

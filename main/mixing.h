@@ -13,8 +13,6 @@
 #endif
 
 void    *PUBLIC_CODE mapSampleData(uint16_t seg, uint16_t len);
-uint16_t PUBLIC_CODE getBufOffFromCount(uint16_t count);
-uint16_t PUBLIC_CODE getCountFromBufOff(uint16_t bufOff);
-void     PUBLIC_CODE calcTick(void);
+void     PUBLIC_CODE calcTick(void *outBuf, uint16_t len);
 
 #endif  /* MIXING_H */

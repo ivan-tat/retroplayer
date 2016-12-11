@@ -55,9 +55,9 @@ var
     sdev_caps_stereo_maxrate: word;
 
     sdev_mode_rate: word;
-    _16bit:boolean;             (* flag if 16bit-play on/off *)
+    sdev_mode_16bit: boolean;
     sdev_mode_signed: boolean;
-    stereo:boolean;             (* flag if stereo-play on/off *)
+    sdev_mode_stereo: boolean;
 
 procedure setvolume( vol: byte );
 function sbReadDSPVersion: word;

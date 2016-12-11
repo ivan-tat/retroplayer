@@ -28,7 +28,7 @@ var samplerate:word;
       writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');
       if not Init_S3Mplayer then halt;
       if not init_device(1) then begin writeln(' SoundBlaster not found sorry ... ');halt end;
-      setsamplerate(samplerate,stereo);
+      playSetMode(_16bit,stereo,samplerate);
       set_ST3order(true);
       playOption_LoopSong:=true;
     end;

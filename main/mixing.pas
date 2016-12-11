@@ -11,7 +11,7 @@ unit mixing;
 interface
 
 function  mapSampleData(wSeg: word; wLen: word): pointer;
-procedure calcTick;
+procedure calcTick(dOutBuf: pointer; wLen: word);
 
 implementation
 
@@ -30,6 +30,6 @@ uses
 
 (*$l mixing.obj*)
 function  mapSampleData(wSeg: word; wLen: word): pointer; external;
-procedure calcTick; external;
+procedure calcTick(dOutBuf: pointer; wLen: word); external;
 
 end.

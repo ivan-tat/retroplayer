@@ -17,7 +17,7 @@
 uint32_t PUBLIC_CODE mixCalcSampleStep(uint16_t wPeriod)
 {
     long long int a = (long long int) 1712 * 8363 << 16;
-    long int b = (long int)wPeriod * (long int)UseRate;
+    long int b = (long int)wPeriod * (long int)mixSampleRate;
     b = a / b;
     return b;
 }

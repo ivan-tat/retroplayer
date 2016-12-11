@@ -5,7 +5,7 @@ set -e
 AS="tasm -t"
 ASW="wasm -zq"
 PC='tpc -gd -q -v -$d+,e-,g+,n+ -DDEBUG;BETATEST'
-export WCC="-3 -fp3 -ml -na -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu"
+export WCC="-3 -fp3 -ml -na -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu -dDEBUG"
 # disable optimization:
 # "-oc" - disable <call followed by return> to jump optimization;
 # reason: "wdis" incorrectly writes "je near ptr <near_extern_label>"
@@ -30,6 +30,7 @@ s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$)/_DATA\1/;" 
 
 echo '*** pascal'
 cd pascal
+$PC strutils.pas
 $PC syswrap.pas
 
 echo '*** watcom'
@@ -102,9 +103,16 @@ $PC $PASINC types.pas
 $PC $PASINC mixtypes.pas
 $PC $PASINC s3mtypes.pas
 
-echo '*** variables'
+echo '*** mixvars.c/pas'
+compile_c mixvars.c
 $PC $PASINC mixvars.pas
+
+echo '*** s3mvars.c/pas'
+compile_c s3mvars.c
 $PC $PASINC s3mvars.pas
+
+echo '*** fillvars.c/pas'
+compile_c fillvars.c
 $PC $PASINC fillvars.pas
 
 echo '*** voltab.c'

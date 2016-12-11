@@ -1,4 +1,4 @@
-/* fillvars.h -- declarations for fillvars.pas.
+/* fillvars.h -- declarations for fillvars.c.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -7,46 +7,47 @@
 #define FILLVARS_H 1
 
 #ifdef __WATCOMC__
+#pragma once
 #include <stdbool.h>
 #include <stdint.h>
 #endif
 
-// TODO: remove reserved words "extern" and PUBLIC_DATA macros when done.
+// TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
 
 #include "..\pascal\pascal.h"
 
 /* DMA buffer */
-extern void    *PUBLIC_DATA AllocBuffer;
-    /* position where we allocate DMA buffer - remember that we may use second half ... */
-extern void    *PUBLIC_DATA DMAbuffer;
-extern void    *PUBLIC_DATA PlayBuffer;
-    /* pointer to DMAbuffer - for public use, but don't write into it !!!
-       - it's never used for any action while mixing !
-       - while playing you can read the DMA base counter
-       and find out in that way what sample value the
-       SB currently plays ... refer to DMA Controller */
-extern uint8_t  PUBLIC_DATA NumBuffers;
-    /* number of parts in DMAbuffer */
-extern uint8_t  PUBLIC_DATA LastReady;
-    /* last part of DMAbuffer we calculated last call */
-extern uint8_t  PUBLIC_DATA DMAHalf;
-    /* last part of DMAbuffer we have to fill */
-extern uint16_t PUBLIC_DATA DMARealBufSize[64];
 
-/* mixer */
+#define DMA_BUF_SIZE_MAX (8<<10)
 
-extern void   *PUBLIC_DATA TickBuffer;
-    /* the well known buffer for one tick - size depends on _currennt_tempo_ */
-extern bool    PUBLIC_DATA LQMode;
-    /* flag if lowquality mode */
-extern bool    PUBLIC_DATA TooSlow;
-extern bool    PUBLIC_DATA JustInFill;
-extern bool    PUBLIC_DATA RasterTime;
-extern uint8_t PUBLIC_DATA FPS;
+extern void    *PUBLIC_DATA DMABufUnaligned;
+extern void    *PUBLIC_DATA DMABuf;
+extern uint32_t PUBLIC_DATA DMABufSize;
+extern uint16_t PUBLIC_DATA DMABufFrameSize;
+extern uint8_t  PUBLIC_DATA DMABufFramesCount;
+extern uint8_t  PUBLIC_DATA DMABufFrameLast;
+extern uint8_t  PUBLIC_DATA DMABufFrameActive;
+extern bool     PUBLIC_DATA DMAFlags_JustInFill;
+extern bool     PUBLIC_DATA DMAFlags_Slow;
+
+/* player */
+
+extern uint8_t PUBLIC_DATA playOption_FPS;
     /* frames per second ... default is about 70Hz */
+extern bool    PUBLIC_DATA playOption_LowQuality;
+    /* flag if lowquality mode */
 
 /* EMM */
 
 extern uint16_t PUBLIC_DATA SavHandle;
+    /* EMS handle for saving mapping while playing */
 
-#endif /* FILLVARS_H */
+extern uint16_t PUBLIC_CODE getDMABufFrameOff(uint8_t index);
+extern uint16_t PUBLIC_CODE getDMABufOffFromCount(uint16_t count);
+extern uint16_t PUBLIC_CODE getCountFromDMABufOff(uint16_t bufOff);
+extern void     PUBLIC_CODE initDMABuf(void);
+extern bool     PUBLIC_CODE allocDMABuf(uint32_t dmaSize);
+extern void     PUBLIC_CODE freeDMABuf(void);
+extern void     PUBLIC_CODE doneDMABuf(void);
+
+#endif  /* FILLVARS_H */

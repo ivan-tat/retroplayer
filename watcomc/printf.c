@@ -23,86 +23,86 @@ extern void __near __pascal printstring( char *s );
 /* ------------------------------------------------------------------ */
 
 void __near print_decimal (
-    const unsigned long int value,
-    const bool              sign,
-    const bool              leadingzeroes,
-    const unsigned char     count
+    const unsigned long value,
+    const bool          sign,
+    const bool          leadingzeroes,
+    const unsigned char count
 )
 {
-    unsigned long int _value;
+    unsigned long _value;
     unsigned char _count;
-	char s[11];
-	int i;
+    char s[11];
+    int i;
 
     i = 10;
-	s[i] = 0;
+    s[i] = 0;
     _value = value;
     _count = count <= 10 ? count : 10;
-	do {
+    do {
         if ( _count ) _count--;
-		i--;
+        i--;
         if ( _value || i == 10 ) {
             s[i] = '0' + ( _value % 10 );
             _value /= 10;
         } else {
             s[i] = leadingzeroes ? '0' : ' ';
         }
-	} while ( _value || _count );
+    } while ( _value || _count );
     if ( sign ) {
         i--;
         s[i] = '-';
     }
 
-	printstring( s + i );
+    printstring( s + i );
 }
 
 /* ------------------------------------------------------------------ */
 
 void __near print_decimal_signed(
-    const signed long int   value,
-    const bool              leadingzeroes,
-    const unsigned char     count
+    const signed long   value,
+    const bool          leadingzeroes,
+    const unsigned char count
 )
 {
-    unsigned long int _value;
+    unsigned long _value;
     bool sign;
-    
+
     sign = value < 0;
     if ( sign ) _value = -value; else _value = value;
 
-	print_decimal( _value, sign, leadingzeroes, count );
+    print_decimal( _value, sign, leadingzeroes, count );
 }
 
 /* ------------------------------------------------------------------ */
 
 void __near print_hexvalue (
-    const unsigned long int value,
-    const bool              uppercase,
-    const bool              leadingzeroes,
-    const unsigned char     count
+    const unsigned long value,
+    const bool          uppercase,
+    const bool          leadingzeroes,
+    const unsigned char count
 )
 {
-    unsigned long int _value;
+    unsigned long _value;
     unsigned char _count;
-	char s[9];
-	int i;
+    char s[9];
+    int i;
 
     i = 8;
-	s[i] = 0;
+    s[i] = 0;
     _value = value;
     _count = count <= 8 ? count : 8;
-	do {
+    do {
         if ( _count ) _count--;
-		i--;
+        i--;
         if ( _value || i == 8 ) {
             s[i] = uppercase ? HEXDIGITS_UC( _value & 15 ) : HEXDIGITS_LC( _value & 15 );
             _value >>= 4;
         } else {
             s[i] = leadingzeroes ? '0' : ' ';
         }
-	} while ( _value || _count );
+    } while ( _value || _count );
 
-	printstring( s + i );
+    printstring( s + i );
 }
 
 /* ------------------------------------------------------------------ */
@@ -152,9 +152,9 @@ void __near print_int(
 /* ------------------------------------------------------------------ */
 
 void __near print_ulong(
-    const unsigned long int value,
-    const bool              leadingzeroes,
-    const unsigned char     count
+    const unsigned long value,
+    const bool          leadingzeroes,
+    const unsigned char count
 )
 {
     print_decimal( value, false, leadingzeroes, count );
@@ -163,9 +163,9 @@ void __near print_ulong(
 /* ------------------------------------------------------------------ */
 
 void __near print_long(
-    const signed long int value,
-    const bool            leadingzeroes,
-    const unsigned char   count
+    const signed long   value,
+    const bool          leadingzeroes,
+    const unsigned char count
 )
 {
     print_decimal_signed( value, leadingzeroes, count );
@@ -229,7 +229,7 @@ void __far printf( char *format, ... ) {
                     break;
                 case 'c':
                 case 'C':
-                    if ( f_unsigned ) 
+                    if ( f_unsigned )
                         print_uchar( va_arg( parminfo, unsigned char ), f_leadingzeroes, f_count );
                     else
                         print_char( va_arg( parminfo, signed char ), f_leadingzeroes, f_count );
@@ -240,9 +240,9 @@ void __far printf( char *format, ... ) {
                 case 'I':
                     if ( f_long ) {
                         if ( f_unsigned ) {
-                            print_uint( va_arg( parminfo, unsigned long int ), f_leadingzeroes, f_count );
+                            print_uint( va_arg( parminfo, unsigned long ), f_leadingzeroes, f_count );
                         } else
-                            print_int( va_arg( parminfo, signed long int ), f_leadingzeroes, f_count );
+                            print_int( va_arg( parminfo, signed long ), f_leadingzeroes, f_count );
                     } else {
                         if ( f_unsigned ) {
                             print_uint( va_arg( parminfo, unsigned int ), f_leadingzeroes, f_count );
@@ -253,9 +253,9 @@ void __far printf( char *format, ... ) {
                 case 'h':
                 case 'H':
                         if ( f_unsigned ) {
-                            print_uint( va_arg( parminfo, unsigned short int ), f_leadingzeroes, f_count );
+                            print_uint( va_arg( parminfo, unsigned short ), f_leadingzeroes, f_count );
                         } else
-                            print_int( va_arg( parminfo, signed short int ), f_leadingzeroes, f_count );
+                            print_int( va_arg( parminfo, signed short ), f_leadingzeroes, f_count );
                 case 'l':
                 case 'L':
                     f_long = true;
@@ -272,13 +272,13 @@ void __far printf( char *format, ... ) {
                     break;
                 case 'x':
                     if ( f_long )
-                        print_hexvalue( va_arg( parminfo, unsigned long int ), false, f_leadingzeroes, f_count );
+                        print_hexvalue( va_arg( parminfo, unsigned long ), false, f_leadingzeroes, f_count );
                     else
                         print_hexvalue( va_arg( parminfo, unsigned int ), false, f_leadingzeroes, f_count );
                     break;
                 case 'X':
                     if ( f_long )
-                        print_hexvalue( va_arg( parminfo, unsigned long int ), true, f_leadingzeroes, f_count );
+                        print_hexvalue( va_arg( parminfo, unsigned long ), true, f_leadingzeroes, f_count );
                     else
                         print_hexvalue( va_arg( parminfo, unsigned int ), true, f_leadingzeroes, f_count );
                     break;

@@ -41,15 +41,13 @@ begin
     end;
 end;
 
-procedure unpackPattern( src, dst: parray );
+procedure unpackPattern( src, dst: parray; maxrow, maxchn: byte );
 var
-    i, maxrow, row: integer;
-    maxchn, chn: byte;
+    i, row: integer;
+    chn: byte;
     srcoff, dstoff: word;
     a: byte;
 begin
-    maxrow := 64;
-    maxchn := usedchannels;
 
     (* clear pattern *)
     dstoff := 0;
@@ -375,7 +373,7 @@ var f:file;
           setPattern( patpos-1, seg( p^ ) );
         end;
 
-      unpackPattern( buffer, p );
+      unpackPattern(buffer, p, 64, UsedChannels);
 
       if ( isPatternInEM( patpos-1 ) ) then
         begin
@@ -453,7 +451,7 @@ var a,b,c:string;
     if not (header.ffv in [1,2]) then begin load_error:=wrongformat;exit end;
     gvolume:=header.gvolume;
     mvolume:=header.mvolume and $7f;
-    stereo :=(header.mvolume shr 7)=1;  { bit 7 is stereo flag ... }
+    modOption_Stereo := (header.mvolume and $80 <> 0);
     initspeed:=header.initialspeed;
     inittempo:=header.initialtempo;
     { setup channels : }

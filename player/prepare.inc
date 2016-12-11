@@ -1,25 +1,130 @@
+(* Text window *)
+
+const
+    scrWidth = 80;
+    scrHeight = 25;
+
+type
+    TWindowRect = record
+        visible: boolean;
+        focused: boolean;
+        fgColor, bgColor: byte;
+        x0, y0, x1, y1: byte;
+        width, height: byte;
+    end;
+    PWindowRect = ^TWindowRect;
+
+var
+    DebugWindowInstance: TWindowRect;
+
+const
+    DebugWindow: PWindowRect = nil;
+
+procedure createWindow(Self: PWindowRect; fgColor, bgColor: byte; x0, y0, x1, y1: byte);
+begin
+    Self^.visible := false;
+    Self^.focused := false;
+    Self^.fgColor := fgColor;
+    Self^.bgColor := bgColor;
+    Self^.x0 := x0;
+    Self^.y0 := y0;
+    Self^.x1 := x1;
+    Self^.y1 := y1;
+    Self^.width := x1-x0+1;
+    Self^.height := y1-y0+1;
+end;
+
+function isWindowCreated(Self: PWindowRect): boolean;
+begin
+    isWindowCreated := Self <> nil;
+end;
+
+procedure showWindow(Self: PWindowRect);
+begin
+    Window(Self^.x0, Self^.y0, Self^.x1, Self^.y1);
+    TextColor(Self^.fgColor);
+    TextBackground(Self^.bgColor);
+    ClrScr;
+    Self^.visible := true;
+    Self^.focused := true;
+end;
+
+procedure focusWindow(Self: PWindowRect);
+begin
+    if (Self^.visible) then
+    begin
+        Window(Self^.x0, Self^.y0, Self^.x1, Self^.y1);
+        TextColor(Self^.fgColor);
+        TextBackground(Self^.bgColor);
+        Self^.focused := true;
+    end;
+end;
+
+procedure leaveWindow(Self: PWindowRect);
+begin
+    Self^.focused := false;
+    Window(1, 1, scrWidth, scrHeight);
+end;
+
+procedure closeWindow(Self: PWindowRect);
+begin
+    if (Self^.focused) then leaveWindow(Self);
+    Self^.visible := false;
+end;
+
+const
+    scrHeaderTop = 1;
+    scrHeaderBottom = 7;
+    scrHeaderLeft = 1;
+    scrHeaderRight = scrWidth;
+
+    scrInfoTop = scrHeaderBottom + 1;
+    scrInfoBottom = scrHeight;
+    scrInfoLeft = 1;
+    scrInfoRight = scrWidth;
+
+procedure scrOpenInfoBackground(textCol, bgCol: byte);
+begin
+    textcolor(textCol);
+    textbackground(bgCol);
+    window(scrInfoLeft, scrInfoTop, scrInfoRight, scrInfoBottom);
+    clrscr;
+end;
+
+procedure scrLeave;
+begin
+    window(1, 1, scrWidth, scrHeight);
+end;
+
+(* Channels *)
+
 procedure prep_channels;
-  begin
-    textcolor(white);textbackground(blue);
-    window(1,8,80,25);clrscr;
-    window(1,1,80,25);
-  end;
+begin
+    scrOpenInfoBackground(white, blue);
+    scrLeave;
+end;
+
+(* Patterns *)
+
+var lastrow:byte;
 
 procedure prep_patterns;
 var w:word;
   begin
-    textcolor(white);textbackground(black);
-    window(1,8,80,25);clrscr;
+    scrOpenInfoBackground(white, black);
     textbackground(white);textcolor(black);
     for w:=0 to 2 do begin gotoxy(w*28+6,1);write('    Chn ',2*w+startchn:2,'    '); end;
     textbackground(black);textcolor(white);
     for w:=0 to 1 do begin gotoxy(w*28+20,1);write('    Chn ',2*w+1+startchn:2,'    '); end;
-    window(1,1,80,25);
+    scrLeave;
     lastrow:=curline;
     if ( isPatternInEM( curpattern ) ) then { switch EMSpage 0 to curpattern }
         EmsMap( patEMShandle, getPatternLogPageInEM( curpattern ), 0 );
   end;
 
+(* Instruments *)
+
+var chnlastinst:array[0..max_channels-1] of byte;
 
 procedure prep_inst;
 var i,l:word;
@@ -29,7 +134,7 @@ var psmp:pSmpheader;
     psmp:=addr(Instruments^[b]);
     if psmp^.typ=1 then
       begin
-        posstring:=w2hs(psmp^.mempos)+'h';
+        posstring:=hexw(psmp^.mempos)+'h';
       end
     else
       begin
@@ -37,8 +142,7 @@ var psmp:pSmpheader;
       end;
   end;
   begin
-    textcolor(white);textbackground(blue);
-    window(1,8,80,25);clrscr;
+    scrOpenInfoBackground(white, blue);
     writeln(' Sample positions in memory : ');
     l:=15;
     textcolor(yellow);
@@ -55,23 +159,13 @@ var psmp:pSmpheader;
         if i+6*l<100 then write(i+6*l,': ',posstring(i+6*l),'  ');
       end;
     textcolor(white);textbackground(blue);
-    window(1,1,80,25);
+    scrLeave;
   end;
 
-function leftformat(s:string;b:byte):string;
-var t:string;
-    i:byte;
-  begin
-    t:=s;for i:=length(s) to b do t:=t+' ';
-    t:=copy(t,1,b);
-    leftformat:=t;
-  end;
+(* Samples *)
 
-function hex2str(w:word):string;
-const s:string[16] = '0123456789ABCDEF';
-  begin
-    hex2str:=s[w div 256 div 16+1]+s[w div 256 mod 16+1]+s[w mod 256 div 16+1]+s[w mod 16+1]+'h';
-  end;
+var samplepage:byte;
+    wassmp_scr:boolean;
 
 procedure prep_smp;
 const what:array[false..true] of string[3] = ('OFF','ON ');
@@ -102,11 +196,26 @@ var i,j:byte;
           if j>1 then write(#10#13);
           if pSmp^.typ=1 then textcolor(white) else textcolor(lightgray);
           write(' ',i:2,'. ',leftformat(psmp^.name,28),' ',what[(psmp^.flags and 1) = 1],' ',
-                hex2str(psmp^.loopbeg),' ',hex2str(psmp^.loopend),' ',hex2str(psmp^.length),' ',pSmp^.c2speed:5,'Hz');
+                hexw(psmp^.loopbeg),'h ',hexw(psmp^.loopend),'h ',hexw(psmp^.length),'h ',pSmp^.c2speed:5,'Hz');
           inc(i);
         end;
-    window(1,1,80,25);
+    scrLeave;
   end;
+
+(* Debug *)
+
+procedure prep_debug;
+begin
+    if (not isWindowCreated(DebugWindow)) then
+    begin
+        createWindow(@DebugWindowInstance, lightgray, black, 1, 8, scrWidth, scrHeight);
+        DebugWindow := @DebugWindowInstance;
+    end;
+    showWindow(DebugWindow);
+    leaveWindow(DebugWindow);
+end;
+
+(* Router *)
 
 procedure prepare_scr;
   begin
@@ -116,6 +225,7 @@ procedure prepare_scr;
       2: { pattern view }     prep_patterns;
       3: { Instrument infos } prep_inst;
       4: { sample infos }     prep_smp;
+      5: (* DEBUG *)          prep_debug;
     end;
     wassmp_scr:=screen_no=4;
   end;

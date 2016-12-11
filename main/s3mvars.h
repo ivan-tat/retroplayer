@@ -35,6 +35,7 @@ extern bool PUBLIC_DATA modOption_VolZeroOptim; /* PSIs volume-zero optimization
 extern bool PUBLIC_DATA modOption_AmigaLimits;  /* check for amiga limits */
 extern bool PUBLIC_DATA modOption_SignedData;   /* signed/unsigned data */
                                                 /* (only volumetable differs in those modes) */
+extern bool PUBLIC_DATA modOption_Stereo;
 
 /* play options */
 

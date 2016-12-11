@@ -6,7 +6,6 @@
 MIXING_TEXT segment word public use16 'CODE'
 
 extrn mapSampleData: far
-extrn getBufOffFromCount: far
-extrn getCountFromBufOff: far
+extrn calcTick: far
 
 MIXING_TEXT ends

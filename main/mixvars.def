@@ -7,8 +7,23 @@ _DATA segment word public use16 'DATA'
 
 extrn ST3Periods: word
 
-extrn UseRate: word
+extrn mixBuf: dword
+extrn mixSampleRate: word
+extrn mixChannels: byte
+extrn mixBufSamplesPerChannel: word
+extrn mixBufSamples: word
 extrn mixTickSamplesPerChannel: word
 extrn mixTickSamplesPerChannelLeft: word
 
 _DATA ends
+
+MIXVARS_TEXT segment word public use16 'CODE'
+
+extrn setMixSampleRate: far
+extrn setMixChannels: far
+extrn setMixBufSamplesPerChannel: far
+extrn setMixMode: far
+extrn getMixBufOffFromCount: far
+extrn getCountFromMixBufOff: far
+
+MIXVARS_TEXT ends
