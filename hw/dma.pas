@@ -32,23 +32,60 @@ const
     DMA_MODE_BLOCK        = $80;
     DMA_MODE_CASCADE      = $c0;
 
-procedure dmaMaskMulti(mask: byte);
-procedure dmaMask(ch: byte);
-procedure dmaEnableMulti(mask: byte);
-procedure dmaEnable(ch: byte);
+type
+    TDMAMask = byte;
+
+type
+    PDMAOwner = pointer;
+
+procedure dmaMaskChannels(mask: TDMAMask);
+procedure dmaMaskSingleChannel(ch: byte);
+procedure dmaEnableChannels(mask: TDMAMask);
+procedure dmaEnableSingleChannel(ch: byte);
 function  dmaGetLinearAddress(p: pointer): longint;
-procedure dmaSetup(ch: byte; mode: TDMAMode; p: pointer; count: word);
+procedure dmaSetupSingleChannel(ch: byte; mode: TDMAMode; p: pointer; count: word);
 function  dmaGetCounter(ch: byte): word;
+
+(* Sharing DMA channels *)
+
+function  dmaIsAvailableSingleChannel(ch: byte): boolean;
+function  dmaGetAvailableChannels: TDMAMask;
+function  dmaGetSingleChannelOwner(ch: byte): PDMAOwner;
+procedure dmaHookSingleChannel(ch: byte; owner: PDMAOwner);
+procedure dmaHookChannels(mask: TDMAMask; owner: PDMAOwner);
+procedure dmaReleaseSingleChannel(ch: byte);
+procedure dmaReleaseChannels(mask: TDMAMask);
+
+(* Initialization *)
+
+procedure dmaInit;
+procedure dmaDone;
 
 implementation
 
 (*$l dma.obj*)
-procedure dmaMaskMulti(mask: byte); external;
-procedure dmaMask(ch: byte); external;
-procedure dmaEnableMulti(mask: byte); external;
-procedure dmaEnable(ch: byte); external;
+
+procedure dmaMaskChannels(mask: TDMAMask); external;
+procedure dmaMaskSingleChannel(ch: byte); external;
+procedure dmaEnableChannels(mask: TDMAMask); external;
+procedure dmaEnableSingleChannel(ch: byte); external;
 function  dmaGetLinearAddress(p: pointer): longint; external;
-procedure dmaSetup(ch: byte; mode: TDMAMode; p: pointer; count: word); external;
+procedure dmaSetupSingleChannel(ch: byte; mode: TDMAMode; p: pointer; count: word); external;
 function  dmaGetCounter(ch: byte): word; external;
+
+(* Sharing DMA channels *)
+
+function  dmaIsAvailableSingleChannel(ch: byte): boolean; external;
+function  dmaGetAvailableChannels: TDMAMask; external;
+function  dmaGetSingleChannelOwner(ch: byte): PDMAOwner; external;
+procedure dmaHookSingleChannel(ch: byte; owner: PDMAOwner); external;
+procedure dmaHookChannels(mask: TDMAMask; owner: PDMAOwner); external;
+procedure dmaReleaseSingleChannel(ch: byte); external;
+procedure dmaReleaseChannels(mask: TDMAMask); external;
+
+(* Initialization *)
+
+procedure dmaInit; external;
+procedure dmaDone; external;
 
 end.
