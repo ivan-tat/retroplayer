@@ -17,13 +17,15 @@
 
 #include "pic.h"
 
-static const uint8_t IRQTAB[16] = {
-    0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
-    0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77
-};
-
 /* PIC1: IRQ 0-7 */
+/* This one is programmed by BIOS when PC is powered on */
+static const uint8_t PIC1_VEC = 0x08;
+
 /* PIC2: IRQ 8-15 */
+/* This one is programmed by BIOS when PC is powered on */
+static const uint8_t PIC2_VEC = 0x70;
+
+#define picvec(ch) ((ch) < 8 ? PIC1_VEC + (ch) : PIC2_VEC + (ch) - 8)
 
 /* Output Control Word 1 (OCW1) */
 /* Read/Write: Get/Set interrupt mask */
@@ -75,7 +77,7 @@ static const uint8_t IRQTAB[16] = {
 #define OCW3_SPEC_RST_MASK 0x40
 #define OCW3_SPEC_SET_MASK 0x60
 
-void PUBLIC_CODE picEnableIRQs(uint16_t mask)
+void PUBLIC_CODE picEnableChannels(irqMask_t mask)
 {
     if (mask & 0xff) {
         outp(PIC1_IO_OCW1, inp(PIC1_IO_OCW1) | (uint8_t)(mask & 0xff));
@@ -85,7 +87,7 @@ void PUBLIC_CODE picEnableIRQs(uint16_t mask)
     }
 }
 
-void PUBLIC_CODE picDisableIRQs(uint16_t mask)
+void PUBLIC_CODE picDisableChannels(irqMask_t mask)
 {
     if (mask & 0xff) {
         outp(PIC1_IO_OCW1, inp(PIC1_IO_OCW1) & (uint8_t)(~(mask & 0xff)));
@@ -95,19 +97,100 @@ void PUBLIC_CODE picDisableIRQs(uint16_t mask)
     }
 }
 
-void PUBLIC_CODE picEOI(uint8_t irq)
+void PUBLIC_CODE picEOI(uint8_t ch)
 {
-    outp((irq < 8) ? PIC1_IO_OCW2 : PIC2_IO_OCW2, OCW2_COMMAND_OCW2 | OCW2_CMD_NONSPEC_EOI);
+    if (ch >= 8) outp(PIC2_IO_OCW2, OCW2_COMMAND_OCW2 | OCW2_CMD_NONSPEC_EOI);
+    outp(PIC1_IO_OCW2, OCW2_COMMAND_OCW2 | OCW2_CMD_NONSPEC_EOI);
 }
 
-void *PUBLIC_CODE picGetIntVec(uint8_t irq)
+void *PUBLIC_CODE picGetISR(uint8_t ch)
 {
     void *p;
-    getintvec(IRQTAB[irq], &p);
+    getintvec(picvec(ch), &p);
     return p;
 }
 
-void PUBLIC_CODE picSetIntVec(uint8_t irq, void *p)
+void PUBLIC_CODE picSetISR(uint8_t ch, void *p)
 {
-    setintvec(IRQTAB[irq], p);
+    setintvec(picvec(ch), p);
+}
+
+/* Sharing IRQ channels */
+
+#include "isr.h"
+
+typedef struct isrInfo_t {
+    bool hooked;
+    void *original;
+    isrCallback_t *handler;
+};
+
+static struct isrInfo_t _isrList[IRQ_CHANNELS] = {
+    { false, (void *)0, (void *)0 }
+};
+
+void __far __pascal _ISRCallback(uint8_t ch)
+{
+    isrCallback_t *handler;
+
+    handler = _isrList[ch].handler;
+    if (handler)
+        handler(ch);
+    else
+        picEOI(ch);
+}
+
+void PUBLIC_CODE isrHookSingleChannel(uint8_t ch)
+{
+    if (! _isrList[ch].hooked)
+    {
+        _isrList[ch].original = picGetISR(ch);
+        picSetISR(ch, getISR(ch));
+        _isrList[ch].hooked = true;
+    };
+}
+
+void PUBLIC_CODE isrReleaseSingleChannel(uint8_t ch)
+{
+    if (_isrList[ch].hooked) {
+        picSetISR(ch, _isrList[ch].original);
+        _isrList[ch].original = (void *)0;
+        _isrList[ch].hooked = false;
+    };
+}
+
+void PUBLIC_CODE isrSetSingleChannelHandler(uint8_t ch, isrCallback_t *p)
+{
+    _isrList[ch].handler = p;
+}
+
+isrCallback_t *PUBLIC_CODE isrGetSingleChannelHandler(uint8_t ch)
+{
+    return _isrList[ch].handler;
+}
+
+void PUBLIC_CODE isrClearSingleChannelHandler(uint8_t ch)
+{
+    _isrList[ch].handler = (void *)0;
+}
+
+/* Initialization */
+
+void PUBLIC_CODE isrInit(void)
+{
+    int ch;
+    for (ch = 0; ch < IRQ_CHANNELS; ch++) {
+        _isrList[ch].hooked = false;
+        _isrList[ch].original = (void *)0;
+        _isrList[ch].handler = (void *)0;
+    };
+}
+
+void PUBLIC_CODE isrDone(void)
+{
+    int ch;
+    for (ch = 0; ch < IRQ_CHANNELS; ch++) {
+        isrReleaseSingleChannel(ch);
+        isrClearSingleChannelHandler(ch);
+    };
 }

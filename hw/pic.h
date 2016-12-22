@@ -7,6 +7,7 @@
 #define PIC_H 1
 
 #ifdef __WATCOMC__
+#pragma once
 #include <stdbool.h>
 #include <stdint.h>
 #endif
@@ -15,10 +16,31 @@
 
 #include "..\pascal\pascal.h"
 
-void  PUBLIC_CODE picEnableIRQs(uint16_t mask);
-void  PUBLIC_CODE picDisableIRQs(uint16_t mask);
-void  PUBLIC_CODE picEOI(uint8_t irq);
-void *PUBLIC_CODE picGetIntVec(uint8_t irq);
-void  PUBLIC_CODE picSetIntVec(uint8_t irq, void *p);
+/* Hardware I/O */
 
-#endif /* PIC_H */
+#define IRQ_CHANNELS 16
+
+typedef uint16_t irqMask_t;
+
+void  PUBLIC_CODE picEnableChannels(irqMask_t mask);
+void  PUBLIC_CODE picDisableChannels(irqMask_t mask);
+void  PUBLIC_CODE picEOI(uint8_t ch);
+void *PUBLIC_CODE picGetISR(uint8_t ch);
+void  PUBLIC_CODE picSetISR(uint8_t ch, void *p);
+
+/* Sharing IRQ channels */
+
+#include "isr_t.h"
+
+extern void PUBLIC_CODE isrHookSingleChannel(uint8_t ch);
+extern void PUBLIC_CODE isrReleaseSingleChannel(uint8_t ch);
+extern void PUBLIC_CODE isrSetSingleChannelHandler(uint8_t ch, isrCallback_t *p);
+extern isrCallback_t *PUBLIC_CODE isrGetSingleChannelHandler(uint8_t ch);
+extern void PUBLIC_CODE isrClearSingleChannelHandler(uint8_t ch);
+
+/* Initialization */
+
+extern void PUBLIC_CODE isrInit(void);
+extern void PUBLIC_CODE isrDone(void);
+
+#endif  /* PIC_H */
