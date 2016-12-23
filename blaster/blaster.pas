@@ -267,7 +267,7 @@ begin
 
     mRate := 8000;
     mStereo := false;
-    dmaMask( dmac );
+    dmaMaskSingleChannel( dmac );
     stop_play;
     Initblaster(m16bits, mStereo, mRate);
     play_oneblock( ptr( 0, 0 ), 1 );
@@ -309,7 +309,7 @@ begin
     for i := 0 to HW_DMA_MAX-1 do
         dmamask := dmamask or ( 1 shl HW_DMA_NUM[ i ] );
 
-    dmaMaskMulti( dmamask );
+    dmaMaskChannels( dmamask );
 
     asm sti end;
 
@@ -320,13 +320,13 @@ begin
     begin
         irq := HW_IRQ_NUM[ i ];
         irqmask := irqmask or ( 1 shl irq );
-        oldv[i] := picGetIntVec( irq );
-        picSetIntVec( irq, GetDetISR( irq ));
+        oldv[i] := picGetISR( irq );
+        picSetISR( irq, GetDetISR( irq ));
     end;
     (* no changes for IRQ 2 *)
     irqmask := irqmask and not ( 1 shl 2 );
 
-    picDisableIRQs( irqmask );
+    picDisableChannels( irqmask );
 
     i := 0;
     while ( ( i < HW_DMA_MAX) and not sdev_hwflags_dma8 ) do
@@ -350,9 +350,9 @@ begin
     end;
 
     for i := 0 to HW_IRQ_MAX-1 do
-        picSetIntVec( HW_IRQ_NUM[i], oldv[i] );
+        picSetISR( HW_IRQ_NUM[i], oldv[i] );
 
-    picEnableIRQs( irqmask );
+    picEnableChannels( irqmask );
 
     if ( not sdev_hwflags_dma8 ) then
     begin
@@ -427,17 +427,17 @@ PROCEDURE set_ready_irq(p:pointer);
 begin
     ISRUserCallback := p;
     SetSoundHWISRCallback( @ISRSoundPlayback );
-    savvect := picGetIntVec( sdev_hw_irq );
-    picSetIntVec( sdev_hw_irq, GetSoundHWISR );
+    savvect := picGetISR( sdev_hw_irq );
+    picSetISR( sdev_hw_irq, GetSoundHWISR );
     (* no changes for IRQ2 *)
-    picDisableIRQs( ( 1 shl sdev_hw_irq ) and not ( 1 shl 2 ) );
+    picDisableChannels( ( 1 shl sdev_hw_irq ) and not ( 1 shl 2 ) );
 end;
 
 PROCEDURE restore_irq;
 begin
     (* no changes for IRQ2 *)
-    picEnableIRQs( ( 1 shl sdev_hw_irq ) and not ( 1 shl 2 ) );
-    picSetIntVec( sdev_hw_irq, savvect );
+    picEnableChannels( ( 1 shl sdev_hw_irq ) and not ( 1 shl 2 ) );
+    picSetISR( sdev_hw_irq, savvect );
 end;
 
 FUNCTION ready:boolean;
