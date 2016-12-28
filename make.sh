@@ -104,6 +104,13 @@ compile sbio.c
 compile sbio.pas
 compile sbctl.c
 compile sbctl.pas
+compile detisr_.asm
+compile detisr.c
+compile detisr.pas
+compile sndisr_.asm
+compile sndisr.c
+compile sndisr.pas
+compile blaster.pas
 
 cd ../main
 LOCDIR=main
