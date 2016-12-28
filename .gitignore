@@ -56,6 +56,7 @@ main/mixer.asm
 main/mixing.asm
 main/mixvars.asm
 main/posttab.asm
+main/s3mplay.asm
 main/s3mvars.asm
 main/voltab.asm
 watcomc/scripts/tmp/

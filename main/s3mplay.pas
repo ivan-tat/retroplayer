@@ -78,6 +78,7 @@ IMPLEMENTATION
 uses
     cpu,
     memset,
+    printf,
     strutils,
     crt,
     dos,
@@ -93,6 +94,8 @@ uses
     filldma,
     mixing,
     readnote;
+
+(*$l s3mplay.obj*)
 
 { Internal variables : }
 VAR
@@ -204,14 +207,6 @@ PROCEDURE Done_S3Mplayer;
     doneDMABuf;
     if mixBuf<>Nil then freeDOSmem(mixBuf);
     buffersreserved:=false;
-  end;
-
-PROCEDURE NewExitRoutine; Far;
-  begin
-    stop_play; { halt SB :) }
-    done_module;
-    if buffersreserved then done_S3Mplayer else restore_irq;
-    exitproc:=oldexitproc;
   end;
 
 {$I LOADPROC.INC}
@@ -447,9 +442,8 @@ var key:boolean;
     startplaying:=true;
   end;
 
-VAR i:byte;
-
 procedure calcwaves;
+VAR i:byte;
   begin
     for i:=0 to 63 do
       begin
@@ -459,14 +453,15 @@ procedure calcwaves;
       end;
   end;
 
-BEGIN
+procedure s3mplayInit;
+var
+    i: integer;
+begin
   inside:=false;
   PROC386:=isCPU_i386;
   calcwaves;
   buffersreserved:=false;
   sounddevice:=false;
-  oldexitproc:=exitproc;
-  exitproc:=@newExitRoutine;
   initVolumeTable;
   initDMABuf;
   mixBuf:=Nil;  (* FIXME: initMixBuf() *)
@@ -493,4 +488,18 @@ BEGIN
       Instruments^[i,0]:=0;
     END;
   for i := 0 to MAX_patterns-1 do setPattern( i, 0 );
-END.
+end;
+
+procedure s3mplayDone;
+begin
+    stop_play;
+    done_module;
+    if buffersreserved then done_S3Mplayer else restore_irq;
+end;
+
+procedure register_s3mplay; far; external;
+procedure unregister_s3mplay; far; external;
+
+begin
+    register_s3mplay;
+end.

@@ -141,6 +141,7 @@ compile mixing.c
 compile mixing.pas
 compile filldma.c
 compile filldma.pas
+compile s3mplay.c
 compile s3mplay.pas
 
 cd ../player
