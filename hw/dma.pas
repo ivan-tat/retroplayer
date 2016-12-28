@@ -46,8 +46,6 @@ function  dmaGetLinearAddress(p: pointer): longint;
 procedure dmaSetupSingleChannel(ch: byte; mode: TDMAMode; p: pointer; count: word);
 function  dmaGetCounter(ch: byte): word;
 
-(* Sharing DMA channels *)
-
 function  dmaIsAvailableSingleChannel(ch: byte): boolean;
 function  dmaGetAvailableChannels: TDMAMask;
 function  dmaGetSingleChannelOwner(ch: byte): PDMAOwner;
@@ -56,12 +54,10 @@ procedure dmaHookChannels(mask: TDMAMask; owner: PDMAOwner);
 procedure dmaReleaseSingleChannel(ch: byte);
 procedure dmaReleaseChannels(mask: TDMAMask);
 
-(* Initialization *)
-
-procedure dmaInit;
-procedure dmaDone;
-
 implementation
+
+uses
+    printf;
 
 (*$l dma.obj*)
 
@@ -73,8 +69,6 @@ function  dmaGetLinearAddress(p: pointer): longint; external;
 procedure dmaSetupSingleChannel(ch: byte; mode: TDMAMode; p: pointer; count: word); external;
 function  dmaGetCounter(ch: byte): word; external;
 
-(* Sharing DMA channels *)
-
 function  dmaIsAvailableSingleChannel(ch: byte): boolean; external;
 function  dmaGetAvailableChannels: TDMAMask; external;
 function  dmaGetSingleChannelOwner(ch: byte): PDMAOwner; external;
@@ -83,9 +77,9 @@ procedure dmaHookChannels(mask: TDMAMask; owner: PDMAOwner); external;
 procedure dmaReleaseSingleChannel(ch: byte); external;
 procedure dmaReleaseChannels(mask: TDMAMask); external;
 
-(* Initialization *)
+procedure register_dma; far; external;
+procedure unregister_dma; far; external;
 
-procedure dmaInit; external;
-procedure dmaDone; external;
-
+begin
+    register_dma;
 end.

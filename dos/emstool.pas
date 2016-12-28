@@ -37,14 +37,13 @@ function EmsSaveMap( handle: TEMMHandle ): boolean;
 function EmsRestoreMap( handle: TEMMHandle ): boolean;
 function EmsGetHandleSize( handle: TEMMHandle ): word;
 function EmsSetHandleName( handle: TEMMHandle; name: TEMMHandleName ): boolean;
-procedure EMMInit;
-procedure EMMDone;
 
 implementation
 
 uses
     pascal,
     memcmp,
+    printf,
     dos,
     intr;
 
@@ -61,20 +60,10 @@ function EmsSaveMap( handle: TEMMHandle ): boolean; external;
 function EmsRestoreMap( handle: TEMMHandle ): boolean; external;
 function EmsGetHandleSize( handle: TEMMHandle ): word; external;
 function EmsSetHandleName( handle: TEMMHandle; name: TEMMHandleName ): boolean; external;
-procedure EMMInit; external;
-procedure EMMDone; external;
 
-var
-    oldexitproc: pointer;
-
-procedure EMMExitProc; far;
-begin
-    EMMDone;
-    exitproc := oldexitproc;
-end;
+procedure register_emstool; far; external;
+procedure unregister_emstool; far; external;
 
 begin
-    EMMInit;
-    oldexitproc := exitproc;
-    exitproc := @EMMExitProc;
+    register_emstool;
 end.

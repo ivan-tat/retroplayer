@@ -207,16 +207,18 @@ void PUBLIC_CODE dmaReleaseChannels(dmaMask_t mask)
 
 /* Initialization */
 
-void PUBLIC_CODE dmaInit(void)
+void dmaInit(void)
 {
     int ch;
     for (ch = 0; ch < DMA_CHANNELS; ch++)
         _dmaClearSingleChannel(ch);
 }
 
-void PUBLIC_CODE dmaDone(void)
+void dmaDone(void)
 {
     int ch;
     for (ch = 0; ch < DMA_CHANNELS; ch++)
         dmaReleaseSingleChannel(ch);
 }
+
+DEFINE_REGISTRATION(dma, dmaInit, dmaDone)

@@ -70,7 +70,6 @@ extern void        PUBLIC_CODE dmaReleaseChannels(dmaMask_t mask);
 
 /* Initialization */
 
-extern void PUBLIC_CODE dmaInit(void);
-extern void PUBLIC_CODE dmaDone(void);
+DECLARE_REGISTRATION(dma)
 
 #endif /* DMA_H */

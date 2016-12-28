@@ -12,6 +12,7 @@
 #endif
 
 #include "..\pascal\pascal.h"
+#include "..\watcomc\printf.h"
 #include "emstool.h"
 
 #define DOS_DRIVER_NAME_OFF 10
@@ -43,60 +44,61 @@ const static struct EMMErrorDesc_t EMM_ERRORS[] = {
 
 const static char EMM_ERROR_UNKNOWN[] = "Unknown error";
 
-const char * __far __pascal GetEMMErrorMsg( EMMError_t err ) {
+const char * PUBLIC_CODE GetEMMErrorMsg(EMMError_t err) {
     uint16_t i = 0;
-    while ( EMM_ERRORS[i].code ) {
-        if ( EMM_ERRORS[i].code == err ) return EMM_ERRORS[i].msg;
+    while (EMM_ERRORS[i].code) {
+        if (EMM_ERRORS[i].code == err) return EMM_ERRORS[i].msg;
         i++;
     }
     return EMM_ERROR_UNKNOWN;
 }
 
-static struct EMMHandleEntry_t *handleList;
+/* Initialize for Pascal linker */
+static struct EMMHandleEntry_t *handleList = (void *)0;
 
-void insert_handle( EMMHandle_t handle ) {
+void __near insert_handle(EMMHandle_t handle) {
     struct EMMHandleEntry_t *n;
-    if ( mavail() < sizeof( struct EMMHandleEntry_t ) ) return;
-    n = malloc( sizeof( struct EMMHandleEntry_t ) );
+    if (mavail() < sizeof(struct EMMHandleEntry_t)) return;
+    n = malloc(sizeof(struct EMMHandleEntry_t));
     n->next = handleList;
     handleList = n;
     n->handle = handle;
 }
 
-void remove_handle( EMMHandle_t handle ) {
+void __near remove_handle(EMMHandle_t handle) {
     struct EMMHandleEntry_t *h, *i;
     h = handleList;
     i = NULL;
-    while ( ( h != NULL ) && ( h->handle != handle ) ) {
+    while ((h != NULL) && (h->handle != handle)) {
         i = h;
         h = h->next;
     }
-    if ( h == NULL ) return;
-    if ( i == NULL ) {
+    if (h == NULL) return;
+    if (i == NULL) {
         handleList = h->next;
         h->next = NULL;
-        memfree( h, sizeof( struct EMMHandleEntry_t ) );
+        memfree(h, sizeof(struct EMMHandleEntry_t));
     } else {
         i->next = h->next;
         h->next = NULL;
-        memfree( h, sizeof( struct EMMHandleEntry_t ) );
+        memfree(h, sizeof(struct EMMHandleEntry_t));
     }
 }
 
-bool __far __pascal CheckEMM( void ) {
+bool PUBLIC_CODE CheckEMM(void) {
     union REGPACK regs;
     DOSDriverName_t *p;
     regs.w.ax = 0x3567;
-    intr( 0x21, &regs );
-    p = MK_FP( regs.w.es, DOS_DRIVER_NAME_OFF );
-    return ( memcmp( p, EMMDriverName, sizeof( DOSDriverName_t ) ) == 0 );
+    intr(0x21, &regs);
+    p = MK_FP(regs.w.es, DOS_DRIVER_NAME_OFF);
+    return (memcmp(p, EMMDriverName, sizeof(DOSDriverName_t)) == 0);
 }
 
-bool __far __pascal GetEMMVersion( void ) {
+bool PUBLIC_CODE GetEMMVersion(void) {
     union REGPACK regs;
     regs.w.ax = 0x4600;
-    intr( 0x67, &regs );
-    if ( regs.h.ah ) {
+    intr(0x67, &regs);
+    if (regs.h.ah) {
         EmsEC = regs.h.ah;
         EmsVersion.Lo = 0;
         EmsVersion.Hi = 0;
@@ -108,11 +110,11 @@ bool __far __pascal GetEMMVersion( void ) {
     }
 }
 
-uint16_t __far __pascal GetEMMFrameSeg( void ) {
+uint16_t PUBLIC_CODE GetEMMFrameSeg(void) {
     union REGPACK regs;
     regs.w.ax = 0x4100;
-    intr( 0x67, &regs );
-    if ( regs.h.ah ) {
+    intr(0x67, &regs);
+    if (regs.h.ah) {
         EmsEC = regs.h.ah;
         return -1;
     } else {
@@ -120,11 +122,11 @@ uint16_t __far __pascal GetEMMFrameSeg( void ) {
     }
 }
 
-uint16_t __far __pascal EmsFreePages( void ) {
+uint16_t PUBLIC_CODE EmsFreePages(void) {
     union REGPACK regs;
     regs.w.ax = 0x4200;
-    intr( 0x67, &regs );
-    if ( regs.h.ah ) {
+    intr(0x67, &regs);
+    if (regs.h.ah) {
         EmsEC = regs.h.ah;
         return 0;
     } else {
@@ -132,42 +134,42 @@ uint16_t __far __pascal EmsFreePages( void ) {
     }
 }
 
-EMMHandle_t __far __pascal EmsAlloc( uint16_t pages ) {
+EMMHandle_t PUBLIC_CODE EmsAlloc(uint16_t pages) {
     union REGPACK regs;
     regs.w.ax = 0x4300;
     regs.w.bx = pages;
-    intr( 0x67, &regs );
-    if ( regs.h.ah ) {
+    intr(0x67, &regs);
+    if (regs.h.ah) {
         EmsEC = regs.h.ah;
         return -1;
     } else {
-        insert_handle( regs.w.dx );
+        insert_handle(regs.w.dx);
         return regs.w.dx;
     }
 }
 
-bool __far __pascal EmsFree( EMMHandle_t handle ) {
+bool PUBLIC_CODE EmsFree(EMMHandle_t handle) {
     union REGPACK regs;
     regs.w.ax = 0x4500;
     regs.w.dx = handle;
-    intr( 0x67, &regs );
-    if ( regs.h.ah ) {
+    intr(0x67, &regs);
+    if (regs.h.ah) {
         EmsEC = regs.h.ah;
         return false;
     } else {
-        remove_handle( regs.w.dx );
+        remove_handle(regs.w.dx);
         return true;
     }
 }
 
-bool __far __pascal EmsMap( EMMHandle_t handle, uint16_t logPage, uint8_t physPage ) {
+bool PUBLIC_CODE EmsMap(EMMHandle_t handle, uint16_t logPage, uint8_t physPage) {
     union REGPACK regs;
     regs.h.ah = 0x44;
     regs.h.al = physPage;
     regs.w.bx = logPage;
     regs.w.dx = handle;
-    intr( 0x67, &regs );
-    if ( regs.h.ah ) {
+    intr(0x67, &regs);
+    if (regs.h.ah) {
         EmsEC = regs.h.ah;
         return false;
     } else {
@@ -175,12 +177,12 @@ bool __far __pascal EmsMap( EMMHandle_t handle, uint16_t logPage, uint8_t physPa
     }
 }
 
-bool __far __pascal EmsSaveMap( EMMHandle_t handle ) {
+bool PUBLIC_CODE EmsSaveMap(EMMHandle_t handle) {
     union REGPACK regs;
     regs.w.ax = 0x4700;
     regs.w.dx = handle;
-    intr( 0x67, &regs );
-    if ( regs.h.ah ) {
+    intr(0x67, &regs);
+    if (regs.h.ah) {
         EmsEC = regs.h.ah;
         return false;
     } else {
@@ -188,12 +190,12 @@ bool __far __pascal EmsSaveMap( EMMHandle_t handle ) {
     }
 }
 
-bool __far __pascal EmsRestoreMap( EMMHandle_t handle ) {
+bool PUBLIC_CODE EmsRestoreMap(EMMHandle_t handle) {
     union REGPACK regs;
     regs.w.ax = 0x4800;
     regs.w.dx = handle;
-    intr( 0x67, &regs );
-    if ( regs.h.ah ) {
+    intr(0x67, &regs);
+    if (regs.h.ah) {
         EmsEC = regs.h.ah;
         return false;
     } else {
@@ -201,12 +203,12 @@ bool __far __pascal EmsRestoreMap( EMMHandle_t handle ) {
     }
 }
 
-uint16_t __far __pascal EmsGetHandleSize( EMMHandle_t handle ) {
+uint16_t PUBLIC_CODE EmsGetHandleSize(EMMHandle_t handle) {
     union REGPACK regs;
     regs.w.ax = 0x4c00;
     regs.w.dx = handle;
-    intr( 0x67, &regs );
-    if ( regs.h.ah ) {
+    intr(0x67, &regs);
+    if (regs.h.ah) {
         EmsEC = regs.h.ah;
         return 0;
     } else {
@@ -214,14 +216,14 @@ uint16_t __far __pascal EmsGetHandleSize( EMMHandle_t handle ) {
     }
 }
 
-bool __far __pascal EmsSetHandleName( EMMHandle_t handle, EMMHandleName_t *name ) {
+bool PUBLIC_CODE EmsSetHandleName(EMMHandle_t handle, EMMHandleName_t *name) {
     union REGPACK regs;
     regs.w.ax = 0x5301;
     regs.w.dx = handle;
     regs.w.si = FP_OFF(name);
     regs.w.ds = FP_SEG(name);
-    intr( 0x67, &regs );
-    if ( regs.h.ah ) {
+    intr(0x67, &regs);
+    if (regs.h.ah) {
         EmsEC = regs.h.ah;
         return false;
     } else {
@@ -229,23 +231,27 @@ bool __far __pascal EmsSetHandleName( EMMHandle_t handle, EMMHandleName_t *name 
     }
 }
 
-void __far __pascal EMMInit( void ) {
+/*** Initialization ***/
+
+void EMMInit(void) {
     EmsInstalled = CheckEMM();
-    if ( EmsInstalled ) {
-        if ( GetEMMVersion() ) {
+    if (EmsInstalled) {
+        if (GetEMMVersion()) {
             FrameSEG[0] = GetEMMFrameSeg();
             FrameSEG[1] = FrameSEG[0] + 0x0400;
             FrameSEG[2] = FrameSEG[1] + 0x0400;
             FrameSEG[3] = FrameSEG[2] + 0x0400;
-            FramePTR[0] = MK_FP( FrameSEG[0], 0 );
-            FramePTR[1] = MK_FP( FrameSEG[1], 0 );
-            FramePTR[2] = MK_FP( FrameSEG[2], 0 );
-            FramePTR[3] = MK_FP( FrameSEG[3], 0 );
+            FramePTR[0] = MK_FP(FrameSEG[0], 0);
+            FramePTR[1] = MK_FP(FrameSEG[1], 0);
+            FramePTR[2] = MK_FP(FrameSEG[2], 0);
+            FramePTR[3] = MK_FP(FrameSEG[3], 0);
         }
     }
     handleList = NULL;
 }
 
-void __far __pascal EMMDone( void ) {
-    while ( handleList != NULL ) EmsFree( handleList->handle );
+void EMMDone(void) {
+    while (handleList != NULL) EmsFree(handleList->handle);
 }
+
+DEFINE_REGISTRATION(emstool, EMMInit, EMMDone)

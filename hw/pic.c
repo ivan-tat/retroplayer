@@ -176,7 +176,7 @@ void PUBLIC_CODE isrClearSingleChannelHandler(uint8_t ch)
 
 /* Initialization */
 
-void PUBLIC_CODE isrInit(void)
+void isrInit(void)
 {
     int ch;
     for (ch = 0; ch < IRQ_CHANNELS; ch++) {
@@ -186,7 +186,7 @@ void PUBLIC_CODE isrInit(void)
     };
 }
 
-void PUBLIC_CODE isrDone(void)
+void isrDone(void)
 {
     int ch;
     for (ch = 0; ch < IRQ_CHANNELS; ch++) {
@@ -194,3 +194,5 @@ void PUBLIC_CODE isrDone(void)
         isrClearSingleChannelHandler(ch);
     };
 }
+
+DEFINE_REGISTRATION(pic, isrInit, isrDone)

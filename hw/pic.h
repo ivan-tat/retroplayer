@@ -40,7 +40,6 @@ extern void PUBLIC_CODE isrClearSingleChannelHandler(uint8_t ch);
 
 /* Initialization */
 
-extern void PUBLIC_CODE isrInit(void);
-extern void PUBLIC_CODE isrDone(void);
+DECLARE_REGISTRATION(pic)
 
 #endif  /* PIC_H */

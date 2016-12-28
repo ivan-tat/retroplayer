@@ -10,10 +10,6 @@ unit pic;
 
 interface
 
-(* pic.c *)
-
-(* Hardware I/O *)
-
 type
     TIRQMask = word;
 
@@ -22,8 +18,6 @@ procedure picDisableChannels(mask: TIRQMask);
 procedure picEOI(irq: byte);
 function  picGetISR(irq: byte): pointer;
 procedure picSetISR(irq: byte; p: pointer);
-
-(* Sharing IRQ channels *)
 
 type
   TISRCallback = procedure (ch: byte);
@@ -35,44 +29,33 @@ procedure isrSetSingleChannelHandler(ch: byte; p: PISRCallback);
 function  isrGetSingleChannelHandler(ch: byte): PISRCallback;
 procedure isrClearSingleChannelHandler(ch: byte);
 
-(* Initialization *)
-
-procedure isrInit;
-procedure isrDone;
-
 implementation
 
 uses
+    printf,
     dos;
 
 (*$l isr.obj*)
+
+function getISR(ch: byte): pointer; external;
+
 (*$l pic.obj*)
 
-(* Hardware I/O *)
-
-(* pic.c *)
 procedure picEnableChannels(mask: TIRQMask); external;
 procedure picDisableChannels(mask: TIRQMask); external;
 procedure picEOI(irq: byte); external;
 function  picGetISR(irq: byte): pointer; external;
 procedure picSetISR(irq: byte; p: pointer); external;
 
-(* Sharing IRQ channels *)
-
-(* isr_.asm *)
-function getISR(ch: byte): pointer; external;
-
-(* pic.c *)
 procedure isrHookSingleChannel(ch: byte); external;
 procedure isrReleaseSingleChannel(ch: byte); external;
 procedure isrSetSingleChannelHandler(ch: byte; p: PISRCallback); external;
 function  isrGetSingleChannelHandler(ch: byte): PISRCallback; external;
 procedure isrClearSingleChannelHandler(ch: byte); external;
 
-(* Initialization *)
+procedure register_pic; far; external;
+procedure unregister_pic; far; external;
 
-(* pic.c *)
-procedure isrInit; external;
-procedure isrDone; external;
-
+begin
+    register_pic;
 end.
