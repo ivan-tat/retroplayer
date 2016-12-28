@@ -11,22 +11,6 @@ export WCC="-3 -fp3 -ml -na -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu -
 # reason: "wdis" incorrectly writes "je near ptr <near_extern_label>"
 #   (without "near ptr")
 
-logfile() {
-    local f_name="$1"
-    echo "### $LOCDIR/$f_name"
-}
-
-compile_a() {
-    local f_name="$1"
-    local usebin="$2"
-    logfile "$f_name"
-    if [ "$usebin" = 'tasm' ]; then
-        $AS "$f_name"
-    else
-        $ASW "$f_name"
-    fi
-}
-
 compile_c() {
     local f_c="$1"
     local segname="${f_c%.*}"
@@ -34,7 +18,6 @@ compile_c() {
     local f_lst="${f_c%.*}.lst"
     local f_tmp="${f_c%.*}.tmp"
     local f_asm="${f_c%.*}.asm"
-    logfile "$f_c"
     #segname="${segname^^}_TEXT" # such expansion is not supported by Bash-2.05b.0 in DJGPP
     segname="`echo $segname | tr a-z A-Z`_TEXT"
     wcc -nt=$segname "$f_c"
@@ -45,25 +28,40 @@ s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$)/_DATA\1/;" 
     $ASW "$f_asm"
 }
 
-compile_p() {
+compile() {
     local f_name="$1"
-    logfile "$f_name"
-    if [ -n "$PASINC" ]; then
-        $PC $PASINC "$f_name"
-    else
-        $PC "$f_name"
-    fi
+    local usebin="$2"
+    echo "--- $LOCDIR/$f_name ---"
+    case "${f_name##*.}" in
+        asm)
+            if [ "$usebin" = 'tasm' ]; then
+                $AS "$f_name"
+            else
+                $ASW "$f_name"
+            fi
+            ;;
+        c)
+            compile_c "$f_name"
+            ;;
+        pas)
+            if [ -n "$PASINC" ]; then
+                $PC -u$PASINC "$f_name"
+            else
+                $PC "$f_name"
+            fi
+            ;;
+    esac
 }
 
 cd pascal
 LOCDIR=pascal
 PASINC=''
-compile_p strutils.pas
-compile_p syswrap.pas
+compile strutils.pas
+compile syswrap.pas
 
 cd ../watcomc
 LOCDIR=watcomc
-PASINC='-u..\pascal'
+PASINC='..\pascal'
 for f in \
 dointr \
 intr \
@@ -74,82 +72,75 @@ memset \
 i4d \
 i4m \
 i8d086; do
-    compile_a $f.asm
-    compile_p $f.pas
+    compile $f.asm
+    compile $f.pas
 done
-compile_c printf.c
-compile_p printf.pas
+compile printf.c
+compile printf.pas
 
 cd ../dos
 LOCDIR=dos
-PASINC='-u..\pascal;..\watcomc'
-compile_c dosproc.c
-compile_p dosproc.pas
-compile_c emstool.c
-compile_p emstool.pas
+PASINC='..\pascal;..\watcomc'
+compile dosproc.c
+compile dosproc.pas
+compile emstool.c
+compile emstool.pas
 
 cd ../hw
 LOCDIR=hw
-PASINC='-u..\pascal;..\watcomc'
-compile_a cpu.asm
-compile_p cpu.pas
-compile_c dma.c
-compile_p dma.pas
-compile_a isr.asm
-compile_c pic.c
-compile_p pic.pas
+PASINC='..\dos;..\pascal;..\watcomc'
+compile cpu.asm
+compile cpu.pas
+compile dma.c
+compile dma.pas
+compile isr.asm
+compile pic.c
+compile pic.pas
 
 cd ../blaster
 LOCDIR=blaster
-PASINC='-u..\pascal;..\watcomc;..\hw'
-compile_a detisr_.asm
-compile_c detisr.c
-compile_p detisr.pas
-compile_a sndisr_.asm
-compile_c sndisr.c
-compile_p sndisr.pas
-compile_c sbio.c
-compile_p sbio.pas
-compile_c sbctl.c
-compile_p sbctl.pas
-compile_p blaster.pas
+PASINC='..\dos;..\hw;..\pascal;..\watcomc'
+compile sbio.c
+compile sbio.pas
+compile sbctl.c
+compile sbctl.pas
 
 cd ../main
 LOCDIR=main
-PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster'
-compile_p types.pas
-compile_p mixtypes.pas
-compile_p s3mtypes.pas
-compile_c mixvars.c
-compile_p mixvars.pas
-compile_c s3mvars.c
-compile_p s3mvars.pas
-compile_c fillvars.c
-compile_p fillvars.pas
-compile_c voltab.c
-compile_p voltab.pas
-compile_c posttab.c
-compile_p posttab.pas
-compile_a mixer_.asm
-compile_p mixer_.pas
-compile_c mixer.c
-compile_p mixer.pas
-compile_p effvars.pas
-compile_c effects.c
-compile_p effects.pas
-compile_a readnote.asm tasm
-compile_p readnote.pas
-compile_c mixing.c
-compile_p mixing.pas
-compile_c filldma.c
-compile_p filldma.pas
-compile_p s3mplay.pas
+PASINC='..\blaster;..\dos;..\hw;..\pascal;..\watcomc'
+compile types.pas
+compile mixtypes.pas
+compile s3mtypes.pas
+compile mixvars.c
+compile mixvars.pas
+compile s3mvars.c
+compile s3mvars.pas
+compile fillvars.c
+compile fillvars.pas
+compile voltab.c
+compile voltab.pas
+compile posttab.c
+compile posttab.pas
+compile mixer_.asm
+compile mixer_.pas
+compile mixer.c
+compile mixer.pas
+compile effvars.pas
+compile effects.c
+compile effects.pas
+compile readnote.asm tasm
+compile readnote.pas
+compile mixing.c
+compile mixing.pas
+compile filldma.c
+compile filldma.pas
+compile s3mplay.pas
 
 cd ../player
 LOCDIR=player
-PASINC='-u..\pascal;..\watcomc;..\dos;..\hw;..\blaster;..\main'
-compile_p plays3m.pas
-compile_p smalls3m.pas
-compile_a lines.asm
-compile_p s3m_osci.pas
+PASINC='..\blaster;..\dos;..\hw;..\main;..\pascal;..\watcomc'
+compile plays3m.pas
+compile smalls3m.pas
+compile lines.asm
+compile s3m_osci.pas
 cd ..
