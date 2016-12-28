@@ -13,6 +13,7 @@ interface
 function  mavail: longint;
 function  malloc(size: word): pointer;
 procedure memfree(p: pointer; size: word);
+procedure crt_delay(count: word);
 
 implementation
 
@@ -35,6 +36,11 @@ end;
 procedure memfree(p: pointer; size: word);
 begin
     System.FreeMem(p, size);
+end;
+
+procedure crt_delay(count: word);
+begin
+    crt.delay(count);
 end;
 
 end.

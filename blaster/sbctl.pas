@@ -72,7 +72,11 @@ procedure stop_play;
 
 implementation
 
-uses crt, dma, sbio, i4d;
+uses
+    pascal,
+    dma,
+    sbio,
+    i4d;
 
 (*$l sbctl.obj*)
 

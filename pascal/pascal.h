@@ -24,4 +24,9 @@ extern uint32_t PUBLIC_CODE mavail(void);
 extern void    *PUBLIC_CODE malloc(uint16_t size);
 extern void     PUBLIC_CODE memfree(void *p, uint16_t size);
 
+/*** CRT unit ***/
+
+extern void PUBLIC_CODE crt_delay(uint16_t count);
+#define DELAY(count) crt_delay(count)
+
 #endif  /* PASCAL_H */

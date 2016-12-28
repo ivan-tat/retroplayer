@@ -10,7 +10,6 @@
 #endif
 
 #include "..\pascal\pascal.h"
-#include "..\pascal\crt.h"
 #include "..\hw\dma.h"
 #include "sbio.h"
 #include "sbctl.h"
@@ -65,11 +64,11 @@ void setSpeaker(bool state) {
         /* Does not work on SB16 */
         sbioDSPWrite(sdev_hw_base, 0xd1);
         /* Needs a bit time to switch it on */
-        delay(110);
+        DELAY(110);
     } else {
         sbioDSPWrite(sdev_hw_base, 0xd3);
         /* Needs a bit time to switch it off */
-        delay(220);
+        DELAY(220);
     }
 }
 
