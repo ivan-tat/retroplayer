@@ -42,7 +42,11 @@ procedure EMMDone;
 
 implementation
 
-uses syswrap,dos,intr,memcmp;
+uses
+    pascal,
+    memcmp,
+    dos,
+    intr;
 
 (*$l emstool.obj*)
 function CheckEMM: boolean; external;

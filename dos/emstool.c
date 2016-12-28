@@ -11,8 +11,8 @@
 #include <string.h>
 #endif
 
+#include "..\pascal\pascal.h"
 #include "emstool.h"
-#include "..\pascal\syswrap.h"
 
 #define DOS_DRIVER_NAME_OFF 10
 typedef char DOSDriverName_t[8];

@@ -56,8 +56,8 @@ compile() {
 cd pascal
 LOCDIR=pascal
 PASINC=''
+compile pascal.pas
 compile strutils.pas
-compile syswrap.pas
 
 cd ../watcomc
 LOCDIR=watcomc
