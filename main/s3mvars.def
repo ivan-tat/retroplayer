@@ -47,11 +47,11 @@ extrn EMSSmp: byte
 ; patterns
 
 extrn Pattern: word
-extrn PatNum: word
-extrn PatLength: word
-extrn EMSPat: byte
-extrn PatEMSHandle: word
-extrn PatPerPage: byte
+extrn patListCount: word
+extrn patListPatLength: word
+extrn patListUseEM: byte
+extrn patListEMHandle: word
+extrn patListPatPerEMPage: byte
 
 ; song arrangment
 

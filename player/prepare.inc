@@ -109,7 +109,9 @@ end;
 var lastrow:byte;
 
 procedure prep_patterns;
-var w:word;
+var
+    w:word;
+    pat: PMUSPAT;
   begin
     scrOpenInfoBackground(white, black);
     textbackground(white);textcolor(black);
@@ -118,8 +120,10 @@ var w:word;
     for w:=0 to 1 do begin gotoxy(w*28+20,1);write('    Chn ',2*w+1+startchn:2,'    '); end;
     scrLeave;
     lastrow:=curline;
-    if ( isPatternInEM( curpattern ) ) then { switch EMSpage 0 to curpattern }
-        EmsMap( patEMShandle, getPatternLogPageInEM( curpattern ), 0 );
+    { switch EMSpage 0 to curpattern }
+    pat := patList_get(curpattern);
+    if (patIsDataInEM(pat)) then
+        EmsMap(patListEMHandle, patGetDataLogPageInEM(pat), 0);
   end;
 
 (* Instruments *)

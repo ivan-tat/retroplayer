@@ -59,21 +59,29 @@ extern uint16_t PUBLIC_DATA SmpEMSHandle;   /* hanlde to access EMS for samples 
 
 /* patterns */
 
-extern patternsList_t PUBLIC_DATA Pattern;  /* segment for every pattern */
-                                            /* 0xFxyy -> at EMS page YY on Offset X*5120 */
-extern uint16_t PUBLIC_DATA PatNum;
-extern uint16_t PUBLIC_DATA PatLength;      /* length of one pattern */
-extern bool     PUBLIC_DATA EMSPat;         /* patterns in EMS ? */
-extern uint16_t PUBLIC_DATA PatEMSHandle;   /* handle to access EMS for patterns */
-extern uint8_t  PUBLIC_DATA PatPerPage;     /* count of patterns per page (<64!!!) */
+extern patternsList_t PUBLIC_DATA Pattern;
+extern uint16_t PUBLIC_DATA patListCount;
+extern uint16_t PUBLIC_DATA patListPatLength;   /* length of one pattern */
+extern bool     PUBLIC_DATA patListUseEM;       /* patterns in EM */
+extern uint16_t PUBLIC_DATA patListEMHandle;    /* handle to access EM for patterns */
+extern uint8_t  PUBLIC_DATA patListPatPerEMPage;  /* count of patterns per page (<64!!!) */
 
-void     PUBLIC_CODE setPattern(int16_t index, uint16_t p_seg);
-void     PUBLIC_CODE setPatternInEM(int16_t index, uint8_t logpage, uint8_t part);
-void    *PUBLIC_CODE getPattern(int16_t index);
-bool     PUBLIC_CODE isPatternInEM(int16_t index);
-uint8_t  PUBLIC_CODE getPatternLogPageInEM(int16_t index);
-uint8_t  PUBLIC_CODE getPatternPartInEM(int16_t index);
-uint32_t PUBLIC_CODE getUsedEmsPat(void);
+//MUSPAT *PUBLIC_CODE pat_new(void);
+void    PUBLIC_CODE pat_clear(MUSPAT *pat);
+//void    PUBLIC_CODE pat_delete(MUSPAT **pat);
+void    PUBLIC_CODE patSetData(MUSPAT *pat, uint16_t data_seg);
+void    PUBLIC_CODE patSetDataInEM(MUSPAT *pat, uint8_t logpage, uint8_t part);
+bool    PUBLIC_CODE patIsDataInEM(MUSPAT *pat);
+void   *PUBLIC_CODE patGetData(MUSPAT *pat);
+uint8_t PUBLIC_CODE patGetDataLogPageInEM(MUSPAT *pat);
+uint8_t PUBLIC_CODE patGetDataPartInEM(MUSPAT *pat);
+void    PUBLIC_CODE patFree(MUSPAT *pat);
+//void    PUBLIC_CODE patInit(MUSPAT *pat);
+//void    PUBLIC_CODE patDone(MUSPAT *pat);
+
+void     PUBLIC_CODE patList_set(int16_t index, MUSPAT *pat);
+MUSPAT  *PUBLIC_CODE patList_get(int16_t index);
+uint32_t PUBLIC_CODE patListGetUsedEM(void);
 void     PUBLIC_CODE patListFree(void);
 void     PUBLIC_CODE patListInit(void);
 void     PUBLIC_CODE patListDone(void);

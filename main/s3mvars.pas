@@ -56,19 +56,23 @@ var
 
 var
     Pattern: TPatternsArray;
-    PatNum: word;
-    PatLength: word;
-    EMSPat: boolean;
-    PatEMSHandle: word;
-    PatPerPage: byte;
+    patListCount: word;
+    patListPatLength: word;
+    patListUseEM: boolean;
+    patListEMHandle: word;
+    patListPatPerEMPage: byte;
 
-procedure setPattern(index: integer; p_seg: word);
-procedure setPatternInEM(index: integer; logpage, part: byte);
-function  getPattern(index: integer): pointer;
-function  isPatternInEM(index: integer): boolean;
-function  getPatternLogPageInEM(index: integer): byte;
-function  getPatternPartInEM(index: integer): byte;
-function  getUsedEmsPat: longint;
+procedure pat_clear(pat: PMUSPAT);
+procedure patSetData(pat: PMUSPAT; p: pointer);
+procedure patSetDataInEM(pat: PMUSPAT; logpage, part: byte);
+function  patIsDataInEM(pat: PMUSPAT): boolean;
+function  patGetData(pat: PMUSPAT): pointer;
+function  patGetDataLogPageInEM(pat: PMUSPAT): byte;
+function  patGetDataPartInEM(pat: PMUSPAT): byte;
+
+procedure patList_set(index: integer; pat: PMUSPAT);
+function  patList_get(index: integer): PMUSPAT;
+function  patListGetUsedEM: longint;
 procedure patListFree;
 procedure patListInit;
 procedure patListDone;
@@ -132,13 +136,17 @@ uses
 
 (*$l s3mvars.obj*)
 
-procedure setPattern(index: integer; p_seg: word); external;
-procedure setPatternInEM(index: integer; logpage, part: byte); external;
-function  getPattern(index: integer): pointer; external;
-function  isPatternInEM(index: integer): boolean; external;
-function  getPatternLogPageInEM(index: integer): byte; external;
-function  getPatternPartInEM(index: integer): byte; external;
-function  getUsedEmsPat: longint; external;
+procedure pat_clear(pat: PMUSPAT); external;
+procedure patSetData(pat: PMUSPAT; p: pointer); external;
+procedure patSetDataInEM(pat: PMUSPAT; logpage, part: byte); external;
+function  patIsDataInEM(pat: PMUSPAT): boolean; external;
+function  patGetData(pat: PMUSPAT): pointer; external;
+function  patGetDataLogPageInEM(pat: PMUSPAT): byte; external;
+function  patGetDataPartInEM(pat: PMUSPAT): byte; external;
+
+procedure patList_set(index: integer; pat: PMUSPAT); external;
+function  patList_get(index: integer): PMUSPAT; external;
+function  patListGetUsedEM: longint; external;
 procedure patListFree; external;
 procedure patListInit; external;
 procedure patListDone; external;

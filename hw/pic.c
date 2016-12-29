@@ -14,7 +14,7 @@
 
 #include "..\pascal\pascal.h"
 #include "..\pascal\dos.h"
-
+#include "..\watcomc\printf.h"
 #include "pic.h"
 
 /* PIC1: IRQ 0-7 */

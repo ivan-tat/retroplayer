@@ -5,12 +5,12 @@ const
 
 procedure setEMSnames;
 begin
-    if ( EMSpat ) then
-    begin
-        EmsSetHandleName( patEMShandle, patname );
+    if ( patListUseEM ) then
+        EmsSetHandleName( patListEMHandle, patname );
+    if ( EMSsmp ) then
+        EmsSetHandleName( smpEMShandle, smpname );
+    if ( useEMS ) then
         EmsSetHandleName( savhandle, savname );
-        if ( EMSsmp ) then EmsSetHandleName( smpEMShandle, smpname );
-    end;
 end;
 
 procedure convert2pas(var from,topas;maxchars:byte);
@@ -111,7 +111,7 @@ var f:file;
     header:Theader;
     maxused:byte;
     inspara:array[1..MAX_INSTRUMENTS] of word;
-    patpara:TPatternSarray;
+    patpara:array[0..MAX_PATTERNS] of word;
     smppara:array[0..MAX_INSTRUMENTS] of longint;
     i:byte;
     inspos,patpos,smppos,smpnum:byte;
@@ -323,12 +323,16 @@ var f:file;
       chn:byte;
       length:word;
       linecount:byte;
+      pat_static: TMUSPAT;
+      pat: PMUSPAT;
     BEGIN
       load_decrunc_pattern:=false;
       if nextpat=0 then
       begin
         load_decrunc_pattern := true;
-        setPattern( patpos-1, 0 );
+        pat := @pat_static;
+        pat_clear(pat);
+        patList_set(patpos-1, pat);
         exit;
       end;
       { first jump to position }
@@ -361,28 +365,35 @@ var f:file;
       if IOresult<>0 then begin load_error:=filecorrupt;exit end;
       inc(fileposit,length);
       { first get memory : (if useEMS than try to put it into the EMS ... }
-      if useEMS and EMSpat and (curpart<patperpage) then
+      if useEMS and patListUseEM and (curpart<patListPatPerEMPage) then
         begin
-          setPatternInEM( patpos-1, curPpage, curpart );
-          if not EMSmap(patEMShandle,curPpage,0) then write('<EMS-ERROR>');
-          p:=ptr(frameseg[0]+(patlength div 16)*word(curpart),0);
+          pat := @pat_static;
+          pat_clear(pat);
+          patSetDataInEM(pat, curPpage, curpart);
+          p := patGetData(pat);
+          patList_set(patpos-1, pat);
+          if (not EMSmap(patListEMHandle, curPpage, 0)) then write('<EMS-ERROR>');
         end
       else
         begin
           if not getdosmem(p,longint(64*5)*usedchannels) then begin load_error:=notenoughmem;exit end;
-          setPattern( patpos-1, seg( p^ ) );
+          pat := @pat_static;
+          pat_clear(pat);
+          patSetData(pat, p);
+          patList_set(patpos-1, pat);
         end;
 
       unpackPattern(buffer, p, 64, UsedChannels);
 
-      if ( isPatternInEM( patpos-1 ) ) then
+      pat := patList_get(patpos-1);
+      if (patIsDataInEM(pat)) then
         begin
           {$IFDEF LOADINFO}
           write('E(',curPpage,',',curpart,')');
           {$ENDIF}
           { next position in EMS : }
           inc(curpart);
-          if (curpart=patperpage) and (Ppagesleft>0) then
+          if (curpart=patListPatPerEMPage) and (Ppagesleft>0) then
             begin
               dec(Ppagesleft);inc(curPpage);
               curpart:=0;
@@ -433,7 +444,7 @@ var a,b,c:string;
     convert2pas(header.name,mod_Title,28);
     ordnum:=header.ordnum;
     insnum:=header.insnum;
-    patnum:=header.patnum;
+    patListCount:=header.patnum;
     { setup flags }
     modOption_ST2Vibrato := header.flags and $01 <> 0;
     modOption_ST2Tempo := header.flags and $02 <> 0;
@@ -474,7 +485,7 @@ var a,b,c:string;
     if i=ordnum then begin load_error:=ordercorrupt;exit end; { playable entry not found :( }
     blockread(f,inspara,insnum*2);
     IF IORESULT<>0 THEN begin load_error:=filecorrupt;exit end;
-    blockread(f,patpara,patnum*2);
+    blockread(f,patpara,patListCount*2);
     IF IORESULT<>0 THEN begin load_error:=filecorrupt;exit end;
     close(f);
     { Ok now the difficult part ...
@@ -482,34 +493,34 @@ var a,b,c:string;
       - load them in a row (don't jump through the file, that costs time !
       - problem is that you don't know the order and possibly there's no !
     }
-    patlength:=5*64*usedchannels;
+    patListPatLength:=5*64*usedchannels;
     {$IFDEF BETATEST}
-    writeln(' length of Patterns in memory: ',patlength);
+    writeln(' length of Patterns in memory: ',patListPatLength);
     {$ENDIF}
     if useEMS then
       begin
         { we use EMS, then we need a page to save mapping in interrupt ! }
         savHandle:=EMSalloc(1); { 1 page is enough ? }
         { let's continue with loading: }
-        PatPerPage:=(16*1024) div patlength;
+        patListPatPerEMPage:=(16*1024) div patListPatLength;
         {$IFDEF BETATEST}
-        writeln(' Patterns per Page: ',patperpage);
+        writeln(' Patterns per Page: ',patListPatPerEMPage);
         {$ENDIF}
         { try to allocate EMS for all patterns : }
-        if (EMSfreepages<(patnum+(patperpage-1)) div patperpage) then
+        if (EMSfreepages<(patListCount+(patListPatPerEMPage-1)) div patListPatPerEMPage) then
           begin
             Ppagesleft:=EMSfreepages;
-            patEMShandle:=EMSalloc(Ppagesleft);
-            EMSpat:=true;
+            patListEMHandle:=EMSalloc(Ppagesleft);
+            patListUseEM:=true;
           end
         else
           begin
-            patEMShandle:=EMSalloc((patnum+(patperpage-1)) div patperpage);
-            Ppagesleft:=(patnum+(patperpage-1)) div patperpage;
-            EMSpat:=true
+            patListEMHandle:=EMSalloc((patListCount+(patListPatPerEMPage-1)) div patListPatPerEMPage);
+            Ppagesleft:=(patListCount+(patListPatPerEMPage-1)) div patListPatPerEMPage;
+            patListUseEM:=true
           end;
       end;
-    if useEMS and EMSpat then
+    if useEMS and patListUseEM then
       begin
         curpart:=0;curPpage:=0;
       end;
@@ -528,11 +539,11 @@ var a,b,c:string;
     if not getdosmem(buffer,10*1024) then begin load_error:=notenoughmem;exit end;
     { init some variables for loading : }
     inspos:=1;patpos:=0;smppos:=0;smpnum:=0;nextpat:=$7fffffff;nextins:=$7fffffff;nextsmp:=$7fffffff;
-    while (inspos<insnum+1) or (patpos<patnum) or (smppos<smpnum)
+    while (inspos<insnum+1) or (patpos<patListCount) or (smppos<smpnum)
           or (nextpat<$7fffffff) or (nextins<$7fffffff) or (nextsmp<$7fffffff) do
       begin
         {writeln('--->',inspos,',',patpos,',',smppos);readkey;}
-        if (nextpat=$7fffffff) and (patpos<patnum) then
+        if (nextpat=$7fffffff) and (patpos<patListCount) then
           begin
             nextpat:=patpara[patpos];inc(patpos)
           end;

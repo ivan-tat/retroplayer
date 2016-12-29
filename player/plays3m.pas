@@ -289,18 +289,21 @@ CONST SW_order:array[false..true] of string = ('Extended Order','Normal Order');
     gotoxy(1,3);write(' Samplerate: ',getSamplerate:5,'  ',sw_stereo[stereo],', ',sw_res[_16bit],
     ', ',sw_order[ST3order],', ',sw_qual[playOption_LowQuality]);
     gotoxy(1,4);write(' Free DOS memory : ',(getFreeDOSMemory shr 10):6,' KiB   Free EMS memory : ',getFreeEMMMemory:5,' KiB');
-    gotoxy(1,5);write(' Used EMS memory : ',(getusedEMSsmp+getusedEMSpat):6,' KiB   <F1> - Help screen',
+    gotoxy(1,5);write(' Used EMS memory : ',(getusedEMSsmp+patListGetUsedEM):6,' KiB   <F1> - Help screen',
                       '':10,'Version : ',PLAYER_VERSION);
   end;
 
 procedure refr_mainscr;
+var
+    pat: PMUSPAT;
   begin
+    pat := patList_get(curpattern);
     textbackground(white);textcolor(black);
     gotoxy(8,1);write(curOrder:2);
     gotoxy(11,1);write(lastorder:2);
     gotoxy(20,1);write(curline:2);
     gotoxy(29,1);write(curtick:2);
-    gotoxy(63,1);write(curpattern:2,' (',hexw( seg( getPattern( curpattern )^ ) ),')');
+    gotoxy(63,1);write(curpattern:2,' (',hexw( seg( patGetData(pat)^ ) ),')');
     textbackground(green);textcolor(black);
     gotoxy(76,6);write(switch[playOption_LoopSong]);
     gotoxy(1,2);

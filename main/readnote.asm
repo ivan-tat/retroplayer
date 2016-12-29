@@ -317,7 +317,7 @@ nopatdly:    mov     al,[usedchannels]
              xor     bx,bx
              mov     bl,al              ; bx = logical page
              xor     al,al              ; al = physical page
-             mov     dx,[patEMShandle]  ; dx = handle
+             mov     dx,[patListEMHandle]  ; dx = handle
              int     67h
              cmp     ah,0
              je      noemsprob
@@ -329,7 +329,7 @@ noemsprob:   pop     di
              shr     ax,8
              and     al,3fh             ; bit 13-8 = partno.
              xor     ah,ah
-             mov     dx,[patlength]
+             mov     dx,[patListPatLength]
              mul     dx                 ; ax = partno * pattern length
              add     di,ax
              mov     ax,[frameSEG]

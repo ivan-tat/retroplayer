@@ -10,10 +10,13 @@ begin
 end;
 
 procedure display_row(ordr,row:byte);
-var pA:Parray;
+var
+    pat: PMUSPAT;
+    pA:Parray;
     i,b:byte;
   begin
-    pA := getPattern( ORDER[ordr] );
+    pat := patList_get(ORDER[ordr]);
+    pA := patGetData(pat);
     write(row:2,'   ');
     for i:=startchn-1 to startchn+3 do
       begin
@@ -95,7 +98,9 @@ var i:byte;
 (* Patterns *)
 
 procedure refr_patterns;
-var i,j:byte;
+var
+    i,j:byte;
+    pat: PMUSPAT;
   begin
     window(1,9,80,25);textbackground(white);textcolor(black);
     if curline+1<lastrow then
@@ -108,8 +113,9 @@ var i,j:byte;
         lastrow:=0;
         { new pattern }
         (* switch EMSpage zero to curpattern *)
-        if ( isPatternInEM( curpattern ) ) then
-            EmsMap( patEMShandle, getPatternLogPageInEM( curpattern ), 0 );
+        pat := patList_get(curpattern);
+        if (patIsDataInEM(pat)) then
+            EmsMap(patListEMHandle, patGetDataLogPageInEM(pat), 0);
       end;
     for i:=lastrow to curline do
       begin

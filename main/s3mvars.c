@@ -52,11 +52,11 @@ EXTERN_LINK uint16_t PUBLIC_DATA SmpEMSHandle;
 /* patterns */
 
 EXTERN_LINK patternsList_t PUBLIC_DATA Pattern;
-EXTERN_LINK uint16_t PUBLIC_DATA PatNum;
-EXTERN_LINK uint16_t PUBLIC_DATA PatLength;
-EXTERN_LINK bool     PUBLIC_DATA EMSPat;
-EXTERN_LINK uint16_t PUBLIC_DATA PatEMSHandle;
-EXTERN_LINK uint8_t  PUBLIC_DATA PatPerPage;
+EXTERN_LINK uint16_t PUBLIC_DATA patListCount;
+EXTERN_LINK uint16_t PUBLIC_DATA patListPatLength;
+EXTERN_LINK bool     PUBLIC_DATA patListUseEM;
+EXTERN_LINK uint16_t PUBLIC_DATA patListEMHandle;
+EXTERN_LINK uint8_t  PUBLIC_DATA patListPatPerEMPage;
 
 /* song arrangement */
 
@@ -101,50 +101,88 @@ EXTERN_LINK uint8_t PUBLIC_DATA PLoop_To;
 
 EXTERN_LINK uint8_t PUBLIC_DATA PatternDelay;
 
-/* Patterns */
+/*** Patterns ***/
 
+#define _patSetPatternDataInEM(logpage, part) (0xC000 + ((part & 0x3f) << 8) + logpage)
+#define _getPatternDataLogPageInEM(data_seg) (data_seg & 0xff)
+#define _getPatternDataPartInEM(data_seg) ((data_seg >> 8) & 0x3f)
+#define _getPatternDataInEM(data_seg, length) (MK_FP(FrameSEG[0], (_getPatternDataPartInEM(data_seg) * length)))
 #define _isPatternDataInEM(data_seg) (data_seg >= 0xC000)
 
-void PUBLIC_CODE setPattern(int16_t index, uint16_t p_seg)
+void PUBLIC_CODE pat_clear(MUSPAT *pat)
 {
-    Pattern[index] = p_seg;
+    pat->data_seg = 0;
 }
 
-void PUBLIC_CODE setPatternInEM(int16_t index, uint8_t logpage, uint8_t part)
+void PUBLIC_CODE patSetData(MUSPAT *pat, void *p)
 {
-    Pattern[index] = 0xC000 + ((part & 0x3f) << 8) + logpage;
+    pat->data_seg = FP_SEG(p);
 }
 
-void *PUBLIC_CODE getPattern(int16_t index)
+void PUBLIC_CODE patSetDataInEM(MUSPAT *pat, uint8_t logpage, uint8_t part)
 {
-    uint16_t p_seg;
+    pat->data_seg = _patSetPatternDataInEM(logpage, part);
+}
 
-    p_seg = Pattern[index];
-    if (_isPatternDataInEM(p_seg))
-        return MK_FP(FrameSEG[0], ((p_seg >> 8) & 0x3f) * PatLength);
+bool PUBLIC_CODE patIsDataInEM(MUSPAT *pat)
+{
+    return _isPatternDataInEM(pat->data_seg);
+}
+
+void *PUBLIC_CODE patGetData(MUSPAT *pat)
+{
+    uint16_t data_seg = pat->data_seg;
+    if (_isPatternDataInEM(data_seg))
+        return _getPatternDataInEM(data_seg, patListPatLength);
     else
-        return MK_FP(p_seg, 0);
+        return MK_FP(data_seg, 0);
 }
 
-bool PUBLIC_CODE isPatternInEM(int16_t index)
+uint8_t PUBLIC_CODE patGetDataLogPageInEM(MUSPAT *pat)
 {
-    return _isPatternDataInEM(Pattern[index]);
+    return _getPatternDataLogPageInEM(pat->data_seg);
 }
 
-uint8_t PUBLIC_CODE getPatternLogPageInEM(int16_t index)
+uint8_t PUBLIC_CODE patGetDataPartInEM(MUSPAT *pat)
 {
-    return Pattern[index] & 0xff;
+    return _getPatternDataPartInEM(pat->data_seg);
 }
 
-uint8_t PUBLIC_CODE getPatternPartInEM(int16_t index)
+void PUBLIC_CODE patFree(MUSPAT *pat)
 {
-    return (Pattern[index] >> 8) & 0x3f;
+    void *p;
+
+    if (!patIsDataInEM(pat))
+    {
+        p = patGetData(pat);
+        if (p)
+            freedosmem(p);
+        pat_clear(pat);
+    };
 }
 
-uint32_t PUBLIC_CODE getUsedEmsPat(void)
+/*** Patterns list ***/
+
+void PUBLIC_CODE patList_set(int16_t index, MUSPAT *pat)
 {
-    if (EMSPat)
-        return 16*EmsGetHandleSize(PatEMSHandle);
+    if (pat)
+        Pattern[index].data_seg = pat->data_seg;
+    else
+        pat_clear(&(Pattern[index]));
+}
+
+MUSPAT *PUBLIC_CODE patList_get(int16_t index)
+{
+    if ((index >= 0) && (index < MAX_PATTERNS))
+        return &(Pattern[index]);
+    else
+        return (void *)0;
+}
+
+uint32_t PUBLIC_CODE patListGetUsedEM(void)
+{
+    if (patListUseEM)
+        return 16*EmsGetHandleSize(patListEMHandle);
     else
         return 0;
 }
@@ -152,22 +190,17 @@ uint32_t PUBLIC_CODE getUsedEmsPat(void)
 void PUBLIC_CODE patListFree(void)
 {
     int i;
-    void *p;
+    MUSPAT *pat;
 
     for (i = 0; i < MAX_PATTERNS; i++)
     {
-        if (!isPatternInEM(i))
-        {
-            p = getPattern(i);
-            if (p)
-                freedosmem(p);
-            setPattern(i, 0);
-        };
+        pat = patList_get(i);
+        patFree(pat);
     };
-    if (EMSPat)
+    if (patListUseEM)
     {
-        EmsFree(PatEMSHandle);
-        EMSPat = false;
+        EmsFree(patListEMHandle);
+        patListUseEM = false;
     };
 }
 
@@ -175,7 +208,7 @@ void PUBLIC_CODE patListInit(void)
 {
     int i;
     for (i = 0; i < MAX_PATTERNS; i++)
-        setPattern(i, 0);
+        pat_clear(&(Pattern[i]));
 }
 
 void PUBLIC_CODE patListDone(void)

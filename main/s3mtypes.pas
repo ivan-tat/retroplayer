@@ -114,11 +114,14 @@ type
 (* patterns *)
 
 type
-    TPattern = word;
-        (* segment for pattern's data *)
+    TMUSPAT = record
+        data_seg: word;
+            (* segment for pattern's data *)
+    end;
+    PMUSPAT = ^TMUSPAT;
 
 type
-    TPatternsArray = array [0..MAX_PATTERNS-1] of TPattern;
+    TPatternsArray = array [0..MAX_PATTERNS-1] of TMUSPAT;
         (* segment for every pattern *)
 
 (* song arrangement *)

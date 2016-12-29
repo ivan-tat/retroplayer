@@ -73,9 +73,13 @@ typedef struct instrument_t instrumentsList_t[MAX_INSTRUMENTS];
 #define MAX_PATTERNS 100
     /* 0..99 patterns */
 
-typedef uint16_t pattern_t;
+typedef struct pattern_t {
+    uint16_t data_seg;
+        /* segment for every pattern: 0xC000 + ((part & 63) << 8) + page */
+};
+typedef struct pattern_t MUSPAT;
 
-typedef pattern_t patternsList_t[MAX_PATTERNS];
+typedef struct pattern_t patternsList_t[MAX_PATTERNS];
 
 /* song arrangement */
 

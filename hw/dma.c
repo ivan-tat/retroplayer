@@ -13,7 +13,7 @@
 // TODO: remove PUBLIC_CODE macros when done.
 
 #include "..\pascal\pascal.h"
-
+#include "..\watcomc\printf.h"
 #include "dma.h"
 
 /* DMA i/o ports */
