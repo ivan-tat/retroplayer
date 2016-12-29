@@ -10,6 +10,10 @@ include s3mtypes.def
 
 _DATA segment word public use16 'DATA'
 
+; EMM
+
+extrn UseEMS: byte
+
 ; general module information
 
 extrn mod_isLoaded: byte
@@ -37,12 +41,17 @@ extrn playOption_LoopSong: byte
 
 extrn Instruments: dword
 extrn InsNum: word
+extrn SmpEMSHandle: word
+extrn EMSSmp: byte
 
 ; patterns
 
 extrn Pattern: word
 extrn PatNum: word
 extrn PatLength: word
+extrn EMSPat: byte
+extrn PatEMSHandle: word
+extrn PatPerPage: byte
 
 ; song arrangment
 
@@ -88,15 +97,6 @@ extrn PLoop_To: byte
 ; pattern delay
 
 extrn PatternDelay: byte
-
-; EMM
-
-extrn UseEMS: byte
-extrn PatEMSHandle: word
-extrn SmpEMSHandle: word
-extrn EMSPat: byte
-extrn EMSSmp: byte
-extrn PatPerPage: byte
 
 _DATA ends
 

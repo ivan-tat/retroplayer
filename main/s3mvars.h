@@ -15,8 +15,11 @@
 // TODO: remove PUBLIC_DATA macros when done.
 
 #include "..\pascal\pascal.h"
-
 #include "s3mtypes.h"
+
+/* EMM */
+
+extern bool PUBLIC_DATA UseEMS;
 
 /* general module information */
 
@@ -51,6 +54,8 @@ extern bool PUBLIC_DATA playOption_LoopSong;
 
 extern instrumentsList_t *PUBLIC_DATA Instruments;  /* pointer to data for all instruments */
 extern uint16_t PUBLIC_DATA InsNum;
+extern bool     PUBLIC_DATA EMSSmp;         /* samples in EMS ? */
+extern uint16_t PUBLIC_DATA SmpEMSHandle;   /* hanlde to access EMS for samples */
 
 /* patterns */
 
@@ -58,6 +63,20 @@ extern patternsList_t PUBLIC_DATA Pattern;  /* segment for every pattern */
                                             /* 0xFxyy -> at EMS page YY on Offset X*5120 */
 extern uint16_t PUBLIC_DATA PatNum;
 extern uint16_t PUBLIC_DATA PatLength;      /* length of one pattern */
+extern bool     PUBLIC_DATA EMSPat;         /* patterns in EMS ? */
+extern uint16_t PUBLIC_DATA PatEMSHandle;   /* handle to access EMS for patterns */
+extern uint8_t  PUBLIC_DATA PatPerPage;     /* count of patterns per page (<64!!!) */
+
+void     PUBLIC_CODE setPattern(int16_t index, uint16_t p_seg);
+void     PUBLIC_CODE setPatternInEM(int16_t index, uint8_t logpage, uint8_t part);
+void    *PUBLIC_CODE getPattern(int16_t index);
+bool     PUBLIC_CODE isPatternInEM(int16_t index);
+uint8_t  PUBLIC_CODE getPatternLogPageInEM(int16_t index);
+uint8_t  PUBLIC_CODE getPatternPartInEM(int16_t index);
+uint32_t PUBLIC_CODE getUsedEmsPat(void);
+void     PUBLIC_CODE patListFree(void);
+void     PUBLIC_CODE patListInit(void);
+void     PUBLIC_CODE patListDone(void);
 
 /* song arrangement */
 
@@ -103,15 +122,5 @@ extern uint8_t PUBLIC_DATA PLoop_To;    /* position to loop to */
 /* pattern delay */
 
 extern uint8_t PUBLIC_DATA PatternDelay;
-
-/* EMM */
-
-extern bool     PUBLIC_DATA UseEMS;
-extern uint16_t PUBLIC_DATA PatEMSHandle;   /* handle to access EMS for patterns */
-extern uint16_t PUBLIC_DATA SmpEMSHandle;   /* hanlde to access EMS for samples */
-                                            /* I seperated them, but that does not matter, well ? */
-extern bool     PUBLIC_DATA EMSPat;         /* patterns in EMS ? */
-extern bool     PUBLIC_DATA EMSSmp;         /* samples in EMS ? */
-extern uint8_t  PUBLIC_DATA PatPerPage;     /* count of patterns per page (<64!!!) */
 
 #endif /* S3MVARS_H */

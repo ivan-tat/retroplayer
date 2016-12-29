@@ -68,7 +68,7 @@ function  getPattern(index: integer): pointer;
 function  isPatternInEM(index: integer): boolean;
 function  getPatternLogPageInEM(index: integer): byte;
 function  getPatternPartInEM(index: integer): byte;
-function  getusedEMSpat:longint;
+function  getUsedEmsPat: longint;
 procedure patListFree;
 procedure patListInit;
 procedure patListDone;
@@ -132,85 +132,15 @@ uses
 
 (*$l s3mvars.obj*)
 
-(* Patterns >> *)
-
-procedure setPattern(index: integer; p_seg: word);
-begin
-    PATTERN[index] := p_seg;
-end;
-
-procedure setPatternInEM(index: integer; logpage, part: byte);
-begin
-    PATTERN[index] := $C000 + ((part and $3f) shl 8) + logpage;
-end;
-
-function getPattern(index: integer): pointer;
-var
-    p_seg: word;
-begin
-    p_seg := PATTERN[index];
-    if (p_seg >= $C000) then
-        getPattern := ptr(FrameSEG[0], ((p_seg shr 8) and $3f) * patlength)
-    else
-        getPattern := ptr(p_seg, 0);
-end;
-
-function isPatternInEM(index: integer): boolean;
-begin
-    isPatternInEM := PATTERN[index] >= $C000;
-end;
-
-function getPatternLogPageInEM(index: integer): byte;
-begin
-    getPatternLogPageInEM := PATTERN[index] and $ff;
-end;
-
-function getPatternPartInEM(index: integer): byte;
-begin
-    getPatternPartInEM := (PATTERN[index] shr 8) and $3f;
-end;
-
-function getusedEMSpat: longint;
-begin
-    if (EMSpat) then
-        getusedEMSpat := 16*EmsGetHandleSize(patEMShandle)
-    else
-        getusedEMSpat := 0;
-end;
-
-procedure patListFree;
-var
-    i: integer;
-    p: pointer;
-begin
-    for i := 0 to MAX_PATTERNS-1 do
-    begin
-        if (not isPatternInEM(i)) then
-        begin
-            p := getPattern(i);
-            if (p <> nil) then freedosmem(p);
-            setPattern(i, 0);
-        end;
-    end;
-    if (EMSpat) then
-    begin
-        EMSfree(patEMShandle);
-        EMSpat := false;
-    end;
-end;
-
-procedure patListInit;
-var
-    i: integer;
-begin
-  for i := 0 to MAX_PATTERNS-1 do setPattern(i, 0);
-end;
-
-procedure patListDone;
-begin
-    patListFree;
-end;
-
-(* << Patterns *)
+procedure setPattern(index: integer; p_seg: word); external;
+procedure setPatternInEM(index: integer; logpage, part: byte); external;
+function  getPattern(index: integer): pointer; external;
+function  isPatternInEM(index: integer): boolean; external;
+function  getPatternLogPageInEM(index: integer): byte; external;
+function  getPatternPartInEM(index: integer): byte; external;
+function  getUsedEmsPat: longint; external;
+procedure patListFree; external;
+procedure patListInit; external;
+procedure patListDone; external;
 
 end.
