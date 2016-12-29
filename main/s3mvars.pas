@@ -64,10 +64,14 @@ var
 
 procedure setPattern(index: integer; p_seg: word);
 procedure setPatternInEM(index: integer; logpage, part: byte);
-function getPattern(index: integer): pointer;
-function isPatternInEM(index: integer): boolean;
-function getPatternLogPageInEM(index: integer): byte;
-function getPatternPartInEM(index: integer): byte;
+function  getPattern(index: integer): pointer;
+function  isPatternInEM(index: integer): boolean;
+function  getPatternLogPageInEM(index: integer): byte;
+function  getPatternPartInEM(index: integer): byte;
+function  getusedEMSpat:longint;
+procedure patListFree;
+procedure patListInit;
+procedure patListDone;
 
 (* song arrangment *)
 
@@ -123,6 +127,7 @@ var
 implementation
 
 uses
+    dosproc,
     emstool;
 
 (*$l s3mvars.obj*)
@@ -163,6 +168,47 @@ end;
 function getPatternPartInEM(index: integer): byte;
 begin
     getPatternPartInEM := (PATTERN[index] shr 8) and $3f;
+end;
+
+function getusedEMSpat: longint;
+begin
+    if (EMSpat) then
+        getusedEMSpat := 16*EmsGetHandleSize(patEMShandle)
+    else
+        getusedEMSpat := 0;
+end;
+
+procedure patListFree;
+var
+    i: integer;
+    p: pointer;
+begin
+    for i := 0 to MAX_PATTERNS-1 do
+    begin
+        if (not isPatternInEM(i)) then
+        begin
+            p := getPattern(i);
+            if (p <> nil) then freedosmem(p);
+            setPattern(i, 0);
+        end;
+    end;
+    if (EMSpat) then
+    begin
+        EMSfree(patEMShandle);
+        EMSpat := false;
+    end;
+end;
+
+procedure patListInit;
+var
+    i: integer;
+begin
+  for i := 0 to MAX_PATTERNS-1 do setPattern(i, 0);
+end;
+
+procedure patListDone;
+begin
+    patListFree;
 end;
 
 (* << Patterns *)

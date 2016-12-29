@@ -59,7 +59,6 @@ function get_mvolume:byte;
 function get_delay:byte;
 function getSamplerate:word;
 function getusedEMSsmp:longint;    { get size of samples in EMS }
-function getusedEMSpat:longint;    { get size of patterns in EMS }
 
 { not supported functions: }
 FUNCTION getuseddevice(var typ:byte;var base:word;var dma8,dma16:byte;var irq:byte):byte;
@@ -128,27 +127,12 @@ var i:word;
           end;
         Instruments^[i,0]:=0;
       end;
-    { Free patterns : }
-    for i:=0 to MAX_patterns do
-      begin
-        if ( not isPatternInEM( i ) ) then
-          begin
-            p := getPattern( i );
-            if p<>Nil then freedosmem(p);
-            setPattern( i, 0 );
-          end;
-      end;
-    if EMSpat then { patterns in EMS }
-      begin
-        EMSfree(savHandle);
-        EMSfree(patEMShandle);
-        EMSpat:=false;
-      end;
     if EMSsmp then { samples in EMS }
       begin
         EMSfree(smpEMShandle);
         EMSsmp:=false;
       end;
+    patListDone;
     mod_isLoaded:=false;
   END;
 
@@ -307,14 +291,6 @@ begin
         getusedEMSsmp:=0;
 end;
 
-function getusedEMSpat:longint;    { get size of patterns in EMS }
-begin
-    if EMSpat then
-        getusedEMSpat:=16*EmsGetHandleSize(patEMShandle)
-    else
-        getusedEMSpat:=0;
-end;
-
 procedure set_ST3order(new:boolean);
 var i:byte;
   begin
@@ -439,7 +415,7 @@ begin
     BEGIN
       Instruments^[i,0]:=0;
     END;
-  for i := 0 to MAX_patterns-1 do setPattern( i, 0 );
+    patListInit;
 end;
 
 procedure s3mplayDone;
