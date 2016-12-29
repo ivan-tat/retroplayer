@@ -13,6 +13,11 @@ interface
 uses
     s3mtypes;
 
+(* EMM *)
+
+var
+    UseEMS: boolean;
+
 (* general module information *)
 
 var
@@ -44,6 +49,8 @@ var
 var
     Instruments: ^TInstrArray;
     InsNum: word;
+    EMSSmp: boolean;
+    SmpEMSHandle: word;
 
 (* patterns *)
 
@@ -51,6 +58,16 @@ var
     Pattern: TPatternsArray;
     PatNum: word;
     PatLength: word;
+    EMSPat: boolean;
+    PatEMSHandle: word;
+    PatPerPage: byte;
+
+procedure setPattern(index: integer; p_seg: word);
+procedure setPatternInEM(index: integer; logpage, part: byte);
+function getPattern(index: integer): pointer;
+function isPatternInEM(index: integer): boolean;
+function getPatternLogPageInEM(index: integer): byte;
+function getPatternPartInEM(index: integer): byte;
 
 (* song arrangment *)
 
@@ -103,18 +120,51 @@ var
 var
     PatternDelay: byte;
 
-(* EMM *)
-
-var
-    UseEMS: boolean;
-    PatEMSHandle: word;
-    SmpEMSHandle: word;
-    EMSPat: boolean;
-    EMSSmp: boolean;
-    PatPerPage: byte;
-
 implementation
 
+uses
+    emstool;
+
 (*$l s3mvars.obj*)
+
+(* Patterns >> *)
+
+procedure setPattern(index: integer; p_seg: word);
+begin
+    PATTERN[index] := p_seg;
+end;
+
+procedure setPatternInEM(index: integer; logpage, part: byte);
+begin
+    PATTERN[index] := $C000 + ((part and $3f) shl 8) + logpage;
+end;
+
+function getPattern(index: integer): pointer;
+var
+    p_seg: word;
+begin
+    p_seg := PATTERN[index];
+    if (p_seg >= $C000) then
+        getPattern := ptr(FrameSEG[0], ((p_seg shr 8) and $3f) * patlength)
+    else
+        getPattern := ptr(p_seg, 0);
+end;
+
+function isPatternInEM(index: integer): boolean;
+begin
+    isPatternInEM := PATTERN[index] >= $C000;
+end;
+
+function getPatternLogPageInEM(index: integer): byte;
+begin
+    getPatternLogPageInEM := PATTERN[index] and $ff;
+end;
+
+function getPatternPartInEM(index: integer): byte;
+begin
+    getPatternPartInEM := (PATTERN[index] shr 8) and $3f;
+end;
+
+(* << Patterns *)
 
 end.

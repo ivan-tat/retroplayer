@@ -65,14 +65,6 @@ function getusedEMSpat:longint;    { get size of patterns in EMS }
 FUNCTION getuseddevice(var typ:byte;var base:word;var dma8,dma16:byte;var irq:byte):byte;
 FUNCTION load_specialdata(var p):boolean; { allocate memory and load special data from file }
 
-(* Patterns *)
-procedure setPattern( index: integer; p_seg: word );
-procedure setPatternInEM( index: integer; logpage, part: byte );
-function getPattern( index: integer ): pointer;
-function isPatternInEM( index: integer ): boolean;
-function getPatternLogPageInEM( index: integer ): byte;
-function getPatternPartInEM( index: integer ): byte;
-
 IMPLEMENTATION
 
 uses
@@ -114,46 +106,6 @@ FUNCTION getuseddevice(var typ:byte;var base:word;var dma8,dma16:byte; var irq:b
 { = 0 ... no device set / = 1 ... use SB mixing / > 1 ... other devices not supported yet }
 { typ ... up2now only SB typ - look at BLASTER.PAS }
 begin end;
-
-(* Patterns >> *)
-
-procedure setPattern( index: integer; p_seg: word );
-begin
-    PATTERN[ index ] := p_seg;
-end;
-
-procedure setPatternInEM( index: integer; logpage, part: byte );
-begin
-    PATTERN[ index ] := $C000 + ( ( part and $3f ) shl 8 ) + logpage;
-end;
-
-function getPattern( index: integer ): pointer;
-var
-    p_seg: word;
-begin
-    p_seg := PATTERN[ index ];
-    if ( p_seg >= $C000 ) then
-        getPattern := ptr( FrameSEG[0], ( ( p_seg shr 8 ) and $3f ) * patlength )
-    else
-        getPattern := ptr( p_seg, 0 );
-end;
-
-function isPatternInEM( index: integer ): boolean;
-begin
-    isPatternInEM := PATTERN[ index ] >= $C000;
-end;
-
-function getPatternLogPageInEM( index: integer ): byte;
-begin
-    getPatternLogPageInEM := PATTERN[ index ] and $ff;
-end;
-
-function getPatternPartInEM( index: integer ): byte;
-begin
-    getPatternPartInEM := ( PATTERN[ index ] shr 8 ) and $3f;
-end;
-
-(* << Patterns *)
 
 PROCEDURE done_module;
 var i:word;
