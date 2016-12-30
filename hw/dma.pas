@@ -38,12 +38,12 @@ type
 type
     PDMAOwner = pointer;
 
-procedure dmaMaskChannels(mask: TDMAMask);
 procedure dmaMaskSingleChannel(ch: byte);
-procedure dmaEnableChannels(mask: TDMAMask);
+procedure dmaMaskChannels(mask: TDMAMask);
 procedure dmaEnableSingleChannel(ch: byte);
+procedure dmaEnableChannels(mask: TDMAMask);
 function  dmaGetLinearAddress(p: pointer): longint;
-procedure dmaSetupSingleChannel(ch: byte; mode: TDMAMode; p: pointer; count: word);
+procedure dmaSetupSingleChannel(ch: byte; mode: TDMAMode; l: longint; count: word);
 function  dmaGetCounter(ch: byte): word;
 
 function  dmaIsAvailableSingleChannel(ch: byte): boolean;
@@ -54,19 +54,36 @@ procedure dmaHookChannels(mask: TDMAMask; owner: PDMAOwner);
 procedure dmaReleaseSingleChannel(ch: byte);
 procedure dmaReleaseChannels(mask: TDMAMask);
 
+type
+    TDMABUF = record
+        data: pointer;
+        size: longint;
+        unaligned: pointer;
+    end;
+    PDMABUF = ^TDMABUF;
+
+function  dmaBuf_new: PDMABUF;
+procedure dmaBuf_delete(var buf: PDMABUF);
+function  dmaBufAlloc(buf: PDMABUF; size: longint): boolean;
+procedure dmaBufFree(buf: PDMABUF);
+
+procedure dmaBufInit(buf: PDMABUF);
+procedure dmaBufDone(buf: PDMABUF);
+
 implementation
 
 uses
-    printf;
+    printf,
+    dosproc;
 
 (*$l dma.obj*)
 
-procedure dmaMaskChannels(mask: TDMAMask); external;
 procedure dmaMaskSingleChannel(ch: byte); external;
-procedure dmaEnableChannels(mask: TDMAMask); external;
+procedure dmaMaskChannels(mask: TDMAMask); external;
 procedure dmaEnableSingleChannel(ch: byte); external;
+procedure dmaEnableChannels(mask: TDMAMask); external;
 function  dmaGetLinearAddress(p: pointer): longint; external;
-procedure dmaSetupSingleChannel(ch: byte; mode: TDMAMode; p: pointer; count: word); external;
+procedure dmaSetupSingleChannel(ch: byte; mode: TDMAMode; l: longint; count: word); external;
 function  dmaGetCounter(ch: byte): word; external;
 
 function  dmaIsAvailableSingleChannel(ch: byte): boolean; external;
@@ -77,8 +94,15 @@ procedure dmaHookChannels(mask: TDMAMask; owner: PDMAOwner); external;
 procedure dmaReleaseSingleChannel(ch: byte); external;
 procedure dmaReleaseChannels(mask: TDMAMask); external;
 
+function  dmaBuf_new: PDMABUF; external;
+procedure dmaBuf_delete(var buf: PDMABUF); external;
+function  dmaBufAlloc(buf: PDMABUF; size: longint): boolean; external;
+procedure dmaBufFree(buf: PDMABUF); external;
+
+procedure dmaBufInit(buf: PDMABUF); external;
+procedure dmaBufDone(buf: PDMABUF); external;
+
 procedure register_dma; far; external;
-procedure unregister_dma; far; external;
 
 begin
     register_dma;

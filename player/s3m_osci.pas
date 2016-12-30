@@ -117,7 +117,7 @@ begin
   writeln;
   Init;
   if not startplaying(stereo,_16bit,false) then halt;
-  writeln(#13#10' DMA buffer frame size: ', DMABufFrameSize);
+  writeln(#13#10' DMA buffer frame size: ', sndDMABuf.frameSize);
   writeln(#13#10' Stop playing and exit with <ESC> ');
   writeln('press any key to switch to oscillator ... ');
   readkey;
@@ -135,7 +135,7 @@ begin
   { DIsplay Oscilator : }
   if not stereo then
     begin
-      h:=DMABuf;
+      h:=sndDMABuf.buf^.Data;
       while not keypressed do
         begin
           waitretrace;
@@ -154,7 +154,7 @@ begin
     end
   else { in stereo mode : }
     begin
-      h:=DMABuf;
+      h:=sndDMABuf.buf^.Data;
       while not keypressed do
         begin
           for pos:=0 to usedchannels-1 do
@@ -164,7 +164,7 @@ begin
           for pos:=1 to 319 do
             begin
               i:=sbGetDMACounter and $fffe; { current position in DMA buffer }
-              if i>DMABufFrameSize then b:=7 else b:=4;
+              if (i > sndDMABuf.frameSize) then b:=7 else b:=4;
               { left channel : }
               linie(pos-1,36+scr[pos-1],pos,36+scr[pos],1);
               scr[pos-1]:=yl;yl:=h^[i] shr 2;

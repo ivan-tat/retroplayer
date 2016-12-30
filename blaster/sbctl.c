@@ -197,7 +197,8 @@ void PUBLIC_CODE sbSetupDMATransfer(void *p, uint16_t count, bool autoinit) {
         }
     };
 
-    dmaSetupSingleChannel(sdev_mode_16bit ? sdev_hw_dma16 : sdev_hw_dma8, mode, p, count);
+    dmaSetupSingleChannel(sdev_mode_16bit ? sdev_hw_dma16 : sdev_hw_dma8,
+        mode, dmaGetLinearAddress(p), count);
 }
 
 uint16_t PUBLIC_CODE sbGetDMACounter(void) {

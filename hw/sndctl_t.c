@@ -1,0 +1,64 @@
+/* sndctl_t.c -- type declarations for sndctl.c.
+
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
+
+#ifdef __WATCOMC__
+#include <stdbool.h>
+#include <stdint.h>
+#endif
+
+// TODO: remove PUBLIC_CODE macros when done.
+
+#include "..\pascal\pascal.h"
+#include "sndctl_t.h"
+
+bool PUBLIC_CODE set_sample_format(HWSMPFMT *p, uint8_t b, bool s, uint8_t c)
+{
+    HWSMPFMT fmt;
+
+    switch (b)
+    {
+        case 8:
+        case 16:
+        case 32:
+            fmt.flags = b | (s ? HWSMPFMTFL_SIGNED : 0);
+            break;
+    default:
+        return false;
+    };
+
+    switch (c)
+    {
+        case 1:
+        case 2:
+            fmt.channels = c;
+            break;
+    default:
+        return false;
+    };
+
+    *p = fmt;
+    return true;
+}
+
+uint8_t PUBLIC_CODE get_sample_format_bits(HWSMPFMT *p)
+{
+    return p->flags & HWSMPFMTFL_BITS_MASK;
+}
+
+bool PUBLIC_CODE is_sample_format_signed(HWSMPFMT *p)
+{
+    return (p->flags & HWSMPFMTFL_SIGNED) != 0;
+}
+
+uint8_t PUBLIC_CODE get_sample_format_channels(HWSMPFMT *p)
+{
+    return p->channels;
+}
+
+void PUBLIC_CODE clear_sample_format(HWSMPFMT *p)
+{
+    p->flags = 0;
+    p->channels = 0;
+}

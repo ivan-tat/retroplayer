@@ -23,6 +23,7 @@ rm -f ./dos/emstool.asm
 cleandir ./hw
 rm -f ./hw/dma.asm
 rm -f ./hw/pic.asm
+rm -f ./hw/sndctl_t.asm
 cleandir ./main
 rm -f ./main/effects.asm
 rm -f ./main/filldma.asm

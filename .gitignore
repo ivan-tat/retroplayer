@@ -49,6 +49,7 @@ dos/dosproc.asm
 dos/emstool.asm
 hw/dma.asm
 hw/pic.asm
+hw/sndctl_t.asm
 main/effects.asm
 main/filldma.asm
 main/fillvars.asm

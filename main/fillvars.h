@@ -15,39 +15,49 @@
 // TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
 
 #include "..\pascal\pascal.h"
+#include "..\hw\dma.h"
+#include "..\hw\sndctl_t.h"
 
-/* DMA buffer */
+/* DMA buffer for sound */
 
 #define DMA_BUF_SIZE_MAX (8<<10)
 
-extern void    *PUBLIC_DATA DMABufUnaligned;
-extern void    *PUBLIC_DATA DMABuf;
-extern uint32_t PUBLIC_DATA DMABufSize;
-extern uint16_t PUBLIC_DATA DMABufFrameSize;
-extern uint8_t  PUBLIC_DATA DMABufFramesCount;
-extern uint8_t  PUBLIC_DATA DMABufFrameLast;
-extern uint8_t  PUBLIC_DATA DMABufFrameActive;
-extern bool     PUBLIC_DATA DMAFlags_JustInFill;
-extern bool     PUBLIC_DATA DMAFlags_Slow;
+typedef struct soundDMABuffer_t {
+    DMABUF  *buf;
+    HWSMPFMT format;
+    uint16_t frameSize;
+    uint8_t  framesCount;
+    uint8_t  frameLast;
+    uint8_t  frameActive;
+    bool     flags_locked;
+    bool     flags_Slow;
+};
+typedef struct soundDMABuffer_t SNDDMABUF;
+
+extern SNDDMABUF PUBLIC_DATA sndDMABuf;
 
 /* player */
 
 extern uint8_t PUBLIC_DATA playOption_FPS;
     /* frames per second ... default is about 70Hz */
 extern bool    PUBLIC_DATA playOption_LowQuality;
-    /* flag if lowquality mode */
 
 /* EMM */
 
 extern uint16_t PUBLIC_DATA SavHandle;
     /* EMS handle for saving mapping while playing */
 
-extern uint16_t PUBLIC_CODE getDMABufFrameOff(uint8_t index);
-extern uint16_t PUBLIC_CODE getDMABufOffFromCount(uint16_t count);
-extern uint16_t PUBLIC_CODE getCountFromDMABufOff(uint16_t bufOff);
-extern void     PUBLIC_CODE initDMABuf(void);
-extern bool     PUBLIC_CODE allocDMABuf(uint32_t dmaSize);
-extern void     PUBLIC_CODE freeDMABuf(void);
-extern void     PUBLIC_CODE doneDMABuf(void);
+//SNDDMABUF *PUBLIC_CODE sndDMABuf_new(void);
+//SNDDMABUF *PUBLIC_CODE sndDMABuf_copy(SNDDMABUF *instance);
+//void     PUBLIC_CODE sndDMABuf_delete(SNDDMABUF **instance);
+
+uint16_t PUBLIC_CODE sndDMABufGetFrameOff(SNDDMABUF *buf, uint8_t index);
+uint16_t PUBLIC_CODE sndDMABufGetOffFromCount(SNDDMABUF *buf, uint16_t count);
+uint16_t PUBLIC_CODE sndDMABufGetCountFromOff(SNDDMABUF *buf, uint16_t bufOff);
+bool     PUBLIC_CODE sndDMABufAlloc(SNDDMABUF *buf, uint32_t dmaSize);
+void     PUBLIC_CODE sndDMABufFree(SNDDMABUF *buf);
+
+void     PUBLIC_CODE sndDMABufInit(SNDDMABUF *buf);
+void     PUBLIC_CODE sndDMABufDone(SNDDMABUF *buf);
 
 #endif  /* FILLVARS_H */

@@ -23,7 +23,7 @@
 
 static bool errorsav = false;
 
-void convert_8(void *outbuf, void *mixbuf, uint16_t count)
+void __near convert_8(void *outbuf, void *mixbuf, uint16_t count)
 {
     uint16_t *src;
     uint8_t *dst;
@@ -39,7 +39,7 @@ void convert_8(void *outbuf, void *mixbuf, uint16_t count)
     } while (count);
 }
 
-void LQconvert_8(void *outbuf, void *mixbuf, uint16_t count)
+void __near LQconvert_8(void *outbuf, void *mixbuf, uint16_t count)
 {
     uint16_t (*src)[1];
     uint8_t (*dst)[1];
@@ -73,47 +73,47 @@ void LQconvert_8(void *outbuf, void *mixbuf, uint16_t count)
     }
 }
 
-void fill_8bit(void)
+void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
 {
-    uint16_t wait, bufsize, buflen, srcoff, dstoff;
+    uint16_t wait, framesize, framelen, srcoff, dstoff;
     uint8_t (*buf)[1];
 
     /* check if we are allready in calculation routines
        if we are the PC is too slow -> how you wanna handle it ? */
 
-    buf = DMABuf;
-    bufsize = DMABufFrameSize;
+    buf = outbuf->buf->data;
+    framesize = outbuf->frameSize;
         // size to fill
-    buflen = getCountFromDMABufOff(bufsize);
+    framelen = sndDMABufGetCountFromOff(&sndDMABuf, framesize);
         // samples per channel to fill
 
-    if (DMAFlags_JustInFill) {
+    if (sndDMABuf.flags_locked) {
         wait = 0xffff;
-        while (wait && DMAFlags_JustInFill) {
+        while (wait && sndDMABuf.flags_locked) {
             wait--;
         }
-        if (DMAFlags_JustInFill) {
+        if (sndDMABuf.flags_locked) {
             /* sorry your PC is to slow - maincode may ignore this flag */
             /* but it'll sound ugly :( */
-            DMAFlags_Slow = true;
+            sndDMABuf.flags_Slow = true;
 
             /* simply fill the half with last correct mixed value */
-            dstoff = getDMABufFrameOff(DMABufFrameActive);
-            DMABufFrameActive = 1 - DMABufFrameActive;
-            srcoff = getDMABufFrameOff(DMABufFrameActive);
+            dstoff = sndDMABufGetFrameOff(&sndDMABuf, sndDMABuf.frameActive);
+            sndDMABuf.frameActive = 1 - sndDMABuf.frameActive;
+            srcoff = sndDMABufGetFrameOff(&sndDMABuf, sndDMABuf.frameActive);
             // FIXME: 8-bits stereo is two byte fill, not one
-            memset(&(buf[dstoff]), *buf[srcoff + bufsize - 1], bufsize);
+            memset(&(buf[dstoff]), *buf[srcoff + framesize - 1], framesize);
             return;
         }
     }
     /* for check if too slow set a variable (flag that we are allready in calc) */
 
-    DMAFlags_JustInFill = true;
+    sndDMABuf.flags_locked = true;
 
     if (EndOfSong) {
-        // clear DMA buffer
-        memset(&(buf[getDMABufFrameOff(DMABufFrameActive)]), 0, bufsize);
-        DMABufFrameActive = 1 - DMABufFrameActive;
+        // clear buffer
+        memset(&(buf[sndDMABufGetFrameOff(&sndDMABuf, sndDMABuf.frameActive)]), 0, framesize);
+        sndDMABuf.frameActive = 1 - sndDMABuf.frameActive;
     } else {
         // before calling mixing routines: save EMM mapping !
         if (UseEMS) {
@@ -122,30 +122,30 @@ void fill_8bit(void)
         }
 
         // mix into the mixing buffer
-        calcTick(mixBuf, buflen);
+        calcTick(mixbuf, framelen);
 
         // now restore EMM mapping:
         if (UseEMS) {
             if (! errorsav) EmsRestoreMap(SavHandle);
         }
 
-        DMABufFrameLast = (DMABufFrameLast + 1) & (DMABufFramesCount - 1);
-        dstoff = getDMABufFrameOff(DMABufFrameLast);
+        sndDMABuf.frameLast = (sndDMABuf.frameLast + 1) & (sndDMABuf.framesCount - 1);
+        dstoff = sndDMABufGetFrameOff(&sndDMABuf, sndDMABuf.frameLast);
 
         if (playOption_LowQuality)
-            LQconvert_8(&(buf[dstoff << 1]), mixBuf, bufsize);
+            LQconvert_8(&(buf[dstoff << 1]), mixbuf, framesize);
         else
-            convert_8(&(buf[dstoff]), mixBuf, bufsize);
+            convert_8(&(buf[dstoff]), mixbuf, framesize);
     }
 
-    DMAFlags_JustInFill = false;
+    sndDMABuf.flags_locked = false;
 }
 
-void PUBLIC_CODE fill_DMAbuffer(void)
+void PUBLIC_CODE fill_DMAbuffer(void *mixbuf, SNDDMABUF *outbuf)
 {
     if (! sdev_mode_16bit) {
         do {
-            fill_8bit();
-        } while (DMABufFrameLast != DMABufFrameActive);
+            fill_8bit(mixbuf, outbuf);
+        } while (outbuf->frameLast != outbuf->frameActive);
     }
 }

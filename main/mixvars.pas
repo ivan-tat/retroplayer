@@ -17,8 +17,8 @@ const
 
 var
     mixBuf: pointer;
-    mixSampleRate: word;
     mixChannels: byte;
+    mixSampleRate: word;
     mixBufSamplesPerChannel: word;
     mixBufSamples: word;
     mixTickSamplesPerChannel: word;

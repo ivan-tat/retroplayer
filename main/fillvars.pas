@@ -10,37 +10,40 @@ unit fillvars;
 
 interface
 
+uses
+    dma,
+    sndctl_t;
+
 const
     DMA_BUF_SIZE_MAX = 8*1024;
 
-(* DMA buffer *)
-var
-    DMABufUnaligned: pointer;
-    DMABuf: pointer;
-    DMABufSize: longint;
-    DMABufFrameSize: word;
-    DMABufFramesCount: byte;
-    DMABufFrameLast: byte;
-    DMABufFrameActive: byte;
-    DMAFlags_JustInFill: boolean;
-    DMAFlags_Slow: boolean;
+type
+    TSNDDMABUF = record
+        buf: PDMABUF;
+        format: THWSMPFMT;
+        frameSize: word;
+        framesCount: byte;
+        frameLast: byte;
+        frameActive: byte;
+        flags_locked: boolean;
+        flags_Slow: boolean;
+    end;
+    PSNDDMABUF = ^TSNDDMABUF;
 
-(* player *)
 var
+    sndDMABuf: TSNDDMABUF;
     playOption_FPS: byte;
     playOption_LowQuality: boolean;
-
-(* EMM *)
-var
     SavHandle: word;
 
-function  getDMABufFrameOff(index: byte): word;
-function  getDMABufOffFromCount(count: word): word;
-function  getCountFromDMABufOff(bufOff: word): word;
-procedure initDMABuf;
-function  allocDMABuf(dmaSize: longint): boolean;
-procedure freeDMABuf;
-procedure doneDMABuf;
+function  sndDMABufGetFrameOff(buf: PSNDDMABUF; index: byte): word;
+function  sndDMABufGetOffFromCount(buf: PSNDDMABUF; count: word): word;
+function  sndDMABufGetCountFromOff(buf: PSNDDMABUF; off: word): word;
+function  sndDMABufAlloc(buf: PSNDDMABUF; size: longint): boolean;
+procedure sndDMABufFree(buf: PSNDDMABUF);
+
+procedure sndDMABufInit(buf: PSNDDMABUF);
+procedure sndDMABufDone(buf: PSNDDMABUF);
 
 implementation
 
@@ -49,16 +52,18 @@ uses
     strutils,
     printf,
     dosproc,
-    sbctl;
+    sbctl,
+    s3mvars;
 
 (*$l fillvars.obj*)
 
-function  getDMABufFrameOff(index: byte): word; external;
-function  getDMABufOffFromCount(count: word): word; external;
-function  getCountFromDMABufOff(bufOff: word): word; external;
-procedure initDMABuf; external;
-function  allocDMABuf(dmaSize: longint): boolean; external;
-procedure freeDMABuf; external;
-procedure doneDMABuf; external;
+function  sndDMABufGetFrameOff(buf: PSNDDMABUF; index: byte): word; external;
+function  sndDMABufGetOffFromCount(buf: PSNDDMABUF; count: word): word; external;
+function  sndDMABufGetCountFromOff(buf: PSNDDMABUF; off: word): word; external;
+function  sndDMABufAlloc(buf: PSNDDMABUF; size: longint): boolean; external;
+procedure sndDMABufFree(buf: PSNDDMABUF); external;
+
+procedure sndDMABufInit(buf: PSNDDMABUF); external;
+procedure sndDMABufDone(buf: PSNDDMABUF); external;
 
 end.

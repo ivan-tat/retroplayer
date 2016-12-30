@@ -96,6 +96,8 @@ compile dma.pas
 compile isr.asm
 compile pic.c
 compile pic.pas
+compile sndctl_t.c
+compile sndctl_t.pas
 
 cd ../blaster
 LOCDIR=blaster

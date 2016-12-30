@@ -7,6 +7,7 @@
 #define DMA_H 1
 
 #ifdef __WATCOMC__
+#pragma once
 #include <stdbool.h>
 #include <stdint.h>
 #endif
@@ -17,9 +18,9 @@
 
 #define DMA_CHANNELS 8
 
-/* DMA i/o */
+/*** Hardware I/O ***/
 
-/* DMA transfer mode register */
+/* Transfer mode register */
 
 typedef uint8_t dmaMode_t;
 
@@ -53,23 +54,40 @@ void     PUBLIC_CODE dmaMaskChannels(dmaMask_t mask);
 void     PUBLIC_CODE dmaEnableSingleChannel(uint8_t ch);
 void     PUBLIC_CODE dmaEnableChannels(dmaMask_t mask);
 uint32_t PUBLIC_CODE dmaGetLinearAddress(void *p);
-void     PUBLIC_CODE dmaSetupSingleChannel(uint8_t ch, dmaMode_t mode, void *p, uint16_t count);
+void     PUBLIC_CODE dmaSetupSingleChannel(uint8_t ch, dmaMode_t mode, uint32_t l, uint16_t count);
 uint16_t PUBLIC_CODE dmaGetCounter(uint8_t ch);
 
-/* Sharing DMA channels */
+/*** Sharing DMA channels ***/
 
 typedef void dmaOwner_t;
 
-extern bool        PUBLIC_CODE dmaIsAvailableSingleChannel(uint8_t ch);
-extern dmaMask_t   PUBLIC_CODE dmaGetAvailableChannels(void);
-extern dmaOwner_t *PUBLIC_CODE dmaGetSingleChannelOwner(uint8_t ch);
-extern void        PUBLIC_CODE dmaHookSingleChannel(uint8_t ch, dmaOwner_t *owner);
-extern void        PUBLIC_CODE dmaHookChannels(dmaMask_t mask, dmaOwner_t *owner);
-extern void        PUBLIC_CODE dmaReleaseSingleChannel(uint8_t d);
-extern void        PUBLIC_CODE dmaReleaseChannels(dmaMask_t mask);
+bool        PUBLIC_CODE dmaIsAvailableSingleChannel(uint8_t ch);
+dmaMask_t   PUBLIC_CODE dmaGetAvailableChannels(void);
+dmaOwner_t *PUBLIC_CODE dmaGetSingleChannelOwner(uint8_t ch);
+void        PUBLIC_CODE dmaHookSingleChannel(uint8_t ch, dmaOwner_t *owner);
+void        PUBLIC_CODE dmaHookChannels(dmaMask_t mask, dmaOwner_t *owner);
+void        PUBLIC_CODE dmaReleaseSingleChannel(uint8_t ch);
+void        PUBLIC_CODE dmaReleaseChannels(dmaMask_t mask);
 
-/* Initialization */
+/*** Buffer ***/
+
+typedef struct dmaBuffer_t {
+    void    *data;
+    uint32_t size;
+    void    *unaligned;
+};
+typedef struct dmaBuffer_t DMABUF;
+
+DMABUF *PUBLIC_CODE dmaBuf_new(void);
+void    PUBLIC_CODE dmaBuf_delete(DMABUF **buf);
+bool    PUBLIC_CODE dmaBufAlloc(DMABUF *buf, uint32_t size);
+void    PUBLIC_CODE dmaBufFree(DMABUF *buf);
+
+void    PUBLIC_CODE dmaBufInit(DMABUF *buf);
+void    PUBLIC_CODE dmaBufDone(DMABUF *buf);
+
+/*** Initialization ***/
 
 DECLARE_REGISTRATION(dma)
 
-#endif /* DMA_H */
+#endif  /* DMA_H */

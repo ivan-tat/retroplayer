@@ -433,8 +433,8 @@ begin
       end;
     if (c=#77) and (startchn<usedchannels) then begin inc(startchn);if screen_no=2 then prepare_scr; end;
     if (c=#75) and (startchn>1) then begin dec(startchn);if screen_no=2 then prepare_scr; end;
-  until (DMAFlags_Slow or (c=#27) or EndOfSong);
-  if (DMAFlags_Slow) then writeln(' Sorry your PC is to slow ... ');
+  until (sndDMABuf.flags_Slow or (c=#27) or EndOfSong);
+  if (sndDMABuf.flags_Slow) then writeln(' Sorry your PC is to slow ... ');
   view_cursor;
   stop_play;
   done_module;

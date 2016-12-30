@@ -14,7 +14,8 @@
 // TODO: remove PUBLIC_CODE macros when done.
 
 #include "..\pascal\pascal.h"
+#include "fillvars.h"
 
-extern void PUBLIC_CODE fill_DMAbuffer(void);
+void PUBLIC_CODE fill_DMAbuffer(void *mixbuf, SNDDMABUF *outbuf);
 
-#endif /* FILLDMA_H */
+#endif  /* FILLDMA_H */

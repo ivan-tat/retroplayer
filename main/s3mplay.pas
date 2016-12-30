@@ -74,8 +74,9 @@ uses
     crt,
     dos,
     dosproc,
+    emstool,
     pic,
-    EMStool,
+    sndctl_t,
     sbctl,
     blaster,
     effvars,
@@ -140,7 +141,7 @@ PROCEDURE Done_S3Mplayer;
   begin
     restore_irq;
     freeVolumeTable;
-    doneDMABuf;
+    sndDMABufDone(@sndDMABuf);
     if mixBuf<>Nil then freeDOSmem(mixBuf);
     buffersreserved:=false;
   end;
@@ -173,7 +174,7 @@ var p:pArray;
     { buffersreserved = false ! }
     if ( not allocVolumeTable ) then begin player_error:=notenoughmem;exit end;
 
-    if (not allocDMABuf(DMA_BUF_SIZE_MAX)) then
+    if (not sndDMABufAlloc(@sndDMABuf, DMA_BUF_SIZE_MAX)) then
     begin
         player_error := notenoughmem;
         exit;
@@ -181,9 +182,9 @@ var p:pArray;
     {
       in tick buffer we calc one DMA buffer half - that are DMA_BUF_SIZE_MAX/2 words
     }
-    if (not getdosmem(mixBuf, DMABufSize)) then
+    if (not getdosmem(mixBuf, sndDMABuf.buf^.Size)) then
       begin
-        freeDMABuf;
+        sndDMABufFree(@sndDMABuf);
         freeVolumeTable;
         player_error:=notenoughmem;
         exit
@@ -196,33 +197,56 @@ var p:pArray;
 
 PROCEDURE playSetMode(m16bits, mStereo: boolean; mRate: word);
 var
-    rate, tmp: word;
-    channels, i: byte;
+    outbuf: PSNDDMABUF;
+    b: byte;
+    s: boolean;
+    c: byte;
+    r: word;
+    tmp: word;
+    i: byte;
+    fmt: THWSMPFMT;
 begin
     (*sbAdjustMode(mRate,mStereo,m16bits);*)
+
+    case m16bits of
+        false:
+            begin
+                b := 8;
+                s := false;
+            end;
+        true:
+            begin
+                b := 16;
+                s := true;
+            end;
+    end;
+
+    case mStereo of
+        false: c := 1;
+        true: c := 2;
+    end;
+
     SampleRate := mRate;
 
-    rate := mRate;
-    if (playOption_LowQuality) then rate := rate shr 1;
+    outbuf := @sndDMABuf;
 
-    if (mStereo) then
-        channels := 2
-    else
-        channels := 1;
+    r := mRate;
+    if (playOption_LowQuality) then r := r shr 1;
 
-    (*tmp := longint(1000000) div rate;
-    setMixMode(channels, rate, ((longint(1000000) div tmp) div playOption_FPS)+1);*)
-    setMixMode(channels, rate, trunc(trunc(1000000/trunc(1000000/rate))/playOption_FPS)+1);
+    set_sample_format(@(outbuf^.format), b, s, c);
+    (*tmp := longint(1000000) div r;
+    setMixMode(c, r, ((longint(1000000) div tmp) div playOption_FPS)+1);*)
+    setMixMode(c, r, trunc(trunc(1000000/trunc(1000000/r))/playOption_FPS)+1);
 
-    DMABufFrameSize := mixBufSamplesPerChannel;
-    if (m16bits) then DMABufFrameSize := DMABufFrameSize shl 1;
-    if (mStereo) then DMABufFrameSize := DMABufFrameSize shl 1;
+    outbuf^.frameSize := mixBufSamplesPerChannel;
+    if (b = 16) then outbuf^.frameSize := outbuf^.frameSize shl 1;
+    if (c = 2) then outbuf^.frameSize := outbuf^.frameSize shl 1;
 
-    i := DMABufSize div DMABufFrameSize;
-    DMABufFramesCount := 1;
-    while DMABufFramesCount < i do DMABufFramesCount := DMABufFramesCount shl 1;
-    DMABufFramesCount := DMABufFramesCount shr 1;
-    if (playOption_LowQuality) then DMABufFramesCount := DMABufFramesCount shr 1;
+    i := outbuf^.buf^.Size div outbuf^.frameSize;
+    outbuf^.framesCount := 1;
+    while outbuf^.framesCount < i do outbuf^.framesCount := outbuf^.framesCount shl 1;
+    outbuf^.framesCount := outbuf^.framesCount shr 1;
+    if (playOption_LowQuality) then outbuf^.framesCount := outbuf^.framesCount shr 1;
 end;
 
 function getspeed:byte;
@@ -245,10 +269,10 @@ begin
     end;
 
     inside := true;
-    DMABufFrameActive := (DMABufFrameActive + 1) and (DMABufFramesCount - 1);
+    sndDMABuf.frameActive := (sndDMABuf.frameActive + 1) and (sndDMABuf.framesCount - 1);
     inside := false;
 
-    fill_dmabuffer;
+    fill_dmabuffer(mixbuf, @sndDMABuf);
 end;
 
 procedure Initchannels;
@@ -347,21 +371,21 @@ var key:boolean;
     curspeed:=initspeed;set_tempo(inittempo);
     set_ST3order(playOption_ST3Order); { <- don't remove this ! it's important ! (setup lastorder) }
     EndOfSong:=false;
-    DMAFlags_Slow := false;
+    sndDMABuf.flags_Slow := false;
     mixTickSamplesPerChannelLeft:=0;    (* emmidiately next tick *)
     Initchannels;
 
-    count := DMABufFrameSize;
+    count := sndDMABuf.frameSize;
     if (playOption_LowQuality) then count := count * 2;
 
     (* loop through whole DMA buffer *)
-    sbSetupDMATransfer(DMABuf, count * DMABufFramesCount, true);
+    sbSetupDMATransfer(sndDMABuf.buf^.Data, count * sndDMABuf.framesCount, true);
 
-    DMABufFrameActive := DMABufFramesCount - 1;
-    DMABufFrameLast := DMABufFramesCount;
+    sndDMABuf.frameActive := sndDMABuf.framesCount - 1;
+    sndDMABuf.frameLast := sndDMABuf.framesCount;
 
     (* calc all buffer parts *)
-    fill_dmabuffer;
+    fill_dmabuffer(mixbuf, @sndDMABuf);
 
     (* double buffering *)
     play_firstblock( count );
@@ -391,7 +415,7 @@ begin
   buffersreserved:=false;
   sounddevice:=false;
   initVolumeTable;
-  initDMABuf;
+  sndDMABufInit(@sndDMABuf);
   mixBuf:=Nil;  (* FIXME: initMixBuf() *)
   Samplerate:=22000; { not the highest but nice sounding samplerate :) }
   mixSampleRate := Samplerate;
@@ -426,7 +450,6 @@ begin
 end;
 
 procedure register_s3mplay; far; external;
-procedure unregister_s3mplay; far; external;
 
 begin
     register_s3mplay;
