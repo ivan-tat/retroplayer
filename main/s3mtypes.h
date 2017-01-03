@@ -143,7 +143,9 @@ typedef struct channel_t {
     uint8_t  bDelayTicks;   // NoteDelay: new value | NoteCut: ticks left to cut
 };
 
-typedef struct channel_t channelsList_t[MAX_CHANNELS];
+typedef struct channel_t MIXCHN;
+
+typedef MIXCHN channelsList_t[MAX_CHANNELS];
 
 #define chn_getInstrument(chn) (struct instrument_t *)MK_FP(chn->wInsSeg, 0)
 #define chn_setInstrument(chn, p) chn->wInsSeg = FP_SEG((void __far *)p)

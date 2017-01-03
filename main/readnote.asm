@@ -12,252 +12,271 @@ include effects.def
 include mixer.def
 include mixer_.def
 
+; general
+
+chnSetCommand macro command
+mov word ptr [SI][TChannel.wCommand],command*2
+endm
+
+chnIfCommand macro command
+cmp word ptr [SI][TChannel.wCommand],command*2
+endm
+
+regIfCommand macro reg, command
+cmp reg,command*2
+endm
+
+chnSetSubCommand macro command
+mov word ptr [SI][TChannel.wCommand2],command*2
+endm
+
+; Initialize effects
+
+effInitCall macro address
+        call    address
+endm
+
+ISTART_ macro name
+name proc near
+endm
+
+effInitReturn macro value
+        mov al,&value
+        ret
+endm
+
+effInitReturnNothing macro
+        ret
+endm
+
+IEND___ macro name
+name endp
+endm
+
+;  Handle effects
+
+effHandleCall macro address
+        call    address
+endm
+
+HSTART_ macro name
+name proc near
+endm
+
+effHandleReturn macro value
+        mov al,&value
+        ret
+endm
+
+effHandleReturnNothing macro
+        ret
+endm
+
+HEND___ macro name
+name endp
+endm
+
 ; declared in readnote.pas
 extrn set_tempo: far
 
 _DATA segment word public use16 'DATA'
 
-noeffect  equ dw offset checkonlyPara   ; no effect
-noeffect2 equ dw offset handlenothing   ; nothing to handle for this effect
+EFFIDX_NONE              equ 0
+EFFIDX_A_SET_SPEED       equ 1
+EFFIDX_B_JUMP            equ 2
+EFFIDX_C_PATTERN_BREAK   equ 3
+EFFIDX_D_VOLUME_SLIDE    equ 4
+EFFIDX_E_PITCH_DOWN      equ 5
+EFFIDX_F_PITCH_UP        equ 6
+EFFIDX_G_PORTAMENTO      equ 7
+EFFIDX_H_VIBRATO         equ 8
+EFFIDX_I_TREMOR          equ 9
+EFFIDX_J_ARPEGGIO        equ 10
+EFFIDX_K_VIB_VOLSLIDE    equ 11
+EFFIDX_L_PORTA_VOLSLIDE  equ 12
+EFFIDX_M                 equ 13
+EFFIDX_N                 equ 14
+EFFIDX_O                 equ 15
+EFFIDX_P                 equ 16
+EFFIDX_Q_RETRIG_VOLSLIDE equ 17
+EFFIDX_R_TREMOLO         equ 18
+EFFIDX_S_SPECIAL         equ 19
+EFFIDX_T_SET_TEMPO       equ 20
+EFFIDX_U_FINE_VIBRATO    equ 21
+EFFIDX_V_SET_GVOLUME     equ 22
+EFFIDX_W                 equ 23
+EFFIDX_X                 equ 24
+EFFIDX_Y                 equ 25
+EFFIDX_Z                 equ 26
 
 ; we have to init all the effects :
-initeffects label word
-                   noeffect
-                   dw offset setspeed       ; effect 'A'  ok !
-                   dw offset jump2order     ; effect 'B'  ok !
-                   dw offset patternbreak2  ; effect 'C'  ok !
-                   dw offset VolumeEfcts    ; effect 'D'  ok !
-                   dw offset Pitchdowns     ; effect 'E'  ok !
-                   dw offset Pitchups       ; effect 'F'  ok !
-                   dw offset Portamento     ; effect 'G'  ok !
-                   dw offset vibrato        ; effect 'H'  ok !
-                   dw offset Tremor         ; effect 'I'   <- shity can't get it :( ... ugly implementation
-                   dw offset Arpeggio       ; effect 'J'  ok !
-                   dw offset Vib_Vol        ; effect 'K'  ok !
-                   dw offset Port_Vol       ; effect 'L'  ok !
-                   noeffect
-                   noeffect
-                   noeffect
-                   noeffect
-                   dw offset Retrigg        ; effect 'Q'  ok !
-                   dw offset Tremolo        ; effect 'R'  ok !
-                   dw offset Specialsets    ; effect 'S'  look at special 1
-                   dw offset EffInit_T_SetTempo
-                   dw offset vibrato        ; effect 'U'  ok ! (here equal to vibrato)
-                   dw offset globalvolume   ; effect 'V'  ok !
+effInit_tab label word
+        dw offset effInit_None
+        dw offset effInit_A_SetSpeed
+        dw offset effInit_B_JumpToOrder
+        dw offset effInit_C_PatternBreak
+        dw offset effInit_D_VolumeSlide
+        dw offset effInit_E_PitchDown
+        dw offset effInit_F_PitchUp
+        dw offset effInit_G_Portamento
+        dw offset effInit_H_Vibrato
+        dw offset effInit_I_Tremor  ; can't get it - ugly implementation
+        dw offset effInit_J_Arpeggio
+        dw offset effInit_K_Vib_VolSlide
+        dw offset effInit_L_Porta_VolSlide
+        dw offset effInit_None
+        dw offset effInit_None
+        dw offset effInit_None
+        dw offset effInit_None
+        dw offset effInit_Q_Retrig_VolSlide
+        dw offset effInit_R_Tremolo
+        dw offset effInit_S_Special
+        dw offset effInit_T_SetTempo
+        dw offset effInit_H_Vibrato ; 'U' here equal to 'H' (Vibrato)
+        dw offset effInit_V_SetGVolume
 
 ; Ok now some tables for multichoise effects (e.g. 'Syx' but also 'Dxy',E,F)
 ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-special1 label word
-                   noeffect                   ; S0? - nothin
-                   noeffect                   ; set filter -> not implemented (by ST3)
-                   noeffect                   ; set glissando -> not implemented (by ST3)
-                   noeffect                   ; set finetune -> not here ! look special2
-                   dw offset setvibwav     ;OK !
-                   dw offset settremwav    ;OK !
-                   noeffect                   ; does not exist
-                   noeffect                   ; does not exist
-                   noeffect                   ; maybe later (it's E8x - panning )
-                   noeffect                   ; does not exist
-                   noeffect                   ; stereo control not implemented
-                   dw offset cmdPatloop    ;
-                   dw offset InitNotecut   ;
-                   dw offset InitNotedelay ;
-                   dw offset InitPatdelay  ;
-                   noeffect                   ; funkrepeat -> not implemented
+effInit_S_Special_tab label word
+        dw offset effInit_None                   ; S0? - nothin
+        dw offset effInit_None                   ; set filter -> not implemented (by ST3)
+        dw offset effInit_None                   ; set glissando -> not implemented (by ST3)
+        dw offset effInit_None                   ; set finetune -> not here ! look special2
+        dw offset effInit_S4_SetVibratoWaveform
+        dw offset effInit_S5_SetTremoloWaveform
+        dw offset effInit_None                   ; does not exist
+        dw offset effInit_None                   ; does not exist
+        dw offset effInit_None                   ; maybe later (it's E8x - panning )
+        dw offset effInit_None                   ; does not exist
+        dw offset effInit_None                   ; stereo control not implemented
+        dw offset effInit_SB_PatternLoop
+        dw offset effInit_SC_NoteCut
+        dw offset effInit_SD_NoteDelay
+        dw offset effInit_SE_PatternDelay
+        dw offset effInit_None                   ; funkrepeat -> not implemented
 
-retrig_dif label word
-                   dw offset nosld            ; all done ...
-                   dw offset slddown
-                   dw offset slddown
-                   dw offset slddown
-                   dw offset slddown
-                   dw offset slddown
-                   dw offset use2div3
-                   dw offset use1div2
-                   dw offset nosld
-                   dw offset sldup
-                   dw offset sldup
-                   dw offset sldup
-                   dw offset sldup
-                   dw offset sldup
-                   dw offset use3div2
-                   dw offset use2times
+EFFIDX_Q_RETRIG_VOLSLIDE_NONE     equ 0
+EFFIDX_Q_RETRIG_VOLSLIDE_DOWN     equ 1
+EFFIDX_Q_RETRIG_VOLSLIDE_USE2DIV3 equ 2
+EFFIDX_Q_RETRIG_VOLSLIDE_USE1DIV2 equ 3
+EFFIDX_Q_RETRIG_VOLSLIDE_UP       equ 4
+EFFIDX_Q_RETRIG_VOLSLIDE_USE3DIV2 equ 5
+EFFIDX_Q_RETRIG_VOLSLIDE_USE2DIV1 equ 6
+
+effInit_Q_Retrig_VolSlide_tab label word
+        dw offset effInit_Q_Retrig_VolSlide_None
+        dw offset effInit_Q_Retrig_VolSlide_Down
+        dw offset effInit_Q_Retrig_VolSlide_Down
+        dw offset effInit_Q_Retrig_VolSlide_Down
+        dw offset effInit_Q_Retrig_VolSlide_Down
+        dw offset effInit_Q_Retrig_VolSlide_Down
+        dw offset effInit_Q_Retrig_VolSlide_Use2Div3
+        dw offset effInit_Q_Retrig_VolSlide_Use1Div2
+        dw offset effInit_Q_Retrig_VolSlide_None
+        dw offset effInit_Q_Retrig_VolSlide_Up
+        dw offset effInit_Q_Retrig_VolSlide_Up
+        dw offset effInit_Q_Retrig_VolSlide_Up
+        dw offset effInit_Q_Retrig_VolSlide_Up
+        dw offset effInit_Q_Retrig_VolSlide_Up
+        dw offset effInit_Q_Retrig_VolSlide_Use3Div2
+        dw offset effInit_Q_Retrig_VolSlide_Use2Div1
 
 ; and some effects we have to handle after reading vol/inst/note
-; maybe refresh etc. - remember MODplayer ...
-; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-handleeffects label word
-                     noeffect2              ; really no effect ;)
-                     noeffect2
-                     noeffect2
-                     noeffect2
-                     dw offset Hdl_Volfx    ; effect 'D'  ok!
-                     dw offset Hdl_pitchdwn ; effect 'E'  ok!
-                     dw offset Hdl_pitchup  ; effect 'F'  ok!
-                     dw offset Hdl_porta    ; effect 'G'  ok!
-                     dw offset Hdl_Vibrato  ; effect 'H'  ok!
-                     noeffect2
-                     dw offset Hdl_arpeggio ; effect 'J'  ok!
-                     dw offset hdl_Vib_Vol  ; effect 'K'  ok!
-                     dw offset Hdl_Port_Vol ; effect 'L'  ok!
-                     noeffect2
-                     noeffect2
-                     dw offset Hdl_setsmpofs ; effect 'O'  ok!
-                     noeffect2
-                     noeffect2
-                     dw offset Hdl_tremolo  ; effect 'R'  ok!
-                     dw offset Hdl_Special  ; effect 'S'  look at special 2
-                     noeffect2
-                     dw offset Hdl_Vibrato  ; effect 'U'  ok! (here equal to vibrato
-                     noeffect2
+; maybe refresh etc.
+effHandle_tab label word
+        dw offset effHandle_None
+        dw offset effHandle_None
+        dw offset effHandle_None
+        dw offset effHandle_None
+        dw offset effHandle_D_VolumeSlide
+        dw offset effHandle_E_PitchDown
+        dw offset effHandle_F_PitchUp
+        dw offset effHandle_G_Portamento
+        dw offset effHandle_H_Vibrato
+        dw offset effHandle_None
+        dw offset effHandle_J_Arpeggio
+        dw offset effHandle_K_Vib_VolSlide
+        dw offset effHandle_L_Porta_VolSlide
+        dw offset effHandle_None
+        dw offset effHandle_None
+        dw offset effHandle_O_SetSampleOffset
+        dw offset effHandle_None
+        dw offset effHandle_None
+        dw offset effHandle_R_Tremolo
+        dw offset effHandle_S_Special
+        dw offset effHandle_None
+        dw offset effHandle_H_Vibrato  ; 'U' here equal to 'H' (vibrato)
+        dw offset effHandle_None
 
       ; Ok now some tables for multichoise effects (e.g. 'Syx' but also 'Dxy',E,F)
       ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Vol_cmd2nd label word
-                     noeffect2
-                     noeffect2
-                     dw offset FineVSlideDwn
-                     dw offset FineVSlideUp
-Pitdwn_cmd2nd label word
-                     noeffect2
-                     dw offset Finepitch_down
-                     dw offset XFinepitch_down
-Pitup_cmd2nd label word
-                     noeffect2
-                     dw offset Finepitch_up
-                     dw offset XFinepitch_up
+effHandle_D_VolumeSlide_tab label word
+        dw offset effHandle_None
+        dw offset effHandle_None
+        dw offset effHandle_D_VolumeSlide_FineDown
+        dw offset effHandle_D_VolumeSlide_FineUp
 
-special2 label word
-                   noeffect2                  ; S0? - nothin
-                   noeffect2                  ; set filter -> not implemented (by ST3)
-                   noeffect2                  ; set glissando -> not implemented (by ST3)
-                   dw offset Hdl_finetune
-                   noeffect2                  ; not here -> special 1
-                   noeffect2                  ; not here -> special 1
-                   noeffect2                  ; does not exist
-                   noeffect2                  ; does not exist
-                   noeffect2                  ; not here -> special 1
-                   noeffect2                  ; does not exist
-                   noeffect2                  ; stereo control -> not implemented (by ST3)
-                   noeffect2                  ; not here -> special 1
-                   noeffect2                  ; not here -> special 1
-                   noeffect2                  ; not here -> special 1
-                   dw offset Hdl_patterndly
-                   noeffect2                  ; funkrepeat -> not implemented
+effHandle_E_PitchDown_tab label word
+        dw offset effHandle_None
+        dw offset effHandle_E_PitchDown_Fine
+        dw offset effHandle_E_PitchDown_Extra
 
-      jump2flag    db ?
-      jump2where   db ?
-      breakflag    db ?
-      break2where  db ?
-      pLoop_now    db ?
-      gvolFlag     db ?
-      newgvol      db ?
-      ; to save portamento values :
-      portaFlag    db ?
-      Period_old   dw ?
-      sStep_old    dd ?
-      ; a little one for arpeggio :
-      arp_chg      db ?
-      ; save effect,parameter for patterndelay
-      sav_cmd      dw ?
-      sav_para     db ?
-      ; now some variables I added after I found out those amazing things
-      ; about patterndelay
-      inpatterndly db ?   ;<- call 'readnotes' inside a patterndelay, if then ignore all
-                          ;notes/inst/vol !
-      curnote      db ?   ;<- normaly it will be a copie of es:[di], but in
-                          ; patterndelay =0 <- ignore note =)
-      curinst      db ?   ; the same thing for instrument
-      curVol       db ?   ; and for volume
+effHandle_F_PitchUp_tab label word
+        dw offset effHandle_None
+        dw offset effHandle_F_PitchUp_Fine
+        dw offset effHandle_F_PitchUp_Extra
+
+effHandle_S_Special_tab label word
+        dw offset effHandle_None                  ; S0? - nothin
+        dw offset effHandle_None                  ; set filter -> not implemented (by ST3)
+        dw offset effHandle_None                  ; set glissando -> not implemented (by ST3)
+        dw offset effHandle_S3_FineTune
+        dw offset effHandle_None                  ; not here -> special 1
+        dw offset effHandle_None                  ; not here -> special 1
+        dw offset effHandle_None                  ; does not exist
+        dw offset effHandle_None                  ; does not exist
+        dw offset effHandle_None                  ; not here -> special 1
+        dw offset effHandle_None                  ; does not exist
+        dw offset effHandle_None                  ; stereo control -> not implemented (by ST3)
+        dw offset effHandle_None                  ; not here -> special 1
+        dw offset effHandle_None                  ; not here -> special 1
+        dw offset effHandle_None                  ; not here -> special 1
+        dw offset effHandle_SE_PatternDelay
+        dw offset effHandle_None                  ; funkrepeat -> not implemented
+
+; Play state
+        playState_jumpToOrder_bFlag db ?
+        playState_jumpToOrder_bPos  db ?
+        playState_patBreak_bFlag    db ?
+        playState_patBreak_bPos     db ?
+        playState_patLoop_bNow      db ?
+        playState_gVolume_bFlag     db ?
+        playState_gVolume_bValue    db ?
+        playState_patDelay_bNow     db ?
+            ; call 'readnotes' inside a pattern delay,
+            ; if then ignore all notes/inst/vol !
+; now some variables I added after I found out those amazing things
+; about pattern delay
+; save effect,parameter for pattern delay
+        chnState_patDelay_wCommandSaved     dw ?
+        chnState_patDelay_bParameterSaved   db ?
+; Channel state
+        chnState_cur_bNote  db ?
+            ; normaly it will be a copie of es:[di], but in
+            ; patterndelay == 0 -> ignore note
+        chnState_cur_bIns   db ?    ; the same thing for instrument
+        chnState_cur_bVol   db ?    ; and for volume
+; to save portamento values :
+        chnState_porta_flag             db ?
+        chnState_porta_wSmpPeriodOld    dw ?
+        chnState_porta_dSmpStepOld      dd ?
+; a little one for arpeggio :
+        chnState_arp_bFlag  db ?
 
 _DATA ends
 
 READNOTE_TEXT segment word public use16 'CODE'
 assume cs:READNOTE_TEXT,ds:DGROUP
-
-; Local
-calcNotePeriod proc near _dChn: dword, _dIns: dword, _bNote: byte
-; IN:  DS = _DATA
-;      _bNote = Note: (name << 4) + ocatve
-; OUT: AX = Period
-        push    bx
-        push    cx
-        push    si
-        push    di
-        push    es
-        push    fs
-        les     si,[_dChn]
-        lfs     di,[_dIns]
-        movzx   ax,[_bNote]
-        ; calc wSmpPeriod (with st3 finetune) :
-        mov     bl,al
-        mov     cl,al
-        shr     cl,4
-        and     bx,0fh
-        shl     bx,1
-        ; ok calculate the period
-        mov     ax,[ST3Periods+bx]
-        shl     ax,4                 ; period(note)*16
-        shr     ax,cl                ; period(note)*16 >> octave(note)
-        mov     dx,8363
-        mul     dx                   ; dx:ax = 8363*period(note)*16 >> octave(note)
-        mov     bx,fs:[di][TInstrument.c2speed]
-        div     bx
-        ;       8363*(period(note)*16 shr octave(note))
-        ; ax = --------------------------------------
-        ;            C2Speed of current Sample
-        ; Now check borders :
-        cmp     ax,es:[si][TChannel.wSmpPeriodLow]
-        jnb     calcNotePeriod@_notbelow
-        mov     ax,es:[si][TChannel.wSmpPeriodLow]
-calcNotePeriod@_notbelow:
-        cmp     ax,es:[si][TChannel.wSmpPeriodHigh]
-        jna     calcNotePeriod@_notabove
-        mov     ax,es:[si][TChannel.wSmpPeriodHigh]
-calcNotePeriod@_notabove:
-        pop     fs
-        pop     es
-        pop     di
-        pop     si
-        pop     cx
-        pop     bx
-        ret
-calcNotePeriod endp
-
-; Local
-calcpart proc near _dChn: dword, _dIns: dword, _bNote: byte
-; IN:  DS = _DATA
-;      _bNote = Note: (name << 4) + ocatve
-; OUT: DX:AX = step
-        push    si
-        push    di
-        push    es
-        push    fs
-        les     si,[_dChn]
-        lfs     di,[_dIns]
-        movzx   ax,[_bNote]
-        push    ds
-        push    si
-        push    fs
-        push    di
-        push    ax
-        call    calcNotePeriod
-        test    ax,ax
-        jz      calcpart@_nostep
-        push    ax  ; uint16 wPeriod
-        call    mixCalcSampleStep
-        jmp     calcpart@_done
-calcpart@_nostep:
-        xor     ax,ax
-        xor     dx,dx
-calcpart@_done:
-        pop     fs
-        pop     es
-        pop     di
-        pop     si
-        ret
-calcpart endp
 
 CheckPara0 MACRO
 local cp
@@ -275,32 +294,54 @@ local cp
 cp:
 ENDM
 
+; Out: dx:ax = pointer to pattern data
+mapPatternData proc near dPatData: dword
+        mov     dx,word ptr [dPatData][2]
+        cmp     dx,0c000h
+        jae     mapPatternData@_map
+        mov     ax,word ptr [dPatData][0]
+        jmp     mapPatternData@_exit
+mapPatternData@_map:
+        push    bp
+        mov     ax,[patListEMHandle]
+        push    ax      ; uint16 handle
+        xor     dh,dh
+        push    dx      ; uint16 logPage
+        push    0       ; uint8 physPage
+        call    EmsMap
+        pop     bp
+        test    al,al
+        jnz     mapPatternData@_ok
+        xor     ax,ax
+        xor     dx,dx
+        jmp     mapPatternData@_exit
+mapPatternData@_ok:
+        mov     ax,word ptr [dPatData][2]
+        movzx   ax,ah
+        and     al,03fh
+        mul     [patListPatLength]  ; ax = partno * pattern length
+        add     ax,word ptr [dPatData][0]
+        mov     dx,[FrameSEG]
+mapPatternData@_exit:
+        ret
+mapPatternData endp
+
 ; put next notes into channels
 public readnewnotes
 readnewnotes proc far
 local chnCounter: byte
-             mov     [jump2flag],0
-             mov     [breakflag],0
-             mov     [gvolFlag],0
-             mov     [Ploop_now],0
-             mov     [inpatterndly],0
-             cmp     [patterndelay],0
-             je      nopatdly
-             mov     [inpatterndly],1
-nopatdly:    mov     al,[usedchannels]
-             mov     [chnCounter],al
-             ; get next postion in current pattern
+             mov     [playState_jumpToOrder_bFlag],0
+             mov     [playState_patBreak_bFlag],0
+             mov     [playState_gVolume_bFlag],0
+             mov     [playState_patLoop_bNow],0
+             mov     al,[patterndelay]
+             test    al,al
+             setnz   al
+             mov     [playState_patDelay_bNow],al
              mov     al,[usedchannels]
-             mov     ah,al
-             shl     al,2
-             add     al,ah        ; al = 5*[usedchannels]
-             mov     ah,[curline]
-             mul     ah
-             ; ok that was the offset :
-             mov     di,ax
+             mov     [chnCounter],al
              ; now the segment of current pattern :
-             xor     bh,bh
-             mov     bl,[curorder]
+             movzx   bx,[curorder]
              mov     bl,[order+bx]
              cmp     bl,254
              jae     nextorder
@@ -308,68 +349,58 @@ nopatdly:    mov     al,[usedchannels]
              mov     ax,[pattern+bx]
              or      ax,ax
              jz      nopatloop
-             cmp     ax,0C000h
-             jb      noEMSpattern
-             push    ax
-             push    di
-             ; Set page number:
-             mov     ah,044h
-             xor     bx,bx
-             mov     bl,al              ; bx = logical page
-             xor     al,al              ; al = physical page
-             mov     dx,[patListEMHandle]  ; dx = handle
-             int     67h
-             cmp     ah,0
-             je      noemsprob
-             mov     dl,0
-             div     dl         ; <- cause a "div by 0" because EMSdriver does not work correct
-noemsprob:   pop     di
-             pop     ax
-             ; change offset to part #(ah and 0fh)
-             shr     ax,8
-             and     al,3fh             ; bit 13-8 = partno.
-             xor     ah,ah
-             mov     dx,[patListPatLength]
-             mul     dx                 ; ax = partno * pattern length
-             add     di,ax
-             mov     ax,[frameSEG]
-noemspattern:mov     es,ax
-             ; ES:DI - pointer to current position in current pattern
+        push    ax      ; seg(data)
+        push    0       ; off(data)
+        call    mapPatternData
+        mov     bx,ax
+        or      bx,dx
+        jz      nopatloop
+        mov     di,ax
+        mov     es,dx
+        ; get next postion in current pattern
+        mov     al,[usedchannels]
+        mov     ah,al
+        shl     al,2
+        add     al,ah        ; al = 5*[usedchannels]
+        mov     ah,[curline]
+        mul     ah
+        add     di,ax
+        ; ES:DI - pointer to current position in current pattern
              lea    si,[Channel]
 chnLoop:     cmp     byte ptr [SI][TChannel.bChannelType],2
-             ja      donothing           ; <- for adlib channels
-             mov     [portaFlag],0      ; <- set Flag back
-             ; ok first do read current note,inst,vol -> if in patterndelay then ignore them !
-             mov     [curNote],0ffh
-             mov     [curInst],00h
-             mov     [curVol] ,0ffh
-             cmp     [inpatterndly],1
+             ja      handlenothing           ; <- for adlib channels
+             mov     [chnState_porta_flag],0      ; <- set Flag back
+             ; ok first do read current note,inst,vol -> if in pattern delay then ignore them !
+             mov     [chnState_cur_bNote],0ffh
+             mov     [chnState_cur_bIns],00h
+             mov     [chnState_cur_bVol] ,0ffh
+             cmp     [playState_patDelay_bNow],1
              je      ignorethem
              mov     al,es:[di]
-             mov     [curNote],al
+             mov     [chnState_cur_bNote],al
              mov     al,es:[di+1]
-             mov     [curInst],al
+             mov     [chnState_cur_bIns],al
              mov     al,es:[di+2]
-             mov     [curVol],al
+             mov     [chnState_cur_bVol],al
 ignorethem:  ; read effects - it may change the read instr/note !
              ; ~~~~~~~~~~~~
              mov     al,es:[di+3]        ; read effect number
              xor     ah,ah
              shl     ax,1
              mov     byte ptr [SI][TChannel.bEffFlags],0
-             cmp     ax,2*8              ; Vibrato ...
+             regIfCommand ax,EFFIDX_H_VIBRATO
              je      checkifcontV
-             cmp     ax,2*11             ; Vibrato Volefcs
+             regIfCommand ax,EFFIDX_K_VIB_VOLSLIDE
              je      checkifcontV
-             cmp     ax,2*21             ; fine Vibrato
+             regIfCommand ax,EFFIDX_U_FINE_VIBRATO
              je      checkifcontV
              ; -> no vibrato effect, so check if last row there was one ...
              ; if there was - do refresh dSmpStep
-             cmp     word ptr [SI][TChannel.wCommand],2*8      ; was vibrato
+             chnIfCommand EFFIDX_H_VIBRATO
              je      Vibend
-             cmp     word ptr [SI][TChannel.wCommand],2*21     ; was fine vibrato
+             chnIfCommand EFFIDX_U_FINE_VIBRATO
              je      Vibend
-             cmp     word ptr [SI][TChannel.wCommand],2*11     ; was vibrato+volef
+             chnIfCommand EFFIDX_K_VIB_VOLSLIDE
              jne     noVibend
              ; refresh frequency
 vibend:      push    ax
@@ -379,52 +410,54 @@ vibend:      push    ax
              je      novibcalc
              push    ax  ; uint16 wPeriod
              call    mixCalcSampleStep
-             mov     word ptr [SI][TChannel.dSmpStep],ax
-             mov     word ptr [SI][TChannel.dSmpStep+2],dx
+             mov     [SI][word ptr TChannel.dSmpStep][0],ax
+             mov     [SI][word ptr TChannel.dSmpStep][2],dx
 novibcalc:   pop     ax
-novibend:    cmp     ax,2*18             ; Tremolo ...
+novibend:
+             regIfCommand ax,EFFIDX_R_TREMOLO
              je      checkifcontTrm
-             cmp     ax,2*10             ; Arpeggio ...
+             regIfCommand ax,EFFIDX_J_ARPEGGIO
              je      checkifcontA
              ; - currently no arpeggio, but arpeggio was last row ?
              ; if there was - set dSmpStep = dArpSmpSteps[0] (refresh frequ)
-             cmp     word ptr [SI][TChannel.wCommand],2*10
+        chnIfCommand EFFIDX_J_ARPEGGIO
              jne     noarpegend
              ; arpeggio ends :
              push    ax
              mov     eax,[SI][TChannel.dArpSmpSteps]
              mov     [SI][TChannel.dSmpStep],eax
              pop     ax
-noarpegend:  cmp     ax,2*17               ; Note retrigg
+noarpegend:
+             regIfCommand ax,EFFIDX_Q_RETRIG_VOLSLIDE
              je      checkifcontRetr
 aftercontcheck:
              mov     bx,[SI][TChannel.wCommand]
-             mov     [sav_cmd],bx               ; to save it for pattern delay ...
+             mov     [chnState_patDelay_wCommandSaved],bx   ; to save it for pattern delay ...
              mov     [SI][TChannel.wCommand],ax
-             mov     word ptr [SI][TChannel.wCommand2],0
-             cmp     al,44
+             chnSetSubCommand 0
+             regIfCommand al,EFFIDX_V_SET_GVOLUME  ; last effect in table
              jbe     noproblem
-             mov     word ptr [SI][TChannel.wCommand],0
+        chnSetCommand EFFIDX_NONE
              xor     ax,ax
 noproblem:   mov     bx,ax
-             mov     al,es:[di+4]        ; read effect parameter
-             jmp     [initeffects+bx]
-back2reality:
+        mov     al,es:[di+4]    ; read effect parameter
+        effInitCall [effInit_tab+bx]
+        test    al,al
+        jz      handlenothing
 
 effectdone:  ; read instrument
              ; ~~~~~~~~~~~~~~~
              ; reinit instrument data but don't restart !
-             mov     al,[curInst]
+             mov     al,[chnState_cur_bIns]
              cmp     al,00
              je      no_newinstr
 
              ; ------------------ check if instrument does exist
              push    ax
              dec     al
-             mov     bl,al
-             xor     bh,bh
-             shl     bx,2
              xor     ah,ah
+             mov     bx,ax
+             shl     bx,2
              add     bx,ax
              mov     ax,word ptr ds:[Instruments+2]
              add     bx,ax
@@ -433,34 +466,28 @@ effectdone:  ; read instrument
              je      instok
              pop     ax
              xor     al,al
-             mov     [curInst],al
+             mov     [chnState_cur_bIns],al
              jmp     no_newinstr
 instok:      pop     ax
 
-             comment #
-             cmp     byte ptr [SI][TChannel.bEnabled],0    ; if channel is disabled then restart definitly
-             je      restart
-             cmp     [SI][TChannel.bIns],al      ; but if it's enabled & same instrno then don't restart
-             je      dontrestart
-restart:     cmp     [portaFlag],1                ; and if portamento then don't restart ;)
-             je      dontrestart
-             mov     bx,[SI][TChannel.wSmpStart]
-             mov     [SI][TChannel.dSmpPos],bx
-dontrestart:
-             #
+comment #
+    if ((!chn->bEnabled) || (chn->bIns != {al}))
+    {
+        if (!chnState_porta_flag)
+            chn->dSmpPos = chn->wSmpStart << 16;
+    };
+#
 
-;        mov     [SI][TChannel.bIns],al
         push    es  ; save
         push    ds  ; FP_SEG(channel_t *)
         push    si  ; FP_OFF(channel_t *)
         xor     ah,ah
         push    ax  ; uint8 insNum
-;        call    SetupNewInst
         call    chn_setupInstrument
         pop     es  ; restore
 no_newinstr: ; read note ...
              ; ~~~~~~~~~~~~~
-             mov     al,[curNote]
+             mov     al,[chnState_cur_bNote]
              cmp     al,0ffh
              je      no_newnote
              cmp     al,0feh
@@ -473,13 +500,13 @@ normal_note:
         push    si  ; FP_OFF(channel_t *)
         xor     ah,ah
         push    ax  ; uint8 note
-        mov     al,[portaFlag]
+        mov     al,[chnState_porta_flag]
         push    ax  ; bool keep
         call    chn_setupNote
         pop     es  ; restore
 no_newnote:  ; read volume - last but not least ;)
              ; ~~~~~~~~~~~
-             mov     al,[curVol]
+             mov     al,[chnState_cur_bVol]
              cmp     al,0ffh
              je      no_vol
              cmp     al,64
@@ -489,27 +516,29 @@ volok:       mul     [gvolume]
              shr     ax,6
              mov     [SI][TChannel.bSmpVol],al
 
-no_vol:      ; ok now the effect handling after reading vol/instr/note
-             mov     bx,[SI][TChannel.wCommand]
-             jmp     [handleeffects+bx]
-handlenothing:
+no_vol:
+        ; ok now the effect handling after reading vol/instr/note
+        mov bx,[SI][TChannel.wCommand]
+         effHandleCall [effHandle_tab+bx]
 
-donothing:   add     di,5                ; to next channel in pattern
+handlenothing:
+             add     di,5                ; to next channel in pattern
              add     si,size TChannel    ; to next channel in channel mix info
              dec     [chnCounter]        ; one channel done
              jnz     chnLoop
-             cmp     [gvolFlag],0
+             cmp     [playState_gVolume_bFlag],0
              je      nonewglobal
-             mov     al,[newgvol]
+             mov     al,[playState_gVolume_bValue]
              mov     [gvolume],al
 nonewglobal: mov     al,[curspeed]
              mov     [curtick],al
-             cmp     [breakflag],1
+             cmp     [playState_patBreak_bFlag],1
              je      patternbreak
-             cmp     [jump2flag],1
+             cmp     [playState_jumpToOrder_bFlag],1
              je      jumporder
-             cmp     [Ploop_now],1
+             cmp     [playState_patLoop_bNow],1
              je      dopatloop
+
 nopatloop:   inc     [curline]
              cmp     [curline],64
              jne     only_next
@@ -520,20 +549,20 @@ otherorder:  mov     [Ploop_to],0
              mov     al,[lastorder]
              cmp     [curorder],al
              ja      end_reached
-doloop:      xor     bh,bh
-             mov     bl,[curorder]
+doloop:
+             movzx   bx,[curorder]
              mov     al,[Order+bx]
              cmp     al,254
              jae     nextorder
              mov     [curpattern],al
 only_next:   ret
 
-patternbreak:mov     al,[break2where]
+patternbreak:mov     al,[playState_patBreak_bPos]
              mov     [curline],al
              jmp     nextorder
 
 jumporder:   mov     [curline],0
-             mov     al,[jump2where]
+             mov     al,[playState_jumpToOrder_bPos]
              mov     [curorder],al
              jmp     otherorder
 
@@ -555,20 +584,20 @@ end_reached: cmp     [playOption_LoopSong],1
 donotloop:   mov     [EndOfSong],1
              jmp     only_next
 
-checkifcontV:  ; check if continue Vib/Vib_vol
-             cmp     [curNote],0feh
+checkifcontV:  ; check if continue Vib/effInit_K_Vib_VolSlide
+             cmp     [chnState_cur_bNote],0feh
              jb      aftercontcheck
-             cmp     word ptr [SI][TChannel.wCommand],11*2  ; command before was vibrato
+             chnIfCommand EFFIDX_K_VIB_VOLSLIDE  ; command before was vibrato
              je      checkok1
-             cmp     word ptr [SI][TChannel.wCommand],21*2  ; command before was fine vibrato
+             chnIfCommand EFFIDX_U_FINE_VIBRATO  ; command before was fine vibrato
              je      checkok1
-             cmp     word ptr [SI][TChannel.wCommand],8*2   ; command before was vibrato+volef
+             chnIfCommand EFFIDX_H_VIBRATO   ; command before was vibrato+volef
              jne     aftercontcheck
 checkok1:    mov     byte ptr [SI][TChannel.bEffFlags],EFFFLAG_CONTINUE
              jmp     aftercontcheck
 
 checkifcontA:     ; check if continue Arpeg
-             cmp     [curNote],0feh
+             cmp     [chnState_cur_bNote],0feh
              jb      aftercontcheck
 checkifcontTrm:   ; check if continue a tremolo
 checkifcontRetr:  ; check if continue a note retrig
@@ -577,157 +606,217 @@ checkifcontRetr:  ; check if continue a note retrig
              mov     byte ptr [SI][TChannel.bEffFlags],EFFFLAG_CONTINUE
              jmp     aftercontcheck
 
+readnewnotes endp
+
 ; Effects :
 ; ~~~~~~~~~
 
-checkonlyPara: checkPara0
-               jmp      back2reality
+ISTART_ effInit_None
+        checkPara0
+        effInitReturn 1
+IEND___ effInit_None
 
-setspeed:      ; effect 'A'
-               checkPara0not
-               cmp      al,0                ; speed = 0 does not exist
-               je       back2reality
-               mov      [curspeed],al
-               jmp      back2reality
-jump2order:    ; effect 'B'
-               checkPara0not
-               mov      [jump2flag],1
-               mov      [jump2where],al
-               jmp      back2reality
-patternbreak2: ; effect 'C'
-               checkPara0not
-               mov      [breakflag],1
-               mov      ah,al
-               and      al,0fh
-               shr      ah,4
-               AAD
-               mov      [break2where],al
-               jmp      back2reality
-VolumeEfcts:   ; effect 'D' or jump from dual commands ...
+ISTART_ effInit_A_SetSpeed
+        checkPara0not
+        cmp     al,0    ; speed = 0 does not exist
+        je      effInit_A_SetSpeed@_exit
+        mov     [curspeed],al
+effInit_A_SetSpeed@_exit:
+        effInitReturn 1
+IEND___ effInit_A_SetSpeed
+
+ISTART_ effInit_B_JumpToOrder
+        checkPara0not
+        mov     [playState_jumpToOrder_bFlag],1
+        mov     [playState_jumpToOrder_bPos],al
+        effInitReturn 1
+IEND___ effInit_B_JumpToOrder
+
+ISTART_ effInit_C_PatternBreak
+        checkPara0not
+        mov     [playState_patBreak_bFlag],1
+        mov     ah,al
+        and     al,0fh
+        shr     ah,4
+        AAD
+        mov     [playState_patBreak_bPos],al
+        effInitReturn 1
+IEND___ effInit_C_PatternBreak
+
+ISTART_ effInit_D_VolumeSlide
                checkPara0
                mov      ah,al
                shr      ah,4
                cmp      ah,0fh
-               jne      nofinevoldown
+               jne      effInit_D_VolumeSlide@_noFineDown
                cmp      al,0f0h
-               je       volup
+               je       effInit_D_VolumeSlide@_up
                ; normal fine volume down   DFx
-               mov      word ptr [SI][TChannel.wCommand2],2*2
-               jmp      back2reality
-nofinevoldown: mov      ah,al
+        chnSetSubCommand 2
+        jmp effInit_D_VolumeSlide@_exit
+effInit_D_VolumeSlide@_noFineDown:
+               mov      ah,al
                and      ah,0fh
                cmp      ah,0fh
-               jne      nofinevolup
+               jne      effInit_D_VolumeSlide@_noFineUp
                cmp      al,0fh
-               je       voldown
-               ; normal fine volume up     DxF
-               mov      word ptr [SI][TChannel.wCommand2],3*2
-               jmp      back2reality
-nofinevolup:   mov      ah,al
+               je       effInit_D_VolumeSlide@_down
+        ; normal fine volume up DxF
+        chnSetSubCommand 3
+        jmp effInit_D_VolumeSlide@_exit
+effInit_D_VolumeSlide@_noFineUp:
+               mov      ah,al
                and      ah,00fh
-               jz       notVslidedown
-               ; normale slide down effect D0x
-voldown:       mov      word ptr [SI][TChannel.wCommand2],0
-               jmp      back2reality
-notVslidedown: ; normal slide up effect    Dx0
-volup:         mov      word ptr [SI][TChannel.wCommand2],1*2
-               jmp      back2reality
-Pitchdowns:    ; effect 'E'
+               jz       effInit_D_VolumeSlide@_up
+effInit_D_VolumeSlide@_down:
+        ; normal slide down effect D0x
+        chnSetSubCommand 0
+        jmp effInit_D_VolumeSlide@_exit
+effInit_D_VolumeSlide@_up:
+        ; normal slide up effect Dx0
+        chnSetSubCommand 1
+effInit_D_VolumeSlide@_exit:
+        effInitReturn 1
+IEND___ effInit_D_VolumeSlide
+
+ISTART_ effInit_E_PitchDown
                checkPara0
                cmp      al,0DFh      ; al is parameter
-               ja       extraptdowns
-               mov      word ptr [SI][TChannel.wCommand2],0
-               jmp      back2reality
-extraptdowns:  cmp      al,0EFh
-               ja       Finepitchdown
+               ja       effInit_E_PitchDown@_extra
+        chnSetSubCommand 0
+        jmp effInit_E_PitchDown@_exit
+effInit_E_PitchDown@_extra:
+               cmp      al,0EFh
+               ja       effInit_E_PitchDown@_fine
                ; extra fine slides
-               mov      word ptr [SI][TChannel.wCommand2],2*2
-               jmp      back2reality
-Finepitchdown: mov      word ptr [SI][TChannel.wCommand2],1*2
-               jmp      back2reality
-Pitchups:      ; effect 'F'
+        chnSetSubCommand 2
+        jmp effInit_E_PitchDown@_exit
+effInit_E_PitchDown@_fine:
+        chnSetSubCommand 1
+effInit_E_PitchDown@_exit:
+        effInitReturn 1
+IEND___ effInit_E_PitchDown
+
+ISTART_ effInit_F_PitchUp
                checkPara0
                cmp      al,0DFh      ; al is parameter
-               ja       extraptups
-               mov      word ptr [SI][TChannel.wCommand2],0
-               jmp      back2reality
-extraptups:    cmp      al,0EFh
-               ja       Finepitchup
+               ja       effInit_F_PitchUp@_extra
+        chnSetSubCommand 0
+        jmp effInit_F_PitchUp@_exit
+effInit_F_PitchUp@_extra:
+               cmp      al,0EFh
+               ja       effInit_F_PitchUp@_fine
                ; extra fine slides
-               mov      word ptr [SI][TChannel.wCommand2],2*2
-               jmp      back2reality
-Finepitchup:   mov      word ptr [SI][TChannel.wCommand2],1*2
-               jmp      back2reality
-Portamento:    ; effect 'G'
+        chnSetSubCommand 2
+        jmp effInit_F_PitchUp@_exit
+effInit_F_PitchUp@_fine:
+        chnSetSubCommand 1
+effInit_F_PitchUp@_exit:
+        effInitReturn 1
+IEND___ effInit_F_PitchUp
+
+ISTART_ effInit_G_Portamento_Stop
+        mov     [chnState_porta_flag],0
+        chnSetCommand EFFIDX_NONE
+        effInitReturnNothing
+IEND___ effInit_G_Portamento_Stop
+
+ISTART_ effInit_G_Portamento
                checkPara0not
                cmp      al,0
-               je       nonewPortpara
+               je       effInit_G_Portamento@_noNewParam
                mov      [SI][TChannel.bPortParam],al
-nonewPortpara: mov      [portaFlag],1
+effInit_G_Portamento@_noNewParam:
+               mov      [chnState_porta_flag],1
                ; check first if portamento really possible:
                cmp      byte ptr [SI][TChannel.bEnabled],0
-               je       stopporta
-               cmp      [curNote],0feh
-               jae      back2reality    ; <- continue portamento
+               je       effInit_G_Portamento@_stop
+               cmp      [chnState_cur_bNote],0feh
+               jae      effInit_G_Portamento@_exit  ; <- continue portamento
                ; now save some values (we wanna slide from ...)
                mov      eax,[SI][TChannel.dSmpStep]
-               mov      [sStep_old],eax
+               mov      [chnState_porta_dSmpStepOld],eax
                mov      ax,[SI][TChannel.wSmpPeriod]
-               mov      [Period_old],ax
-               jmp      back2reality
-stopporta:     mov      word ptr [SI][TChannel.wCommand],0   ;<-noeffect
-               mov      [portaFlag],0
-               jmp      back2reality
-Vibrato:       ; effect 'H'
+               mov      [chnState_porta_wSmpPeriodOld],ax
+        jmp effInit_G_Portamento@_exit
+effInit_G_Portamento@_stop:
+        effInitCall effInit_G_Portamento_Stop
+effInit_G_Portamento@_exit:
+        effInitReturn 1
+IEND___ effInit_G_Portamento
+
+ISTART_ effInit_H_Vibrato
                checkpara0not
                test     byte ptr [SI][TChannel.bEffFlags],EFFFLAG_CONTINUE
-               jnz      norestart
+               jnz      effInit_H_Vibrato@_noRestart
                mov      byte ptr [SI][TChannel.bTabPos],0
-norestart:     cmp      al,0
-               jne      newVibvalue
+effInit_H_Vibrato@_noRestart:
+               cmp      al,0
+               jne      effInit_H_Vibrato@_newValue
                mov      al,[SI][TChannel.bVibParam]
-newVibValue:   mov      ah,al
+effInit_H_Vibrato@_newValue:
+               mov      ah,al
                shr      ah,4
                cmp      ah,0
-               jne      Vibspeedok
+               jne      effInit_H_Vibrato@_speedOk
                mov      ah,[SI][TChannel.bVibParam]
                and      ah,0f0h
                or       al,ah
-VibspeedOk:    mov      [SI][TChannel.bVibParam],al
-               jmp      back2reality
-Tremor:        ; effect 'I'
+effInit_H_Vibrato@_speedOk:
+               mov      [SI][TChannel.bVibParam],al
+        effInitReturn 1
+IEND___ effInit_H_Vibrato
+
+ISTART_ effInit_I_Tremor
                checkPara0
-               jmp      back2reality
-Arpeggio:      ; effect 'J'
+        effInitReturn 1
+IEND___ effInit_I_Tremor
+
+ISTART_ effInit_J_Arpeggio
                cmp      al,0
-               je       uselastPara
-               mov      [arp_chg],1
+               je       effInit_J_Arpeggio@_useLastPara
+               mov      [chnState_arp_bFlag],1
                mov      [SI][TChannel.bParameter],al
-               jmp      back2reality
-uselastPara:   mov      [arp_chg],0
-               jmp      back2reality
-Vib_Vol:       ; effect 'K'
+        jmp effInit_J_Arpeggio@_exit
+effInit_J_Arpeggio@_useLastPara:
+               mov      [chnState_arp_bFlag],0
+effInit_J_Arpeggio@_exit:
+        effInitReturn 1
+IEND___ effInit_J_Arpeggio
+
+ISTART_ effInit_K_Vib_VolSlide
                test     byte ptr [SI][TChannel.bEffFlags],EFFFLAG_CONTINUE
-               jnz      volumeefcts
+               jnz      effInit_K_Vib_VolSlide@_volumeSlide
                mov      byte ptr [SI][TChannel.bTabPos],0
-               jmp      volumeefcts
-Port_Vol:      ; effect 'L'
-               mov      [portaFlag],1
+effInit_K_Vib_VolSlide@_volumeSlide:
+        effInitCall effInit_D_VolumeSlide
+        effInitReturn 1
+IEND___ effInit_K_Vib_VolSlide
+
+ISTART_ effInit_L_Porta_VolSlide
+               mov      [chnState_porta_flag],1
                ; check first if portamento really possible:
                cmp      byte ptr [SI][TChannel.bEnabled],0
-               je       stopporta             ; <- channel plays nothing -> no porta and volfx usefull ;)
-               cmp      [curNote],0feh
-               jae      volumeefcts           ; <- continue portamento
+               je       effInit_L_Porta_VolSlide@_stop  ; <- channel plays nothing -> no porta and volfx usefull ;)
+               cmp      [chnState_cur_bNote],0feh
+               jae      effInit_L_Porta_VolSlide@_volumeSlide   ; <- continue portamento
                ; now save some values (we wanna slide from ...)
                push     ax
                mov      eax,[SI][TChannel.dSmpStep]
-               mov      [sStep_old],eax
+               mov      [chnState_porta_dSmpStepOld],eax
                mov      ax,[SI][TChannel.wSmpPeriod]
-               mov      [Period_old],ax
+               mov      [chnState_porta_wSmpPeriodOld],ax
                pop      ax
-               jmp      volumeefcts    ; <- and now volume effects
+effInit_L_Porta_VolSlide@_volumeSlide:
+        effInitCall effInit_D_VolumeSlide
+        jmp effInit_L_Porta_VolSlide@_exit
+effInit_L_Porta_VolSlide@_stop:
+        effInitCall effInit_G_Portamento_Stop
+effInit_L_Porta_VolSlide@_exit:
+        effInitReturn 1
+IEND___ effInit_L_Porta_VolSlide
 
-Retrigg:       ; effect 'Q'
+ISTART_ effInit_Q_Retrig_VolSlide
                cmp      al,0
                jne      newretrPara
                mov      al,[SI][TChannel.bParameter]
@@ -739,53 +828,89 @@ newretrPara:   mov      [SI][TChannel.bParameter],al
                je       noretrigg
                dec      ah
                mov      [SI][TChannel.bRetrigTicks],ah
-aftersetretr:  mov      bl,al
-               shr      bl,4
-               shl      bl,1
-               xor      bh,bh
-               jmp      [retrig_dif+bx]
-nosld:         mov      word ptr [SI][TChannel.wCommand2],0
-               jmp      back2reality
-slddown:       mov      word ptr [SI][TChannel.wCommand2],2
-               jmp      back2reality
-use2div3:      mov      word ptr [SI][TChannel.wCommand2],4
-               jmp      back2reality
-use1div2:      mov      word ptr [SI][TChannel.wCommand2],6
-               jmp      back2reality
-sldup:         mov      word ptr [SI][TChannel.wCommand2],8
-               jmp      back2reality
-use3div2:      mov      word ptr [SI][TChannel.wCommand2],10
-               jmp      back2reality
-use2times:     mov      word ptr [SI][TChannel.wCommand2],12
-               jmp      back2reality
-noretrigg:     mov      word ptr [SI][TChannel.wCommand],0
-               jmp      back2reality
-Tremolo:       ; effect 'R'
+aftersetretr:
+        movzx   bx,al
+        shr     bx,4
+        shl     bx,1
+        effInitCall [effInit_Q_Retrig_VolSlide_tab+bx]
+        effInitReturnNothing
+IEND___ effInit_Q_Retrig_VolSlide
+
+ISTART_ effInit_Q_Retrig_VolSlide_None
+        chnSetSubCommand EFFIDX_Q_RETRIG_VOLSLIDE_NONE
+        effInitReturn 1
+IEND___ effInit_Q_Retrig_VolSlide_None
+
+ISTART_ effInit_Q_Retrig_VolSlide_Down
+        chnSetSubCommand EFFIDX_Q_RETRIG_VOLSLIDE_DOWN
+        effInitReturn 1
+IEND___ effInit_Q_Retrig_VolSlide_Down
+
+ISTART_ effInit_Q_Retrig_VolSlide_Use2Div3
+        chnSetSubCommand EFFIDX_Q_RETRIG_VOLSLIDE_USE2DIV3
+        effInitReturn 1
+IEND___ effInit_Q_Retrig_VolSlide_Use2Div3
+
+ISTART_ effInit_Q_Retrig_VolSlide_Use1Div2
+        chnSetSubCommand EFFIDX_Q_RETRIG_VOLSLIDE_USE1DIV2
+        effInitReturn 1
+IEND___ effInit_Q_Retrig_VolSlide_Use1Div2
+
+ISTART_ effInit_Q_Retrig_VolSlide_Up
+        chnSetSubCommand EFFIDX_Q_RETRIG_VOLSLIDE_UP
+        effInitReturn 1
+IEND___ effInit_Q_Retrig_VolSlide_Up
+
+ISTART_ effInit_Q_Retrig_VolSlide_Use3Div2
+        chnSetSubCommand EFFIDX_Q_RETRIG_VOLSLIDE_USE3DIV2
+        effInitReturn 1
+IEND___ effInit_Q_Retrig_VolSlide_Use3Div2
+
+ISTART_ effInit_Q_Retrig_VolSlide_Use2Div1
+        chnSetSubCommand EFFIDX_Q_RETRIG_VOLSLIDE_USE2DIV1
+        effInitReturn 1
+IEND___ effInit_Q_Retrig_VolSlide_Use2Div1
+
+ISTART_ noretrigg
+        chnSetCommand EFFIDX_NONE
+        effInitReturn 1
+IEND___ noretrigg
+
+ISTART_ effInit_R_Tremolo
                test     byte ptr [SI][TChannel.bEffFlags],EFFFLAG_CONTINUE
                jnz      noTrmrestart
                mov      byte ptr [SI][TChannel.bTabPos],0
-noTrmrestart:  cmp      al,0
+noTrmrestart:
+               cmp      al,0
                jne      newTrmvalue
                mov      al,[SI][TChannel.bParameter]
-newTrmValue:   mov      ah,al
+newTrmValue:
+               mov      ah,al
                shr      ah,4
                cmp      ah,0
                jne      Trmspeedok
                mov      ah,[SI][TChannel.bParameter]
                and      ah,0f0h
                or       al,ah
-TrmspeedOk:    mov      [SI][TChannel.bParameter],al
-               jmp      back2reality
-Specialsets:   ; effect 'S'
+TrmspeedOk:
+               mov     [SI][TChannel.bParameter],al
+        effInitReturn 1
+IEND___ effInit_R_Tremolo
+
+ISTART_ effInit_S_Special
                checkPara0
                xor      bh,bh
                mov      bl,al
                shr      bl,4
                shl      bx,1
                mov      [SI][TChannel.wCommand2],bx
-               ; do effects we have to check before reading note/vol/instr
-               jmp      [special1+bx]
-setvibwav:     ; for every channel a seperate choise !
+        ; do effects we have to check before reading note/vol/instr
+        effInitCall [effInit_S_Special_tab+bx]
+        effInitReturnNothing
+IEND___ effInit_S_Special
+
+ISTART_ effInit_S4_SetVibratoWaveform
+        ;for every channel a seperate choise !
                and      al,3
                add      al,al
                xor      ah,ah
@@ -793,8 +918,11 @@ setvibwav:     ; for every channel a seperate choise !
                shl      bx,1
                mov      ax,[wavetab+bx]
                mov      [SI][TChannel.wVibTab],ax
-               jmp      back2reality
-settremwav:    ; for every channel a seperate choise !
+        effInitReturn 1
+IEND___ effInit_S4_SetVibratoWaveform
+
+ISTART_ effInit_S5_SetTremoloWaveform
+        ; for every channel a seperate choise !
                and      al,3
                add      al,al
                xor      ah,ah
@@ -802,8 +930,11 @@ settremwav:    ; for every channel a seperate choise !
                shl      bx,1
                mov      ax,[wavetab+bx]
                mov      [SI][TChannel.wTrmTab],ax
-               jmp      back2reality
-cmdPatloop:    and      al,0fh
+        effInitReturn 1
+IEND___ effInit_S5_SetTremoloWaveform
+
+ISTART_ effInit_SB_PatternLoop
+               and      al,0fh
                cmp      al,0
                je       set2where
                cmp      [Ploop_on],1
@@ -811,40 +942,58 @@ cmdPatloop:    and      al,0fh
                mov      [Ploop_on],1
                inc      al
                mov      [Ploop_no],al
-alreadyinside: mov      [Ploop_now],1
-               jmp      back2reality
-set2where:     mov      al,[curline]
+alreadyinside:
+               mov      [playState_patLoop_bNow],1
+        jmp effInit_SB_PatternLoop@_exit
+set2where:
+               mov      al,[curline]
                mov      [Ploop_to],al
-               jmp      back2reality
-InitNotecut:   and      al,0fh
+effInit_SB_PatternLoop@_exit:
+        effInitReturn 1
+IEND___ effInit_SB_PatternLoop
+
+ISTART_ effInit_SC_NoteCut
+               and      al,0fh
                cmp      al,0
-               je       noCut
+               je       effInit_SC_NoteCut@_noCut
                ;inc      al
                mov      [SI][TChannel.bDelayTicks],al
-               jmp      back2reality
-noCut:         mov      word ptr [SI][TChannel.wCommand],9
-               jmp      back2reality
-InitNotedelay: and      al,0fh
+        jmp effInit_SC_NoteCut@_exit
+effInit_SC_NoteCut@_noCut:
+        chnSetCommand 0	; FIXME: 9 = mistake? Zero?
+effInit_SC_NoteCut@_exit:
+        effInitReturn 1
+IEND___ effInit_SC_NoteCut
+
+ISTART_ effInit_SD_NoteDelay
+               and      al,0fh
                mov      [SI][TChannel.bDelayTicks],al
-               cmp      [inpatterndly],1
-               je       donothing
-               mov      al,[curNote]      ; new note for later
+               cmp      [playState_patDelay_bNow],1
+               je       effInit_SD_NoteDelay@_exit
+               mov      al,[chnState_cur_bNote]      ; new note for later
                mov      [SI][TChannel.bSavNote],al
-               mov      al,[curInst]    ; new instrument for later
+               mov      al,[chnState_cur_bIns]    ; new instrument for later
                mov      [SI][TChannel.bSavIns],al
-               mov      al,[curVol]    ; new volume for later
+               mov      al,[chnState_cur_bVol]    ; new volume for later
                mov      [SI][TChannel.bSavVol],al
-               jmp      donothing       ; setup note/instr/vol later while mixing !
-InitPatdelay:  cmp      [inpatterndly],1
-               je       back2reality            ; <- hehe we are allread in this patterndelay ...
+effInit_SD_NoteDelay@_exit:
+        ; setup note/instr/vol later while mixing !
+        effInitReturn 0
+IEND___ effInit_SD_NoteDelay
+
+ISTART_ effInit_SE_PatternDelay
+        cmp [byte ptr playState_patDelay_bNow],0
+        jne  effInit_SE_PatternDelay@_exit  ; we are already in this pattern delay
                and      al,0fh
                inc      al
                mov      [patterndelay],al
                mov      al,[SI][TChannel.bParameter]
-               mov      [sav_para],al
-               jmp      back2reality
+               mov      [chnState_patDelay_bParameterSaved],al
+effInit_SE_PatternDelay@_exit:
+        effInitReturn 1
+IEND___ effInit_SE_PatternDelay
 
-EffInit_T_SetTempo:
+ISTART_ effInit_T_SetTempo
         checkPara0not
         xor     ah,ah
         push    si
@@ -857,41 +1006,78 @@ EffInit_T_SetTempo:
         pop     fs
         pop     di
         pop     si
-        jmp     back2reality
+        effInitReturn 1
+IEND___ effInit_T_SetTempo
 
-globalvolume:  ; effect 'V'
+ISTART_ effInit_V_SetGVolume
                checkPara0not
-               mov      [gvolFlag],1
+               mov      [playState_gVolume_bFlag],1
                cmp      al,64
-               jbe      gvolok
+               jbe      effInit_V_SetGVolume@_volok
                mov      al,64
-gvolok:        mov      [newgvol],al
-               jmp      back2reality
+effInit_V_SetGVolume@_volok:
+               mov      [playState_gVolume_bValue],al
+        effInitReturn 1
+IEND___ effInit_V_SetGVolume
 
 ;  _____________________________________
 ;  Effect after reading vol/instr/note :
 ;  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Hdl_Volfx:    ; effect 'D'
-              mov       bx,[SI][TChannel.wCommand2]
-              jmp       [vol_cmd2nd+bx]
-FineVSlideDwn:mov       al,[SI][TChannel.bParameter]
-              and       al,0fh
-              sub       [SI][TChannel.bSmpVol],al
-              jnc       handlenothing
-              mov       byte ptr [SI][TChannel.bSmpVol],0
-              jmp       handlenothing
-FineVSlideUp: mov       al,[SI][TChannel.bParameter]
-              shr       al,4
-              add       [SI][TChannel.bSmpVol],al
-              cmp       byte ptr [SI][TChannel.bSmpVol],64
-              jb        handlenothing
-              mov       byte ptr [SI][TChannel.bSmpVol],63
-              jmp       handlenothing
-Hdl_pitchdwn: ; effect 'E'
-              mov       bx,[SI][TChannel.wCommand2]
-              jmp       [pitdwn_cmd2nd+bx]
-Finepitch_down:
+HSTART_ effHandle_None
+        effHandleReturnNothing
+HEND___ effHandle_None
+
+HSTART_ effHandle_D_VolumeSlide
+        mov bx,[SI][TChannel.wCommand2]
+        effHandleCall [effHandle_D_VolumeSlide_tab+bx]
+        effHandleReturnNothing
+HEND___ effHandle_D_VolumeSlide
+
+HSTART_ effHandle_D_VolumeSlide_FineDown
+        mov     al,[SI][TChannel.bSmpVol]
+        mov     ah,[SI][TChannel.bParameter]
+        and     ah,0fh
+        sub     al,ah
+        jnc     effHandle_D_VolumeSlide_FineDown@_ok
+        xor     al,al
+effHandle_D_VolumeSlide_FineDown@_ok:
+        mov     byte ptr [SI][TChannel.bSmpVol],al
+        effHandleReturnNothing
+HEND___ effHandle_D_VolumeSlide_FineDown
+
+HSTART_ effHandle_D_VolumeSlide_FineUp
+        mov     al,[SI][TChannel.bSmpVol]
+        mov     ah,[SI][TChannel.bParameter]
+        shr     ah,4
+        add     al,ah
+        cmp     al,64
+        jb      effHandle_D_VolumeSlide_FineUp@_ok
+        mov     al,63
+effHandle_D_VolumeSlide_FineUp@_ok:
+        mov     byte ptr [SI][TChannel.bSmpVol],al
+        effHandleReturnNothing
+HEND___ effHandle_D_VolumeSlide_FineUp
+
+HSTART_ effHandle_E_PitchDown
+        mov bx,[SI][TChannel.wCommand2]
+        effHandleCall [effHandle_E_PitchDown_tab+bx]
+        effHandleReturnNothing
+HEND___ effHandle_E_PitchDown
+
+HSTART_ ptok
+; in: ax = period
+;     ds:si = mixchn
+        ; now calc new frequency step for this period
+        mov     [SI][TChannel.wSmpPeriod],ax
+        push    ax  ; uint16 wPeriod
+        call    mixCalcSampleStep
+        mov     [SI][word ptr TChannel.dSmpStep][0],ax
+        mov     [SI][word ptr TChannel.dSmpStep][2],dx
+        effHandleReturnNothing
+HEND___ ptok
+
+HSTART_ effHandle_E_PitchDown_Fine
               ; we pitch down, but increase period ! (so check wSmpPeriodHigh)
               mov       ax,[SI][TChannel.wSmpPeriod]
               mov       bl,[SI][TChannel.bParameter]
@@ -900,16 +1086,14 @@ Finepitch_down:
               shl       bx,2
               add       ax,bx
               cmp       ax,[SI][TChannel.wSmpPeriodHigh]
-              jb        ptok
+              jb        effHandle_E_PitchDown_Fine@_ptok
               mov       ax,[SI][TChannel.wSmpPeriodHigh]
-ptok:         ; now calc new frequency step for this period
-              mov       [SI][TChannel.wSmpPeriod],ax
-              push    ax  ; uint16 wPeriod
-              call    mixCalcSampleStep
-              mov     word ptr [SI][TChannel.dSmpStep],ax
-              mov     word ptr [SI][TChannel.dSmpStep+2],dx
-              jmp       handlenothing
-XFinepitch_down:
+effHandle_E_PitchDown_Fine@_ptok:
+        effHandleCall ptok
+        effHandleReturnNothing
+HEND___ effHandle_E_PitchDown_Fine
+
+HSTART_ effHandle_E_PitchDown_Extra
               ; we pitch down, but increase period ! (so check wSmpPeriodHigh)
               mov       ax,[SI][TChannel.wSmpPeriod]
               mov       bl,[SI][TChannel.bParameter]
@@ -917,13 +1101,21 @@ XFinepitch_down:
               xor       bh,bh
               add       ax,bx
               cmp       ax,[SI][TChannel.wSmpPeriodHigh]
-              jb        ptok
+              jb        effHandle_E_PitchDown_Extra@_ptok
               mov       ax,[SI][TChannel.wSmpPeriodHigh]
-              jmp       ptok
-Hdl_pitchup:  ; effect 'F'
-              mov       bx,[SI][TChannel.wCommand2]
-              jmp       [pitup_cmd2nd+bx]
-Finepitch_up: ; we pitch up, but decrease period ! (so check wSmpPeriodLow)
+effHandle_E_PitchDown_Extra@_ptok:
+        effHandleCall ptok
+        effHandleReturnNothing
+HEND___ effHandle_E_PitchDown_Extra
+
+HSTART_ effHandle_F_PitchUp
+        mov bx,[SI][TChannel.wCommand2]
+        effHandleCall [effHandle_F_PitchUp_tab+bx]
+        effHandleReturnNothing
+HEND___ effHandle_F_PitchUp
+
+HSTART_ effHandle_F_PitchUp_Fine
+              ; we pitch up, but decrease period ! (so check wSmpPeriodLow)
               mov       ax,[SI][TChannel.wSmpPeriod]
               mov       bl,[SI][TChannel.bParameter]
               and       bl,0fh
@@ -931,39 +1123,54 @@ Finepitch_up: ; we pitch up, but decrease period ! (so check wSmpPeriodLow)
               shl       bx,2
               sub       ax,bx
               cmp       ax,[SI][TChannel.wSmpPeriodLow]
-              ja        ptok
+              ja        effHandle_F_PitchUp_Fine@_ptok
               mov       ax,[SI][TChannel.wSmpPeriodLow]
-              jmp       ptok
-XFinepitch_up:; we pitch up, but decrease period ! (so check wSmpPeriodLow)
+effHandle_F_PitchUp_Fine@_ptok:
+        effHandleCall ptok
+        effHandleReturnNothing
+HEND___ effHandle_F_PitchUp_Fine
+
+HSTART_ effHandle_F_PitchUp_Extra
+              ; we pitch up, but decrease period ! (so check wSmpPeriodLow)
               mov       ax,[SI][TChannel.wSmpPeriod]
               mov       bl,[SI][TChannel.bParameter]
               and       bl,0fh
               xor       bh,bh
               sub       ax,bx
               cmp       ax,[SI][TChannel.wSmpPeriodLow]
-              ja        ptok
+              ja        effHandle_F_PitchUp_Extra@_ptok
               mov       ax,[SI][TChannel.wSmpPeriodLow]
-              jmp       ptok
-Hdl_porta:     ; effect 'G'
-               cmp      [curNote],0feh
-               jae      handlenothing         ; <- is a portamento continue
-               mov      ax,[Period_Old]
-               xchg     ax,[SI][TChannel.wSmpPeriod]
-               mov      [SI][TChannel.wSmpPeriodDest],ax
-               mov      eax,[sStep_old]
-               mov      [SI][TChannel.dSmpStep],eax
-               jmp      handlenothing
-Hdl_Vibrato:   ; effect 'H'
+effHandle_F_PitchUp_Extra@_ptok:
+        effHandleCall ptok
+        effHandleReturnNothing
+HEND___ effHandle_F_PitchUp_Extra
+
+HSTART_ effHandle_G_Portamento
+        cmp     [chnState_cur_bNote],0feh
+        jae     effHandle_G_Portamento@_exit ; <- is a portamento continue
+        mov     ax,[chnState_porta_wSmpPeriodOld]
+        xchg    ax,[SI][TChannel.wSmpPeriod]
+        mov     [SI][TChannel.wSmpPeriodDest],ax
+        mov     eax,[chnState_porta_dSmpStepOld]
+        mov     [SI][TChannel.dSmpStep],eax
+effHandle_G_Portamento@_exit:
+        effHandleReturnNothing
+HEND___ effHandle_G_Portamento
+
+HSTART_ effHandle_H_Vibrato
                test     byte ptr [SI][TChannel.bEffFlags],EFFFLAG_CONTINUE
-               jnz      handlenothing                ; continue this effect !
+               jnz      effHandle_H_Vibrato@_exit ; continue this effect !
                mov      ax,[SI][TChannel.wSmpPeriod]
                mov      [SI][TChannel.wSmpPeriodOld],ax
-               jmp      handlenothing
-Hdl_arpeggio:  ; effect 'J'
-               cmp      [arp_chg],1
-               je       newPara
+effHandle_H_Vibrato@_exit:
+        effHandleReturnNothing
+HEND___ effHandle_H_Vibrato
+
+HSTART_ effHandle_J_Arpeggio
+               cmp      [byte ptr chnState_arp_bFlag],0
+               jne      newPara
                test     byte ptr [SI][TChannel.bEffFlags],EFFFLAG_CONTINUE
-               jnz      handlenothing                ; no new note !
+               jnz      effHandle_J_Arpeggio@_exit ; no new note !
                ; start arpeggio:
                mov      byte ptr [SI][TChannel.bArpPos],0
 newPara:       mov      al,[SI][TChannel.bParameter]
@@ -982,7 +1189,7 @@ arpt1:         cmp      bl,12
                add      bh,10h
                jmp      arpt1
 arpok1:        or       bh,bl
-               mov      [SI][TChannel.bArpNotes],bh
+               mov      [SI][TChannel.bArpNotes][0],bh
                ; now note 2:
                mov      bl,ah
                mov      bh,al
@@ -997,90 +1204,112 @@ arpt2:         cmp      bl,12
                add      bh,10h
                jmp      arpt2
 arpok2:        or       bh,bl
-               mov      [SI][TChannel.bArpNotes+1],bh
+               mov      [SI][TChannel.bArpNotes][1],bh
                ; now calc the Steps:
                mov     ax,[SI][TChannel.wInsSeg]
                mov     fs,ax
                mov      al,[SI][TChannel.bNote]
-               push     ds
-               push     si
-               push     fs
+               push     ds  ; FP_SEG(chn)
+               push     si  ; FP_OFF(chn)
+               push     fs  ; FP_SEG(ins)
                xor      bx,bx
-               push     bx
-               push     ax
-               call    calcpart
-               mov      word ptr [SI][TChannel.dArpSmpSteps],ax
-               mov      word ptr [SI][TChannel.dArpSmpSteps+2],dx
+               push     bx  ; FP_OFF(ins)
+               push     ax  ; uint8 note
+               call    chn_calcNoteStep;calcpart
+               mov      [SI][word ptr TChannel.dArpSmpSteps][4*0][0],ax
+               mov      [SI][word ptr TChannel.dArpSmpSteps][4*0][2],dx
                mov      al,[SI][TChannel.bArpNotes]
-               push     ds
-               push     si
-               push     fs
+               push     ds  ; FP_SEG(chn)
+               push     si  ; FP_OFF(chn)
+               push     fs  ; FP_SEG(ins)
                xor      bx,bx
-               push     bx
-               push     ax
-               call    calcpart
-               mov      word ptr [SI][TChannel.dArpSmpSteps+4*1],ax
-               mov      word ptr [SI][TChannel.dArpSmpSteps+4*1+2],dx
+               push     bx  ; FP_OFF(ins)
+               push     ax  ; uint8 note
+               call    chn_calcNoteStep;calcpart
+               mov      [SI][word ptr TChannel.dArpSmpSteps][4*1][0],ax
+               mov      [SI][word ptr TChannel.dArpSmpSteps][4*1][2],dx
                mov      al,[SI][TChannel.bArpNotes+1]
-               push     ds
-               push     si
-               push     fs
+               push     ds  ; FP_SEG(chn)
+               push     si  ; FP_OFF(chn)
+               push     fs  ; FP_SEG(ins)
                xor      bx,bx
-               push     bx
-               push     ax
-               call    calcpart
-               mov      word ptr [SI][TChannel.dArpSmpSteps+4*2],ax
-               mov      word ptr [SI][TChannel.dArpSmpSteps+4*2+2],dx
-               jmp      handlenothing
+               push     bx  ; FP_OFF(ins)
+               push     ax  ; uint8 note
+               call    chn_calcNoteStep;calcpart
+               mov      [SI][word ptr TChannel.dArpSmpSteps][4*2][0],ax
+               mov      [SI][word ptr TChannel.dArpSmpSteps][4*2][2],dx
+effHandle_J_Arpeggio@_exit:
+        effHandleReturnNothing
+HEND___ effHandle_J_Arpeggio
 
-Hdl_Vib_Vol:   test     [SI][TChannel.bEffFlags],EFFFLAG_CONTINUE
-               jnz      Hdl_Volfx
+HSTART_ effHandle_K_Vib_VolSlide
+               test     [SI][TChannel.bEffFlags],EFFFLAG_CONTINUE
+               jnz      effHandle_K_Vib_VolSlide@_volfx
                mov      ax,[SI][TChannel.wSmpPeriod]
                mov      [SI][TChannel.wSmpPeriodOld],ax
-               jmp      Hdl_Volfx
+effHandle_K_Vib_VolSlide@_volfx:
+        effHandleCall effHandle_D_VolumeSlide
+        effHandleReturnNothing
+HEND___ effHandle_K_Vib_VolSlide
 
-Hdl_Port_Vol:  ; effect 'L'
+HSTART_ effHandle_L_Porta_VolSlide
                ; first handle Portamento (and then jump to volume effect handling)
-               cmp      [curNote],0feh
-               jae      Hdl_Volfx
-               mov      ax,[Period_Old]
+               cmp      [chnState_cur_bNote],0feh
+               jae      effHandle_L_Porta_VolSlide@_volfx
+               mov      ax,[chnState_porta_wSmpPeriodOld]
                xchg     ax,[SI][TChannel.wSmpPeriod]
                mov      [SI][TChannel.wSmpPeriodDest],ax
-               mov      eax,[sStep_old]
+               mov      eax,[chnState_porta_dSmpStepOld]
                mov      [SI][TChannel.dSmpStep],eax
-               jmp       Hdl_Volfx
-Hdl_setsmpofs:; effect 'O'
+effHandle_L_Porta_VolSlide@_volfx:
+        effHandleCall effHandle_D_VolumeSlide
+        effHandleReturnNothing
+HEND___ effHandle_L_Porta_VolSlide
+
+HSTART_ effHandle_O_SetSampleOffset
                xor       eax,eax
                mov       ah,[SI][TChannel.bParameter]
                mov       [SI][TChannel.wSmpStart],ax
+               cmp       [byte ptr chnState_cur_bNote],0ffh
+               je        effHandle_O_SetSampleOffset@_exit
                shl       eax,16
-               cmp       [curnote],0ffh
-               je        handlenothing
                mov       [SI][TChannel.dSmpPos],eax
-               jmp       handlenothing
-Hdl_tremolo:  ; effect 'R' (Tremolo)
-               cmp      [curInst],0
+effHandle_O_SetSampleOffset@_exit:
+        effHandleReturnNothing
+HEND___ effHandle_O_SetSampleOffset
+
+HSTART_ effHandle_R_Tremolo
+               cmp      [byte ptr chnState_cur_bIns],0
                jne      savevol                      ; new instrument
-               cmp      [curVol],0ffh
+               cmp      [byte ptr chnState_cur_bVol],0ffh
                jne      savevol                      ; new volume
                test     [SI][TChannel.bEffFlags],EFFFLAG_CONTINUE
-               jnz      handlenothing                ; continue this effect !
-              ; save volume
-savevol:      mov       al,[SI][TChannel.bSmpVol]
+               jnz      effHandle_R_Tremolo@_exit ; continue this effect !
+savevol:
+              mov       al,[SI][TChannel.bSmpVol]
               mov       [SI][TChannel.bSmpVolOld],al
-              jmp       handlenothing
-Hdl_Special:  ; effect 'S'
-              mov       bx,[SI][TChannel.wCommand2]
-              jmp       [special2+bx]
-Hdl_finetune: jmp       handlenothing
-Hdl_patterndly: mov       al,[sav_para]
-                mov       [SI][TChannel.bParameter],al
-                mov       ax,[sav_cmd]
-                mov       [SI][TChannel.wCommand],ax
-                mov       word ptr [SI][TChannel.wCommand2],0
-                jmp       handlenothing
+effHandle_R_Tremolo@_exit:
+        effHandleReturnNothing
+HEND___ effHandle_R_Tremolo
 
-readnewnotes endp
+HSTART_ effHandle_S_Special
+        mov bx,[SI][TChannel.wCommand2]
+        effHandleCall [effHandle_S_Special_tab+bx]
+        effHandleReturnNothing
+HEND___ effHandle_S_Special
+
+HSTART_ effHandle_S3_FineTune
+        effHandleReturnNothing
+HEND___ effHandle_S3_FineTune
+
+HSTART_ effHandle_SE_PatternDelay
+                mov       al,[chnState_patDelay_bParameterSaved]
+                mov       [SI][TChannel.bParameter],al
+                mov       ax,[chnState_patDelay_wCommandSaved]
+                mov       [SI][TChannel.wCommand],ax
+        chnSetSubCommand 0
+        effHandleReturnNothing
+HEND___ effHandle_SE_PatternDelay
 
 READNOTE_TEXT ends
 

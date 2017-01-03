@@ -16,6 +16,8 @@ uses
 procedure chn_setSamplePeriod(var chn: TChannel; period: longint);
 procedure chn_setSampleVolume(var chn: TChannel; vol: integer);
 procedure chn_setupInstrument(var chn: TChannel; insNum: byte);
+function  chn_calcNotePeriod(var chn: TChannel; ins: pointer; note: byte): word;
+function  chn_calcNoteStep(var chn: TChannel; ins: pointer; note: byte): longint;
 procedure chn_setupNote(var chn: TChannel; note: byte; keep: boolean);
 procedure chn_effTick(var chn: TChannel);
 
@@ -34,6 +36,8 @@ uses
 procedure chn_setSamplePeriod(var chn: TChannel; period: longint); external;
 procedure chn_setSampleVolume(var chn: TChannel; vol: integer); external;
 procedure chn_setupInstrument(var chn: TChannel; insNum: byte); external;
+function  chn_calcNotePeriod(var chn: TChannel; ins: pointer; note: byte): word; external;
+function  chn_calcNoteStep(var chn: TChannel; ins: pointer; note: byte): longint; external;
 procedure chn_setupNote(var chn: TChannel; note: byte; keep: boolean); external;
 procedure chn_effTick(var chn: TChannel); external;
 

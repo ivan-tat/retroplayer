@@ -2,7 +2,7 @@
 # This script must be run in DOS.
 set -e
 
-AS="tasm -t"
+AS="tasm -t -la"
 ASW="wasm -zq"
 PC='tpc -gd -q -v -$d+,e-,g+,n+ -DDEBUG;BETATEST'
 export WCC="-3 -fp3 -ml -na -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu -dDEBUG"

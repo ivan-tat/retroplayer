@@ -28,6 +28,7 @@ function  set_sample_format(p: PHWSMPFMT; b: byte; s: boolean; c: byte): boolean
 function  get_sample_format_bits(p: PHWSMPFMT): byte;
 function  is_sample_format_signed(p: PHWSMPFMT): boolean;
 function  get_sample_format_channels(p: PHWSMPFMT): byte;
+function  get_sample_format_width(p: PHWSMPFMT): word;
 procedure clear_sample_format(p: PHWSMPFMT);
 
 implementation
@@ -38,6 +39,7 @@ function  set_sample_format(p: PHWSMPFMT; b: byte; s: boolean; c: byte): boolean
 function  get_sample_format_bits(p: PHWSMPFMT): byte; external;
 function  is_sample_format_signed(p: PHWSMPFMT): boolean; external;
 function  get_sample_format_channels(p: PHWSMPFMT): byte; external;
+function  get_sample_format_width(p: PHWSMPFMT): word; external;
 procedure clear_sample_format(p: PHWSMPFMT); external;
 
 end.

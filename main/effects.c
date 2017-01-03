@@ -29,36 +29,37 @@
 
 #define getNotePeriod(note) ((ST3Periods[(note) & 0x0f] << 4) >> ((note) >> 4))
 
-#define effTickProc(name) void __near name(struct channel_t *chn)
+#define effTickProc(name) void __near name(MIXCHN *chn)
 
-typedef void __near effTickProc_t(struct channel_t *chn);
+typedef void __near effTickProc_t(MIXCHN *chn);
 
 effTickProc(effTick_none);
+/* A - */
+/* B - */
+/* C - */
 effTickProc(effTick_D_VolumeSlide);
-effTickProc(effTick_D_VolumeSlide_Down);
-effTickProc(effTick_D_VolumeSlide_Up);
 effTickProc(effTick_E_PitchDown);
-effTickProc(effTick_E_PitchDown_Down);
 effTickProc(effTick_F_PitchUp);
-effTickProc(effTick_F_PitchUp_Up);
 effTickProc(effTick_G_Portamento);
 effTickProc(effTick_H_Vibrato);
 effTickProc(effTick_I_Tremor);
 effTickProc(effTick_J_Arpeggio);
 effTickProc(effTick_K_VibratoVolSlide);
 effTickProc(effTick_L_PortamentoVolSlide);
+/* M - */
+/* N - */
+/* O - */
+/* P - */
 effTickProc(effTick_Q_Retrigger);
-effTickProc(effTick_Q_Retrigger_SlideDown);
-effTickProc(effTick_Q_Retrigger_Use2div3);
-effTickProc(effTick_Q_Retrigger_Use1div2);
-effTickProc(effTick_Q_Retrigger_SlideUp);
-effTickProc(effTick_Q_Retrigger_Use3div2);
-effTickProc(effTick_Q_Retrigger_Use2div1);
 effTickProc(effTick_R_Tremolo);
 effTickProc(effTick_S_Special);
-effTickProc(effTick_S_Special_C_NoteCut);
-effTickProc(effTick_S_Special_D_NoteDelay);
+/* T - */
 effTickProc(effTick_U_FineVibrato);
+/* V - */
+/* W - */
+/* X - */
+/* Y - */
+/* Z - */
 
 #define MAXEFF 22
 
@@ -88,6 +89,11 @@ const static effTickProc_t *effTick_tab[] = {
     effTick_none
 };
 
+/* D */
+
+effTickProc(effTick_D_VolumeSlide_Down);
+effTickProc(effTick_D_VolumeSlide_Up);
+
 const static effTickProc_t *effTick_D_VolumeSlide_tab[] = {
     effTick_D_VolumeSlide_Down,
     effTick_D_VolumeSlide_Up,
@@ -95,17 +101,34 @@ const static effTickProc_t *effTick_D_VolumeSlide_tab[] = {
     effTick_none
 };
 
+/* E */
+
+effTickProc(effTick_E_PitchDown_Down);
+
 const static effTickProc_t *effTick_E_PitchDown_tab[] = {
     effTick_E_PitchDown_Down,
     effTick_none,
     effTick_none
 };
 
+/* F */
+
+effTickProc(effTick_F_PitchUp_Up);
+
 const static effTickProc_t *effTick_F_PitchUp_tab[] = {
     effTick_F_PitchUp_Up,
     effTick_none,
     effTick_none
 };
+
+/* Q */
+
+effTickProc(effTick_Q_Retrigger_SlideDown);
+effTickProc(effTick_Q_Retrigger_Use2div3);
+effTickProc(effTick_Q_Retrigger_Use1div2);
+effTickProc(effTick_Q_Retrigger_SlideUp);
+effTickProc(effTick_Q_Retrigger_Use3div2);
+effTickProc(effTick_Q_Retrigger_Use2div1);
 
 const static effTickProc_t *effTick_Q_Retrigger_tab[] = {
     effTick_none,
@@ -116,6 +139,11 @@ const static effTickProc_t *effTick_Q_Retrigger_tab[] = {
     effTick_Q_Retrigger_Use3div2,
     effTick_Q_Retrigger_Use2div1
 };
+
+/* S */
+
+effTickProc(effTick_S_Special_C_NoteCut);
+effTickProc(effTick_S_Special_D_NoteDelay);
 
 const static effTickProc_t *effTick_S_Special_tab[] = {
     effTick_none,   // N/A
@@ -136,7 +164,7 @@ const static effTickProc_t *effTick_S_Special_tab[] = {
     effTick_none    // funkrepeat
 };
 
-void PUBLIC_CODE chn_setSamplePeriod(struct channel_t *chn, int32_t period)
+void PUBLIC_CODE chn_setSamplePeriod(MIXCHN *chn, int32_t period)
 {
     if (period) {
         if (period < chn->wSmpPeriodLow)  period = chn->wSmpPeriodLow; else
@@ -149,12 +177,12 @@ void PUBLIC_CODE chn_setSamplePeriod(struct channel_t *chn, int32_t period)
     };
 }
 
-void PUBLIC_CODE chn_setSampleVolume(struct channel_t *chn, int16_t vol)
+void PUBLIC_CODE chn_setSampleVolume(MIXCHN *chn, int16_t vol)
 {
     if (vol < 0) chn->bSmpVol = 0; else chn->bSmpVol = vol > CHNINSVOL_MAX ? CHNINSVOL_MAX : vol;
 }
 
-void __near chn_setPeriodLimits(struct channel_t *chn, uint16_t rate, bool amiga)
+void __near chn_setPeriodLimits(MIXCHN *chn, uint16_t rate, bool amiga)
 {
     if (amiga) {
          // B-5, C-3:
@@ -167,7 +195,7 @@ void __near chn_setPeriodLimits(struct channel_t *chn, uint16_t rate, bool amiga
     };
 }
 
-void PUBLIC_CODE chn_setupInstrument(struct channel_t *chn, uint8_t insNum)
+void PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum)
 {
     struct instrument_t *ins;
     unsigned int rate;
@@ -201,7 +229,7 @@ void PUBLIC_CODE chn_setupInstrument(struct channel_t *chn, uint8_t insNum)
 //#pragma aux chn_setupInstrument modify [ es ];
 //#endif
 
-uint16_t __near chn_calcNotePeriod(struct channel_t *chn, struct instrument_t *ins, uint8_t note)
+uint16_t PUBLIC_CODE chn_calcNotePeriod(MIXCHN *chn, struct instrument_t *ins, uint8_t note)
 {
     unsigned int period;
     // calc period with st3 finetune
@@ -212,7 +240,17 @@ uint16_t __near chn_calcNotePeriod(struct channel_t *chn, struct instrument_t *i
     return period;
 }
 
-void PUBLIC_CODE chn_setupNote(struct channel_t *chn, uint8_t note, bool keep)
+uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, struct instrument_t *ins, uint8_t note)
+{
+    unsigned int period;
+    period = chn_calcNotePeriod(chn, ins, note);
+    if (period)
+        return mixCalcSampleStep(period);
+    else
+        return 0;
+}
+
+void PUBLIC_CODE chn_setupNote(MIXCHN *chn, uint8_t note, bool keep)
 {
     struct instrument_t *ins;
     chn->bNote = note;
@@ -234,7 +272,7 @@ void PUBLIC_CODE chn_setupNote(struct channel_t *chn, uint8_t note, bool keep)
 //#pragma aux chn_setupNote modify [ es ];
 //#endif
 
-void PUBLIC_CODE chn_effTick(struct channel_t *chn)
+void PUBLIC_CODE chn_effTick(MIXCHN *chn)
 {
     if (chn->wCommand >> 1 <= MAXEFF) effTick_tab[chn->wCommand >> 1](chn);
 }

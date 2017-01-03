@@ -29,10 +29,11 @@ typedef struct hwSampleFormat_t {
 };
 typedef struct hwSampleFormat_t HWSMPFMT;
 
-bool    PUBLIC_CODE set_sample_format(HWSMPFMT *p, uint8_t bits, bool sign, uint8_t channels);
-uint8_t PUBLIC_CODE get_sample_format_bits(HWSMPFMT *p);
-bool    PUBLIC_CODE is_sample_format_signed(HWSMPFMT *p);
-uint8_t PUBLIC_CODE get_sample_format_channels(HWSMPFMT *p);
-void    PUBLIC_CODE clear_sample_format(HWSMPFMT *p);
+bool     PUBLIC_CODE set_sample_format(HWSMPFMT *p, uint8_t bits, bool sign, uint8_t channels);
+uint8_t  PUBLIC_CODE get_sample_format_bits(HWSMPFMT *p);
+bool     PUBLIC_CODE is_sample_format_signed(HWSMPFMT *p);
+uint8_t  PUBLIC_CODE get_sample_format_channels(HWSMPFMT *p);
+uint16_t PUBLIC_CODE get_sample_format_width(HWSMPFMT *p);
+void     PUBLIC_CODE clear_sample_format(HWSMPFMT *p);
 
 #endif  /* SNDCTL_T_H */

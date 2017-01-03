@@ -42,19 +42,27 @@ bool PUBLIC_CODE set_sample_format(HWSMPFMT *p, uint8_t b, bool s, uint8_t c)
     return true;
 }
 
+#define _sample_format_bits(p) (p->flags & HWSMPFMTFL_BITS_MASK)
+#define _sample_format_signed(p) ((p->flags & HWSMPFMTFL_SIGNED) != 0)
+
 uint8_t PUBLIC_CODE get_sample_format_bits(HWSMPFMT *p)
 {
-    return p->flags & HWSMPFMTFL_BITS_MASK;
+    return _sample_format_bits(p);
 }
 
 bool PUBLIC_CODE is_sample_format_signed(HWSMPFMT *p)
 {
-    return (p->flags & HWSMPFMTFL_SIGNED) != 0;
+    return _sample_format_signed(p);
 }
 
 uint8_t PUBLIC_CODE get_sample_format_channels(HWSMPFMT *p)
 {
     return p->channels;
+}
+
+uint16_t PUBLIC_CODE get_sample_format_width(HWSMPFMT *p)
+{
+    return (_sample_format_bits(p) >> 3) * p->channels;
 }
 
 void PUBLIC_CODE clear_sample_format(HWSMPFMT *p)

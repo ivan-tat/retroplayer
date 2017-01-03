@@ -8,6 +8,8 @@ EFFECTS_TEXT segment word public use16 'CODE'
 extrn chn_setSamplePeriod: far
 extrn chn_setSampleVolume: far
 extrn chn_setupInstrument: far
+extrn chn_calcNotePeriod: far
+extrn chn_calcNoteStep: far
 extrn chn_setupNote: far
 extrn chn_effTick: far
 
