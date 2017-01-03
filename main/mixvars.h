@@ -34,4 +34,6 @@ extern void     PUBLIC_CODE setMixMode(uint8_t channels, uint16_t rate, uint16_t
 extern uint16_t PUBLIC_CODE getMixBufOffFromCount(uint16_t count);
 extern uint16_t PUBLIC_CODE getCountFromMixBufOff(uint16_t bufOff);
 
+#define getNotePeriod(note) ((ST3Periods[(note) & 0x0f] << 4) >> ((note) >> 4))
+
 #endif  /* MIXVARS_H */

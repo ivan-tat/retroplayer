@@ -57,6 +57,19 @@ extern uint16_t PUBLIC_DATA InsNum;
 extern bool     PUBLIC_DATA EMSSmp;         /* samples in EMS ? */
 extern uint16_t PUBLIC_DATA SmpEMSHandle;   /* hanlde to access EMS for samples */
 
+//#define insList_get(num) (Instruments[(num)-1])
+//#define insList_get(num) (struct instrument_t *)(MK_FP(FP_SEG(*Instruments), FP_OFF(*Instruments) + ((num) - 1) * sizeof(struct instrument_t)))
+#define insList_get(num) (struct instrument_t *)MK_FP(FP_SEG(Instruments[0]) + ((num) - 1) * 5, 0)
+#define ins_isSample(ins) (ins->bType == 1)
+#define ins_isSampleLooped(ins) (ins->flags & 0x01 != 0)
+#define ins_getSampleLoopStart(ins) (ins->loopbeg)
+#define ins_getSampleLoopEnd(ins) (ins->flags & 0x01 ? ins->loopend : ins->slength)
+#define ins_getSampleRate(ins) (ins->c2speed)
+#define ins_getSampleData(ins) (void *)MK_FP(ins->memseg, 0)
+
+#define isSampleDataInEM(seg) (seg >= 0xf000)
+#define getSampleDataLogPageInEM(seg) (seg & 0x0fff)
+
 /* patterns */
 
 extern patternsList_t PUBLIC_DATA Pattern;
@@ -65,6 +78,10 @@ extern uint16_t PUBLIC_DATA patListPatLength;   /* length of one pattern */
 extern bool     PUBLIC_DATA patListUseEM;       /* patterns in EM */
 extern uint16_t PUBLIC_DATA patListEMHandle;    /* handle to access EM for patterns */
 extern uint8_t  PUBLIC_DATA patListPatPerEMPage;  /* count of patterns per page (<64!!!) */
+
+#define isPatternDataInEM(seg) (seg >= 0xc000)
+#define getPatternDataLogPageInEM(seg) (seg & 0x00ff)
+#define getPatternDataOffsetInEM(seg) (((seg >> 8) & 0x3f) * patListPatLength)
 
 //MUSPAT *PUBLIC_CODE pat_new(void);
 void    PUBLIC_CODE pat_clear(MUSPAT *pat);
@@ -96,8 +113,19 @@ extern uint8_t  PUBLIC_DATA LastOrder;  /* last order to play */
 extern uint16_t PUBLIC_DATA StartOrder;
 #endif
 
+/* channels */
+
 extern channelsList_t PUBLIC_DATA Channel;  /* all public/private data for every channel */
 extern uint8_t PUBLIC_DATA UsedChannels;    /* possible values : 1..32 (kill all Adlib) */
+
+#define chn_getInstrument(chn) (struct instrument_t *)MK_FP(chn->wInsSeg, 0)
+#define chn_setInstrument(chn, p) chn->wInsSeg = FP_SEG((void __far *)p)
+#define chn_setSampleData(chn, p) chn->wSmpSeg = FP_SEG((void __far *)p)
+
+#define chn_setCommand(chn, cmd)    chn->wCommand = cmd << 1
+#define chn_getCommand(chn)         (chn->wCommand >> 1)
+#define chn_setSubCommand(chn, cmd) chn->wCommand2 = cmd << 1
+#define chn_getSubCommand(chn)      (chn->wCommand2 >> 1)
 
 /* initial state */
 
@@ -131,4 +159,4 @@ extern uint8_t PUBLIC_DATA PLoop_To;    /* position to loop to */
 
 extern uint8_t PUBLIC_DATA PatternDelay;
 
-#endif /* S3MVARS_H */
+#endif  /* S3MVARS_H */

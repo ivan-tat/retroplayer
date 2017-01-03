@@ -81,34 +81,6 @@ extrn set_tempo: far
 
 _DATA segment word public use16 'DATA'
 
-EFFIDX_NONE              equ 0
-EFFIDX_A_SET_SPEED       equ 1
-EFFIDX_B_JUMP            equ 2
-EFFIDX_C_PATTERN_BREAK   equ 3
-EFFIDX_D_VOLUME_SLIDE    equ 4
-EFFIDX_E_PITCH_DOWN      equ 5
-EFFIDX_F_PITCH_UP        equ 6
-EFFIDX_G_PORTAMENTO      equ 7
-EFFIDX_H_VIBRATO         equ 8
-EFFIDX_I_TREMOR          equ 9
-EFFIDX_J_ARPEGGIO        equ 10
-EFFIDX_K_VIB_VOLSLIDE    equ 11
-EFFIDX_L_PORTA_VOLSLIDE  equ 12
-EFFIDX_M                 equ 13
-EFFIDX_N                 equ 14
-EFFIDX_O                 equ 15
-EFFIDX_P                 equ 16
-EFFIDX_Q_RETRIG_VOLSLIDE equ 17
-EFFIDX_R_TREMOLO         equ 18
-EFFIDX_S_SPECIAL         equ 19
-EFFIDX_T_SET_TEMPO       equ 20
-EFFIDX_U_FINE_VIBRATO    equ 21
-EFFIDX_V_SET_GVOLUME     equ 22
-EFFIDX_W                 equ 23
-EFFIDX_X                 equ 24
-EFFIDX_Y                 equ 25
-EFFIDX_Z                 equ 26
-
 ; we have to init all the effects :
 effInit_tab label word
         dw offset effInit_None
@@ -154,14 +126,6 @@ effInit_S_Special_tab label word
         dw offset effInit_SD_NoteDelay
         dw offset effInit_SE_PatternDelay
         dw offset effInit_None                   ; funkrepeat -> not implemented
-
-EFFIDX_Q_RETRIG_VOLSLIDE_NONE     equ 0
-EFFIDX_Q_RETRIG_VOLSLIDE_DOWN     equ 1
-EFFIDX_Q_RETRIG_VOLSLIDE_USE2DIV3 equ 2
-EFFIDX_Q_RETRIG_VOLSLIDE_USE1DIV2 equ 3
-EFFIDX_Q_RETRIG_VOLSLIDE_UP       equ 4
-EFFIDX_Q_RETRIG_VOLSLIDE_USE3DIV2 equ 5
-EFFIDX_Q_RETRIG_VOLSLIDE_USE2DIV1 equ 6
 
 effInit_Q_Retrig_VolSlide_tab label word
         dw offset effInit_Q_Retrig_VolSlide_None
@@ -244,35 +208,6 @@ effHandle_S_Special_tab label word
         dw offset effHandle_SE_PatternDelay
         dw offset effHandle_None                  ; funkrepeat -> not implemented
 
-; Play state
-        playState_jumpToOrder_bFlag db ?
-        playState_jumpToOrder_bPos  db ?
-        playState_patBreak_bFlag    db ?
-        playState_patBreak_bPos     db ?
-        playState_patLoop_bNow      db ?
-        playState_gVolume_bFlag     db ?
-        playState_gVolume_bValue    db ?
-        playState_patDelay_bNow     db ?
-            ; call 'readnotes' inside a pattern delay,
-            ; if then ignore all notes/inst/vol !
-; now some variables I added after I found out those amazing things
-; about pattern delay
-; save effect,parameter for pattern delay
-        chnState_patDelay_wCommandSaved     dw ?
-        chnState_patDelay_bParameterSaved   db ?
-; Channel state
-        chnState_cur_bNote  db ?
-            ; normaly it will be a copie of es:[di], but in
-            ; patterndelay == 0 -> ignore note
-        chnState_cur_bIns   db ?    ; the same thing for instrument
-        chnState_cur_bVol   db ?    ; and for volume
-; to save portamento values :
-        chnState_porta_flag             db ?
-        chnState_porta_wSmpPeriodOld    dw ?
-        chnState_porta_dSmpStepOld      dd ?
-; a little one for arpeggio :
-        chnState_arp_bFlag  db ?
-
 _DATA ends
 
 READNOTE_TEXT segment word public use16 'CODE'
@@ -293,38 +228,6 @@ local cp
               mov      [SI][TChannel.bParameter],al
 cp:
 ENDM
-
-; Out: dx:ax = pointer to pattern data
-mapPatternData proc near dPatData: dword
-        mov     dx,word ptr [dPatData][2]
-        cmp     dx,0c000h
-        jae     mapPatternData@_map
-        mov     ax,word ptr [dPatData][0]
-        jmp     mapPatternData@_exit
-mapPatternData@_map:
-        push    bp
-        mov     ax,[patListEMHandle]
-        push    ax      ; uint16 handle
-        xor     dh,dh
-        push    dx      ; uint16 logPage
-        push    0       ; uint8 physPage
-        call    EmsMap
-        pop     bp
-        test    al,al
-        jnz     mapPatternData@_ok
-        xor     ax,ax
-        xor     dx,dx
-        jmp     mapPatternData@_exit
-mapPatternData@_ok:
-        mov     ax,word ptr [dPatData][2]
-        movzx   ax,ah
-        and     al,03fh
-        mul     [patListPatLength]  ; ax = partno * pattern length
-        add     ax,word ptr [dPatData][0]
-        mov     dx,[FrameSEG]
-mapPatternData@_exit:
-        ret
-mapPatternData endp
 
 ; put next notes into channels
 public readnewnotes
@@ -644,55 +547,87 @@ ISTART_ effInit_C_PatternBreak
 IEND___ effInit_C_PatternBreak
 
 ISTART_ effInit_D_VolumeSlide
-               checkPara0
-               mov      ah,al
-               shr      ah,4
-               cmp      ah,0fh
-               jne      effInit_D_VolumeSlide@_noFineDown
-               cmp      al,0f0h
-               je       effInit_D_VolumeSlide@_up
-               ; normal fine volume down   DFx
-        chnSetSubCommand 2
-        jmp effInit_D_VolumeSlide@_exit
-effInit_D_VolumeSlide@_noFineDown:
-               mov      ah,al
-               and      ah,0fh
-               cmp      ah,0fh
-               jne      effInit_D_VolumeSlide@_noFineUp
-               cmp      al,0fh
-               je       effInit_D_VolumeSlide@_down
-        ; normal fine volume up DxF
-        chnSetSubCommand 3
-        jmp effInit_D_VolumeSlide@_exit
-effInit_D_VolumeSlide@_noFineUp:
-               mov      ah,al
-               and      ah,00fh
-               jz       effInit_D_VolumeSlide@_up
+        checkPara0
+        mov     ah,al
+        and     ah,0f0h
+        cmp     ah,0f0h
+        ; ((param & 0xf0) == 0xf0)
+        jne      effInit_D_VolumeSlide@_check
+        je       effInit_D_VolumeSlide@_check2
+
+effInit_D_VolumeSlide@_check:
+        mov     ah,al
+        and     ah,0fh
+        cmp     ah,0fh
+        ; ((param & 0x0f) == 0x0f)
+        jne     effInit_D_VolumeSlide@_check0
+        je      effInit_D_VolumeSlide@_check1
+
+effInit_D_VolumeSlide@_check0:
+        mov      ah,al
+        and      ah,00fh
+        ; (param & 0x0f)
+        jz       effInit_D_VolumeSlide@_up
+        jnz      effInit_D_VolumeSlide@_down
+
+effInit_D_VolumeSlide@_check1:
+        cmp      al,0fh
+        ; (param == 0x0f)
+        je       effInit_D_VolumeSlide@_down
+        jne      effInit_D_VolumeSlide@_fineUp
+
+effInit_D_VolumeSlide@_check2:
+        cmp      al,0f0h
+        ; (param == 0xf0)
+        je       effInit_D_VolumeSlide@_up
+        jne      effInit_D_VolumeSlide@_fineDown
+
 effInit_D_VolumeSlide@_down:
-        ; normal slide down effect D0x
-        chnSetSubCommand 0
+        chnSetSubCommand 0  ; normal slide down effect D0x
         jmp effInit_D_VolumeSlide@_exit
+
 effInit_D_VolumeSlide@_up:
-        ; normal slide up effect Dx0
-        chnSetSubCommand 1
+        chnSetSubCommand 1  ; normal slide up effect Dx0
+        jmp effInit_D_VolumeSlide@_exit
+
+effInit_D_VolumeSlide@_fineDown:
+        chnSetSubCommand 2  ; normal fine volume down   DFx
+        jmp effInit_D_VolumeSlide@_exit
+
+effInit_D_VolumeSlide@_fineUp:
+        chnSetSubCommand 3  ; normal fine volume up DxF
+        jmp effInit_D_VolumeSlide@_exit
+
 effInit_D_VolumeSlide@_exit:
         effInitReturn 1
 IEND___ effInit_D_VolumeSlide
 
 ISTART_ effInit_E_PitchDown
-               checkPara0
-               cmp      al,0DFh      ; al is parameter
-               ja       effInit_E_PitchDown@_extra
+        checkPara0
+        cmp     al,0DFh
+        ; (param >= 0xe0)
+        ja      effInit_E_PitchDown@_extra
+        jna     effInit_E_PitchDown@_0
+
+effInit_E_PitchDown@_extra:
+        cmp     al,0EFh
+        ; (param >= 0xf0)
+        ja      effInit_E_PitchDown@_1
+        jna     effInit_E_PitchDown@_2
+
+effInit_E_PitchDown@_0:
         chnSetSubCommand 0
         jmp effInit_E_PitchDown@_exit
-effInit_E_PitchDown@_extra:
-               cmp      al,0EFh
-               ja       effInit_E_PitchDown@_fine
-               ; extra fine slides
+
+effInit_E_PitchDown@_1:
+        chnSetSubCommand 1
+        jmp effInit_E_PitchDown@_exit
+
+effInit_E_PitchDown@_2:
+        ; extra fine slides
         chnSetSubCommand 2
         jmp effInit_E_PitchDown@_exit
-effInit_E_PitchDown@_fine:
-        chnSetSubCommand 1
+
 effInit_E_PitchDown@_exit:
         effInitReturn 1
 IEND___ effInit_E_PitchDown
