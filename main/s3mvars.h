@@ -118,6 +118,18 @@ extern uint16_t PUBLIC_DATA StartOrder;
 extern channelsList_t PUBLIC_DATA Channel;  /* all public/private data for every channel */
 extern uint8_t PUBLIC_DATA UsedChannels;    /* possible values : 1..32 (kill all Adlib) */
 
+#define chn_getState(chn)        (chn->bEnabled)
+#define chn_setState(chn, value) chn->bEnabled = value
+
+#define chn_getEffectParam(chn)        (chn->bParameter)
+#define chn_setEffectParam(chn, value) chn->bParameter = value
+
+#define _chn_setSamplePeriod(chn, value) chn->wSmpPeriod= value
+#define chn_getSamplePeriod(chn)         (chn->wSmpPeriod)
+
+#define chn_getSampleStep(chn)          (chn->dSmpStep)
+#define chn_setSampleStep(chn, value)   chn->dSmpStep = value
+
 #define chn_getInstrument(chn) (struct instrument_t *)MK_FP(chn->wInsSeg, 0)
 #define chn_setInstrument(chn, p) chn->wInsSeg = FP_SEG((void __far *)p)
 #define chn_setSampleData(chn, p) chn->wSmpSeg = FP_SEG((void __far *)p)

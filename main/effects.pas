@@ -61,6 +61,7 @@ var
     chnState_porta_dSmpStepOld: longint;
     chnState_arp_bFlag: boolean;
 
+procedure set_tempo(tempo: byte);
 function  mapPatternData(p: pointer): pointer;
 procedure chn_setSamplePeriod(var chn: TChannel; period: longint);
 procedure chn_setSampleVolume(var chn: TChannel; vol: integer);
@@ -85,6 +86,7 @@ uses
 
 (*$l effects.obj*)
 
+procedure set_tempo(tempo: byte); external;
 function  mapPatternData(p: pointer): pointer; external;
 procedure chn_setSamplePeriod(var chn: TChannel; period: longint); external;
 procedure chn_setSampleVolume(var chn: TChannel; vol: integer); external;

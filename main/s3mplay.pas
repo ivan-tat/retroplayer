@@ -85,6 +85,7 @@ uses
     mixer,
     filldma,
     mixing,
+    effects,
     readnote;
 
 (*$l s3mplay.obj*)

@@ -12,7 +12,6 @@
 #include <stdint.h>
 #endif
 
-extern void PUBLIC_CODE set_tempo(uint8_t tempo);
-extern void PUBLIC_CODE readnewnotes(void);
+void PUBLIC_CODE readnewnotes(void);
 
 #endif  /* READNOTE_H */

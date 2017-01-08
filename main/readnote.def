@@ -5,9 +5,6 @@
 
 READNOTE_TEXT segment byte public use16 'CODE'
 
-; declared in readnote.pas
-extrn set_tempo: far
-
 extrn readnewnotes: far
 
 READNOTE_TEXT ends

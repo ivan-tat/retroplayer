@@ -10,8 +10,6 @@ unit readnote;
 
 interface
 
-procedure set_tempo(tempo: byte);
-
 procedure readnewnotes;
 
 implementation
@@ -26,16 +24,8 @@ uses
     mixer,
     mixer_;
 
-procedure set_tempo(tempo: byte);
-begin
-    if (tempo >= 32) then
-        curtempo := tempo
-    else
-        tempo := curtempo;
-    if (tempo <> 0) then mixTickSamplesPerChannel := longint(mixSampleRate)*5 div (2*tempo);
-end;
-
 (*$l readnote.obj*)
+
 procedure readnewnotes; external;
 
 end.

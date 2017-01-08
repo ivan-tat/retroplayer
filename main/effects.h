@@ -45,6 +45,8 @@
 #define EFFIDX_Y                 25
 #define EFFIDX_Z                 26
 
+void PUBLIC_CODE set_tempo(uint8_t tempo);
+
 /* TODO: rename to 'void *patMapData(MUSPAT *pat)', and move to s3mvars.c */
 void *PUBLIC_CODE mapPatternData(void *pat);
 
