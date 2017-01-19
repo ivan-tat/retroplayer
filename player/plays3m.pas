@@ -14,6 +14,7 @@ uses
     s3mvars,
     fillvars,
     mixvars,
+    effects,
     s3mplay;
 
 const stereo_calc=true;

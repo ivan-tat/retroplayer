@@ -20,21 +20,6 @@
 #include "mixer.h"
 #include "effects.h"
 
-#define NOTE_MAX (7 * 12 + 11)
-
-#define CHNNOTE_MAX ((7 << 4) + 11)
-#define CHNNOTE_EMPTY 0xff
-#define CHNNOTE_OFF 0xfe
-
-#define _isNote(note) ((note != CHNNOTE_OFF) && (note != CHNNOTE_EMPTY))
-#define _packNote(note) ((note % 12) + ((note / 12) << 4))
-#define _unpackNote(note) ((note & 0x0f) + (note >> 4) * 12)
-
-#define CHNINSVOL_EMPTY 0xff
-#define CHNINSVOL_MAX 63
-
-#define MID_C_RATE 8363
-
 #define get_i8_value(off, pos) *(int8_t *)MK_FP(FP_SEG(&wavetab), off + pos)
 
 /*** Effects ***/
@@ -43,6 +28,8 @@
 typedef bool __near emInit_t  (MIXCHN *chn, uint8_t param);
 typedef void __near emHandle_t(MIXCHN *chn);
 typedef void __near emTick_t  (MIXCHN *chn);
+typedef bool __near emCont_t  (MIXCHN *chn);
+typedef void __near emStop_t  (MIXCHN *chn);
 
 // Effect's methods table
 typedef struct effMethodsTable_t
@@ -50,6 +37,8 @@ typedef struct effMethodsTable_t
     emInit_t   __near *init;
     emHandle_t __near *handle;
     emTick_t   __near *tick;
+    emCont_t   __near *cont;
+    emStop_t   __near *stop;
 };
 typedef struct effMethodsTable_t EFFMT;
 
@@ -57,20 +46,26 @@ typedef struct effMethodsTable_t EFFMT;
 #define NAME_INIT(name)   eff_##name##_init
 #define NAME_HANDLE(name) eff_##name##_handle
 #define NAME_TICK(name)   eff_##name##_tick
+#define NAME_CONT(name)   eff_##name##_cont
+#define NAME_STOP(name)   eff_##name##_stop
 
 // Effect's method definition
 #define METHOD_INIT(name)   bool __near NAME_INIT(name)  (MIXCHN *chn, uint8_t param)
 #define METHOD_HANDLE(name) void __near NAME_HANDLE(name)(MIXCHN *chn)
 #define METHOD_TICK(name)   void __near NAME_TICK(name)  (MIXCHN *chn)
+#define METHOD_CONT(name)   bool __near NAME_CONT(name)  (MIXCHN *chn)
+#define METHOD_STOP(name)   void __near NAME_STOP(name)  (MIXCHN *chn)
 
 // Effect description
 #define EFFECT(name) eff_##name##_desc
-#define DEFINE_EFFECT(name, init, handle, tick) \
+#define DEFINE_EFFECT(name, init, handle, tick, cont, stop) \
 static const EFFMT EFFECT(name) = \
 { \
     NAME_INIT  (init), \
     NAME_HANDLE(handle), \
-    NAME_TICK  (tick) \
+    NAME_TICK  (tick), \
+    NAME_CONT  (cont), \
+    NAME_STOP  (stop) \
 }
 
 // Effect descriptions list
@@ -79,12 +74,14 @@ static const EFFMT EFFECT(name) = \
 
 // Sub-effect description
 #define SUB_EFFECT(name) eff_##name##_sub_desc
-#define DEFINE_SUB_EFFECT(name, init, handle, tick) \
+#define DEFINE_SUB_EFFECT(name, init, handle, tick, cont, stop) \
 static const EFFMT SUB_EFFECT(name) = \
 { \
     NAME_INIT  (init), \
     NAME_HANDLE(handle), \
-    NAME_TICK  (tick) \
+    NAME_TICK  (tick), \
+    NAME_CONT  (cont), \
+    NAME_STOP  (stop) \
 }
 
 // Sub-effect descriptions list
@@ -93,16 +90,22 @@ static const EFFMT SUB_EFFECT(name) = \
 
 /*** No effect ***/
 
+// effect continue checks
+
+METHOD_CONT(allow);
+METHOD_CONT(deny);
+
 // empty effect
 
 METHOD_INIT  (none);
 METHOD_HANDLE(none);
 METHOD_TICK  (none);
-DEFINE_EFFECT(none, none, none, none);
+METHOD_STOP  (none);
+DEFINE_EFFECT(none, none, none, none, deny, none);
 
 // empty sub-effect
 
-DEFINE_SUB_EFFECT(none, none, none, none);
+DEFINE_SUB_EFFECT(none, none, none, none, deny, none);
 
 /****** Global effects ******/
 
@@ -110,31 +113,31 @@ DEFINE_SUB_EFFECT(none, none, none, none);
 /* Scream Tracker 3 command: T */
 
 METHOD_INIT(setTempo);
-DEFINE_EFFECT(setTempo, setTempo, none, none);
+DEFINE_EFFECT(setTempo, setTempo, none, none, deny, none);
 
 /*** Set speed ***/
 /* Scream Tracker 3 command: A */
 
 METHOD_INIT(setSpeed);
-DEFINE_EFFECT(setSpeed, setSpeed, none, none);
+DEFINE_EFFECT(setSpeed, setSpeed, none, none, deny, none);
 
 /*** Jump to order ***/
 /* Scream Tracker 3 command: B */
 
 METHOD_INIT(jumpToOrder);
-DEFINE_EFFECT(jumpToOrder, jumpToOrder, none, none);
+DEFINE_EFFECT(jumpToOrder, jumpToOrder, none, none, deny, none);
 
 /*** Pattern break ***/
 /* Scream Tracker 3 command: C */
 
 METHOD_INIT(patBreak);
-DEFINE_EFFECT(patBreak, patBreak, none, none);
+DEFINE_EFFECT(patBreak, patBreak, none, none, deny, none);
 
 /*** Set global volume ***/
 /* Scream Tracker 3 command: V */
 
 METHOD_INIT(setGVol);
-DEFINE_EFFECT(setGVol, setGVol, none, none);
+DEFINE_EFFECT(setGVol, setGVol, none, none, deny, none);
 
 // TODO: move here pattern delay
 
@@ -146,16 +149,16 @@ DEFINE_EFFECT(setGVol, setGVol, none, none);
 // sub-effects
 
 METHOD_TICK(volSlide_down);
-DEFINE_SUB_EFFECT(volSlide_down, none, none, volSlide_down);
+DEFINE_SUB_EFFECT(volSlide_down, none, none, volSlide_down, allow, none);
 
 METHOD_TICK(volSlide_up);
-DEFINE_SUB_EFFECT(volSlide_up, none, none, volSlide_up);
+DEFINE_SUB_EFFECT(volSlide_up, none, none, volSlide_up, allow, none);
 
 METHOD_HANDLE(volSlide_fineDown);
-DEFINE_SUB_EFFECT(volSlide_fineDown, none, volSlide_fineDown, none);
+DEFINE_SUB_EFFECT(volSlide_fineDown, none, volSlide_fineDown, none, allow, none);
 
 METHOD_HANDLE(volSlide_fineUp);
-DEFINE_SUB_EFFECT(volSlide_fineUp, none, volSlide_fineUp, none);
+DEFINE_SUB_EFFECT(volSlide_fineUp, none, volSlide_fineUp, none, allow, none);
 
 // sub-effects list
 
@@ -178,7 +181,7 @@ DEFINE_SUB_EFFECTS_LIST(volSlide) =
 METHOD_INIT  (volSlide);
 METHOD_HANDLE(volSlide);
 METHOD_TICK  (volSlide);
-DEFINE_EFFECT(volSlide, volSlide, volSlide, volSlide);
+DEFINE_EFFECT(volSlide, volSlide, volSlide, volSlide, allow, none);
 
 /*** Pitch slide down ***/
 /* Scream Tracker 3 command: E */
@@ -186,13 +189,13 @@ DEFINE_EFFECT(volSlide, volSlide, volSlide, volSlide);
 // sub-effects
 
 METHOD_TICK(pitchDown_normal);
-DEFINE_SUB_EFFECT(pitchDown_normal, none, none, pitchDown_normal);
+DEFINE_SUB_EFFECT(pitchDown_normal, none, none, pitchDown_normal, allow, none);
 
 METHOD_HANDLE(pitchDown_fine);
-DEFINE_SUB_EFFECT(pitchDown_fine, none, pitchDown_fine, none);
+DEFINE_SUB_EFFECT(pitchDown_fine, none, pitchDown_fine, none, allow, none);
 
 METHOD_HANDLE(pitchDown_extra);
-DEFINE_SUB_EFFECT(pitchDown_extra, none, pitchDown_extra, none);
+DEFINE_SUB_EFFECT(pitchDown_extra, none, pitchDown_extra, none, allow, none);
 
 // sub-effects list
 
@@ -213,7 +216,7 @@ DEFINE_SUB_EFFECTS_LIST(pitchDown) =
 METHOD_INIT  (pitchDown);
 METHOD_HANDLE(pitchDown);
 METHOD_TICK  (pitchDown);
-DEFINE_EFFECT(pitchDown, pitchDown, pitchDown, pitchDown);
+DEFINE_EFFECT(pitchDown, pitchDown, pitchDown, pitchDown, allow, none);
 
 /*** Pitch slide up ***/
 /* Scream Tracker 3 command: F */
@@ -221,13 +224,13 @@ DEFINE_EFFECT(pitchDown, pitchDown, pitchDown, pitchDown);
 // sub-effects
 
 METHOD_TICK(pitchUp_normal);
-DEFINE_SUB_EFFECT(pitchUp_normal, none, none, pitchUp_normal);
+DEFINE_SUB_EFFECT(pitchUp_normal, none, none, pitchUp_normal, allow, none);
 
 METHOD_HANDLE(pitchUp_fine);
-DEFINE_SUB_EFFECT(pitchUp_fine, none, pitchUp_fine, none);
+DEFINE_SUB_EFFECT(pitchUp_fine, none, pitchUp_fine, none, allow, none);
 
 METHOD_HANDLE(pitchUp_extra);
-DEFINE_SUB_EFFECT(pitchUp_extra, none, pitchUp_extra, none);
+DEFINE_SUB_EFFECT(pitchUp_extra, none, pitchUp_extra, none, allow, none);
 
 // sub-effects list
 
@@ -248,7 +251,7 @@ DEFINE_SUB_EFFECTS_LIST(pitchUp) =
 METHOD_INIT  (pitchUp);
 METHOD_HANDLE(pitchUp);
 METHOD_TICK  (pitchUp);
-DEFINE_EFFECT(pitchUp, pitchUp, pitchUp, pitchUp);
+DEFINE_EFFECT(pitchUp, pitchUp, pitchUp, pitchUp, allow, none);
 
 /*** Portamento to note ***/
 /* Scream Tracker 3 command: G */
@@ -256,7 +259,7 @@ DEFINE_EFFECT(pitchUp, pitchUp, pitchUp, pitchUp);
 METHOD_INIT  (porta);
 METHOD_HANDLE(porta);
 METHOD_TICK  (porta);
-DEFINE_EFFECT(porta, porta, porta, porta);
+DEFINE_EFFECT(porta, porta, porta, porta, allow, none);
 
 /*** Portamento to note + Volume slide ***/
 /* Scream Tracker 3 command: L (G + D) */
@@ -264,36 +267,38 @@ DEFINE_EFFECT(porta, porta, porta, porta);
 METHOD_INIT  (porta_vol);
 METHOD_HANDLE(porta_vol);
 METHOD_TICK  (porta_vol);
-DEFINE_EFFECT(porta_vol, porta_vol, porta_vol, porta_vol);
+DEFINE_EFFECT(porta_vol, porta_vol, porta_vol, porta_vol, allow, none);
 
 /*** Vibrato (normal) ***/
 /* Scream Tracker 3 command: H */
 
-METHOD_INIT  (vibNormal);
-METHOD_HANDLE(vibNormal);
-METHOD_TICK  (vibNormal);
-DEFINE_EFFECT(vibNormal, vibNormal, vibNormal, vibNormal);
+METHOD_INIT  (vibNorm);
+METHOD_HANDLE(vibNorm);
+METHOD_TICK  (vibNorm);
+METHOD_CONT  (vibNorm);
+METHOD_STOP  (vibNorm);
+DEFINE_EFFECT(vibNorm, vibNorm, vibNorm, vibNorm, vibNorm, vibNorm);
 
 /*** Vibrato (fine) ***/
 /* Scream Tracker 3 command: U */
 
 METHOD_TICK(vibFine);
-DEFINE_EFFECT(vibFine, vibNormal, none, vibFine);
+DEFINE_EFFECT(vibFine, vibNorm, none, vibFine, vibNorm, vibNorm);
 
-/*** vibNormal + Volume slide ***/
+/*** Vibrato (normal) + Volume slide ***/
 /* Scream Tracker 3 command: K (H + D) */
 
-METHOD_INIT  (vibNormal_vol);
-METHOD_HANDLE(vibNormal_vol);
-METHOD_TICK  (vibNormal_vol);
-DEFINE_EFFECT(vibNormal_vol, vibNormal_vol, vibNormal_vol, vibNormal_vol);
+METHOD_INIT  (vibNorm_vol);
+METHOD_HANDLE(vibNorm_vol);
+METHOD_TICK  (vibNorm_vol);
+DEFINE_EFFECT(vibNorm_vol, vibNorm_vol, vibNorm_vol, vibNorm_vol, vibNorm, vibNorm);
 
 /*** Tremor ***/
 /* Scream Tracker 3 command: I */
 
 METHOD_INIT(tremor);
 METHOD_TICK(tremor);
-DEFINE_EFFECT(tremor, tremor, none, tremor);
+DEFINE_EFFECT(tremor, tremor, none, tremor, allow, none);
 
 /*** Arpeggio ***/
 /* Scream Tracker 3 command: J */
@@ -301,49 +306,50 @@ DEFINE_EFFECT(tremor, tremor, none, tremor);
 METHOD_INIT  (arpeggio);
 METHOD_HANDLE(arpeggio);
 METHOD_TICK  (arpeggio);
-DEFINE_EFFECT(arpeggio, arpeggio, arpeggio, arpeggio);
+METHOD_STOP  (arpeggio);
+DEFINE_EFFECT(arpeggio, arpeggio, arpeggio, arpeggio, allow, arpeggio);
 
 /*** Set sample offset ***/
 /* Scream Tracker 3 command: O */
 
 METHOD_HANDLE(sampleOffset);
-DEFINE_EFFECT(sampleOffset, none, sampleOffset, none);
+DEFINE_EFFECT(sampleOffset, none, sampleOffset, none, deny, none);
 
 /*** Note retrigger + Volume slide ***/
 /* Scream Tracker 3 command: Q */
 
 METHOD_INIT(retrig);
 METHOD_TICK(retrig);
-DEFINE_EFFECT(retrig, retrig, none, retrig);
+DEFINE_EFFECT(retrig, retrig, none, retrig, allow, none);
 
 // sub-effects
 
 METHOD_INIT(retrig_none);
-DEFINE_SUB_EFFECT(retrig_none, retrig_none, none, none);
+DEFINE_SUB_EFFECT(retrig_none, retrig_none, none, none, allow, none);
 
 METHOD_INIT(retrig_slideDown);
 METHOD_TICK(retrig_slideDown);
-DEFINE_SUB_EFFECT(retrig_slideDown, retrig_slideDown, none, retrig_slideDown);
+DEFINE_SUB_EFFECT(retrig_slideDown, retrig_slideDown, none, retrig_slideDown, allow, none);
 
 METHOD_INIT(retrig_use2div3);
 METHOD_TICK(retrig_use2div3);
-DEFINE_SUB_EFFECT(retrig_use2div3, retrig_use2div3, none, retrig_use2div3);
+DEFINE_SUB_EFFECT(retrig_use2div3, retrig_use2div3, none, retrig_use2div3, allow, none);
 
 METHOD_INIT(retrig_use1div2);
 METHOD_TICK(retrig_use1div2);
-DEFINE_SUB_EFFECT(retrig_use1div2, retrig_use1div2, none, retrig_use1div2);
+DEFINE_SUB_EFFECT(retrig_use1div2, retrig_use1div2, none, retrig_use1div2, allow, none);
 
 METHOD_INIT(retrig_slideUp);
 METHOD_TICK(retrig_slideUp);
-DEFINE_SUB_EFFECT(retrig_slideUp, retrig_slideUp, none, retrig_slideUp);
+DEFINE_SUB_EFFECT(retrig_slideUp, retrig_slideUp, none, retrig_slideUp, allow, none);
 
 METHOD_INIT(retrig_use3div2);
 METHOD_TICK(retrig_use3div2);
-DEFINE_SUB_EFFECT(retrig_use3div2, retrig_use3div2, none, retrig_use3div2);
+DEFINE_SUB_EFFECT(retrig_use3div2, retrig_use3div2, none, retrig_use3div2, allow, none);
 
 METHOD_INIT(retrig_use2div1);
 METHOD_TICK(retrig_use2div1);
-DEFINE_SUB_EFFECT(retrig_use2div1, retrig_use2div1, none, retrig_use2div1);
+DEFINE_SUB_EFFECT(retrig_use2div1, retrig_use2div1, none, retrig_use2div1, allow, none);
 
 // sub-effects list
 
@@ -392,7 +398,7 @@ static const uint8_t eff_retrig_route[16] =
 METHOD_INIT(tremolo);
 METHOD_HANDLE(tremolo);
 METHOD_TICK(tremolo);
-DEFINE_EFFECT(tremolo, tremolo, tremolo, tremolo);
+DEFINE_EFFECT(tremolo, tremolo, tremolo, tremolo, allow, none);
 
 /****** Special effects ******/
 /* Scream Tracker 3 command: S */
@@ -403,42 +409,42 @@ DEFINE_EFFECT(tremolo, tremolo, tremolo, tremolo);
 /* Scream Tracker 3 command: S3 */
 
 METHOD_HANDLE(special_fineTune);
-DEFINE_SUB_EFFECT(special_fineTune, none, special_fineTune, none);
+DEFINE_SUB_EFFECT(special_fineTune, none, special_fineTune, none, deny, none);
 
 /*** Set vibrato waveform ***/
 
 METHOD_INIT(special_setVibWave);
-DEFINE_SUB_EFFECT(special_setVibWave, special_setVibWave, none, none);
+DEFINE_SUB_EFFECT(special_setVibWave, special_setVibWave, none, none, deny, none);
 
 /*** Set tremolo waveform ***/
 
 METHOD_INIT(special_setTremWave);
-DEFINE_SUB_EFFECT(special_setTremWave, special_setTremWave, none, none);
+DEFINE_SUB_EFFECT(special_setTremWave, special_setTremWave, none, none, deny, none);
 
 /*** Pattern loop ***/
 
 METHOD_INIT(special_patLoop);
-DEFINE_SUB_EFFECT(special_patLoop, special_patLoop, none, none);
+DEFINE_SUB_EFFECT(special_patLoop, special_patLoop, none, none, deny, none);
 
 /*** Note cut ***/
 /* Scream Tracker 3 command: SC */
 
 METHOD_TICK(special_noteCut);
-DEFINE_SUB_EFFECT(special_noteCut, none, none, special_noteCut);
+DEFINE_SUB_EFFECT(special_noteCut, none, none, special_noteCut, deny, none);
 
 /*** Note delay ***/
 /* Scream Tracker 3 command: SD */
 
 METHOD_INIT(special_noteDelay);
 METHOD_TICK(special_noteDelay);
-DEFINE_SUB_EFFECT(special_noteDelay, special_noteDelay, none, special_noteDelay);
+DEFINE_SUB_EFFECT(special_noteDelay, special_noteDelay, none, special_noteDelay, deny, none);
 
 /*** Pattern delay ***/
 /* Scream Tracker 3 command: SE */
 
 METHOD_INIT  (special_patDelay);
 METHOD_HANDLE(special_patDelay);
-DEFINE_SUB_EFFECT(special_patDelay, special_patDelay, special_patDelay, none);
+DEFINE_SUB_EFFECT(special_patDelay, special_patDelay, special_patDelay, none, deny, none);
 
 // sub-effects list
 
@@ -488,11 +494,9 @@ static const uint8_t eff_special_route[16] =
 
 METHOD_INIT(special);
 METHOD_TICK(special);
-DEFINE_EFFECT(special, special, none, special);
+DEFINE_EFFECT(special, special, none, special, deny, none);
 
 /*** Main effects table ***/
-
-#define MAXEFF 22
 
 DEFINE_EFFECTS_LIST(main) =
 {
@@ -504,10 +508,10 @@ DEFINE_EFFECTS_LIST(main) =
     &EFFECT(pitchDown),     // E
     &EFFECT(pitchUp),       // F
     &EFFECT(porta),         // G
-    &EFFECT(vibNormal),     // H
+    &EFFECT(vibNorm),       // H
     &EFFECT(tremor),        // I
     &EFFECT(arpeggio),      // J
-    &EFFECT(vibNormal_vol), // K: (H) + (D)
+    &EFFECT(vibNorm_vol),   // K: (H) + (D)
     &EFFECT(porta_vol),     // L: (G) + (D)
     &EFFECT(none),          // M
     &EFFECT(none),          // N
@@ -525,69 +529,20 @@ DEFINE_EFFECTS_LIST(main) =
     // Z
 };
 
-/* Flow control variables */
-// TODO: make portable: place it to a structure and pass pointer to all effect's methods
-extern bool    PUBLIC_DATA playState_jumpToOrder_bFlag;
-extern uint8_t PUBLIC_DATA playState_jumpToOrder_bPos;
-extern bool    PUBLIC_DATA playState_patBreak_bFlag;
-extern uint8_t PUBLIC_DATA playState_patBreak_bPos;
-extern bool    PUBLIC_DATA playState_patLoop_bNow;
-extern bool    PUBLIC_DATA playState_gVolume_bFlag;
-extern uint8_t PUBLIC_DATA playState_gVolume_bValue;
-extern bool    PUBLIC_DATA playState_patDelay_bNow;
-
-/* Channel state */
-
-/* [Andre] call 'readnotes' inside a pattern delay, */
-/* [Andre] if then ignore all notes/inst/vol ! */
-
-/* [Andre] now some variables I added after I found out those amazing */
-/* [Andre] things about pattern delay */
-
-/* save effect,parameter for pattern delay */
-extern uint16_t PUBLIC_DATA chnState_patDelay_wCommandSaved;
-extern uint8_t  PUBLIC_DATA chnState_patDelay_bParameterSaved;
-
-/* [Andre] normaly it will be a copie of es:[di], but in */
-/* [Andre] pattern delay = 0 -> ignore note */
-extern uint8_t PUBLIC_DATA chnState_cur_bNote;
-extern uint8_t PUBLIC_DATA chnState_cur_bIns;   /* the same thing for instrument */
-extern uint8_t PUBLIC_DATA chnState_cur_bVol;   /* and for volume */
-
-/* to save portamento values : */
-extern bool     PUBLIC_DATA chnState_porta_flag;
-extern uint16_t PUBLIC_DATA chnState_porta_wSmpPeriodOld;
-extern uint32_t PUBLIC_DATA chnState_porta_dSmpStepOld;
-
-extern bool     PUBLIC_DATA chnState_arp_bFlag;
-    /* a little one for arpeggio */
-
-void PUBLIC_CODE set_tempo(uint8_t tempo)
+void PUBLIC_CODE set_speed(uint8_t value)
 {
-    if (tempo >= 32)
-        CurTempo = tempo;
-    else
-        tempo = CurTempo;
-    if (tempo)
-        mixTickSamplesPerChannel = (long)mixSampleRate * 5 / (int)(tempo * 2);
+    if (value > 0)
+        CurSpeed = value;
 }
 
-void *PUBLIC_CODE mapPatternData(void *pat)
+void PUBLIC_CODE set_tempo(uint8_t value)
 {
-    unsigned int logPage;
-    unsigned char physPage;
-    if (isPatternDataInEM(FP_SEG(pat)))
-    {
-        logPage = getPatternDataLogPageInEM(FP_SEG(pat));
-        physPage = 0;
-        if (! EmsMap(patListEMHandle, logPage, physPage))
-            return MK_FP(0, 0);
-        return MK_FP(FrameSEG[0], getPatternDataOffsetInEM(FP_SEG(pat)));
-    }
+    if (value >= 32)
+        CurTempo = value;
     else
-    {
-        return pat;
-    };
+        value = CurTempo;
+    if (value)
+        mixTickSamplesPerChannel = (long)mixSampleRate * 5 / (int)(value * 2);
 }
 
 void PUBLIC_CODE chn_setSamplePeriod(MIXCHN *chn, int32_t period)
@@ -728,6 +683,18 @@ uint8_t __near checkPara0not(MIXCHN *chn, uint8_t param)
     return param;
 }
 
+/*** Continue checks ***/
+
+METHOD_CONT(allow)
+{
+    return true;
+}
+
+METHOD_CONT(deny)
+{
+    return false;
+}
+
 /*** No effect ***/
 
 METHOD_INIT(none)
@@ -746,13 +713,17 @@ METHOD_TICK(none)
     return;
 }
 
+METHOD_STOP(none)
+{
+    return;
+}
+
 /*** Set speed ***/
 
 METHOD_INIT(setSpeed)
 {
     param = checkPara0not(chn, param);
-    if (param)
-        CurSpeed = param;
+    set_speed(param);
     return true;
 }
 
@@ -1061,7 +1032,7 @@ METHOD_TICK(porta_vol)
 
 /*** Vibrato (normal) ***/
 
-METHOD_INIT(vibNormal)
+METHOD_INIT(vibNorm)
 {
     param = checkPara0not(chn, param);
 
@@ -1078,13 +1049,13 @@ METHOD_INIT(vibNormal)
     return true;
 }
 
-METHOD_HANDLE(vibNormal)
+METHOD_HANDLE(vibNorm)
 {
     if (!(chn->bEffFlags & EFFFLAG_CONTINUE))
         chn->wSmpPeriodOld = chn_getSamplePeriod(chn);
 }
 
-METHOD_TICK(vibNormal)
+METHOD_TICK(vibNorm)
 {
     unsigned int pos;
     if (chn_getState(chn))
@@ -1095,6 +1066,20 @@ METHOD_TICK(vibNormal)
         chn_setSamplePeriod(chn, chn->wSmpPeriodOld +
             ((get_i8_value(chn->wVibTab, pos) * (chn->bVibParam & 0x0f)) >> 4));
     };
+}
+
+METHOD_CONT(vibNorm)
+{
+    return !_isNote(chnState_cur_bNote);
+}
+
+METHOD_STOP(vibNorm)
+{
+    unsigned int period;
+    period = chn->wSmpPeriodOld;
+    chn->wSmpPeriod = period;
+    if (period)
+        chn->dSmpStep = mixCalcSampleStep(period);
 }
 
 /*** Vibrato (fine) ***/
@@ -1114,7 +1099,7 @@ METHOD_TICK(vibFine)
 
 /*** Vibrato (normal) + Volume slide ***/
 
-METHOD_INIT(vibNormal_vol)
+METHOD_INIT(vibNorm_vol)
 {
     if (!(chn->bEffFlags & EFFFLAG_CONTINUE))
         chn->bTabPos = 0;
@@ -1122,16 +1107,16 @@ METHOD_INIT(vibNormal_vol)
     return true;
 }
 
-METHOD_HANDLE(vibNormal_vol)
+METHOD_HANDLE(vibNorm_vol)
 {
     EFFECT(volSlide).handle(chn);
-    EFFECT(vibNormal).handle(chn);
+    EFFECT(vibNorm).handle(chn);
 }
 
-METHOD_TICK(vibNormal_vol)
+METHOD_TICK(vibNorm_vol)
 {
     EFFECT(volSlide).tick(chn);
-    EFFECT(vibNormal).tick(chn);
+    EFFECT(vibNorm).tick(chn);
 }
 
 /*** Tremor ***/
@@ -1199,6 +1184,11 @@ METHOD_TICK(arpeggio)
     chn->dSmpStep = chn->dArpSmpSteps[pos];
 }
 
+METHOD_STOP(arpeggio)
+{
+    chn->dSmpStep = chn->dArpSmpSteps[0];
+}
+
 /*** Set sample offset ***/
 
 METHOD_HANDLE(sampleOffset)
@@ -1207,7 +1197,7 @@ METHOD_HANDLE(sampleOffset)
     param = chn_getEffectParam(chn);
     chn->wSmpStart = param << 8;
     if (_isNote(chnState_cur_bNote))
-        chn->dSmpPos = chn->wSmpStart << 16;
+        chn->dSmpPos = (unsigned long)chn->wSmpStart << 16;
 }
 
 /*** Note retrigger + Volume slide ***/
@@ -1462,9 +1452,9 @@ METHOD_INIT(special_patDelay)
 
 METHOD_HANDLE(special_patDelay)
 {
-    chn_setEffectParam(chn, chnState_patDelay_bParameterSaved);
-    chn_setCommand(chn, chnState_patDelay_wCommandSaved);
+    chn_setCommand(chn, chnState_patDelay_bCommandSaved);
     chn_setSubCommand(chn, 0);
+    chn_setEffectParam(chn, chnState_patDelay_bParameterSaved);
 }
 
 METHOD_INIT(special)
@@ -1510,4 +1500,22 @@ void PUBLIC_CODE chn_effTick(MIXCHN *chn)
     cmd = chn_getCommand(chn);
     if (cmd <= MAXEFF)
         EFFECTS_LIST(main)[cmd]->tick(chn);
+}
+
+bool PUBLIC_CODE chn_effCanContinue(MIXCHN *chn)
+{
+    uint8_t cmd;
+    cmd = chn_getCommand(chn);
+    if (cmd <= MAXEFF)
+        return EFFECTS_LIST(main)[cmd]->cont(chn);
+    else
+        return false;
+}
+
+void PUBLIC_CODE chn_effStop(MIXCHN *chn)
+{
+    uint8_t cmd;
+    cmd = chn_getCommand(chn);
+    if (cmd <= MAXEFF)
+        EFFECTS_LIST(main)[cmd]->stop(chn);
 }

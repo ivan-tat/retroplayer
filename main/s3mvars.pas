@@ -69,6 +69,7 @@ function  patIsDataInEM(pat: PMUSPAT): boolean;
 function  patGetData(pat: PMUSPAT): pointer;
 function  patGetDataLogPageInEM(pat: PMUSPAT): byte;
 function  patGetDataPartInEM(pat: PMUSPAT): byte;
+function  patMapData(pat: PMUSPAT): pointer;
 
 procedure patList_set(index: integer; pat: PMUSPAT);
 function  patList_get(index: integer): PMUSPAT;
@@ -143,6 +144,7 @@ function  patIsDataInEM(pat: PMUSPAT): boolean; external;
 function  patGetData(pat: PMUSPAT): pointer; external;
 function  patGetDataLogPageInEM(pat: PMUSPAT): byte; external;
 function  patGetDataPartInEM(pat: PMUSPAT): byte; external;
+function  patMapData(pat: PMUSPAT): pointer; external;
 
 procedure patList_set(index: integer; pat: PMUSPAT); external;
 function  patList_get(index: integer): PMUSPAT; external;

@@ -13,6 +13,7 @@
 #endif
 
 #include "..\pascal\pascal.h"
+#include "effects.h"
 
 /*** Initialization ***/
 

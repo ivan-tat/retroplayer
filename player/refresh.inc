@@ -86,8 +86,8 @@ var i:byte;
             {write(' ',channel[i].dArpSmpSteps[1].DD/64/1024:7:4);
             write(' ',channel[i].dArpSmpSteps[2].DD/64/1024:7:4);}
             write(' ',channel[i].bSmpVol:2);
-            if channel[i].wCommand<=44 then
-            write(' ',get_effectname(i,channel[i].wCommand shr 1,channel[i].wCommand2 shr 1,channel[i].bParameter));clreol;
+            if channel[i].bCommand <= MAXEFF then
+            write(' ',get_effectname(i,channel[i].bCommand,channel[i].bCommand2,channel[i].bParameter));clreol;
             write(#13#10);
           end;
         inc(i);

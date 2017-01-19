@@ -42,6 +42,21 @@ const
     EFFIDX_Y                 = 25;
     EFFIDX_Z                 = 26;
 
+const
+    MAXEFF = 22;
+
+(*
+const
+    EFFGROUP_GLOBAL  = 0;
+    EFFGROUP_PATTERN = 1;
+    EFFGROUP_ROW     = 2;
+    EFFGROUP_NOTE    = 3;
+    EFFGROUP_PITCH   = 4;
+    EFFGROUP_VOLUME  = 5;
+    EFFGROUP_PANNING = 6;
+    EFFGROUP_SAMPLE  = 7;
+*)
+
 var
     playState_jumpToOrder_bFlag: boolean;
     playState_jumpToOrder_bPos: byte;
@@ -51,7 +66,7 @@ var
     playState_gVolume_bFlag: boolean;
     playState_gVolume_bValue: byte;
     playState_patDelay_bNow: boolean;
-    chnState_patDelay_wCommandSaved: word;
+    chnState_patDelay_bCommandSaved: byte;
     chnState_patDelay_bParameterSaved: byte;
     chnState_cur_bNote: byte;
     chnState_cur_bIns: byte;
@@ -61,8 +76,8 @@ var
     chnState_porta_dSmpStepOld: longint;
     chnState_arp_bFlag: boolean;
 
-procedure set_tempo(tempo: byte);
-function  mapPatternData(p: pointer): pointer;
+procedure set_speed(value: byte);
+procedure set_tempo(value: byte);
 procedure chn_setSamplePeriod(var chn: TChannel; period: longint);
 procedure chn_setSampleVolume(var chn: TChannel; vol: integer);
 procedure chn_setupInstrument(var chn: TChannel; insNum: byte);
@@ -72,6 +87,8 @@ procedure chn_setupNote(var chn: TChannel; note: byte; keep: boolean);
 function  chn_effInit(var chn: TChannel; param: byte): boolean;
 procedure chn_effHandle(var chn: TChannel);
 procedure chn_effTick(var chn: TChannel);
+function  chn_effCanContinue(var chn: TChannel): boolean;
+procedure chn_effStop(var chn: TChannel);
 
 implementation
 
@@ -86,8 +103,8 @@ uses
 
 (*$l effects.obj*)
 
-procedure set_tempo(tempo: byte); external;
-function  mapPatternData(p: pointer): pointer; external;
+procedure set_speed(value: byte); external;
+procedure set_tempo(value: byte); external;
 procedure chn_setSamplePeriod(var chn: TChannel; period: longint); external;
 procedure chn_setSampleVolume(var chn: TChannel; vol: integer); external;
 procedure chn_setupInstrument(var chn: TChannel; insNum: byte); external;
@@ -97,5 +114,7 @@ procedure chn_setupNote(var chn: TChannel; note: byte; keep: boolean); external;
 function  chn_effInit(var chn: TChannel; param: byte): boolean; external;
 procedure chn_effHandle(var chn: TChannel); external;
 procedure chn_effTick(var chn: TChannel); external;
+function  chn_effCanContinue(var chn: TChannel): boolean; external;
+procedure chn_effStop(var chn: TChannel); external;
 
 end.

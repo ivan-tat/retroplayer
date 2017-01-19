@@ -27,8 +27,8 @@ TCHANNEL STRUC
     wSmpPeriod      dw ?
     wSmpPeriodLow   dw ?
     wSmpPeriodHigh  dw ?
-    wCommand        dw ?
-    wCommand2       dw ?
+    bCommand        db ?
+    bCommand2       db ?
     bParameter      db ?
     bEffFlags       db ?
     wVibTab         dw ?

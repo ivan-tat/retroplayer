@@ -12,6 +12,23 @@
 #include <stdint.h>
 #endif
 
+#define NOTE_MAX (7 * 12 + 11)
+
+#define CHNNOTE_MAX ((7 << 4) + 11)
+#define CHNNOTE_EMPTY 0xff
+#define CHNNOTE_OFF 0xfe
+
+#define _isNote(note) (((note) != CHNNOTE_OFF) && ((note) != CHNNOTE_EMPTY))
+#define _packNote(note) (((note) % 12) + (((note) / 12) << 4))
+#define _unpackNote(note) (((note) & 0x0f) + ((note) >> 4) * 12)
+
+#define CHNINSVOL_EMPTY 0xff
+#define CHNINSVOL_MAX 63
+
+#define _isVolume(vol) ((vol) != CHNINSVOL_EMPTY)
+
+#define MID_C_RATE 8363
+
 /* generic module information */
 
 #define MOD_MAX_TITLE_LENGTH 29
@@ -107,8 +124,8 @@ typedef struct channel_t {
     uint16_t wSmpPeriodLow; // B-7 or B-5 period for current instrument to check limits
     uint16_t wSmpPeriodHigh;// C-0 or C-3 period for current instrument to check limits
     // effect info :
-    uint16_t wCommand;      // 2 times effectnumber (for using a jmptable)
-    uint16_t wCommand2;     // 2nd command part - for multiple effects
+    uint8_t  bCommand;      // effect number (for using a jmptable)
+    uint8_t  bCommand2;     // internal 2nd command part - for multiple effects
     uint8_t  bParameter;    // just the command parameters
     // extra effect data :
     uint8_t  bEffFlags;     // multiple effects: flags (continue for Vibrato and Tremolo)

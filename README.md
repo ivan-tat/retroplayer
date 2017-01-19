@@ -48,7 +48,7 @@ Plans for the future:
 
 * Turbo Pascal 7.0 compiler for DOS (will be dropped)
 
-* Turbo Assembler 3.0 compiler for DOS (will be dropped)
+* Turbo Assembler 3.0 compiler for DOS (dropped, use `wasm`)
 
 * Sound Blaster Programming Information Version 0.90 (1995) by Andre Baresel & Craig Jackson
 

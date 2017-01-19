@@ -14,6 +14,7 @@
 #include "..\dos\dosproc.h"
 #include "..\dos\emstool.h"
 #include "s3mtypes.h"
+#include "s3mvars.h"
 
 /* EMM */
 
@@ -103,12 +104,6 @@ EXTERN_LINK uint8_t PUBLIC_DATA PatternDelay;
 
 /*** Patterns ***/
 
-#define _patSetPatternDataInEM(logpage, part) (0xC000 + ((part & 0x3f) << 8) + logpage)
-#define _getPatternDataLogPageInEM(data_seg) (data_seg & 0xff)
-#define _getPatternDataPartInEM(data_seg) ((data_seg >> 8) & 0x3f)
-#define _getPatternDataInEM(data_seg, length) (MK_FP(FrameSEG[0], (_getPatternDataPartInEM(data_seg) * length)))
-#define _isPatternDataInEM(data_seg) (data_seg >= 0xC000)
-
 void PUBLIC_CODE pat_clear(MUSPAT *pat)
 {
     pat->data_seg = 0;
@@ -121,31 +116,49 @@ void PUBLIC_CODE patSetData(MUSPAT *pat, void *p)
 
 void PUBLIC_CODE patSetDataInEM(MUSPAT *pat, uint8_t logpage, uint8_t part)
 {
-    pat->data_seg = _patSetPatternDataInEM(logpage, part);
+    pat->data_seg = setPatternDataInEM(logpage, part);
 }
 
 bool PUBLIC_CODE patIsDataInEM(MUSPAT *pat)
 {
-    return _isPatternDataInEM(pat->data_seg);
+    return isPatternDataInEM(pat->data_seg);
 }
 
 void *PUBLIC_CODE patGetData(MUSPAT *pat)
 {
     uint16_t data_seg = pat->data_seg;
-    if (_isPatternDataInEM(data_seg))
-        return _getPatternDataInEM(data_seg, patListPatLength);
+    if (isPatternDataInEM(data_seg))
+        return getPatternDataInEM(data_seg, patListPatLength);
     else
         return MK_FP(data_seg, 0);
 }
 
+void *PUBLIC_CODE patMapData(MUSPAT *pat)
+{
+    uint16_t data_seg = pat->data_seg;
+    unsigned int logPage;
+    unsigned char physPage;
+    if (isPatternDataInEM(data_seg))
+    {
+        logPage = getPatternDataLogPageInEM(data_seg);
+        physPage = 0;
+        if (EmsMap(patListEMHandle, logPage, physPage))
+            return getPatternDataInEM(data_seg, patListPatLength);
+        else
+            return MK_FP(0, 0);
+    }
+    else
+        return MK_FP(data_seg, 0);;
+}
+
 uint8_t PUBLIC_CODE patGetDataLogPageInEM(MUSPAT *pat)
 {
-    return _getPatternDataLogPageInEM(pat->data_seg);
+    return getPatternDataLogPageInEM(pat->data_seg);
 }
 
 uint8_t PUBLIC_CODE patGetDataPartInEM(MUSPAT *pat)
 {
-    return _getPatternDataPartInEM(pat->data_seg);
+    return getPatternDataPartInEM(pat->data_seg);
 }
 
 void PUBLIC_CODE patFree(MUSPAT *pat)

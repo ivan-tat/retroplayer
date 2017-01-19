@@ -32,6 +32,7 @@ rm -f ./main/mixer.asm
 rm -f ./main/mixing.asm
 rm -f ./main/mixvars.asm
 rm -f ./main/posttab.asm
+rm -f ./main/readnote.asm
 rm -f ./main/s3mplay.asm
 rm -f ./main/s3mvars.asm
 rm -f ./main/voltab.asm

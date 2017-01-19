@@ -159,8 +159,8 @@ type
         wSmpPeriod:     word;
         wSmpPeriodLow:  word;
         wSmpPeriodHigh: word;
-        wCommand:       word;
-        wCommand2:      word;
+        bCommand:       byte;
+        bCommand2:      byte;
         bParameter:     byte;
         bEffFlags:      byte;
         wVibTab:        word;

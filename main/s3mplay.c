@@ -10,6 +10,7 @@
 
 #include "..\pascal\pascal.h"
 #include "..\watcomc\printf.h"
+#include "effects.h"
 #include "s3mplay.h"
 
 /*** Initialization ***/

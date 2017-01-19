@@ -79,19 +79,23 @@ extern bool     PUBLIC_DATA patListUseEM;       /* patterns in EM */
 extern uint16_t PUBLIC_DATA patListEMHandle;    /* handle to access EM for patterns */
 extern uint8_t  PUBLIC_DATA patListPatPerEMPage;  /* count of patterns per page (<64!!!) */
 
-#define isPatternDataInEM(seg) (seg >= 0xc000)
-#define getPatternDataLogPageInEM(seg) (seg & 0x00ff)
-#define getPatternDataOffsetInEM(seg) (((seg >> 8) & 0x3f) * patListPatLength)
+#define isPatternDataInEM(seg)                ((seg) >= 0xc000)
+#define getPatternDataLogPageInEM(seg)        ((seg) & 0x00ff)
+#define getPatternDataPartInEM(seg)           (((seg) >> 8) & 0x3f)
+#define getPatternDataOffsetInEM(seg, length) (getPatternDataPartInEM(seg) * (length))
+#define setPatternDataInEM(logpage, part)     (0xc000 + (((part) & 0x3f) << 8) + (logpage))
+#define getPatternDataInEM(seg, length)       (MK_FP(FrameSEG[0], getPatternDataOffsetInEM((seg), (length))))
 
 //MUSPAT *PUBLIC_CODE pat_new(void);
 void    PUBLIC_CODE pat_clear(MUSPAT *pat);
 //void    PUBLIC_CODE pat_delete(MUSPAT **pat);
-void    PUBLIC_CODE patSetData(MUSPAT *pat, uint16_t data_seg);
+void    PUBLIC_CODE patSetData(MUSPAT *pat, void *p);
 void    PUBLIC_CODE patSetDataInEM(MUSPAT *pat, uint8_t logpage, uint8_t part);
 bool    PUBLIC_CODE patIsDataInEM(MUSPAT *pat);
 void   *PUBLIC_CODE patGetData(MUSPAT *pat);
 uint8_t PUBLIC_CODE patGetDataLogPageInEM(MUSPAT *pat);
 uint8_t PUBLIC_CODE patGetDataPartInEM(MUSPAT *pat);
+void   *PUBLIC_CODE patMapData(MUSPAT *pat);
 void    PUBLIC_CODE patFree(MUSPAT *pat);
 //void    PUBLIC_CODE patInit(MUSPAT *pat);
 //void    PUBLIC_CODE patDone(MUSPAT *pat);
@@ -109,7 +113,7 @@ extern ordersList_t PUBLIC_DATA Order;
 extern uint16_t PUBLIC_DATA OrdNum;
 extern uint8_t  PUBLIC_DATA LastOrder;  /* last order to play */
 
-#ifdef BETATEST
+#ifdef DEBUG
 extern uint16_t PUBLIC_DATA StartOrder;
 #endif
 
@@ -121,9 +125,6 @@ extern uint8_t PUBLIC_DATA UsedChannels;    /* possible values : 1..32 (kill all
 #define chn_getState(chn)        (chn->bEnabled)
 #define chn_setState(chn, value) chn->bEnabled = value
 
-#define chn_getEffectParam(chn)        (chn->bParameter)
-#define chn_setEffectParam(chn, value) chn->bParameter = value
-
 #define _chn_setSamplePeriod(chn, value) chn->wSmpPeriod= value
 #define chn_getSamplePeriod(chn)         (chn->wSmpPeriod)
 
@@ -134,10 +135,12 @@ extern uint8_t PUBLIC_DATA UsedChannels;    /* possible values : 1..32 (kill all
 #define chn_setInstrument(chn, p) chn->wInsSeg = FP_SEG((void __far *)p)
 #define chn_setSampleData(chn, p) chn->wSmpSeg = FP_SEG((void __far *)p)
 
-#define chn_setCommand(chn, cmd)    chn->wCommand = cmd << 1
-#define chn_getCommand(chn)         (chn->wCommand >> 1)
-#define chn_setSubCommand(chn, cmd) chn->wCommand2 = cmd << 1
-#define chn_getSubCommand(chn)      (chn->wCommand2 >> 1)
+#define chn_setCommand(chn, value)     chn->bCommand = value
+#define chn_getCommand(chn)            (chn->bCommand)
+#define chn_setSubCommand(chn, value)  chn->bCommand2 = value
+#define chn_getSubCommand(chn)         (chn->bCommand2)
+#define chn_setEffectParam(chn, value) chn->bParameter = value
+#define chn_getEffectParam(chn)        (chn->bParameter)
 
 /* initial state */
 

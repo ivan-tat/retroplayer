@@ -369,7 +369,8 @@ var key:boolean;
     patterndelay:=0;      { no patterndelay at start of course ! }
     Ploop_on:=false;
     Ploop_to:=0;
-    curspeed:=initspeed;set_tempo(inittempo);
+    set_speed(initspeed);
+    set_tempo(inittempo);
     set_ST3order(playOption_ST3Order); { <- don't remove this ! it's important ! (setup lastorder) }
     EndOfSong:=false;
     sndDMABuf.flags_Slow := false;

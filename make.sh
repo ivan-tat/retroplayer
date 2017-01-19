@@ -2,8 +2,7 @@
 # This script must be run in DOS.
 set -e
 
-AS="tasm -t -la"
-ASW="wasm -zq"
+AS="wasm -zq"
 PC='tpc -gd -q -v -$d+,e-,g+,n+ -DDEBUG;BETATEST'
 export WCC="-3 -fp3 -ml -na -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu -dDEBUG"
 # disable optimization:
@@ -25,7 +24,7 @@ compile_c() {
     sed -r -e "s/(^DGROUP[[:space:]]+GROUP[[:space:]]+)CONST,CONST2,(_DATA)/\1\2/;\
 s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$)/_DATA\1/;" "$f_tmp" >"$f_asm"
     rm -f "$f_tmp"
-    $ASW "$f_asm"
+    $AS "$f_asm"
 }
 
 compile() {
@@ -34,11 +33,7 @@ compile() {
     echo "--- $LOCDIR/$f_name ---"
     case "${f_name##*.}" in
         asm)
-            if [ "$usebin" = 'tasm' ]; then
-                $AS "$f_name"
-            else
-                $ASW "$f_name"
-            fi
+            $AS "$f_name"
             ;;
         c)
             compile_c "$f_name"
@@ -137,7 +132,7 @@ compile mixer.pas
 compile effvars.pas
 compile effects.c
 compile effects.pas
-compile readnote.asm tasm
+compile readnote.c
 compile readnote.pas
 compile mixing.c
 compile mixing.pas
