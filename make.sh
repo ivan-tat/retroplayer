@@ -48,15 +48,15 @@ compile() {
     esac
 }
 
-cd pascal
 LOCDIR=pascal
 PASINC=''
+cd $LOCDIR
 compile pascal.pas
 compile strutils.pas
 
-cd ../watcomc
 LOCDIR=watcomc
 PASINC='..\pascal'
+cd ../$LOCDIR
 for f in \
 dointr \
 intr \
@@ -73,17 +73,17 @@ done
 compile printf.c
 compile printf.pas
 
-cd ../dos
 LOCDIR=dos
 PASINC='..\pascal;..\watcomc'
+cd ../$LOCDIR
 compile dosproc.c
 compile dosproc.pas
 compile emstool.c
 compile emstool.pas
 
-cd ../hw
 LOCDIR=hw
 PASINC='..\dos;..\pascal;..\watcomc'
+cd ../$LOCDIR
 compile cpu.asm
 compile cpu.pas
 compile dma.c
@@ -94,9 +94,9 @@ compile pic.pas
 compile sndctl_t.c
 compile sndctl_t.pas
 
-cd ../blaster
 LOCDIR=blaster
 PASINC='..\dos;..\hw;..\pascal;..\watcomc'
+cd ../$LOCDIR
 compile sbio.c
 compile sbio.pas
 compile sbctl.c
@@ -109,9 +109,9 @@ compile sndisr.c
 compile sndisr.pas
 compile blaster.pas
 
-cd ../main
 LOCDIR=main
 PASINC='..\blaster;..\dos;..\hw;..\pascal;..\watcomc'
+cd ../$LOCDIR
 compile types.pas
 compile mixtypes.pas
 compile s3mtypes.pas
@@ -119,6 +119,8 @@ compile mixvars.c
 compile mixvars.pas
 compile s3mvars.c
 compile s3mvars.pas
+compile loads3m.c
+compile loads3m.pas
 compile fillvars.c
 compile fillvars.pas
 compile voltab.c
@@ -141,9 +143,9 @@ compile filldma.pas
 compile s3mplay.c
 compile s3mplay.pas
 
-cd ../player
 LOCDIR=player
 PASINC='..\blaster;..\dos;..\hw;..\main;..\pascal;..\watcomc'
+cd ../$LOCDIR
 compile plays3m.pas
 compile smalls3m.pas
 compile lines.asm

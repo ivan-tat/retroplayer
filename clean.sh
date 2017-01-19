@@ -28,6 +28,7 @@ cleandir ./main
 rm -f ./main/effects.asm
 rm -f ./main/filldma.asm
 rm -f ./main/fillvars.asm
+rm -f ./main/loads3m.asm
 rm -f ./main/mixer.asm
 rm -f ./main/mixing.asm
 rm -f ./main/mixvars.asm

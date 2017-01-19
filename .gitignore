@@ -53,6 +53,7 @@ hw/sndctl_t.asm
 main/effects.asm
 main/filldma.asm
 main/fillvars.asm
+main/loads3m.asm
 main/mixer.asm
 main/mixing.asm
 main/mixvars.asm

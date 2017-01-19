@@ -75,6 +75,7 @@ uses
     dos,
     dosproc,
     emstool,
+    loads3m,
     pic,
     sndctl_t,
     sbctl,
