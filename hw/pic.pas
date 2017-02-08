@@ -32,8 +32,8 @@ procedure isrClearSingleChannelHandler(ch: byte);
 implementation
 
 uses
-    printf,
-    dos;
+    pascal,
+    printf;
 
 (*$l isr.obj*)
 

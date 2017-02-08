@@ -71,15 +71,36 @@ _UNREGMETHOD(name)\
     exitproc = _EXITVARNAME(name);\
 }
 
+/* File I/O */
+
+typedef struct pascalFile_t {
+    char data[128];
+};
+typedef struct pascalFile_t PASCALFILE;
+
+extern void     PUBLIC_CODE pascal_assign(PASCALFILE *f, const char *path);
+extern bool     PUBLIC_CODE pascal_reset(PASCALFILE *f);
+extern bool     PUBLIC_CODE pascal_rewrite(PASCALFILE *f);
+extern void     PUBLIC_CODE pascal_close(PASCALFILE *f);
+extern bool     PUBLIC_CODE pascal_seek(PASCALFILE *f, uint32_t pos);
+extern uint16_t PUBLIC_CODE pascal_blockread(PASCALFILE *f, void *buf, uint16_t size);
+extern uint16_t PUBLIC_CODE pascal_blockwrite(PASCALFILE *f, void *buf, uint16_t size);
+
 /* Heap */
+extern uint32_t PUBLIC_CODE pascal_maxavail(void);
+extern void     PUBLIC_CODE pascal_getmem(void **p, uint16_t size);
+extern void     PUBLIC_CODE pascal_freemem(void *p, uint16_t size);
 
-extern uint32_t PUBLIC_CODE mavail(void);
-extern void    *PUBLIC_CODE malloc(uint16_t size);
-extern void     PUBLIC_CODE memfree(void *p, uint16_t size);
+/*** CRT Unit ***/
 
-/*** CRT unit ***/
+extern void PUBLIC_CODE pascal_delay(uint16_t count);
 
-extern void PUBLIC_CODE crt_delay(uint16_t count);
-#define DELAY(count) crt_delay(count)
+/*** DOS Unit ***/
+
+extern void PUBLIC_CODE pascal_getintvec(uint8_t num, void **p);
+extern void PUBLIC_CODE pascal_setintvec(uint8_t num, void *p);
+
+#define getintvec(num, p) pascal_getintvec(num, p)
+#define setintvec(num, p) pascal_setintvec(num, p)
 
 #endif  /* PASCAL_H */

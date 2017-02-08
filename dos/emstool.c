@@ -58,8 +58,8 @@ static struct EMMHandleEntry_t *handleList = (void *)0;
 
 void __near insert_handle(EMMHandle_t handle) {
     struct EMMHandleEntry_t *n;
-    if (mavail() < sizeof(struct EMMHandleEntry_t)) return;
-    n = malloc(sizeof(struct EMMHandleEntry_t));
+    if (pascal_maxavail() < sizeof(struct EMMHandleEntry_t)) return;
+    pascal_getmem((void **)&n, sizeof(struct EMMHandleEntry_t));
     n->next = handleList;
     handleList = n;
     n->handle = handle;
@@ -77,11 +77,11 @@ void __near remove_handle(EMMHandle_t handle) {
     if (i == NULL) {
         handleList = h->next;
         h->next = NULL;
-        memfree(h, sizeof(struct EMMHandleEntry_t));
+        pascal_freemem(h, sizeof(struct EMMHandleEntry_t));
     } else {
         i->next = h->next;
         h->next = NULL;
-        memfree(h, sizeof(struct EMMHandleEntry_t));
+        pascal_freemem(h, sizeof(struct EMMHandleEntry_t));
     }
 }
 

@@ -64,11 +64,11 @@ void setSpeaker(bool state) {
         /* Does not work on SB16 */
         sbioDSPWrite(sdev_hw_base, 0xd1);
         /* Needs a bit time to switch it on */
-        DELAY(110);
+        pascal_delay(110);
     } else {
         sbioDSPWrite(sdev_hw_base, 0xd3);
         /* Needs a bit time to switch it off */
-        DELAY(220);
+        pascal_delay(220);
     }
 }
 

@@ -13,7 +13,6 @@
 // TODO: remove PUBLIC_CODE macros when done.
 
 #include "..\pascal\pascal.h"
-#include "..\pascal\dos.h"
 #include "..\watcomc\printf.h"
 #include "pic.h"
 

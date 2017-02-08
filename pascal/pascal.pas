@@ -10,37 +10,113 @@ unit pascal;
 
 interface
 
-function  mavail: longint;
-function  malloc(size: word): pointer;
-procedure memfree(p: pointer; size: word);
-procedure crt_delay(count: word);
+(* System Unit *)
+
+function  pascal_maxavail: longint;
+procedure pascal_getmem(var p: pointer; size: word);
+procedure pascal_freemem(p: pointer; size: word);
+
+procedure pascal_assign(var f: file; path: PChar);
+function  pascal_reset(var f: file): boolean;
+function  pascal_rewrite(var f: file): boolean;
+procedure pascal_close(var f: file);
+function  pascal_seek(var f: file; pos: longint): boolean;
+function  pascal_blockread(var f: file; var buf; size: word; var actual: word): boolean;
+function  pascal_blockwrite(var f: file; var buf; size: word; var actual: word): boolean;
+
+(* CRT Unit *)
+
+procedure pascal_delay(count: word);
+
+(* DOS Unit *)
+
+procedure pascal_getintvec(num: byte; var p: pointer);
+procedure pascal_setintvec(num: byte; p: pointer);
 
 implementation
 
 uses
-    crt;
+    crt,
+    dos;
 
-function mavail: longint;
+function pascal_maxavail: longint;
 begin
-    mavail := System.MaxAvail;
+    pascal_maxavail := System.MaxAvail;
 end;
 
-function malloc(size: word): pointer;
-var
-    p: pointer;
+procedure pascal_getmem(var p: pointer; size: word);
 begin
     System.GetMem(p, size);
-    malloc := p;
 end;
 
-procedure memfree(p: pointer; size: word);
+procedure pascal_freemem(p: pointer; size: word);
 begin
     System.FreeMem(p, size);
 end;
 
-procedure crt_delay(count: word);
+procedure pascal_assign(var f: file; path: pchar);
 begin
-    crt.delay(count);
+    System.Assign(f, path);
+end;
+
+function pascal_reset(var f: file): boolean;
+begin
+    (*$I-*)
+    System.Reset(f, 1);
+    (*$I+*)
+    pascal_reset := IOResult = 0;
+end;
+
+function pascal_rewrite(var f: file): boolean;
+begin
+    (*$I-*)
+    System.Rewrite(f, 1);
+    (*$I+*)
+    pascal_rewrite := IOResult = 0;
+end;
+
+procedure pascal_close(var f: file);
+begin
+    System.Close(f);
+end;
+
+function pascal_seek(var f: file; pos: longint): boolean;
+begin
+    (*$I-*)
+    System.Seek(f, pos);
+    (*$I+*)
+    pascal_seek := IOResult = 0;
+end;
+
+function pascal_blockread(var f: file; var buf; size: word; var actual: word): boolean;
+begin
+    (*$I-*)
+    System.BlockRead(f, buf, size, actual);
+    (*$I+*)
+    pascal_blockread := IOResult = 0;
+end;
+
+function pascal_blockwrite(var f: file; var buf; size: word; var actual: word): boolean;
+begin
+    (*$I-*)
+    System.BlockWrite(f, buf, size, actual);
+    (*$I+*)
+    pascal_blockwrite := IOResult = 0;
+end;
+
+procedure pascal_delay(count: word);
+begin
+    crt.Delay(count);
+end;
+
+procedure pascal_getintvec(num: byte; var p: pointer);
+begin
+    dos.GetIntVec(num, p);
+end;
+
+procedure pascal_setintvec(num: byte; p: pointer);
+begin
+    dos.SetIntVec(num, p);
 end;
 
 end.
