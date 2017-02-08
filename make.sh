@@ -63,9 +63,8 @@ compile dointr.pas
 compile intr.asm
 compile intr.pas
 compile inp.asm
-compile inp.pas
 compile outp.asm
-compile outp.pas
+compile conio.pas
 compile memcmp.asm
 compile memcpy.asm
 compile memset.asm
