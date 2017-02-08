@@ -74,6 +74,7 @@ implementation
 
 uses
     pascal,
+    i86,
     dma,
     sbio,
     i4d;

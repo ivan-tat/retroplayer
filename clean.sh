@@ -40,6 +40,7 @@ rm -f ./main/voltab.asm
 cleandir ./pascal
 cleandir ./player
 cleandir ./watcomc
+rm -f ./watcomc/i86.asm
 rm -f ./watcomc/printf.asm
 
 echo "Done."

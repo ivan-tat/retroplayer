@@ -4,6 +4,7 @@
    For more information, please refer to <http://unlicense.org>. */
 
 #ifdef __WATCOMC__
+#include <i86.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <conio.h>
@@ -64,11 +65,11 @@ void setSpeaker(bool state) {
         /* Does not work on SB16 */
         sbioDSPWrite(sdev_hw_base, 0xd1);
         /* Needs a bit time to switch it on */
-        pascal_delay(110);
+        delay(110);
     } else {
         sbioDSPWrite(sdev_hw_base, 0xd3);
         /* Needs a bit time to switch it off */
-        pascal_delay(220);
+        delay(220);
     }
 }
 

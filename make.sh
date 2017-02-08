@@ -59,9 +59,9 @@ LOCDIR=watcomc
 PASINC='..\pascal'
 cd $LOCDIR
 compile dointr.asm
-compile dointr.pas
 compile intr.asm
-compile intr.pas
+compile i86.c
+compile i86.pas
 compile inp.asm
 compile outp.asm
 compile conio.pas

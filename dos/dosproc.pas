@@ -17,7 +17,8 @@ function setsize(var p; size: longint): boolean;
 
 implementation
 
-uses intr;
+uses
+    i86;
 
 (*$l dosproc.obj*)
 

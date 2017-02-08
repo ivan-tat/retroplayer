@@ -45,7 +45,7 @@ uses
     string_,
     printf,
     dos,
-    intr;
+    i86;
 
 (*$l emstool.obj*)
 function CheckEMM: boolean; external;
