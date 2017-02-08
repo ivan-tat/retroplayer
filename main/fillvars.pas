@@ -48,7 +48,7 @@ procedure sndDMABufDone(buf: PSNDDMABUF);
 implementation
 
 uses
-    memset,
+    string_,
     strutils,
     printf,
     dosproc,

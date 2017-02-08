@@ -42,7 +42,7 @@ implementation
 
 uses
     pascal,
-    memcmp,
+    string_,
     printf,
     dos,
     intr;

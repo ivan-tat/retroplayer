@@ -19,7 +19,7 @@ procedure unpackPattern(src, dst: parray; maxrow, maxchn: byte);
 implementation
 
 uses
-    memset,
+    string_,
     printf,
     strutils,
     crt,

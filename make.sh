@@ -53,37 +53,46 @@ PASINC=''
 cd $LOCDIR
 compile pascal.pas
 compile strutils.pas
+cd ..
 
 LOCDIR=watcomc
 PASINC='..\pascal'
-cd ../$LOCDIR
-for f in \
-dointr \
-intr \
-inp \
-outp \
-memcmp \
-memset \
-i4d \
-i4m \
-i8d086; do
-    compile $f.asm
-    compile $f.pas
-done
+cd $LOCDIR
+compile dointr.asm
+compile dointr.pas
+compile intr.asm
+compile intr.pas
+compile inp.asm
+compile inp.pas
+compile outp.asm
+compile outp.pas
+compile memcmp.asm
+compile memcpy.asm
+compile memset.asm
+compile strlen.asm
+compile string_.pas
+compile i4d.asm
+compile i4d.pas
+compile i4m.asm
+compile i4m.pas
+compile i8d086.asm
+compile i8d086.pas
 compile printf.c
 compile printf.pas
+cd ..
 
 LOCDIR=dos
 PASINC='..\pascal;..\watcomc'
-cd ../$LOCDIR
+cd $LOCDIR
 compile dosproc.c
 compile dosproc.pas
 compile emstool.c
 compile emstool.pas
+cd ..
 
 LOCDIR=hw
 PASINC='..\dos;..\pascal;..\watcomc'
-cd ../$LOCDIR
+cd $LOCDIR
 compile cpu.asm
 compile cpu.pas
 compile dma.c
@@ -93,10 +102,11 @@ compile pic.c
 compile pic.pas
 compile sndctl_t.c
 compile sndctl_t.pas
+cd ..
 
 LOCDIR=blaster
 PASINC='..\dos;..\hw;..\pascal;..\watcomc'
-cd ../$LOCDIR
+cd $LOCDIR
 compile sbio.c
 compile sbio.pas
 compile sbctl.c
@@ -108,10 +118,11 @@ compile sndisr_.asm
 compile sndisr.c
 compile sndisr.pas
 compile blaster.pas
+cd ..
 
 LOCDIR=main
 PASINC='..\blaster;..\dos;..\hw;..\pascal;..\watcomc'
-cd ../$LOCDIR
+cd $LOCDIR
 compile types.pas
 compile mixtypes.pas
 compile s3mtypes.pas
@@ -142,10 +153,11 @@ compile filldma.c
 compile filldma.pas
 compile s3mplay.c
 compile s3mplay.pas
+cd ..
 
 LOCDIR=player
 PASINC='..\blaster;..\dos;..\hw;..\main;..\pascal;..\watcomc'
-cd ../$LOCDIR
+cd $LOCDIR
 compile plays3m.pas
 compile smalls3m.pas
 compile lines.asm

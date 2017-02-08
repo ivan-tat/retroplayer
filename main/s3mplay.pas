@@ -68,7 +68,7 @@ IMPLEMENTATION
 
 uses
     cpu,
-    memset,
+    string_,
     printf,
     strutils,
     crt,
