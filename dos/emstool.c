@@ -5,6 +5,7 @@
 
 #ifdef __WATCOMC__
 #include <i86.h>
+#include <malloc.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>

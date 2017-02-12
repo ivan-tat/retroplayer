@@ -1,14 +1,14 @@
 #!/bin/bash
 
 cleandir() {
-	local DIR="$1"
-	echo "Cleaning $DIR ..."
+    local DIR="$1"
+    echo "Cleaning $DIR ..."
     cd $DIR
-	rm -f *.err
-	rm -f *.exe
-	rm -f *.map
-	rm -f *.obj
-	rm -f *.tpu
+    rm -f *.err
+    rm -f *.exe
+    rm -f *.map
+    rm -f *.obj
+    rm -f *.tpu
     cd $OLDPWD
 }
 
@@ -40,7 +40,9 @@ rm -f ./main/voltab.asm
 cleandir ./pascal
 cleandir ./player
 cleandir ./watcomc
+rm -f ./watcomc/dos_.asm
 rm -f ./watcomc/i86.asm
+rm -f ./watcomc/malloc.asm
 rm -f ./watcomc/printf.asm
 
 echo "Done."

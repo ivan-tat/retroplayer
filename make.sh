@@ -4,7 +4,7 @@ set -e
 
 AS="wasm -zq"
 PC='tpc -gd -q -v -$d+,e-,g+,n+ -DDEBUG;BETATEST'
-export WCC="-3 -fp3 -ml -na -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu -dDEBUG"
+export WCC="-3 -fp3 -ml -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu -dDEBUG"
 # disable optimization:
 # "-oc" - disable <call followed by return> to jump optimization;
 # reason: "wdis" incorrectly writes "je near ptr <near_extern_label>"
@@ -62,6 +62,10 @@ compile dointr.asm
 compile intr.asm
 compile i86.c
 compile i86.pas
+compile dos_.c
+compile dos_.pas
+compile malloc.c
+compile malloc.pas
 compile inp.asm
 compile outp.asm
 compile conio.pas

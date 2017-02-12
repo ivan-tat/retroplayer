@@ -63,5 +63,7 @@ main/s3mplay.asm
 main/s3mvars.asm
 main/voltab.asm
 watcomc/scripts/tmp/
+watcomc/dos_.asm
 watcomc/i86.asm
+watcomc/malloc.asm
 watcomc/printf.asm
