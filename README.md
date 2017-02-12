@@ -42,15 +42,15 @@ Plans for the future:
 
 * [DOSBox](http://www.dosbox.com/) (DOS emulator with good hardware support)
 
+* [The Doszip Commander](https://sourceforge.net/projects/doszip/) (good NC clone for DOS with LFN support)
+
 * [DJGPP](http://www.delorie.com/djgpp/) (DOS ports of many GNU development utilities)
 
 * [Open Watcom](http://www.openwatcom.org/) (original optimizing C/C++ and assembler compilers for DOS)
 
 * [Open Watcom V2](https://github.com/open-watcom) (fork of Open Watcom compilers for various platforms)
 
-* [The Doszip Commander](https://sourceforge.net/projects/doszip/) (good NC clone for DOS with LFN support)
-
-* [Free Pascal](http://freepascal.org/) (advanced open source Pascal compiler for Pascal and Object Pascal for various platforms]
+* [Free Pascal](http://freepascal.org/) (advanced open source Pascal compiler for Pascal and Object Pascal for various platforms)
 
 * Turbo Pascal 7.0 compiler for DOS (will be dropped)
 
