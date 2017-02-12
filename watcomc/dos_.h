@@ -16,8 +16,8 @@
 
 #define _dos_para(size) (((size) + 15) >> 4)
 
-uint16_t _dos_allocmem(uint16_t size, uint16_t *seg);
-uint16_t _dos_freemem(uint16_t seg);
-uint16_t _dos_setblock(uint16_t size, uint16_t seg, uint16_t *maxsize);
+uint16_t PUBLIC_CODE _dos_allocmem(uint16_t size, uint16_t *seg);
+uint16_t PUBLIC_CODE _dos_freemem(uint16_t seg);
+uint16_t PUBLIC_CODE _dos_setblock(uint16_t size, uint16_t seg, uint16_t *max);
 
 #endif  /* CUSTOM_DOS_H */

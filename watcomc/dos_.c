@@ -18,7 +18,7 @@ uint16_t __near __doserror(uint16_t code)
     return code ? code : 0xffff;
 }
 
-uint16_t _dos_allocmem(uint16_t size, uint16_t *seg)
+uint16_t PUBLIC_CODE _dos_allocmem(uint16_t size, uint16_t *seg)
 {
     union REGPACK regs;
     regs.w.bx = size;
@@ -36,7 +36,7 @@ uint16_t _dos_allocmem(uint16_t size, uint16_t *seg)
     };
 }
 
-uint16_t _dos_freemem(uint16_t seg)
+uint16_t PUBLIC_CODE _dos_freemem(uint16_t seg)
 {
     union REGPACK regs;
     regs.w.es = seg;
@@ -48,7 +48,7 @@ uint16_t _dos_freemem(uint16_t seg)
         return 0;
 }
 
-uint16_t _dos_setblock(uint16_t size, uint16_t seg, uint16_t *maxsize)
+uint16_t PUBLIC_CODE _dos_setblock(uint16_t size, uint16_t seg, uint16_t *max)
 {
     union REGPACK regs;
     regs.w.bx = size;
@@ -57,7 +57,7 @@ uint16_t _dos_setblock(uint16_t size, uint16_t seg, uint16_t *maxsize)
     intr(0x21, &regs);
     if (regs.w.flags & INTR_CF)
     {
-        *maxsize = regs.w.bx;
+        *max = regs.w.bx;
         return __doserror(regs.w.ax);
     }
     else

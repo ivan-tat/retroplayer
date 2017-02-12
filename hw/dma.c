@@ -286,7 +286,7 @@ void PUBLIC_CODE dmaReleaseChannels(dmaMask_t mask)
 DMABUF *PUBLIC_CODE dmaBuf_new(void)
 {
     DMABUF *p;
-    if (getdosmem(&p, sizeof(DMABUF)))
+    if (getdosmem((void **)&p, sizeof(DMABUF)))
         return p;
     else
         return (void *)0;
@@ -298,7 +298,7 @@ void PUBLIC_CODE dmaBuf_delete(DMABUF **buf)
     {
         if (*buf)
         {
-            freedosmem(*buf);
+            freedosmem((void **)buf);
             *buf = (void *)0;
         };
     };
@@ -322,7 +322,7 @@ bool PUBLIC_CODE dmaBufAlloc(DMABUF *buf, uint32_t size)
         dmaSize = dmaSize > 0x10000 ? 0x10000 : ((dmaSize + 15) & 0x1fff0);
 
         bufSize = dmaSize << 1;
-        if (!getdosmem(&(buf->unaligned), bufSize)) return false;
+        if (!getdosmem((void **)&(buf->unaligned), bufSize)) return false;
 
         bufStart = dmaGetLinearAddress(buf->unaligned);
         bufEnd = bufStart + bufSize - 1;
@@ -367,7 +367,7 @@ void PUBLIC_CODE dmaBufFree(DMABUF *buf)
     if (buf)
     {
         if (buf->unaligned)
-            freedosmem(buf->unaligned);
+            freedosmem(&(buf->unaligned));
         _dmaBufClear(buf);
     };
 }

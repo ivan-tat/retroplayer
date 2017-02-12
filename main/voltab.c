@@ -21,7 +21,7 @@ void PUBLIC_CODE initVolumeTable(void)
 
 bool PUBLIC_CODE allocVolumeTable(void)
 {
-	if (getdosmem(&volumetableptr, sizeof(voltab_t))) {
+	if (getdosmem((void **)&volumetableptr, sizeof(voltab_t))) {
 		memset(volumetableptr, 0, sizeof(voltab_t));
 		return true;
 	} else {
@@ -55,5 +55,6 @@ void PUBLIC_CODE calcVolumeTable(bool sign)
 
 void PUBLIC_CODE freeVolumeTable(void)
 {
-    if (volumetableptr) freedosmem(&volumetableptr);
+    if (volumetableptr)
+        freedosmem((void **)&volumetableptr);
 }

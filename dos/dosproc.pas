@@ -10,21 +10,22 @@ unit dosproc;
 
 interface
 
-function getdosmem(var p; size: longint): boolean;
+function  getdosmem(var p; size: longint): boolean;
 procedure freedosmem(var p);
-function getfreesize: word;
-function setsize(var p; size: longint): boolean;
+function  setsize(var p; size: longint): boolean;
+function  getfreesize: longint;
 
 implementation
 
 uses
-    i86;
+    pascal,
+    i86,
+    dos_;
 
 (*$l dosproc.obj*)
-
-function getdosmem(var p; size: longint): boolean; external;
+function  getdosmem(var p; size: longint): boolean; external;
 procedure freedosmem(var p); external;
-function getfreesize: word; external;
-function setsize(var p; size: longint): boolean; external;
+function  setsize(var p; size: longint): boolean; external;
+function  getfreesize: longint; external;
 
 end.

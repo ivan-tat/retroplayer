@@ -10,9 +10,9 @@ unit dos_;
 
 interface
 
-procedure _dos_allocmem_;
-procedure _dos_freemem_;
-procedure _dos_setblock_;
+function _dos_allocmem(size: word; var seg: word): word;
+function _dos_freemem(seg: word): word;
+function _dos_setblock(size: word; seg: word; var max: word): word;
 
 implementation
 
@@ -21,8 +21,8 @@ uses
     i86;
 
 (*$l dos_.obj*)
-procedure _dos_allocmem_; external;
-procedure _dos_freemem_; external;
-procedure _dos_setblock_; external;
+function _dos_allocmem(size: word; var seg: word): word; external;
+function _dos_freemem(seg: word): word; external;
+function _dos_setblock(size: word; seg: word; var max: word): word; external;
 
 end.

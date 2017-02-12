@@ -3,17 +3,20 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef _DOSPROC_H
-#define _DOSPROC_H 1
+#ifndef DOSPROC_H
+#define DOSPROC_H 1
 
 #ifdef __WATCOMC__
+#pragma once
 #include <stdbool.h>
 #include <stdint.h>
 #endif
 
-bool __far __pascal getdosmem( void *p, uint32_t size );
-void __far __pascal freedosmem( void *p );
-uint16_t __far __pascal getfreesize( void );
-bool __far __pascal setsize( void *p, uint32_t size );
+#include "..\pascal\pascal.h"
 
-#endif /* _DOSPROC_H */
+bool     PUBLIC_CODE getdosmem(void **p, uint32_t size);
+void     PUBLIC_CODE freedosmem(void **p);
+bool     PUBLIC_CODE setsize(void *p, uint32_t size);
+uint32_t PUBLIC_CODE getfreesize(void);
+
+#endif  /* DOSPROC_H */

@@ -428,7 +428,7 @@ begin
   playOption_FPS := 70;
   playOption_LowQuality := false;
   useEMS:=EMSinstalled;      { more space for Modules ! }
-  if not getdosmem(instruments,MAX_INSTRUMENTS*sizeof(TInstr)) then
+  if not getdosmem(pointer(instruments),MAX_INSTRUMENTS*sizeof(TInstr)) then
     begin
       asm
         mov     ax,3

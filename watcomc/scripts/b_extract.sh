@@ -9,7 +9,7 @@
 
 DST=tmp
 mkdir -p "$DST"
-wlib -d="$DST" "$CLIB" '*intr.c' '*dointr' '*dosmem'
+wlib -d="$DST" "$CLIB" '*intr.c' '*dointr' '*dosmem' '*dosret.asm' '*error086.asm' '*mem086.asm'
 wlib -d="$DST" "$CLIB" '*memcmp.c' '*memcpy.c' '*memset.c'
 wlib -d="$DST" "$CLIB" '*inp.c' '*outp.c'
 wlib -d="$DST" "$CLIB" '*i4d' '*i4m' '*i8d086'

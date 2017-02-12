@@ -10,47 +10,37 @@
 #include <stdint.h>
 #endif
 
-bool __far __pascal getdosmem( void **p, uint32_t size ) {
-    union REGPACK regs;
-    regs.w.bx = (size+15)>>4;
-    regs.h.ah = 0x48;
-    intr( 0x21, &regs );
-    if (regs.w.flags & INTR_CF) {
+#include "..\pascal\pascal.h"
+#include "..\watcomc\dos_.h"
+#include "dosproc.h"
+
+bool PUBLIC_CODE getdosmem(void **p, uint32_t size)
+{
+    uint16_t seg;
+    if (_dos_allocmem(_dos_para(size), &seg))
         return false;
-    } else {
-        *p = MK_FP(regs.w.ax, 0);
+    else
+    {
+        *p = MK_FP(seg, 0);
         return true;
-    };
+    }
 }
 
-void __far __pascal freedosmem( void **p ) {
-    union REGPACK regs;
-    regs.h.ah = 0x49;
-    regs.w.di = FP_OFF(*p);
-    regs.w.es = FP_SEG(*p);
-    intr( 0x21, &regs );
-    *p = MK_FP(0, 0);
+void PUBLIC_CODE freedosmem(void **p)
+{
+    _dos_freemem(FP_SEG(*p));
+    *p = (void *)0;
 }
 
-bool __far __pascal setsize( void **p, uint32_t size ) {
-    union REGPACK regs;
-    regs.h.ah = 0x4a;
-    regs.w.bx = (size+15)>>4;
-    regs.w.di = FP_OFF(*p);
-    regs.w.es = FP_SEG(*p);
-    intr( 0x21, &regs );
-    if (regs.w.flags & INTR_CF) {
-        return false;
-    } else {
-        *p = MK_FP(regs.w.ax, 0);
-        return true;
-    };
+bool PUBLIC_CODE setsize(void *p, uint32_t size)
+{
+    uint16_t max;
+    return !_dos_setblock(_dos_para(size), FP_SEG(p), &max);
 }
 
-uint16_t __far __pascal getfreesize( void ) {
-    union REGPACK regs;
-    regs.h.ah = 0x48;
-    regs.w.bx = 0xffff;
-    intr( 0x21, &regs );
-    return regs.w.bx;
+uint32_t PUBLIC_CODE getfreesize(void)
+{
+    uint16_t size;
+    _dos_allocmem(0xffff, &size);
+    return (uint32_t)size << 4;
 }

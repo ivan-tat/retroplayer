@@ -107,7 +107,8 @@ var f:file;
 
   PROCEDURE freeallmem;
     begin
-      if buffer<>Nil then freedosmem(buffer);
+      if (buffer <> Nil) then
+        freedosmem(pointer(buffer));
       done_module;
     end;
 
@@ -471,7 +472,7 @@ var a,b,c:string;
     load_smp_later:=false; { load instruments not later (up to now we can say only this) }
     firstSMP:=true; { if we load now an instrument, then it's the first =) }
     { init buffer for fast loading : }
-    if not getdosmem(buffer,10*1024) then begin load_error:=notenoughmem;exit end;
+    if not getdosmem(pointer(buffer),10*1024) then begin load_error:=notenoughmem;exit end;
     { init some variables for loading : }
     inspos:=1;patpos:=0;smppos:=0;smpnum:=0;nextpat:=$7fffffff;nextins:=$7fffffff;nextsmp:=$7fffffff;
     while (inspos<insnum+1) or (patpos<patListCount) or (smppos<smpnum)
@@ -557,7 +558,7 @@ var a,b,c:string;
     writeln(#10);
     {$ENDIF}
     { free buffer : }
-    freedosmem(buffer);
+    freedosmem(pointer(buffer));
     { Just for fun set names for EMS handles (does only work for EMS>= v4.0) }
     if ( EMSVersion.Hi >= 4 ) then setEMSnames;
     mod_isLoaded := true;

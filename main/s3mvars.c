@@ -169,7 +169,7 @@ void PUBLIC_CODE patFree(MUSPAT *pat)
     {
         p = patGetData(pat);
         if (p)
-            freedosmem(p);
+            freedosmem(&p);
         pat_clear(pat);
     };
 }

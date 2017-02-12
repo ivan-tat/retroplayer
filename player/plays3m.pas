@@ -263,7 +263,7 @@ procedure display_helpscreen;
 
 function getFreeDOSMemory: longint;
 begin
-    getFreeDOSMemory := longint(16)*getfreesize;
+    getFreeDOSMemory := getfreesize;
 end;
 
 function getFreeEMMMemory: longint;
