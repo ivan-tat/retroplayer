@@ -12,8 +12,8 @@
 #endif
 
 #include "..\pascal\pascal.h"
-#include "..\watcomc\printf.h"
 #include "..\watcomc\malloc.h"
+#include "..\watcomc\stdio.h"
 #include "..\watcomc\stdlib.h"
 #include "emstool.h"
 

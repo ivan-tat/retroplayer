@@ -48,9 +48,9 @@ procedure sndDMABufDone(buf: PSNDDMABUF);
 implementation
 
 uses
+    stdio,
     string_,
     strutils,
-    printf,
     dosproc,
     sbctl,
     s3mvars;

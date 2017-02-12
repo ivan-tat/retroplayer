@@ -2,11 +2,14 @@
 
    This is free and unencumbered software released into the public domain */
 
-#ifndef _DEBUG_H
-#define _DEBUG_H 1
+#ifndef DEBUG_H
+#define DEBUG_H 1
 
-#include "printf.h"
+#ifdef __WATCOMC__
+#pragma once
+#include "stdio.h"
+#endif
 
-#define LOG( s ) printf( s )
+#define LOG(s) printf(s)
 
-#endif /* _DEBUG_H */
+#endif  /* DEBUG_H */

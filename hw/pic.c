@@ -13,7 +13,7 @@
 // TODO: remove PUBLIC_CODE macros when done.
 
 #include "..\pascal\pascal.h"
-#include "..\watcomc\printf.h"
+#include "..\watcomc\stdio.h"
 #include "pic.h"
 
 /* PIC1: IRQ 0-7 */

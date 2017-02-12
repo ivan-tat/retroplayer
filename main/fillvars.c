@@ -13,7 +13,7 @@
 /* TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done */
 
 #include "..\pascal\pascal.h"
-#include "..\watcomc\printf.h"
+#include "..\watcomc\stdio.h"
 #include "..\dos\dosproc.h"
 #include "..\hw\dma.h"
 #include "..\blaster\sbctl.h"

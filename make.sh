@@ -10,6 +10,11 @@ export WCC="-3 -fp3 -ml -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu -dDEB
 # reason: "wdis" incorrectly writes "je near ptr <near_extern_label>"
 #   (without "near ptr")
 
+ch_dir() {
+    LOCDIR="$1"
+    cd $LOCDIR
+}
+
 compile_c() {
     local f_c="$1"
     local segname="${f_c%.*}"
@@ -39,25 +44,17 @@ compile() {
             compile_c "$f_name"
             ;;
         pas)
-            if [ -n "$PASINC" ]; then
-                $PC -u$PASINC "$f_name"
-            else
-                $PC "$f_name"
-            fi
+            $PC "$f_name"
             ;;
     esac
 }
 
-LOCDIR=pascal
-PASINC=''
-cd $LOCDIR
+ch_dir pascal
 compile pascal.pas
 compile strutils.pas
 cd ..
 
-LOCDIR=watcomc
-PASINC='..\pascal'
-cd $LOCDIR
+ch_dir watcomc
 compile dointr.asm
 compile intr.asm
 compile i86.c
@@ -83,21 +80,18 @@ compile i4m.pas
 compile i8d086.asm
 compile i8d086.pas
 compile printf.c
-compile printf.pas
+compile stdio.c
+compile stdio.pas
 cd ..
 
-LOCDIR=dos
-PASINC='..\pascal;..\watcomc'
-cd $LOCDIR
+ch_dir dos
 compile dosproc.c
 compile dosproc.pas
 compile emstool.c
 compile emstool.pas
 cd ..
 
-LOCDIR=hw
-PASINC='..\dos;..\pascal;..\watcomc'
-cd $LOCDIR
+ch_dir hw
 compile cpu.asm
 compile cpu.pas
 compile dma.c
@@ -109,9 +103,7 @@ compile sndctl_t.c
 compile sndctl_t.pas
 cd ..
 
-LOCDIR=blaster
-PASINC='..\dos;..\hw;..\pascal;..\watcomc'
-cd $LOCDIR
+ch_dir blaster
 compile sbio.c
 compile sbio.pas
 compile sbctl.c
@@ -125,9 +117,7 @@ compile sndisr.pas
 compile blaster.pas
 cd ..
 
-LOCDIR=main
-PASINC='..\blaster;..\dos;..\hw;..\pascal;..\watcomc'
-cd $LOCDIR
+ch_dir main
 compile types.pas
 compile mixtypes.pas
 compile s3mtypes.pas
@@ -160,9 +150,7 @@ compile s3mplay.c
 compile s3mplay.pas
 cd ..
 
-LOCDIR=player
-PASINC='..\blaster;..\dos;..\hw;..\main;..\pascal;..\watcomc'
-cd $LOCDIR
+ch_dir player
 compile plays3m.pas
 compile smalls3m.pas
 compile lines.asm

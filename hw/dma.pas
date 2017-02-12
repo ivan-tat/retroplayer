@@ -73,7 +73,7 @@ procedure dmaBufDone(buf: PDMABUF);
 implementation
 
 uses
-    printf,
+    stdio,
     dosproc;
 
 (*$l dma.obj*)

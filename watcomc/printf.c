@@ -11,7 +11,7 @@
 #endif
 
 #include "..\pascal\pascal.h"
-#include "printf.h"
+#include "stdio.h"
 
 extern void __near __pascal printstring(char *s);
 

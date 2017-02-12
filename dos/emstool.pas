@@ -43,10 +43,9 @@ implementation
 uses
     pascal,
     malloc,
+    stdio,
     stdlib,
     string_,
-    printf,
-    dos,
     i86;
 
 (*$l emstool.obj*)

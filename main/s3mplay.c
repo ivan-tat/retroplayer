@@ -9,7 +9,7 @@
 #endif
 
 #include "..\pascal\pascal.h"
-#include "..\watcomc\printf.h"
+#include "..\watcomc\stdio.h"
 #include "effects.h"
 #include "s3mplay.h"
 

@@ -68,8 +68,8 @@ IMPLEMENTATION
 
 uses
     cpu,
+    stdio,
     string_,
-    printf,
     strutils,
     crt,
     dos,

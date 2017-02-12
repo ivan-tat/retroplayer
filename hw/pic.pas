@@ -33,7 +33,7 @@ implementation
 
 uses
     pascal,
-    printf;
+    stdio;
 
 (*$l isr.obj*)
 
