@@ -37,14 +37,14 @@ rm -f ./main/readnote.asm
 rm -f ./main/s3mplay.asm
 rm -f ./main/s3mvars.asm
 rm -f ./main/voltab.asm
+cleandir ./ow
+rm -f ./ow/dos_.asm
+rm -f ./ow/i86.asm
+rm -f ./ow/malloc.asm
+rm -f ./ow/printf.asm
+rm -f ./ow/stdio.asm
+rm -f ./ow/stdlib.asm
 cleandir ./pascal
 cleandir ./player
-cleandir ./watcomc
-rm -f ./watcomc/dos_.asm
-rm -f ./watcomc/i86.asm
-rm -f ./watcomc/malloc.asm
-rm -f ./watcomc/printf.asm
-rm -f ./watcomc/stdio.asm
-rm -f ./watcomc/stdlib.asm
 
 echo "Done."

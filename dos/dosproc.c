@@ -11,7 +11,7 @@
 #endif
 
 #include "..\pascal\pascal.h"
-#include "..\watcomc\dos_.h"
+#include "..\ow\dos_.h"
 #include "dosproc.h"
 
 bool PUBLIC_CODE getdosmem(void **p, uint32_t size)

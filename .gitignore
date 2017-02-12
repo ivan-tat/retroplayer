@@ -62,10 +62,10 @@ main/readnote.asm
 main/s3mplay.asm
 main/s3mvars.asm
 main/voltab.asm
-watcomc/scripts/tmp/
-watcomc/dos_.asm
-watcomc/i86.asm
-watcomc/malloc.asm
-watcomc/printf.asm
-watcomc/stdio.asm
-watcomc/stdlib.asm
+ow/scripts/tmp/
+ow/dos_.asm
+ow/i86.asm
+ow/malloc.asm
+ow/printf.asm
+ow/stdio.asm
+ow/stdlib.asm

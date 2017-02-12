@@ -54,7 +54,7 @@ compile pascal.pas
 compile strutils.pas
 cd ..
 
-ch_dir watcomc
+ch_dir ow
 compile dointr.asm
 compile intr.asm
 compile i86.c
