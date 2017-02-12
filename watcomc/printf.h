@@ -6,6 +6,6 @@
 #ifndef _PRINTF_H
 #define _PRINTF_H 1
 
-void __far printf( char *format,... );
+void printf( char *format,... );
 
 #endif /* _PRINTF_H */
