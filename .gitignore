@@ -67,3 +67,4 @@ watcomc/dos_.asm
 watcomc/i86.asm
 watcomc/malloc.asm
 watcomc/printf.asm
+watcomc/stdlib.asm

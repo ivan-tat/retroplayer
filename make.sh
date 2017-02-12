@@ -69,6 +69,8 @@ compile malloc.pas
 compile inp.asm
 compile outp.asm
 compile conio.pas
+compile stdlib.c
+compile stdlib.pas
 compile memcmp.asm
 compile memcpy.asm
 compile memset.asm

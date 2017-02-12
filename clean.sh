@@ -44,5 +44,6 @@ rm -f ./watcomc/dos_.asm
 rm -f ./watcomc/i86.asm
 rm -f ./watcomc/malloc.asm
 rm -f ./watcomc/printf.asm
+rm -f ./watcomc/stdlib.asm
 
 echo "Done."

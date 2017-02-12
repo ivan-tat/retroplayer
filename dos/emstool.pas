@@ -42,6 +42,8 @@ implementation
 
 uses
     pascal,
+    malloc,
+    stdlib,
     string_,
     printf,
     dos,
