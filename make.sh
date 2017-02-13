@@ -85,8 +85,6 @@ compile stdio.pas
 cd ..
 
 ch_dir dos
-compile dosproc.c
-compile dosproc.pas
 compile emstool.c
 compile emstool.pas
 cd ..

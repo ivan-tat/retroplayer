@@ -48,10 +48,10 @@ procedure sndDMABufDone(buf: PSNDDMABUF);
 implementation
 
 uses
+    dos_,
     stdio,
     string_,
     strutils,
-    dosproc,
     sbctl,
     s3mvars;
 

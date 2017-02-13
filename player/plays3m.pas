@@ -6,7 +6,8 @@ uses
     strutils,
     crt,
     dos,
-    dosproc,
+    dos_,
+    malloc,
     emstool,
     sbctl,
     blaster,
@@ -263,7 +264,7 @@ procedure display_helpscreen;
 
 function getFreeDOSMemory: longint;
 begin
-    getFreeDOSMemory := getfreesize;
+    getFreeDOSMemory := _memmax;
 end;
 
 function getFreeEMMMemory: longint;

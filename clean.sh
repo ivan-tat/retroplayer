@@ -18,7 +18,6 @@ rm -f ./blaster/sbctl.asm
 rm -f ./blaster/sbio.asm
 rm -f ./blaster/sndisr.asm
 cleandir ./dos
-rm -f ./dos/dosproc.asm
 rm -f ./dos/emstool.asm
 cleandir ./hw
 rm -f ./hw/dma.asm

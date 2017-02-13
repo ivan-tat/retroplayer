@@ -24,7 +24,7 @@ uses
     strutils,
     crt,
     dos,
-    dosproc,
+    dos_,
     emstool,
     s3mvars;
 

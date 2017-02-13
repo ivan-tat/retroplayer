@@ -68,12 +68,12 @@ IMPLEMENTATION
 
 uses
     cpu,
+    dos_,
     stdio,
     string_,
     strutils,
     crt,
     dos,
-    dosproc,
     emstool,
     loads3m,
     pic,
@@ -125,7 +125,8 @@ var i:word;
               begin
                 p:=ptr(psmp^.mempos,0);
                 psmp^.mempos:=0;
-                if p<>Nil then freedosmem(p);
+                if (p <> Nil) then
+                    _dos_freemem(seg(p^));
               end;
           end;
         Instruments^[i,0]:=0;
@@ -144,7 +145,11 @@ PROCEDURE Done_S3Mplayer;
     restore_irq;
     freeVolumeTable;
     sndDMABufDone(@sndDMABuf);
-    if mixBuf<>Nil then freeDOSmem(mixBuf);
+    if (mixBuf <> Nil) then
+    begin
+        _dos_freemem(seg(mixBuf^));
+        mixBuf := nil;
+    end;
     buffersreserved:=false;
   end;
 
@@ -169,6 +174,7 @@ FUNCTION Init_device(input:byte):boolean;
 
 FUNCTION Init_S3Mplayer:boolean;
 var p:pArray;
+    _seg: word;
   begin
     Init_S3Mplayer:=false;
     if not proc386 then begin player_error:=nota386orhigher;exit end;
@@ -184,13 +190,14 @@ var p:pArray;
     {
       in tick buffer we calc one DMA buffer half - that are DMA_BUF_SIZE_MAX/2 words
     }
-    if (not getdosmem(mixBuf, sndDMABuf.buf^.Size)) then
-      begin
+    if (_dos_allocmem((sndDMABuf.buf^.Size + 15) shr 4, _seg) <> 0) then
+    begin
         sndDMABufFree(@sndDMABuf);
         freeVolumeTable;
         player_error:=notenoughmem;
-        exit
-      end;
+        exit;
+    end;
+    mixBuf := ptr(_seg, 0);
     buffersreserved:=true;
     { clear those buffers : }
     fillchar(mixBuf^,DMA_BUF_SIZE_MAX,0);
@@ -411,6 +418,7 @@ VAR i:byte;
 procedure s3mplayInit;
 var
     i: integer;
+    _seg: word;
 begin
   inside:=false;
   PROC386:=isCPU_i386;
@@ -428,15 +436,12 @@ begin
   playOption_FPS := 70;
   playOption_LowQuality := false;
   useEMS:=EMSinstalled;      { more space for Modules ! }
-  if not getdosmem(pointer(instruments),MAX_INSTRUMENTS*sizeof(TInstr)) then
+    if (_dos_allocmem((MAX_INSTRUMENTS*sizeof(TInstr) + 15) shr 4, _seg) <> 0) then
     begin
-      asm
-        mov     ax,3
-        int     10h
-      end;
-      writeln(' Hey S3M-Player needs some DOSmem (programmers info: lower PAS-heap !) ');
-      halt(1);
+        writeln('[init] s3mplayInit: Failed to allocate DOS memory for instruments');
+        exit;
     end;
+    instruments := ptr(_seg, 0);
 
   FOR i:=1 TO MAX_INSTRUMENTS DO
     BEGIN

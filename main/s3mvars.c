@@ -11,7 +11,7 @@
 // TODO: remove EXTERN_LINK, PUBLIC_DATA and PUBLIC_CODE macros when done.
 
 #include "..\pascal\pascal.h"
-#include "..\dos\dosproc.h"
+#include "..\ow\dos_.h"
 #include "..\dos\emstool.h"
 #include "s3mtypes.h"
 #include "s3mvars.h"
@@ -169,7 +169,7 @@ void PUBLIC_CODE patFree(MUSPAT *pat)
     {
         p = patGetData(pat);
         if (p)
-            freedosmem(&p);
+            _dos_freemem(FP_SEG(p));
         pat_clear(pat);
     };
 }

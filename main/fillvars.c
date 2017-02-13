@@ -14,7 +14,7 @@
 
 #include "..\pascal\pascal.h"
 #include "..\ow\stdio.h"
-#include "..\dos\dosproc.h"
+#include "..\ow\dos_.h"
 #include "..\hw\dma.h"
 #include "..\blaster\sbctl.h"
 #include "s3mvars.h"

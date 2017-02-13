@@ -9,9 +9,12 @@
 #endif
 
 #include "..\pascal\pascal.h"
+#include "dos_.h"
 #include "malloc.h"
 
-uint32_t _memmax(void)
+uint32_t PUBLIC_CODE _memmax(void)
 {
-    return pascal_maxavail();
+    uint16_t max;
+    _dos_allocmem(0xffff, &max);
+    return (uint32_t)max << 4;
 };

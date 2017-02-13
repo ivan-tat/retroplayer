@@ -25,10 +25,9 @@ procedure freeVolumeTable;
 implementation
 
 uses
-    dosproc;
+    dos_;
 
 (*$l voltab.obj*)
-
 procedure initVolumeTable; external;
 function  allocVolumeTable: boolean; external;
 procedure calcVolumeTable( sign: boolean ); external;

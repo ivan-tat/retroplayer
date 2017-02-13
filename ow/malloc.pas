@@ -10,15 +10,15 @@ unit malloc;
 
 interface
 
-procedure _memmax_;
+function _memmax: longint;
 
 implementation
 
 uses
-    pascal;
+    pascal,
+    dos_;
 
 (*$l malloc.obj*)
-
-procedure _memmax_; external;
+function _memmax: longint; external;
 
 end.

@@ -14,6 +14,6 @@
 
 #include "..\pascal\pascal.h"
 
-uint32_t _memmax(void);
+uint32_t PUBLIC_CODE _memmax(void);
 
 #endif  /* CUSTOM_MALLOC_H */

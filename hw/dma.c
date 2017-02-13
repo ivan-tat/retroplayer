@@ -14,8 +14,8 @@
 // TODO: remove PUBLIC_CODE macros when done.
 
 #include "..\pascal\pascal.h"
+#include "..\ow\dos_.h"
 #include "..\ow\stdio.h"
-#include "..\dos\dosproc.h"
 #include "dma.h"
 
 /* I/O ports */
@@ -285,9 +285,9 @@ void PUBLIC_CODE dmaReleaseChannels(dmaMask_t mask)
 
 DMABUF *PUBLIC_CODE dmaBuf_new(void)
 {
-    DMABUF *p;
-    if (getdosmem((void **)&p, sizeof(DMABUF)))
-        return p;
+    uint16_t seg;
+    if (!_dos_allocmem(_dos_para(sizeof(DMABUF)), &seg))
+        return MK_FP(seg, 0);
     else
         return (void *)0;
 }
@@ -298,7 +298,7 @@ void PUBLIC_CODE dmaBuf_delete(DMABUF **buf)
     {
         if (*buf)
         {
-            freedosmem((void **)buf);
+            _dos_freemem(FP_SEG(*buf));
             *buf = (void *)0;
         };
     };
@@ -313,6 +313,7 @@ void __near _dmaBufClear(DMABUF *buf)
 
 bool PUBLIC_CODE dmaBufAlloc(DMABUF *buf, uint32_t size)
 {
+    uint16_t seg, max;
     uint32_t bufStart, bufEnd, bufSize, dmaStart, dmaEnd, dmaSize;
     dmaSize = size;
 
@@ -322,7 +323,9 @@ bool PUBLIC_CODE dmaBufAlloc(DMABUF *buf, uint32_t size)
         dmaSize = dmaSize > 0x10000 ? 0x10000 : ((dmaSize + 15) & 0x1fff0);
 
         bufSize = dmaSize << 1;
-        if (!getdosmem((void **)&(buf->unaligned), bufSize)) return false;
+        if (_dos_allocmem(_dos_para(bufSize), &seg))
+            return false;
+        buf->unaligned = MK_FP(seg, 0);
 
         bufStart = dmaGetLinearAddress(buf->unaligned);
         bufEnd = bufStart + bufSize - 1;
@@ -353,7 +356,7 @@ bool PUBLIC_CODE dmaBufAlloc(DMABUF *buf, uint32_t size)
                 (uint32_t)(bufEnd - dmaEnd));
             #endif
             bufSize = dmaEnd - bufStart + 1;
-            setsize(buf->unaligned, bufSize);
+            _dos_setblock(_dos_para(bufSize), FP_SEG(buf->unaligned), &max);
         }
         memset(buf->data, 0, buf->size);
 
@@ -367,7 +370,7 @@ void PUBLIC_CODE dmaBufFree(DMABUF *buf)
     if (buf)
     {
         if (buf->unaligned)
-            freedosmem(&(buf->unaligned));
+            _dos_freemem(FP_SEG(buf->unaligned));
         _dmaBufClear(buf);
     };
 }

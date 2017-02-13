@@ -132,7 +132,7 @@ var
 implementation
 
 uses
-    dosproc,
+    dos_,
     emstool;
 
 (*$l s3mvars.obj*)

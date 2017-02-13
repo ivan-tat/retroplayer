@@ -107,9 +107,12 @@ var f:file;
 
   PROCEDURE freeallmem;
     begin
-      if (buffer <> Nil) then
-        freedosmem(pointer(buffer));
-      done_module;
+        if (buffer <> Nil) then
+        begin
+            _dos_freemem(seg(buffer^));
+            buffer := nil;
+        end;
+        done_module;
     end;
 
   PROCEDURE forget(count:longint);
@@ -183,6 +186,7 @@ var f:file;
       z,h:word;
       i:byte;
       smplen:word;
+      _seg: word;
     begin
       load_sample:=false;
       if (fileposit>nextsmp*16) then
@@ -220,10 +224,15 @@ var f:file;
         end
       else { we have to use normal memory (geeee) for this sample }
         begin
-          if not getdosmem(p,smplen+1024) then begin load_error:=notenoughmem;exit end;
-          blockread(f,p^,smplen);
-          pSmp^.mempos:=seg(p^);
-          par:=p;
+            if (_dos_allocmem((smplen+1024+15) shr 4, _seg) <> 0) then
+            begin
+                load_error:=notenoughmem;
+                exit;
+            end;
+            p := ptr(_seg, 0);
+            blockread(f,p^,smplen);
+            pSmp^.mempos:=seg(p^);
+            par:=p;
         end;
       if (Psmp^.flags and 1)=1 then
         { if loop then copy from loopstart : }
@@ -261,6 +270,7 @@ var f:file;
       linecount:byte;
       pat_static: TMUSPAT;
       pat: PMUSPAT;
+      _seg: word;
     BEGIN
       load_decrunc_pattern:=false;
       if nextpat=0 then
@@ -312,11 +322,16 @@ var f:file;
         end
       else
         begin
-          if not getdosmem(p,longint(64*5)*usedchannels) then begin load_error:=notenoughmem;exit end;
-          pat := @pat_static;
-          pat_clear(pat);
-          patSetData(pat, p);
-          patList_set(patpos-1, pat);
+            if (_dos_allocmem((longint(64*5)*usedchannels + 15) shr 4, _seg) <> 0) then
+            begin
+                load_error:=notenoughmem;
+                exit;
+            end;
+            p := ptr(_seg, 0);
+            pat := @pat_static;
+            pat_clear(pat);
+            patSetData(pat, p);
+            patList_set(patpos-1, pat);
         end;
 
       unpackPattern(buffer, p, 64, UsedChannels);
@@ -351,6 +366,7 @@ var a,b,c:string;
     Inst_done:boolean;
     load_smp_later:boolean;
     firstSMP:boolean;
+    _seg: word;
 
   BEGIN
     LOAD_S3M := FALSE;
@@ -472,7 +488,12 @@ var a,b,c:string;
     load_smp_later:=false; { load instruments not later (up to now we can say only this) }
     firstSMP:=true; { if we load now an instrument, then it's the first =) }
     { init buffer for fast loading : }
-    if not getdosmem(pointer(buffer),10*1024) then begin load_error:=notenoughmem;exit end;
+    if (_dos_allocmem((10*1024 + 15) shr 4, _seg) <> 0) then
+    begin
+        load_error:=notenoughmem;
+        exit;
+    end;
+    buffer := ptr(_seg, 0);
     { init some variables for loading : }
     inspos:=1;patpos:=0;smppos:=0;smpnum:=0;nextpat:=$7fffffff;nextins:=$7fffffff;nextsmp:=$7fffffff;
     while (inspos<insnum+1) or (patpos<patListCount) or (smppos<smpnum)
@@ -558,7 +579,8 @@ var a,b,c:string;
     writeln(#10);
     {$ENDIF}
     { free buffer : }
-    freedosmem(pointer(buffer));
+    _dos_freemem(seg(buffer^));
+    buffer := nil;
     { Just for fun set names for EMS handles (does only work for EMS>= v4.0) }
     if ( EMSVersion.Hi >= 4 ) then setEMSnames;
     mod_isLoaded := true;

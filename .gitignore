@@ -45,7 +45,6 @@ blaster/detisr.asm
 blaster/sbctl.asm
 blaster/sbio.asm
 blaster/sndisr.asm
-dos/dosproc.asm
 dos/emstool.asm
 hw/dma.asm
 hw/pic.asm
