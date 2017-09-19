@@ -6,6 +6,8 @@
 #ifndef _POSTTAB_H
 #define _POSTTAB_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>

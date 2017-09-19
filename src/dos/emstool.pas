@@ -10,6 +10,8 @@ unit EMStool;
 
 interface
 
+(*$I defines.pas*)
+
 type
     TEMMVersion = record
         Lo, Hi: byte;

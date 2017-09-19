@@ -6,6 +6,8 @@
 #ifndef PASCAL_H
 #define PASCAL_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include <stdbool.h>
@@ -46,8 +48,8 @@ _UNREGMETHOD(name);
 #define _EXITVARNAME(name) _oldexit_##name
 
 #ifdef DEBUG
- #define LOG_REGMETHOD(name, init) printf("[init] " #name ": " #init "()\r\n");
- #define LOG_UNREGMETHOD(name, done) printf("[done] " #name ": " #done "()\r\n");
+ #define LOG_REGMETHOD(name, init) printf("[init] " #name ": " #init "()" CRLF);
+ #define LOG_UNREGMETHOD(name, done) printf("[done] " #name ": " #done "()" CRLF);
 #else
  #define LOG_REGMETHOD(name, init)
  #define LOG_UNREGMETHOD(name, done)

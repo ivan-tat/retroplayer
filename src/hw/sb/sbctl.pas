@@ -10,6 +10,8 @@ unit sbctl;
 
 interface
 
+(*$I defines.pas*)
+
 (* The different SoundBlaster versions and its hardware :
 
    #  Name                   Mono    Stereo   Bits   Mixer   DSP

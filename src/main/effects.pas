@@ -10,6 +10,8 @@ unit effects;
 
 interface
 
+(*$I defines.pas*)
+
 uses
     s3mtypes;
 

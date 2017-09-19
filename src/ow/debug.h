@@ -5,6 +5,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include "stdio.h"

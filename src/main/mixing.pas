@@ -10,6 +10,8 @@ unit mixing;
 
 interface
 
+(*$I defines.pas*)
+
 function  mapSampleData(wSeg: word; wLen: word): pointer;
 procedure calcTick(dOutBuf: pointer; wLen: word);
 

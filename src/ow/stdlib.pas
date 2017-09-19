@@ -10,6 +10,8 @@ unit stdlib;
 
 interface
 
+(*$I defines.pas*)
+
 procedure malloc_;
 procedure free_;
 

@@ -9,6 +9,8 @@ unit detisr;
 
 interface
 
+(*$I defines.pas*)
+
 type
   TDetISRCallback = procedure ( irq: byte );
   PDetISRCallback = ^TDetISRCallback;

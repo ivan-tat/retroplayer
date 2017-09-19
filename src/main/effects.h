@@ -6,6 +6,8 @@
 #ifndef EFFECTS_H
 #define EFFECTS_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include <stdbool.h>

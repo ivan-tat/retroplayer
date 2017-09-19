@@ -31,6 +31,8 @@ Unit Blaster;
 
 Interface
 
+(*$I defines.pas*)
+
 CONST defaultvolume=31;    { full power =;) }
 
 PROCEDURE Forceto(typ,dma,dma16,irq:byte;dsp:word);     (* force to use these values for playing *)

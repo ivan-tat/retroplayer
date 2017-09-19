@@ -6,6 +6,8 @@
 #ifndef CUSTOM_STDIO_H
 #define CUSTOM_STDIO_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include <stdbool.h>

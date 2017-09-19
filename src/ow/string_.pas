@@ -10,6 +10,8 @@ unit string_;
 
 interface
 
+(*$I defines.pas*)
+
 procedure memcmp_;
 procedure memcpy_;
 procedure memset_;

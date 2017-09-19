@@ -10,6 +10,8 @@ unit mixtypes;
 
 interface
 
+(*$I defines.pas*)
+
 const
     MIXSMPFLAG_16BITS = $01;
     MIXSMPFLAG_LOOP   = $02;

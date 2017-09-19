@@ -10,6 +10,8 @@ unit mixvars;
 
 interface
 
+(*$I defines.pas*)
+
 const
     ST3Periods: array [0..11] of word = (
         1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907

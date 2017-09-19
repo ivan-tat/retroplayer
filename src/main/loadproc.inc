@@ -81,7 +81,7 @@ var f:file;
               w:=w + w0 div (16*1024) + ord(w0 mod (16*1024)>0);
             end;
         end;
-      {$IFDEF BETATEST }
+      {$IFDEF DEBUGLOAD}
       writeln(' Instruments to load : ',insnum);
       writeln(' EMS pages are needed for Samples : ',w);
       {$ENDIF}
@@ -97,7 +97,7 @@ var f:file;
           { fine let's load everything into EMS }
           smpEMShandle:=EMSalloc(w);
         end;
-      {$IFDEF BETATEST }
+      {$IFDEF DEBUGLOAD}
       writeln(' EMS pages allocated for Samples : ',w);
       {$ENDIF}
       Spagesleft:=w;
@@ -139,7 +139,7 @@ var f:file;
           seek(f,nextins*16); { <- we start reading from filestart again
                                 and read till we are at start of this pattern ... }
           if IOresult<>0 then begin load_error:=filecorrupt;exit end;
-          {$IFDEF BETATEST}
+          {$IFDEF DEBUGLOAD}
           writeln(#13#10'somethings going wrong with order. position was: ',fileposit,' but we need : ',nextins*16);
           {$ENDIF}
         end
@@ -196,7 +196,7 @@ var f:file;
           seek(f,nextsmp*16); { <- we start reading from filestart again
                                 and read till we are at start of this pattern ... }
           if IOresult<>0 then begin load_error:=filecorrupt;exit end;
-          {$IFDEF BETATEST}
+          {$IFDEF DEBUGLOAD}
           writeln(#13#10'somethings going wrong with order. position was: ',fileposit,' but we need : ',nextsmp*16);
           {$ENDIF}
         end
@@ -288,7 +288,7 @@ var f:file;
           reset(f,1);
           seek(f,nextpat*16); { <- we start reading from filestart again
                                    and read till we are at start of this pattern ... }
-          {$IFDEF BETATEST}
+          {$IFDEF DEBUGLOAD}
           writeln(#13#10'somethings going wrong with order. position was: ',fileposit,' but we need : ',nextpat*16);
           {$ENDIF}
           if IOresult<>0 then begin load_error:=filecorrupt;exit end;
@@ -426,7 +426,7 @@ var a,b,c:string;
         if channel[i].bEnabled and (channel[i].bChannelType>0) and (channel[i].bChannelType<3) then maxused:=i+1;
       end;
     usedchannels:=maxused;
-    {$IFDEF BETATEST}
+    {$IFDEF DEBUGLOAD}
     writeln(' Used channels :',usedchannels);
     {$ENDIF}
     { now load arrangment : }
@@ -446,7 +446,7 @@ var a,b,c:string;
       - problem is that you don't know the order and possibly there's no !
     }
     patListPatLength:=5*64*usedchannels;
-    {$IFDEF BETATEST}
+    {$IFDEF DEBUGLOAD}
     writeln(' length of Patterns in memory: ',patListPatLength);
     {$ENDIF}
     if useEMS then
@@ -455,7 +455,7 @@ var a,b,c:string;
         savHandle:=EMSalloc(1); { 1 page is enough ? }
         { let's continue with loading: }
         patListPatPerEMPage:=(16*1024) div patListPatLength;
-        {$IFDEF BETATEST}
+        {$IFDEF DEBUGLOAD}
         writeln(' Patterns per Page: ',patListPatPerEMPage);
         {$ENDIF}
         { try to allocate EMS for all patterns : }
@@ -575,7 +575,7 @@ var a,b,c:string;
             nextsmp:=$7fffffff;
           end;
       end;
-    {$IFDEF BETATEST}
+    {$IFDEF DEBUGLOAD}
     writeln(#10);
     {$ENDIF}
     { free buffer : }

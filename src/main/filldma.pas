@@ -13,6 +13,8 @@ interface
 uses
     fillvars;
 
+(*$I defines.pas*)
+
 procedure fill_DMAbuffer(mixbuf: pointer; outbuf: PSNDDMABUF);
 
 implementation

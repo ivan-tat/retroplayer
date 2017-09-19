@@ -12,6 +12,8 @@ uses
     posttab,
     fillvars;
 
+(*$I defines.pas*)
+
 CONST
     PLAYER_VERSION: PChar = '1.70.1';
 
@@ -368,7 +370,7 @@ var key:boolean;
     calcposttable(mvolume,A_16bit);
     curtick:=1; { last tick -> goto next note ! }
     curLine:=0; { <- next line to read from }
-    {$IFDEF BETATEST}
+    {$IFDEF DEBUG}
     curorder:=startorder;
     {$ELSE}
     curOrder:=0; { <- next order to read from }

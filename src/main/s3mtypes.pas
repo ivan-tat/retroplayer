@@ -12,6 +12,8 @@ interface
 
 uses types;
 
+(*$I defines.pas*)
+
 (* generic module information *)
 
 const

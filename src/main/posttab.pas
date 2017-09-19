@@ -10,6 +10,8 @@ unit posttab;
 
 interface
 
+(*$I defines.pas*)
+
 var
     post8bit :array[0..4095] of byte;
     post16bit:array[0..4095] of word;

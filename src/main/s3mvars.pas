@@ -13,6 +13,8 @@ interface
 uses
     s3mtypes;
 
+(*$I defines.pas*)
+
 (* EMM *)
 
 var

@@ -10,6 +10,8 @@ unit i86;
 
 interface
 
+(*$I defines.pas*)
+
 procedure delay_;
 procedure intr_;
 procedure _DoINTR_;

@@ -6,6 +6,8 @@
 #ifndef MIXER__H
 #define MIXER__H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include <stdbool.h>

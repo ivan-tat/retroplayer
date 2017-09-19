@@ -10,6 +10,8 @@ unit i8d086;
 
 interface
 
+(*$I defines.pas*)
+
 procedure __u8dq;
 procedure __u8dr;
 procedure __i8dq;

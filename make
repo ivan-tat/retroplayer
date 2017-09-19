@@ -82,14 +82,14 @@ LASTDIR="$PROJDIR"
 
 AS="wasm -zq"
 CC='wcc'
-export WCC="-3 -fp3 -ml -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu -dDEBUG"
+export WCC="-3 -fp3 -ml -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu"
 # disable optimization:
 # "-oc" - disable <call followed by return> to jump optimization;
 # reason: "wdis" incorrectly writes "je near ptr <near_extern_label>"
 #   (without "near ptr")
 CL='wcl'
 DA='wdis'
-PC='tpc -gd -q -v -$d+,e-,g+,l+,n+ -DDEBUG;BETATEST'
+PC='tpc -gd -q -v -$d+,e-,g+,l+,n+'
 
 _dir="$PROJDIR/src"
 if [ -n "$INCLUDE" ]; then
@@ -282,7 +282,7 @@ _dir="$INCLUDE"
 if [ -n "$_dir" ]; then
     # replace slashes "/" with backslashes "\" for DOS compatibility
     _dir="${_dir//\//\\}"
-    export INCLUDE="$INCLUDE;$_dir"
+    export INCLUDE="$_dir"
 fi
 unset _dir
 build_target $T_TP        obj src/pascal/pascal.pas

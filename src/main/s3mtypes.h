@@ -6,6 +6,8 @@
 #ifndef S3MTYPES_H
 #define S3MTYPES_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #include <i86.h>
 #include <stdbool.h>

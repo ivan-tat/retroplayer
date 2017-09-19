@@ -10,6 +10,8 @@ unit readnote;
 
 interface
 
+(*$I defines.pas*)
+
 procedure readnewnotes;
 
 implementation

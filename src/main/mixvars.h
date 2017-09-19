@@ -6,6 +6,8 @@
 #ifndef MIXVARS_H
 #define MIXVARS_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>

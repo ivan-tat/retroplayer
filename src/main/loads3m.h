@@ -6,6 +6,8 @@
 #ifndef LOADS3M_H
 #define LOADS3M_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include <stdbool.h>

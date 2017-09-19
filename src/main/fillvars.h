@@ -6,6 +6,8 @@
 #ifndef FILLVARS_H
 #define FILLVARS_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include <stdbool.h>

@@ -10,6 +10,8 @@ unit dma;
 
 interface
 
+(*$I defines.pas*)
+
 type
     TDMAMode = byte;
 

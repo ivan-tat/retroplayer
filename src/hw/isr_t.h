@@ -6,6 +6,8 @@
 #ifndef ISR_T_H
 #define ISR_T_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include <stdbool.h>

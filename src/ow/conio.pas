@@ -10,6 +10,8 @@ unit conio;
 
 interface
 
+(*$I defines.pas*)
+
 procedure inp_;
 procedure outp_;
 

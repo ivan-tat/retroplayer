@@ -10,6 +10,8 @@ unit effvars;
 
 interface
 
+(*$I defines.pas*)
+
 (* tables for mixing *)
 var
     sinuswave: array [0..63] of shortint;

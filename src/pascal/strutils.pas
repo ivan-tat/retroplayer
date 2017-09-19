@@ -11,6 +11,8 @@ unit
 
 interface
 
+(*$I defines.pas*)
+
 type
     TString2 = string[2];
     TString3 = string[3];

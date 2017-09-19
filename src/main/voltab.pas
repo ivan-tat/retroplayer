@@ -10,6 +10,8 @@ unit voltab;
 
 interface
 
+(*$I defines.pas*)
+
 type
     voltab_t = array[0..64,0..255] of integer;
     voltab_p = ^voltab_t;

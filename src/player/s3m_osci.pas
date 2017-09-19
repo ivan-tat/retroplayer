@@ -10,6 +10,8 @@ uses
     fillvars,
     s3mplay;
 
+(*$I defines.pas*)
+
 const stereo_calc=true ;
       _16bit_calc=false;        { 16bit play not yet possible }
 

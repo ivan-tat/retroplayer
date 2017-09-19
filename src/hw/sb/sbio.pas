@@ -10,6 +10,8 @@ unit sbio;
 
 interface
 
+(*$I defines.pas*)
+
 type
     TSBIOError = word;
 

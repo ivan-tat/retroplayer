@@ -14,6 +14,8 @@ uses
     types,
     s3mtypes;
 
+(*$I defines.pas*)
+
 procedure unpackPattern(src, dst: parray; maxrow, maxchn: byte);
 
 implementation

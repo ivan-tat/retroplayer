@@ -10,6 +10,8 @@ unit dos_;
 
 interface
 
+(*$I defines.pas*)
+
 function _dos_allocmem(size: word; var seg: word): word;
 function _dos_freemem(seg: word): word;
 function _dos_setblock(size: word; seg: word; var max: word): word;

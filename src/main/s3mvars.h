@@ -6,6 +6,8 @@
 #ifndef S3MVARS_H
 #define S3MVARS_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include <stdbool.h>

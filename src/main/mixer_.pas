@@ -13,6 +13,8 @@ interface
 uses
     mixtypes;
 
+(*$I defines.pas*)
+
 procedure _MixSampleMono8(outBuf: pointer; var smpInfo: TPlaySampleInfo;
     volTab: word; vol: byte; count: word);
 procedure _MixSampleStereo8(outBuf: pointer; var smpInfo: TPlaySampleInfo;

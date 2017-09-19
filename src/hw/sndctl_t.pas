@@ -10,6 +10,8 @@ unit sndctl_t;
 
 interface
 
+(*$I defines.pas*)
+
 type
     THWSMPFMTFLAGS = byte;
 

@@ -6,6 +6,8 @@
 #ifndef CUSTOM_I86_H
 #define CUSTOM_I86_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include <stdbool.h>

@@ -10,6 +10,8 @@ unit i4m;
 
 interface
 
+(*$I defines.pas*)
+
 procedure __i4m;
 procedure __u4m;
 

@@ -10,6 +10,8 @@ unit malloc;
 
 interface
 
+(*$I defines.pas*)
+
 function _memmax: longint;
 
 implementation

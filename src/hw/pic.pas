@@ -10,6 +10,8 @@ unit pic;
 
 interface
 
+(*$I defines.pas*)
+
 type
     TIRQMask = word;
 

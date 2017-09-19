@@ -18,6 +18,8 @@ uses
     effects,
     s3mplay;
 
+{$I defines.pas}
+
 const stereo_calc=true;
       _16bit_calc=false;
       switch:array[false..true] of string[3] = ('off','on ');
@@ -49,7 +51,9 @@ procedure display_errormsg(err:integer);
       -4: write(' File does not exist. ');
       -7: write(' Need a 386 or higher. ');
       -8: write(' No sounddevice set. (wrong code - shame on you programmer) ');
-      -11: write(' Loading stoped by user <- only for betatest ! ');
+    {$ifdef DEBUGLOAD}
+      -11: write(' Loading stoped by user!');
+    {$endif}
     else write(' Somethings going wrong, but I dounno about that errorcode: ',err,'  ');
     end;
     writeln('PROGRAM HALTED.'#7);
@@ -172,7 +176,7 @@ var t:string;
     if upstr(copy(p,2,3))='ENV' then { read Blaster enviroment } how2input:=2;
     if upstr(copy(p,2,3))='CFG' then { input SB config by hand } how2input:=3;
     if upstr(copy(p,2,2))='LQ' then { mix in low quality mode } _LQ:=true;
-    {$IFDEF BETATEST}
+    {$IFDEF DEBUG}
     if upcase(p[2])='B' then
       begin
         t:=copy(p,3,length(p));
@@ -239,7 +243,7 @@ procedure display_help;
     writeln('                      also <don''t use EMS>');
 
     writeln('         /LQ      ... use low quality mode');
-    {$IFDEF BETATEST}
+    {$IFDEF DEBUG}
     writeln(' for debugging: ');
     writeln('         /Bxx     ... start at order xx (default is 0)');
     writeln('         /Fxx     ... set Frames Per Second (default is 70Hz)');
@@ -335,7 +339,7 @@ begin
   disply_c:=false;
   filename:='';
   ST3order:=false;
-  {$IFDEF BETATEST}
+  {$IFDEF DEBUG}
   startorder:=0;
   {$ENDIF}
   { end of default ... }
@@ -346,12 +350,12 @@ begin
     check_para(paramstr(i));
   if (filename='') then display_help;
   writeln;
-  {$IFDEF BETATEST}
+  {$IFDEF DEBUGLOAD}
   writeln('Free DOS memory before loading: ',getFreeDOSMemory shr 10, ' KiB');
   writeln('Free EMM memory before loading: ',getFreeEMMMemory, ' KiB');
   {$ENDIF}
   if not load_S3M(filename) then display_errormsg(load_error);
-  {$IFDEF BETATEST}
+  {$IFDEF DEBUGLOAD}
   writeln('Free DOS memory after loading: ',getFreeDOSMemory shr 10, ' KiB');
   writeln('Free EMM memory after loading: ',getFreeEMMMemory, ' KiB');
   {$ENDIF}
@@ -443,7 +447,7 @@ begin
   done_S3Mplayer;
   gotoxy(1,8);
   textcolor(white);textbackground(blue);
-  {$IFDEF BETATEST}
+  {$IFDEF DEBUGLOAD}
   writeln('Free DOS memory after all: ',getFreeDOSMemory shr 10, ' KiB');clreol;
   writeln('Free EMM memory after all: ',getFreeEMMMemory, ' KiB');clreol;
   {$ENDIF}

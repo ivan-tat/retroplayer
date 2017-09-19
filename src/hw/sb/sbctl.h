@@ -6,6 +6,8 @@
 #ifndef SBCTL_H
 #define SBCTL_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include <stdbool.h>

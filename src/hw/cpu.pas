@@ -10,6 +10,8 @@ unit cpu;
 
 interface
 
+(*$I defines.pas*)
+
 function  isCPU_i386: boolean;
 
 implementation

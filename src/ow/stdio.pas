@@ -10,6 +10,8 @@ unit stdio;
 
 interface
 
+(*$I defines.pas*)
+
 procedure printf_;
 procedure fopen_;
 procedure fclose_;

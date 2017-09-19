@@ -14,6 +14,8 @@ uses
     dma,
     sndctl_t;
 
+(*$I defines.pas*)
+
 const
     DMA_BUF_SIZE_MAX = 8*1024;
 

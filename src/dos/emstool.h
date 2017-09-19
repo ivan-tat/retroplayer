@@ -6,6 +6,8 @@
 #ifndef EMSTOOL_H
 #define EMSTOOL_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include <stdbool.h>

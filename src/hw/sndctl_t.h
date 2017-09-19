@@ -6,6 +6,8 @@
 #ifndef SNDCTL_T_H
 #define SNDCTL_T_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #include <stdbool.h>

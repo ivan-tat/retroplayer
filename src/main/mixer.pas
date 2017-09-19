@@ -10,6 +10,8 @@ unit mixer;
 
 interface
 
+(*$I defines.pas*)
+
 function  mixCalcSampleStep(wPeriod: word): longint;
 
 implementation

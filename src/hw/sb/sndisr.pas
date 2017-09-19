@@ -10,6 +10,8 @@ unit sndisr;
 
 interface
 
+(*$I defines.pas*)
+
 type
   TSoundHWISRCallback = procedure;
   PSoundHWISRCallback = ^TSoundHWISRCallback;

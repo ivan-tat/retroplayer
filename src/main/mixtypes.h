@@ -6,6 +6,8 @@
 #ifndef MIXTYPES_H
 #define MIXTYPES_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>

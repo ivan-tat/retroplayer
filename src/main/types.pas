@@ -10,6 +10,8 @@ unit types;
 
 interface
 
+(*$I defines.pas*)
+
 type
     dword = packed record
     case integer of

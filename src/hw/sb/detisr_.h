@@ -6,6 +6,8 @@
 #ifndef _DETISR__H
 #define _DETISR__H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>

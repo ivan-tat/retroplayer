@@ -59,7 +59,7 @@ extrn Order: byte
 extrn OrdNum: word
 extrn LastOrder: byte
 
-ifdef BETATEST
+ifdef DEBUG
 extrn StartOrder: word
 endif
 

@@ -10,6 +10,8 @@ unit pascal;
 
 interface
 
+(*$I defines.pas*)
+
 (* System Unit *)
 
 function  pascal_maxavail: longint;
