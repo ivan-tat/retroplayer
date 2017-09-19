@@ -12,7 +12,7 @@
 #include <stdint.h>
 #endif
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
 void *malloc(uint16_t size);
 void  free(void *ptr);

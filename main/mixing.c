@@ -12,9 +12,9 @@
 
 // TODO: remove PUBLIC_CODE macros when done.
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
-#include "..\dos\emstool.h"
+#include "../dos/emstool.h"
 #include "s3mtypes.h"
 #include "mixtypes.h"
 #include "s3mvars.h"

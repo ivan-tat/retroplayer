@@ -11,7 +11,7 @@
 #include <stdint.h>
 #endif
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
 extern uint16_t PUBLIC_DATA ST3Periods[12];
 

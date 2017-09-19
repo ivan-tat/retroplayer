@@ -11,10 +11,10 @@
 
 // TODO: remove PUBLIC_CODE macros when done.
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
-#include "..\dos\emstool.h"
-#include "..\blaster\sbctl.h"
+#include "../dos/emstool.h"
+#include "../blaster/sbctl.h"
 #include "posttab.h"
 #include "s3mvars.h"
 #include "fillvars.h"

@@ -1,4 +1,5 @@
 #!/bin/bash
+# This script must be run in GNU/Linux OR in DOS/DJGPP Bash shell.
 
 cleandir() {
     local DIR="$1"

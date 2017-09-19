@@ -12,7 +12,7 @@
 #include <stdint.h>
 #endif
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
 extern void intr(int, void *);
 void delay(unsigned int __milliseconds);

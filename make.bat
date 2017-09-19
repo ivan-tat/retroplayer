@@ -1,2 +1,2 @@
 @echo off
-bash make.sh
+bash make

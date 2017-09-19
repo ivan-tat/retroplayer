@@ -13,9 +13,9 @@
 
 // TODO: remove PUBLIC_CODE macros when done.
 
-#include "..\pascal\pascal.h"
-#include "..\ow\dos_.h"
-#include "..\ow\stdio.h"
+#include "../pascal/pascal.h"
+#include "../ow/dos_.h"
+#include "../ow/stdio.h"
 #include "dma.h"
 
 /* I/O ports */

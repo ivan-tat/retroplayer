@@ -14,7 +14,7 @@
 
 // TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
 /* hardware config */
 

@@ -14,7 +14,7 @@
 
 // TODO: remove PUBLIC_CODE macros when done.
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
 #define DMA_CHANNELS 8
 

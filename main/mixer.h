@@ -13,7 +13,7 @@
 
 // TODO: remove PUBLIC_CODE macros when done.
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
 extern uint32_t PUBLIC_CODE mixCalcSampleStep(uint16_t wPeriod);
 #ifdef __WATCOMC__

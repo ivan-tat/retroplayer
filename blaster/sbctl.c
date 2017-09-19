@@ -10,8 +10,8 @@
 #include <conio.h>
 #endif
 
-#include "..\pascal\pascal.h"
-#include "..\hw\dma.h"
+#include "../pascal/pascal.h"
+#include "../hw/dma.h"
 #include "sbio.h"
 #include "sbctl.h"
 

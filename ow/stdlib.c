@@ -9,7 +9,7 @@
 #include <stdint.h>
 #endif
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 #include "stdlib.h"
 
 void *malloc(uint16_t size)

@@ -10,7 +10,7 @@
 
 // TODO: remove PUBLIC_CODE macros when done.
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 #include "sndctl_t.h"
 
 bool PUBLIC_CODE set_sample_format(HWSMPFMT *p, uint8_t b, bool s, uint8_t c)

@@ -14,7 +14,7 @@
 
 // TODO: remove reserved words "extern", PUBLIC_CODE and PUBLIC_DATA macros when done.
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 #include "s3mtypes.h"
 
 #define EFFGROUP_EMPTY   0

@@ -12,7 +12,7 @@
 #include <stdint.h>
 #endif
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
 typedef PASCALFILE FILE;
 

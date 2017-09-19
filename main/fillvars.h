@@ -14,9 +14,9 @@
 
 // TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
 
-#include "..\pascal\pascal.h"
-#include "..\hw\dma.h"
-#include "..\hw\sndctl_t.h"
+#include "../pascal/pascal.h"
+#include "../hw/dma.h"
+#include "../hw/sndctl_t.h"
 
 /* DMA buffer for sound */
 

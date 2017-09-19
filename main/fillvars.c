@@ -12,11 +12,11 @@
 
 /* TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done */
 
-#include "..\pascal\pascal.h"
-#include "..\ow\stdio.h"
-#include "..\ow\dos_.h"
-#include "..\hw\dma.h"
-#include "..\blaster\sbctl.h"
+#include "../pascal/pascal.h"
+#include "../ow/stdio.h"
+#include "../ow/dos_.h"
+#include "../hw/dma.h"
+#include "../blaster/sbctl.h"
 #include "s3mvars.h"
 #include "fillvars.h"
 

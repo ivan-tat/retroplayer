@@ -10,7 +10,7 @@
 #include <stdint.h>
 #endif
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 #include "dos_.h"
 
 uint16_t __near __doserror(uint16_t code)

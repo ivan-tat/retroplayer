@@ -14,7 +14,7 @@
 
 // TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
 /* Here we use "__far __pascal" modificators instead of PUBLIC_CODE:
    when all done we must use only "__far" modificator */

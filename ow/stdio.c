@@ -9,7 +9,7 @@
 #include <stdint.h>
 #endif
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 #include "dos_.h"
 #include "stdio.h"
 

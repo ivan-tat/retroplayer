@@ -13,7 +13,7 @@
 
 // TODO: remove PUBLIC_DATA/PUBLIC_CODE macros when done.
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
 typedef int16_t voltab_t[65][256];
 

@@ -8,7 +8,7 @@
 #include <stdint.h>
 #endif
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 #include "i86.h"
 
 void delay(unsigned int __milliseconds)

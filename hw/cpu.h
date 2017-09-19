@@ -13,7 +13,7 @@
 
 // TODO: remove PUBLIC_CODE macros when done.
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
 extern bool PUBLIC_CODE isCPU_i386(void);
 

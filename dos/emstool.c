@@ -11,10 +11,10 @@
 #include <string.h>
 #endif
 
-#include "..\pascal\pascal.h"
-#include "..\ow\malloc.h"
-#include "..\ow\stdio.h"
-#include "..\ow\stdlib.h"
+#include "../pascal/pascal.h"
+#include "../ow/malloc.h"
+#include "../ow/stdio.h"
+#include "../ow/stdlib.h"
 #include "emstool.h"
 
 #define DOS_DRIVER_NAME_OFF 10

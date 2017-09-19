@@ -13,7 +13,7 @@
 
 // TODO: remove reserved words "extern" and PUBLIC_DATA macros when done.
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
 extern int8_t   PUBLIC_DATA sinuswave[64];
 extern int8_t   PUBLIC_DATA rampwave[64];

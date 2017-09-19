@@ -14,7 +14,7 @@
 
 // TODO: remove PUBLIC_DATA macros when done.
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 #include "s3mtypes.h"
 
 /* EMM */

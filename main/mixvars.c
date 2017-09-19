@@ -10,7 +10,7 @@
 
 /* TODO: remove EXTERN_LINK, PUBLIC_DATA and PUBLIC_CODE macros when done */
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 
 EXTERN_LINK uint16_t PUBLIC_DATA ST3Periods[12];
 /* TODO: uncomment when done */

@@ -10,7 +10,7 @@
 #include <stdarg.h>
 #endif
 
-#include "..\pascal\pascal.h"
+#include "../pascal/pascal.h"
 #include "stdio.h"
 
 extern void __near __pascal printstring(char *s);

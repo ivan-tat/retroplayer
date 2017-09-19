@@ -8,8 +8,8 @@
 #include <stdint.h>
 #endif
 
-#include "..\pascal\pascal.h"
-#include "..\ow\stdio.h"
+#include "../pascal/pascal.h"
+#include "../ow/stdio.h"
 #include "s3mtypes.h"
 #include "s3mplay.h"
 #include "loads3m.h"

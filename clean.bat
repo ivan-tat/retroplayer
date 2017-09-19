@@ -1,2 +1,2 @@
 @echo off
-bash clean.sh
+bash clean
