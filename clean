@@ -13,38 +13,38 @@ cleandir() {
     cd $OLDPWD
 }
 
-cleandir ./blaster
-rm -f ./blaster/detisr.asm
-rm -f ./blaster/sbctl.asm
-rm -f ./blaster/sbio.asm
-rm -f ./blaster/sndisr.asm
-cleandir ./dos
-rm -f ./dos/emstool.asm
-cleandir ./hw
-rm -f ./hw/dma.asm
-rm -f ./hw/pic.asm
-rm -f ./hw/sndctl_t.asm
-cleandir ./main
-rm -f ./main/effects.asm
-rm -f ./main/filldma.asm
-rm -f ./main/fillvars.asm
-rm -f ./main/loads3m.asm
-rm -f ./main/mixer.asm
-rm -f ./main/mixing.asm
-rm -f ./main/mixvars.asm
-rm -f ./main/posttab.asm
-rm -f ./main/readnote.asm
-rm -f ./main/s3mplay.asm
-rm -f ./main/s3mvars.asm
-rm -f ./main/voltab.asm
-cleandir ./ow
-rm -f ./ow/dos_.asm
-rm -f ./ow/i86.asm
-rm -f ./ow/malloc.asm
-rm -f ./ow/printf.asm
-rm -f ./ow/stdio.asm
-rm -f ./ow/stdlib.asm
-cleandir ./pascal
-cleandir ./player
+cleandir ./src/hw
+rm -f ./src/hw/dma.asm
+rm -f ./src/hw/pic.asm
+rm -f ./src/hw/sndctl_t.asm
+cleandir ./src/hw/sb
+rm -f ./src/hw/sb/detisr.asm
+rm -f ./src/hw/sb/sbctl.asm
+rm -f ./src/hw/sb/sbio.asm
+rm -f ./src/hw/sb/sndisr.asm
+cleandir ./src/dos
+rm -f ./src/dos/emstool.asm
+cleandir ./src/main
+rm -f ./src/main/effects.asm
+rm -f ./src/main/filldma.asm
+rm -f ./src/main/fillvars.asm
+rm -f ./src/main/loads3m.asm
+rm -f ./src/main/mixer.asm
+rm -f ./src/main/mixing.asm
+rm -f ./src/main/mixvars.asm
+rm -f ./src/main/posttab.asm
+rm -f ./src/main/readnote.asm
+rm -f ./src/main/s3mplay.asm
+rm -f ./src/main/s3mvars.asm
+rm -f ./src/main/voltab.asm
+cleandir ./src/ow
+rm -f ./src/ow/dos_.asm
+rm -f ./src/ow/i86.asm
+rm -f ./src/ow/malloc.asm
+rm -f ./src/ow/printf.asm
+rm -f ./src/ow/stdio.asm
+rm -f ./src/ow/stdlib.asm
+cleandir ./src/pascal
+cleandir ./src/player
 
 echo "Done."

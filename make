@@ -92,8 +92,6 @@ DA='wdis'
 PC='tpc -gd -q -v -$d+,e-,g+,l+,n+ -DDEBUG;BETATEST'
 
 _dir="$PROJDIR/src"
-# replace slashes "/" with backslashes "\" for DOS compatibility
-_dir="${_dir//\//\\}"
 if [ -n "$INCLUDE" ]; then
     export INCLUDE="$INCLUDE;$_dir"
 else
@@ -235,94 +233,101 @@ build_target() {
 }
 
 if [ -z "$DJGPP" ]; then
-build_target $T_WATCOM obj ow/dointr.asm
-build_target $T_WATCOM obj ow/intr.asm
-build_target $T_WATCOM obj ow/i86.c
-build_target $T_WATCOM obj ow/dos_.c
-build_target $T_WATCOM obj ow/malloc.c
-build_target $T_WATCOM obj ow/inp.asm
-build_target $T_WATCOM obj ow/outp.asm
-build_target $T_WATCOM obj ow/stdlib.c
-build_target $T_WATCOM obj ow/memcmp.asm
-build_target $T_WATCOM obj ow/memcpy.asm
-build_target $T_WATCOM obj ow/memset.asm
-build_target $T_WATCOM obj ow/strlen.asm
-build_target $T_WATCOM obj ow/i4d.asm
-build_target $T_WATCOM obj ow/i4m.asm
-build_target $T_WATCOM obj ow/i8d086.asm
-build_target $T_WATCOM obj ow/printf.c
-build_target $T_WATCOM obj ow/stdio.c
-build_target $T_DOS    obj dos/emstool.c
-build_target $T_HW     obj hw/cpu.asm
-build_target $T_HW     obj hw/dma.c
-build_target $T_HW     obj hw/isr.asm
-build_target $T_HW     obj hw/pic.c
-build_target $T_HW     obj hw/sndctl_t.c
-build_target $T_HW_SB  obj blaster/sbio.c
-build_target $T_HW_SB  obj blaster/sbctl.c
-build_target $T_HW_SB  obj blaster/detisr_.asm
-build_target $T_HW_SB  obj blaster/detisr.c
-build_target $T_HW_SB  obj blaster/sndisr_.asm
-build_target $T_HW_SB  obj blaster/sndisr.c
-build_target $T_MAIN   obj main/mixvars.c
-build_target $T_MAIN   obj main/s3mvars.c
-build_target $T_MAIN   obj main/loads3m.c
-build_target $T_MAIN   obj main/fillvars.c
-build_target $T_MAIN   obj main/voltab.c
-build_target $T_MAIN   obj main/posttab.c
-build_target $T_MAIN   obj main/mixer_.asm
-build_target $T_MAIN   obj main/mixer.c
-build_target $T_MAIN   obj main/effects.c
-build_target $T_MAIN   obj main/readnote.c
-build_target $T_MAIN   obj main/mixing.c
-build_target $T_MAIN   obj main/filldma.c
-build_target $T_MAIN   obj main/s3mplay.c
+build_target $T_WATCOM obj src/ow/dointr.asm
+build_target $T_WATCOM obj src/ow/intr.asm
+build_target $T_WATCOM obj src/ow/i86.c
+build_target $T_WATCOM obj src/ow/dos_.c
+build_target $T_WATCOM obj src/ow/malloc.c
+build_target $T_WATCOM obj src/ow/inp.asm
+build_target $T_WATCOM obj src/ow/outp.asm
+build_target $T_WATCOM obj src/ow/stdlib.c
+build_target $T_WATCOM obj src/ow/memcmp.asm
+build_target $T_WATCOM obj src/ow/memcpy.asm
+build_target $T_WATCOM obj src/ow/memset.asm
+build_target $T_WATCOM obj src/ow/strlen.asm
+build_target $T_WATCOM obj src/ow/i4d.asm
+build_target $T_WATCOM obj src/ow/i4m.asm
+build_target $T_WATCOM obj src/ow/i8d086.asm
+build_target $T_WATCOM obj src/ow/printf.c
+build_target $T_WATCOM obj src/ow/stdio.c
+build_target $T_DOS    obj src/dos/emstool.c
+build_target $T_HW     obj src/hw/cpu.asm
+build_target $T_HW     obj src/hw/dma.c
+build_target $T_HW     obj src/hw/isr.asm
+build_target $T_HW     obj src/hw/pic.c
+build_target $T_HW     obj src/hw/sndctl_t.c
+build_target $T_HW_SB  obj src/hw/sb/sbio.c
+build_target $T_HW_SB  obj src/hw/sb/sbctl.c
+build_target $T_HW_SB  obj src/hw/sb/detisr_.asm
+build_target $T_HW_SB  obj src/hw/sb/detisr.c
+build_target $T_HW_SB  obj src/hw/sb/sndisr_.asm
+build_target $T_HW_SB  obj src/hw/sb/sndisr.c
+build_target $T_MAIN   obj src/main/mixvars.c
+build_target $T_MAIN   obj src/main/s3mvars.c
+build_target $T_MAIN   obj src/main/loads3m.c
+build_target $T_MAIN   obj src/main/fillvars.c
+build_target $T_MAIN   obj src/main/voltab.c
+build_target $T_MAIN   obj src/main/posttab.c
+build_target $T_MAIN   obj src/main/mixer_.asm
+build_target $T_MAIN   obj src/main/mixer.c
+build_target $T_MAIN   obj src/main/effects.c
+build_target $T_MAIN   obj src/main/readnote.c
+build_target $T_MAIN   obj src/main/mixing.c
+build_target $T_MAIN   obj src/main/filldma.c
+build_target $T_MAIN   obj src/main/s3mplay.c
 fi
 
 if [ -n "$DJGPP" ]; then
-build_target $T_TP        obj pascal/pascal.pas
-build_target $T_TP        obj pascal/strutils.pas
-build_target $T_WATCOM_TP obj ow/i86.pas
-build_target $T_WATCOM_TP obj ow/dos_.pas
-build_target $T_WATCOM_TP obj ow/malloc.pas
-build_target $T_WATCOM_TP obj ow/conio.pas
-build_target $T_WATCOM_TP obj ow/stdlib.pas
-build_target $T_WATCOM_TP obj ow/string_.pas
-build_target $T_WATCOM_TP obj ow/i4d.pas
-build_target $T_WATCOM_TP obj ow/i4m.pas
-build_target $T_WATCOM_TP obj ow/i8d086.pas
-build_target $T_WATCOM_TP obj ow/stdio.pas
-build_target $T_DOS_TP    obj dos/emstool.pas
-build_target $T_HW_TP     obj hw/cpu.pas
-build_target $T_HW_TP     obj hw/dma.pas
-build_target $T_HW_TP     obj hw/pic.pas
-build_target $T_HW_TP     obj hw/sndctl_t.pas
-build_target $T_HW_SB_TP  obj blaster/sbio.pas
-build_target $T_HW_SB_TP  obj blaster/sbctl.pas
-build_target $T_HW_SB_TP  obj blaster/detisr.pas
-build_target $T_HW_SB_TP  obj blaster/sndisr.pas
-build_target $T_HW_SB_TP  obj blaster/blaster.pas
-build_target $T_MAIN_TP   obj main/types.pas
-build_target $T_MAIN_TP   obj main/mixtypes.pas
-build_target $T_MAIN_TP   obj main/s3mtypes.pas
-build_target $T_MAIN_TP   obj main/mixvars.pas
-build_target $T_MAIN_TP   obj main/s3mvars.pas
-build_target $T_MAIN_TP   obj main/loads3m.pas
-build_target $T_MAIN_TP   obj main/fillvars.pas
-build_target $T_MAIN_TP   obj main/voltab.pas
-build_target $T_MAIN_TP   obj main/posttab.pas
-build_target $T_MAIN_TP   obj main/mixer_.pas
-build_target $T_MAIN_TP   obj main/mixer.pas
-build_target $T_MAIN_TP   obj main/effvars.pas
-build_target $T_MAIN_TP   obj main/effects.pas
-build_target $T_MAIN_TP   obj main/readnote.pas
-build_target $T_MAIN_TP   obj main/mixing.pas
-build_target $T_MAIN_TP   obj main/filldma.pas
-build_target $T_MAIN_TP   obj main/s3mplay.pas
-build_target $T_PLAYER_TP exe player/plays3m.pas
-build_target $T_PLAYER_TP exe player/smalls3m.pas
-build_target $T_PLAYER_TP obj player/lines.asm
-build_target $T_PLAYER_TP exe player/s3m_osci.pas
+_dir="$INCLUDE"
+if [ -n "$_dir" ]; then
+    # replace slashes "/" with backslashes "\" for DOS compatibility
+    _dir="${_dir//\//\\}"
+    export INCLUDE="$INCLUDE;$_dir"
+fi
+unset _dir
+build_target $T_TP        obj src/pascal/pascal.pas
+build_target $T_TP        obj src/pascal/strutils.pas
+build_target $T_WATCOM_TP obj src/ow/i86.pas
+build_target $T_WATCOM_TP obj src/ow/dos_.pas
+build_target $T_WATCOM_TP obj src/ow/malloc.pas
+build_target $T_WATCOM_TP obj src/ow/conio.pas
+build_target $T_WATCOM_TP obj src/ow/stdlib.pas
+build_target $T_WATCOM_TP obj src/ow/string_.pas
+build_target $T_WATCOM_TP obj src/ow/i4d.pas
+build_target $T_WATCOM_TP obj src/ow/i4m.pas
+build_target $T_WATCOM_TP obj src/ow/i8d086.pas
+build_target $T_WATCOM_TP obj src/ow/stdio.pas
+build_target $T_DOS_TP    obj src/dos/emstool.pas
+build_target $T_HW_TP     obj src/hw/cpu.pas
+build_target $T_HW_TP     obj src/hw/dma.pas
+build_target $T_HW_TP     obj src/hw/pic.pas
+build_target $T_HW_TP     obj src/hw/sndctl_t.pas
+build_target $T_HW_SB_TP  obj src/hw/sb/sbio.pas
+build_target $T_HW_SB_TP  obj src/hw/sb/sbctl.pas
+build_target $T_HW_SB_TP  obj src/hw/sb/detisr.pas
+build_target $T_HW_SB_TP  obj src/hw/sb/sndisr.pas
+build_target $T_HW_SB_TP  obj src/hw/sb/blaster.pas
+build_target $T_MAIN_TP   obj src/main/types.pas
+build_target $T_MAIN_TP   obj src/main/mixtypes.pas
+build_target $T_MAIN_TP   obj src/main/s3mtypes.pas
+build_target $T_MAIN_TP   obj src/main/mixvars.pas
+build_target $T_MAIN_TP   obj src/main/s3mvars.pas
+build_target $T_MAIN_TP   obj src/main/loads3m.pas
+build_target $T_MAIN_TP   obj src/main/fillvars.pas
+build_target $T_MAIN_TP   obj src/main/voltab.pas
+build_target $T_MAIN_TP   obj src/main/posttab.pas
+build_target $T_MAIN_TP   obj src/main/mixer_.pas
+build_target $T_MAIN_TP   obj src/main/mixer.pas
+build_target $T_MAIN_TP   obj src/main/effvars.pas
+build_target $T_MAIN_TP   obj src/main/effects.pas
+build_target $T_MAIN_TP   obj src/main/readnote.pas
+build_target $T_MAIN_TP   obj src/main/mixing.pas
+build_target $T_MAIN_TP   obj src/main/filldma.pas
+build_target $T_MAIN_TP   obj src/main/s3mplay.pas
+build_target $T_PLAYER_TP exe src/player/plays3m.pas
+build_target $T_PLAYER_TP exe src/player/smalls3m.pas
+build_target $T_PLAYER_TP obj src/player/lines.asm
+build_target $T_PLAYER_TP exe src/player/s3m_osci.pas
 fi
 
 cd "$PROJDIR"

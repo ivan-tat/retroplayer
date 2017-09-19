@@ -1,4 +1,4 @@
 @echo off
-cd player
+cd src\player
 plays3m /env test.s3m
-cd ..
+cd ..\..
