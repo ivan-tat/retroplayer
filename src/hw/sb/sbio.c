@@ -5,12 +5,10 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
-#include <conio.h>
-#endif
 
+#include "cc/conio.h"
 #include "hw/sb/sbio.h"
 
 /* Mixer i/o ports */

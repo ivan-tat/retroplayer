@@ -249,10 +249,10 @@ build_target $T_CC     obj src/cc/i86/disable.c
 build_target $T_CC     obj src/cc/i86/dointr.asm
 build_target $T_CC     obj src/cc/i86/enable.c
 build_target $T_CC     obj src/cc/i86/intr.asm
+build_target $T_CC     obj src/cc/conio/inp.c
+build_target $T_CC     obj src/cc/conio/outp.c
 build_target $T_WATCOM obj src/ow/dos_.c
 build_target $T_WATCOM obj src/ow/malloc.c
-build_target $T_WATCOM obj src/ow/inp.asm
-build_target $T_WATCOM obj src/ow/outp.asm
 build_target $T_WATCOM obj src/ow/stdlib.c
 build_target $T_WATCOM obj src/ow/memcmp.asm
 build_target $T_WATCOM obj src/ow/memcpy.asm
@@ -301,9 +301,9 @@ build_target $T_WATCOM_TP obj src/ow/i4m.pas
 build_target $T_TP        obj src/pascal/pascal.pas
 build_target $T_TP        obj src/pascal/strutils.pas
 build_target $T_CC_TP     obj src/cc/i86.pas
+build_target $T_CC_TP     obj src/cc/conio.pas
 build_target $T_WATCOM_TP obj src/ow/dos_.pas
 build_target $T_WATCOM_TP obj src/ow/malloc.pas
-build_target $T_WATCOM_TP obj src/ow/conio.pas
 build_target $T_WATCOM_TP obj src/ow/stdlib.pas
 build_target $T_WATCOM_TP obj src/ow/string_.pas
 build_target $T_WATCOM_TP obj src/ow/i8d086.pas

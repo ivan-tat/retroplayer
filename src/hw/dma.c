@@ -8,12 +8,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <conio.h>
 
 // TODO: remove PUBLIC_CODE macros when done.
 
 #include "pascal/pascal.h"
 #include "cc/i86.h"
+#include "cc/conio.h"
 #include "ow/dos_.h"
 #include "ow/stdio.h"
 #include "hw/dma.h"

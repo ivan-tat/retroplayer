@@ -14,6 +14,9 @@ cleandir() {
 }
 
 cleandir ./src/cc
+cleandir ./src/cc/conio
+rm -f ./src/cc/conio/inp.asm
+rm -f ./src/cc/conio/outp.asm
 cleandir ./src/cc/i86
 rm -f ./src/cc/i86/delay.asm
 rm -f ./src/cc/i86/disable.asm

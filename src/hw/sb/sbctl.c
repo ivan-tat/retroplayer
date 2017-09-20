@@ -7,10 +7,10 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <conio.h>
 
 #include "pascal/pascal.h"
 #include "cc/i86.h"
+#include "cc/conio.h"
 #include "hw/dma.h"
 #include "hw/sb/sbio.h"
 #include "hw/sb/sbctl.h"
