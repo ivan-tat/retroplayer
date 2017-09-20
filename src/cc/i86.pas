@@ -1,4 +1,4 @@
-(* i86.pas -- Pascal declarations for i86.c.
+(* i86.pas -- Pascal declarations for custom "i86" library.
 
    This file is for linking compiled object files with Pascal linker.
    It will be deleted in future when we rewrite the project in C.
@@ -12,22 +12,23 @@ interface
 
 (*$I defines.pas*)
 
-procedure delay_;
-procedure intr_;
-procedure _DoINTR_;
+procedure cc_delay_;
+procedure cc_intr_;
+procedure _cc_DoINTR_;
 
 implementation
 
 uses
+    i4m,
     pascal;
 
-(*$l i86.obj*)
-procedure delay_; external;
+(*$L i86\delay.obj*)
+procedure cc_delay_; external;
 
-(*$l intr.obj*)
-procedure intr_; external;
+(*$L i86\intr.obj*)
+procedure cc_intr_; external;
 
-(*$l dointr.obj*)
-procedure _DoINTR_; external;
+(*$L i86\dointr.obj*)
+procedure _cc_DoINTR_; external;
 
 end.

@@ -10,6 +10,7 @@ if [ -z "$target" ]; then
     target=all
 fi
 
+T_CC=0
 T_DOS=0
 T_HW=0
 T_HW_SB=0
@@ -20,11 +21,15 @@ T_TP=1
 
 case "$target" in
     all)
+        T_CC=1
         T_DOS=1
         T_HW=1
         T_HW_SB=1
         T_MAIN=1
         T_PLAYER=1
+        ;;
+    cc)
+        T_CC=1
         ;;
     dos)
         T_DOS=1
@@ -48,6 +53,9 @@ case "$target" in
 esac
 
 if [ $T_TP == 1 ]; then
+    if [ $T_CC == 1 ]; then
+        T_CC_TP=1
+    fi
     if [ $T_DOS == 1 ]; then
         T_DOS_TP=1
     fi
@@ -67,6 +75,7 @@ if [ $T_TP == 1 ]; then
         T_WATCOM_TP=1
     fi
 else
+    T_CC_TP=0
     T_DOS_TP=0
     T_HW_TP=0
     T_HW_SB_TP=0
@@ -233,9 +242,13 @@ build_target() {
 }
 
 if [ -z "$DJGPP" ]; then
-build_target $T_WATCOM obj src/ow/dointr.asm
-build_target $T_WATCOM obj src/ow/intr.asm
-build_target $T_WATCOM obj src/ow/i86.c
+build_target $T_WATCOM obj src/ow/i4d.asm
+build_target $T_WATCOM obj src/ow/i4m.asm
+build_target $T_CC     obj src/cc/i86/delay.c
+build_target $T_CC     obj src/cc/i86/disable.c
+build_target $T_CC     obj src/cc/i86/dointr.asm
+build_target $T_CC     obj src/cc/i86/enable.c
+build_target $T_CC     obj src/cc/i86/intr.asm
 build_target $T_WATCOM obj src/ow/dos_.c
 build_target $T_WATCOM obj src/ow/malloc.c
 build_target $T_WATCOM obj src/ow/inp.asm
@@ -245,8 +258,6 @@ build_target $T_WATCOM obj src/ow/memcmp.asm
 build_target $T_WATCOM obj src/ow/memcpy.asm
 build_target $T_WATCOM obj src/ow/memset.asm
 build_target $T_WATCOM obj src/ow/strlen.asm
-build_target $T_WATCOM obj src/ow/i4d.asm
-build_target $T_WATCOM obj src/ow/i4m.asm
 build_target $T_WATCOM obj src/ow/i8d086.asm
 build_target $T_WATCOM obj src/ow/printf.c
 build_target $T_WATCOM obj src/ow/stdio.c
@@ -285,16 +296,16 @@ if [ -n "$_dir" ]; then
     export INCLUDE="$_dir"
 fi
 unset _dir
+build_target $T_WATCOM_TP obj src/ow/i4d.pas
+build_target $T_WATCOM_TP obj src/ow/i4m.pas
 build_target $T_TP        obj src/pascal/pascal.pas
 build_target $T_TP        obj src/pascal/strutils.pas
-build_target $T_WATCOM_TP obj src/ow/i86.pas
+build_target $T_CC_TP     obj src/cc/i86.pas
 build_target $T_WATCOM_TP obj src/ow/dos_.pas
 build_target $T_WATCOM_TP obj src/ow/malloc.pas
 build_target $T_WATCOM_TP obj src/ow/conio.pas
 build_target $T_WATCOM_TP obj src/ow/stdlib.pas
 build_target $T_WATCOM_TP obj src/ow/string_.pas
-build_target $T_WATCOM_TP obj src/ow/i4d.pas
-build_target $T_WATCOM_TP obj src/ow/i4m.pas
 build_target $T_WATCOM_TP obj src/ow/i8d086.pas
 build_target $T_WATCOM_TP obj src/ow/stdio.pas
 build_target $T_DOS_TP    obj src/dos/emstool.pas

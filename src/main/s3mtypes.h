@@ -8,11 +8,10 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
-#include <i86.h>
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "cc/i86.h"
 
 #define NOTE_MAX (7 * 12 + 11)
 

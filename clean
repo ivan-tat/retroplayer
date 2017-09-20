@@ -13,6 +13,11 @@ cleandir() {
     cd $OLDPWD
 }
 
+cleandir ./src/cc
+cleandir ./src/cc/i86
+rm -f ./src/cc/i86/delay.asm
+rm -f ./src/cc/i86/disable.asm
+rm -f ./src/cc/i86/enable.asm
 cleandir ./src/hw
 rm -f ./src/hw/dma.asm
 rm -f ./src/hw/pic.asm
@@ -39,7 +44,6 @@ rm -f ./src/main/s3mvars.asm
 rm -f ./src/main/voltab.asm
 cleandir ./src/ow
 rm -f ./src/ow/dos_.asm
-rm -f ./src/ow/i86.asm
 rm -f ./src/ow/malloc.asm
 rm -f ./src/ow/printf.asm
 rm -f ./src/ow/stdio.asm

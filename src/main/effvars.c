@@ -5,11 +5,10 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
-#include <i86.h>
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "cc/i86.h"
 
 int8_t  sinuswave[64];
 int8_t  rampwave[64];

@@ -5,16 +5,14 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
-#include <i86.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#endif
 
 // TODO: remove PUBLIC_CODE macros when done.
 
 #include "pascal/pascal.h"
+#include "cc/i86.h"
 #include "dos/emstool.h"
 #include "main/s3mtypes.h"
 #include "main/mixtypes.h"

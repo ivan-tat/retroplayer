@@ -5,14 +5,12 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
-#include <i86.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <conio.h>
-#endif
 
 #include "pascal/pascal.h"
+#include "cc/i86.h"
 #include "hw/dma.h"
 #include "hw/sb/sbio.h"
 #include "hw/sb/sbctl.h"

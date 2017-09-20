@@ -5,14 +5,12 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
-#include <i86.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-#endif
 
 #include "pascal/pascal.h"
+#include "cc/i86.h"
 #include "ow/dos_.h"
 
 uint16_t __near __doserror(uint16_t code)
