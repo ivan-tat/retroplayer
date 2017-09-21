@@ -1,15 +1,15 @@
 #!/bin/bash
-# This script must be run in DOS.
+# This script must be run in GNU/Linux.
 #
 # List contents of a library in human readable form.
 
-. ./djgpp.sh
+#. ./djgpp.sh
 . ./watcom.sh
 . ./clib.sh
 
 DST=tmp
 mkdir -p "$DST"
-DST="$DST\\${CLIB##*\\}"
+DST="$DST/${CLIB##*/}"
 DST="${DST%.*}.list"
 wlib "$CLIB" | \
 grep -E "^([a-zA-Z0-9_]+)\.+([a-zA-Z0-9_.]+)$" | \

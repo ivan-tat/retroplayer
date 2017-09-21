@@ -19,8 +19,8 @@ procedure _cc_DoINTR_;
 implementation
 
 uses
-    i4m,
-    pascal;
+    pascal,
+    watcom;
 
 (*$L i86\delay.obj*)
 procedure cc_delay_; external;

@@ -17,8 +17,7 @@ function  mixCalcSampleStep(wPeriod: word): longint;
 implementation
 
 uses
-    i4m,
-    i8d086,
+    watcom,
     mixvars;
 
 (*$l mixer.obj*)

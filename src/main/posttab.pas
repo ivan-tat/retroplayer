@@ -20,7 +20,8 @@ procedure calcPostTable( vol: byte; use16bit: boolean );
 
 implementation
 
-uses i4m;
+uses
+    watcom;
 
 (*$l posttab.obj*)
 

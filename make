@@ -98,6 +98,7 @@ export WCC="-3 -fp3 -ml -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu"
 #   (without "near ptr")
 CL='wcl'
 DA='wdis'
+WLIB='wlib'
 PC='tpc -gd -q -v -$d+,e-,g+,l+,n+'
 
 _dir="$PROJDIR/src"
@@ -242,8 +243,17 @@ build_target() {
 }
 
 if [ -z "$DJGPP" ]; then
-build_target $T_WATCOM obj src/ow/i4d.asm
-build_target $T_WATCOM obj src/ow/i4m.asm
+if [ $T_WATCOM == 1 ]; then
+    echo 'Extracting Watcom C specific files...'
+    . ./scripts/ow/ow.sh
+    . ./scripts/ow/clib.sh
+    cd "$PROJDIR/src/ow"
+    $WLIB "$CLIB" ':i4d.asm' ':i4m.asm' ':i8d086.asm'
+    mv i4d.o i4d.obj
+    mv i4m.o i4m.obj
+    mv i8d086.o i8d086.obj
+    cd "$PROJDIR"
+fi
 build_target $T_CC     obj src/cc/i86/delay.c
 build_target $T_CC     obj src/cc/i86/disable.c
 build_target $T_CC     obj src/cc/i86/dointr.asm
@@ -258,7 +268,6 @@ build_target $T_WATCOM obj src/ow/memcmp.asm
 build_target $T_WATCOM obj src/ow/memcpy.asm
 build_target $T_WATCOM obj src/ow/memset.asm
 build_target $T_WATCOM obj src/ow/strlen.asm
-build_target $T_WATCOM obj src/ow/i8d086.asm
 build_target $T_WATCOM obj src/ow/printf.c
 build_target $T_WATCOM obj src/ow/stdio.c
 build_target $T_DOS    obj src/dos/emstool.c
@@ -296,8 +305,7 @@ if [ -n "$_dir" ]; then
     export INCLUDE="$_dir"
 fi
 unset _dir
-build_target $T_WATCOM_TP obj src/ow/i4d.pas
-build_target $T_WATCOM_TP obj src/ow/i4m.pas
+build_target $T_WATCOM_TP obj src/ow/watcom.pas
 build_target $T_TP        obj src/pascal/pascal.pas
 build_target $T_TP        obj src/pascal/strutils.pas
 build_target $T_CC_TP     obj src/cc/i86.pas
@@ -306,7 +314,6 @@ build_target $T_WATCOM_TP obj src/ow/dos_.pas
 build_target $T_WATCOM_TP obj src/ow/malloc.pas
 build_target $T_WATCOM_TP obj src/ow/stdlib.pas
 build_target $T_WATCOM_TP obj src/ow/string_.pas
-build_target $T_WATCOM_TP obj src/ow/i8d086.pas
 build_target $T_WATCOM_TP obj src/ow/stdio.pas
 build_target $T_DOS_TP    obj src/dos/emstool.pas
 build_target $T_HW_TP     obj src/hw/cpu.pas

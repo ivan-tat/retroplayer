@@ -76,10 +76,10 @@ implementation
 
 uses
     pascal,
+    watcom,
     i86,
     dma,
-    sbio,
-    i4d;
+    sbio;
 
 (*$l sbctl.obj*)
 

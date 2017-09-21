@@ -20,7 +20,7 @@ implementation
 
 uses
     pascal,
-    i4d,
+    watcom,
     dos_;
 
 procedure printstring(s: pchar); near;

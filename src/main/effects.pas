@@ -95,8 +95,7 @@ procedure chn_effStop(var chn: TChannel);
 implementation
 
 uses
-    i4d,
-    i4m,
+    watcom,
     emstool,
     s3mvars,
     effvars,

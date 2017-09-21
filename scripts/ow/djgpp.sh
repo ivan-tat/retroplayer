@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script must be run in DOS.
+# This script is sourced by other scripts in DOS/DJGPP environment.
 #
 # Helper script.
 
