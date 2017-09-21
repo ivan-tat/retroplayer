@@ -47,6 +47,16 @@ src/cc/conio/outp.asm
 src/cc/i86/delay.asm
 src/cc/i86/disable.asm
 src/cc/i86/enable.asm
+src/cc/string/memcmp.asm
+src/cc/string/memcpy.asm
+src/cc/string/memset.asm
+src/cc/string/strchr.asm
+src/cc/string/strcmp.asm
+src/cc/string/stricmp.asm
+src/cc/string/strlen.asm
+src/cc/string/strncmp.asm
+src/cc/string/strncpy.asm
+src/cc/string/strnicmp.asm
 src/dos/emstool.asm
 src/hw/dma.asm
 src/hw/pic.asm

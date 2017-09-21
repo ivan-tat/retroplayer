@@ -1,56 +1,69 @@
 #!/bin/bash
 # This script must be run in GNU/Linux OR in DOS/DJGPP Bash shell.
 
+RM='rm -f'
+
 cleandir() {
     local DIR="$1"
     echo "Cleaning $DIR ..."
     cd $DIR
-    rm -f *.err
-    rm -f *.exe
-    rm -f *.map
-    rm -f *.obj
-    rm -f *.tpu
+    $RM *.err
+    $RM *.exe
+    $RM *.map
+    $RM *.obj
+    $RM *.tpu
     cd $OLDPWD
 }
 
 cleandir ./src/cc
 cleandir ./src/cc/conio
-rm -f ./src/cc/conio/inp.asm
-rm -f ./src/cc/conio/outp.asm
+$RM ./src/cc/conio/inp.asm
+$RM ./src/cc/conio/outp.asm
 cleandir ./src/cc/i86
-rm -f ./src/cc/i86/delay.asm
-rm -f ./src/cc/i86/disable.asm
-rm -f ./src/cc/i86/enable.asm
+$RM ./src/cc/i86/delay.asm
+$RM ./src/cc/i86/disable.asm
+$RM ./src/cc/i86/enable.asm
+cleandir ./src/cc/string
+$RM ./src/cc/string/memcmp.asm
+$RM ./src/cc/string/memcpy.asm
+$RM ./src/cc/string/memset.asm
+$RM ./src/cc/string/strchr.asm
+$RM ./src/cc/string/strcmp.asm
+$RM ./src/cc/string/stricmp.asm
+$RM ./src/cc/string/strlen.asm
+$RM ./src/cc/string/strncmp.asm
+$RM ./src/cc/string/strncpy.asm
+$RM ./src/cc/string/strnicmp.asm
 cleandir ./src/hw
-rm -f ./src/hw/dma.asm
-rm -f ./src/hw/pic.asm
-rm -f ./src/hw/sndctl_t.asm
+$RM ./src/hw/dma.asm
+$RM ./src/hw/pic.asm
+$RM ./src/hw/sndctl_t.asm
 cleandir ./src/hw/sb
-rm -f ./src/hw/sb/detisr.asm
-rm -f ./src/hw/sb/sbctl.asm
-rm -f ./src/hw/sb/sbio.asm
-rm -f ./src/hw/sb/sndisr.asm
+$RM ./src/hw/sb/detisr.asm
+$RM ./src/hw/sb/sbctl.asm
+$RM ./src/hw/sb/sbio.asm
+$RM ./src/hw/sb/sndisr.asm
 cleandir ./src/dos
-rm -f ./src/dos/emstool.asm
+$RM ./src/dos/emstool.asm
 cleandir ./src/main
-rm -f ./src/main/effects.asm
-rm -f ./src/main/filldma.asm
-rm -f ./src/main/fillvars.asm
-rm -f ./src/main/loads3m.asm
-rm -f ./src/main/mixer.asm
-rm -f ./src/main/mixing.asm
-rm -f ./src/main/mixvars.asm
-rm -f ./src/main/posttab.asm
-rm -f ./src/main/readnote.asm
-rm -f ./src/main/s3mplay.asm
-rm -f ./src/main/s3mvars.asm
-rm -f ./src/main/voltab.asm
+$RM ./src/main/effects.asm
+$RM ./src/main/filldma.asm
+$RM ./src/main/fillvars.asm
+$RM ./src/main/loads3m.asm
+$RM ./src/main/mixer.asm
+$RM ./src/main/mixing.asm
+$RM ./src/main/mixvars.asm
+$RM ./src/main/posttab.asm
+$RM ./src/main/readnote.asm
+$RM ./src/main/s3mplay.asm
+$RM ./src/main/s3mvars.asm
+$RM ./src/main/voltab.asm
 cleandir ./src/ow
-rm -f ./src/ow/dos_.asm
-rm -f ./src/ow/malloc.asm
-rm -f ./src/ow/printf.asm
-rm -f ./src/ow/stdio.asm
-rm -f ./src/ow/stdlib.asm
+$RM ./src/ow/dos_.asm
+$RM ./src/ow/malloc.asm
+$RM ./src/ow/printf.asm
+$RM ./src/ow/stdio.asm
+$RM ./src/ow/stdlib.asm
 cleandir ./src/pascal
 cleandir ./src/player
 
