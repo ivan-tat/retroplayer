@@ -44,6 +44,7 @@
 scripts/ow/tmp/
 src/cc/conio/inp.asm
 src/cc/conio/outp.asm
+src/cc/errno/errno.asm
 src/cc/i86/delay.asm
 src/cc/i86/disable.asm
 src/cc/i86/enable.asm

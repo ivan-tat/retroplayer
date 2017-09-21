@@ -261,6 +261,7 @@ build_target $T_CC     obj src/cc/i86/enable.c
 build_target $T_CC     obj src/cc/i86/intr.asm
 build_target $T_CC     obj src/cc/conio/inp.c
 build_target $T_CC     obj src/cc/conio/outp.c
+build_target $T_CC     obj src/cc/errno/errno.c
 build_target $T_CC     obj src/cc/string/memcmp.c
 build_target $T_CC     obj src/cc/string/memcpy.c
 build_target $T_CC     obj src/cc/string/memset.c
@@ -316,6 +317,7 @@ build_target $T_TP        obj src/pascal/pascal.pas
 build_target $T_TP        obj src/pascal/strutils.pas
 build_target $T_CC_TP     obj src/cc/i86.pas
 build_target $T_CC_TP     obj src/cc/conio.pas
+build_target $T_CC_TP     obj src/cc/errno_.pas
 build_target $T_CC_TP     obj src/cc/string_.pas
 build_target $T_WATCOM_TP obj src/ow/dos_.pas
 build_target $T_WATCOM_TP obj src/ow/malloc.pas

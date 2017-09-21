@@ -5,6 +5,7 @@
 
 #define DEBUG 1
 #define DEBUGLOAD 1
+//#define DEFINE_LOCAL_DATA 1
 
 #define CRLF "\r\n"
 //#define CRLF "\n"
