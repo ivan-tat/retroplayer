@@ -14,7 +14,7 @@
 #include "pascal/pascal.h"
 #include "cc/i86.h"
 #include "cc/conio.h"
-#include "ow/dos_.h"
+#include "cc/dos.h"
 #include "ow/stdio.h"
 #include "hw/dma.h"
 

@@ -13,8 +13,8 @@
 
 #include "pascal/pascal.h"
 #include "cc/i86.h"
+#include "cc/dos.h"
 #include "ow/stdio.h"
-#include "ow/dos_.h"
 #include "hw/dma.h"
 #include "hw/sb/sbctl.h"
 #include "main/s3mvars.h"

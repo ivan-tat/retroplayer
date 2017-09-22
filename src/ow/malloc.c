@@ -11,7 +11,7 @@
 #endif
 
 #include "pascal/pascal.h"
-#include "ow/dos_.h"
+#include "cc/dos.h"
 #include "ow/malloc.h"
 
 uint32_t PUBLIC_CODE _memmax(void)

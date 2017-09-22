@@ -45,6 +45,12 @@ scripts/ow/tmp/
 src/cc/conio/inp.asm
 src/cc/conio/outp.asm
 src/cc/ctype/istable.asm
+src/cc/dos/d_getvec.asm
+src/cc/dos/d_setvec.asm
+src/cc/dos/dosret.asm
+src/cc/dos/error086.asm
+src/cc/dos/gtime086.asm
+src/cc/dos/mem086.asm
 src/cc/errno/errno.asm
 src/cc/i86/delay.asm
 src/cc/i86/disable.asm

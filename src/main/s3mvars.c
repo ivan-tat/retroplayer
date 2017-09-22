@@ -13,7 +13,7 @@
 // TODO: remove EXTERN_LINK, PUBLIC_DATA and PUBLIC_CODE macros when done.
 
 #include "pascal/pascal.h"
-#include "ow/dos_.h"
+#include "cc/dos.h"
 #include "dos/emstool.h"
 #include "main/s3mtypes.h"
 #include "main/s3mvars.h"

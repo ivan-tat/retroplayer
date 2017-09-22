@@ -11,7 +11,7 @@
 
 #include "pascal/pascal.h"
 #include "cc/i86.h"
-#include "ow/dos_.h"
+#include "cc/dos.h"
 #include "main/voltab.h"
 
 void PUBLIC_CODE initVolumeTable(void)
