@@ -13,7 +13,7 @@
 #include "pascal/pascal.h"
 #include "cc/i86.h"
 #include "cc/conio.h"
-#include "ow/stdio.h"
+#include "cc/stdio.h"
 #include "hw/pic.h"
 
 /* PIC1: IRQ 0-7 */

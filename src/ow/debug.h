@@ -9,8 +9,9 @@
 
 #ifdef __WATCOMC__
 #pragma once
-#include "stdio.h"
 #endif
+
+#include "cc/stdio.h"
 
 #define LOG(s) printf(s)
 

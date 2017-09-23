@@ -34,6 +34,21 @@ cleandir ./src/cc/i86
 $RM ./src/cc/i86/delay.asm
 $RM ./src/cc/i86/disable.asm
 $RM ./src/cc/i86/enable.asm
+cleandir ./src/cc/stdio
+$RM ./src/cc/stdio/_printf.asm
+$RM ./src/cc/stdio/fclose.asm
+$RM ./src/cc/stdio/fopen.asm
+$RM ./src/cc/stdio/fprintf.asm
+$RM ./src/cc/stdio/fread.asm
+$RM ./src/cc/stdio/fsetpos.asm
+$RM ./src/cc/stdio/fwrite.asm
+$RM ./src/cc/stdio/printf.asm
+$RM ./src/cc/stdio/snprintf.asm
+$RM ./src/cc/stdio/sprintf.asm
+$RM ./src/cc/stdio/vfprintf.asm
+$RM ./src/cc/stdio/vprintf.asm
+$RM ./src/cc/stdio/vsnprntf.asm
+$RM ./src/cc/stdio/vsprintf.asm
 cleandir ./src/cc/stdlib
 $RM ./src/cc/stdlib/atoi.asm
 $RM ./src/cc/stdlib/atol.asm
@@ -77,11 +92,7 @@ $RM ./src/main/s3mplay.asm
 $RM ./src/main/s3mvars.asm
 $RM ./src/main/voltab.asm
 cleandir ./src/ow
-$RM ./src/ow/dos_.asm
 $RM ./src/ow/malloc.asm
-$RM ./src/ow/printf.asm
-$RM ./src/ow/stdio.asm
-$RM ./src/ow/stdlib.asm
 cleandir ./src/pascal
 cleandir ./src/player
 

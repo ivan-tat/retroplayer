@@ -1,4 +1,4 @@
-/* stdio.c -- custom standard I/O library.
+/* fopen.c -- part of custom "stdio" library.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -11,22 +11,25 @@
 #include "pascal/pascal.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
-#include "ow/stdio.h"
+#include "cc/string.h"
 
-FILE *fopen(char *path, char *mode)
+#include "cc/stdio.h"
+#include "cc/stdio/_io.h"
+
+FILE *cc_fopen(const char *path, const char *mode)
 {
     uint16_t seg;
-    FILE *file;
-    char *m;
+    FILE *stream;
+    const char *m;
     bool m_read;
     bool m_write;
     bool m_plus;
     bool result;
 
-    if (!_dos_allocmem(sizeof(FILE), &seg))
+    if (!_dos_allocmem(_dos_para(sizeof(FILE)), &seg))
     {
-        file = MK_FP(seg, 0);
-        pascal_assign(file, path);
+        stream = MK_FP(seg, 0);
+        pascal_assign(stream, path);
 
         if (mode)
         {
@@ -38,15 +41,15 @@ FILE *fopen(char *path, char *mode)
             {
                 switch (*m)
                 {
-                case 'r':
-                    m_read = true;
-                    break;
-                case 'w':
-                    m_write = true;
-                    break;
-                case '+':
-                    m_plus = true;
-                    break;
+                    case 'r':
+                        m_read = true;
+                        break;
+                    case 'w':
+                        m_write = true;
+                        break;
+                    case '+':
+                        m_plus = true;
+                        break;
                 };
                 m++;
             };
@@ -59,27 +62,22 @@ FILE *fopen(char *path, char *mode)
         };
 
         if (m_read)
-            result = pascal_reset(file);
+        {
+            result = pascal_reset(stream);
+        }
         else
             if (m_write)
-                result = pascal_rewrite(file);
+            {
+                result = pascal_rewrite(stream);
+            }
             else
                 result = false;
 
         if (result)
-            return file;
+            return stream;
         else
-            _dos_freemem(FP_SEG(file));
+            _dos_freemem(FP_SEG(stream));
     };
 
-    return (void *)0;
-}
-
-void fclose(FILE *file)
-{
-    if (file)
-    {
-        pascal_close(file);
-        _dos_freemem(FP_SEG(file));
-    };
+    return NULL;
 }

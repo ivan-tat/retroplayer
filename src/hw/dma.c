@@ -15,7 +15,7 @@
 #include "cc/i86.h"
 #include "cc/conio.h"
 #include "cc/dos.h"
-#include "ow/stdio.h"
+#include "cc/stdio.h"
 #include "hw/dma.h"
 
 /* I/O ports */
@@ -331,7 +331,7 @@ bool PUBLIC_CODE dmaBufAlloc(DMABUF *buf, uint32_t size)
         bufEnd = bufStart + bufSize - 1;
 
         #ifdef DEBUG
-        printf("[info] Allocated %uli bytes of DOS memory for DMA buffer at 0x%05ulX-0x%05ulX\r\n",
+        printf("[info] Allocated %lu bytes of DOS memory for DMA buffer at 0x%05lX-0x%05lX\r\n",
             (uint32_t)bufSize, (uint32_t)bufStart, (uint32_t)bufEnd);
         #endif
 
@@ -346,13 +346,13 @@ bool PUBLIC_CODE dmaBufAlloc(DMABUF *buf, uint32_t size)
         buf->size = dmaSize;
         buf->data = MK_FP(dmaStart >> 4, 0);
         #ifdef DEBUG
-        printf("[info] Using %uli bytes for DMA buffer at 0x%05ulX-0x%05ulX\r\n",
+        printf("[info] Using %lu bytes for DMA buffer at 0x%05lX-0x%05lX\r\n",
             (uint32_t)buf->size, (uint32_t)dmaStart, (uint32_t)dmaEnd);
         #endif
 
         if (dmaEnd < bufEnd) {
             #ifdef DEBUG
-            printf("[info] Freeing unused trailing %uli bytes of allocated DMA buffer\r\n",
+            printf("[info] Freeing unused trailing %lu bytes of allocated DMA buffer\r\n",
                 (uint32_t)(bufEnd - dmaEnd));
             #endif
             bufSize = dmaEnd - bufStart + 1;

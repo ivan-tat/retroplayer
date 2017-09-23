@@ -11,7 +11,7 @@
 #endif
 
 #include "pascal/pascal.h"
-#include "ow/stdio.h"
+#include "cc/stdio.h"
 #include "main/s3mtypes.h"
 #include "main/s3mplay.h"
 #include "main/loads3m.h"

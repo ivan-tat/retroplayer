@@ -55,6 +55,20 @@ src/cc/errno/errno.asm
 src/cc/i86/delay.asm
 src/cc/i86/disable.asm
 src/cc/i86/enable.asm
+src/cc/stdio/_printf.asm
+src/cc/stdio/fclose.asm
+src/cc/stdio/fopen.asm
+src/cc/stdio/fprintf.asm
+src/cc/stdio/fread.asm
+src/cc/stdio/fsetpos.asm
+src/cc/stdio/fwrite.asm
+src/cc/stdio/printf.asm
+src/cc/stdio/snprintf.asm
+src/cc/stdio/sprintf.asm
+src/cc/stdio/vfprintf.asm
+src/cc/stdio/vprintf.asm
+src/cc/stdio/vsnprntf.asm
+src/cc/stdio/vsprintf.asm
 src/cc/stdlib/atoi.asm
 src/cc/stdlib/atol.asm
 src/cc/stdlib/fexit.asm
@@ -93,6 +107,3 @@ src/main/s3mvars.asm
 src/main/voltab.asm
 src/ow/dos_.asm
 src/ow/malloc.asm
-src/ow/printf.asm
-src/ow/stdio.asm
-src/ow/stdlib.asm
