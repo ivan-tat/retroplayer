@@ -123,7 +123,7 @@ var
     { switch EMSpage 0 to curpattern }
     pat := patList_get(curpattern);
     if (patIsDataInEM(pat)) then
-        EmsMap(patListEMHandle, patGetDataLogPageInEM(pat), 0);
+        emsMap(patListEMHandle, patGetDataLogPageInEM(pat), 0);
   end;
 
 (* Instruments *)

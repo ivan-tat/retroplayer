@@ -86,7 +86,7 @@ extern uint8_t  PUBLIC_DATA patListPatPerEMPage;  /* count of patterns per page 
 #define getPatternDataPartInEM(seg)           (((seg) >> 8) & 0x3f)
 #define getPatternDataOffsetInEM(seg, length) (getPatternDataPartInEM(seg) * (length))
 #define setPatternDataInEM(logpage, part)     (0xc000 + (((part) & 0x3f) << 8) + (logpage))
-#define getPatternDataInEM(seg, length)       (MK_FP(FrameSEG[0], getPatternDataOffsetInEM((seg), (length))))
+#define getPatternDataInEM(seg, length)       (MK_FP(emsFrameSeg, getPatternDataOffsetInEM((seg), (length))))
 
 //MUSPAT *PUBLIC_CODE pat_new(void);
 void    PUBLIC_CODE pat_clear(MUSPAT *pat);

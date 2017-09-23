@@ -18,7 +18,7 @@ procedure calcTick(dOutBuf: pointer; wLen: word);
 implementation
 
 uses
-    emstool,
+    ems,
     sbctl,
     voltab,
     s3mvars,

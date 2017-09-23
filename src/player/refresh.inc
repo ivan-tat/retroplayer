@@ -115,7 +115,7 @@ var
         (* switch EMSpage zero to curpattern *)
         pat := patList_get(curpattern);
         if (patIsDataInEM(pat)) then
-            EmsMap(patListEMHandle, patGetDataLogPageInEM(pat), 0);
+            emsMap(patListEMHandle, patGetDataLogPageInEM(pat), 0);
       end;
     for i:=lastrow to curline do
       begin

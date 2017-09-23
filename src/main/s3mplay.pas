@@ -77,7 +77,7 @@ uses
     strutils,
     crt,
     dos,
-    emstool,
+    ems,
     loads3m,
     pic,
     sndctl_t,
@@ -136,7 +136,7 @@ var i:word;
       end;
     if EMSsmp then { samples in EMS }
       begin
-        EMSfree(smpEMShandle);
+        emsFree(smpEMShandle);
         EMSsmp:=false;
       end;
     patListDone;
@@ -322,7 +322,7 @@ function getSamplerate:word;
 function getusedEMSsmp:longint;    { get size of samples in EMS }
 begin
     if EMSsmp then
-        getusedEMSsmp:=16*EmsGetHandleSize(smpEMShandle)
+        getusedEMSsmp:=16*emsGetHandleSize(smpEMShandle)
     else
         getusedEMSsmp:=0;
 end;
@@ -438,7 +438,7 @@ begin
   playOption_ST3Order:=false;   { Ok let's hear all patterns are saved ... }
   playOption_FPS := 70;
   playOption_LowQuality := false;
-  useEMS:=EMSinstalled;      { more space for Modules ! }
+  useEMS:=emsInstalled;      { more space for Modules ! }
     if (_dos_allocmem((MAX_INSTRUMENTS*sizeof(TInstr) + 15) shr 4, _seg) <> 0) then
     begin
         writeln('[init] s3mplayInit: Failed to allocate DOS memory for instruments');

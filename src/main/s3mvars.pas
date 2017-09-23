@@ -135,7 +135,7 @@ implementation
 
 uses
     dos_,
-    emstool;
+    ems;
 
 (*$l s3mvars.obj*)
 

@@ -81,7 +81,7 @@ $RM ./src/hw/sb/sbctl.asm
 $RM ./src/hw/sb/sbio.asm
 $RM ./src/hw/sb/sndisr.asm
 cleandir ./src/dos
-$RM ./src/dos/emstool.asm
+$RM ./src/dos/ems.asm
 cleandir ./src/main
 $RM ./src/main/effects.asm
 $RM ./src/main/filldma.asm

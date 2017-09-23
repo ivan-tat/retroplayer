@@ -1,16 +1,16 @@
 const
-    patname: TEMMHandleName = 'Pattern'#0;
-    smpname: TEMMHandleName = 'Samples'#0;
-    savname: TEMMHandleName = 'saveMAP'#0;
+    patname: TEMSNAME = 'Pattern'#0;
+    smpname: TEMSNAME = 'Samples'#0;
+    savname: TEMSNAME = 'saveMAP'#0;
 
 procedure setEMSnames;
 begin
     if ( patListUseEM ) then
-        EmsSetHandleName( patListEMHandle, patname );
+        emsSetHandleName( patListEMHandle, @patname );
     if ( EMSsmp ) then
-        EmsSetHandleName( smpEMShandle, smpname );
+        emsSetHandleName( smpEMShandle, @smpname );
     if ( useEMS ) then
-        EmsSetHandleName( savhandle, savname );
+        emsSetHandleName( savhandle, @savname );
 end;
 
 procedure convert2pas(var from,topas;maxchars:byte);
@@ -70,7 +70,7 @@ var f:file;
       i:integer;
       pSmp:PSMPheader;
     begin
-      if EMSfreepages=0 then begin EMSsmp:=false;exit end;
+      if emsGetFreePagesCount=0 then begin EMSsmp:=false;exit end;
       w:=0;
       for i:=1 to 99 do
         begin
@@ -86,16 +86,16 @@ var f:file;
       writeln(' EMS pages are needed for Samples : ',w);
       {$ENDIF}
       { w = number of 16Kb pages in EMS }
-      if w>EMSfreepages then { not enough EMS for all samples }
+      if w>emsGetFreePagesCount then { not enough EMS for all samples }
         begin
           { use as many pages as possible :) }
-          w:=EMSfreepages;
-          smpEMShandle:=EMSalloc(w);
+          w:=emsGetFreePagesCount;
+          smpEMShandle:=emsAlloc(w);
         end
       else { oh well enough, that's nice }
         begin
           { fine let's load everything into EMS }
-          smpEMShandle:=EMSalloc(w);
+          smpEMShandle:=emsAlloc(w);
         end;
       {$IFDEF DEBUGLOAD}
       writeln(' EMS pages allocated for Samples : ',w);
@@ -218,9 +218,10 @@ var f:file;
           {$ENDIF}
           pSmp^.mempos:=$f000+curSpage; { and z-1 pages after }
           for i:=0 to z-1 do
-            if not EMSmap(smpEMShandle,curSpage+i,i) then write('<EMS-ERROR>');
+            if not emsMap(smpEMShandle,curSpage+i,i) then write('<EMS-ERROR>');
           inc(curSpage,z);
-          blockread(f,frameptr[0]^,smplen);par:=frameptr[0];
+          par:=emsFramePtr;
+          blockread(f,par^,smplen);
         end
       else { we have to use normal memory (geeee) for this sample }
         begin
@@ -318,7 +319,7 @@ var f:file;
           patSetDataInEM(pat, curPpage, curpart);
           p := patGetData(pat);
           patList_set(patpos-1, pat);
-          if (not EMSmap(patListEMHandle, curPpage, 0)) then write('<EMS-ERROR>');
+          if (not emsMap(patListEMHandle, curPpage, 0)) then write('<EMS-ERROR>');
         end
       else
         begin
@@ -370,7 +371,7 @@ var a,b,c:string;
 
   BEGIN
     LOAD_S3M := FALSE;
-    useEMS:=EMSinstalled and useEMS and (EMSfreepages>1); { we need one page for saving mapping while playing }
+    useEMS:=emsInstalled and useEMS and (emsGetFreePagesCount>1); { we need one page for saving mapping while playing }
     load_error:=0;buffer:=Nil;
     fsplit(name,a,b,c);
     if not fileexist(a+b+c) then name:=a+b+'.S3M';
@@ -452,22 +453,22 @@ var a,b,c:string;
     if useEMS then
       begin
         { we use EMS, then we need a page to save mapping in interrupt ! }
-        savHandle:=EMSalloc(1); { 1 page is enough ? }
+        savHandle:=emsAlloc(1); { 1 page is enough ? }
         { let's continue with loading: }
         patListPatPerEMPage:=(16*1024) div patListPatLength;
         {$IFDEF DEBUGLOAD}
         writeln(' Patterns per Page: ',patListPatPerEMPage);
         {$ENDIF}
         { try to allocate EMS for all patterns : }
-        if (EMSfreepages<(patListCount+(patListPatPerEMPage-1)) div patListPatPerEMPage) then
+        if (emsGetFreePagesCount<(patListCount+(patListPatPerEMPage-1)) div patListPatPerEMPage) then
           begin
-            Ppagesleft:=EMSfreepages;
-            patListEMHandle:=EMSalloc(Ppagesleft);
+            Ppagesleft:=emsGetFreePagesCount;
+            patListEMHandle:=emsAlloc(Ppagesleft);
             patListUseEM:=true;
           end
         else
           begin
-            patListEMHandle:=EMSalloc((patListCount+(patListPatPerEMPage-1)) div patListPatPerEMPage);
+            patListEMHandle:=emsAlloc((patListCount+(patListPatPerEMPage-1)) div patListPatPerEMPage);
             Ppagesleft:=(patListCount+(patListPatPerEMPage-1)) div patListPatPerEMPage;
             patListUseEM:=true
           end;
@@ -582,7 +583,7 @@ var a,b,c:string;
     _dos_freemem(seg(buffer^));
     buffer := nil;
     { Just for fun set names for EMS handles (does only work for EMS>= v4.0) }
-    if ( EMSVersion.Hi >= 4 ) then setEMSnames;
+    if ( emsVersion.Hi >= 4 ) then setEMSnames;
     mod_isLoaded := true;
     LOAD_S3M :=TRUE;
   END;

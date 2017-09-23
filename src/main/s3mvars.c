@@ -14,7 +14,7 @@
 
 #include "pascal/pascal.h"
 #include "cc/dos.h"
-#include "dos/emstool.h"
+#include "dos/ems.h"
 #include "main/s3mtypes.h"
 #include "main/s3mvars.h"
 
@@ -144,7 +144,7 @@ void *PUBLIC_CODE patMapData(MUSPAT *pat)
     {
         logPage = getPatternDataLogPageInEM(data_seg);
         physPage = 0;
-        if (EmsMap(patListEMHandle, logPage, physPage))
+        if (emsMap(patListEMHandle, logPage, physPage))
             return getPatternDataInEM(data_seg, patListPatLength);
         else
             return MK_FP(0, 0);
@@ -197,7 +197,7 @@ MUSPAT *PUBLIC_CODE patList_get(int16_t index)
 uint32_t PUBLIC_CODE patListGetUsedEM(void)
 {
     if (patListUseEM)
-        return 16*EmsGetHandleSize(patListEMHandle);
+        return 16*emsGetHandleSize(patListEMHandle);
     else
         return 0;
 }
@@ -214,7 +214,7 @@ void PUBLIC_CODE patListFree(void)
     };
     if (patListUseEM)
     {
-        EmsFree(patListEMHandle);
+        emsFree(patListEMHandle);
         patListUseEM = false;
     };
 }

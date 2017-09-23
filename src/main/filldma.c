@@ -14,7 +14,7 @@
 // TODO: remove PUBLIC_CODE macros when done.
 
 #include "pascal/pascal.h"
-#include "dos/emstool.h"
+#include "dos/ems.h"
 #include "hw/sb/sbctl.h"
 #include "main/posttab.h"
 #include "main/s3mvars.h"
@@ -119,7 +119,7 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
         // before calling mixing routines: save EMM mapping !
         if (UseEMS) {
             errorsav = true;
-            if (EmsSaveMap(SavHandle)) errorsav = false;
+            if (emsSaveMap(SavHandle)) errorsav = false;
         }
 
         // mix into the mixing buffer
@@ -127,7 +127,7 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
 
         // now restore EMM mapping:
         if (UseEMS) {
-            if (! errorsav) EmsRestoreMap(SavHandle);
+            if (! errorsav) emsRestoreMap(SavHandle);
         }
 
         sndDMABuf.frameLast = (sndDMABuf.frameLast + 1) & (sndDMABuf.framesCount - 1);

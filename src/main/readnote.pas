@@ -17,7 +17,7 @@ procedure readnewnotes;
 implementation
 
 uses
-    emstool,
+    ems,
     s3mtypes,
     s3mvars,
     effvars,

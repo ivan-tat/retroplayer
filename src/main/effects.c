@@ -12,7 +12,7 @@
 
 #include "pascal/pascal.h"
 #include "cc/i86.h"
-#include "dos/emstool.h"
+#include "dos/ems.h"
 #include "main/s3mtypes.h"
 #include "main/s3mvars.h"
 #include "main/effvars.h"

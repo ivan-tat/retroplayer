@@ -7,9 +7,9 @@ uses
     crt,
     dos,
     dos_,
+    ems,
     malloc,
     debug,
-    emstool,
     sbctl,
     blaster,
     s3mtypes,
@@ -274,8 +274,8 @@ end;
 
 function getFreeEMMMemory: longint;
 begin
-    if EMSinstalled then
-        getFreeEMMMemory := EmsFreePages*16
+    if emsInstalled then
+        getFreeEMMMemory := emsGetFreePagesCount*16
     else
         getFreeEMMMemory := 0;
 end;

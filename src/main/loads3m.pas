@@ -27,7 +27,7 @@ uses
     crt,
     dos,
     dos_,
-    emstool,
+    ems,
     s3mvars;
 
 (*$l loads3m.obj*)

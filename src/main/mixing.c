@@ -13,7 +13,7 @@
 
 #include "pascal/pascal.h"
 #include "cc/i86.h"
-#include "dos/emstool.h"
+#include "dos/ems.h"
 #include "main/s3mtypes.h"
 #include "main/mixtypes.h"
 #include "main/s3mvars.h"
@@ -35,10 +35,10 @@ void *PUBLIC_CODE mapSampleData(uint16_t seg, uint16_t len)
         physPage = 0;
         count = (unsigned int)(((unsigned long)len + 0x3fff) >> 1) >> 13;
         while (count--) {
-            if (! EmsMap(SmpEMSHandle, logPage++, physPage++))
+            if (! emsMap(SmpEMSHandle, logPage++, physPage++))
                 return MK_FP(0, 0);
         };
-        return MK_FP(FrameSEG[0], 0);
+        return emsFramePtr;
     } else {
         return MK_FP(seg, 0);
     };
