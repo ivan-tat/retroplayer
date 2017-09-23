@@ -44,14 +44,22 @@ extern void cc_outp(unsigned int port, char value);
 #define inp cc_inp
 #define outp cc_outp
 
-/* Aliases */
+/*** Keyboard functions ***/
 
-/* Keyboard functions */
+extern bool PUBLIC_CODE pascal_keypressed(void);
+extern char PUBLIC_CODE pascal_readkey(void);
+
+#ifdef __WATCOMC__
+#pragma aux pascal_keypressed modify [bx cx dx si di es];
+#pragma aux pascal_readkey    modify [bx cx dx si di es];
+#endif
+
+/* Aliases */
 
 #define kbhit() pascal_keypressed()
 #define getch() pascal_readkey()
 
-/* Text-mode functions */
+/*** Text-mode functions ***/
 
 #define _TEXTBW40 0
 #define _TEXTC40  1
@@ -82,6 +90,26 @@ extern uint16_t PUBLIC_DATA lastmode;
 extern uint8_t  PUBLIC_DATA textattr;
 extern uint16_t PUBLIC_DATA windmin;
 extern uint16_t PUBLIC_DATA windmax;
+
+extern void PUBLIC_CODE pascal_clreol(void);
+extern void PUBLIC_CODE pascal_clrscr(void);
+extern void PUBLIC_CODE pascal_gotoxy(uint8_t x, uint8_t y);
+extern void PUBLIC_CODE pascal_textbackground(uint8_t color);
+extern void PUBLIC_CODE pascal_textcolor(uint8_t color);
+extern void PUBLIC_CODE pascal_textmode(uint16_t mode);
+extern void PUBLIC_CODE pascal_window(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
+
+#ifdef __WATCOMC__
+#pragma aux pascal_clreol         modify [ax bx cx dx si di es];
+#pragma aux pascal_clrscr         modify [ax bx cx dx si di es];
+#pragma aux pascal_gotoxy         modify [ax bx cx dx si di es];
+#pragma aux pascal_textbackground modify [ax bx cx dx si di es];
+#pragma aux pascal_textcolor      modify [ax bx cx dx si di es];
+#pragma aux pascal_textmode       modify [ax bx cx dx si di es];
+#pragma aux pascal_window         modify [ax bx cx dx si di es];
+#endif
+
+/* Aliases */
 
 #define clreol()                pascal_clreol()
 #define clrscr()                pascal_clrscr()
