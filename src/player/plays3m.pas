@@ -8,6 +8,7 @@ uses
     dos,
     dos_,
     malloc,
+    debug,
     emstool,
     sbctl,
     blaster,

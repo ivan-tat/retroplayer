@@ -11,6 +11,7 @@ if [ -z "$target" ]; then
 fi
 
 T_CC=0
+T_DEBUG=0
 T_DOS=0
 T_HW=0
 T_HW_SB=0
@@ -22,6 +23,7 @@ T_TP=1
 case "$target" in
     all)
         T_CC=1
+        T_DEBUG=1
         T_DOS=1
         T_HW=1
         T_HW_SB=1
@@ -30,6 +32,9 @@ case "$target" in
         ;;
     cc)
         T_CC=1
+        ;;
+    debug)
+        T_DEBUG=1
         ;;
     dos)
         T_DOS=1
@@ -56,6 +61,9 @@ if [ $T_TP == 1 ]; then
     if [ $T_CC == 1 ]; then
         T_CC_TP=1
     fi
+    if [ $T_DEBUG == 1 ]; then
+        T_DEBUG_TP=1
+    fi
     if [ $T_DOS == 1 ]; then
         T_DOS_TP=1
     fi
@@ -76,6 +84,7 @@ if [ $T_TP == 1 ]; then
     fi
 else
     T_CC_TP=0
+    T_DEBUG=0
     T_DOS_TP=0
     T_HW_TP=0
     T_HW_SB_TP=0
@@ -300,6 +309,7 @@ build_target $T_CC     obj src/cc/string/strlen.c
 build_target $T_CC     obj src/cc/string/strncmp.c
 build_target $T_CC     obj src/cc/string/strncpy.c
 build_target $T_CC     obj src/cc/string/strnicmp.c
+build_target $T_DEBUG  obj src/debug.c
 build_target $T_DOS    obj src/dos/emstool.c
 build_target $T_HW     obj src/hw/cpu.asm
 build_target $T_HW     obj src/hw/dma.c
@@ -347,6 +357,7 @@ build_target $T_CC_TP     obj src/cc/malloc.pas
 build_target $T_CC_TP     obj src/cc/stdlib.pas
 build_target $T_CC_TP     obj src/cc/string_.pas
 build_target $T_CC_TP     obj src/cc/stdio.pas
+build_target $T_DEBUG_TP  obj src/debug.pas
 build_target $T_DOS_TP    obj src/dos/emstool.pas
 build_target $T_HW_TP     obj src/hw/cpu.pas
 build_target $T_HW_TP     obj src/hw/dma.pas
