@@ -5,18 +5,17 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
-#endif
 
-// TODO: remove EXTERN_LINK, PUBLIC_DATA and PUBLIC_CODE macros when done.
-
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/dos.h"
 #include "dos/ems.h"
 #include "main/s3mtypes.h"
+
 #include "main/s3mvars.h"
+
+// TODO: remove EXTERN_LINK, PUBLIC_DATA and PUBLIC_CODE macros when done.
 
 /* EMM */
 

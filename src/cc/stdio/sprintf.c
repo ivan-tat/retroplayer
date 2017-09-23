@@ -7,7 +7,7 @@
 
 #include <stdarg.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 
 #include "cc/stdio.h"
 #include "cc/stdio/_printf.h"

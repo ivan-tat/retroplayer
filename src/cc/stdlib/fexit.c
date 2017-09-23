@@ -8,7 +8,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
+
 #include "cc/stdlib.h"
 
 extern void __declspec(noreturn) PUBLIC_CODE pascal_halt(uint16_t exitcode);

@@ -10,11 +10,12 @@
 
 #ifdef __WATCOMC__
 #pragma once
-#include <stdbool.h>
-#include <stdint.h>
 #endif
 
-#include "pascal/pascal.h"
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "pascal.h"
 #include "debug.h"
 #include "main/effects.h"
 

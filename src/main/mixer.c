@@ -5,15 +5,13 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "pascal.h"
+#include "main/mixvars.h"
 
 // TODO: remove PUBLIC_CODE macros when done.
-
-#include "pascal/pascal.h"
-#include "main/mixvars.h"
 
 uint32_t PUBLIC_CODE mixCalcSampleStep(uint16_t wPeriod)
 {

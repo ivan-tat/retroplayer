@@ -8,12 +8,12 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/i86.h"
 #include "cc/stdlib.h"
 #include "cc/stdio.h"
+#include "cc/string.h"
 #include "cc/dos.h"
 #include "debug.h"
 

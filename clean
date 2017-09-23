@@ -95,9 +95,6 @@ $RM ./src/main/readnote.asm
 $RM ./src/main/s3mplay.asm
 $RM ./src/main/s3mvars.asm
 $RM ./src/main/voltab.asm
-cleandir ./src/ow
-$RM ./src/ow/malloc.asm
-cleandir ./src/pascal
 cleandir ./src/player
 
 echo "Done."

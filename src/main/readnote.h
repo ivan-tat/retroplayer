@@ -10,9 +10,12 @@
 
 #ifdef __WATCOMC__
 #pragma once
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "pascal.h"
 
 void PUBLIC_CODE readnewnotes(void);
 

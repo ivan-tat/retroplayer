@@ -7,12 +7,10 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
-// TODO: remove PUBLIC_CODE macros when done.
-
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/i86.h"
+#include "cc/string.h"
 #include "dos/ems.h"
 #include "main/s3mtypes.h"
 #include "main/mixtypes.h"
@@ -25,6 +23,8 @@
 #include "main/mixer.h"
 #include "main/mixer_.h"
 #include "main/readnote.h"
+
+// TODO: remove PUBLIC_CODE macros when done.
 
 void *PUBLIC_CODE mapSampleData(uint16_t seg, uint16_t len)
 {

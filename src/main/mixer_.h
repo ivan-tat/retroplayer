@@ -10,14 +10,15 @@
 
 #ifdef __WATCOMC__
 #pragma once
-#include <stdbool.h>
-#include <stdint.h>
 #endif
 
-// TODO: remove PUBLIC_CODE macros when done.
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "main/mixtypes.h"
+
+// TODO: remove PUBLIC_CODE macros when done.
 
 extern void PUBLIC_CODE _MixSampleMono8(void *outBuf, struct playSampleInfo_t *smpInfo, uint16_t volTab, uint8_t vol, uint16_t count);
 extern void PUBLIC_CODE _MixSampleStereo8(void *outBuf, struct playSampleInfo_t *smpInfo, uint16_t volTab, uint8_t vol, uint16_t count);

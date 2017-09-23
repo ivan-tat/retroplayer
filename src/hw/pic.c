@@ -8,9 +8,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-// TODO: remove PUBLIC_CODE macros when done.
-
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
 #include "cc/conio.h"
@@ -18,6 +16,8 @@
 #include "debug.h"
 
 #include "hw/pic.h"
+
+// TODO: remove PUBLIC_CODE macros when done.
 
 /* PIC1: IRQ 0-7 */
 /* This one is programmed by BIOS when PC is powered on */

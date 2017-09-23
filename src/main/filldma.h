@@ -9,14 +9,16 @@
 #include "defines.h"
 
 #ifdef __WATCOMC__
-#include <stdbool.h>
-#include <stdint.h>
+#pragma once
 #endif
 
-// TODO: remove PUBLIC_CODE macros when done.
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "../pascal/pascal.h"
-#include "fillvars.h"
+#include "pascal.h"
+#include "main/fillvars.h"
+
+// TODO: remove PUBLIC_CODE macros when done.
 
 void PUBLIC_CODE fill_DMAbuffer(void *mixbuf, SNDDMABUF *outbuf);
 

@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/i86.h"
 #include "cc/conio.h"
 #include "hw/dma.h"

@@ -10,16 +10,17 @@
 
 #ifdef __WATCOMC__
 #pragma once
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "pascal.h"
+#include "main/s3mtypes.h"
 
 // TODO: remove PUBLIC_DATA macros when done.
 
-#include "pascal/pascal.h"
-#include "main/s3mtypes.h"
-
-/* EMM */
+/* EMS */
 
 extern bool PUBLIC_DATA UseEMS;
 

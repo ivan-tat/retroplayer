@@ -5,8 +5,9 @@
 
 #include "defines.h"
 
-#include <stdbool.h>
 #include <stddef.h>
+#include <stdbool.h>
+
 #include "cc/string.h"
 
 int cc_strncmp(const char *s1, const char *s2, size_t n)

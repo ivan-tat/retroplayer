@@ -5,19 +5,19 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "pascal.h"
 
 #include "hw/sb/sndisr.h"
 
-void *__far __pascal GetSoundHWISR( void )
+void *PUBLIC_CODE GetSoundHWISR(void)
 {
     return &SoundHWISR;
 }
 
-void __far __pascal SetSoundHWISRCallback( SoundHWISRCallback_t *p )
+void PUBLIC_CODE SetSoundHWISRCallback(SoundHWISRCallback_t *p)
 {
     SoundHWISRCallback = p;
 }

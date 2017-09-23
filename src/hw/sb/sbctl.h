@@ -10,13 +10,14 @@
 
 #ifdef __WATCOMC__
 #pragma once
-#include <stdbool.h>
-#include <stdint.h>
 #endif
 
-// TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
+
+// TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
 
 /* hardware config */
 

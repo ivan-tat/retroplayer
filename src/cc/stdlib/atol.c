@@ -6,6 +6,7 @@
 #include "defines.h"
 
 #include "cc/ctype.h"
+
 #include "cc/stdlib.h"
 
 long cc_atol(const char *src)

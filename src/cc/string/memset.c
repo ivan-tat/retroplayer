@@ -6,6 +6,7 @@
 #include "defines.h"
 
 #include <stdint.h>
+
 #include "cc/string.h"
 
 void *cc_memset(void *s, int c, size_t n)

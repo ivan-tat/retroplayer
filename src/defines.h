@@ -3,6 +3,10 @@
 #ifndef DEFINES_H
 #define DEFINES_H 1
 
+#ifdef __WATCOMC__
+#pragma once
+#endif
+
 #define DEBUG 1
 #define DEBUGLOAD 1
 //#define DEFINE_LOCAL_DATA 1

@@ -13,7 +13,8 @@
 #endif
 
 #include <stddef.h>
-#include "pascal/pascal.h"
+
+#include "pascal.h"
 
 #ifndef NULL
 #define NULL ((void *)0)

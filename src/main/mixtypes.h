@@ -9,9 +9,13 @@
 #include "defines.h"
 
 #ifdef __WATCOMC__
+#pragma once
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include <pascal.h>
 
 #define MIXSMPFL_16BITS 0x01
 #define MIXSMPFL_LOOP   0x02

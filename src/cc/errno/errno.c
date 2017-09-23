@@ -6,7 +6,8 @@
 #include "defines.h"
 
 #include <stdint.h>
-#include "pascal/pascal.h"
+
+#include "pascal.h"
 
 #if DEFINE_LOCAL_DATA
 

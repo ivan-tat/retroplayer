@@ -18,6 +18,7 @@ procedure calcTick(dOutBuf: pointer; wLen: word);
 implementation
 
 uses
+    string_,
     ems,
     sbctl,
     voltab,

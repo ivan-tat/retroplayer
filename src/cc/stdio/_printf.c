@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/i86.h"
 #include "cc/string.h"
 

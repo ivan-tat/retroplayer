@@ -5,14 +5,14 @@
 
 #include "defines.h"
 
-#include <string.h>
-
-// TODO: remove PUBLIC_CODE macros when done.
-
-#include "pascal/pascal.h"
+#include "pascal.h"
+#include "cc/string.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
+
 #include "main/voltab.h"
+
+// TODO: remove PUBLIC_CODE macros when done.
 
 void PUBLIC_CODE initVolumeTable(void)
 {

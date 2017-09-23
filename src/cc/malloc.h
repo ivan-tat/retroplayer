@@ -14,7 +14,7 @@
 
 #include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 
 uint32_t PUBLIC_CODE _memmax(void);
 

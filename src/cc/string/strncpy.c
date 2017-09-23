@@ -5,8 +5,9 @@
 
 #include "defines.h"
 
-#include <stdbool.h>
 #include <stddef.h>
+#include <stdbool.h>
+
 #include "cc/string.h"
 
 char *cc_strncpy(char *dest, const char *src, size_t n)

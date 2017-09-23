@@ -8,6 +8,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma once
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 

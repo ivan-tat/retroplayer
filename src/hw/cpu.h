@@ -9,13 +9,15 @@
 #include "defines.h"
 
 #ifdef __WATCOMC__
-#include <stdbool.h>
-#include <stdint.h>
+#pragma once
 #endif
 
-// TODO: remove PUBLIC_CODE macros when done.
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
+
+// TODO: remove PUBLIC_CODE macros when done.
 
 extern bool PUBLIC_CODE isCPU_i386(void);
 

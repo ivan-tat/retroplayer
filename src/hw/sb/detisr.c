@@ -5,14 +5,14 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "pascal.h"
 
 #include "hw/sb/detisr.h"
 
-void __far __pascal SetDetISRCallback( DetISRCallback_t *p )
+void PUBLIC_CODE SetDetISRCallback(DetISRCallback_t *p)
 {
     DetISRCallback = p;
 }

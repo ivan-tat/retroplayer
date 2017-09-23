@@ -1,21 +1,25 @@
-/* posttab.h -- declarations for posttab.pas.
+/* posttab.h -- declarations for posttab.c.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef _POSTTAB_H
-#define _POSTTAB_H 1
+#ifndef POSTTAB_H
+#define POSTTAB_H 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
-#include <stdbool.h>
-#include <stdint.h>
+#pragma once
 #endif
 
-extern uint8_t  __pascal post8bit[4096];
-extern uint16_t __pascal post16bit[4096];
+#include <stdbool.h>
+#include <stdint.h>
 
-void __far __pascal calcPostTable( uint8_t vol, bool use16bit );
+#include "pascal.h"
 
-#endif /* _POSTTAB_H */
+extern uint8_t  PUBLIC_DATA post8bit[4096];
+extern uint16_t PUBLIC_DATA post16bit[4096];
+
+void PUBLIC_CODE calcPostTable(uint8_t vol, bool use16bit);
+
+#endif  /* POSTTAB_H */

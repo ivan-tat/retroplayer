@@ -8,7 +8,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
+
 #include "cc/i86.h"
 
 extern void PUBLIC_CODE pascal_delay(uint16_t count);

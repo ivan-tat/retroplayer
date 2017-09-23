@@ -8,8 +8,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/i86.h"
+
 #include "cc/stdlib.h"
 
 extern void PUBLIC_CODE pascal_freemem(void *p, uint16_t size);

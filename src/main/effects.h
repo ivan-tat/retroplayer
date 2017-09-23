@@ -1,4 +1,4 @@
-/* effects.h -- declarations for effects.pas.
+/* effects.h -- declarations for effects.c.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -10,14 +10,15 @@
 
 #ifdef __WATCOMC__
 #pragma once
-#include <stdbool.h>
-#include <stdint.h>
 #endif
 
-// TODO: remove reserved words "extern", PUBLIC_CODE and PUBLIC_DATA macros when done.
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "main/s3mtypes.h"
+
+// TODO: remove PUBLIC_CODE and PUBLIC_DATA macros when done.
 
 #define EFFGROUP_EMPTY   0
 #define EFFGROUP_GLOBAL  1

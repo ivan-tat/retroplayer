@@ -9,13 +9,15 @@
 #include "defines.h"
 
 #ifdef __WATCOMC__
-#include <stdbool.h>
-#include <stdint.h>
+#pragma once
 #endif
 
-// TODO: remove reserved words "extern" and PUBLIC_DATA macros when done.
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
+
+// TODO: remove reserved words "extern" and PUBLIC_DATA macros when done.
 
 extern int8_t   PUBLIC_DATA sinuswave[64];
 extern int8_t   PUBLIC_DATA rampwave[64];

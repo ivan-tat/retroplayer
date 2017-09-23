@@ -5,15 +5,11 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
-#endif
 
-// TODO: remove PUBLIC_CODE macros when done.
-
-#include "pascal/pascal.h"
+#include "pascal.h"
+#include "cc/string.h"
 #include "dos/ems.h"
 #include "hw/sb/sbctl.h"
 #include "main/posttab.h"
@@ -21,6 +17,8 @@
 #include "main/fillvars.h"
 #include "main/mixvars.h"
 #include "main/mixing.h"
+
+// TODO: remove PUBLIC_CODE macros when done.
 
 static bool errorsav = false;
 

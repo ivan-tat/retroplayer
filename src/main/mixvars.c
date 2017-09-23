@@ -5,22 +5,22 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "pascal.h"
+#include "main/mixvars.h"
 
 /* TODO: remove EXTERN_LINK, PUBLIC_DATA and PUBLIC_CODE macros when done */
 
-#include "pascal/pascal.h"
+#ifdef DEFINE_LOCAL_DATA
 
-EXTERN_LINK uint16_t PUBLIC_DATA ST3Periods[12];
-/* TODO: uncomment when done */
-/*
-uint16_t ST3Periods[12] = {
+uint16_t ST3Periods[12] =
+{
     1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
 };
-*/
+
+#endif
 
 EXTERN_LINK uint16_t (*PUBLIC_DATA mixBuf)[];
 EXTERN_LINK uint8_t  PUBLIC_DATA mixChannels;

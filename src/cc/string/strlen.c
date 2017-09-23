@@ -6,6 +6,7 @@
 #include "defines.h"
 
 #include <stddef.h>
+
 #include "cc/string.h"
 
 size_t cc_strlen(const char *s)

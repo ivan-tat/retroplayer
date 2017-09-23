@@ -6,6 +6,7 @@
 #include "defines.h"
 
 #include <stdint.h>
+
 #include "cc/string.h"
 
 int cc_memcmp(const void *s1, const void *s2, size_t n)

@@ -27,6 +27,7 @@ procedure freeVolumeTable;
 implementation
 
 uses
+    string_,
     dos_;
 
 (*$l voltab.obj*)

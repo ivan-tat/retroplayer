@@ -8,9 +8,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-// TODO: remove PUBLIC_CODE macros when done.
-
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/i86.h"
 #include "dos/ems.h"
 #include "main/s3mtypes.h"
@@ -19,6 +17,8 @@
 #include "main/mixvars.h"
 #include "main/mixer.h"
 #include "main/effects.h"
+
+// TODO: remove PUBLIC_CODE macros when done.
 
 #define get_i8_value(off, pos) *(int8_t *)MK_FP(FP_SEG(&wavetab), off + pos)
 

@@ -5,14 +5,13 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
-#endif
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/stdio.h"
 #include "main/effects.h"
+
 #include "main/s3mplay.h"
 
 /*** Initialization ***/

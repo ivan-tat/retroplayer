@@ -9,14 +9,18 @@
 #include "defines.h"
 
 #ifdef __WATCOMC__
-#include <stdbool.h>
-#include <stdint.h>
+#pragma once
 #endif
 
-typedef void __far __pascal DetISRCallback_t( uint8_t irq );
+#include <stdbool.h>
+#include <stdint.h>
 
-extern DetISRCallback_t * __pascal DetISRCallback;
+#include "pascal.h"
 
-extern void *__far __pascal GetDetISR( uint8_t irq );
+typedef void PUBLIC_CODE DetISRCallback_t(uint8_t irq);
 
-#endif /* _DETISR__H */
+extern DetISRCallback_t *PUBLIC_DATA DetISRCallback;
+
+extern void *PUBLIC_CODE GetDetISR(uint8_t irq);
+
+#endif  /* _DETISR__H */

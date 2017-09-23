@@ -5,9 +5,7 @@
 
 #include "defines.h"
 
-#include <stddef.h>
-
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
 #include "cc/dos/error086.h"

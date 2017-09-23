@@ -9,13 +9,15 @@
 #include "defines.h"
 
 #ifdef __WATCOMC__
-#include <stdbool.h>
-#include <stdint.h>
+#pragma once
 #endif
 
-// TODO: remove PUBLIC_DATA/PUBLIC_CODE macros when done.
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
+
+// TODO: remove PUBLIC_DATA/PUBLIC_CODE macros when done.
 
 typedef int16_t voltab_t[65][256];
 

@@ -10,9 +10,12 @@
 
 #ifdef __WATCOMC__
 #pragma once
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "pascal.h"
 
 extern void PUBLIC_CODE unpackPattern(uint8_t *src, uint8_t *dst, uint8_t maxrow, uint8_t maxchn);
 

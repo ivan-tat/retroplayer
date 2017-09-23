@@ -5,8 +5,9 @@
 
 #include "defines.h"
 
-#include <stdbool.h>
 #include <stddef.h>
+#include <stdbool.h>
+
 #include "cc/string.h"
 
 #define tolower(c) (((c >= 'A') && (c <= 'Z')) ? (c - 'A' + 'a') : c)

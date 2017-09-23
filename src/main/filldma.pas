@@ -20,6 +20,7 @@ procedure fill_DMAbuffer(mixbuf: pointer; outbuf: PSNDDMABUF);
 implementation
 
 uses
+    string_,
     ems,
     sbctl,
     posttab,

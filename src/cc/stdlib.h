@@ -12,10 +12,10 @@
 #pragma once
 #endif
 
-#include <stdarg.h>
 #include <stddef.h>
+#include <stdarg.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/errno.h"
 
 int  cc_atoi(const char *src);

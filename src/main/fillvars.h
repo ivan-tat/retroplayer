@@ -10,15 +10,16 @@
 
 #ifdef __WATCOMC__
 #pragma once
-#include <stdbool.h>
-#include <stdint.h>
 #endif
 
-// TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "hw/dma.h"
 #include "hw/sndctl_t.h"
+
+// TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
 
 /* DMA buffer for sound */
 

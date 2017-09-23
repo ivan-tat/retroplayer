@@ -7,18 +7,18 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
-/* TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done */
-
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
 #include "cc/stdio.h"
+#include "cc/string.h"
 #include "hw/dma.h"
 #include "hw/sb/sbctl.h"
 #include "main/s3mvars.h"
 #include "main/fillvars.h"
+
+/* TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done */
 
 uint16_t PUBLIC_CODE sndDMABufGetFrameOff(SNDDMABUF *buf, uint8_t index)
 {

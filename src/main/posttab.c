@@ -5,14 +5,14 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "pascal.h"
 
 #include "main/posttab.h"
 
-void __far __pascal calcPostTable( uint8_t vol, bool use16bit )
+void PUBLIC_CODE calcPostTable(uint8_t vol, bool use16bit)
 {
     int16_t z, i, sample;
 

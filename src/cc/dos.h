@@ -13,7 +13,8 @@
 #endif
 
 #include <stdint.h>
-#include "pascal/pascal.h"
+
+#include "pascal.h"
 
 struct cc_dosdate_t {
     unsigned char  day;         /* 1-31 */

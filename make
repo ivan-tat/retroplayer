@@ -256,7 +256,7 @@ if [ $T_WATCOM == 1 ]; then
     echo 'Extracting Watcom C specific files...'
     . ./scripts/ow/ow.sh
     . ./scripts/ow/clib.sh
-    cd "$PROJDIR/src/ow"
+    cd "$PROJDIR/src"
     $WLIB "$CLIB" ':i4d.asm' ':i4m.asm' ':i8d086.asm'
     mv i4d.o i4d.obj
     mv i4m.o i4m.obj
@@ -345,9 +345,9 @@ if [ -n "$_dir" ]; then
     export INCLUDE="$_dir"
 fi
 unset _dir
-build_target $T_WATCOM_TP obj src/ow/watcom.pas
-build_target $T_TP        obj src/pascal/pascal.pas
-build_target $T_TP        obj src/pascal/strutils.pas
+build_target $T_WATCOM_TP obj src/watcom.pas
+build_target $T_TP        obj src/pascal.pas
+build_target $T_TP        obj src/strutils.pas
 build_target $T_CC_TP     obj src/cc/i86.pas
 build_target $T_CC_TP     obj src/cc/conio.pas
 build_target $T_CC_TP     obj src/cc/ctype.pas

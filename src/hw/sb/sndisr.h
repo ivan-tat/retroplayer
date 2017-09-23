@@ -3,19 +3,23 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#include "defines.h"
-
 #ifndef _SNDISR_H
 #define _SNDISR_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
+#pragma once
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "pascal.h"
 
 #include "hw/sb/sndisr_.h"
 
-void *__far __pascal GetSoundHWISR( void );
-void  __far __pascal SetSoundHWISRCallback( SoundHWISRCallback_t *p );
+void *PUBLIC_CODE GetSoundHWISR(void);
+void  PUBLIC_CODE SetSoundHWISRCallback(SoundHWISRCallback_t *p);
 
-#endif /* _SNDISR_H */
+#endif  /* _SNDISR_H */

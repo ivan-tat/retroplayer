@@ -1,4 +1,4 @@
-/* mixvars.h -- declarations for mixvars.pas.
+/* mixvars.h -- declarations for mixvars.c.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -9,11 +9,13 @@
 #include "defines.h"
 
 #ifdef __WATCOMC__
-#include <stdbool.h>
-#include <stdint.h>
+#pragma once
 #endif
 
-#include "pascal/pascal.h"
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "pascal.h"
 
 extern uint16_t PUBLIC_DATA ST3Periods[12];
 

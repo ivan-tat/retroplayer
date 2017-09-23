@@ -5,15 +5,14 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "pascal.h"
+
+#include "hw/sndctl_t.h"
 
 // TODO: remove PUBLIC_CODE macros when done.
-
-#include "pascal/pascal.h"
-#include "hw/sndctl_t.h"
 
 bool PUBLIC_CODE set_sample_format(HWSMPFMT *p, uint8_t b, bool s, uint8_t c)
 {

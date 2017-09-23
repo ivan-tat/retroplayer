@@ -5,8 +5,6 @@
 
 #include "defines.h"
 
-#include <stddef.h>
-
 #include "cc/i86.h"
 #include "cc/dos.h"
 

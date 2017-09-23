@@ -9,12 +9,16 @@
 #include "defines.h"
 
 #ifdef __WATCOMC__
+#pragma once
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-#endif
+
+#include "pascal.h"
 
 #include "hw/sb/detisr_.h"
 
-void __far __pascal SetDetISRCallback( DetISRCallback_t *p );
+void PUBLIC_CODE SetDetISRCallback(DetISRCallback_t *p);
 
 #endif /* _DETISR_H */

@@ -5,10 +5,6 @@
 
 #include "defines.h"
 
-#ifdef __WATCOMC__
-#pragma once
-#endif
-
 #include "cc/ctype.h"
 
 const unsigned char _cc_IsTable[257] =

@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/dos.h"
 
 #include "cc/malloc.h"

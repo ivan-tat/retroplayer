@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 
 /* Types */
 

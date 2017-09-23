@@ -3,13 +3,19 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef _IO_H
-#define _IO_H 1
+#ifndef CC_STDIO__IO_H
+#define CC_STDIO__IO_H 1
+
+#include "defines.h"
+
+#ifdef __WATCOMC__
+#pragma once
+#endif
 
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "pascal/pascal.h"
+#include "pascal.h"
 
 /* File I/O */
 
@@ -31,4 +37,4 @@ extern uint16_t PUBLIC_CODE pascal_blockwrite(PASCALFILE *f, void *buf, uint16_t
 #pragma aux pascal_blockwrite modify [   bx cx dx si di es];
 #endif
 
-#endif  /* _IO_H */
+#endif  /* CC_STDIO__IO_H */

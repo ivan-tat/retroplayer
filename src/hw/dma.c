@@ -7,18 +7,18 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
 
-// TODO: remove PUBLIC_CODE macros when done.
-
-#include "pascal/pascal.h"
+#include "pascal.h"
 #include "cc/i86.h"
 #include "cc/conio.h"
 #include "cc/dos.h"
 #include "cc/stdio.h"
+#include "cc/string.h"
 #include "debug.h"
 
 #include "hw/dma.h"
+
+// TODO: remove PUBLIC_CODE macros when done.
 
 /* I/O ports */
 
