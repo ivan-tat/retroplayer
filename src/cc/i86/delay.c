@@ -11,8 +11,15 @@
 #include "pascal/pascal.h"
 #include "cc/i86.h"
 
+extern void PUBLIC_CODE pascal_delay(uint16_t count);
+
+#ifdef __WATCOMC__
+#pragma aux pascal_delay modify [ax bx cx dx si di es];
+#endif
+
 void cc_delay(unsigned int __milliseconds)
 {
+    /* FIXME: does not work
     union CC_REGPACK regs;
     unsigned long ms;
 
@@ -21,4 +28,6 @@ void cc_delay(unsigned int __milliseconds)
     regs.w.cx = ms & 0xffff;
     regs.w.dx = ms >> 16;
     cc_intr(0x15, &regs);
+    */
+    pascal_delay(__milliseconds);   // bad workaround
 }

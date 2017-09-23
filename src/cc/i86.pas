@@ -20,7 +20,13 @@ implementation
 
 uses
     pascal,
-    watcom;
+    watcom,
+    crt;
+
+procedure pascal_delay(count: word); far;
+begin
+    crt.Delay(count);
+end;
 
 (*$L i86\delay.obj*)
 procedure cc_delay_; external;

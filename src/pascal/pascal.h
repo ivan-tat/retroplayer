@@ -98,10 +98,6 @@ extern uint32_t PUBLIC_CODE pascal_maxavail(void);
 extern void     PUBLIC_CODE pascal_getmem(void **p, uint16_t size);
 extern void     PUBLIC_CODE pascal_freemem(void *p, uint16_t size);
 
-/*** CRT Unit ***/
-
-extern void PUBLIC_CODE pascal_delay(uint16_t count);
-
 /*** DOS Unit ***/
 
 extern void PUBLIC_CODE pascal_getintvec(uint8_t num, void **p);
@@ -121,7 +117,6 @@ extern void PUBLIC_CODE pascal_setintvec(uint8_t num, void *p);
 #pragma aux pascal_maxavail   modify [   bx cx    si di es];
 #pragma aux pascal_getmem     modify [ax bx cx dx si di es];
 #pragma aux pascal_freemem    modify [ax bx cx dx si di es];
-#pragma aux pascal_delay      modify [ax bx cx dx si di es];
 #pragma aux pascal_getintvec  modify [ax bx cx dx si di es];
 #pragma aux pascal_setintvec  modify [ax bx cx dx si di es];
 #endif

@@ -28,10 +28,6 @@ function  pascal_seek(var f: file; pos: longint): boolean;
 function  pascal_blockread(var f: file; var buf; size: word; var actual: word): boolean;
 function  pascal_blockwrite(var f: file; var buf; size: word; var actual: word): boolean;
 
-(* CRT Unit *)
-
-procedure pascal_delay(count: word);
-
 (* DOS Unit *)
 
 procedure pascal_getintvec(num: byte; var p: pointer);
@@ -111,11 +107,6 @@ begin
     System.BlockWrite(f, buf, size, actual);
     (*$I+*)
     pascal_blockwrite := IOResult = 0;
-end;
-
-procedure pascal_delay(count: word);
-begin
-    crt.Delay(count);
 end;
 
 procedure pascal_getintvec(num: byte; var p: pointer);
