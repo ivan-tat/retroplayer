@@ -163,7 +163,7 @@ sudo apt-get install git
 
 ## 2. Download project
 
-Download or clone project to `~/Projects/retroplayer` and make a symbolic link `c:\projects\rp` to it.
+Download or clone project to `~/Projects/retroplayer` (or any other at your option) and make a symbolic link `c:\projects\rp` to it.
 
 ```sh
 PROJ_DIR=~/Projects/retroplayer
@@ -203,7 +203,7 @@ EOF
 # Build project
 
 ```sh
-cd ~/Projects/retroplayer
+cd $PROJ_DIR
 ./make
 ```
 
@@ -212,13 +212,13 @@ Start DOSEMU and type `make`.
 # Test project
 
 ```sh
-cd ~/Projects/retroplayer/dosbox
+cd $PROJ_DIR
 ./test
 ```
 
 # Clean project
 
 ```sh
-cd ~/Projects/retroplayer
+cd $PROJ_DIR
 ./clean
 ```

@@ -1,0 +1,6 @@
+#!/bin/sh
+# This script must be run in GNU/Linux
+OLDPWD="$PWD"
+cd scripts/dosbox
+./test
+cd "$OLDPWD"
