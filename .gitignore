@@ -55,6 +55,12 @@ src/cc/errno/errno.asm
 src/cc/i86/delay.asm
 src/cc/i86/disable.asm
 src/cc/i86/enable.asm
+src/cc/stdlib/atoi.asm
+src/cc/stdlib/atol.asm
+src/cc/stdlib/fexit.asm
+src/cc/stdlib/ffree.asm
+src/cc/stdlib/fmalloc.asm
+src/cc/stdlib/strtol.asm
 src/cc/string/memcmp.asm
 src/cc/string/memcpy.asm
 src/cc/string/memset.asm
