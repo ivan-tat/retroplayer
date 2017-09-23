@@ -55,6 +55,7 @@ src/cc/errno/errno.asm
 src/cc/i86/delay.asm
 src/cc/i86/disable.asm
 src/cc/i86/enable.asm
+src/cc/malloc/memmax.asm
 src/cc/stdio/_printf.asm
 src/cc/stdio/fclose.asm
 src/cc/stdio/fopen.asm
@@ -105,5 +106,3 @@ src/main/readnote.asm
 src/main/s3mplay.asm
 src/main/s3mvars.asm
 src/main/voltab.asm
-src/ow/dos_.asm
-src/ow/malloc.asm

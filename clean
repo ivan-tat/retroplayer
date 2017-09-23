@@ -34,6 +34,8 @@ cleandir ./src/cc/i86
 $RM ./src/cc/i86/delay.asm
 $RM ./src/cc/i86/disable.asm
 $RM ./src/cc/i86/enable.asm
+cleandir ./src/cc/malloc
+$RM ./src/cc/malloc/memmax.asm
 cleandir ./src/cc/stdio
 $RM ./src/cc/stdio/_printf.asm
 $RM ./src/cc/stdio/fclose.asm

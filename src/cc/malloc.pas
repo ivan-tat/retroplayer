@@ -1,4 +1,4 @@
-(* malloc.pas -- Pascal declarations for malloc.c.
+(* malloc.pas -- Pascal declarations for custom "malloc" library.
 
    This file is for linking compiled object files with Pascal linker.
    It will be deleted in future when we rewrite the project in C.
@@ -20,7 +20,7 @@ uses
     pascal,
     dos_;
 
-(*$l malloc.obj*)
+(*$l malloc/memmax.obj*)
 function _memmax: longint; external;
 
 end.

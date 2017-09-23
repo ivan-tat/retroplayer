@@ -1,21 +1,21 @@
-/* malloc.h -- declarations for malloc.c.
+/* malloc.h -- declarations for custom "malloc" library.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CUSTOM_MALLOC_H
-#define CUSTOM_MALLOC_H 1
+#ifndef CC_MALLOC_H
+#define CC_MALLOC_H 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#include <stdbool.h>
-#include <stdint.h>
 #endif
+
+#include <stdint.h>
 
 #include "pascal/pascal.h"
 
 uint32_t PUBLIC_CODE _memmax(void);
 
-#endif  /* CUSTOM_MALLOC_H */
+#endif  /* CC_MALLOC_H */

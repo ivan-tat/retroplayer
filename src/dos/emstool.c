@@ -14,7 +14,8 @@
 #include "cc/i86.h"
 #include "cc/stdlib.h"
 #include "cc/stdio.h"
-#include "ow/malloc.h"
+#include "cc/malloc.h"
+
 #include "dos/emstool.h"
 
 #define DOS_DRIVER_NAME_OFF 10

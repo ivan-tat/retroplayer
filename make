@@ -269,6 +269,7 @@ build_target $T_CC     obj src/cc/dos/dosret.c
 build_target $T_CC     obj src/cc/dos/error086.c
 build_target $T_CC     obj src/cc/dos/gtime086.c
 build_target $T_CC     obj src/cc/dos/mem086.c
+build_target $T_CC     obj src/cc/malloc/memmax.c
 build_target $T_CC     obj src/cc/stdio/_printf.c
 build_target $T_CC     obj src/cc/stdio/fclose.c
 build_target $T_CC     obj src/cc/stdio/fopen.c
@@ -299,7 +300,6 @@ build_target $T_CC     obj src/cc/string/strlen.c
 build_target $T_CC     obj src/cc/string/strncmp.c
 build_target $T_CC     obj src/cc/string/strncpy.c
 build_target $T_CC     obj src/cc/string/strnicmp.c
-build_target $T_WATCOM obj src/ow/malloc.c
 build_target $T_DOS    obj src/dos/emstool.c
 build_target $T_HW     obj src/hw/cpu.asm
 build_target $T_HW     obj src/hw/dma.c
@@ -343,10 +343,10 @@ build_target $T_CC_TP     obj src/cc/conio.pas
 build_target $T_CC_TP     obj src/cc/ctype.pas
 build_target $T_CC_TP     obj src/cc/errno_.pas
 build_target $T_CC_TP     obj src/cc/dos_.pas
+build_target $T_CC_TP     obj src/cc/malloc.pas
 build_target $T_CC_TP     obj src/cc/stdlib.pas
 build_target $T_CC_TP     obj src/cc/string_.pas
 build_target $T_CC_TP     obj src/cc/stdio.pas
-build_target $T_WATCOM_TP obj src/ow/malloc.pas
 build_target $T_DOS_TP    obj src/dos/emstool.pas
 build_target $T_HW_TP     obj src/hw/cpu.pas
 build_target $T_HW_TP     obj src/hw/dma.pas
