@@ -34,6 +34,13 @@ cleandir ./src/cc/i86
 $RM ./src/cc/i86/delay.asm
 $RM ./src/cc/i86/disable.asm
 $RM ./src/cc/i86/enable.asm
+cleandir ./src/cc/stdlib
+$RM ./src/cc/stdlib/atoi.asm
+$RM ./src/cc/stdlib/atol.asm
+$RM ./src/cc/stdlib/fexit.asm
+$RM ./src/cc/stdlib/ffree.asm
+$RM ./src/cc/stdlib/fmalloc.asm
+$RM ./src/cc/stdlib/strtol.asm
 cleandir ./src/cc/string
 $RM ./src/cc/string/memcmp.asm
 $RM ./src/cc/string/memcpy.asm

@@ -14,6 +14,8 @@ interface
 
 (* System Unit *)
 
+procedure pascal_halt(exitcode: word);
+
 function  pascal_maxavail: longint;
 procedure pascal_getmem(var p: pointer; size: word);
 procedure pascal_freemem(p: pointer; size: word);
@@ -40,6 +42,11 @@ implementation
 uses
     crt,
     dos;
+
+procedure pascal_halt(exitcode: word);
+begin
+    System.Halt(exitcode);
+end;
 
 function pascal_maxavail: longint;
 begin

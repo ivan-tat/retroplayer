@@ -12,9 +12,9 @@
 
 #include "pascal/pascal.h"
 #include "cc/i86.h"
+#include "cc/stdlib.h"
 #include "ow/malloc.h"
 #include "ow/stdio.h"
-#include "ow/stdlib.h"
 #include "dos/emstool.h"
 
 #define DOS_DRIVER_NAME_OFF 10

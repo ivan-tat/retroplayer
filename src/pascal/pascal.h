@@ -73,6 +73,10 @@ _UNREGMETHOD(name)\
     exitproc = _EXITVARNAME(name);\
 }
 
+/* System */
+
+extern void PUBLIC_CODE pascal_halt(uint16_t exitcode);
+
 /* File I/O */
 
 typedef struct pascalFile_t {
@@ -89,6 +93,7 @@ extern uint16_t PUBLIC_CODE pascal_blockread(PASCALFILE *f, void *buf, uint16_t 
 extern uint16_t PUBLIC_CODE pascal_blockwrite(PASCALFILE *f, void *buf, uint16_t size);
 
 /* Heap */
+
 extern uint32_t PUBLIC_CODE pascal_maxavail(void);
 extern void     PUBLIC_CODE pascal_getmem(void **p, uint16_t size);
 extern void     PUBLIC_CODE pascal_freemem(void *p, uint16_t size);
@@ -104,5 +109,21 @@ extern void PUBLIC_CODE pascal_setintvec(uint8_t num, void *p);
 
 #define getintvec(num, p) pascal_getintvec(num, p)
 #define setintvec(num, p) pascal_setintvec(num, p)
+
+#ifdef __WATCOMC__
+#pragma aux pascal_assign     modify [ax bx cx dx si di es];
+#pragma aux pascal_reset      modify [   bx cx dx si di es];
+#pragma aux pascal_rewrite    modify [   bx cx dx si di es];
+#pragma aux pascal_close      modify [ax bx cx dx si di es];
+#pragma aux pascal_seek       modify [   bx cx dx si di es];
+#pragma aux pascal_blockread  modify [   bx cx dx si di es];
+#pragma aux pascal_blockwrite modify [   bx cx dx si di es];
+#pragma aux pascal_maxavail   modify [   bx cx    si di es];
+#pragma aux pascal_getmem     modify [ax bx cx dx si di es];
+#pragma aux pascal_freemem    modify [ax bx cx dx si di es];
+#pragma aux pascal_delay      modify [ax bx cx dx si di es];
+#pragma aux pascal_getintvec  modify [ax bx cx dx si di es];
+#pragma aux pascal_setintvec  modify [ax bx cx dx si di es];
+#endif
 
 #endif  /* PASCAL_H */
