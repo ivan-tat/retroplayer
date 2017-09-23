@@ -12,8 +12,11 @@
 
 #include "pascal/pascal.h"
 #include "cc/i86.h"
+#include "cc/dos.h"
 #include "cc/conio.h"
 #include "cc/stdio.h"
+#include "debug.h"
+
 #include "hw/pic.h"
 
 /* PIC1: IRQ 0-7 */
@@ -104,14 +107,12 @@ void PUBLIC_CODE picEOI(uint8_t ch)
 
 void *PUBLIC_CODE picGetISR(uint8_t ch)
 {
-    void *p;
-    getintvec(picvec(ch), &p);
-    return p;
+    return _dos_getvect(picvec(ch));
 }
 
 void PUBLIC_CODE picSetISR(uint8_t ch, void *p)
 {
-    setintvec(picvec(ch), p);
+    _dos_setvect(picvec(ch), p);
 }
 
 /* Sharing IRQ channels */

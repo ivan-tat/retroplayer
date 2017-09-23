@@ -10,8 +10,6 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-#include "pascal/pascal.h"
-
 #include "cc/i86.h"
 #include "cc/conio.h"
 #include "cc/stdlib.h"

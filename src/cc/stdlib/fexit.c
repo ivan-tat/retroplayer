@@ -11,6 +11,8 @@
 #include "pascal/pascal.h"
 #include "cc/stdlib.h"
 
+extern void __declspec(noreturn) PUBLIC_CODE pascal_halt(uint16_t exitcode);
+
 void cc_exit(int status)
 {
     pascal_halt(status);

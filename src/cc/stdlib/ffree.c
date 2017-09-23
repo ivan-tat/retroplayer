@@ -12,6 +12,12 @@
 #include "cc/i86.h"
 #include "cc/stdlib.h"
 
+extern void PUBLIC_CODE pascal_freemem(void *p, uint16_t size);
+
+#ifdef __WATCOMC__
+#pragma aux pascal_freemem modify [ax bx cx dx si di es];
+#endif
+
 void cc_free(void *ptr)
 {
     void *data;

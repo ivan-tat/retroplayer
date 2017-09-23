@@ -12,6 +12,12 @@
 #include "cc/i86.h"
 #include "cc/stdlib.h"
 
+extern void PUBLIC_CODE pascal_getmem(void **p, uint16_t size);
+
+#ifdef __WATCOMC__
+#pragma aux pascal_getmem modify [ax bx cx dx si di es];
+#endif
+
 void *cc_malloc(size_t size)
 {
     size_t n;

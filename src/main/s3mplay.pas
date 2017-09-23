@@ -73,6 +73,7 @@ uses
     dos_,
     stdio,
     string_,
+    debug,
     strutils,
     crt,
     dos,

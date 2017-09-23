@@ -30,6 +30,21 @@ uses
     ctype,
     errno_;
 
+procedure pascal_halt(exitcode: word); far;
+begin
+    System.Halt(exitcode);
+end;
+
+procedure pascal_getmem(var p: pointer; size: word); far;
+begin
+    System.GetMem(p, size);
+end;
+
+procedure pascal_freemem(p: pointer; size: word); far;
+begin
+    System.FreeMem(p, size);
+end;
+
 (*$L stdlib/atoi.obj*)
 procedure cc_atoi_; external;
 (*$L stdlib/atol.obj*)

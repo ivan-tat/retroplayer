@@ -48,7 +48,8 @@ uses
     stdio,
     stdlib,
     string_,
-    i86;
+    i86,
+    debug;
 
 (*$l emstool.obj*)
 function CheckEMM: boolean; external;

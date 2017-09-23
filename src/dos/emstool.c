@@ -15,6 +15,7 @@
 #include "cc/stdlib.h"
 #include "cc/stdio.h"
 #include "cc/malloc.h"
+#include "debug.h"
 
 #include "dos/emstool.h"
 

@@ -35,7 +35,9 @@ implementation
 
 uses
     pascal,
-    stdio;
+    dos_,
+    stdio,
+    debug;
 
 (*$l isr.obj*)
 

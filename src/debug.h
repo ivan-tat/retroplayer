@@ -6,13 +6,13 @@
 #ifndef DEBUG_H
 #define DEBUG_H 1
 
+#include "defines.h"
+
 #ifdef __WATCOMC__
 #pragma once
 #endif
 
 #include <stdarg.h>
-
-#include "pascal/pascal.h"
 
 #define DBGLOG_MSG  0
 #define DBGLOG_INFO 1

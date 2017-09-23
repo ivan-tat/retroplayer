@@ -15,6 +15,7 @@
 #endif
 
 #include "pascal/pascal.h"
+#include "debug.h"
 #include "main/effects.h"
 
 /*** Initialization ***/

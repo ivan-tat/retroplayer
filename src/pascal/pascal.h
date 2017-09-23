@@ -10,13 +10,10 @@
 
 #ifdef __WATCOMC__
 #pragma once
-#include <stdbool.h>
-#include <stdint.h>
 #endif
 
-#define PUBLIC_DATA __pascal
-#define PUBLIC_CODE __far __pascal
-#define EXTERN_LINK extern
+#include <stdbool.h>
+#include <stdint.h>
 
 /*** System unit ***/
 
@@ -48,8 +45,8 @@ _UNREGMETHOD(name);
 #define _EXITVARNAME(name) _oldexit_##name
 
 #ifdef DEBUG
- #define LOG_REGMETHOD(name, init) printf("[init] " #name ": " #init "()" CRLF);
- #define LOG_UNREGMETHOD(name, done) printf("[done] " #name ": " #done "()" CRLF);
+ #define LOG_REGMETHOD(name, init)   DEBUG_REG(#init, #name);
+ #define LOG_UNREGMETHOD(name, done) DEBUG_UNREG(#done, #name);
 #else
  #define LOG_REGMETHOD(name, init)
  #define LOG_UNREGMETHOD(name, done)
@@ -79,30 +76,5 @@ typedef struct pascalFile_t {
     char data[128];
 };
 typedef struct pascalFile_t PASCALFILE;
-
-/* System */
-
-extern void PUBLIC_CODE pascal_halt(uint16_t exitcode);
-/* Heap */
-
-extern uint32_t PUBLIC_CODE pascal_maxavail(void);
-extern void     PUBLIC_CODE pascal_getmem(void **p, uint16_t size);
-extern void     PUBLIC_CODE pascal_freemem(void *p, uint16_t size);
-
-/*** DOS Unit ***/
-
-extern void PUBLIC_CODE pascal_getintvec(uint8_t num, void **p);
-extern void PUBLIC_CODE pascal_setintvec(uint8_t num, void *p);
-
-#define getintvec(num, p) pascal_getintvec(num, p)
-#define setintvec(num, p) pascal_setintvec(num, p)
-
-#ifdef __WATCOMC__
-#pragma aux pascal_maxavail   modify [   bx cx    si di es];
-#pragma aux pascal_getmem     modify [ax bx cx dx si di es];
-#pragma aux pascal_freemem    modify [ax bx cx dx si di es];
-#pragma aux pascal_getintvec  modify [ax bx cx dx si di es];
-#pragma aux pascal_setintvec  modify [ax bx cx dx si di es];
-#endif
 
 #endif  /* PASCAL_H */

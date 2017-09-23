@@ -76,7 +76,8 @@ implementation
 
 uses
     dos_,
-    stdio;
+    stdio,
+    debug;
 
 (*$l dma.obj*)
 

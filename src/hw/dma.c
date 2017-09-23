@@ -16,6 +16,8 @@
 #include "cc/conio.h"
 #include "cc/dos.h"
 #include "cc/stdio.h"
+#include "debug.h"
+
 #include "hw/dma.h"
 
 /* I/O ports */
