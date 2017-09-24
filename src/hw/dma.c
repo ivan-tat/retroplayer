@@ -332,10 +332,9 @@ bool PUBLIC_CODE dmaBufAlloc(DMABUF *buf, uint32_t size)
         bufStart = dmaGetLinearAddress(buf->unaligned);
         bufEnd = bufStart + bufSize - 1;
 
-        #ifdef DEBUG
-        printf("[info] Allocated %lu bytes of DOS memory for DMA buffer at 0x%05lX-0x%05lX\r\n",
+        DEBUG_MSG_("dmaBufAlloc",
+            "Allocated %lu bytes of DOS memory for DMA buffer at 0x%05lX-0x%05lX\r\n",
             (uint32_t)bufSize, (uint32_t)bufStart, (uint32_t)bufEnd);
-        #endif
 
         dmaStart = bufStart;
         dmaEnd = dmaStart + dmaSize - 1;
@@ -347,16 +346,17 @@ bool PUBLIC_CODE dmaBufAlloc(DMABUF *buf, uint32_t size)
 
         buf->size = dmaSize;
         buf->data = MK_FP(dmaStart >> 4, 0);
-        #ifdef DEBUG
-        printf("[info] Using %lu bytes for DMA buffer at 0x%05lX-0x%05lX\r\n",
+
+        DEBUG_MSG_("dmaBufAlloc",
+            "Using %lu bytes for DMA buffer at 0x%05lX-0x%05lX\r\n",
             (uint32_t)buf->size, (uint32_t)dmaStart, (uint32_t)dmaEnd);
-        #endif
 
         if (dmaEnd < bufEnd) {
-            #ifdef DEBUG
-            printf("[info] Freeing unused trailing %lu bytes of allocated DMA buffer\r\n",
+
+            DEBUG_MSG_("dmaBufAlloc",
+                "Freeing unused trailing %lu bytes of allocated DMA buffer\r\n",
                 (uint32_t)(bufEnd - dmaEnd));
-            #endif
+
             bufSize = dmaEnd - bufStart + 1;
             _dos_setblock(_dos_para(bufSize), FP_SEG(buf->unaligned), &max);
         }
