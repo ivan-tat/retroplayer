@@ -98,16 +98,17 @@ echo "Building for target \`$target' ..."
 PROJDIR="$PWD"
 LASTDIR="$PROJDIR"
 
-AS="wasm -zq"
-CC='wcc'
+W_AS="wasm -zq"
+W_CC='wcc'
 export WCC="-3 -fp3 -ml -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu"
 # disable optimization:
 # "-oc" - disable <call followed by return> to jump optimization;
 # reason: "wdis" incorrectly writes "je near ptr <near_extern_label>"
 #   (without "near ptr")
-CL='wcl'
-DA='wdis'
-WLIB='wlib'
+W_CL='wcl'
+W_CL386='wcl386'
+W_DIS='wdis'
+W_LIB='wlib'
 PC='tpc -gd -q -v -$d+,e-,g+,l+,n+'
 
 _dir="$PROJDIR/src"
@@ -143,11 +144,11 @@ recompile_obj() {
     local f_nam="${f_obj%.obj}"
     local f_tmp="${f_nam}.tmp"
     local f_asm="${f_nam}.asm"
-    $DA -a "$f_obj" >"$f_tmp"
+    $W_DIS -a "$f_obj" >"$f_tmp"
     sed -r -e "s/(^DGROUP[[:space:]]+GROUP[[:space:]]+)CONST,CONST2,(_DATA)/\1\2/;\
 s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$)/_DATA\1/;" "$f_tmp" >"$f_asm"
     rm -f "$f_tmp"
-    $AS -fo="$f_obj" "$f_asm"
+    $W_AS -fo="$f_obj" "$f_asm"
 }
 
 mkobj_c() {
@@ -157,7 +158,7 @@ mkobj_c() {
     local segname
     #segname="${f_nam^^}_TEXT" # such expansion is not supported by Bash-2.05b.0 in DJGPP
     segname="`echo $f_nam | tr a-z A-Z`_TEXT"
-    $CC -nt=$segname -fo="$f_obj" "$f_c"
+    $W_CC -nt=$segname -fo="$f_obj" "$f_c"
     recompile_obj "$f_obj"
 }
 
@@ -170,7 +171,7 @@ mkobj() {
         asm)
             if [ ! -f "$PROJDIR/$f_dir/${f_name%.*}.obj" ]; then
                 ch_dir "$f_locname" 1
-                $AS -fo="${f_name%.asm}.obj" "$f_name"
+                $W_AS -fo="${f_name%.asm}.obj" "$f_name"
             else
                 ch_dir "$f_locname" 0
             fi
@@ -191,20 +192,70 @@ mkobj() {
                 ch_dir "$f_locname" 0
             fi
             ;;
+        *)
+            echo "Error: Do not known how to build source \`$f_locname'."
+            return 1;
+            ;;
     esac
 }
 
-mkexe_c() {
-    local f_c="$1"
-    local f_obj="${f_c%.c}.obj"
-    local WCC_OLD="$WCC"
-    export WCC="-q -3 -fp3 -fpi87"
-    $CL -fo="$f_obj" "$f_c"
+mkexe_c_dos() {
+    local f_name="$1"
+    local f_obj="${f_name%.*}.obj"
+    local f_exe="${f_name%.*}.exe"
+    local WCL_OLD="$WCL"
+    export WCL="-q -3 -fp3 -fpi87 -om -bcl=dos"
+    $W_CL -fo="$f_obj" -fe="$f_exe" "$f_name"
     rm -f "$f_obj"
-    export WCC="$WCC_OLD"
+    export WCL="$WCL_OLD"
 }
 
-mkexe() {
+mkexe_c_linux() {
+    local f_name="$1"
+    local f_obj="${f_name%.*}.o"
+    local f_exe="${f_name%.*}"
+    local WCL386_OLD="$WCL386"
+    export WCL386="-q -3 -fp3 -fpi87 -om -bcl=linux"
+    $W_CL386 -fo="$f_obj" -fe="$f_exe" "$f_name"
+    rm -f "$f_obj"
+    export WCL386="$WCC_OLD"
+}
+
+mkinc_linux() {
+    local f_locname="$1"
+    local f_dir="${f_locname%/*}"
+    local f_name="${f_locname##*/}"
+    local f_exe="${f_name%.*}"
+    local f_inc="${f_name%.*}.inc"
+    local domake
+
+    if [ -f "$PROJDIR/$f_dir/$f_inc" ]; then
+        domake=0
+    else
+        domake=1
+    fi
+
+    ch_dir "$f_locname" "$domake"
+
+    if [ $domake == 1 ]; then
+        case "${f_name##*.}" in
+            c)
+                if [ -f "$PROJDIR/$f_dir/$f_exe" ]; then
+                    rm -f "$PROJDIR/$f_dir/$f_exe"
+                fi
+                mkexe_c_linux "$f_name"
+                "./$f_exe" > "$f_inc"
+                rm -f "$f_exe"
+                ;;
+            *)
+                echo "Error: Do not known how to build source \`$f_locname' in GNU/Linux."
+                return 1;
+                ;;
+        esac
+    fi
+}
+
+mkexe_dos() {
     local f_locname="$1"
     local f_dir="${f_locname%/*}"
     local f_name="${f_locname##*/}"
@@ -222,10 +273,14 @@ mkexe() {
     if [ $domake == 1 ]; then
         case "${f_name##*.}" in
             c)
-                mkexe_c "$f_name"
+                mkexe_c_dos "$f_name"
                 ;;
             pas)
                 $PC "$f_name"
+                ;;
+            *)
+                echo "Error: Do not known how to build source \`$Source' in DOS."
+                return 1;
                 ;;
         esac
     fi
@@ -237,8 +292,11 @@ build_target() {
     local Source="$3"
     if [ $Target -eq 1 ]; then
         case $BuildType in
-            exe)
-                mkexe "$Source"
+            inc-linux)
+                mkinc_linux "$Source"
+                ;;
+            exe-dos)
+                mkexe_dos "$Source"
                 ;;
             obj)
                 mkobj "$Source"
@@ -257,7 +315,7 @@ if [ $T_WATCOM == 1 ]; then
     . ./scripts/ow/ow.sh
     . ./scripts/ow/clib.sh
     cd "$PROJDIR/src"
-    $WLIB "$CLIB" ':i4d.asm' ':i4m.asm' ':i8d086.asm'
+    $W_LIB "$CLIB" ':i4d.asm' ':i4m.asm' ':i8d086.asm'
     mv i4d.o i4d.obj
     mv i4m.o i4m.obj
     mv i8d086.o i8d086.obj
@@ -322,6 +380,9 @@ build_target $T_HW_SB  obj src/hw/sb/detisr_.asm
 build_target $T_HW_SB  obj src/hw/sb/detisr.c
 build_target $T_HW_SB  obj src/hw/sb/sndisr_.asm
 build_target $T_HW_SB  obj src/hw/sb/sndisr.c
+build_target $T_MAIN   inc-linux src/main/_wramp.c
+build_target $T_MAIN   inc-linux src/main/_wsinus.c
+build_target $T_MAIN   inc-linux src/main/_wsquare.c
 build_target $T_MAIN   obj src/main/mixvars.c
 build_target $T_MAIN   obj src/main/s3mvars.c
 build_target $T_MAIN   obj src/main/loads3m.c
@@ -385,10 +446,10 @@ build_target $T_MAIN_TP   obj src/main/readnote.pas
 build_target $T_MAIN_TP   obj src/main/mixing.pas
 build_target $T_MAIN_TP   obj src/main/filldma.pas
 build_target $T_MAIN_TP   obj src/main/s3mplay.pas
-build_target $T_PLAYER_TP exe src/player/plays3m.pas
-build_target $T_PLAYER_TP exe src/player/smalls3m.pas
+build_target $T_PLAYER_TP exe-dos src/player/plays3m.pas
+build_target $T_PLAYER_TP exe-dos src/player/smalls3m.pas
 build_target $T_PLAYER_TP obj src/player/lines.asm
-build_target $T_PLAYER_TP exe src/player/s3m_osci.pas
+build_target $T_PLAYER_TP exe-dos src/player/s3m_osci.pas
 fi
 
 cd "$PROJDIR"

@@ -95,6 +95,9 @@ src/hw/sb/detisr.asm
 src/hw/sb/sbctl.asm
 src/hw/sb/sbio.asm
 src/hw/sb/sndisr.asm
+src/main/_wramp.inc
+src/main/_wsinus.inc
+src/main/_wsquare.inc
 src/main/effects.asm
 src/main/filldma.asm
 src/main/fillvars.asm

@@ -13,16 +13,31 @@ interface
 (*$I defines.pas*)
 
 (* tables for mixing *)
-var
-    sinuswave: array [0..63] of shortint;
-    rampwave: array [0..63] of shortint;
-    squarewave: array [0..63] of byte;
 
 const
-    wavetab: array [0..2] of word = (
+    sinuswave: array [0..63] of shortint =
+(
+(*$I _wsinus.inc*)
+);
+
+const
+    rampwave: array [0..63] of shortint =
+(
+(*$I _wramp.inc*)
+);
+
+const
+    squarewave: array [0..63] of shortint =
+(
+(*$I _wsquare.inc*)
+);
+
+const
+    wavetab: array [0..2] of word =
+    (
         ofs(sinuswave),
         ofs(rampwave),
-        ofs(squarewave) (* looks not like a square but anyway *)
+        ofs(squarewave)
         (* 'random wave' is not a table, but a call for a random number ! *)
     );
 

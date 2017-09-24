@@ -83,6 +83,12 @@ $RM ./src/hw/sb/sndisr.asm
 cleandir ./src/dos
 $RM ./src/dos/ems.asm
 cleandir ./src/main
+$RM ./src/main/_wramp
+$RM ./src/main/_wramp.inc
+$RM ./src/main/_wsinus
+$RM ./src/main/_wsinus.inc
+$RM ./src/main/_wsquare
+$RM ./src/main/_wsquare.inc
 $RM ./src/main/effects.asm
 $RM ./src/main/filldma.asm
 $RM ./src/main/fillvars.asm

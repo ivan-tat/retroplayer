@@ -405,17 +405,6 @@ var key:boolean;
     playStart:=true;
   end;
 
-procedure calcwaves;
-VAR i:byte;
-  begin
-    for i:=0 to 63 do
-      begin
-        squarewave[i]:=255*ord(i<64);
-        sinuswave[i] :=round(sin(pi/32*i)*(127));
-        rampwave[i]  :=i*2-127;
-      end;
-  end;
-
 procedure s3mplayInit;
 var
     i: integer;
@@ -423,7 +412,6 @@ var
 begin
   inside:=false;
   PROC386:=isCPU_i386;
-  calcwaves;
   buffersreserved:=false;
   sounddevice:=false;
   initVolumeTable;

@@ -10,13 +10,31 @@
 
 #include "cc/i86.h"
 
-int8_t  sinuswave[64];
-int8_t  rampwave[64];
-uint8_t squarewave[64];
+#include "main/effvars.h"
 
-static const uint16_t wavetab[3] = {
-    MK_OFF(&sinuswave),
-    MK_OFF(&rampwave),
-    MK_OFF(&squarewave) /* looks not like a square but anyway */
+#ifdef DEFINE_LOCAL_DATA
+
+static const int8_t __near sinuswave[64] =
+{
+#include "main/_wsinus.inc"
+};
+
+static const int8_t __near rampwave[64] =
+{
+#include "main/_wramp.inc"
+};
+
+static const int8_t __near squarewave[64] =
+{
+#include "main/_wsquare.inc"
+};
+
+static const uint8_t __near *wavetab[3] =
+{
+    &sinuswave,
+    &rampwave,
+    &squarewave
     /* 'random wave' is not a table, but a call for a random number ! */
 };
+
+#endif
