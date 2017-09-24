@@ -17,91 +17,95 @@
 
 // TODO: remove EXTERN_LINK, PUBLIC_DATA and PUBLIC_CODE macros when done.
 
-/* EMM */
+#ifdef DEFINE_LOCAL_DATA
 
-EXTERN_LINK bool PUBLIC_DATA UseEMS;
+/* EMS */
+
+bool PUBLIC_DATA UseEMS;
 
 /* general module information */
 
-EXTERN_LINK bool             PUBLIC_DATA mod_isLoaded;
-EXTERN_LINK modTitle_t       PUBLIC_DATA mod_Title;
-EXTERN_LINK modTrackerName_t PUBLIC_DATA mod_TrackerName;
+bool             PUBLIC_DATA mod_isLoaded;
+modTitle_t       PUBLIC_DATA mod_Title;
+modTrackerName_t PUBLIC_DATA mod_TrackerName;
 
 /* module options */
 
-EXTERN_LINK bool PUBLIC_DATA modOption_ST2Vibrato;
-EXTERN_LINK bool PUBLIC_DATA modOption_ST2Tempo;
-EXTERN_LINK bool PUBLIC_DATA modOption_AmigaSlides;
-EXTERN_LINK bool PUBLIC_DATA modOption_SBfilter;
-EXTERN_LINK bool PUBLIC_DATA modOption_CostumeFlag;
-EXTERN_LINK bool PUBLIC_DATA modOption_VolZeroOptim;
-EXTERN_LINK bool PUBLIC_DATA modOption_AmigaLimits;
-EXTERN_LINK bool PUBLIC_DATA modOption_SignedData;
-EXTERN_LINK bool PUBLIC_DATA modOption_Stereo;
+bool PUBLIC_DATA modOption_ST2Vibrato;
+bool PUBLIC_DATA modOption_ST2Tempo;
+bool PUBLIC_DATA modOption_AmigaSlides;
+bool PUBLIC_DATA modOption_SBfilter;
+bool PUBLIC_DATA modOption_CostumeFlag;
+bool PUBLIC_DATA modOption_VolZeroOptim;
+bool PUBLIC_DATA modOption_AmigaLimits;
+bool PUBLIC_DATA modOption_SignedData;
+bool PUBLIC_DATA modOption_Stereo;
 
 /* play options */
 
-EXTERN_LINK bool PUBLIC_DATA playOption_ST3Order;
-EXTERN_LINK bool PUBLIC_DATA playOption_LoopSong;
+bool PUBLIC_DATA playOption_ST3Order;
+bool PUBLIC_DATA playOption_LoopSong;
 
 /* instruments */
 
-EXTERN_LINK instrumentsList_t *PUBLIC_DATA Instruments;
-EXTERN_LINK uint16_t PUBLIC_DATA InsNum;
-EXTERN_LINK bool     PUBLIC_DATA EMSSmp;
-EXTERN_LINK uint16_t PUBLIC_DATA SmpEMSHandle;
+instrumentsList_t *PUBLIC_DATA Instruments;
+uint16_t PUBLIC_DATA InsNum;
+bool     PUBLIC_DATA EMSSmp;
+uint16_t PUBLIC_DATA SmpEMSHandle;
 
 /* patterns */
 
-EXTERN_LINK patternsList_t PUBLIC_DATA Pattern;
-EXTERN_LINK uint16_t PUBLIC_DATA patListCount;
-EXTERN_LINK uint16_t PUBLIC_DATA patListPatLength;
-EXTERN_LINK bool     PUBLIC_DATA patListUseEM;
-EXTERN_LINK uint16_t PUBLIC_DATA patListEMHandle;
-EXTERN_LINK uint8_t  PUBLIC_DATA patListPatPerEMPage;
+patternsList_t PUBLIC_DATA Pattern;
+uint16_t PUBLIC_DATA patListCount;
+uint16_t PUBLIC_DATA patListPatLength;
+bool     PUBLIC_DATA patListUseEM;
+uint16_t PUBLIC_DATA patListEMHandle;
+uint8_t  PUBLIC_DATA patListPatPerEMPage;
 
 /* song arrangement */
 
-EXTERN_LINK ordersList_t PUBLIC_DATA Order;
-EXTERN_LINK uint16_t PUBLIC_DATA OrdNum;
-EXTERN_LINK uint8_t  PUBLIC_DATA LastOrder;
+ordersList_t PUBLIC_DATA Order;
+uint16_t PUBLIC_DATA OrdNum;
+uint8_t  PUBLIC_DATA LastOrder;
 
 #ifdef DEBUG
-EXTERN_LINK uint16_t PUBLIC_DATA StartOrder;
+uint16_t PUBLIC_DATA StartOrder;
 #endif
 
-EXTERN_LINK channelsList_t PUBLIC_DATA Channel;
-EXTERN_LINK uint8_t PUBLIC_DATA UsedChannels;
+channelsList_t PUBLIC_DATA Channel;
+uint8_t PUBLIC_DATA UsedChannels;
 
 /* initial state */
 
-EXTERN_LINK uint8_t PUBLIC_DATA InitTempo;
-EXTERN_LINK uint8_t PUBLIC_DATA InitSpeed;
+uint8_t PUBLIC_DATA InitTempo;
+uint8_t PUBLIC_DATA InitSpeed;
 
 /* play state */
 
-EXTERN_LINK bool    PUBLIC_DATA EndOfSong;
-EXTERN_LINK uint8_t PUBLIC_DATA CurTempo;
-EXTERN_LINK uint8_t PUBLIC_DATA CurSpeed;
-EXTERN_LINK uint8_t PUBLIC_DATA GVolume;
-EXTERN_LINK uint8_t PUBLIC_DATA MVolume;
+bool    PUBLIC_DATA EndOfSong;
+uint8_t PUBLIC_DATA CurTempo;
+uint8_t PUBLIC_DATA CurSpeed;
+uint8_t PUBLIC_DATA GVolume;
+uint8_t PUBLIC_DATA MVolume;
 
 /* position in song - you can change it while playing to jump arround */
 
-EXTERN_LINK uint8_t PUBLIC_DATA CurOrder;
-EXTERN_LINK uint8_t PUBLIC_DATA CurPattern;
-EXTERN_LINK uint8_t PUBLIC_DATA CurLine;
-EXTERN_LINK uint8_t PUBLIC_DATA CurTick;
+uint8_t PUBLIC_DATA CurOrder;
+uint8_t PUBLIC_DATA CurPattern;
+uint8_t PUBLIC_DATA CurLine;
+uint8_t PUBLIC_DATA CurTick;
 
 /* pattern loop */
 
-EXTERN_LINK bool    PUBLIC_DATA PLoop_On;
-EXTERN_LINK uint8_t PUBLIC_DATA PLoop_No;
-EXTERN_LINK uint8_t PUBLIC_DATA PLoop_To;
+bool    PUBLIC_DATA PLoop_On;
+uint8_t PUBLIC_DATA PLoop_No;
+uint8_t PUBLIC_DATA PLoop_To;
 
 /* pattern delay */
 
-EXTERN_LINK uint8_t PUBLIC_DATA PatternDelay;
+uint8_t PUBLIC_DATA PatternDelay;
+
+#endif  /* DEFINE_LOCAL_DATA */
 
 /*** Patterns ***/
 
