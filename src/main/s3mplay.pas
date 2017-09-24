@@ -261,12 +261,12 @@ end;
 
 function playGetSpeed:byte;
   begin
-    playGetSpeed:=curspeed;
+    playGetSpeed:=playState_speed;
   end;
 
 function playGetTempo:byte;
   begin
-    playGetTempo:=curtempo
+    playGetTempo:=playState_tempo
   end;
 
 var inside:boolean;
@@ -298,18 +298,18 @@ var i:byte;
 procedure playSetMasterVolume(vol:byte);
   begin
     if vol>127 then vol:=127;
-    mvolume:=vol;
-    calcposttable(mvolume, sdev_mode_16bit);
+    playState_mVolume:=vol;
+    calcposttable(playState_mVolume, sdev_mode_16bit);
   end;
 
 function playGetMasterVolume:byte;
   begin
-    playGetMasterVolume:=mvolume;
+    playGetMasterVolume:=playState_mVolume;
   end;
 
 function playGetPatternDelay:byte;
   begin
-    playGetPatternDelay:=patterndelay;
+    playGetPatternDelay:=playState_patDelayCount;
   end;
 
 function playGetSampleRate:word;
@@ -366,22 +366,23 @@ var key:boolean;
     (* now after loading we know if signed data or not *)
     calcVolumeTable( modOption_SignedData );
 
-    calcposttable(mvolume,A_16bit);
-    curtick:=1; { last tick -> goto next note ! }
-    curLine:=0; { <- next line to read from }
-    {$IFDEF DEBUG}
-    curorder:=startorder;
-    {$ELSE}
-    curOrder:=0; { <- next order to read from }
-    {$ENDIF}
-    curpattern:=order[0]; { next pattern to read from }
-    patterndelay:=0;      { no patterndelay at start of course ! }
-    Ploop_on:=false;
-    Ploop_to:=0;
-    set_speed(initspeed);
-    set_tempo(inittempo);
+    calcposttable(playState_mVolume,A_16bit);
+    (* last tick -> goto next note: *)
+    playState_tick:=1;
+    (* next row to read from: *)
+    playState_row:=0;
+    (* next order to read from: *)
+    playState_order:=initState_startOrder;
+    (* next pattern to read from: *)
+    playState_pattern:=order[playState_order];
+    (* reset pattern effects: *)
+    playState_patDelayCount:=0;
+    playState_patLoopActive:=false;
+    playState_patLoopStartRow:=0;
+    set_speed(initState_speed);
+    set_tempo(initState_tempo);
     playSetOrder(playOption_ST3Order); { <- don't remove this ! it's important ! (setup lastorder) }
-    EndOfSong:=false;
+    playState_songEnded:=false;
     sndDMABuf.flags_Slow := false;
     mixTickSamplesPerChannelLeft:=0;    (* emmidiately next tick *)
     Initchannels;

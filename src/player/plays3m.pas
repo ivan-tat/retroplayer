@@ -100,7 +100,7 @@ procedure local_exit; far;
 
 function nextord(nr:byte):byte;
   begin
-    patterndelay:=0;Ploop_on:=false;Ploop_no:=0;Ploop_to:=0;
+    playState_patDelayCount:=0;playState_patLoopActive:=false;playState_patLoopCount:=0;playState_patLoopStartRow:=0;
     inc(nr);
     while (nr<=lastorder) and (order[nr]>=254) do inc(nr);
     if nr>lastorder then
@@ -108,9 +108,9 @@ function nextord(nr:byte):byte;
         begin
           nr:=0;
           while (nr<=lastorder) and (order[nr]>=254) do inc(nr);
-          if nr>lastorder then EndofSong:=true; { stupid order ! (no real entry) }
+          if nr>lastorder then playState_songEnded:=true; { stupid order ! (no real entry) }
         end
-      else begin nr:=0;EndofSong:=true end;
+      else begin nr:=0;playState_songEnded:=true end;
     nextord:=nr;
   end;
 
@@ -129,7 +129,7 @@ function prevorder(nr:byte):byte;
     if order[nr]>=254 then { to far - search next playable }
       begin
         while (nr<=lastorder) and (order[nr]>=254) do inc(nr);
-        if nr>lastorder then EndofSong:=true; { stupid order ! (no real entry) }
+        if nr>lastorder then playState_songEnded:=true; { stupid order ! (no real entry) }
       end;
     prevorder:=nr;
   end;
@@ -177,12 +177,11 @@ var t:string;
     if upstr(copy(p,2,3))='ENV' then { read Blaster enviroment } how2input:=2;
     if upstr(copy(p,2,3))='CFG' then { input SB config by hand } how2input:=3;
     if upstr(copy(p,2,2))='LQ' then { mix in low quality mode } _LQ:=true;
-    {$IFDEF DEBUG}
     if upcase(p[2])='B' then
       begin
         t:=copy(p,3,length(p));
         val(t,b,i);
-        if i=0 then startorder:=b;
+        if i=0 then initState_startOrder:=b;
       end;
     if upcase(p[2])='F' then { set frame rate }
       begin
@@ -190,7 +189,6 @@ var t:string;
         val(t,b,i);
         if i=0 then playOption_FPS:=b;
       end;
-    {$ENDIF}
   end;
 
 procedure display_keys;
@@ -233,22 +231,15 @@ procedure display_help;
     writeln('         /ENV     ... use informations of blaster envirment');
     writeln('         /CFG     ... input SB config by hand');
     writeln('                      (default is SB hardware autodetect)');
-    write(' a key for next page ...');
-    readkey;
-    write(#13);clreol;
     writeln('         /O       ... handle order like ST3 does');
     writeln('                      (default is my own way - play ALL patterns are defined');
     writeln('                      in Order)');
     writeln('         /NOEMS   ... don''t use EMS for playing (player won''t use any EMS ');
     writeln('                      after this) - if there''s no free EMS, player''ll set');
     writeln('                      also <don''t use EMS>');
-
     writeln('         /LQ      ... use low quality mode');
-    {$IFDEF DEBUG}
-    writeln(' for debugging: ');
     writeln('         /Bxx     ... start at order xx (default is 0)');
     writeln('         /Fxx     ... set Frames Per Second (default is 70Hz)');
-    {$ENDIF}
     if not help then writeln('Gimme a filename :)');
     halt(1);
   end;
@@ -304,20 +295,25 @@ procedure refr_mainscr;
 var
     pat: PMUSPAT;
   begin
-    pat := patList_get(curpattern);
+    pat := patList_get(playState_pattern);
     textbackground(white);textcolor(black);
-    gotoxy(8,1);write(curOrder:2);
+    gotoxy(8,1);write(playState_order:2);
     gotoxy(11,1);write(lastorder:2);
-    gotoxy(20,1);write(curline:2);
-    gotoxy(29,1);write(curtick:2);
-    gotoxy(63,1);write(curpattern:2,' (',hexw( seg( patGetData(pat)^ ) ),')');
+    gotoxy(20,1);write(playState_row:2);
+    gotoxy(29,1);write(playState_tick:2);
+    gotoxy(63,1);write(playState_pattern:2,' (',hexw( seg( patGetData(pat)^ ) ),')');
     textbackground(green);textcolor(black);
     gotoxy(76,6);write(switch[playOption_LoopSong]);
     gotoxy(1,2);
     textbackground(magenta);textcolor(yellow);
-    write(' Speed: ',playGetSpeed:3,' '#179' Tempo: ',playGetTempo:3,' '#179' GVol: ',
-          gvolume:2,' '#179' MVol: ',playGetMasterVolume:3,' '#179' Pdelay: ',playGetPatternDelay:2,' '#179' Ploop: ');
-    if Ploop_on then write(Ploop_to,'(',PLoop_no,')') else write(Ploop_to);
+    write(' Speed: ', playGetSpeed:3,
+        ' '#179' Tempo: ', playGetTempo:3,
+        ' '#179' GVol: ', playState_gVolume:2,
+        ' '#179' MVol: ', playGetMasterVolume:3,
+        ' '#179' Pdelay: ', playGetPatternDelay:2,
+        ' '#179' Ploop: ', playState_patLoopStartRow);
+    if playState_patLoopActive then
+        write('(',playState_patLoopCount,')');
     clreol;
   end;
 
@@ -340,9 +336,7 @@ begin
   disply_c:=false;
   filename:='';
   ST3order:=false;
-  {$IFDEF DEBUG}
-  startorder:=0;
-  {$ENDIF}
+  initState_startOrder:=0;
   { end of default ... }
   textbackground(black);textcolor(lightgray);
   oldexit:=exitproc;
@@ -401,15 +395,26 @@ begin
       end;
     if (c='+') then
         begin
-          curorder:=nextord(curorder);
-          lastrow:=0;curline:=0;curtick:=1;curpattern:=order[curorder];c:=#0
+          playState_order:=nextord(playState_order);
+          lastrow:=0;
+          playState_row:=0;
+          playState_tick:=1;
+          playState_pattern:=order[playState_order];
+          c:=#0
         end;
     if (c='-') then
         begin
-          curorder:=prevorder(curorder);
-          patterndelay:=0;Ploop_on:=false;Ploop_no:=0;Ploop_to:=0;
+          playState_order:=prevorder(playState_order);
+          playState_patDelayCount:=0;
+          playState_patLoopActive:=false;
+          playState_patLoopCount:=0;
+          playState_patLoopStartRow:=0;
           disable_all;
-          lastrow:=0;curline:=0;curtick:=1;curpattern:=order[curorder];c:=#0
+          lastrow:=0;
+          playState_row:=0;
+          playState_tick:=1;
+          playState_pattern:=order[playState_order];
+          c:=#0
         end;
     if upcase(c)='L' then playOption_LoopSong:=not playOption_LoopSong;
     if upcase(c)='D' then
@@ -440,7 +445,7 @@ begin
       end;
     if (c=#77) and (startchn<usedchannels) then begin inc(startchn);if screen_no=2 then prepare_scr; end;
     if (c=#75) and (startchn>1) then begin dec(startchn);if screen_no=2 then prepare_scr; end;
-  until (sndDMABuf.flags_Slow or (c=#27) or EndOfSong);
+  until (sndDMABuf.flags_Slow or (c=#27) or playState_songEnded);
   if (sndDMABuf.flags_Slow) then writeln(' Sorry your PC is to slow ... ');
   view_cursor;
   stop_play;

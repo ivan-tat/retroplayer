@@ -86,9 +86,6 @@ var
     Order: TOrderArray;
     OrdNum: word;
     LastOrder: byte;
-{$IFDEF DEBUG}
-    StartOrder: word;
-{$ENDIF}
 
 (* channels *)
 
@@ -99,37 +96,38 @@ var
 (* initial state *)
 
 var
-    InitTempo: byte;
-    InitSpeed: byte;
+    initState_tempo: byte;
+    initState_speed: byte;
+    initState_startOrder: word;
 
 (* play state *)
 
 var
-    EndOfSong: boolean;
-    CurTempo: byte;
-    CurSpeed: byte;
-    GVolume: byte;
-    MVolume: byte;
+    playState_songEnded: boolean;
+    playState_tempo: byte;
+    playState_speed: byte;
+    playState_gVolume: byte;
+    playState_mVolume: byte;
 
 (* position in song - you can change it while playing to jump arround *)
 
 var
-    CurOrder: byte;
-    CurPattern: byte;
-    CurLine: byte;
-    CurTick: byte;
+    playState_order: byte;
+    playState_pattern: byte;
+    playState_row: byte;
+    playState_tick: byte;
 
 (* pattern loop *)
 
 var
-    PLoop_On: boolean;
-    PLoop_No: byte;
-    PLoop_To: byte;
+    playState_patLoopActive: boolean;
+    playState_patLoopCount: byte;
+    playState_patLoopStartRow: byte;
 
 (* pattern delay *)
 
 var
-    PatternDelay: byte;
+    playState_patDelayCount: byte;
 
 implementation
 

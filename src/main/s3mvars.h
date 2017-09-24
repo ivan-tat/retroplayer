@@ -116,10 +116,6 @@ extern ordersList_t PUBLIC_DATA Order;
 extern uint16_t PUBLIC_DATA OrdNum;
 extern uint8_t  PUBLIC_DATA LastOrder;  /* last order to play */
 
-#ifdef DEBUG
-extern uint16_t PUBLIC_DATA StartOrder;
-#endif
-
 /* channels */
 
 extern channelsList_t PUBLIC_DATA Channel;  /* all public/private data for every channel */
@@ -147,34 +143,33 @@ extern uint8_t PUBLIC_DATA UsedChannels;    /* possible values : 1..32 (kill all
 
 /* initial state */
 
-extern uint8_t PUBLIC_DATA InitTempo;   /* initial tempo */
-extern uint8_t PUBLIC_DATA InitSpeed;   /* initial speed */
+extern uint8_t  PUBLIC_DATA initState_tempo;
+extern uint8_t  PUBLIC_DATA initState_speed;
+extern uint16_t PUBLIC_DATA initState_startOrder;
 
 /* play state */
 
-extern bool    PUBLIC_DATA EndOfSong;
-extern uint8_t PUBLIC_DATA CurTempo;    /* current tempo - count of ticks per note */
-extern uint8_t PUBLIC_DATA CurSpeed;    /* current speed - length of one tick */
-extern uint8_t PUBLIC_DATA GVolume;     /* global volume -> usedvol = instrvol*gvolume/255 */
-extern uint8_t PUBLIC_DATA MVolume;     /* master volume -> calc posttables */
+extern bool    PUBLIC_DATA playState_songEnded;
+extern uint8_t PUBLIC_DATA playState_tempo;
+extern uint8_t PUBLIC_DATA playState_speed;
+extern uint8_t PUBLIC_DATA playState_gVolume;
+extern uint8_t PUBLIC_DATA playState_mVolume;
 
 /* position in song - you can change it while playing to jump arround */
 
-extern uint8_t PUBLIC_DATA CurOrder;    /* position in song arrangement */
-extern uint8_t PUBLIC_DATA CurPattern;  /* current pattern - is specified also by Order[curorder] */
-                                        /* so it's only for the user ... */
-extern uint8_t PUBLIC_DATA CurLine;     /* current line in pattern */
-extern uint8_t PUBLIC_DATA CurTick;     /* current tick - we only calc one tick per call */
-                                        /* (look at MIXING.ASM) */
+extern uint8_t PUBLIC_DATA playState_order;
+extern uint8_t PUBLIC_DATA playState_pattern;
+extern uint8_t PUBLIC_DATA playState_row;
+extern uint8_t PUBLIC_DATA playState_tick;
 
 /* pattern loop */
 
-extern bool    PUBLIC_DATA PLoop_On;    /* in a Pattern loop? */
-extern uint8_t PUBLIC_DATA PLoop_No;    /* number of loops left */
-extern uint8_t PUBLIC_DATA PLoop_To;    /* position to loop to */
+extern bool    PUBLIC_DATA playState_patLoopActive;
+extern uint8_t PUBLIC_DATA playState_patLoopCount;
+extern uint8_t PUBLIC_DATA playState_patLoopStartRow;
 
 /* pattern delay */
 
-extern uint8_t PUBLIC_DATA PatternDelay;
+extern uint8_t PUBLIC_DATA playState_patDelayCount;
 
 #endif  /* S3MVARS_H */

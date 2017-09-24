@@ -46,7 +46,7 @@ var
 
 procedure display_currow;
   begin
-    display_row(curorder,curline);writeln;
+    display_row(playState_order,playState_row);writeln;
   end;
 
 {$I EFX_NAME.INC}
@@ -103,9 +103,9 @@ var
     pat: PMUSPAT;
   begin
     window(1,9,80,25);textbackground(white);textcolor(black);
-    if curline+1<lastrow then
+    if playState_row+1<lastrow then
       begin
-        j:=prevorder(curorder);
+        j:=prevorder(playState_order);
         for i:=lastrow to 63 do
           begin
             gotoxy(1,17);writeln;gotoxy(1,17);display_row(j,i);
@@ -113,15 +113,15 @@ var
         lastrow:=0;
         { new pattern }
         (* switch EMSpage zero to curpattern *)
-        pat := patList_get(curpattern);
+        pat := patList_get(playState_pattern);
         if (patIsDataInEM(pat)) then
             emsMap(patListEMHandle, patGetDataLogPageInEM(pat), 0);
       end;
-    for i:=lastrow to curline do
+    for i:=lastrow to playState_row do
       begin
-        gotoxy(1,17);writeln;gotoxy(1,17);display_row(curorder,i);
+        gotoxy(1,17);writeln;gotoxy(1,17);display_row(playState_order,i);
       end;
-    lastrow:=curline+1;
+    lastrow:=playState_row+1;
     scrLeave;
   end;
 

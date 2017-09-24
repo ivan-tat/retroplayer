@@ -119,9 +119,9 @@ var
     textbackground(black);textcolor(white);
     for w:=0 to 1 do begin gotoxy(w*28+20,1);write('    Chn ',2*w+1+startchn:2,'    '); end;
     scrLeave;
-    lastrow:=curline;
+    lastrow:=playState_row;
     { switch EMSpage 0 to curpattern }
-    pat := patList_get(curpattern);
+    pat := patList_get(playState_pattern);
     if (patIsDataInEM(pat)) then
         emsMap(patListEMHandle, patGetDataLogPageInEM(pat), 0);
   end;

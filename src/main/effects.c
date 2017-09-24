@@ -532,15 +532,15 @@ DEFINE_EFFECTS_LIST(main) =
 void PUBLIC_CODE set_speed(uint8_t value)
 {
     if (value > 0)
-        CurSpeed = value;
+        playState_speed = value;
 }
 
 void PUBLIC_CODE set_tempo(uint8_t value)
 {
     if (value >= 32)
-        CurTempo = value;
+        playState_tempo = value;
     else
-        value = CurTempo;
+        value = playState_tempo;
     if (value)
         mixTickSamplesPerChannel = (long)mixSampleRate * 5 / (int)(value * 2);
 }
@@ -601,7 +601,7 @@ void PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum)
         {
             chn->bIns = insNum;
             chn_setInstrument(chn, ins);
-            chn_setSampleVolume(chn, (ins->vol * GVolume) >> 6);
+            chn_setSampleVolume(chn, (ins->vol * playState_gVolume) >> 6);
             chn_setSampleData(chn, ins_getSampleData(ins));
             flags = 0;
             if (ins->flags & 0x01)
@@ -829,7 +829,7 @@ METHOD_TICK(volSlide_down)
 
 METHOD_TICK(volSlide_up)
 {
-    chn_setSampleVolume(chn, ((chn->bSmpVol + (chn_getEffectParam(chn) >> 4)) * GVolume) >> 6);
+    chn_setSampleVolume(chn, ((chn->bSmpVol + (chn_getEffectParam(chn) >> 4)) * playState_gVolume) >> 6);
 }
 
 METHOD_HANDLE(volSlide_fineDown)
@@ -1381,14 +1381,14 @@ METHOD_INIT(special_setTremWave)
 METHOD_INIT(special_patLoop)
 {
     if (!param)
-        PLoop_To = CurLine;
+        playState_patLoopStartRow = playState_row;
     else
     {
-        if (!PLoop_On)
+        if (!playState_patLoopActive)
         {
-            PLoop_On = true;
+            playState_patLoopActive = true;
             param++;
-            PLoop_No = param;
+            playState_patLoopCount = param;
         };
         playState_patLoop_bNow = true;
     };
@@ -1435,7 +1435,7 @@ METHOD_TICK(special_noteDelay)
             };
         };
         if (chn->bSavVol != CHNINSVOL_EMPTY)
-            chn_setSampleVolume(chn, (chn->bSavVol * GVolume) >> 6);
+            chn_setSampleVolume(chn, (chn->bSavVol * playState_gVolume) >> 6);
         chn_setCommand(chn, EFFIDX_NONE);
     };
 }
@@ -1444,7 +1444,7 @@ METHOD_INIT(special_patDelay)
 {
     if (!playState_patDelay_bNow)
     {
-        PatternDelay = param + 1;
+        playState_patDelayCount = param + 1;
         chnState_patDelay_bParameterSaved = chn_getEffectParam(chn);
     };
     return true;

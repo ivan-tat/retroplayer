@@ -47,15 +47,15 @@ void *PUBLIC_CODE mapSampleData(uint16_t seg, uint16_t len)
 void __near newTick(void)
 {
     mixTickSamplesPerChannelLeft = mixTickSamplesPerChannel;
-    if (CurTick <= 1) {
-        if (PatternDelay != 0) {
+    if (playState_tick <= 1) {
+        if (playState_patDelayCount != 0) {
             /* or pattern delay done ... */
-            PatternDelay--;
-            if (PatternDelay != 0) CurLine--;
+            playState_patDelayCount--;
+            if (playState_patDelayCount != 0) playState_row--;
         };
         readnewnotes();
     } else {
-        CurTick--;
+        playState_tick--;
     };
 }
 
@@ -67,7 +67,7 @@ void __near calcChannel(struct channel_t *chnInfo, bool callEffects, uint16_t co
     if (chnInfo->bChannelType == 0 || chnInfo->bChannelType > 2) return;
     if (callEffects) {
         /* do effects for this channel: */
-        if (CurTick != CurSpeed) chn_effTick(chnInfo);
+        if (playState_tick != playState_speed) chn_effTick(chnInfo);
     };
     /* check if mixing: */
     if (chnInfo->bEnabled == 0) return;
@@ -122,7 +122,7 @@ void PUBLIC_CODE calcTick(void *outBuf, uint16_t len)
         newTick();
     };
 
-    while (! EndOfSong) {
+    while (! playState_songEnded) {
         count = getCountFromMixBufOff(bufSize - bufOff);
         if (count > mixTickSamplesPerChannelLeft) count = mixTickSamplesPerChannelLeft;
             /* finish that tick and loop to fill the whole mixing buffer */

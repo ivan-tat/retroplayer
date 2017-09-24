@@ -68,42 +68,39 @@ ordersList_t PUBLIC_DATA Order;
 uint16_t PUBLIC_DATA OrdNum;
 uint8_t  PUBLIC_DATA LastOrder;
 
-#ifdef DEBUG
-uint16_t PUBLIC_DATA StartOrder;
-#endif
-
 channelsList_t PUBLIC_DATA Channel;
 uint8_t PUBLIC_DATA UsedChannels;
 
 /* initial state */
 
-uint8_t PUBLIC_DATA InitTempo;
-uint8_t PUBLIC_DATA InitSpeed;
+uint8_t  PUBLIC_DATA initState_tempo;
+uint8_t  PUBLIC_DATA initState_speed;
+uint16_t PUBLIC_DATA initState_startOrder;
 
 /* play state */
 
-bool    PUBLIC_DATA EndOfSong;
-uint8_t PUBLIC_DATA CurTempo;
-uint8_t PUBLIC_DATA CurSpeed;
-uint8_t PUBLIC_DATA GVolume;
-uint8_t PUBLIC_DATA MVolume;
+bool    PUBLIC_DATA playState_songEnded;
+uint8_t PUBLIC_DATA playState_tempo;
+uint8_t PUBLIC_DATA playState_speed;
+uint8_t PUBLIC_DATA playState_gVolume;
+uint8_t PUBLIC_DATA playState_mVolume;
 
 /* position in song - you can change it while playing to jump arround */
 
-uint8_t PUBLIC_DATA CurOrder;
-uint8_t PUBLIC_DATA CurPattern;
-uint8_t PUBLIC_DATA CurLine;
-uint8_t PUBLIC_DATA CurTick;
+uint8_t PUBLIC_DATA playState_order;
+uint8_t PUBLIC_DATA playState_pattern;
+uint8_t PUBLIC_DATA playState_row;
+uint8_t PUBLIC_DATA playState_tick;
 
 /* pattern loop */
 
-bool    PUBLIC_DATA PLoop_On;
-uint8_t PUBLIC_DATA PLoop_No;
-uint8_t PUBLIC_DATA PLoop_To;
+bool    PUBLIC_DATA playState_patLoopActive;
+uint8_t PUBLIC_DATA playState_patLoopCount;
+uint8_t PUBLIC_DATA playState_patLoopStartRow;
 
 /* pattern delay */
 
-uint8_t PUBLIC_DATA PatternDelay;
+uint8_t PUBLIC_DATA playState_patDelayCount;
 
 #endif  /* DEFINE_LOCAL_DATA */
 

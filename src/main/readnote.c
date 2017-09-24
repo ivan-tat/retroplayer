@@ -172,7 +172,7 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
         {
             chnState_cur_bVol = chnState_cur_bVol > CHNINSVOL_MAX ?
                 CHNINSVOL_MAX : chnState_cur_bVol;
-            chn_setSampleVolume(chn, (chnState_cur_bVol * GVolume) >> 6);
+            chn_setSampleVolume(chn, (chnState_cur_bVol * playState_gVolume) >> 6);
         };
         chn_effHandle(chn);
     };
@@ -205,7 +205,7 @@ PATFLOWSTATE __near pat_playRow(MUSPAT *pat)
     if (!pattern_open(&patDesc, pat))
         return FLOWSTATE_ROWEND;
 
-    pattern_seekRow(&patDesc, CurLine);
+    pattern_seekRow(&patDesc, playState_row);
 
     for (i = 0; i < UsedChannels; i++)
     {
@@ -223,14 +223,14 @@ PATFLOWSTATE __near pat_playRow(MUSPAT *pat)
     };
 
     if (playState_gVolume_bFlag)
-        GVolume = playState_gVolume_bValue;
+        playState_gVolume = playState_gVolume_bValue;
 
-    CurTick = CurSpeed;
+    playState_tick = playState_speed;
 
     // Pattern break ?
     if (playState_patBreak_bFlag)
     {
-        CurLine = playState_patBreak_bPos;
+        playState_row = playState_patBreak_bPos;
         pattern_close(&patDesc);
         return FLOWSTATE_PATTERNEND;
     };
@@ -238,17 +238,17 @@ PATFLOWSTATE __near pat_playRow(MUSPAT *pat)
     // Pattern loop ?
     if (playState_patLoop_bNow)
     {
-        PLoop_No--;
-        if (PLoop_No)
+        playState_patLoopCount--;
+        if (playState_patLoopCount)
         {
-            CurLine = PLoop_To;
+            playState_row = playState_patLoopStartRow;
             pattern_close(&patDesc);
             return FLOWSTATE_WAIT;
         }
         else
         {
-            PLoop_To = CurLine + 1;
-            PLoop_On = false;
+            playState_patLoopStartRow = playState_row + 1;
+            playState_patLoopActive = false;
         };
     };
 
@@ -273,36 +273,36 @@ void PUBLIC_CODE readnewnotes(void)
         switch (status)
         {
             case FLOWSTATE_ROWEND:
-                CurLine++;
-                if (CurLine < 64)
+                playState_row++;
+                if (playState_row < 64)
                     status = FLOWSTATE_WAIT;
                 else
                 {
-                    CurLine = 0;
+                    playState_row = 0;
                     status = FLOWSTATE_PATTERNEND;
                 };
                 break;
 
             case FLOWSTATE_PATTERNEND:
-                CurOrder++;
+                playState_order++;
                 status = FLOWSTATE_PATTERNJUMP;
                 break;
 
             case FLOWSTATE_PATTERNJUMP:
-                PLoop_To = 0;
-                if (CurOrder > LastOrder)
+                playState_patLoopStartRow = 0;
+                if (playState_order > LastOrder)
                     status = FLOWSTATE_SONGSTOP;
                 else
                     status = FLOWSTATE_SONGLOOP;
                 break;
 
             case FLOWSTATE_SONGLOOP:
-                patIndex = Order[CurOrder];
+                patIndex = Order[playState_order];
                 if (patIndex >= 254)
                     status = FLOWSTATE_PATTERNEND;
                 else
                 {
-                    CurPattern = patIndex;
+                    playState_pattern = patIndex;
                     if (firstPlay)
                     {
                         firstPlay = false;
@@ -310,7 +310,7 @@ void PUBLIC_CODE readnewnotes(void)
                         playState_patBreak_bFlag = false;
                         playState_gVolume_bFlag = false;
                         playState_patLoop_bNow = false;
-                        playState_patDelay_bNow = PatternDelay != 0;
+                        playState_patDelay_bNow = playState_patDelayCount != 0;
                         pat = patList_get(patIndex);
                         status = pat_playRow(pat);
                     }
@@ -322,12 +322,12 @@ void PUBLIC_CODE readnewnotes(void)
             case FLOWSTATE_SONGSTOP:
                 if (playOption_LoopSong)
                 {
-                    CurOrder = 0;
+                    playState_order = 0;
                     status = FLOWSTATE_SONGLOOP;
                 }
                 else
                 {
-                    EndOfSong = true;
+                    playState_songEnded = true;
                     status = FLOWSTATE_WAIT;
                 };
                 break;

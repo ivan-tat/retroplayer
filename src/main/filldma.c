@@ -109,7 +109,7 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
 
     sndDMABuf.flags_locked = true;
 
-    if (EndOfSong) {
+    if (playState_songEnded) {
         // clear buffer
         memset(&(buf[sndDMABufGetFrameOff(&sndDMABuf, sndDMABuf.frameActive)]), 0, framesize);
         sndDMABuf.frameActive = 1 - sndDMABuf.frameActive;

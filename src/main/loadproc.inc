@@ -413,11 +413,11 @@ var a,b,c:string;
         chr( ord('0') + ( header.cwtv and $0f ) );
     modOption_SignedData := (header.ffv = 1);
     if not (header.ffv in [1,2]) then begin load_error:=wrongformat;exit end;
-    gvolume:=header.gvolume;
-    mvolume:=header.mvolume and $7f;
+    playState_gVolume:=header.gvolume;
+    playState_mVolume:=header.mvolume and $7f;
     modOption_Stereo := (header.mvolume and $80 <> 0);
-    initspeed:=header.initialspeed;
-    inittempo:=header.initialtempo;
+    initState_speed:=header.initialspeed;
+    initState_tempo:=header.initialtempo;
     { setup channels : }
     maxused:=0;
     for i:=0 to 31 do
