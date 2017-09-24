@@ -59,7 +59,7 @@ typedef struct effMethodsTable_t EFFMT;
 // Effect description
 #define EFFECT(name) eff_##name##_desc
 #define DEFINE_EFFECT(name, init, handle, tick, cont, stop) \
-static const EFFMT EFFECT(name) = \
+static const EFFMT __near EFFECT(name) = \
 { \
     NAME_INIT  (init), \
     NAME_HANDLE(handle), \
@@ -75,7 +75,7 @@ static const EFFMT EFFECT(name) = \
 // Sub-effect description
 #define SUB_EFFECT(name) eff_##name##_sub_desc
 #define DEFINE_SUB_EFFECT(name, init, handle, tick, cont, stop) \
-static const EFFMT SUB_EFFECT(name) = \
+static const EFFMT __near SUB_EFFECT(name) = \
 { \
     NAME_INIT  (init), \
     NAME_HANDLE(handle), \
