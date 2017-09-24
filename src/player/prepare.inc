@@ -150,7 +150,7 @@ var psmp:pSmpheader;
     writeln(' Sample positions in memory : ');
     l:=15;
     textcolor(yellow);
-    if useEMS then begin write(#10' EMS used by samples :',getusedEMSsmp,' KB') end;
+    if useEMS then begin write(#10' EMS used by samples :',smpListGetUsedEM,' KB') end;
     textcolor(white);
     for i:=1 to l do
       begin

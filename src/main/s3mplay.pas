@@ -43,28 +43,31 @@ CONST
 VAR load_Error:integer;
     player_Error:integer;
 
-FUNCTION  load_s3m(name:string):BOOLEAN;        { load S3M module into memory }
-PROCEDURE done_module;                          { free memory used by S3M }
-FUNCTION  Init_device(input:byte):boolean;       { = false if set device failed }
-FUNCTION  Init_S3Mplayer:boolean;                { init DMABuf,mixBuf,volumetable and some variables }
-PROCEDURE Done_S3Mplayer;                       { free buffers used by player }
-PROCEDURE playSetMode(m16bits, mStereo: boolean; mRate: word);
-FUNCTION  startplaying(var A_stereo,A_16Bit:boolean;LQ:Boolean):Boolean;
-    (* play totaly in background - you have nothin else to do for continue playing !
-        It'll interrupt your program itself and calculate the next data is required *)
-procedure set_mastervolume(vol:byte);
-procedure set_ST3order(new:boolean);             (* look at ST3order *)
-{ To get some infos : }
-function getspeed:byte;
-function gettempo:byte;
-function get_mvolume:byte;
-function get_delay:byte;
-function getSamplerate:word;
-function getusedEMSsmp:longint;    { get size of samples in EMS }
+function  player_load_s3m(name: String): Boolean;
+    (* load S3M module into memory *)
 
-{ not supported functions: }
-FUNCTION getuseddevice(var typ:byte;var base:word;var dma8,dma16:byte;var irq:byte):byte;
-FUNCTION load_specialdata(var p):boolean; { allocate memory and load special data from file }
+procedure player_free_module;
+    (* free memory used by module *)
+
+function  player_init_device(input: Byte): Boolean;
+
+function  player_init: Boolean;
+    (* init DMABuf,mixBuf,volumetable and some variables *)
+
+procedure player_free;
+    (* free buffers used by player *)
+
+procedure playSetMode(m16bits, mStereo: boolean; mRate: word);
+function  playStart(var A_stereo, A_16Bit: Boolean; LQ: Boolean): Boolean;
+procedure playSetMasterVolume(vol: Byte);
+procedure playSetOrder(new: Boolean);   (* look at ST3order *)
+function  playGetSpeed: byte;
+function  playGetTempo: byte;
+function  playGetMasterVolume: byte;
+function  playGetPatternDelay: byte;
+function  playGetSampleRate: word;
+
+function  smpListGetUsedEM:longint;
 
 IMPLEMENTATION
 
@@ -106,13 +109,7 @@ VAR
     { some saved values for correct restoring former status : }
     oldexitproc  :pointer;
 
-{ getuseddevice is not implemented yet }
-FUNCTION getuseddevice(var typ:byte;var base:word;var dma8,dma16:byte; var irq:byte):byte;
-{ = 0 ... no device set / = 1 ... use SB mixing / > 1 ... other devices not supported yet }
-{ typ ... up2now only SB typ - look at BLASTER.PAS }
-begin end;
-
-PROCEDURE done_module;
+PROCEDURE player_free_module;
 var i:word;
     p:pointer;
     psmp:PsmpHeader;
@@ -143,8 +140,9 @@ var i:word;
     mod_isLoaded:=false;
   END;
 
-PROCEDURE Done_S3Mplayer;
+PROCEDURE player_free;
   begin
+    player_free_module;
     restore_irq;
     freeVolumeTable;
     sndDMABufDone(@sndDMABuf);
@@ -158,13 +156,13 @@ PROCEDURE Done_S3Mplayer;
 
 {$I LOADPROC.INC}
 
-FUNCTION Init_device(input:byte):boolean;
+FUNCTION player_init_device(input:byte):boolean;
 {  input= 0 ... use settings in BLASTER unit
         = 1 ... hardware autodetect SB
         = 2 ... read blaster enviroment
         = 3 ... input by hand }
   begin
-    Init_device:=false;
+    player_init_device:=false;
     if Input = 0 then { 'checkthem' not yet implemented } sounddevice:=true
     else
     if Input = 1 then Sounddevice:=DetectSoundblaster(true)
@@ -172,16 +170,16 @@ FUNCTION Init_device(input:byte):boolean;
     if Input = 2 then Sounddevice:=UseBlasterEnv
     else
     if Input = 3 then Sounddevice:=InputSoundblasterValues;
-    Init_device:=Sounddevice;
+    player_init_device:=Sounddevice;
   end;
 
-FUNCTION Init_S3Mplayer:boolean;
+FUNCTION player_init:boolean;
 var p:pArray;
     _seg: word;
   begin
-    Init_S3Mplayer:=false;
+    player_init:=false;
     if not proc386 then begin player_error:=nota386orhigher;exit end;
-    if buffersreserved then begin player_error:=Allreadyallocbuffers;Init_S3Mplayer:=true;exit end;
+    if buffersreserved then begin player_error:=Allreadyallocbuffers;player_init:=true;exit end;
     { buffersreserved = false ! }
     if ( not allocVolumeTable ) then begin player_error:=notenoughmem;exit end;
 
@@ -204,7 +202,7 @@ var p:pArray;
     buffersreserved:=true;
     { clear those buffers : }
     fillchar(mixBuf^,DMA_BUF_SIZE_MAX,0);
-    Init_S3Mplayer:=true;
+    player_init:=true;
   end;
 
 PROCEDURE playSetMode(m16bits, mStereo: boolean; mRate: word);
@@ -261,14 +259,14 @@ begin
     if (playOption_LowQuality) then outbuf^.framesCount := outbuf^.framesCount shr 1;
 end;
 
-function getspeed:byte;
+function playGetSpeed:byte;
   begin
-    getspeed:=curspeed;
+    playGetSpeed:=curspeed;
   end;
 
-function gettempo:byte;
+function playGetTempo:byte;
   begin
-    gettempo:=curtempo
+    playGetTempo:=curtempo
   end;
 
 var inside:boolean;
@@ -297,37 +295,37 @@ var i:byte;
       end;
   end;
 
-procedure set_mastervolume(vol:byte);
+procedure playSetMasterVolume(vol:byte);
   begin
     if vol>127 then vol:=127;
     mvolume:=vol;
     calcposttable(mvolume, sdev_mode_16bit);
   end;
 
-function get_mvolume:byte;
+function playGetMasterVolume:byte;
   begin
-    get_mvolume:=mvolume;
+    playGetMasterVolume:=mvolume;
   end;
 
-function get_delay:byte;
+function playGetPatternDelay:byte;
   begin
-    get_delay:=patterndelay;
+    playGetPatternDelay:=patterndelay;
   end;
 
-function getSamplerate:word;
+function playGetSampleRate:word;
   begin
-    getSamplerate:=Samplerate;
+    playGetSampleRate:=Samplerate;
   end;
 
-function getusedEMSsmp:longint;    { get size of samples in EMS }
+function smpListGetUsedEM:longint;    { get size of samples in EMS }
 begin
     if EMSsmp then
-        getusedEMSsmp:=16*emsGetHandleSize(smpEMShandle)
+        smpListGetUsedEM:=16*emsGetHandleSize(smpEMShandle)
     else
-        getusedEMSsmp:=0;
+        smpListGetUsedEM:=0;
 end;
 
-procedure set_ST3order(new:boolean);
+procedure playSetOrder(new:boolean);
 var i:byte;
   begin
     playOption_ST3Order:=new;
@@ -349,12 +347,12 @@ var i:byte;
       end;
   end;
 
-FUNCTION startplaying(var A_stereo,A_16Bit:boolean;LQ:Boolean):boolean;
+FUNCTION playStart(var A_stereo,A_16Bit:boolean;LQ:Boolean):boolean;
 var key:boolean;
     p:parray;
     count: word;
   begin
-    startplaying:=false;
+    playStart:=false;
     player_error:=0;
     playOption_LowQuality := LQ;
     A_stereo := A_Stereo and sdev_caps_stereo;
@@ -382,7 +380,7 @@ var key:boolean;
     Ploop_to:=0;
     set_speed(initspeed);
     set_tempo(inittempo);
-    set_ST3order(playOption_ST3Order); { <- don't remove this ! it's important ! (setup lastorder) }
+    playSetOrder(playOption_ST3Order); { <- don't remove this ! it's important ! (setup lastorder) }
     EndOfSong:=false;
     sndDMABuf.flags_Slow := false;
     mixTickSamplesPerChannelLeft:=0;    (* emmidiately next tick *)
@@ -404,7 +402,7 @@ var key:boolean;
     play_firstblock( count );
 
     (* ok, now everything works in background *)
-    startplaying:=true;
+    playStart:=true;
   end;
 
 procedure calcwaves;
@@ -456,8 +454,7 @@ end;
 procedure s3mplayDone;
 begin
     stop_play;
-    done_module;
-    if buffersreserved then done_S3Mplayer else restore_irq;
+    player_free;
 end;
 
 procedure register_s3mplay; far; external;

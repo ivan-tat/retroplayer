@@ -41,7 +41,7 @@ begin
     end;
 end;
 
-FUNCTION  LOAD_S3M(name:string):BOOLEAN;
+FUNCTION  player_load_s3m(name:string):BOOLEAN;
 var f:file;
     header:Theader;
     maxused:byte;
@@ -112,7 +112,7 @@ var f:file;
             _dos_freemem(seg(buffer^));
             buffer := nil;
         end;
-        done_module;
+        player_free_module;
     end;
 
   PROCEDURE forget(count:longint);
@@ -370,7 +370,7 @@ var a,b,c:string;
     _seg: word;
 
   BEGIN
-    LOAD_S3M := FALSE;
+    player_load_s3m := FALSE;
     useEMS:=emsInstalled and useEMS and (emsGetFreePagesCount>1); { we need one page for saving mapping while playing }
     load_error:=0;buffer:=Nil;
     fsplit(name,a,b,c);
@@ -585,7 +585,5 @@ var a,b,c:string;
     { Just for fun set names for EMS handles (does only work for EMS>= v4.0) }
     if ( emsVersion.Hi >= 4 ) then setEMSnames;
     mod_isLoaded := true;
-    LOAD_S3M :=TRUE;
+    player_load_s3m :=TRUE;
   END;
-
-FUNCTION load_specialdata(var p):boolean; BEGIN { not implemented } END;
