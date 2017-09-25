@@ -13,6 +13,7 @@ uses
     sbctl,
     blaster,
     s3mtypes,
+    muspat,
     s3mvars,
     fillvars,
     mixvars,

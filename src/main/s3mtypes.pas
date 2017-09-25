@@ -31,9 +31,6 @@ type
     PModTrackerName = ^TModTrackerName;
 
 const
-    MAX_PATTERNS = 100; (* 0..99 patterns *)
-
-const
     MAX_ORDERS = 255; (* 0..254 orders *)
 
 type
@@ -112,19 +109,6 @@ const
 type
     TInstr = array [0..16*5-1] of byte;
     TInstrArray = array [1..MAX_INSTRUMENTS] of TInstr;
-
-(* patterns *)
-
-type
-    TMUSPAT = record
-        data_seg: word;
-            (* segment for pattern's data *)
-    end;
-    PMUSPAT = ^TMUSPAT;
-
-type
-    TPatternsArray = array [0..MAX_PATTERNS-1] of TMUSPAT;
-        (* segment for every pattern *)
 
 (* song arrangement *)
 

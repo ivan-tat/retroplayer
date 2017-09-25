@@ -54,32 +54,6 @@ var
     EMSSmp: boolean;
     SmpEMSHandle: word;
 
-(* patterns *)
-
-var
-    Pattern: TPatternsArray;
-    patListCount: word;
-    patListPatLength: word;
-    patListUseEM: boolean;
-    patListEMHandle: word;
-    patListPatPerEMPage: byte;
-
-procedure pat_clear(pat: PMUSPAT);
-procedure patSetData(pat: PMUSPAT; p: pointer);
-procedure patSetDataInEM(pat: PMUSPAT; logpage, part: byte);
-function  patIsDataInEM(pat: PMUSPAT): boolean;
-function  patGetData(pat: PMUSPAT): pointer;
-function  patGetDataLogPageInEM(pat: PMUSPAT): byte;
-function  patGetDataPartInEM(pat: PMUSPAT): byte;
-function  patMapData(pat: PMUSPAT): pointer;
-
-procedure patList_set(index: integer; pat: PMUSPAT);
-function  patList_get(index: integer): PMUSPAT;
-function  patListGetUsedEM: longint;
-procedure patListFree;
-procedure patListInit;
-procedure patListDone;
-
 (* song arrangment *)
 
 var
@@ -136,21 +110,5 @@ uses
     ems;
 
 (*$l s3mvars.obj*)
-
-procedure pat_clear(pat: PMUSPAT); external;
-procedure patSetData(pat: PMUSPAT; p: pointer); external;
-procedure patSetDataInEM(pat: PMUSPAT; logpage, part: byte); external;
-function  patIsDataInEM(pat: PMUSPAT): boolean; external;
-function  patGetData(pat: PMUSPAT): pointer; external;
-function  patGetDataLogPageInEM(pat: PMUSPAT): byte; external;
-function  patGetDataPartInEM(pat: PMUSPAT): byte; external;
-function  patMapData(pat: PMUSPAT): pointer; external;
-
-procedure patList_set(index: integer; pat: PMUSPAT); external;
-function  patList_get(index: integer): PMUSPAT; external;
-function  patListGetUsedEM: longint; external;
-procedure patListFree; external;
-procedure patListInit; external;
-procedure patListDone; external;
 
 end.

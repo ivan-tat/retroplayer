@@ -12,6 +12,7 @@
 #include "cc/i86.h"
 #include "dos/ems.h"
 #include "main/s3mtypes.h"
+#include "main/muspat.h"
 #include "main/s3mvars.h"
 #include "main/effvars.h"
 #include "main/mixvars.h"

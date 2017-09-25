@@ -44,15 +44,6 @@ extrn InsNum: word
 extrn SmpEMSHandle: word
 extrn EMSSmp: byte
 
-; patterns
-
-extrn Pattern: word
-extrn patListCount: word
-extrn patListPatLength: word
-extrn patListUseEM: byte
-extrn patListEMHandle: word
-extrn patListPatPerEMPage: byte
-
 ; song arrangment
 
 extrn Order: byte

@@ -105,6 +105,7 @@ src/main/loads3m.asm
 src/main/mixer.asm
 src/main/mixing.asm
 src/main/mixvars.asm
+src/main/muspat.asm
 src/main/posttab.asm
 src/main/readnote.asm
 src/main/s3mplay.asm

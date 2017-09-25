@@ -7,6 +7,7 @@ INTERFACE
 uses
     types,
     s3mtypes,
+    muspat,
     s3mvars,
     voltab,
     posttab,

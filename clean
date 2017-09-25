@@ -96,6 +96,7 @@ $RM ./src/main/loads3m.asm
 $RM ./src/main/mixer.asm
 $RM ./src/main/mixing.asm
 $RM ./src/main/mixvars.asm
+$RM ./src/main/muspat.asm
 $RM ./src/main/posttab.asm
 $RM ./src/main/readnote.asm
 $RM ./src/main/s3mplay.asm
