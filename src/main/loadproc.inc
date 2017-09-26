@@ -317,9 +317,9 @@ var f:file;
           pat := @pat_static;
           pat_clear(pat);
           patSetDataInEM(pat, curPpage, curpart);
-          p := patGetData(pat);
           patList_set(patpos-1, pat);
-          if (not emsMap(patListEMHandle, curPpage, 0)) then write('<EMS-ERROR>');
+          p := patMapData(pat);
+          if (p = nil) then write('<EMS-ERROR>');
         end
       else
         begin

@@ -26,22 +26,21 @@ typedef struct pattern_t {
 };
 typedef struct pattern_t MUSPAT;
 
-#define isPatternDataInEM(seg)                ((seg) >= 0xc000)
-#define getPatternDataLogPageInEM(seg)        ((seg) & 0x00ff)
-#define getPatternDataPartInEM(seg)           (((seg) >> 8) & 0x3f)
-#define getPatternDataOffsetInEM(seg, length) (getPatternDataPartInEM(seg) * (length))
-#define setPatternDataInEM(logpage, part)     (0xc000 + (((part) & 0x3f) << 8) + (logpage))
-#define getPatternDataInEM(seg, length)       (MK_FP(emsFrameSeg, getPatternDataOffsetInEM((seg), (length))))
+#define _patIsDataInEM(o)              (o->data_seg >= 0xc000)
+#define _patGetDataEMPage(o)           (o->data_seg & 0x00ff)
+#define _patGetDataEMPart(o)           ((o->data_seg >> 8) & 0x3f)
+#define _patSetDataInEM(o, page, part) { o->data_seg = 0xc000 + (((part) & 0x3f) << 8) + (page); }
+#define _patGetDataInEM(o, length)     (MK_FP(emsFrameSeg, _patGetDataEMPart(o) * (length)))
 
 //MUSPAT *PUBLIC_CODE pat_new(void);
 void    PUBLIC_CODE pat_clear(MUSPAT *pat);
 //void    PUBLIC_CODE pat_delete(MUSPAT **pat);
 void    PUBLIC_CODE patSetData(MUSPAT *pat, void *p);
-void    PUBLIC_CODE patSetDataInEM(MUSPAT *pat, uint8_t logpage, uint8_t part);
+void    PUBLIC_CODE patSetDataInEM(MUSPAT *pat, uint8_t page, uint8_t part);
 bool    PUBLIC_CODE patIsDataInEM(MUSPAT *pat);
 void   *PUBLIC_CODE patGetData(MUSPAT *pat);
-uint8_t PUBLIC_CODE patGetDataLogPageInEM(MUSPAT *pat);
-uint8_t PUBLIC_CODE patGetDataPartInEM(MUSPAT *pat);
+uint8_t PUBLIC_CODE patGetDataEMPage(MUSPAT *pat);
+uint8_t PUBLIC_CODE patGetDataEMPart(MUSPAT *pat);
 void   *PUBLIC_CODE patMapData(MUSPAT *pat);
 void    PUBLIC_CODE patFree(MUSPAT *pat);
 //void    PUBLIC_CODE patInit(MUSPAT *pat);
@@ -54,7 +53,7 @@ void    PUBLIC_CODE patFree(MUSPAT *pat);
 
 typedef struct pattern_t patternsList_t[MAX_PATTERNS];
 
-extern patternsList_t PUBLIC_DATA Pattern;
+extern patternsList_t PUBLIC_DATA mod_Patterns;
 extern uint16_t PUBLIC_DATA patListCount;
 extern uint16_t PUBLIC_DATA patListPatLength;   /* length of one pattern */
 extern bool     PUBLIC_DATA patListUseEM;       /* patterns in EM */

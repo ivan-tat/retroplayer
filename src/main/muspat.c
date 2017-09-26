@@ -19,7 +19,7 @@
 
 /* patterns */
 
-patternsList_t PUBLIC_DATA Pattern;
+patternsList_t PUBLIC_DATA mod_Patterns;
 uint16_t PUBLIC_DATA patListCount;
 uint16_t PUBLIC_DATA patListPatLength;
 bool     PUBLIC_DATA patListUseEM;
@@ -40,51 +40,50 @@ void PUBLIC_CODE patSetData(MUSPAT *pat, void *p)
     pat->data_seg = FP_SEG(p);
 }
 
-void PUBLIC_CODE patSetDataInEM(MUSPAT *pat, uint8_t logpage, uint8_t part)
+void PUBLIC_CODE patSetDataInEM(MUSPAT *pat, uint8_t page, uint8_t part)
 {
-    pat->data_seg = setPatternDataInEM(logpage, part);
+    _patSetDataInEM(pat, page, part);
 }
 
 bool PUBLIC_CODE patIsDataInEM(MUSPAT *pat)
 {
-    return isPatternDataInEM(pat->data_seg);
+    return _patIsDataInEM(pat);
 }
 
 void *PUBLIC_CODE patGetData(MUSPAT *pat)
 {
-    uint16_t data_seg = pat->data_seg;
-    if (isPatternDataInEM(data_seg))
-        return getPatternDataInEM(data_seg, patListPatLength);
+    if (_patIsDataInEM(pat))
+        return _patGetDataInEM(pat, patListPatLength);
     else
-        return MK_FP(data_seg, 0);
+        return MK_FP(pat->data_seg, 0);
 }
 
 void *PUBLIC_CODE patMapData(MUSPAT *pat)
 {
-    uint16_t data_seg = pat->data_seg;
     unsigned int logPage;
     unsigned char physPage;
-    if (isPatternDataInEM(data_seg))
+
+    if (_patIsDataInEM(pat))
     {
-        logPage = getPatternDataLogPageInEM(data_seg);
+        logPage = _patGetDataEMPage(pat);
         physPage = 0;
         if (emsMap(patListEMHandle, logPage, physPage))
-            return getPatternDataInEM(data_seg, patListPatLength);
+            return _patGetDataInEM(pat, patListPatLength);
         else
             return MK_FP(0, 0);
     }
     else
-        return MK_FP(data_seg, 0);;
+        return MK_FP(pat->data_seg, 0);;
 }
 
-uint8_t PUBLIC_CODE patGetDataLogPageInEM(MUSPAT *pat)
+uint8_t PUBLIC_CODE patGetDataEMPage(MUSPAT *pat)
 {
-    return getPatternDataLogPageInEM(pat->data_seg);
+    return _patGetDataEMPage(pat);
 }
 
-uint8_t PUBLIC_CODE patGetDataPartInEM(MUSPAT *pat)
+uint8_t PUBLIC_CODE patGetDataEMPart(MUSPAT *pat)
 {
-    return getPatternDataPartInEM(pat->data_seg);
+    return _patGetDataEMPart(pat);
 }
 
 void PUBLIC_CODE patFree(MUSPAT *pat)
@@ -105,15 +104,15 @@ void PUBLIC_CODE patFree(MUSPAT *pat)
 void PUBLIC_CODE patList_set(int16_t index, MUSPAT *pat)
 {
     if (pat)
-        Pattern[index].data_seg = pat->data_seg;
+        mod_Patterns[index].data_seg = pat->data_seg;
     else
-        pat_clear(&(Pattern[index]));
+        pat_clear(&(mod_Patterns[index]));
 }
 
 MUSPAT *PUBLIC_CODE patList_get(int16_t index)
 {
     if ((index >= 0) && (index < MAX_PATTERNS))
-        return &(Pattern[index]);
+        return &(mod_Patterns[index]);
     else
         return (void *)0;
 }
@@ -147,7 +146,7 @@ void PUBLIC_CODE patListInit(void)
 {
     int i;
     for (i = 0; i < MAX_PATTERNS; i++)
-        pat_clear(&(Pattern[i]));
+        pat_clear(&(mod_Patterns[i]));
 }
 
 void PUBLIC_CODE patListDone(void)

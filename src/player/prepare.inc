@@ -122,8 +122,7 @@ var
     lastrow:=playState_row;
     { switch EMSpage 0 to curpattern }
     pat := patList_get(playState_pattern);
-    if (patIsDataInEM(pat)) then
-        emsMap(patListEMHandle, patGetDataLogPageInEM(pat), 0);
+    patMapData(pat);
   end;
 
 (* Instruments *)

@@ -114,8 +114,7 @@ var
         { new pattern }
         (* switch EMSpage zero to curpattern *)
         pat := patList_get(playState_pattern);
-        if (patIsDataInEM(pat)) then
-            emsMap(patListEMHandle, patGetDataLogPageInEM(pat), 0);
+        patMapData(pat);
       end;
     for i:=lastrow to playState_row do
       begin

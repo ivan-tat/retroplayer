@@ -27,7 +27,7 @@ type
         (* segment for every pattern *)
 
 var
-    Pattern: TPatternsArray;
+    mod_Patterns: TPatternsArray;
     patListCount: word;
     patListPatLength: word;
     patListUseEM: boolean;
@@ -39,8 +39,8 @@ procedure patSetData(pat: PMUSPAT; p: pointer);
 procedure patSetDataInEM(pat: PMUSPAT; logpage, part: byte);
 function  patIsDataInEM(pat: PMUSPAT): boolean;
 function  patGetData(pat: PMUSPAT): pointer;
-function  patGetDataLogPageInEM(pat: PMUSPAT): byte;
-function  patGetDataPartInEM(pat: PMUSPAT): byte;
+function  patGetDataEMPage(pat: PMUSPAT): byte;
+function  patGetDataEMPart(pat: PMUSPAT): byte;
 function  patMapData(pat: PMUSPAT): pointer;
 
 procedure patList_set(index: integer; pat: PMUSPAT);
@@ -64,8 +64,8 @@ procedure patSetData(pat: PMUSPAT; p: pointer); external;
 procedure patSetDataInEM(pat: PMUSPAT; logpage, part: byte); external;
 function  patIsDataInEM(pat: PMUSPAT): boolean; external;
 function  patGetData(pat: PMUSPAT): pointer; external;
-function  patGetDataLogPageInEM(pat: PMUSPAT): byte; external;
-function  patGetDataPartInEM(pat: PMUSPAT): byte; external;
+function  patGetDataEMPage(pat: PMUSPAT): byte; external;
+function  patGetDataEMPart(pat: PMUSPAT): byte; external;
 function  patMapData(pat: PMUSPAT): pointer; external;
 
 procedure patList_set(index: integer; pat: PMUSPAT); external;
