@@ -10,6 +10,7 @@
 
 #include "pascal.h"
 #include "cc/i86.h"
+#include "cc/string.h"
 #include "cc/dos.h"
 #include "dos/ems.h"
 
@@ -17,14 +18,7 @@
 
 #ifdef DEFINE_LOCAL_DATA
 
-/* patterns */
-
-patternsList_t PUBLIC_DATA mod_Patterns;
-uint16_t PUBLIC_DATA patListCount;
-uint16_t PUBLIC_DATA patListPatLength;
-bool     PUBLIC_DATA patListUseEM;
-uint16_t PUBLIC_DATA patListEMHandle;
-uint8_t  PUBLIC_DATA patListPatPerEMPage;
+extern MUSPATLIST *PUBLIC_DATA mod_Patterns;
 
 #endif  /* DEFINE_LOCAL_DATA */
 
@@ -53,7 +47,7 @@ bool PUBLIC_CODE patIsDataInEM(MUSPAT *pat)
 void *PUBLIC_CODE patGetData(MUSPAT *pat)
 {
     if (_patIsDataInEM(pat))
-        return _patGetDataInEM(pat, patListPatLength);
+        return _patGetDataInEM(pat, patListGetPatLength(mod_Patterns));
     else
         return MK_FP(pat->data_seg, 0);
 }
@@ -67,8 +61,8 @@ void *PUBLIC_CODE patMapData(MUSPAT *pat)
     {
         logPage = _patGetDataEMPage(pat);
         physPage = 0;
-        if (emsMap(patListEMHandle, logPage, physPage))
-            return _patGetDataInEM(pat, patListPatLength);
+        if (emsMap(patListGetHandle(mod_Patterns), logPage, physPage))
+            return _patGetDataInEM(pat, patListGetPatLength(mod_Patterns));
         else
             return MK_FP(0, 0);
     }
@@ -101,55 +95,218 @@ void PUBLIC_CODE patFree(MUSPAT *pat)
 
 /*** Patterns list ***/
 
-void PUBLIC_CODE patList_set(int16_t index, MUSPAT *pat)
+static EMSNAME EMS_PATLIST_HANDLE_NAME = "patlist";
+
+MUSPATLIST *PUBLIC_CODE patList_new(void)
 {
-    if (pat)
-        mod_Patterns[index].data_seg = pat->data_seg;
+    uint16_t seg;
+            
+    if (!_dos_allocmem(_dos_para(sizeof(MUSPATLIST)), &seg))
+        return MK_FP(seg, 0);
     else
-        pat_clear(&(mod_Patterns[index]));
+        return NULL;
 }
 
-MUSPAT *PUBLIC_CODE patList_get(int16_t index)
+void PUBLIC_CODE patList_clear(MUSPATLIST *self)
 {
-    if ((index >= 0) && (index < MAX_PATTERNS))
-        return &(mod_Patterns[index]);
-    else
-        return (void *)0;
+    if (self)
+        if (self->list && self->count)
+            memset(self->list, 0, self->count * sizeof(MUSPAT));
 }
 
-uint32_t PUBLIC_CODE patListGetUsedEM(void)
+void PUBLIC_CODE patList_delete(MUSPATLIST **self)
+{           
+    if (self)
+        if (*self)
+        {
+            _dos_freemem(FP_SEG(*self));
+            *self = NULL;
+        }
+}
+
+
+void PUBLIC_CODE patList_set(MUSPATLIST *self, int16_t index, MUSPAT *item)
 {
-    if (patListUseEM)
-        return 16*emsGetHandleSize(patListEMHandle);
+    if (self)
+        if (self->list && index < self->count)
+        {
+            if (item)
+                self->list[index].data_seg = item->data_seg;
+            else
+                pat_clear(&(self->list[index]));
+        }
+}
+
+MUSPAT *PUBLIC_CODE patList_get(MUSPATLIST *self, int16_t index)
+{
+    if (self)
+        if (self->list && index >= 0 && index < self->count)
+            return &(self->list[index]);
+
+    return NULL;
+}
+
+bool PUBLIC_CODE patList_set_count(MUSPATLIST *self, uint16_t count)
+{
+    uint16_t seg, max;
+    unsigned int size;
+    bool result;
+    unsigned int i;
+
+    if (self)
+    {
+        if (self->count != count)
+        {
+            size = _dos_para(count * sizeof(MUSPAT));
+            if (count > self->count)
+            {
+                // Grow
+                if (self->count)
+                    result = !_dos_setblock(size, FP_SEG(self->list), &max);
+                else
+                {
+
+                    result = !_dos_allocmem(size, &seg);
+                    if (result)
+                        self->list = MK_FP(seg, 0);
+                    else
+                        self->list = NULL;
+                }
+
+                if (result)
+                {
+                    memset(&(self->list[self->count]), 0, (count - self->count) * sizeof(MUSPAT));
+                    self->count = count;
+                }
+            }
+            else
+            {
+                // Shrink
+                for (i = count; i < self->count; i++)
+                    patFree(&(self->list[i]));
+                if (count)
+                    _dos_setblock(size, FP_SEG(self->list), &max);
+                else
+                {
+                    _dos_freemem(FP_SEG(self->list));
+                    self->list = NULL;
+                }
+                self->count = count;
+                result = true;
+            }
+        }
+        else
+            result = true;
+    }
+    else
+        result = false;
+
+    return result;
+}
+
+uint16_t PUBLIC_CODE patList_get_count(MUSPATLIST *self)
+{
+    if (self)
+        return self->count;
     else
         return 0;
 }
 
-void PUBLIC_CODE patListFree(void)
+void PUBLIC_CODE patListSetPatLength(MUSPATLIST *self, uint16_t value)
 {
+    if (self)
+        self->patLength = value;
+}
+
+uint16_t PUBLIC_CODE patListGetPatLength(MUSPATLIST *self)
+{
+    if (self)
+        return self->patLength;
+    else
+        return 0;
+}
+
+void PUBLIC_CODE patListSetUseEM(MUSPATLIST *self, bool value)
+{
+    if (self)
+        self->useEM = value;
+}
+
+bool PUBLIC_CODE patListIsInEM(MUSPATLIST *self)
+{
+    if (self)
+        return self->useEM;
+    else
+        return false;
+}
+
+void PUBLIC_CODE patListSetHandle(MUSPATLIST *self, EMSHDL value)
+{
+    if (self)
+        self->handle = value;
+}
+
+EMSHDL PUBLIC_CODE patListGetHandle(MUSPATLIST *self)
+{
+    if (self)
+        return self->handle;
+    else
+        return 0;
+}
+
+void PUBLIC_CODE patListSetHandleName(MUSPATLIST *self)
+{
+    if (self)
+        if (self->useEM)
+            emsSetHandleName(self->handle, EMS_PATLIST_HANDLE_NAME);
+}
+
+void PUBLIC_CODE patListSetPatPerPage(MUSPATLIST *self, uint8_t value)
+{
+    if (self)
+        self->patPerPage = value;
+}
+
+uint8_t PUBLIC_CODE patListGetPatPerPage(MUSPATLIST *self)
+{
+    if (self)
+        return self->patPerPage;
+    else
+        return 0;
+}
+
+uint32_t PUBLIC_CODE patListGetUsedEM(MUSPATLIST *self)
+{
+    if (self)
+        if (self->useEM)
+            return 16 * emsGetHandleSize(self->handle);
+
+    return 0;
+}
+
+void PUBLIC_CODE patListFree(MUSPATLIST *self)
+{
+    uint16_t count;
     int i;
     MUSPAT *pat;
 
-    for (i = 0; i < MAX_PATTERNS; i++)
+    if (self)
     {
-        pat = patList_get(i);
-        patFree(pat);
-    };
-    if (patListUseEM)
-    {
-        emsFree(patListEMHandle);
-        patListUseEM = false;
-    };
-}
+        if (self->list)
+        {
+            count = self->count;
+            for (i = 0; i < count; i++)
+            {
+                pat = patList_get(self, i);
+                patFree(pat);
+            }
+            _dos_freemem(FP_SEG(self->list));
+        }
 
-void PUBLIC_CODE patListInit(void)
-{
-    int i;
-    for (i = 0; i < MAX_PATTERNS; i++)
-        pat_clear(&(mod_Patterns[i]));
-}
-
-void PUBLIC_CODE patListDone(void)
-{
-    patListFree();
+        if (self->useEM)
+        {
+            emsFree(self->handle);
+            self->useEM = false;
+        }
+    }
 }

@@ -1,12 +1,10 @@
 const
-    patname: TEMSNAME = 'Pattern'#0;
     smpname: TEMSNAME = 'Samples'#0;
     savname: TEMSNAME = 'saveMAP'#0;
 
 procedure setEMSnames;
 begin
-    if ( patListUseEM ) then
-        emsSetHandleName( patListEMHandle, @patname );
+    patListSetHandleName(mod_Patterns);
     if ( EMSsmp ) then
         emsSetHandleName( smpEMShandle, @smpname );
     if ( useEMS ) then
@@ -279,7 +277,7 @@ var f:file;
         load_decrunc_pattern := true;
         pat := @pat_static;
         pat_clear(pat);
-        patList_set(patpos-1, pat);
+        patList_set(mod_Patterns, patpos-1, pat);
         exit;
       end;
       { first jump to position }
@@ -312,12 +310,14 @@ var f:file;
       if IOresult<>0 then begin load_error:=filecorrupt;exit end;
       inc(fileposit,length);
       { first get memory : (if useEMS than try to put it into the EMS ... }
-      if useEMS and patListUseEM and (curpart<patListPatPerEMPage) then
+      if useEMS and
+        patListIsInEM(mod_Patterns) and
+        (curpart < patListGetPatPerPage(mod_Patterns)) then
         begin
           pat := @pat_static;
           pat_clear(pat);
           patSetDataInEM(pat, curPpage, curpart);
-          patList_set(patpos-1, pat);
+          patList_set(mod_Patterns, patpos-1, pat);
           p := patMapData(pat);
           if (p = nil) then write('<EMS-ERROR>');
         end
@@ -332,12 +332,12 @@ var f:file;
             pat := @pat_static;
             pat_clear(pat);
             patSetData(pat, p);
-            patList_set(patpos-1, pat);
+            patList_set(mod_Patterns, patpos-1, pat);
         end;
 
       unpackPattern(buffer, p, 64, UsedChannels);
 
-      pat := patList_get(patpos-1);
+      pat := patList_get(mod_Patterns, patpos-1);
       if (patIsDataInEM(pat)) then
         begin
           {$IFDEF LOADINFO}
@@ -345,7 +345,7 @@ var f:file;
           {$ENDIF}
           { next position in EMS : }
           inc(curpart);
-          if (curpart=patListPatPerEMPage) and (Ppagesleft>0) then
+          if (curpart = patListGetPatPerPage(mod_Patterns)) and (Ppagesleft>0) then
             begin
               dec(Ppagesleft);inc(curPpage);
               curpart:=0;
@@ -371,7 +371,18 @@ var a,b,c:string;
 
   BEGIN
     player_load_s3m := FALSE;
-    useEMS:=emsInstalled and useEMS and (emsGetFreePagesCount>1); { we need one page for saving mapping while playing }
+
+    (* Patterns list *)
+    mod_Patterns := patList_new;
+    if (mod_Patterns = nil) then
+    begin
+        DEBUG_ERR(__FILE__, 'player_load_s3m', 'Failed to initialize patterns.');
+        exit;
+    end;
+    patList_clear(mod_Patterns);
+
+    useEMS:=emsInstalled and useEMS and (emsGetFreePagesCount>1);
+    { we need one page for saving mapping while playing }
     load_error:=0;buffer:=Nil;
     fsplit(name,a,b,c);
     if not fileexist(a+b+c) then name:=a+b+'.S3M';
@@ -397,7 +408,7 @@ var a,b,c:string;
     convert2pas(header.name,mod_Title,28);
     ordnum:=header.ordnum;
     insnum:=header.insnum;
-    patListCount:=header.patnum;
+    patList_set_count(mod_Patterns, header.patnum);
     { setup flags }
     modOption_ST2Vibrato := header.flags and $01 <> 0;
     modOption_ST2Tempo := header.flags and $02 <> 0;
@@ -438,7 +449,7 @@ var a,b,c:string;
     if i=ordnum then begin load_error:=ordercorrupt;exit end; { playable entry not found :( }
     blockread(f,inspara,insnum*2);
     IF IORESULT<>0 THEN begin load_error:=filecorrupt;exit end;
-    blockread(f,patpara,patListCount*2);
+    blockread(f, patpara, patList_get_count(mod_Patterns) * 2);
     IF IORESULT<>0 THEN begin load_error:=filecorrupt;exit end;
     close(f);
     { Ok now the difficult part ...
@@ -446,34 +457,46 @@ var a,b,c:string;
       - load them in a row (don't jump through the file, that costs time !
       - problem is that you don't know the order and possibly there's no !
     }
-    patListPatLength:=5*64*usedchannels;
+    patListSetPatLength(mod_Patterns, 5 * 64 * UsedChannels);
     {$IFDEF DEBUGLOAD}
-    writeln(' length of Patterns in memory: ',patListPatLength);
+    writeln(' length of Patterns in memory: ', patListGetPatLength(mod_Patterns));
     {$ENDIF}
     if useEMS then
       begin
         { we use EMS, then we need a page to save mapping in interrupt ! }
         savHandle:=emsAlloc(1); { 1 page is enough ? }
         { let's continue with loading: }
-        patListPatPerEMPage:=(16*1024) div patListPatLength;
+        patListSetPatPerPage(mod_Patterns, (16 * 1024) div patListGetPatLength(mod_Patterns));
         {$IFDEF DEBUGLOAD}
-        writeln(' Patterns per Page: ',patListPatPerEMPage);
+        writeln(' Patterns per Page: ',patListGetPatPerPage(mod_Patterns));
         {$ENDIF}
         { try to allocate EMS for all patterns : }
-        if (emsGetFreePagesCount<(patListCount+(patListPatPerEMPage-1)) div patListPatPerEMPage) then
+        if (emsGetFreePagesCount <
+            (patList_get_count(mod_Patterns)+(patListGetPatPerPage(mod_Patterns)-1)) div
+            patListGetPatPerPage(mod_Patterns)) then
           begin
             Ppagesleft:=emsGetFreePagesCount;
-            patListEMHandle:=emsAlloc(Ppagesleft);
-            patListUseEM:=true;
+            patListSetHandle(mod_Patterns, emsAlloc(Ppagesleft));
+            patListSetUseEM(mod_Patterns, true);
           end
         else
           begin
-            patListEMHandle:=emsAlloc((patListCount+(patListPatPerEMPage-1)) div patListPatPerEMPage);
-            Ppagesleft:=(patListCount+(patListPatPerEMPage-1)) div patListPatPerEMPage;
-            patListUseEM:=true
+            patListSetHandle(mod_Patterns,
+                emsAlloc(
+                    (patList_get_count(mod_Patterns)+
+                    (patListGetPatPerPage(mod_Patterns)-1)) div
+                    patListGetPatPerPage(mod_Patterns)
+                )
+            );
+            Ppagesleft:=(
+                patList_get_count(mod_Patterns)+
+                (patListGetPatPerPage(mod_Patterns)-1)
+                ) div
+                patListGetPatPerPage(mod_Patterns);
+            patListSetUseEM(mod_Patterns, true);
           end;
       end;
-    if useEMS and patListUseEM then
+    if useEMS and patListIsInEM(mod_Patterns) then
       begin
         curpart:=0;curPpage:=0;
       end;
@@ -497,11 +520,11 @@ var a,b,c:string;
     buffer := ptr(_seg, 0);
     { init some variables for loading : }
     inspos:=1;patpos:=0;smppos:=0;smpnum:=0;nextpat:=$7fffffff;nextins:=$7fffffff;nextsmp:=$7fffffff;
-    while (inspos<insnum+1) or (patpos<patListCount) or (smppos<smpnum)
+    while (inspos<insnum+1) or (patpos<patList_get_count(mod_Patterns)) or (smppos<smpnum)
           or (nextpat<$7fffffff) or (nextins<$7fffffff) or (nextsmp<$7fffffff) do
       begin
         {writeln('--->',inspos,',',patpos,',',smppos);readkey;}
-        if (nextpat=$7fffffff) and (patpos<patListCount) then
+        if (nextpat=$7fffffff) and (patpos<patList_get_count(mod_Patterns)) then
           begin
             nextpat:=patpara[patpos];inc(patpos)
           end;

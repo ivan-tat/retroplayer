@@ -51,20 +51,36 @@ void    PUBLIC_CODE patFree(MUSPAT *pat);
 #define MAX_PATTERNS 100
     /* 0..99 patterns */
 
-typedef struct pattern_t patternsList_t[MAX_PATTERNS];
+typedef struct musPatternsList_t
+{
+    uint16_t count;
+    MUSPAT *list;
+    uint16_t patLength; /* length of one pattern */
+    bool useEM;         /* patterns in EM */
+    EMSHDL handle;      /* handle to access EM for patterns */
+    uint8_t patPerPage; /* count of patterns per page (<64!!!) */
+};
+typedef struct musPatternsList_t MUSPATLIST;
 
-extern patternsList_t PUBLIC_DATA mod_Patterns;
-extern uint16_t PUBLIC_DATA patListCount;
-extern uint16_t PUBLIC_DATA patListPatLength;   /* length of one pattern */
-extern bool     PUBLIC_DATA patListUseEM;       /* patterns in EM */
-extern uint16_t PUBLIC_DATA patListEMHandle;    /* handle to access EM for patterns */
-extern uint8_t  PUBLIC_DATA patListPatPerEMPage;  /* count of patterns per page (<64!!!) */
+extern MUSPATLIST *PUBLIC_DATA mod_Patterns;
 
-void     PUBLIC_CODE patList_set(int16_t index, MUSPAT *pat);
-MUSPAT  *PUBLIC_CODE patList_get(int16_t index);
-uint32_t PUBLIC_CODE patListGetUsedEM(void);
-void     PUBLIC_CODE patListFree(void);
-void     PUBLIC_CODE patListInit(void);
-void     PUBLIC_CODE patListDone(void);
+MUSPATLIST *PUBLIC_CODE patList_new(void);
+void        PUBLIC_CODE patList_clear(MUSPATLIST *self);
+void        PUBLIC_CODE patList_delete(MUSPATLIST **self);
+void        PUBLIC_CODE patList_set(MUSPATLIST *self, int16_t index, MUSPAT *pat);
+MUSPAT     *PUBLIC_CODE patList_get(MUSPATLIST *self, int16_t index);
+bool        PUBLIC_CODE patList_set_count(MUSPATLIST *self, uint16_t count);
+uint16_t    PUBLIC_CODE patList_get_count(MUSPATLIST *self);
+void        PUBLIC_CODE patListSetPatLength(MUSPATLIST *self, uint16_t value);
+uint16_t    PUBLIC_CODE patListGetPatLength(MUSPATLIST *self);
+void        PUBLIC_CODE patListSetUseEM(MUSPATLIST *self, bool value);
+bool        PUBLIC_CODE patListIsInEM(MUSPATLIST *self);
+void        PUBLIC_CODE patListSetHandle(MUSPATLIST *self, EMSHDL value);
+EMSHDL      PUBLIC_CODE patListGetHandle(MUSPATLIST *self);
+void        PUBLIC_CODE patListSetHandleName(MUSPATLIST *self);
+void        PUBLIC_CODE patListSetPatPerPage(MUSPATLIST *self, uint8_t value);
+uint8_t     PUBLIC_CODE patListGetPatPerPage(MUSPATLIST *self);
+uint32_t    PUBLIC_CODE patListGetUsedEM(MUSPATLIST *self);
+void        PUBLIC_CODE patListFree(MUSPATLIST *self);
 
 #endif  /* MUSPAT_H */

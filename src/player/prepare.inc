@@ -121,7 +121,7 @@ var
     scrLeave;
     lastrow:=playState_row;
     { switch EMSpage 0 to curpattern }
-    pat := patList_get(playState_pattern);
+    pat := patList_get(mod_Patterns, playState_pattern);
     patMapData(pat);
   end;
 

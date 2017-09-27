@@ -15,7 +15,7 @@ var
     pA:Parray;
     i,b:byte;
   begin
-    pat := patList_get(ORDER[ordr]);
+    pat := patList_get(mod_Patterns, ORDER[ordr]);
     pA := patGetData(pat);
     write(row:2,'   ');
     for i:=startchn-1 to startchn+3 do
@@ -113,7 +113,7 @@ var
         lastrow:=0;
         { new pattern }
         (* switch EMSpage zero to curpattern *)
-        pat := patList_get(playState_pattern);
+        pat := patList_get(mod_Patterns, playState_pattern);
         patMapData(pat);
       end;
     for i:=lastrow to playState_row do

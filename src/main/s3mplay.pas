@@ -96,6 +96,9 @@ uses
     effects,
     readnote;
 
+const
+    __FILE__ = 's3mplay.pas';
+
 (*$l s3mplay.obj*)
 
 { Internal variables : }
@@ -137,7 +140,12 @@ var i:word;
         emsFree(smpEMShandle);
         EMSsmp:=false;
       end;
-    patListDone;
+    (* Patterns list *)
+    if (mod_Patterns <> nil) then
+    begin
+        patListFree(mod_Patterns);
+        patList_delete(mod_Patterns);
+    end;
     mod_isLoaded:=false;
   END;
 
@@ -438,7 +446,8 @@ begin
     BEGIN
       Instruments^[i,0]:=0;
     END;
-    patListInit;
+
+    mod_Patterns := nil;
 end;
 
 procedure s3mplayDone;

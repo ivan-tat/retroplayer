@@ -10,6 +10,9 @@ unit muspat;
 
 interface
 
+uses
+    ems;
+
 (*$I defines.pas*)
 
 type
@@ -23,16 +26,18 @@ const
     MAX_PATTERNS = 100; (* 0..99 patterns *)
 
 type
-    TPatternsArray = array [0..MAX_PATTERNS-1] of TMUSPAT;
-        (* segment for every pattern *)
+    TMUSPATLIST = packed record
+        count: Word;
+        list: Pointer;
+        patLength: Word;
+        useEM: Boolean;
+        handle: TEMSHDL;
+        patPerPage: Byte;
+    end;
+    PMUSPATLIST = ^TMUSPATLIST;
 
 var
-    mod_Patterns: TPatternsArray;
-    patListCount: word;
-    patListPatLength: word;
-    patListUseEM: boolean;
-    patListEMHandle: word;
-    patListPatPerEMPage: byte;
+    mod_Patterns: PMUSPATLIST;
 
 procedure pat_clear(pat: PMUSPAT);
 procedure patSetData(pat: PMUSPAT; p: pointer);
@@ -43,19 +48,31 @@ function  patGetDataEMPage(pat: PMUSPAT): byte;
 function  patGetDataEMPart(pat: PMUSPAT): byte;
 function  patMapData(pat: PMUSPAT): pointer;
 
-procedure patList_set(index: integer; pat: PMUSPAT);
-function  patList_get(index: integer): PMUSPAT;
-function  patListGetUsedEM: longint;
-procedure patListFree;
-procedure patListInit;
-procedure patListDone;
+function  patList_new: PMUSPATLIST;
+procedure patList_clear(self: PMUSPATLIST);
+procedure patList_delete(var self: PMUSPATLIST);
+procedure patList_set(self: PMUSPATLIST; index: integer; pat: PMUSPAT);
+function  patList_get(self: PMUSPATLIST; index: integer): PMUSPAT;
+function  patList_set_count(self: PMUSPATLIST; count: Word): Boolean;
+function  patList_get_count(self: PMUSPATLIST): Word;
+procedure patListSetPatLength(self: PMUSPATLIST; value: Word);
+function  patListGetPatLength(self: PMUSPATLIST): Word;
+procedure patListSetUseEM(self: PMUSPATLIST; value: Boolean);
+function  patListIsInEM(self: PMUSPATLIST): Boolean;
+procedure patListSetHandle(self: PMUSPATLIST; value: TEMSHDL);
+function  patListGetHandle(self: PMUSPATLIST): TEMSHDL;
+procedure patListSetHandleName(self: PMUSPATLIST);
+procedure patListSetPatPerPage(self: PMUSPATLIST; value: Byte);
+function  patListGetPatPerPage(self: PMUSPATLIST): Byte;
+function  patListGetUsedEM(self: PMUSPATLIST): longint;
+procedure patListFree(self: PMUSPATLIST);
 
 implementation
 
 uses
     i86,
-    dos_,
-    ems;
+    string_,
+    dos_;
 
 (*$l muspat.obj*)
 
@@ -68,11 +85,23 @@ function  patGetDataEMPage(pat: PMUSPAT): byte; external;
 function  patGetDataEMPart(pat: PMUSPAT): byte; external;
 function  patMapData(pat: PMUSPAT): pointer; external;
 
-procedure patList_set(index: integer; pat: PMUSPAT); external;
-function  patList_get(index: integer): PMUSPAT; external;
-function  patListGetUsedEM: longint; external;
-procedure patListFree; external;
-procedure patListInit; external;
-procedure patListDone; external;
+function  patList_new: PMUSPATLIST; external;
+procedure patList_clear(self: PMUSPATLIST); external;
+procedure patList_delete(var self: PMUSPATLIST); external;
+procedure patList_set(self: PMUSPATLIST; index: integer; pat: PMUSPAT); external;
+function  patList_get(self: PMUSPATLIST; index: integer): PMUSPAT; external;
+function  patList_set_count(self: PMUSPATLIST; count: Word): Boolean; external;
+function  patList_get_count(self: PMUSPATLIST): Word; external;
+procedure patListSetPatLength(self: PMUSPATLIST; value: Word); external;
+function  patListGetPatLength(self: PMUSPATLIST): Word; external;
+procedure patListSetUseEM(self: PMUSPATLIST; value: Boolean); external;
+function  patListIsInEM(self: PMUSPATLIST): Boolean; external;
+procedure patListSetHandle(self: PMUSPATLIST; value: TEMSHDL); external;
+function  patListGetHandle(self: PMUSPATLIST): TEMSHDL; external;
+procedure patListSetHandleName(self: PMUSPATLIST); external;
+procedure patListSetPatPerPage(self: PMUSPATLIST; value: Byte); external;
+function  patListGetPatPerPage(self: PMUSPATLIST): Byte; external;
+function  patListGetUsedEM(self: PMUSPATLIST): longint; external;
+procedure patListFree(self: PMUSPATLIST); external;
 
 end.
