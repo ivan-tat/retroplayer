@@ -357,13 +357,7 @@ var f:file;
       load_decrunc_pattern:=true;
     END;
 
-  function fileexist(s:string):boolean;
-  var f:file;
-    begin
-      assign(f,s);reset(f,1);fileexist:=ioresult=0;close(f);if ioresult<>0 then;
-    end;
-
-var a,b,c:string;
+var
     Inst_done:boolean;
     load_smp_later:boolean;
     firstSMP:boolean;
@@ -384,8 +378,6 @@ var a,b,c:string;
     useEMS:=emsInstalled and useEMS and (emsGetFreePagesCount>1);
     { we need one page for saving mapping while playing }
     load_error:=0;buffer:=Nil;
-    fsplit(name,a,b,c);
-    if not fileexist(a+b+c) then name:=a+b+'.S3M';
     assign(f,name);
     reset(f,1);               { open file - 16byte blocks :) }
     IF IORESULT<>0 THEN begin load_error:=filenotexist;exit end;
