@@ -132,16 +132,16 @@ Append to `~/.bashrc` or other shell script at your option the initialization of
 ```sh
 cat >> ~/.bashrc <<EOF
 export WATCOM=/opt/watcom
-case `uname -m` in
+case \`uname -m\` in
 x86_64)
-    export PATH=$WATCOM/binl64:$WATCOM/binl:$PATH
+    export PATH=\$WATCOM/binl64:\$WATCOM/binl:\$PATH
     ;;
 *)
-    export PATH=$WATCOM/binl:$PATH
+    export PATH=\$WATCOM/binl:\$PATH
     ;;
 esac
-export EDPATH=$WATCOM/eddat
-export INCLUDE=$WATCOM/h
+export EDPATH=\$WATCOM/eddat
+export INCLUDE=\$WATCOM/h
 EOF
 ```
 
@@ -170,6 +170,7 @@ PROJ_DIR=~/Projects/retroplayer
 ENV_PROJ_DIR=$ENV_DRIVE_C_DIR/projects/rp
 mkdir -p $PROJ_DIR
 git clone https://github.com/ivan-tat/retroplayer.git $PROJ_DIR
+mkdir -p `dirname $ENV_PROJ_DIR`
 ln -s $PROJ_DIR $ENV_PROJ_DIR
 ```
 
@@ -193,7 +194,7 @@ EOF
 Create `c:\make.bat` DOS shell script for quick compiling.
 
 ```sh
-cat >> $ENV_DRIVE_C_DIR/make.bat <<EOF
+cat > $ENV_DRIVE_C_DIR/make.bat <<EOF
 @echo off
 call init.bat
 call make.bat
