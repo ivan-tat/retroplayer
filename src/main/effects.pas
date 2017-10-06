@@ -13,7 +13,8 @@ interface
 (*$I defines.pas*)
 
 uses
-    s3mtypes;
+    s3mtypes,
+    mixchn;
 
 const
     EFFIDX_NONE              = 0;
@@ -80,8 +81,6 @@ var
 
 procedure set_speed(value: byte);
 procedure set_tempo(value: byte);
-procedure chn_setSamplePeriod(var chn: TChannel; period: longint);
-procedure chn_setSampleVolume(var chn: TChannel; vol: integer);
 procedure chn_setupInstrument(var chn: TChannel; insNum: byte);
 function  chn_calcNotePeriod(var chn: TChannel; ins: pointer; note: byte): word;
 function  chn_calcNoteStep(var chn: TChannel; ins: pointer; note: byte): longint;
@@ -106,8 +105,6 @@ uses
 
 procedure set_speed(value: byte); external;
 procedure set_tempo(value: byte); external;
-procedure chn_setSamplePeriod(var chn: TChannel; period: longint); external;
-procedure chn_setSampleVolume(var chn: TChannel; vol: integer); external;
 procedure chn_setupInstrument(var chn: TChannel; insNum: byte); external;
 function  chn_calcNotePeriod(var chn: TChannel; ins: pointer; note: byte): word; external;
 function  chn_calcNoteStep(var chn: TChannel; ins: pointer; note: byte): longint; external;

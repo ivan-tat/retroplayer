@@ -61,12 +61,6 @@ var
     OrdNum: word;
     LastOrder: byte;
 
-(* channels *)
-
-var
-    Channel: TChannelArray;
-    UsedChannels: byte;
-
 (* initial state *)
 
 var

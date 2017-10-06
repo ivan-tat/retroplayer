@@ -392,6 +392,7 @@ build_target $T_MAIN   obj src/main/voltab.c
 build_target $T_MAIN   obj src/main/posttab.c
 build_target $T_MAIN   obj src/main/mixer_.asm
 build_target $T_MAIN   obj src/main/mixer.c
+build_target $T_MAIN   obj src/main/mixchn.c
 build_target $T_MAIN   obj src/main/effects.c
 build_target $T_MAIN   obj src/main/readnote.c
 build_target $T_MAIN   obj src/main/mixing.c
@@ -442,6 +443,7 @@ build_target $T_MAIN_TP   obj src/main/voltab.pas
 build_target $T_MAIN_TP   obj src/main/posttab.pas
 build_target $T_MAIN_TP   obj src/main/mixer_.pas
 build_target $T_MAIN_TP   obj src/main/mixer.pas
+build_target $T_MAIN_TP   obj src/main/mixchn.pas
 build_target $T_MAIN_TP   obj src/main/effvars.pas
 build_target $T_MAIN_TP   obj src/main/effects.pas
 build_target $T_MAIN_TP   obj src/main/readnote.pas

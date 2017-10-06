@@ -8,6 +8,7 @@ uses
     blaster,
     s3mvars,
     fillvars,
+    mixchn,
     s3mplay;
 
 (*$I defines.pas*)

@@ -23,6 +23,7 @@ uses
     s3mvars,
     effvars,
     mixvars,
+    mixchn,
     effects,
     mixer,
     mixer_;

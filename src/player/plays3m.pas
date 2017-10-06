@@ -17,6 +17,7 @@ uses
     s3mvars,
     fillvars,
     mixvars,
+    mixchn,
     effects,
     s3mplay;
 

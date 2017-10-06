@@ -545,49 +545,6 @@ void PUBLIC_CODE set_tempo(uint8_t value)
         mixTickSamplesPerChannel = (long)mixSampleRate * 5 / (int)(value * 2);
 }
 
-void PUBLIC_CODE chn_setSamplePeriod(MIXCHN *chn, int32_t period)
-{
-    if (period)
-    {
-        if (period < chn->wSmpPeriodLow)
-            period = chn->wSmpPeriodLow;
-        else
-            if (period > chn->wSmpPeriodHigh)
-                period = chn->wSmpPeriodHigh;
-        _chn_setSamplePeriod(chn, period);
-        chn_setSampleStep(chn, mixCalcSampleStep(period));
-    }
-    else
-    {
-        _chn_setSamplePeriod(chn, 0);
-        chn_setSampleStep(chn, 0);
-    };
-}
-
-void PUBLIC_CODE chn_setSampleVolume(MIXCHN *chn, int16_t vol)
-{
-    if (vol < 0)
-        chn->bSmpVol = 0;
-    else
-        chn->bSmpVol = vol > CHNINSVOL_MAX ? CHNINSVOL_MAX : vol;
-}
-
-void __near chn_setPeriodLimits(MIXCHN *chn, uint16_t rate, bool amiga)
-{
-    if (amiga)
-    {
-         // B-5, C-3:
-         chn->wSmpPeriodLow  = (unsigned long)(MID_C_RATE * (unsigned long)getNotePeriod((5 << 4) + 11)) / rate;
-         chn->wSmpPeriodHigh = (unsigned long)(MID_C_RATE * (unsigned long)getNotePeriod((3 << 4) +  0)) / rate;
-    }
-    else
-    {
-         // B-7, C-0:
-         chn->wSmpPeriodLow  = (unsigned long)(MID_C_RATE * (unsigned long)getNotePeriod((7 << 4) + 11)) / rate;
-         chn->wSmpPeriodHigh = (unsigned long)(MID_C_RATE * (unsigned long)getNotePeriod((0 << 4) +  0)) / rate;
-    };
-}
-
 void PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum)
 {
     struct instrument_t *ins;
@@ -627,11 +584,7 @@ uint16_t PUBLIC_CODE chn_calcNotePeriod(MIXCHN *chn, struct instrument_t *ins, u
     // calc period with st3 finetune
     period = (unsigned long)(MID_C_RATE * (unsigned long)getNotePeriod(note)) / ins_getSampleRate(ins);
     // Now check borders
-    if (period < chn->wSmpPeriodLow)
-        period = chn->wSmpPeriodLow;
-    if (period > chn->wSmpPeriodHigh)
-        period = chn->wSmpPeriodHigh;
-    return period;
+    return chn_checkSamplePeriod(chn, period);
 }
 
 uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, struct instrument_t *ins, uint8_t note)

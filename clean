@@ -93,6 +93,7 @@ $RM ./src/main/effects.asm
 $RM ./src/main/filldma.asm
 $RM ./src/main/fillvars.asm
 $RM ./src/main/loads3m.asm
+$RM ./src/main/mixchn.asm
 $RM ./src/main/mixer.asm
 $RM ./src/main/mixing.asm
 $RM ./src/main/mixvars.asm

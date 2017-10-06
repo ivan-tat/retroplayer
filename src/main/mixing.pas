@@ -26,6 +26,7 @@ uses
     effvars,
     mixvars,
     fillvars,
+    mixchn,
     mixer,
     mixer_,
     effects,

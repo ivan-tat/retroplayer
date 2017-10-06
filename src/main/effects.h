@@ -17,6 +17,7 @@
 
 #include "pascal.h"
 #include "main/s3mtypes.h"
+#include "main/mixchn.h"
 
 // TODO: remove PUBLIC_CODE and PUBLIC_DATA macros when done.
 
@@ -100,8 +101,6 @@ extern bool     PUBLIC_DATA chnState_arp_bFlag;
 void PUBLIC_CODE set_speed(uint8_t value);
 void PUBLIC_CODE set_tempo(uint8_t value);
 
-void PUBLIC_CODE chn_setSamplePeriod(MIXCHN *chn, int32_t period);
-void PUBLIC_CODE chn_setSampleVolume(MIXCHN *chn, int16_t vol);
 void PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum);
 
 /* remove if unused outside effects.c */

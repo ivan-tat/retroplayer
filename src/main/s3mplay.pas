@@ -89,6 +89,7 @@ uses
     blaster,
     effvars,
     mixvars,
+    mixchn,
     mixer_,
     mixer,
     filldma,

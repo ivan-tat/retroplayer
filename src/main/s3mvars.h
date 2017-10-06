@@ -79,31 +79,6 @@ extern ordersList_t PUBLIC_DATA Order;
 extern uint16_t PUBLIC_DATA OrdNum;
 extern uint8_t  PUBLIC_DATA LastOrder;  /* last order to play */
 
-/* channels */
-
-extern channelsList_t PUBLIC_DATA Channel;  /* all public/private data for every channel */
-extern uint8_t PUBLIC_DATA UsedChannels;    /* possible values : 1..32 (kill all Adlib) */
-
-#define chn_getState(chn)        (chn->bEnabled)
-#define chn_setState(chn, value) chn->bEnabled = value
-
-#define _chn_setSamplePeriod(chn, value) chn->wSmpPeriod= value
-#define chn_getSamplePeriod(chn)         (chn->wSmpPeriod)
-
-#define chn_getSampleStep(chn)          (chn->dSmpStep)
-#define chn_setSampleStep(chn, value)   chn->dSmpStep = value
-
-#define chn_getInstrument(chn) (struct instrument_t *)MK_FP(chn->wInsSeg, 0)
-#define chn_setInstrument(chn, p) chn->wInsSeg = FP_SEG((void __far *)p)
-#define chn_setSampleData(chn, p) chn->wSmpSeg = FP_SEG((void __far *)p)
-
-#define chn_setCommand(chn, value)     chn->bCommand = value
-#define chn_getCommand(chn)            (chn->bCommand)
-#define chn_setSubCommand(chn, value)  chn->bCommand2 = value
-#define chn_getSubCommand(chn)         (chn->bCommand2)
-#define chn_setEffectParam(chn, value) chn->bParameter = value
-#define chn_getEffectParam(chn)        (chn->bParameter)
-
 /* initial state */
 
 extern uint8_t  PUBLIC_DATA initState_tempo;

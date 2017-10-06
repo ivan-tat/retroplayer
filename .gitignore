@@ -102,6 +102,7 @@ src/main/effects.asm
 src/main/filldma.asm
 src/main/fillvars.asm
 src/main/loads3m.asm
+src/main/mixchn.asm
 src/main/mixer.asm
 src/main/mixing.asm
 src/main/mixvars.asm
