@@ -56,6 +56,14 @@ begin
     end else
         _fread := 0;
 end;
+function _fsetpos(var stream: File; pos: LongInt): Integer;
+begin
+	Seek(stream, pos);
+	if (IOResult = 0) then
+		_fsetpos := 0
+	else
+		_fsetpos := -1;
+end;
 (*$I+*)
 
 FUNCTION  player_load_s3m(name:string):BOOLEAN;
@@ -68,7 +76,6 @@ var f:file;
     i:byte;
     inspos,patpos,smppos,smpnum:byte;
     nextins,nextpat,nextsmp:longint;
-    fileposit:longint;
     wdummy:word;
     p:pointer;
     pAr:PArray;
@@ -136,16 +143,14 @@ var f:file;
         player_free_module;
     end;
 
-  FUNCTION load_instrument:boolean;
+  function load_instrument(var f: File; pos: LongInt): Boolean;
   var length:word;
       typ:byte;
       pAr:Parray;
       Psmp:PSmpHeader;
     BEGIN
       load_instrument:=false;
-      fileposit:=nextins*16;
-      seek(f,fileposit);
-      if IOresult<>0 then
+      if (_fsetpos(f, pos) <> 0) then
       begin
           Debug_Err(__FILE__, 'load_instrument', 'Failed to read file.');
           load_error := filecorrupt;
@@ -173,7 +178,6 @@ var f:file;
           { calc position in file : }
           smppara[smpnum]:=(longint(256*256)*pSmp^.HI_mempos+pSmp^.mempos);
           pSmp^.mempos:=0;
-          inc(smpnum);
           {$IFDEF LOADINFO}
           write('!');
           {$ENDIF}
@@ -181,18 +185,18 @@ var f:file;
       else
         begin
           smppara[smpnum]:=0;
-          inc(smpnum);
           {$IFDEF LOADINFO}
           write('$');
           {$ENDIF}
         end;
+	  inc(smpnum);
       {$IFDEF LOADINFO}
       write('*');
       {$ENDIF}
       load_instrument:=true;
     END;
 
-  FUNCTION load_sample:boolean;
+  function load_sample(var f: File; pos: LongInt): Boolean;
   var
       par:parray;
       pSmp:pSmpHeader;
@@ -202,10 +206,7 @@ var f:file;
       _seg: word;
     begin
       load_sample:=false;
-      fileposit:=nextsmp*16;
-      reset(f,1);
-      seek(f,fileposit);
-      if IOresult<>0 then
+      if (_fsetpos(f, pos) <> 0) then
       begin
           Debug_Err(__FILE__, 'load_sample', 'Failed to read file.');
           load_error := filecorrupt;
@@ -276,7 +277,7 @@ var f:file;
       load_sample:=true;
     end;
 
-  FUNCTION load_decrunc_pattern: Boolean;
+  function load_decrunc_pattern(var f: File; pos: LongInt): Boolean;
   var row:byte;
       crunch:byte;
       chn:byte;
@@ -287,18 +288,16 @@ var f:file;
       _seg: word;
     BEGIN
       load_decrunc_pattern:=false;
-      if nextpat=0 then
+
+      if (pos = 0) then
       begin
-        load_decrunc_pattern := true;
-        pat := @pat_static;
+        pat := patList_get(mod_Patterns, patpos-1);
         pat_clear(pat);
-        patList_set(mod_Patterns, patpos-1, pat);
+        load_decrunc_pattern := true;
         exit;
       end;
-      { first jump to position }
-      fileposit:=nextpat*16;
-      seek(f,fileposit);
-      if IOresult<>0 then
+
+      if (_fsetpos(f, pos) <> 0) then
       begin
           Debug_Err(__FILE__, 'load_decrunc_pattern', 'Failed to read file.');
           load_error := filecorrupt;
@@ -595,7 +594,7 @@ var
           begin
             { pattern }
             if (nextpat<$7fffffff) then
-                if not load_decrunc_pattern then
+                if (not load_decrunc_pattern(f, nextpat * 16)) then
                 begin
                     freeallmem;
                     exit;
@@ -607,7 +606,7 @@ var
           begin
             { instrument }
             if (nextins<$7fffffff) then
-                if not load_instrument then
+                if (not load_instrument(f, nextins * 16)) then
                 begin
                     freeallmem;
                     exit;
@@ -630,7 +629,7 @@ var
                           firstSMP:=false;
                       end;
                       if (nextsmp<$7fffffff) then
-                      if not load_sample then
+                      if (not load_sample(f, nextsmp*16)) then
                       begin
                           freeallmem;
                           exit;
@@ -670,7 +669,7 @@ var
                 inc(smppos)
             end;
             if (nextsmp<$7fffffff) then
-                if not load_sample then
+                if (not load_sample(f, nextsmp*16)) then
                 begin
                     freeallmem;
                     exit
