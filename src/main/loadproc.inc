@@ -39,6 +39,25 @@ begin
     end;
 end;
 
+(*temporary solution for file I/O*)
+(*$I-*)
+function _fread(p: Pointer; size: Word; n: Word; var stream: File): Word;
+var
+    s, actual: Word;
+begin
+    s := size * n;
+    if (s <> 0) then
+    begin
+        BlockRead(stream, p^, s, actual);
+        if (IOResult = 0) then
+            _fread := n
+        else
+            _fread := 0;
+    end else
+        _fread := 0;
+end;
+(*$I+*)
+
 FUNCTION  player_load_s3m(name:string):BOOLEAN;
 var f:file;
     header:Theader;
@@ -68,7 +87,11 @@ var f:file;
       i:integer;
       pSmp:PSMPheader;
     begin
-      if emsGetFreePagesCount=0 then begin EMSsmp:=false;exit end;
+      if emsGetFreePagesCount=0 then
+      begin
+        EMSsmp:=false;
+        exit;
+      end;
       w:=0;
       for i:=1 to 99 do
         begin
@@ -113,60 +136,52 @@ var f:file;
         player_free_module;
     end;
 
-  PROCEDURE forget(count:longint);
-  var dummy:array[0..511] of byte;
-      i:word;
-    begin
-      for i:=1 to count div 512 do blockread(f,dummy,512);
-      if count mod 512 >0 then blockread(f,dummy,(count mod 512));
-    end;
-
   FUNCTION load_instrument:boolean;
   var length:word;
       typ:byte;
       pAr:Parray;
       Psmp:PSmpHeader;
-      PAdl:PAdlHeader;
     BEGIN
       load_instrument:=false;
-      { first jump to position }
-      if (fileposit>nextins*16) then
-        { shit tables not sorted - more disk access }
-        begin
-          reset(f,1);
-          seek(f,nextins*16); { <- we start reading from filestart again
-                                and read till we are at start of this pattern ... }
-          if IOresult<>0 then begin load_error:=filecorrupt;exit end;
-          {$IFDEF DEBUGLOAD}
-          writeln(#13#10'somethings going wrong with order. position was: ',fileposit,' but we need : ',nextins*16);
-          {$ENDIF}
-        end
-      else
-      if fileposit<nextins*16 then
-        { that's better - we only have to forget some blocks }
-        forget(nextins*16-fileposit);
       fileposit:=nextins*16;
+      seek(f,fileposit);
+      if IOresult<>0 then
+      begin
+          Debug_Err(__FILE__, 'load_instrument', 'Failed to read file.');
+          load_error := filecorrupt;
+          exit;
+      end;
       {$IFDEF LOADINFO}
       write('I',inspos-1);
       {$ENDIF}
       { now read instrument header : }
-      blockread(f,Instruments^[inspos-1],5*16);
-      inc(fileposit,5*16);
+      if (_fread(@(Instruments^[inspos-1]), sizeof(TSmpHeader), 1, f) <> 1) then
+      begin
+          Debug_Err(__FILE__, 'load_instrument', 'Failed to read instrument header.');
+          load_error := filecorrupt;
+          exit;
+      end;
       pSmp:=addr(instruments^[inspos-1]);
-      pAdl:=addr(instruments^[inspos-1]);
       if pSmp^.typ=1 then { that instrument is a sample }
         begin
-          if pSmp^.packinfo <> 0 then begin load_error:=packedsamples;exit end;
+          if pSmp^.packinfo <> 0 then
+          begin
+              Debug_Err(__FILE__, 'load_instrument', 'Packed sample is not supported.');
+              load_error := packedsamples;
+              exit;
+          end;
           { calc position in file : }
           smppara[smpnum]:=(longint(256*256)*pSmp^.HI_mempos+pSmp^.mempos);
-          pSmp^.mempos:=0;inc(smpnum);
+          pSmp^.mempos:=0;
+          inc(smpnum);
           {$IFDEF LOADINFO}
           write('!');
           {$ENDIF}
         end
       else
         begin
-          smppara[smpnum]:=0;inc(smpnum);
+          smppara[smpnum]:=0;
+          inc(smpnum);
           {$IFDEF LOADINFO}
           write('$');
           {$ENDIF}
@@ -178,7 +193,7 @@ var f:file;
     END;
 
   FUNCTION load_sample:boolean;
-  var p:pointer;
+  var
       par:parray;
       pSmp:pSmpHeader;
       z,h:word;
@@ -187,24 +202,23 @@ var f:file;
       _seg: word;
     begin
       load_sample:=false;
-      if (fileposit>nextsmp*16) then
-        { shit tables not sorted - more disk access }
-        begin
-          reset(f,1);
-          seek(f,nextsmp*16); { <- we start reading from filestart again
-                                and read till we are at start of this pattern ... }
-          if IOresult<>0 then begin load_error:=filecorrupt;exit end;
-          {$IFDEF DEBUGLOAD}
-          writeln(#13#10'somethings going wrong with order. position was: ',fileposit,' but we need : ',nextsmp*16);
-          {$ENDIF}
-        end
-      else
-      if fileposit<nextsmp*16 then forget(nextsmp*16-fileposit);
-
       fileposit:=nextsmp*16;
+      reset(f,1);
+      seek(f,fileposit);
+      if IOresult<>0 then
+      begin
+          Debug_Err(__FILE__, 'load_sample', 'Failed to read file.');
+          load_error := filecorrupt;
+          exit;
+      end;
       pSmp:=addr(Instruments^[smppos]);
       if (pSmp^.flags and 1)=1 then smplen:=pSmp^.loopend else smplen:=pSmp^.length;
-      if smplen>64511 then begin load_error:=sample2large;exit end;
+      if smplen>64511 then
+      begin
+          Debug_Err(__FILE__, 'load_sample', 'Sample too large.');
+          load_error := sample2large;
+          exit;
+      end;
       {$IFDEF LOADINFO}
       write('S',smppos,'(',smplen,')');
       {$ENDIF}
@@ -218,20 +232,24 @@ var f:file;
           for i:=0 to z-1 do
             if not emsMap(smpEMShandle,curSpage+i,i) then write('<EMS-ERROR>');
           inc(curSpage,z);
-          par:=emsFramePtr;
-          blockread(f,par^,smplen);
+          par := emsFramePtr;
         end
       else { we have to use normal memory (geeee) for this sample }
         begin
             if (_dos_allocmem((smplen+1024+15) shr 4, _seg) <> 0) then
             begin
-                load_error:=notenoughmem;
+                Debug_Err(__FILE__, 'load_sample', 'Failed to allocate DOS memory for sample data.');
+                load_error := notenoughmem;
                 exit;
             end;
-            p := ptr(_seg, 0);
-            blockread(f,p^,smplen);
-            pSmp^.mempos:=seg(p^);
-            par:=p;
+            par := ptr(_seg, 0);;
+            pSmp^.mempos:=seg(par^);
+        end;
+        if (_fread(par, smplen, 1, f) <> 1) then
+        begin
+            Debug_Err(__FILE__, 'load_sample', 'Failed to read sample data.');
+            load_error := filecorrupt;
+            exit;
         end;
       if (Psmp^.flags and 1)=1 then
         { if loop then copy from loopstart : }
@@ -246,22 +264,19 @@ var f:file;
                 end
               else
                 begin
-                  move(par^[psmp^.loopbeg],par^[smplen+1024-h],h);h:=0;
+                  move(par^[psmp^.loopbeg],par^[smplen+1024-h],h);
+                  h:=0;
                 end;
             end;
         end
       else fillchar(par^[smplen],1024,128);
-      if (pSmp^.flags and 1 = 1) and (pSmp^.loopend<pSmp^.length) then
-        forget(pSmp^.length-pSmp^.loopend);
-      inc(fileposit,pSmp^.length);
-      if IORESULT<>0 then begin write(' Geeee ... (',fileposit,')');load_error:=filecorrupt;exit end;
       {$IFDEF LOADINFO}
       write('*');
       {$ENDIF}
       load_sample:=true;
     end;
 
-  FUNCTION load_decrunc_pattern:boolean;
+  FUNCTION load_decrunc_pattern: Boolean;
   var row:byte;
       crunch:byte;
       chn:byte;
@@ -281,34 +296,36 @@ var f:file;
         exit;
       end;
       { first jump to position }
-      if (fileposit>nextpat*16) then
-        { shit tables not sorted - more dsik access :( }
-        begin
-          reset(f,1);
-          seek(f,nextpat*16); { <- we start reading from filestart again
-                                   and read till we are at start of this pattern ... }
-          {$IFDEF DEBUGLOAD}
-          writeln(#13#10'somethings going wrong with order. position was: ',fileposit,' but we need : ',nextpat*16);
-          {$ENDIF}
-          if IOresult<>0 then begin load_error:=filecorrupt;exit end;
-        end
-      else
-      if fileposit<nextpat*16 then
-        forget(nextpat*16-fileposit);
       fileposit:=nextpat*16;
-      blockread(f,length,2); { <- length of packed pattern }
+      seek(f,fileposit);
+      if IOresult<>0 then
+      begin
+          Debug_Err(__FILE__, 'load_decrunc_pattern', 'Failed to read file.');
+          load_error := filecorrupt;
+          exit;
+      end;
+      if (_fread(@length, 2, 1, f) <> 1) then
+      begin
+          Debug_Err(__FILE__, 'load_decrunc_pattern', 'Failed to read pattern.');
+          load_error := filecorrupt;
+          exit;
+      end;
       {$IFDEF LOADINFO}
       write('P',patpos-1,'(',length,')');
-      if length>10*1024 then
-        begin
-          writeln('Packed data longer then 10K - that''s not allowed ...'#7' PROGRAM HALTED.');
-          halt;
-        end;
       {$ENDIF}
+      if (length = 0) or (length > 10*1024) then
+      begin
+          Debug_Err(__FILE__, 'load_decrunc_pattern', 'Bad pattern size.');
+          load_error := filecorrupt;
+          exit;
+      end;
       { read whole packed pattern }
-      blockread(f,buffer^,length-2); { length=sizeof(packdata)+(sizeof(length)=2) }
-      if IOresult<>0 then begin load_error:=filecorrupt;exit end;
-      inc(fileposit,length);
+      if (_fread(buffer, length - 2, 1, f) <> 1) then
+      begin
+          Debug_Err(__FILE__, 'load_decrunc_pattern', 'Failed to read pattern.');
+          load_error := filecorrupt;
+          exit;
+      end;
       { first get memory : (if useEMS than try to put it into the EMS ... }
       if useEMS and
         patListIsInEM(mod_Patterns) and
@@ -319,13 +336,19 @@ var f:file;
           patSetDataInEM(pat, curPpage, curpart);
           patList_set(mod_Patterns, patpos-1, pat);
           p := patMapData(pat);
-          if (p = nil) then write('<EMS-ERROR>');
+          if (p = nil) then
+          begin
+              Debug_Err(__FILE__, 'load_decrunc_pattern', 'Failed to map EM for pattern.');
+              load_error := internal_failure;
+              exit;
+          end;
         end
       else
         begin
             if (_dos_allocmem((longint(64*5)*usedchannels + 15) shr 4, _seg) <> 0) then
             begin
-                load_error:=notenoughmem;
+                Debug_Err(__FILE__, 'load_decrunc_pattern', 'Failed to allocate DOS memory for pattern.');
+                load_error := notenoughmem;
                 exit;
             end;
             p := ptr(_seg, 0);
@@ -347,7 +370,8 @@ var f:file;
           inc(curpart);
           if (curpart = patListGetPatPerPage(mod_Patterns)) and (Ppagesleft>0) then
             begin
-              dec(Ppagesleft);inc(curPpage);
+              dec(Ppagesleft);
+              inc(curPpage);
               curpart:=0;
             end;
         end;
@@ -377,25 +401,34 @@ var
 
     useEMS:=emsInstalled and useEMS and (emsGetFreePagesCount>1);
     { we need one page for saving mapping while playing }
-    load_error:=0;buffer:=Nil;
+    load_error := 0;
+    buffer := nil;
     assign(f,name);
     reset(f,1);               { open file - 16byte blocks :) }
-    IF IORESULT<>0 THEN begin load_error:=filenotexist;exit end;
-    { First read fileheader }
-    blockread(f,header,sizeof(THeader));
-    IF IORESULT<>0 THEN begin load_error:=wrongformat;exit end;
-    { check if it's really a S3M ... }
-    IF header.filetyp<>16 then begin load_error:=wrongformat;exit end;
-    if ( header.SCRM_ID <> $4d524353 ) then
+    IF IORESULT<>0 then
     begin
+        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to open file.');
+        load_error := filenotexist;
+        exit;
+    end;
+
+    if (_fread(@header, sizeof(THeader), 1, f) <> 1) then
+    begin
+        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to read file''s header.');
         load_error := wrongformat;
         exit;
     end;
-    if ( ( header.CWTV shr 8 ) and $ff <> $13 ) then
+
+    if (header.filetyp <> 16)
+    or (header.SCRM_ID <> $4d524353)
+    or ((header.CWTV shr 8) and $ff <> $13)
+    or (not (header.ffv in [1, 2])) then
     begin
+        Debug_Err(__FILE__, 'player_load_s3m', 'Unsupported file format.');
         load_error := wrongformat;
         exit;
     end;
+
     { set some variables : }
     convert2pas(header.name,mod_Title,28);
     ordnum:=header.ordnum;
@@ -415,7 +448,6 @@ var
         chr( ord('0') + ( ( header.cwtv shr 4 ) and $0f ) ) +
         chr( ord('0') + ( header.cwtv and $0f ) );
     modOption_SignedData := (header.ffv = 1);
-    if not (header.ffv in [1,2]) then begin load_error:=wrongformat;exit end;
     playState_gVolume:=header.gvolume;
     playState_mVolume:=header.mvolume and $7f;
     modOption_Stereo := (header.mvolume and $80 <> 0);
@@ -434,16 +466,34 @@ var
     writeln(' Used channels :',usedchannels);
     {$ENDIF}
     { now load arrangment : }
-    blockread(f,Order,ordnum);
-    IF IORESULT<>0 THEN begin load_error:=filecorrupt;exit end;
+    if (_fread(@Order, ordnum, 1, f) <> 1) then
+    begin
+        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to read patterns order.');
+        load_error := filecorrupt;
+        exit;
+    end;
     { check order if there's one 'real' (playable) entry ... }
-    i:=0;while (i<ordnum) and (order[i]>=254) do inc(i);
-    if i=ordnum then begin load_error:=ordercorrupt;exit end; { playable entry not found :( }
-    blockread(f,inspara,insnum*2);
-    IF IORESULT<>0 THEN begin load_error:=filecorrupt;exit end;
-    blockread(f, patpara, patList_get_count(mod_Patterns) * 2);
-    IF IORESULT<>0 THEN begin load_error:=filecorrupt;exit end;
-    close(f);
+    i:=0;
+    while (i<ordnum) and (order[i]>=254) do inc(i);
+    if i=ordnum then
+    begin
+        Debug_Err(__FILE__, 'player_load_s3m', 'Playable entry not found.');
+        load_error := ordercorrupt;
+        exit;
+    end;
+    if (_fread(@inspara, insnum * 2, 1, f) <> 1) then
+    begin
+        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to read instruments headers.');
+        load_error := filecorrupt;
+        exit;
+    end;
+
+    if (_fread(@patpara, patList_get_count(mod_Patterns) * 2, 1, f) <> 1) then
+    begin
+        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to read patterns offsets.');
+        load_error := filecorrupt;
+        exit;
+    end;
     { Ok now the difficult part ...
       (load patterns/samples/instrumentdata)
       - load them in a row (don't jump through the file, that costs time !
@@ -490,7 +540,8 @@ var
       end;
     if useEMS and patListIsInEM(mod_Patterns) then
       begin
-        curpart:=0;curPpage:=0;
+        curpart:=0;
+        curPpage:=0;
       end;
     { clear all samples }
     fillchar(instruments^,MAX_INSTRUMENTS*sizeof(TInstr),0);
@@ -498,41 +549,57 @@ var
     {$IFDEF LOADINFO}
     writeln(#10#13'load report :');
     {$ENDIF}
-    reset(f,1);
-    fileposit:=0; { at start :) }
     Inst_done:=false;  { Instrument are not loaded yet :) }
     load_smp_later:=false; { load instruments not later (up to now we can say only this) }
     firstSMP:=true; { if we load now an instrument, then it's the first =) }
     { init buffer for fast loading : }
     if (_dos_allocmem((10*1024 + 15) shr 4, _seg) <> 0) then
     begin
-        load_error:=notenoughmem;
+        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to allocate DOS memory for buffer.');
+        load_error := notenoughmem;
         exit;
     end;
     buffer := ptr(_seg, 0);
     { init some variables for loading : }
-    inspos:=1;patpos:=0;smppos:=0;smpnum:=0;nextpat:=$7fffffff;nextins:=$7fffffff;nextsmp:=$7fffffff;
-    while (inspos<insnum+1) or (patpos<patList_get_count(mod_Patterns)) or (smppos<smpnum)
-          or (nextpat<$7fffffff) or (nextins<$7fffffff) or (nextsmp<$7fffffff) do
+    inspos:=1;
+    patpos:=0;
+    smppos:=0;
+    smpnum:=0;
+    nextpat:=$7fffffff;
+    nextins:=$7fffffff;
+    nextsmp:=$7fffffff;
+    while (inspos<insnum+1)
+    or (patpos<patList_get_count(mod_Patterns))
+    or (smppos<smpnum)
+    or (nextpat<$7fffffff)
+    or (nextins<$7fffffff)
+    or (nextsmp<$7fffffff) do
       begin
         {writeln('--->',inspos,',',patpos,',',smppos);readkey;}
         if (nextpat=$7fffffff) and (patpos<patList_get_count(mod_Patterns)) then
           begin
-            nextpat:=patpara[patpos];inc(patpos)
+            nextpat:=patpara[patpos];
+            inc(patpos);
           end;
         if (nextins=$7fffffff) and (inspos<insnum+1) then
           begin
-            nextins:=inspara[inspos];inc(inspos)
+            nextins:=inspara[inspos];
+            inc(inspos);
           end;
         if (nextsmp=$7fffffff) and (smppos<smpnum) then
           begin
-            nextsmp:=smppara[smppos];inc(smppos)
+            nextsmp:=smppara[smppos];
+            inc(smppos);
           end;
         if (nextpat<nextins) and (nextpat<nextsmp) then
           begin
             { pattern }
             if (nextpat<$7fffffff) then
-              if not load_decrunc_pattern then begin freeallmem;exit end;
+                if not load_decrunc_pattern then
+                begin
+                    freeallmem;
+                    exit;
+                end;
             nextpat:=$7fffffff;
           end
         else
@@ -540,8 +607,13 @@ var
           begin
             { instrument }
             if (nextins<$7fffffff) then
-              if not load_instrument then begin freeallmem;exit end;
-            nextins:=$7fffffff;inst_done:=(inspos=insnum+1);
+                if not load_instrument then
+                begin
+                    freeallmem;
+                    exit;
+                end;
+            nextins:=$7fffffff;
+            inst_done:=(inspos=insnum+1);
           end
         else { sampledata }
           begin
@@ -552,9 +624,17 @@ var
                 stop loading here - do it after all Instruments are done ... }
                   else
                     begin
-                      if useEMS and firstSMP then begin allocEMSforSamples;firstSMP:=false end;
+                      if useEMS and firstSMP then
+                      begin
+                          allocEMSforSamples;
+                          firstSMP:=false;
+                      end;
                       if (nextsmp<$7fffffff) then
-                      if not load_sample then begin freeallmem;exit end;
+                      if not load_sample then
+                      begin
+                          freeallmem;
+                          exit;
+                      end;
                     end;
               end;
             nextsmp:=$7fffffff;
@@ -576,18 +656,25 @@ var
       load the samples in a row ... }
     if UseEMS and load_smp_later then
       begin
-        reset(f,1);
-        fileposit:=0; { again to start }
         allocEMSforSamples;
-        smppos:=0;smpnum:=0;nextpat:=$7fffffff;nextins:=$7fffffff;nextsmp:=$7fffffff;
+        smppos:=0;
+        smpnum:=0;
+        nextpat:=$7fffffff;
+        nextins:=$7fffffff;
+        nextsmp:=$7fffffff;
         while (smppos<smpnum) or (nextsmp<$7fffffff) do
           begin
             if (nextsmp=$7fffffff) and (smppos<smpnum) then
-              begin
-                nextsmp:=smppara[smppos];inc(smppos)
-              end;
+            begin
+                nextsmp:=smppara[smppos];
+                inc(smppos)
+            end;
             if (nextsmp<$7fffffff) then
-              if not load_sample then begin freeallmem;exit end;
+                if not load_sample then
+                begin
+                    freeallmem;
+                    exit
+                end;
             nextsmp:=$7fffffff;
           end;
       end;
