@@ -17,6 +17,7 @@
 
 #include "pascal.h"
 #include "cc/i86.h"
+#include "dynarray.h"
 
 /*** Pattern ***/
 
@@ -53,8 +54,7 @@ void    PUBLIC_CODE patFree(MUSPAT *pat);
 
 typedef struct musPatternsList_t
 {
-    uint16_t count;
-    MUSPAT *list;
+    struct _dynarr_t list;
     uint16_t patLength; /* length of one pattern */
     bool useEM;         /* patterns in EM */
     EMSHDL handle;      /* handle to access EM for patterns */
@@ -67,8 +67,8 @@ extern MUSPATLIST *PUBLIC_DATA mod_Patterns;
 MUSPATLIST *PUBLIC_CODE patList_new(void);
 void        PUBLIC_CODE patList_clear(MUSPATLIST *self);
 void        PUBLIC_CODE patList_delete(MUSPATLIST **self);
-void        PUBLIC_CODE patList_set(MUSPATLIST *self, int16_t index, MUSPAT *pat);
-MUSPAT     *PUBLIC_CODE patList_get(MUSPATLIST *self, int16_t index);
+void        PUBLIC_CODE patList_set(MUSPATLIST *self, uint16_t index, MUSPAT *pat);
+MUSPAT     *PUBLIC_CODE patList_get(MUSPATLIST *self, uint16_t index);
 bool        PUBLIC_CODE patList_set_count(MUSPATLIST *self, uint16_t count);
 uint16_t    PUBLIC_CODE patList_get_count(MUSPATLIST *self);
 void        PUBLIC_CODE patListSetPatLength(MUSPATLIST *self, uint16_t value);

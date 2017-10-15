@@ -17,6 +17,7 @@ cleandir() {
 
 cleandir ./src
 $RM ./src/debug.asm
+$RM ./src/dynarray.asm
 cleandir ./src/cc
 cleandir ./src/cc/conio
 $RM ./src/cc/conio/inp.asm

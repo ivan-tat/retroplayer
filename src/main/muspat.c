@@ -12,6 +12,7 @@
 #include "cc/i86.h"
 #include "cc/string.h"
 #include "cc/dos.h"
+#include "dynarray.h"
 #include "dos/ems.h"
 
 #include "main/muspat.h"
@@ -97,12 +98,27 @@ void PUBLIC_CODE patFree(MUSPAT *pat)
 
 static EMSNAME EMS_PATLIST_HANDLE_NAME = "patlist";
 
+void __far _muspatl_clear_item(void *self, void *item)
+{
+    pat_clear((MUSPAT *)item);
+}
+
+void __far _muspatl_free_item(void *self, void *item)
+{
+    patFree((MUSPAT *)item);
+}
+
 MUSPATLIST *PUBLIC_CODE patList_new(void)
 {
     uint16_t seg;
+    MUSPATLIST *self;
             
     if (!_dos_allocmem(_dos_para(sizeof(MUSPATLIST)), &seg))
-        return MK_FP(seg, 0);
+    {
+        self = MK_FP(seg, 0);
+        _dynarr_init(&(self->list), self, sizeof(MUSPAT), _muspatl_clear_item, _muspatl_free_item);
+        return self;
+    }
     else
         return NULL;
 }
@@ -110,8 +126,7 @@ MUSPATLIST *PUBLIC_CODE patList_new(void)
 void PUBLIC_CODE patList_clear(MUSPATLIST *self)
 {
     if (self)
-        if (self->list && self->count)
-            memset(self->list, 0, self->count * sizeof(MUSPAT));
+        _dynarr_clear_list(&(self->list));
 }
 
 void PUBLIC_CODE patList_delete(MUSPATLIST **self)
@@ -125,89 +140,32 @@ void PUBLIC_CODE patList_delete(MUSPATLIST **self)
 }
 
 
-void PUBLIC_CODE patList_set(MUSPATLIST *self, int16_t index, MUSPAT *item)
+void PUBLIC_CODE patList_set(MUSPATLIST *self, uint16_t index, MUSPAT *item)
 {
     if (self)
-        if (self->list && index < self->count)
-        {
-            if (item)
-                self->list[index].data_seg = item->data_seg;
-            else
-                pat_clear(&(self->list[index]));
-        }
+        _dynarr_set_item(&(self->list), index, item);
 }
 
-MUSPAT *PUBLIC_CODE patList_get(MUSPATLIST *self, int16_t index)
+MUSPAT *PUBLIC_CODE patList_get(MUSPATLIST *self, uint16_t index)
 {
     if (self)
-        if (self->list && index >= 0 && index < self->count)
-            return &(self->list[index]);
-
-    return NULL;
+        return _dynarr_get_item(&(self->list), index);
+    else
+        return NULL;
 }
 
 bool PUBLIC_CODE patList_set_count(MUSPATLIST *self, uint16_t count)
 {
-    uint16_t seg, max;
-    unsigned int size;
-    bool result;
-    unsigned int i;
-
     if (self)
-    {
-        if (self->count != count)
-        {
-            size = _dos_para(count * sizeof(MUSPAT));
-            if (count > self->count)
-            {
-                // Grow
-                if (self->count)
-                    result = !_dos_setblock(size, FP_SEG(self->list), &max);
-                else
-                {
-
-                    result = !_dos_allocmem(size, &seg);
-                    if (result)
-                        self->list = MK_FP(seg, 0);
-                    else
-                        self->list = NULL;
-                }
-
-                if (result)
-                {
-                    memset(&(self->list[self->count]), 0, (count - self->count) * sizeof(MUSPAT));
-                    self->count = count;
-                }
-            }
-            else
-            {
-                // Shrink
-                for (i = count; i < self->count; i++)
-                    patFree(&(self->list[i]));
-                if (count)
-                    _dos_setblock(size, FP_SEG(self->list), &max);
-                else
-                {
-                    _dos_freemem(FP_SEG(self->list));
-                    self->list = NULL;
-                }
-                self->count = count;
-                result = true;
-            }
-        }
-        else
-            result = true;
-    }
+        return _dynarr_set_size(&(self->list), count); 
     else
-        result = false;
-
-    return result;
+        return false;
 }
 
 uint16_t PUBLIC_CODE patList_get_count(MUSPATLIST *self)
 {
     if (self)
-        return self->count;
+        return _dynarr_get_size(&(self->list));
     else
         return 0;
 }
@@ -292,16 +250,7 @@ void PUBLIC_CODE patListFree(MUSPATLIST *self)
 
     if (self)
     {
-        if (self->list)
-        {
-            count = self->count;
-            for (i = 0; i < count; i++)
-            {
-                pat = patList_get(self, i);
-                patFree(pat);
-            }
-            _dos_freemem(FP_SEG(self->list));
-        }
+        _dynarr_free(&(self->list));
 
         if (self->useEM)
         {

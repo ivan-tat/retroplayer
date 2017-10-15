@@ -13,6 +13,7 @@ fi
 T_CC=0
 T_DEBUG=0
 T_DOS=0
+T_MISC=0
 T_HW=0
 T_HW_SB=0
 T_MAIN=0
@@ -25,6 +26,7 @@ case "$target" in
         T_CC=1
         T_DEBUG=1
         T_DOS=1
+        T_MISC=1
         T_HW=1
         T_HW_SB=1
         T_MAIN=1
@@ -38,6 +40,9 @@ case "$target" in
         ;;
     dos)
         T_DOS=1
+        ;;
+    misc)
+        T_MISC=1
         ;;
     hw)
         T_HW=1
@@ -67,6 +72,9 @@ if [ $T_TP == 1 ]; then
     if [ $T_DOS == 1 ]; then
         T_DOS_TP=1
     fi
+    if [ $T_MISC == 1 ]; then
+        T_MISC_TP=1
+    fi
     if [ $T_HW == 1 ]; then
         T_HW_TP=1
     fi
@@ -86,6 +94,7 @@ else
     T_CC_TP=0
     T_DEBUG=0
     T_DOS_TP=0
+    T_MISC_TP=0
     T_HW_TP=0
     T_HW_SB_TP=0
     T_MAIN_TP=0
@@ -369,6 +378,7 @@ build_target $T_CC     obj src/cc/string/strncpy.c
 build_target $T_CC     obj src/cc/string/strnicmp.c
 build_target $T_DEBUG  obj src/debug.c
 build_target $T_DOS    obj src/dos/ems.c
+build_target $T_MISC   obj src/dynarray.c
 build_target $T_HW     obj src/hw/cpu.asm
 build_target $T_HW     obj src/hw/dma.c
 build_target $T_HW     obj src/hw/isr.asm
@@ -422,6 +432,7 @@ build_target $T_CC_TP     obj src/cc/string_.pas
 build_target $T_CC_TP     obj src/cc/stdio.pas
 build_target $T_DEBUG_TP  obj src/debug.pas
 build_target $T_DOS_TP    obj src/dos/ems.pas
+build_target $T_MISC_TP   obj src/dynarray.pas
 build_target $T_HW_TP     obj src/hw/cpu.pas
 build_target $T_HW_TP     obj src/hw/dma.pas
 build_target $T_HW_TP     obj src/hw/pic.pas

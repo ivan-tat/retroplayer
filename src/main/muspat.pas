@@ -26,15 +26,7 @@ const
     MAX_PATTERNS = 100; (* 0..99 patterns *)
 
 type
-    TMUSPATLIST = packed record
-        count: Word;
-        list: Pointer;
-        patLength: Word;
-        useEM: Boolean;
-        handle: TEMSHDL;
-        patPerPage: Byte;
-    end;
-    PMUSPATLIST = ^TMUSPATLIST;
+    PMUSPATLIST = Pointer;
 
 var
     mod_Patterns: PMUSPATLIST;
@@ -72,7 +64,8 @@ implementation
 uses
     i86,
     string_,
-    dos_;
+    dos_,
+    dynarray;
 
 (*$l muspat.obj*)
 
