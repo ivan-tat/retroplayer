@@ -109,10 +109,15 @@ bool __far _dynarr_set_size(struct _dynarr_t *self, uint16_t size)
             {
                 // Grow
                 if (self->size)
-                    result = !_dos_setblock(memsize, FP_SEG(self->list), &max);
+                {
+                    // do only when new DOS size differs
+                    if (_dos_para(self->size * self->item_size) != memsize)
+                        result = !_dos_setblock(memsize, FP_SEG(self->list), &max);
+                    else
+                        result = true;
+                }
                 else
                 {
-
                     result = !_dos_allocmem(memsize, &seg);
                     if (result)
                         self->list = MK_FP(seg, 0);
@@ -136,7 +141,11 @@ bool __far _dynarr_set_size(struct _dynarr_t *self, uint16_t size)
                 }
 
                 if (size)
-                    _dos_setblock(memsize, FP_SEG(self->list), &max);
+                {
+                    // do only when new DOS size differs
+                    if (_dos_para(self->size * self->item_size) != memsize)
+                        _dos_setblock(memsize, FP_SEG(self->list), &max);
+                }
                 else
                 {
                     _dos_freemem(FP_SEG(self->list));
@@ -165,7 +174,6 @@ uint16_t __far _dynarr_get_size(struct _dynarr_t *self)
 
 void __far _dynarr_free(struct _dynarr_t *self)
 {
-    void *item;
     uint16_t size, i;
 
     if (self)
