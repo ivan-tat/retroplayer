@@ -304,7 +304,7 @@ var
     gotoxy(11,1);write(lastorder:2);
     gotoxy(20,1);write(playState_row:2);
     gotoxy(29,1);write(playState_tick:2);
-    gotoxy(63,1);write(playState_pattern:2,' (',hexw( seg( patGetData(pat)^ ) ),')');
+    gotoxy(63,1);write(playState_pattern:2,' (',hexw( seg( muspat_get_data(pat)^ ) ),')');
     textbackground(green);textcolor(black);
     gotoxy(76,6);write(switch[playOption_LoopSong]);
     gotoxy(1,2);

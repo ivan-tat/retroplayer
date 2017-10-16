@@ -54,16 +54,15 @@ typedef patternFlowState_t PATFLOWSTATE;
 
 bool __near pattern_open(PATDESC *desc, MUSPAT *pat)
 {
-    void *data;
     if (pat)
     {
-        data = (void *)0;
-        if (pat->data_seg)
-            data = patMapData(pat);
-        if (!data)
-            return false;
         desc->pattern = pat;
-        desc->data = data;
+        if (muspat_is_EM_data(pat))
+            desc->data = muspat_map_EM_data(pat);
+        else
+            desc->data = muspat_get_data(pat);
+        if (!desc->data)
+            return false;
         desc->row = 0;
         desc->channel = 0;
         desc->offset = 0;

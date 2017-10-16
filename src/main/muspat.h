@@ -17,35 +17,54 @@
 
 #include "pascal.h"
 #include "cc/i86.h"
+#include "dos/ems.h"
 #include "dynarray.h"
 
-/*** Pattern ***/
+/*** Music pattern ***/
 
-typedef struct pattern_t {
-    uint16_t data_seg;
-        /* segment for every pattern: 0xC000 + ((part & 63) << 8) + page */
+typedef uint16_t music_pattern_flags_t;
+typedef music_pattern_flags_t MUSPATFLAGS;
+
+#define MUSPATFL_EM     (1<<0)  /* data is in EM */
+#define MUSPATFL_OWNHDL (1<<1)  /* has own EM handle, needs to be freed when done */
+
+#pragma pack(push, 1);
+typedef struct music_pattern_t
+{
+    MUSPATFLAGS flags;
+    uint8_t channels;
+    uint8_t rows;
+    uint16_t size;
+    uint16_t data_off;
+    uint16_t data_seg;  /* DOS segment or EM page */
+    EMSHDL handle;
 };
-typedef struct pattern_t MUSPAT;
+#pragma pack(pop);
+typedef struct music_pattern_t MUSPAT;
 
-#define _patIsDataInEM(o)              (o->data_seg >= 0xc000)
-#define _patGetDataEMPage(o)           (o->data_seg & 0x00ff)
-#define _patGetDataEMPart(o)           ((o->data_seg >> 8) & 0x3f)
-#define _patSetDataInEM(o, page, part) { o->data_seg = 0xc000 + (((part) & 0x3f) << 8) + (page); }
-#define _patGetDataInEM(o, length)     (MK_FP(emsFrameSeg, _patGetDataEMPart(o) * (length)))
-
-//MUSPAT *PUBLIC_CODE pat_new(void);
-void    PUBLIC_CODE pat_clear(MUSPAT *pat);
-//void    PUBLIC_CODE pat_delete(MUSPAT **pat);
-void    PUBLIC_CODE patSetData(MUSPAT *pat, void *p);
-void    PUBLIC_CODE patSetDataInEM(MUSPAT *pat, uint8_t page, uint8_t part);
-bool    PUBLIC_CODE patIsDataInEM(MUSPAT *pat);
-void   *PUBLIC_CODE patGetData(MUSPAT *pat);
-uint8_t PUBLIC_CODE patGetDataEMPage(MUSPAT *pat);
-uint8_t PUBLIC_CODE patGetDataEMPart(MUSPAT *pat);
-void   *PUBLIC_CODE patMapData(MUSPAT *pat);
-void    PUBLIC_CODE patFree(MUSPAT *pat);
-//void    PUBLIC_CODE patInit(MUSPAT *pat);
-//void    PUBLIC_CODE patDone(MUSPAT *pat);
+//MUSPAT  *PUBLIC_CODE muspat_new(void);
+void     PUBLIC_CODE muspat_clear(MUSPAT *self);
+//void     PUBLIC_CODE muspat_delete(MUSPAT **self);
+void     PUBLIC_CODE muspat_set_EM_data(MUSPAT *self, bool value);
+bool     PUBLIC_CODE muspat_is_EM_data(MUSPAT *self);
+void     PUBLIC_CODE muspat_set_own_EM_handle(MUSPAT *self, bool value);
+bool     PUBLIC_CODE muspat_is_own_EM_handle(MUSPAT *self);
+void     PUBLIC_CODE muspat_set_channels(MUSPAT *self, uint8_t value);
+uint8_t  PUBLIC_CODE muspat_get_channels(MUSPAT *self);
+void     PUBLIC_CODE muspat_set_rows(MUSPAT *self, uint8_t value);
+uint8_t  PUBLIC_CODE muspat_get_rows(MUSPAT *self);
+void     PUBLIC_CODE muspat_set_size(MUSPAT *self, uint16_t value);
+uint16_t PUBLIC_CODE muspat_get_size(MUSPAT *self);
+void     PUBLIC_CODE muspat_set_data(MUSPAT *self, void *value);
+void     PUBLIC_CODE muspat_set_EM_data_handle(MUSPAT *self, EMSHDL value);
+EMSHDL   PUBLIC_CODE muspat_get_EM_data_handle(MUSPAT *self);
+void     PUBLIC_CODE muspat_set_EM_data_page(MUSPAT *self, uint16_t value);
+uint16_t PUBLIC_CODE muspat_get_EM_data_page(MUSPAT *self);
+void     PUBLIC_CODE muspat_set_EM_data_offset(MUSPAT *self, uint16_t value);
+uint16_t PUBLIC_CODE muspat_get_EM_data_offset(MUSPAT *self);
+void    *PUBLIC_CODE muspat_get_data(MUSPAT *self);
+void    *PUBLIC_CODE muspat_map_EM_data(MUSPAT *self);
+void     PUBLIC_CODE muspat_free(MUSPAT *self);
 
 /*** Patterns list ***/
 

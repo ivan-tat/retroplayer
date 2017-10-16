@@ -292,7 +292,7 @@ var f:file;
       if (pos = 0) then
       begin
         pat := patList_get(mod_Patterns, patpos-1);
-        pat_clear(pat);
+        muspat_clear(pat);
         load_decrunc_pattern := true;
         exit;
       end;
@@ -325,16 +325,24 @@ var f:file;
           load_error := filecorrupt;
           exit;
       end;
+
+      pat := @pat_static;
+      muspat_clear(pat);
+      muspat_set_channels(pat, UsedChannels);
+      muspat_set_rows(pat, 64);
+
       { first get memory : (if useEMS than try to put it into the EMS ... }
       if useEMS and
         patListIsInEM(mod_Patterns) and
         (curpart < patListGetPatPerPage(mod_Patterns)) then
         begin
-          pat := @pat_static;
-          pat_clear(pat);
-          patSetDataInEM(pat, curPpage, curpart);
+          muspat_set_EM_data(pat, true);
+          muspat_set_own_EM_handle(pat, false);
+          muspat_set_EM_data_handle(pat, patListGetHandle(mod_Patterns));
+          muspat_set_EM_data_page(pat, curPpage);
+          muspat_set_EM_data_offset(pat, curpart * 5 * UsedChannels * 64);
           patList_set(mod_Patterns, patpos-1, pat);
-          p := patMapData(pat);
+          p := muspat_map_EM_data(pat);
           if (p = nil) then
           begin
               Debug_Err(__FILE__, 'load_decrunc_pattern', 'Failed to map EM for pattern.');
@@ -351,16 +359,15 @@ var f:file;
                 exit;
             end;
             p := ptr(_seg, 0);
-            pat := @pat_static;
-            pat_clear(pat);
-            patSetData(pat, p);
+            muspat_set_EM_data(pat, false);
+            muspat_set_data(pat, p);
             patList_set(mod_Patterns, patpos-1, pat);
         end;
 
       unpackPattern(buffer, p, 64, UsedChannels);
 
       pat := patList_get(mod_Patterns, patpos-1);
-      if (patIsDataInEM(pat)) then
+      if (muspat_is_EM_data(pat)) then
         begin
           {$IFDEF LOADINFO}
           write('E(',curPpage,',',curpart,')');

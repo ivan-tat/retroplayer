@@ -31,6 +31,8 @@ typedef emsError_t EMSERR;
 typedef uint16_t emsHandle_t;
 typedef emsHandle_t EMSHDL;
 
+#define EMSBADHDL 0xffff
+
 typedef uint8_t emsHandleName_t[8];
 typedef emsHandleName_t EMSNAME;
 

@@ -16,29 +16,40 @@ uses
 (*$I defines.pas*)
 
 type
-    TMUSPAT = record
-        data_seg: word;
-            (* segment for pattern's data *)
+    TMUSPAT = packed record
+        flags: Word;
+        channels: Byte;
+        rows: Byte;
+        size: Word;
+        data_off: Word;
+        data_seg: Word;
+        handle: TEMSHDL;
     end;
     PMUSPAT = ^TMUSPAT;
 
-const
-    MAX_PATTERNS = 100; (* 0..99 patterns *)
+procedure muspat_clear(self: PMUSPAT);
+procedure muspat_set_EM_data(self: PMUSPAT; value: Boolean);
+function  muspat_is_EM_data(self: PMUSPAT): Boolean;
+procedure muspat_set_own_EM_handle(self: PMUSPAT; value: Boolean);
+function  muspat_is_own_EM_handle(self: PMUSPAT): Boolean;
+procedure muspat_set_channels(self: PMUSPAT; value: Byte);
+function  muspat_get_channels(self: PMUSPAT): Byte;
+procedure muspat_set_rows(self: PMUSPAT; value: Byte);
+function  muspat_get_rows(self: PMUSPAT): Byte;
+procedure muspat_set_size(self: PMUSPAT; value: Word);
+function  muspat_get_size(self: PMUSPAT): Word;
+procedure muspat_set_data(self: PMUSPAT; p: Pointer);
+procedure muspat_set_EM_data_handle(self: PMUSPAT; value: TEMSHDL);
+function  muspat_get_EM_data_handle(self: PMUSPAT): TEMSHDL;
+procedure muspat_set_EM_data_page(self: PMUSPAT; value: Word);
+function  muspat_get_EM_data_page(self: PMUSPAT): Word;
+procedure muspat_set_EM_data_offset(self: PMUSPAT; value: Word);
+function  muspat_get_EM_data_offset(self: PMUSPAT): Word;
+function  muspat_get_data(self: PMUSPAT): Pointer;
+function  muspat_map_EM_data(self: PMUSPAT): Pointer;
 
 type
     PMUSPATLIST = Pointer;
-
-var
-    mod_Patterns: PMUSPATLIST;
-
-procedure pat_clear(pat: PMUSPAT);
-procedure patSetData(pat: PMUSPAT; p: pointer);
-procedure patSetDataInEM(pat: PMUSPAT; logpage, part: byte);
-function  patIsDataInEM(pat: PMUSPAT): boolean;
-function  patGetData(pat: PMUSPAT): pointer;
-function  patGetDataEMPage(pat: PMUSPAT): byte;
-function  patGetDataEMPart(pat: PMUSPAT): byte;
-function  patMapData(pat: PMUSPAT): pointer;
 
 function  patList_new: PMUSPATLIST;
 procedure patList_clear(self: PMUSPATLIST);
@@ -59,6 +70,12 @@ function  patListGetPatPerPage(self: PMUSPATLIST): Byte;
 function  patListGetUsedEM(self: PMUSPATLIST): longint;
 procedure patListFree(self: PMUSPATLIST);
 
+const
+    MAX_PATTERNS = 100; (* 0..99 patterns *)
+
+var
+    mod_Patterns: PMUSPATLIST;
+
 implementation
 
 uses
@@ -67,16 +84,28 @@ uses
     dos_,
     dynarray;
 
-(*$l muspat.obj*)
+(*$L muspat.obj*)
 
-procedure pat_clear(pat: PMUSPAT); external;
-procedure patSetData(pat: PMUSPAT; p: pointer); external;
-procedure patSetDataInEM(pat: PMUSPAT; logpage, part: byte); external;
-function  patIsDataInEM(pat: PMUSPAT): boolean; external;
-function  patGetData(pat: PMUSPAT): pointer; external;
-function  patGetDataEMPage(pat: PMUSPAT): byte; external;
-function  patGetDataEMPart(pat: PMUSPAT): byte; external;
-function  patMapData(pat: PMUSPAT): pointer; external;
+procedure muspat_clear(self: PMUSPAT); external;
+procedure muspat_set_EM_data(self: PMUSPAT; value: Boolean); external;
+function  muspat_is_EM_data(self: PMUSPAT): Boolean; external;
+procedure muspat_set_own_EM_handle(self: PMUSPAT; value: Boolean); external;
+function  muspat_is_own_EM_handle(self: PMUSPAT): Boolean; external;
+procedure muspat_set_channels(self: PMUSPAT; value: Byte); external;
+function  muspat_get_channels(self: PMUSPAT): Byte; external;
+procedure muspat_set_rows(self: PMUSPAT; value: Byte); external;
+function  muspat_get_rows(self: PMUSPAT): Byte; external;
+procedure muspat_set_size(self: PMUSPAT; value: Word); external;
+function  muspat_get_size(self: PMUSPAT): Word; external;
+procedure muspat_set_data(self: PMUSPAT; p: Pointer); external;
+procedure muspat_set_EM_data_handle(self: PMUSPAT; value: TEMSHDL); external;
+function  muspat_get_EM_data_handle(self: PMUSPAT): TEMSHDL; external;
+procedure muspat_set_EM_data_page(self: PMUSPAT; value: Word); external;
+function  muspat_get_EM_data_page(self: PMUSPAT): Word; external;
+procedure muspat_set_EM_data_offset(self: PMUSPAT; value: Word); external;
+function  muspat_get_EM_data_offset(self: PMUSPAT): Word; external;
+function  muspat_get_data(self: PMUSPAT): Pointer; external;
+function  muspat_map_EM_data(self: PMUSPAT): Pointer; external;
 
 function  patList_new: PMUSPATLIST; external;
 procedure patList_clear(self: PMUSPATLIST); external;

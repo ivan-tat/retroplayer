@@ -16,7 +16,10 @@ var
     i,b:byte;
   begin
     pat := patList_get(mod_Patterns, ORDER[ordr]);
-    pA := patGetData(pat);
+    if (muspat_is_EM_data(pat)) then
+        pA := muspat_map_EM_data(pat)
+    else
+        pA := muspat_get_data(pat);
     write(row:2,'   ');
     for i:=startchn-1 to startchn+3 do
       begin
@@ -112,9 +115,9 @@ var
           end;
         lastrow:=0;
         { new pattern }
-        (* switch EMSpage zero to curpattern *)
         pat := patList_get(mod_Patterns, playState_pattern);
-        patMapData(pat);
+        if (muspat_is_EM_data(pat)) then
+            muspat_map_EM_data(pat);
       end;
     for i:=lastrow to playState_row do
       begin

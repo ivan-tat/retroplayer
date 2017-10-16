@@ -17,81 +17,200 @@
 
 #include "main/muspat.h"
 
-#ifdef DEFINE_LOCAL_DATA
+/*** Music pattern ***/
 
-extern MUSPATLIST *PUBLIC_DATA mod_Patterns;
+#define _muspat_set_EM_data(o, v)        o->flags = (o->flags & ~MUSPATFL_EM) | (v ? MUSPATFL_EM : 0)
+#define _muspat_is_EM_data(o)            ((o->flags & MUSPATFL_EM) != 0)
+#define _muspat_set_own_EM_handle(o, v)  o->flags = (o->flags & ~MUSPATFL_OWNHDL) | (v ? MUSPATFL_OWNHDL : 0)
+#define _muspat_is_own_EM_handle(o)      ((o->flags & MUSPATFL_OWNHDL) != 0)
+#define _muspat_set_channels(o, v)       o->channels = v
+#define _muspat_get_channels(o)          o->channels
+#define _muspat_set_rows(o, v)           o->rows = v
+#define _muspat_get_rows(o)              o->rows
+#define _muspat_set_size(o, v)           o->size = v
+#define _muspat_get_size(o)              o->size
+#define _muspat_set_data(o, v)           { o->data_off = FP_OFF(v); o->data_seg = FP_SEG(v); }
+#define _muspat_get_data(o)              MK_FP(o->data_seg, o->data_off)
+#define _muspat_set_EM_data_handle(o, v) o->handle = v
+#define _muspat_get_EM_data_handle(o)    o->handle
+#define _muspat_set_EM_data_page(o, v)   o->data_seg = v
+#define _muspat_get_EM_data_page(o)      o->data_seg
+#define _muspat_set_EM_data_offset(o, v) o->data_off = v
+#define _muspat_get_EM_data_offset(o)    o->data_off
+#define _muspat_get_EM_data(o)           MK_FP(emsFrameSeg, o->data_off)
 
-#endif  /* DEFINE_LOCAL_DATA */
-
-/*** Patterns ***/
-
-void PUBLIC_CODE pat_clear(MUSPAT *pat)
+void PUBLIC_CODE muspat_clear(MUSPAT *self)
 {
-    pat->data_seg = 0;
-}
-
-void PUBLIC_CODE patSetData(MUSPAT *pat, void *p)
-{
-    pat->data_seg = FP_SEG(p);
-}
-
-void PUBLIC_CODE patSetDataInEM(MUSPAT *pat, uint8_t page, uint8_t part)
-{
-    _patSetDataInEM(pat, page, part);
-}
-
-bool PUBLIC_CODE patIsDataInEM(MUSPAT *pat)
-{
-    return _patIsDataInEM(pat);
-}
-
-void *PUBLIC_CODE patGetData(MUSPAT *pat)
-{
-    if (_patIsDataInEM(pat))
-        return _patGetDataInEM(pat, patListGetPatLength(mod_Patterns));
-    else
-        return MK_FP(pat->data_seg, 0);
-}
-
-void *PUBLIC_CODE patMapData(MUSPAT *pat)
-{
-    unsigned int logPage;
-    unsigned char physPage;
-
-    if (_patIsDataInEM(pat))
+    if (self)
     {
-        logPage = _patGetDataEMPage(pat);
-        physPage = 0;
-        if (emsMap(patListGetHandle(mod_Patterns), logPage, physPage))
-            return _patGetDataInEM(pat, patListGetPatLength(mod_Patterns));
+        memset(self, 0, sizeof(MUSPAT));
+        _muspat_set_EM_data_handle(self, EMSBADHDL);
+    }
+}
+
+void PUBLIC_CODE muspat_set_EM_data(MUSPAT *self, bool value)
+{
+    if (self)
+        _muspat_set_EM_data(self, value);
+}
+
+bool PUBLIC_CODE muspat_is_EM_data(MUSPAT *self)
+{
+    if (self)
+        return _muspat_is_EM_data(self);
+    else
+        return false;
+}
+
+void PUBLIC_CODE muspat_set_own_EM_handle(MUSPAT *self, bool value)
+{
+    if (self)
+        _muspat_set_own_EM_handle(self, value);
+}
+
+bool PUBLIC_CODE muspat_is_own_EM_handle(MUSPAT *self)
+{
+    if (self)
+        return _muspat_is_own_EM_handle(self);
+    else
+        return false;
+}
+
+void PUBLIC_CODE muspat_set_channels(MUSPAT *self, uint8_t value)
+{
+    if (self)
+        _muspat_set_channels(self, value);
+}
+
+uint8_t PUBLIC_CODE muspat_get_channels(MUSPAT *self)
+{
+    if (self)
+        return _muspat_get_channels(self);
+    else
+        return 0;
+}
+
+void PUBLIC_CODE muspat_set_rows(MUSPAT *self, uint8_t value)
+{
+    if (self)
+        _muspat_set_rows(self, value);
+}
+
+uint8_t PUBLIC_CODE muspat_get_rows(MUSPAT *self)
+{
+    if (self)
+        return _muspat_get_rows(self);
+    else
+        return 0;
+}
+
+void PUBLIC_CODE muspat_set_size(MUSPAT *self, uint16_t value)
+{
+    if (self)
+        _muspat_set_size(self, value);
+}
+
+uint16_t PUBLIC_CODE muspat_get_size(MUSPAT *self)
+{
+    if (self)
+        return _muspat_get_size(self);
+    else
+        return 0;
+}
+
+void PUBLIC_CODE muspat_set_data(MUSPAT *self, void *value)
+{
+    if (self)
+        _muspat_set_data(self, value);
+}
+
+void PUBLIC_CODE muspat_set_EM_data_handle(MUSPAT *self, EMSHDL value)
+{
+    if (self)
+        _muspat_set_EM_data_handle(self, value);
+}
+
+EMSHDL PUBLIC_CODE muspat_get_EM_data_handle(MUSPAT *self)
+{
+    if (self)
+        return _muspat_get_EM_data_handle(self);
+    else
+        return EMSBADHDL;
+}
+
+void PUBLIC_CODE muspat_set_EM_data_page(MUSPAT *self, uint16_t value)
+{
+    if (self)
+        _muspat_set_EM_data_page(self, value);
+}
+
+uint16_t PUBLIC_CODE muspat_get_EM_data_page(MUSPAT *self)
+{
+    if (self)
+        return _muspat_get_EM_data_page(self);
+    else
+        return 0;
+}
+
+void PUBLIC_CODE muspat_set_EM_data_offset(MUSPAT *self, uint16_t value)
+{
+    if (self)
+        _muspat_set_EM_data_offset(self, value);
+}
+
+uint16_t PUBLIC_CODE muspat_get_EM_data_offset(MUSPAT *self)
+{
+    if (self)
+        return _muspat_get_EM_data_offset(self);
+    else
+        return 0;
+}
+
+void *PUBLIC_CODE muspat_get_data(MUSPAT *self)
+{
+    if (self)
+    {
+        if (_muspat_is_EM_data(self))
+            return _muspat_get_EM_data(self);
         else
-            return MK_FP(0, 0);
+            return _muspat_get_data(self);
     }
     else
-        return MK_FP(pat->data_seg, 0);;
+        return NULL;
 }
 
-uint8_t PUBLIC_CODE patGetDataEMPage(MUSPAT *pat)
+void *PUBLIC_CODE muspat_map_EM_data(MUSPAT *self)
 {
-    return _patGetDataEMPage(pat);
+    if (self)
+    {
+        if (_muspat_is_EM_data(self))
+            if (emsMap(_muspat_get_EM_data_handle(self), _muspat_get_EM_data_page(self), 0))
+                return _muspat_get_EM_data(self);
+    }
+
+    return NULL;
 }
 
-uint8_t PUBLIC_CODE patGetDataEMPart(MUSPAT *pat)
-{
-    return _patGetDataEMPart(pat);
-}
-
-void PUBLIC_CODE patFree(MUSPAT *pat)
+void PUBLIC_CODE muspat_free(MUSPAT *self)
 {
     void *p;
 
-    if (!patIsDataInEM(pat))
+    if (self)
     {
-        p = patGetData(pat);
-        if (p)
-            _dos_freemem(FP_SEG(p));
-        pat_clear(pat);
-    };
+        if (_muspat_is_EM_data(self))
+        {
+            if (_muspat_is_own_EM_handle(self))
+                emsFree(_muspat_get_EM_data_handle(self));
+        }
+        else
+        {
+            p = _muspat_get_data(self);
+            if (p)
+                _dos_freemem(FP_SEG(p));
+        }
+
+        muspat_clear(self);
+    }
 }
 
 /*** Patterns list ***/
@@ -100,19 +219,19 @@ static EMSNAME EMS_PATLIST_HANDLE_NAME = "patlist";
 
 void __far _muspatl_clear_item(void *self, void *item)
 {
-    pat_clear((MUSPAT *)item);
+    muspat_clear((MUSPAT *)item);
 }
 
 void __far _muspatl_free_item(void *self, void *item)
 {
-    patFree((MUSPAT *)item);
+    muspat_free((MUSPAT *)item);
 }
 
 MUSPATLIST *PUBLIC_CODE patList_new(void)
 {
     uint16_t seg;
     MUSPATLIST *self;
-            
+
     if (!_dos_allocmem(_dos_para(sizeof(MUSPATLIST)), &seg))
     {
         self = MK_FP(seg, 0);
@@ -130,7 +249,7 @@ void PUBLIC_CODE patList_clear(MUSPATLIST *self)
 }
 
 void PUBLIC_CODE patList_delete(MUSPATLIST **self)
-{           
+{
     if (self)
         if (*self)
         {
@@ -157,7 +276,7 @@ MUSPAT *PUBLIC_CODE patList_get(MUSPATLIST *self, uint16_t index)
 bool PUBLIC_CODE patList_set_count(MUSPATLIST *self, uint16_t count)
 {
     if (self)
-        return _dynarr_set_size(&(self->list), count); 
+        return _dynarr_set_size(&(self->list), count);
     else
         return false;
 }
@@ -259,3 +378,9 @@ void PUBLIC_CODE patListFree(MUSPATLIST *self)
         }
     }
 }
+
+#ifdef DEFINE_LOCAL_DATA
+
+extern MUSPATLIST *PUBLIC_DATA mod_Patterns;
+
+#endif  /* DEFINE_LOCAL_DATA */
