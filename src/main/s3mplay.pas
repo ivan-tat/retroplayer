@@ -121,9 +121,9 @@ var i:word;
   BEGIN
     if not mod_isLoaded then exit;
     { Free samples & instruments : }
-    for i:=1 to MAX_INSTRUMENTS do
+    for i:=0 to MAX_INSTRUMENTS-1 do
       begin
-        psmp:=addr(Instruments^[i]);
+        psmp:=addr(mod_Instruments^[i]);
         if (psmp^.typ=1) then
           begin
             if psmp^.mempos<$f000 then { no EMS instrument }
@@ -134,7 +134,7 @@ var i:word;
                     _dos_freemem(seg(p^));
               end;
           end;
-        Instruments^[i,0]:=0;
+        mod_Instruments^[i,0]:=0;
       end;
     if EMSsmp then { samples in EMS }
       begin
@@ -441,11 +441,11 @@ begin
         writeln('[init] s3mplayInit: Failed to allocate DOS memory for instruments');
         exit;
     end;
-    instruments := ptr(_seg, 0);
+    mod_Instruments := ptr(_seg, 0);
 
-  FOR i:=1 TO MAX_INSTRUMENTS DO
+  FOR i:=0 TO MAX_INSTRUMENTS-1 DO
     BEGIN
-      Instruments^[i,0]:=0;
+      mod_Instruments^[i,0]:=0;
     END;
 
     mod_Patterns := nil;

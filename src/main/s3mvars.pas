@@ -49,7 +49,7 @@ var
 (* instruments *)
 
 var
-    Instruments: ^TInstrArray;
+    mod_Instruments: PInstrArray;
     InsNum: word;
     EMSSmp: boolean;
     SmpEMSHandle: word;

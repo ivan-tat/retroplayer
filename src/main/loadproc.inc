@@ -66,117 +66,230 @@ begin
 end;
 (*$I+*)
 
-FUNCTION  player_load_s3m(name:string):BOOLEAN;
-var f:file;
-    header:Theader;
-    maxused:byte;
-    inspara:array[1..MAX_INSTRUMENTS] of word;
-    patpara:array[0..MAX_PATTERNS] of word;
-    smppara:array[0..MAX_INSTRUMENTS] of longint;
-    i:byte;
-    inspos,patpos,smppos,smpnum:byte;
-    nextins,nextpat,nextsmp:longint;
-    wdummy:word;
-    p:pointer;
-    pAr:PArray;
-    buffer:PArray;
-    { EMS things: }
-    Ppagesleft:byte;  { number of pages left to use for patterns }
-    curPpage:byte;    { current logical EMS page we fill with next pattern }
-    curpart:byte;     { =0,1,2 -> every page is seperated in 3 parts (one part - one pattern) }
-    curSpage:word;    { current logical EMS page we fill with next sample }
-    Spagesleft:word;  { number of pages left to use for samples }
-    fun:string;
-    funptr:pointer;
+type
+    TS3MLoader = packed record
+        f: File;
+        buffer: PArray;
+        inspara: array [0..MAX_INSTRUMENTS-1] of Word;
+        patpara: array [0..MAX_PATTERNS-1] of Word;
+        smppara: array [0..MAX_INSTRUMENTS-1] of LongInt;
+        pat_EM_pages: Word;
+        pat_EM_page: Word;
+        pat_EM_page_offset: Word;
+        smp_EM_pages: Word;
+        smp_EM_page: Word;
+    end;
+    PS3MLoader = ^TS3MLoader;
 
-  PROCEDURE allocEMSforSamples;
-  var w,w0:word;
-      i:integer;
-      pSmp:PSMPheader;
+function  s3mloader_new: PS3MLoader; forward;
+procedure s3mloader_clear(self: PS3MLoader); forward;
+procedure s3mloader_delete(var self: PS3MLoader); forward;
+function  s3mloader_allocbuf(self: PS3MLoader): Boolean; forward;
+function  s3mloader_load_pattern(self: PS3MLoader; index: Byte; pos: LongInt): Boolean; forward;
+function  s3mloader_load_instrument(self: PS3MLoader; index: Byte; var smppara: LongInt; pos: LongInt): Boolean; forward;
+procedure s3mloader_alloc_samples(self: PS3MLoader); forward;
+function  s3mloader_load_sample(self: PS3MLoader; index: Byte; pos: LongInt): Boolean; forward;
+procedure s3mloader_free(self: PS3MLoader); forward;
+
+function s3mloader_new: PS3MLoader;
+var
+    _seg: Word;
+begin
+    if (_dos_allocmem(_dos_para(sizeof(TS3MLoader)), _seg) = 0) then
+        s3mloader_new := ptr(_seg, 0)
+    else
+        s3mloader_new := nil;
+end;
+
+procedure s3mloader_clear(self: PS3MLoader);
+begin
+    if (self <> nil) then
+        memset(self^, 0, sizeof(TS3MLoader));
+end;
+
+procedure s3mloader_delete(var self: PS3MLoader);
+begin
+    if (self <> nil) then
     begin
-      if emsGetFreePagesCount=0 then
+        _dos_freemem(seg(self^));
+        self := nil;
+    end;
+end;
+
+function s3mloader_allocbuf(self: PS3MLoader): Boolean;
+var
+    _seg: Word;
+begin
+    if (self <> nil) then
+    begin
+        if (_dos_allocmem(_dos_para(10*1024), _seg) = 0) then
+        begin
+            self^.buffer := ptr(_seg, 0);
+            s3mloader_allocbuf := true;
+            exit;
+        end;
+    end;
+
+    s3mloader_allocbuf := false;
+end;
+
+procedure s3mloader_free(self: PS3MLoader);
+begin
+    if (self <> nil) then
+    begin
+        if (self^.buffer <> Nil) then
+        begin
+            _dos_freemem(seg(self^.buffer^));
+            self^.buffer := nil;
+        end;
+        close(self^.f);
+    end;
+end;
+
+function s3mloader_load_pattern(self: PS3MLoader; index: Byte; pos: LongInt): Boolean;
+var
+    length: Word;
+    pat_static: TMUSPAT;
+    pat: PMUSPAT;
+    _seg: Word;
+    p: Pointer;
+begin
+    s3mloader_load_pattern:=false;
+
+      if (pos = 0) then
       begin
-        EMSsmp:=false;
+        pat := patList_get(mod_Patterns, index);
+        muspat_clear(pat);
+        s3mloader_load_pattern := true;
         exit;
       end;
-      w:=0;
-      for i:=1 to 99 do
-        begin
-          pSmp:=addr(Instruments^[i]);
-          if pSmp^.typ=1 then { really a sample }
-            begin
-              if pSmp^.flags and 1 = 1 then w0:=pSmp^.loopend+1024 else w0:=pSmp^.length+1024;
-              w:=w + w0 div (16*1024) + ord(w0 mod (16*1024)>0);
-            end;
-        end;
-      {$IFDEF DEBUGLOAD}
-      writeln(' Instruments to load : ',insnum);
-      writeln(' EMS pages are needed for Samples : ',w);
-      {$ENDIF}
-      { w = number of 16Kb pages in EMS }
-      if w>emsGetFreePagesCount then { not enough EMS for all samples }
-        begin
-          { use as many pages as possible :) }
-          w:=emsGetFreePagesCount;
-          smpEMShandle:=emsAlloc(w);
-        end
-      else { oh well enough, that's nice }
-        begin
-          { fine let's load everything into EMS }
-          smpEMShandle:=emsAlloc(w);
-        end;
-      {$IFDEF DEBUGLOAD}
-      writeln(' EMS pages allocated for Samples : ',w);
-      {$ENDIF}
-      Spagesleft:=w;
-      EMSsmp:=true;
-      curSpage:=0;
-    end;
 
-  PROCEDURE freeallmem;
-    begin
-        if (buffer <> Nil) then
-        begin
-            _dos_freemem(seg(buffer^));
-            buffer := nil;
-        end;
-        player_free_module;
-    end;
-
-  function load_instrument(var f: File; pos: LongInt): Boolean;
-  var length:word;
-      typ:byte;
-      pAr:Parray;
-      Psmp:PSmpHeader;
-    BEGIN
-      load_instrument:=false;
-      if (_fsetpos(f, pos) <> 0) then
+      if (_fsetpos(self^.f, pos) <> 0) then
       begin
-          Debug_Err(__FILE__, 'load_instrument', 'Failed to read file.');
+          Debug_Err(__FILE__, 's3mloader_load_pattern', 'Failed to read file.');
+          load_error := filecorrupt;
+          exit;
+      end;
+      if (_fread(@length, 2, 1, self^.f) <> 1) then
+      begin
+          Debug_Err(__FILE__, 's3mloader_load_pattern', 'Failed to read pattern.');
           load_error := filecorrupt;
           exit;
       end;
       {$IFDEF LOADINFO}
-      write('I',inspos-1);
+      write('P',index,'(',length,')');
       {$ENDIF}
-      { now read instrument header : }
-      if (_fread(@(Instruments^[inspos-1]), sizeof(TSmpHeader), 1, f) <> 1) then
+      if (length = 0) or (length > 10*1024) then
       begin
-          Debug_Err(__FILE__, 'load_instrument', 'Failed to read instrument header.');
+          Debug_Err(__FILE__, 's3mloader_load_pattern', 'Bad pattern size.');
           load_error := filecorrupt;
           exit;
       end;
-      pSmp:=addr(instruments^[inspos-1]);
+      { read whole packed pattern }
+      if (_fread(self^.buffer, length - 2, 1, self^.f) <> 1) then
+      begin
+          Debug_Err(__FILE__, 's3mloader_load_pattern', 'Failed to read pattern.');
+          load_error := filecorrupt;
+          exit;
+      end;
+
+      pat := @pat_static;
+      muspat_clear(pat);
+      muspat_set_channels(pat, UsedChannels);
+      muspat_set_rows(pat, 64);
+
+      { first get memory : (if useEMS than try to put it into the EMS ... }
+      if useEMS and
+        patListIsInEM(mod_Patterns) and
+        (self^.pat_EM_page_offset < patListGetPatPerPage(mod_Patterns)) then
+        begin
+          muspat_set_EM_data(pat, true);
+          muspat_set_own_EM_handle(pat, false);
+          muspat_set_EM_data_handle(pat, patListGetHandle(mod_Patterns));
+          muspat_set_EM_data_page(pat, self^.pat_EM_page);
+          muspat_set_EM_data_offset(pat, self^.pat_EM_page_offset * 5 * UsedChannels * 64);
+          patList_set(mod_Patterns, index, pat);
+          p := muspat_map_EM_data(pat);
+          if (p = nil) then
+          begin
+              Debug_Err(__FILE__, 's3mloader_load_pattern', 'Failed to map EM for pattern.');
+              load_error := internal_failure;
+              exit;
+          end;
+        end
+      else
+        begin
+            if (_dos_allocmem(_dos_para(longint(64*5)*usedchannels + 15), _seg) <> 0) then
+            begin
+                Debug_Err(__FILE__, 's3mloader_load_pattern', 'Failed to allocate DOS memory for pattern.');
+                load_error := notenoughmem;
+                exit;
+            end;
+            p := ptr(_seg, 0);
+            muspat_set_EM_data(pat, false);
+            muspat_set_data(pat, p);
+            patList_set(mod_Patterns, index, pat);
+        end;
+
+      unpackPattern(self^.buffer, p, 64, UsedChannels);
+
+      pat := patList_get(mod_Patterns, index);
+      if (muspat_is_EM_data(pat)) then
+        begin
+          {$IFDEF LOADINFO}
+          write('E(',self^.pat_EM_page,',',self^.pat_EM_page_offset,')');
+          {$ENDIF}
+          { next position in EMS : }
+          inc(self^.pat_EM_page_offset);
+          if (self^.pat_EM_page_offset = patListGetPatPerPage(mod_Patterns)) and (self^.pat_EM_pages>0) then
+            begin
+              dec(self^.pat_EM_pages);
+              inc(self^.pat_EM_page);
+              self^.pat_EM_page_offset:=0;
+            end;
+        end;
+      {$IFDEF LOADINFO}
+      write('*');
+      {$ENDIF}
+
+    s3mloader_load_pattern:=true;
+end;
+
+function s3mloader_load_instrument(self: PS3MLoader; index: Byte; var smppara: LongInt; pos: LongInt): Boolean;
+var
+    length:word;
+    typ:byte;
+    pAr:Parray;
+    Psmp:PSmpHeader;
+begin
+      s3mloader_load_instrument:=false;
+      if (_fsetpos(self^.f, pos) <> 0) then
+      begin
+          Debug_Err(__FILE__, 's3mloader_load_instrument', 'Failed to read file.');
+          load_error := filecorrupt;
+          exit;
+      end;
+      {$IFDEF LOADINFO}
+      write('I',index);
+      {$ENDIF}
+      { now read instrument header : }
+      pSmp := @(mod_Instruments^[index]);
+      if (_fread(pSmp, sizeof(TSmpHeader), 1, self^.f) <> 1) then
+      begin
+          Debug_Err(__FILE__, 's3mloader_load_instrument', 'Failed to read instrument header.');
+          load_error := filecorrupt;
+          exit;
+      end;
       if pSmp^.typ=1 then { that instrument is a sample }
         begin
           if pSmp^.packinfo <> 0 then
           begin
-              Debug_Err(__FILE__, 'load_instrument', 'Packed sample is not supported.');
+              Debug_Err(__FILE__, 's3mloader_load_instrument', 'Packed sample is not supported.');
               load_error := packedsamples;
               exit;
           end;
           { calc position in file : }
-          smppara[smpnum]:=(longint(256*256)*pSmp^.HI_mempos+pSmp^.mempos);
+          smppara:=(longint(256*256)*pSmp^.HI_mempos+pSmp^.mempos);
           pSmp^.mempos:=0;
           {$IFDEF LOADINFO}
           write('!');
@@ -184,71 +297,112 @@ var f:file;
         end
       else
         begin
-          smppara[smpnum]:=0;
+          smppara:=0;
           {$IFDEF LOADINFO}
           write('$');
           {$ENDIF}
         end;
-	  inc(smpnum);
       {$IFDEF LOADINFO}
       write('*');
       {$ENDIF}
-      load_instrument:=true;
-    END;
+      s3mloader_load_instrument:=true;
+end;
 
-  function load_sample(var f: File; pos: LongInt): Boolean;
-  var
+procedure s3mloader_alloc_samples(self: PS3MLoader);
+var
+    w,w0:word;
+    i:integer;
+    pSmp:PSMPheader;
+begin
+    if emsGetFreePagesCount=0 then
+    begin
+        EMSsmp:=false;
+        exit;
+    end;
+    w:=0;
+    for i:=0 to MAX_INSTRUMENTS-1 do
+    begin
+        pSmp := @(mod_Instruments^[i]);
+        if pSmp^.typ=1 then { really a sample }
+        begin
+            if (pSmp^.flags and 1 <> 0) then
+                w0:=pSmp^.loopend
+            else
+                w0:=pSmp^.length;
+            w0 := w0 + 1024;
+            w := w + w0 div (16*1024) + ord(w0 mod (16*1024)>0);
+        end;
+    end;
+    {$IFDEF DEBUGLOAD}
+    writeln(' Instruments to load : ',insnum);
+    writeln(' EMS pages are needed for Samples : ',w);
+    {$ENDIF}
+    { w = number of 16Kb pages in EMS }
+    if (w > emsGetFreePagesCount) then
+        w := emsGetFreePagesCount;
+    smpEMShandle := emsAlloc(w);
+    {$IFDEF DEBUGLOAD}
+    writeln(' EMS pages allocated for Samples : ',w);
+    {$ENDIF}
+    self^.smp_EM_pages:=w;
+    self^.smp_EM_page:=0;
+    EMSsmp:=true;
+end;
+
+function s3mloader_load_sample(self: PS3MLoader; index: Byte; pos: LongInt): Boolean;
+var
       par:parray;
       pSmp:pSmpHeader;
       z,h:word;
       i:byte;
       smplen:word;
       _seg: word;
-    begin
-      load_sample:=false;
-      if (_fsetpos(f, pos) <> 0) then
+begin
+    s3mloader_load_sample := false;
+
+      if (_fsetpos(self^.f, pos) <> 0) then
       begin
-          Debug_Err(__FILE__, 'load_sample', 'Failed to read file.');
+          Debug_Err(__FILE__, 's3mloader_load_sample', 'Failed to read file.');
           load_error := filecorrupt;
           exit;
       end;
-      pSmp:=addr(Instruments^[smppos]);
+      pSmp := @(mod_Instruments^[index]);
       if (pSmp^.flags and 1)=1 then smplen:=pSmp^.loopend else smplen:=pSmp^.length;
       if smplen>64511 then
       begin
-          Debug_Err(__FILE__, 'load_sample', 'Sample too large.');
+          Debug_Err(__FILE__, 's3mloader_load_sample', 'Sample too large.');
           load_error := sample2large;
           exit;
       end;
       {$IFDEF LOADINFO}
-      write('S',smppos,'(',smplen,')');
+      write('S',index,'(',smplen,')');
       {$ENDIF}
       z:=((smplen+1024) div (16*1024))+ord((smplen+1024) mod (16*1024)>0);
-      if useEMS and EMSsmp and (Spagesleft>=z) then
+      if useEMS and EMSsmp and (self^.smp_EM_pages>=z) then
         begin
           {$IFDEF LOADINFO}
-          write('E(',curSpage,'-',curSpage+z-1,')');
+          write('E(',self^.smp_EM_page,'-',self^.smp_EM_page+z-1,')');
           {$ENDIF}
-          pSmp^.mempos:=$f000+curSpage; { and z-1 pages after }
+          pSmp^.mempos:=$f000+self^.smp_EM_page; { and z-1 pages after }
           for i:=0 to z-1 do
-            if not emsMap(smpEMShandle,curSpage+i,i) then write('<EMS-ERROR>');
-          inc(curSpage,z);
+            if not emsMap(smpEMShandle,self^.smp_EM_page+i,i) then write('<EMS-ERROR>');
+          inc(self^.smp_EM_page,z);
           par := emsFramePtr;
         end
       else { we have to use normal memory (geeee) for this sample }
         begin
             if (_dos_allocmem((smplen+1024+15) shr 4, _seg) <> 0) then
             begin
-                Debug_Err(__FILE__, 'load_sample', 'Failed to allocate DOS memory for sample data.');
+                Debug_Err(__FILE__, 's3mloader_load_sample', 'Failed to allocate DOS memory for sample data.');
                 load_error := notenoughmem;
                 exit;
             end;
             par := ptr(_seg, 0);;
             pSmp^.mempos:=seg(par^);
         end;
-        if (_fread(par, smplen, 1, f) <> 1) then
+        if (_fread(par, smplen, 1, self^.f) <> 1) then
         begin
-            Debug_Err(__FILE__, 'load_sample', 'Failed to read sample data.');
+            Debug_Err(__FILE__, 's3mloader_load_sample', 'Failed to read sample data.');
             load_error := filecorrupt;
             exit;
         end;
@@ -274,133 +428,29 @@ var f:file;
       {$IFDEF LOADINFO}
       write('*');
       {$ENDIF}
-      load_sample:=true;
-    end;
 
-  function load_decrunc_pattern(var f: File; pos: LongInt): Boolean;
-  var row:byte;
-      crunch:byte;
-      chn:byte;
-      length:word;
-      linecount:byte;
-      pat_static: TMUSPAT;
-      pat: PMUSPAT;
-      _seg: word;
-    BEGIN
-      load_decrunc_pattern:=false;
+    s3mloader_load_sample:=true;
+end;
 
-      if (pos = 0) then
-      begin
-        pat := patList_get(mod_Patterns, patpos-1);
-        muspat_clear(pat);
-        load_decrunc_pattern := true;
-        exit;
-      end;
-
-      if (_fsetpos(f, pos) <> 0) then
-      begin
-          Debug_Err(__FILE__, 'load_decrunc_pattern', 'Failed to read file.');
-          load_error := filecorrupt;
-          exit;
-      end;
-      if (_fread(@length, 2, 1, f) <> 1) then
-      begin
-          Debug_Err(__FILE__, 'load_decrunc_pattern', 'Failed to read pattern.');
-          load_error := filecorrupt;
-          exit;
-      end;
-      {$IFDEF LOADINFO}
-      write('P',patpos-1,'(',length,')');
-      {$ENDIF}
-      if (length = 0) or (length > 10*1024) then
-      begin
-          Debug_Err(__FILE__, 'load_decrunc_pattern', 'Bad pattern size.');
-          load_error := filecorrupt;
-          exit;
-      end;
-      { read whole packed pattern }
-      if (_fread(buffer, length - 2, 1, f) <> 1) then
-      begin
-          Debug_Err(__FILE__, 'load_decrunc_pattern', 'Failed to read pattern.');
-          load_error := filecorrupt;
-          exit;
-      end;
-
-      pat := @pat_static;
-      muspat_clear(pat);
-      muspat_set_channels(pat, UsedChannels);
-      muspat_set_rows(pat, 64);
-
-      { first get memory : (if useEMS than try to put it into the EMS ... }
-      if useEMS and
-        patListIsInEM(mod_Patterns) and
-        (curpart < patListGetPatPerPage(mod_Patterns)) then
-        begin
-          muspat_set_EM_data(pat, true);
-          muspat_set_own_EM_handle(pat, false);
-          muspat_set_EM_data_handle(pat, patListGetHandle(mod_Patterns));
-          muspat_set_EM_data_page(pat, curPpage);
-          muspat_set_EM_data_offset(pat, curpart * 5 * UsedChannels * 64);
-          patList_set(mod_Patterns, patpos-1, pat);
-          p := muspat_map_EM_data(pat);
-          if (p = nil) then
-          begin
-              Debug_Err(__FILE__, 'load_decrunc_pattern', 'Failed to map EM for pattern.');
-              load_error := internal_failure;
-              exit;
-          end;
-        end
-      else
-        begin
-            if (_dos_allocmem((longint(64*5)*usedchannels + 15) shr 4, _seg) <> 0) then
-            begin
-                Debug_Err(__FILE__, 'load_decrunc_pattern', 'Failed to allocate DOS memory for pattern.');
-                load_error := notenoughmem;
-                exit;
-            end;
-            p := ptr(_seg, 0);
-            muspat_set_EM_data(pat, false);
-            muspat_set_data(pat, p);
-            patList_set(mod_Patterns, patpos-1, pat);
-        end;
-
-      unpackPattern(buffer, p, 64, UsedChannels);
-
-      pat := patList_get(mod_Patterns, patpos-1);
-      if (muspat_is_EM_data(pat)) then
-        begin
-          {$IFDEF LOADINFO}
-          write('E(',curPpage,',',curpart,')');
-          {$ENDIF}
-          { next position in EMS : }
-          inc(curpart);
-          if (curpart = patListGetPatPerPage(mod_Patterns)) and (Ppagesleft>0) then
-            begin
-              dec(Ppagesleft);
-              inc(curPpage);
-              curpart:=0;
-            end;
-        end;
-      {$IFDEF LOADINFO}
-      write('*');
-      {$ENDIF}
-      load_decrunc_pattern:=true;
-    END;
-
+function s3mloader_load(self: PS3MLoader; name: String): Boolean;
 var
-    Inst_done:boolean;
-    load_smp_later:boolean;
-    firstSMP:boolean;
-    _seg: word;
+    header:Theader;
+    maxused:byte;
+    i,smpnum:byte;
+    p:pointer;
+    pAr:PArray;
 
   BEGIN
-    player_load_s3m := FALSE;
+    s3mloader_load := FALSE;
+
+    { clear all samples }
+    fillchar(mod_Instruments^,MAX_INSTRUMENTS*sizeof(TInstr),0);
 
     (* Patterns list *)
     mod_Patterns := patList_new;
     if (mod_Patterns = nil) then
     begin
-        DEBUG_ERR(__FILE__, 'player_load_s3m', 'Failed to initialize patterns.');
+        DEBUG_ERR(__FILE__, 's3mloader_load', 'Failed to initialize patterns.');
         exit;
     end;
     patList_clear(mod_Patterns);
@@ -408,19 +458,18 @@ var
     useEMS:=emsInstalled and useEMS and (emsGetFreePagesCount>1);
     { we need one page for saving mapping while playing }
     load_error := 0;
-    buffer := nil;
-    assign(f,name);
-    reset(f,1);               { open file - 16byte blocks :) }
+    assign(self^.f,name);
+    reset(self^.f,1);               { open file - 16byte blocks :) }
     IF IORESULT<>0 then
     begin
-        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to open file.');
+        Debug_Err(__FILE__, 's3mloader_load', 'Failed to open file.');
         load_error := filenotexist;
         exit;
     end;
 
-    if (_fread(@header, sizeof(THeader), 1, f) <> 1) then
+    if (_fread(@header, sizeof(THeader), 1, self^.f) <> 1) then
     begin
-        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to read file''s header.');
+        Debug_Err(__FILE__, 's3mloader_load', 'Failed to read file''s header.');
         load_error := wrongformat;
         exit;
     end;
@@ -430,7 +479,7 @@ var
     or ((header.CWTV shr 8) and $ff <> $13)
     or (not (header.ffv in [1, 2])) then
     begin
-        Debug_Err(__FILE__, 'player_load_s3m', 'Unsupported file format.');
+        Debug_Err(__FILE__, 's3mloader_load', 'Unsupported file format.');
         load_error := wrongformat;
         exit;
     end;
@@ -472,9 +521,9 @@ var
     writeln(' Used channels :',usedchannels);
     {$ENDIF}
     { now load arrangment : }
-    if (_fread(@Order, ordnum, 1, f) <> 1) then
+    if (_fread(@Order, ordnum, 1, self^.f) <> 1) then
     begin
-        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to read patterns order.');
+        Debug_Err(__FILE__, 's3mloader_load', 'Failed to read patterns order.');
         load_error := filecorrupt;
         exit;
     end;
@@ -483,34 +532,30 @@ var
     while (i<ordnum) and (order[i]>=254) do inc(i);
     if i=ordnum then
     begin
-        Debug_Err(__FILE__, 'player_load_s3m', 'Playable entry not found.');
+        Debug_Err(__FILE__, 's3mloader_load', 'Playable entry not found.');
         load_error := ordercorrupt;
         exit;
     end;
-    if (_fread(@inspara, insnum * 2, 1, f) <> 1) then
+    if (_fread(@self^.inspara, insnum * 2, 1, self^.f) <> 1) then
     begin
-        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to read instruments headers.');
+        Debug_Err(__FILE__, 's3mloader_load', 'Failed to read instruments headers.');
         load_error := filecorrupt;
         exit;
     end;
 
-    if (_fread(@patpara, patList_get_count(mod_Patterns) * 2, 1, f) <> 1) then
+    if (_fread(@self^.patpara, patList_get_count(mod_Patterns) * 2, 1, self^.f) <> 1) then
     begin
-        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to read patterns offsets.');
+        Debug_Err(__FILE__, 's3mloader_load', 'Failed to read patterns offsets.');
         load_error := filecorrupt;
         exit;
     end;
-    { Ok now the difficult part ...
-      (load patterns/samples/instrumentdata)
-      - load them in a row (don't jump through the file, that costs time !
-      - problem is that you don't know the order and possibly there's no !
-    }
+
     patListSetPatLength(mod_Patterns, 5 * 64 * UsedChannels);
     {$IFDEF DEBUGLOAD}
     writeln(' length of Patterns in memory: ', patListGetPatLength(mod_Patterns));
     {$ENDIF}
     if useEMS then
-      begin
+    begin
         { we use EMS, then we need a page to save mapping in interrupt ! }
         savHandle:=emsAlloc(1); { 1 page is enough ? }
         { let's continue with loading: }
@@ -519,179 +564,99 @@ var
         writeln(' Patterns per Page: ',patListGetPatPerPage(mod_Patterns));
         {$ENDIF}
         { try to allocate EMS for all patterns : }
-        if (emsGetFreePagesCount <
-            (patList_get_count(mod_Patterns)+(patListGetPatPerPage(mod_Patterns)-1)) div
-            patListGetPatPerPage(mod_Patterns)) then
-          begin
-            Ppagesleft:=emsGetFreePagesCount;
-            patListSetHandle(mod_Patterns, emsAlloc(Ppagesleft));
-            patListSetUseEM(mod_Patterns, true);
-          end
-        else
-          begin
-            patListSetHandle(mod_Patterns,
-                emsAlloc(
-                    (patList_get_count(mod_Patterns)+
-                    (patListGetPatPerPage(mod_Patterns)-1)) div
-                    patListGetPatPerPage(mod_Patterns)
-                )
-            );
-            Ppagesleft:=(
-                patList_get_count(mod_Patterns)+
-                (patListGetPatPerPage(mod_Patterns)-1)
-                ) div
-                patListGetPatPerPage(mod_Patterns);
-            patListSetUseEM(mod_Patterns, true);
-          end;
-      end;
-    if useEMS and patListIsInEM(mod_Patterns) then
-      begin
-        curpart:=0;
-        curPpage:=0;
-      end;
-    { clear all samples }
-    fillchar(instruments^,MAX_INSTRUMENTS*sizeof(TInstr),0);
-    { Now try to load everything in a row }
+        self^.pat_EM_pages :=
+            (patList_get_count(mod_Patterns)+
+            (patListGetPatPerPage(mod_Patterns)-1)) div
+             patListGetPatPerPage(mod_Patterns);
+
+        if (self^.pat_EM_pages > emsGetFreePagesCount) then
+            self^.pat_EM_pages := emsGetFreePagesCount;
+
+        patListSetUseEM(mod_Patterns, true);
+        patListSetHandle(mod_Patterns, emsAlloc(self^.pat_EM_pages));
+
+        self^.pat_EM_page_offset := 0;
+        self^.pat_EM_page := 0;
+    end;
+
     {$IFDEF LOADINFO}
     writeln(#10#13'load report :');
     {$ENDIF}
-    Inst_done:=false;  { Instrument are not loaded yet :) }
-    load_smp_later:=false; { load instruments not later (up to now we can say only this) }
-    firstSMP:=true; { if we load now an instrument, then it's the first =) }
-    { init buffer for fast loading : }
-    if (_dos_allocmem((10*1024 + 15) shr 4, _seg) <> 0) then
+
+    if (not s3mloader_allocbuf(self)) then
     begin
-        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to allocate DOS memory for buffer.');
+        Debug_Err(__FILE__, 's3mloader_load', 'Failed to allocate DOS memory for buffer.');
         load_error := notenoughmem;
+        s3mloader_load := false;
         exit;
     end;
-    buffer := ptr(_seg, 0);
-    { init some variables for loading : }
-    inspos:=1;
-    patpos:=0;
-    smppos:=0;
-    smpnum:=0;
-    nextpat:=$7fffffff;
-    nextins:=$7fffffff;
-    nextsmp:=$7fffffff;
-    while (inspos<insnum+1)
-    or (patpos<patList_get_count(mod_Patterns))
-    or (smppos<smpnum)
-    or (nextpat<$7fffffff)
-    or (nextins<$7fffffff)
-    or (nextsmp<$7fffffff) do
-      begin
-        {writeln('--->',inspos,',',patpos,',',smppos);readkey;}
-        if (nextpat=$7fffffff) and (patpos<patList_get_count(mod_Patterns)) then
-          begin
-            nextpat:=patpara[patpos];
-            inc(patpos);
-          end;
-        if (nextins=$7fffffff) and (inspos<insnum+1) then
-          begin
-            nextins:=inspara[inspos];
-            inc(inspos);
-          end;
-        if (nextsmp=$7fffffff) and (smppos<smpnum) then
-          begin
-            nextsmp:=smppara[smppos];
-            inc(smppos);
-          end;
-        if (nextpat<nextins) and (nextpat<nextsmp) then
-          begin
-            { pattern }
-            if (nextpat<$7fffffff) then
-                if (not load_decrunc_pattern(f, nextpat * 16)) then
-                begin
-                    freeallmem;
-                    exit;
-                end;
-            nextpat:=$7fffffff;
-          end
-        else
-        if (nextins<nextsmp) then
-          begin
-            { instrument }
-            if (nextins<$7fffffff) then
-                if (not load_instrument(f, nextins * 16)) then
-                begin
-                    freeallmem;
-                    exit;
-                end;
-            nextins:=$7fffffff;
-            inst_done:=(inspos=insnum+1);
-          end
-        else { sampledata }
-          begin
-            if (nextsmp>0) and not load_smp_later then
-              begin
-                if not Inst_done and useEMS then load_smp_later:=true
-                { if all instruments are not loaded yet and we want to load into the EMS then
-                stop loading here - do it after all Instruments are done ... }
-                  else
-                    begin
-                      if useEMS and firstSMP then
-                      begin
-                          allocEMSforSamples;
-                          firstSMP:=false;
-                      end;
-                      if (nextsmp<$7fffffff) then
-                      if (not load_sample(f, nextsmp*16)) then
-                      begin
-                          freeallmem;
-                          exit;
-                      end;
-                    end;
-              end;
-            nextsmp:=$7fffffff;
-          end;
-        if keypressed then
-          if readkey=#27 then
+
+    for i := 0 to patList_get_count(mod_Patterns) - 1 do
+    begin
+        if (not s3mloader_load_pattern(self, i, self^.patpara[i] * 16)) then
+        begin
+            s3mloader_load := false;
+            exit;
+        end;
+    end;
+
+    for i := 0 to insnum-1 do
+    begin
+        if (not s3mloader_load_instrument(self, i, self^.smppara[i], self^.inspara[i] * 16)) then
+        begin
+            s3mloader_load := false;
+            exit;
+        end;
+    end;
+
+    if (UseEMS) then
+        s3mloader_alloc_samples(self);
+
+    for i := 0 to insnum-1 do
+    begin
+        if (self^.smppara[i] <> 0) then
+            if (not s3mloader_load_sample(self, i, self^.smppara[i] * 16)) then
             begin
-              writeln(' Somethings going wrong with loading ? Or why do you pressed <ESC> ?');
-              writeln(' If loading error - please report me.');
-              load_error:=internal_failure;
-              freeallmem;
-              exit;
+                s3mloader_load := false;
+                exit;
             end;
-      end;
-    { And now for ugly orders :
-      if instrumentdata was not fully loaded as the first sampledata starts,
-      then we have to wait, coze we don't know how many EMS we should acolate
-      now we know it so let's start again at the beginning of the file and
-      load the samples in a row ... }
-    if UseEMS and load_smp_later then
-      begin
-        allocEMSforSamples;
-        smppos:=0;
-        smpnum:=0;
-        nextpat:=$7fffffff;
-        nextins:=$7fffffff;
-        nextsmp:=$7fffffff;
-        while (smppos<smpnum) or (nextsmp<$7fffffff) do
-          begin
-            if (nextsmp=$7fffffff) and (smppos<smpnum) then
-            begin
-                nextsmp:=smppara[smppos];
-                inc(smppos)
-            end;
-            if (nextsmp<$7fffffff) then
-                if (not load_sample(f, nextsmp*16)) then
-                begin
-                    freeallmem;
-                    exit
-                end;
-            nextsmp:=$7fffffff;
-          end;
-      end;
+    end;
+
     {$IFDEF DEBUGLOAD}
     writeln(#10);
     {$ENDIF}
-    { free buffer : }
-    _dos_freemem(seg(buffer^));
-    buffer := nil;
     { Just for fun set names for EMS handles (does only work for EMS>= v4.0) }
     if ( emsVersion.Hi >= 4 ) then setEMSnames;
     mod_isLoaded := true;
-    player_load_s3m :=TRUE;
-  END;
+    s3mloader_load := true;
+end;
+
+function player_load_s3m(name: String): Boolean;
+var
+    p: PS3MLoader;
+begin
+    p := s3mloader_new;
+    if (p = nil) then
+    begin
+        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to initialize S3M loader.');
+        load_error := notenoughmem;
+        player_load_s3m := false;
+        exit;
+    end;
+    s3mloader_clear(p);
+
+    if (not s3mloader_load(p, name)) then
+    begin
+        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to load S3M file.');
+        s3mloader_free(p);
+        s3mloader_delete(p);
+        player_free_module;
+        player_load_s3m := false;
+        exit;
+    end;
+
+    s3mloader_free(p);
+    s3mloader_delete(p);
+
+    player_load_s3m := true;
+end;

@@ -55,14 +55,14 @@ extern bool PUBLIC_DATA playOption_LoopSong;
 
 /* instruments */
 
-extern instrumentsList_t *PUBLIC_DATA Instruments;  /* pointer to data for all instruments */
+extern instrumentsList_t *PUBLIC_DATA mod_Instruments;  /* pointer to data for all instruments */
 extern uint16_t PUBLIC_DATA InsNum;
 extern bool     PUBLIC_DATA EMSSmp;         /* samples in EMS ? */
 extern uint16_t PUBLIC_DATA SmpEMSHandle;   /* hanlde to access EMS for samples */
 
-//#define insList_get(num) (Instruments[(num)-1])
-//#define insList_get(num) (struct instrument_t *)(MK_FP(FP_SEG(*Instruments), FP_OFF(*Instruments) + ((num) - 1) * sizeof(struct instrument_t)))
-#define insList_get(num) (struct instrument_t *)MK_FP(FP_SEG(Instruments[0]) + ((num) - 1) * 5, 0)
+//#define insList_get(num) (mod_Instruments[(num)-1])
+//#define insList_get(num) (struct instrument_t *)(MK_FP(FP_SEG(*mod_Instruments), FP_OFF(*mod_Instruments) + ((num) - 1) * sizeof(struct instrument_t)))
+#define insList_get(num) (struct instrument_t *)MK_FP(FP_SEG(mod_Instruments[0]) + ((num) - 1) * 5, 0)
 #define ins_isSample(ins) (ins->bType == 1)
 #define ins_isSampleLooped(ins) (ins->flags & 0x01 != 0)
 #define ins_getSampleLoopStart(ins) (ins->loopbeg)

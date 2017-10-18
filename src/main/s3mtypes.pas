@@ -108,7 +108,8 @@ const
 
 type
     TInstr = array [0..16*5-1] of byte;
-    TInstrArray = array [1..MAX_INSTRUMENTS] of TInstr;
+    TInstrArray = array [0..MAX_INSTRUMENTS-1] of TInstr;
+    PInstrArray = ^TInstrArray;
 
 (* song arrangement *)
 

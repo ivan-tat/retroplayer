@@ -134,7 +134,7 @@ var i,l:word;
 function posstring(b:byte):string;
 var psmp:pSmpheader;
   begin
-    psmp:=addr(Instruments^[b]);
+    psmp:=addr(mod_Instruments^[b-1]);
     if psmp^.typ=1 then
       begin
         posstring:=hexw(psmp^.mempos)+'h';
@@ -195,7 +195,7 @@ var i,j:byte;
     for j:=1 to 18 do
       if i<insnum+1 then
         begin
-          psmp:=addr(Instruments^[i]);
+          psmp:=addr(mod_Instruments^[i-1]);
           if j>1 then write(#10#13);
           if pSmp^.typ=1 then textcolor(white) else textcolor(lightgray);
           write(' ',i:2,'. ',leftformat(psmp^.name,28),' ',what[(psmp^.flags and 1) = 1],' ',

@@ -48,7 +48,7 @@ bool PUBLIC_DATA playOption_LoopSong;
 
 /* instruments */
 
-instrumentsList_t *PUBLIC_DATA Instruments;
+instrumentsList_t *PUBLIC_DATA mod_Instruments;
 uint16_t PUBLIC_DATA InsNum;
 bool     PUBLIC_DATA EMSSmp;
 uint16_t PUBLIC_DATA SmpEMSHandle;

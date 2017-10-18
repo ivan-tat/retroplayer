@@ -39,7 +39,7 @@ extrn playOption_LoopSong: byte
 
 ; instruments
 
-extrn Instruments: dword
+extrn mod_Instruments: dword
 extrn InsNum: word
 extrn SmpEMSHandle: word
 extrn EMSSmp: byte
