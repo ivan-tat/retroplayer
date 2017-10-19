@@ -105,7 +105,7 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
     patOffset = desc->offset;
 
     chnState_porta_flag = false;
-    chnState_patDelay_bCommandSaved = chn_getCommand(chn);
+    chnState_patDelay_bCommandSaved = mixchn_get_command(chn);
 
     if (playState_patDelay_bNow)
     {
@@ -134,7 +134,7 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
 
     if (cmd != EFFIDX_NONE)
     {
-        if (chn_getCommand(chn) == cmd)
+        if (mixchn_get_command(chn) == cmd)
         {
             if (chn_effCanContinue(chn))
                 chn->bEffFlags |= EFFFLAG_CONTINUE;
@@ -142,12 +142,12 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
     }
     else
     {
-        if (chn_getCommand(chn) != EFFIDX_NONE)
+        if (mixchn_get_command(chn) != EFFIDX_NONE)
             chn_effStop(chn);
     };
 
-    chn_setCommand(chn, cmd);
-    chn_setSubCommand(chn, 0);
+    mixchn_set_command(chn, cmd);
+    mixchn_set_sub_command(chn, 0);
 
     if (chn_effInit(chn, param))
     {
@@ -166,13 +166,13 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
             chn_setupNote(chn, chnState_cur_bNote, chnState_porta_flag);
         else
             if (chnState_cur_bNote == CHNNOTE_OFF)
-                chn_setState(chn, false);
+                mixchn_set_enabled(chn, false);
         /* read volume */
         if (_isVolume(chnState_cur_bVol))
         {
             chnState_cur_bVol = chnState_cur_bVol > CHNINSVOL_MAX ?
                 CHNINSVOL_MAX : chnState_cur_bVol;
-            chn_setSampleVolume(chn, (chnState_cur_bVol * playState_gVolume) >> 6);
+            mixchn_set_sample_volume(chn, (chnState_cur_bVol * playState_gVolume) >> 6);
         };
         chn_effHandle(chn);
     };
@@ -210,7 +210,7 @@ PATFLOWSTATE __near pat_playRow(MUSPAT *pat)
     for (i = 0; i < UsedChannels; i++)
     {
         chn = &Channel[i];
-        if (chn->bChannelType <= 2)
+        if (mixchn_get_type(chn) <= 2)
         {
             if (!pat_playNextChannel(&patDesc, chn))
                 break;

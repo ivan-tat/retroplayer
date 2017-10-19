@@ -103,6 +103,7 @@ var pos:word;
     b:byte;
     yl,yr:integer;
     drawseg:word;
+    chn: PMIXCHN;
 
 begin
   { setup defaults: }
@@ -143,7 +144,10 @@ begin
         begin
           waitretrace;
           for pos:=0 to usedchannels-1 do
-            bar(320*170+pos*15+10,10,channel[pos].bSmpVol*ord(channel[pos].bEnabled));
+          begin
+            chn := @channel[pos];
+            bar(320*170+pos*15+10,10,mixchn_get_sample_volume(chn)*ord(mixchn_is_enabled(chn)));
+          end;
           yl:=h^[sbGetDMACounter] shr 1;
           for pos:=1 to 319 do
             begin
@@ -161,7 +165,10 @@ begin
       while not keypressed do
         begin
           for pos:=0 to usedchannels-1 do
-            bar(320*170+pos*15+10,10,channel[pos].bSmpVol*ord(channel[pos].bEnabled));
+          begin
+            chn := @channel[pos];
+            bar(320*170+pos*15+10,10,mixchn_get_sample_volume(chn)*ord(mixchn_is_enabled(chn)));
+          end;
           i:=sbGetDMACounter and $fffe;
           yl:=h^[i] shr 2;yr:=h^[i+1] shr 2;
           for pos:=1 to 319 do

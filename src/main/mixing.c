@@ -59,37 +59,39 @@ void __near newTick(void)
     };
 }
 
-void __near calcChannel(struct channel_t *chnInfo, bool callEffects, uint16_t count, void *outBuf)
+void __near calcChannel(MIXCHN *chnInfo, bool callEffects, uint16_t count, void *outBuf)
 {
+    uint8_t chtype;
     struct playSampleInfo_t smpInfo;
     unsigned int smpPos;
 
-    if (chnInfo->bChannelType == 0 || chnInfo->bChannelType > 2) return;
+    chtype = mixchn_get_type(chnInfo);
+    if (chtype == 0 || chtype > 2) return;
     if (callEffects) {
         /* do effects for this channel: */
         if (playState_tick != playState_speed) chn_effTick(chnInfo);
     };
     /* check if mixing: */
-    if (chnInfo->bEnabled == 0) return;
+    if (!mixchn_is_enabled(chnInfo)) return;
 
-    smpInfo.dData = mapSampleData(chnInfo->wSmpSeg, chnInfo->wSmpLoopEnd);
+    smpInfo.dData = mapSampleData(FP_SEG(mixchn_get_sample_data(chnInfo)), chnInfo->wSmpLoopEnd);
     if (! smpInfo.dData) return; /* skip channel if EMS driver does not work correct */
 
     smpInfo.dPos = chnInfo->dSmpPos;
-    smpInfo.dStep = chnInfo->dSmpStep;
+    smpInfo.dStep = mixchn_get_sample_step(chnInfo);
     smpPos = chnInfo->dSmpPos >> 16;
 
     /* first check for correct position inside sample */
     if (smpPos < chnInfo->wSmpLoopEnd) {
         if (mixChannels == 2)
-            _MixSampleStereo8(outBuf, &smpInfo, FP_SEG(*volumetableptr), chnInfo->bSmpVol, count);
+            _MixSampleStereo8(outBuf, &smpInfo, FP_SEG(*volumetableptr), mixchn_get_sample_volume(chnInfo), count);
         else
-            _MixSampleMono8(outBuf, &smpInfo, FP_SEG(*volumetableptr), chnInfo->bSmpVol, count);
+            _MixSampleMono8(outBuf, &smpInfo, FP_SEG(*volumetableptr), mixchn_get_sample_volume(chnInfo), count);
         smpPos = smpInfo.dPos >> 16;
     };
     if (smpPos >= chnInfo->wSmpLoopEnd) {
         if (chnInfo->bSmpFlags & SMPFLAG_LOOP == 0) {
-            chnInfo->bEnabled = 0;
+            mixchn_set_enabled(chnInfo, false);
         } else {
             while (smpPos >= chnInfo->wSmpLoopEnd) {
                 smpPos -= chnInfo->wSmpLoopEnd;
@@ -107,7 +109,7 @@ void PUBLIC_CODE calcTick(void *outBuf, uint16_t len)
     uint16_t count;   /* N of samples per channel (mono/left/right) to calculate */
     uint8_t ch;
     bool callEffects;
-    struct channel_t *chnInfo;
+    MIXCHN *chnInfo;
 
     /* clear mixing buffer */
     bufSize = getMixBufOffFromCount(len);
@@ -133,7 +135,7 @@ void PUBLIC_CODE calcTick(void *outBuf, uint16_t len)
             chnInfo = &(Channel[ch]);
             calcChannel(chnInfo, callEffects, count,
                 MK_FP(FP_SEG(outBuf), FP_OFF(outBuf) + bufOff +
-                (mixChannels == 2 && chnInfo->bChannelType == 2 ? 2 : 0)));
+                (mixChannels == 2 && mixchn_get_type(chnInfo) == 2 ? 2 : 0)));
         };
 
         mixTickSamplesPerChannelLeft -= count;

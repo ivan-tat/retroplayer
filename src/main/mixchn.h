@@ -25,7 +25,7 @@
 
 #define EFFFLAG_CONTINUE 0x01
 
-typedef struct channel_t
+typedef struct mix_channel_t
 {
     // general switches :
     uint8_t  bEnabled;      // flag if =0 then nothing to mix at the moment
@@ -34,7 +34,7 @@ typedef struct channel_t
     uint16_t wInsSeg;       // DOS segment of current instrument data
     uint16_t wSmpSeg;       // DOS segment of current sample data
     uint8_t  bIns;          // number of instrument is currently playing
-    uint8_t  bNote;         // we don't need it really for playing, but let's store it anyway
+    uint8_t  bNote;
     // copy of sampledata (maybe it differs a bit):
     uint8_t  bSmpVol;       // current sample volume
     uint8_t  bSmpFlags;     // flags (looped sample)
@@ -72,28 +72,33 @@ typedef struct channel_t
     uint8_t  bDelayTicks;   // NoteDelay: new value | NoteCut: ticks left to cut
 };
 
-typedef struct channel_t MIXCHN;
+typedef struct mix_channel_t MIXCHN;
 
-#define chn_getState(o)            (o->bEnabled)
-#define chn_setState(o, v)         o->bEnabled = v
-#define _chn_setSamplePeriod(o, v) o->wSmpPeriod = v
-#define chn_getSamplePeriod(o)     (o->wSmpPeriod)
-#define chn_getSampleStep(o)       (o->dSmpStep)
-#define chn_setSampleStep(o, v)    o->dSmpStep = v
-#define chn_getInstrument(o)       (struct instrument_t *)MK_FP(o->wInsSeg, 0)
-#define chn_setInstrument(o, p)    o->wInsSeg = FP_SEG((void __far *)p)
-#define chn_setSampleData(o, p)    o->wSmpSeg = FP_SEG((void __far *)p)
-#define chn_setCommand(o, v)       o->bCommand = v
-#define chn_getCommand(o)          (o->bCommand)
-#define chn_setSubCommand(o, v)    o->bCommand2 = v
-#define chn_getSubCommand(o)       (o->bCommand2)
-#define chn_setEffectParam(o, v)   o->bParameter = v
-#define chn_getEffectParam(o)      (o->bParameter)
-
-void     PUBLIC_CODE chn_setSampleVolume(MIXCHN *chn, int16_t vol);
-uint16_t PUBLIC_CODE chn_checkSamplePeriod(MIXCHN *chn, uint32_t period);
-void     PUBLIC_CODE chn_setSamplePeriod(MIXCHN *chn, uint32_t period);
-void     PUBLIC_CODE chn_setPeriodLimits(MIXCHN *chn, uint16_t rate, bool amiga);
+void     PUBLIC_CODE mixchn_set_enabled(MIXCHN *self, bool value);
+bool     PUBLIC_CODE mixchn_is_enabled(MIXCHN *self);
+void     PUBLIC_CODE mixchn_set_type(MIXCHN *self, uint8_t value);
+uint8_t  PUBLIC_CODE mixchn_get_type(MIXCHN *self);
+void     PUBLIC_CODE mixchn_set_instrument_num(MIXCHN *self, uint8_t value);
+uint8_t  PUBLIC_CODE mixchn_get_instrument_num(MIXCHN *self);
+void     PUBLIC_CODE mixchn_set_instrument(MIXCHN *self, struct instrument_t *value);
+struct instrument_t *PUBLIC_CODE mixchn_get_instrument(MIXCHN *self);
+void     PUBLIC_CODE mixchn_set_sample_volume(MIXCHN *self, int16_t vol);
+uint8_t  PUBLIC_CODE mixchn_get_sample_volume(MIXCHN *self);
+void     PUBLIC_CODE mixchn_set_sample_period_limits(MIXCHN *self, uint16_t rate, bool amiga);
+uint16_t PUBLIC_CODE mixchn_check_sample_period(MIXCHN *self, uint32_t value);
+void     PUBLIC_CODE mixchn_set_sample_period(MIXCHN *self, uint16_t value);
+uint16_t PUBLIC_CODE mixchn_get_sample_period(MIXCHN *self);
+void     PUBLIC_CODE mixchn_set_sample_step(MIXCHN *self, uint32_t value);
+uint32_t PUBLIC_CODE mixchn_get_sample_step(MIXCHN *self);
+void     PUBLIC_CODE mixchn_setup_sample_period(MIXCHN *self, uint32_t value);
+void     PUBLIC_CODE mixchn_set_sample_data(MIXCHN *self, void *value);
+void    *PUBLIC_CODE mixchn_get_sample_data(MIXCHN *self);
+void     PUBLIC_CODE mixchn_set_command(MIXCHN *self, uint8_t value);
+uint8_t  PUBLIC_CODE mixchn_get_command(MIXCHN *self);
+void     PUBLIC_CODE mixchn_set_sub_command(MIXCHN *self, uint8_t value);
+uint8_t  PUBLIC_CODE mixchn_get_sub_command(MIXCHN *self);
+void     PUBLIC_CODE mixchn_set_command_parameter(MIXCHN *self, uint8_t value);
+uint8_t  PUBLIC_CODE mixchn_get_command_parameter(MIXCHN *self);
 
 /* Mixing channels list */
 

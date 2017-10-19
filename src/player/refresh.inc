@@ -58,39 +58,48 @@ procedure refr_channels;
 const types:array[0..4] of string[6] = ('OFF','Left','Right','Adlib1','Adlib2');
 var i:byte;
     j:byte;
+    chn: PMIXCHN;
+    chtype: Byte;
   begin
     gotoxy(1,8);
     textbackground(blue);textcolor(white);
     i:=0;j:=0;
     while i<usedchannels do
-      begin
-        if (channel[i].bChannelType<3) and
-           ((usedchannels<17) or (channel[i].bChannelType>0)) then
+    begin
+        chn := @channel[i];
+        chtype := mixchn_get_type(chn);
+        if  (chtype < 3)
+        and ((usedchannels<17)
+        or  (chtype > 0)) then
             { display only sample channels }
-          begin
+        begin
             inc(j);
-            write(' Chn ',(i+1):2,' (',types[channel[i].bChannelType]:5,') ');
-            if channel[i].bEnabled then write('*') else write(' ');
-            if channel[i].bSmpFlags and SMPFLAG_LOOP <> 0 then write('!') else write(' ');
-            if channel[i].bEffFlags and EFFFLAG_CONTINUE <> 0 then write('c') else write(' ');
-            write('(',channel[i].bIns:2,') ');
+            write(' Chn ',(i+1):2,' (',types[chtype]:5,') ');
+            if (mixchn_is_enabled(chn)) then write('*') else write(' ');
+            if chn^.bSmpFlags and SMPFLAG_LOOP <> 0 then write('!') else write(' ');
+            if chn^.bEffFlags and EFFFLAG_CONTINUE <> 0 then write('c') else write(' ');
+            write('(',mixchn_get_instrument_num(chn):2,') ');
             write('[');
-            if channel[i].bEnabled then
+            if (mixchn_is_enabled(chn)) then
               begin
-                write_note(channel[i].bNote);
+                write_note(chn^.bNote);
                 { Arpeggio test : }
-                {write(',');write_note(channel[i].bArpNotes[0]);write(',');write_note(channel[i].bArpNotes[1]);}
+                {write(',');write_note(chn^.bArpNotes[0]);write(',');write_note(chn^.bArpNotes[1]);}
               end
             else write('...');
             write('] ');
-            write('<',channel[i].wSmpPeriod:5,'>');
-            write(' ',channel[i].dSmpStep.DD/64/1024:7:4);
+            write('<', mixchn_get_sample_period(chn):5, '>');
+            write(' ', mixchn_get_sample_step(chn)/64/1024:7:4);
             { Arpeggio test : }
-            {write(' ',channel[i].dArpSmpSteps[1].DD/64/1024:7:4);
-            write(' ',channel[i].dArpSmpSteps[2].DD/64/1024:7:4);}
-            write(' ',channel[i].bSmpVol:2);
-            if channel[i].bCommand <= MAXEFF then
-            write(' ',get_effectname(i,channel[i].bCommand,channel[i].bCommand2,channel[i].bParameter));clreol;
+            {write(' ', chn^.dArpSmpSteps[1].DD/64/1024:7:4);
+            write(' ', chn^.dArpSmpSteps[2].DD/64/1024:7:4);}
+            write(' ', mixchn_get_sample_volume(chn):2);
+            if (mixchn_get_command(chn) <= MAXEFF) then
+                write(' ',get_effectname(i,
+                    mixchn_get_command(chn),
+                    mixchn_get_sub_command(chn),
+                    mixchn_get_command_parameter(chn)));
+            clreol;
             write(#13#10);
           end;
         inc(i);
@@ -132,6 +141,7 @@ var
 procedure refr_inst;
 var i:byte;
     n:byte;
+    chn: PMIXCHN;
   procedure write_no(j:word);
     begin
       gotoxy((j div 15)*11+1,j mod 15+1);
@@ -142,10 +152,21 @@ var i:byte;
     if useEMS then window(1,11,80,25) else window(1,10,80,25);
     for i:=0 to usedchannels-1 do
       begin
-        n:=ord(channel[i].bEnabled)* channel[i].bIns*ord(channel[i].bChannelType>0);
-        if (chnlastinst[i]<>n) and (chnlastinst[i]>0) then
-          begin textcolor(white);textbackground(blue);write_no(chnlastinst[i]-1) end;
-        chnlastinst[i]:=n;if n<>0 then begin textcolor(blue);textbackground(white);write_no(n-1) end;
+        chn := @channel[i];
+        n := ord(mixchn_is_enabled(chn)) * mixchn_get_instrument_num(chn) * ord(mixchn_get_type(chn) > 0);
+        if (chnlastinst[i] <> n) and (chnlastinst[i] > 0) then
+        begin
+            textcolor(white);
+            textbackground(blue);
+            write_no(chnlastinst[i]-1);
+        end;
+        chnlastinst[i]:=n;
+        if n<>0 then
+        begin
+            textcolor(blue);
+            textbackground(white);
+            write_no(n-1);
+        end;
       end;
     scrLeave;
   end;
@@ -154,10 +175,12 @@ var i:byte;
 
 procedure refr_sample;
 var i,n:byte;
+    chn: PMIXCHN;
   begin
     for i:=0 to usedchannels-1 do
       begin
-        n:=ord(channel[i].bEnabled)* channel[i].bIns*ord(channel[i].bChannelType>0);
+        chn := @channel[i];
+        n := ord(mixchn_is_enabled(chn)) * mixchn_get_instrument_num(chn) * ord(mixchn_get_type(chn) > 0);
         if (chnlastinst[i]<>n) and (chnlastinst[i]>0) and
            (samplepage*18<chnlastinst[i]) and (samplepage*18+19>chnlastinst[i]) then
           begin

@@ -78,7 +78,6 @@ _DATA ends
 
 EFFECTS_TEXT segment word public use16 'CODE'
 
-extrn chn_setSamplePeriod: far
 extrn chn_setSampleVolume: far
 extrn chn_setupInstrument: far
 extrn chn_calcNotePeriod: far

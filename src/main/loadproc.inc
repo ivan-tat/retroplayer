@@ -439,6 +439,7 @@ var
     i,smpnum:byte;
     p:pointer;
     pAr:PArray;
+    chn: PMIXCHN;
 
   BEGIN
     s3mloader_load := FALSE;
@@ -511,11 +512,15 @@ var
     { setup channels : }
     maxused:=0;
     for i:=0 to 31 do
-      begin
-        channel[i].bEnabled:=(header.channelset[i] and 128=0);
-        channel[i].bChannelType:=getchtyp(header.channelset[i] and 31);
-        if channel[i].bEnabled and (channel[i].bChannelType>0) and (channel[i].bChannelType<3) then maxused:=i+1;
-      end;
+    begin
+        chn := @channel[i];
+        mixchn_set_enabled(chn, (header.channelset[i] and 128) = 0);
+        mixchn_set_type(chn, getchtyp(header.channelset[i] and 31));
+        if  (mixchn_is_enabled(chn))
+        and (mixchn_get_type(chn) > 0)
+        and (mixchn_get_type(chn) < 3) then
+            maxused := i + 1;
+    end;
     usedchannels:=maxused;
     {$IFDEF DEBUGLOAD}
     writeln(' Used channels :',usedchannels);

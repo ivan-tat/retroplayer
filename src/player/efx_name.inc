@@ -63,48 +63,54 @@ const effect_name:array[0..53] of string[26] =
     'T: set tempo',
     'U: fine vibrato',
     'V: set global volume');
+
 function get_effectname(chn_no,cinfo,c2nd:byte;para:byte):string;
 const conv:array[0..22] of byte = (0,1,2,3,4,8,11,14,15,16,17,18,22,0,0,26,0,27,34,35,51,52,53);
 var s,t:string[40];
-  begin
+    chn: PMIXCHN;
+    param: Byte;
+begin
+    chn := @channel[chn_no];
+    param := mixchn_get_command_parameter(chn);
     s:=effect_name[conv[cinfo]+c2nd];
     if cinfo=1 then { Set speed }
-        s:=s+' :'+hexb(channel[chn_no].bParameter);
+        s:=s+' :'+hexb(param);
     if cinfo=2 then { jump to order }
-        s:=s+' :'+hexb(channel[chn_no].bParameter);
+        s:=s+' :'+hexb(param);
     if cinfo=3 then { pattern break to }
-        s:=s+' :'+hexb(channel[chn_no].bParameter);
+        s:=s+' :'+hexb(param);
     if cinfo=4 then { volume effects }
-        s:=s+' :'+hexb(channel[chn_no].bParameter);
+        s:=s+' :'+hexb(param);
     if cinfo=5 then { slide down effects }
-        s:=s+' :'+hexb(channel[chn_no].bParameter);
+        s:=s+' :'+hexb(param);
     if cinfo=6 then { slide down effects }
-        s:=s+' :'+hexb(channel[chn_no].bParameter);
+        s:=s+' :'+hexb(param);
     if cinfo=7 then { portamento }
-        s:=s+' :'+hexb(channel[chn_no].bPortParam);
+        s:=s+' :'+hexb(chn^.bPortParam);
     if cinfo=8 then { Vibrato }
-        s:=s+' :'+hexb(channel[chn_no].bVibParam);
-    if cinfo=9 then { Tremor                           ... not done yet };
+        s:=s+' :'+hexb(chn^.bVibParam);
+    if cinfo=9 then { Tremor }
+        { TODO: tremor };
     if cinfo=10 then { Arpeggio }
-        s:=s+' :'+hexb(channel[chn_no].bParameter);
+        s:=s+' :'+hexb(param);
     if cinfo=11 then { Vibrato+Vol }
-        s:=s+' :'+hexb(channel[chn_no].bParameter);
+        s:=s+' :'+hexb(param);
     if cinfo=12 then { portamento+Vol }
-        s:=s+' :'+hexb(channel[chn_no].bParameter);
+        s:=s+' :'+hexb(param);
     if cinfo=15 then { Sample offset }
         s:=s+': '+hexb(para)+'00h';
     if cinfo=17 then { Retrigger }
-        s:=s+' :'+hexb(channel[chn_no].bParameter);
+        s:=s+' :'+hexb(param);
     if cinfo=18 then { Tremolo }
-        s:=s+' :'+hexb(channel[chn_no].bParameter);
+        s:=s+' :'+hexb(param);
     if cinfo=19 then { Special commands            ... not fully done yet }
-        s:=effect_name[conv[cinfo]+channel[chn_no].bParameter shr 4]+' :'+hexb(channel[chn_no].bParameter);
+        s:=effect_name[conv[cinfo]+param shr 4]+' :'+hexb(param);
     if cinfo=20 then { Set tempo }
-        s:=s+' :'+hexb(channel[chn_no].bParameter);
+        s:=s+' :'+hexb(param);
     if cinfo=21 then { Fine Vibrato }
-        s:=s+' :'+hexb(channel[chn_no].bVibParam);
+        s:=s+' :'+hexb(chn^.bVibParam);
     if cinfo=22 then { Set global volume }
-        s:=s+' :'+decb(channel[chn_no].bParameter);
+        s:=s+' :'+decb(param);
     str(cinfo,t);
     get_effectname:=s;
-  end;
+end;

@@ -69,15 +69,22 @@ var filename:string;
 
 procedure save_chntyps;
 var i:byte;
-  begin
-    for i:=0 to 15 do savchn[i]:=channel[i].bChannelType;
-  end;
+begin
+    for i:=0 to 15 do
+        savchn[i] := mixchn_get_type(@channel[i]);
+end;
 
 procedure revers(n:byte);
-  begin
-    if channel[n].bChannelType=0 then channel[n].bChannelType:=savchn[n]
-    else channel[n].bChannelType:=0
-  end;
+var
+    chn: PMIXCHN;
+begin
+    chn := @channel[n];
+
+    if (mixchn_get_type(chn) = 0) then
+        mixchn_set_type(chn, savchn[n])
+    else
+        mixchn_set_type(chn, 0);
+end;
 
 procedure hide_cursor; assembler;
  asm
@@ -120,7 +127,7 @@ procedure disable_all;
 var i:byte;
   begin
     for i:=0 to usedchannels-1 do
-      channel[i].bEnabled:=false;    { <- use this if you jump to previous order ... }
+      mixchn_set_enabled(@channel[i], false);
   end;
 
 function prevorder(nr:byte):byte;

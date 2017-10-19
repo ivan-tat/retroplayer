@@ -56,6 +56,7 @@ type
         bSavVol:        byte;
         bDelayTicks:    byte;
     end;
+    PMIXCHN = ^TChannel;
 
 const
     MAX_CHANNELS = 32; (* 0..31 channels *)
@@ -68,10 +69,31 @@ var
     Channel: TChannelArray;
     UsedChannels: byte;
 
-procedure chn_setSampleVolume(var chn: TChannel; vol: integer);
-function  chn_checkSamplePeriod(var chn: TChannel; period: longint): word;
-procedure chn_setSamplePeriod(var chn: TChannel; period: longint);
-procedure chn_setPeriodLimits(var chn: TChannel; rate: word; amiga: boolean);
+procedure mixchn_set_enabled(self: PMIXCHN; value: Boolean);
+function  mixchn_is_enabled(self: PMIXCHN): Boolean;
+procedure mixchn_set_type(self: PMIXCHN; value: Byte);
+function  mixchn_get_type(self: PMIXCHN): Byte;
+procedure mixchn_set_instrument_num(self: PMIXCHN; value: Byte);
+function  mixchn_get_instrument_num(self: PMIXCHN): Byte;
+procedure mixchn_set_instrument(self: PMIXCHN; value: Pointer);
+function  mixchn_get_instrument(self: PMIXCHN): Pointer;
+procedure mixchn_set_sample_volume(self: PMIXCHN; value: Integer);
+function  mixchn_get_sample_volume(self: PMIXCHN): Byte;
+procedure mixchn_set_sample_period_limits(self: PMIXCHN; rate: Word; amiga: Boolean);
+function  mixchn_check_sample_period(self: PMIXCHN; value: LongInt): Word;
+procedure mixchn_set_sample_period(self: PMIXCHN; value: Word);
+function  mixchn_get_sample_period(self: PMIXCHN): Word;
+procedure mixchn_set_sample_step(self: PMIXCHN; value: LongInt);
+function  mixchn_get_sample_step(self: PMIXCHN): LongInt;
+procedure mixchn_setup_sample_period(self: PMIXCHN; value: LongInt);
+procedure mixchn_set_sample_data(self: PMIXCHN; value: Pointer);
+function  mixchn_get_sample_data(self: PMIXCHN): Pointer;
+procedure mixchn_set_command(self: PMIXCHN; value: Byte);
+function  mixchn_get_command(self: PMIXCHN): Byte;
+procedure mixchn_set_sub_command(self: PMIXCHN; value: Byte);
+function  mixchn_get_sub_command(self: PMIXCHN): Byte;
+procedure mixchn_set_command_parameter(self: PMIXCHN; value: Byte);
+function  mixchn_get_command_parameter(self: PMIXCHN): Byte;
 
 implementation
 
@@ -82,9 +104,30 @@ uses
 
 (*$l mixchn.obj*)
 
-procedure chn_setSampleVolume(var chn: TChannel; vol: integer); external;
-function  chn_checkSamplePeriod(var chn: TChannel; period: longint): word; external;
-procedure chn_setSamplePeriod(var chn: TChannel; period: longint); external;
-procedure chn_setPeriodLimits(var chn: TChannel; rate: word; amiga: boolean); external;
+procedure mixchn_set_enabled(self: PMIXCHN; value: Boolean); external;
+function  mixchn_is_enabled(self: PMIXCHN): Boolean; external;
+procedure mixchn_set_type(self: PMIXCHN; value: Byte); external;
+function  mixchn_get_type(self: PMIXCHN): Byte; external;
+procedure mixchn_set_instrument_num(self: PMIXCHN; value: Byte); external;
+function  mixchn_get_instrument_num(self: PMIXCHN): Byte; external;
+procedure mixchn_set_instrument(self: PMIXCHN; value: Pointer); external;
+function  mixchn_get_instrument(self: PMIXCHN): Pointer; external;
+procedure mixchn_set_sample_volume(self: PMIXCHN; value: Integer); external;
+function  mixchn_get_sample_volume(self: PMIXCHN): Byte; external;
+procedure mixchn_set_sample_period_limits(self: PMIXCHN; rate: Word; amiga: Boolean); external;
+function  mixchn_check_sample_period(self: PMIXCHN; value: LongInt): Word; external;
+procedure mixchn_set_sample_period(self: PMIXCHN; value: Word); external;
+function  mixchn_get_sample_period(self: PMIXCHN): Word; external;
+procedure mixchn_set_sample_step(self: PMIXCHN; value: LongInt); external;
+function  mixchn_get_sample_step(self: PMIXCHN): LongInt; external;
+procedure mixchn_setup_sample_period(self: PMIXCHN; value: LongInt); external;
+procedure mixchn_set_sample_data(self: PMIXCHN; value: Pointer); external;
+function  mixchn_get_sample_data(self: PMIXCHN): Pointer; external;
+procedure mixchn_set_command(self: PMIXCHN; value: Byte); external;
+function  mixchn_get_command(self: PMIXCHN): Byte; external;
+procedure mixchn_set_sub_command(self: PMIXCHN; value: Byte); external;
+function  mixchn_get_sub_command(self: PMIXCHN): Byte; external;
+procedure mixchn_set_command_parameter(self: PMIXCHN; value: Byte); external;
+function  mixchn_get_command_parameter(self: PMIXCHN): Byte; external;
 
 end.
