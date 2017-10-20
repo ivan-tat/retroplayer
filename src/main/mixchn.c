@@ -12,14 +12,53 @@
 
 #include "main/mixchn.h"
 
+void PUBLIC_CODE mixchn_set_flags(MIXCHN *self, MIXCHNFLAGS value)
+{
+    self->bChannelFlags = value;
+}
+
+MIXCHNFLAGS PUBLIC_CODE mixchn_get_flags(MIXCHN *self)
+{
+    return self->bChannelFlags;
+}
+
 void PUBLIC_CODE mixchn_set_enabled(MIXCHN *self, bool value)
 {
-    self->bEnabled = value;
+    if (value)
+        self->bChannelFlags |= MIXCHNFL_ENABLED;
+    else
+        self->bChannelFlags &= ~MIXCHNFL_ENABLED;
 }
 
 bool PUBLIC_CODE mixchn_is_enabled(MIXCHN *self)
 {
-    return self->bEnabled;
+    return (self->bChannelFlags & MIXCHNFL_ENABLED) != 0;
+}
+
+void PUBLIC_CODE mixchn_set_playing(MIXCHN *self, bool value)
+{
+    if (value)
+        self->bChannelFlags |= MIXCHNFL_PLAYING;
+    else
+        self->bChannelFlags &= ~MIXCHNFL_PLAYING;
+}
+
+bool PUBLIC_CODE mixchn_is_playing(MIXCHN *self)
+{
+    return (self->bChannelFlags & MIXCHNFL_PLAYING) != 0;
+}
+
+void PUBLIC_CODE mixchn_set_mixing(MIXCHN *self, bool value)
+{
+    if (value)
+        self->bChannelFlags |= MIXCHNFL_MIXING;
+    else
+        self->bChannelFlags &= ~MIXCHNFL_MIXING;
+}
+
+bool PUBLIC_CODE mixchn_is_mixing(MIXCHN *self)
+{
+    return (self->bChannelFlags & MIXCHNFL_MIXING) != 0;
 }
 
 void PUBLIC_CODE mixchn_set_type(MIXCHN *self, uint8_t value)

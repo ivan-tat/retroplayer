@@ -146,7 +146,7 @@ begin
           for pos:=0 to usedchannels-1 do
           begin
             chn := @channel[pos];
-            bar(320*170+pos*15+10,10,mixchn_get_sample_volume(chn)*ord(mixchn_is_enabled(chn)));
+            bar(320*170+pos*15+10,10,mixchn_get_sample_volume(chn)*ord(mixchn_is_playing(chn)));
           end;
           yl:=h^[sbGetDMACounter] shr 1;
           for pos:=1 to 319 do
@@ -167,7 +167,7 @@ begin
           for pos:=0 to usedchannels-1 do
           begin
             chn := @channel[pos];
-            bar(320*170+pos*15+10,10,mixchn_get_sample_volume(chn)*ord(mixchn_is_enabled(chn)));
+            bar(320*170+pos*15+10,10,mixchn_get_sample_volume(chn)*ord(mixchn_is_playing(chn)));
           end;
           i:=sbGetDMACounter and $fffe;
           yl:=h^[i] shr 2;yr:=h^[i+1] shr 2;

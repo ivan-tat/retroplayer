@@ -11,7 +11,7 @@ SMPFLAG_LOOP equ 001h
 EFFFLAG_CONTINUE equ 001h
 
 TCHANNEL STRUC
-    bEnabled        db ?
+    bChannelFlags   db ?
     bChannelType    db ?
     wInsSeg         dw ?
     wSmpSeg         dw ?

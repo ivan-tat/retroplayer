@@ -86,6 +86,14 @@ begin
         mixchn_set_type(chn, 0);
 end;
 
+procedure toggle_channel_mixing(index: Byte);
+var
+    chn: PMIXCHN;
+begin
+    chn := @channel[index];
+    mixchn_set_mixing(chn, not mixchn_is_mixing(chn));
+end;
+
 procedure hide_cursor; assembler;
  asm
    mov  ah,01
@@ -127,7 +135,7 @@ procedure disable_all;
 var i:byte;
   begin
     for i:=0 to usedchannels-1 do
-      mixchn_set_enabled(@channel[i], false);
+      mixchn_set_flags(@channel[i], 0);
   end;
 
 function prevorder(nr:byte):byte;
@@ -287,7 +295,10 @@ CONST SW_order:array[false..true] of string = ('Extended Order','Normal Order');
       sw_res:array[false..true] of string = ('8bit','16bit');
   begin
     textbackground(blue);window(1,1,80,25);clrscr;
-    gotoxy(1,7);textbackground(yellow);clreol;writeln('Channel  Stereo ELC Inst Note  Period  Step  Vol Effect');
+    gotoxy(1,7);
+    textbackground(yellow);
+    clreol;
+    writeln('Ch Type Flags Inst Note  Period Step  Vol Effect');
     textbackground(white);textcolor(black);
     gotoxy(1,1);clreol;write('Order:   (  ) Row:    Tick:                  that is Pattern:    ');
     textbackground(green);textcolor(black);gotoxy(1,6);clreol;write(' Title: ',mod_Title);
@@ -388,8 +399,16 @@ begin
     refresh_scr;
     if keypressed then c:=readkey;
     {if c<>#0 then write(ord(c));}
-    if (c>='x') and (c<=chr(ord('x')+16)) then begin revers(ord(c)-ord('x'));c:=#0 end;
-    if (ord(c)>=16) and (ord(c)<=19) then begin revers(ord(c)-4);c:=#0 end;
+    if (c>='x') and (c<=chr(ord('x')+16)) then
+    begin
+        toggle_channel_mixing(ord(c)-ord('x'));
+        c:=#0;
+    end;
+    if (ord(c)>=16) and (ord(c)<=19) then
+    begin
+        toggle_channel_mixing(ord(c)-4);
+        c:=#0;
+    end;
     (* F1-F6 *)
     if (c>=#59) and (c<=#64)  then
       begin

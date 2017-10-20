@@ -120,58 +120,6 @@ type
     TOrderArray = array [0..MAX_ORDERS] of TOrderEntry;
         (* song arrangement *)
 
-(* channels *)
-
-const
-    MAX_CHANNELS = 32; (* 0..31 channels *)
-
-const
-    EFFFLAG_CONTINUE = $01;
-
-type
-    TChannel = record
-        bEnabled:       boolean;
-        bChannelType:   byte;
-        wInsSeg:        word;
-        wSmpSeg:        word;
-        bIns:           byte;
-        bNote:          byte;
-        bSmpVol:        byte;
-        bSmpFlags:      byte;
-        wSmpStart:      word;
-        wSmpLoopStart:  word;
-        wSmpLoopEnd:    word;
-        dSmpPos:        dword;
-        dSmpStep:       dword;
-        wSmpPeriod:     word;
-        wSmpPeriodLow:  word;
-        wSmpPeriodHigh: word;
-        bCommand:       byte;
-        bCommand2:      byte;
-        bParameter:     byte;
-        bEffFlags:      byte;
-        wVibTab:        word;
-        wTrmTab:        word;
-        bTabPos:        byte;
-        bVibParam:      byte;
-        bPortParam:     byte;
-        wSmpPeriodOld:  word;
-        bSmpVolOld:     byte;
-        wSmpPeriodDest: word;
-        bArpPos:        byte;
-        bArpNotes:      array [0..1] of byte;
-        dArpSmpSteps:   array [0..2] of dword;
-        bRetrigTicks:   byte;
-        bSavNote:       byte;
-        bSavIns:        byte;
-        bSavVol:        byte;
-        bDelayTicks:    byte;
-    end;
-
-type
-    TChannelArray = array [0..MAX_CHANNELS-1] of TChannel;
-        (* all public/private data for every channel *)
-
 implementation
 
 end.

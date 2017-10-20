@@ -14,12 +14,20 @@ uses types;
 
 (*$I defines.pas*)
 
+type
+    TMIXCHNFLAGS = Byte;
+
+const
+    MIXCHNFL_ENABLED = $01;
+    MIXCHNFL_PLAYING = $02;
+    MIXCHNFL_MIXING  = $04;
+
 const
     EFFFLAG_CONTINUE = $01;
 
 type
-    TChannel = record
-        bEnabled:       boolean;
+    TChannel = packed record
+        bChannelFlags: TMIXCHNFLAGS;
         bChannelType:   byte;
         wInsSeg:        word;
         wSmpSeg:        word;
@@ -69,8 +77,14 @@ var
     Channel: TChannelArray;
     UsedChannels: byte;
 
+procedure mixchn_set_flags(self: PMIXCHN; value: TMIXCHNFLAGS);
+function  mixchn_get_flags(self: PMIXCHN): TMIXCHNFLAGS;
 procedure mixchn_set_enabled(self: PMIXCHN; value: Boolean);
 function  mixchn_is_enabled(self: PMIXCHN): Boolean;
+procedure mixchn_set_playing(self: PMIXCHN; value: Boolean);
+function  mixchn_is_playing(self: PMIXCHN): Boolean;
+procedure mixchn_set_mixing(self: PMIXCHN; value: Boolean);
+function  mixchn_is_mixing(self: PMIXCHN): Boolean;
 procedure mixchn_set_type(self: PMIXCHN; value: Byte);
 function  mixchn_get_type(self: PMIXCHN): Byte;
 procedure mixchn_set_instrument_num(self: PMIXCHN; value: Byte);
@@ -104,8 +118,14 @@ uses
 
 (*$l mixchn.obj*)
 
+procedure mixchn_set_flags(self: PMIXCHN; value: TMIXCHNFLAGS); external;
+function  mixchn_get_flags(self: PMIXCHN): TMIXCHNFLAGS; external;
 procedure mixchn_set_enabled(self: PMIXCHN; value: Boolean); external;
 function  mixchn_is_enabled(self: PMIXCHN): Boolean; external;
+procedure mixchn_set_playing(self: PMIXCHN; value: Boolean); external;
+function  mixchn_is_playing(self: PMIXCHN): Boolean; external;
+procedure mixchn_set_mixing(self: PMIXCHN; value: Boolean); external;
+function  mixchn_is_mixing(self: PMIXCHN): Boolean; external;
 procedure mixchn_set_type(self: PMIXCHN; value: Byte); external;
 function  mixchn_get_type(self: PMIXCHN): Byte; external;
 procedure mixchn_set_instrument_num(self: PMIXCHN; value: Byte); external;

@@ -20,15 +20,17 @@
 
 /* Mixing channel */
 
-#define MAX_CHANNELS 32
-    /* 0..31 channels */
+typedef uint8_t MIXCHNFLAGS;
+
+#define MIXCHNFL_ENABLED (1<<0) // channel is enabled (can play voice, do effects), otherwise ignored
+#define MIXCHNFL_PLAYING (1<<1) // playing sample, otherwise passive
+#define MIXCHNFL_MIXING  (1<<2) // mix output, otherwise muted
 
 #define EFFFLAG_CONTINUE 0x01
 
 typedef struct mix_channel_t
 {
-    // general switches :
-    uint8_t  bEnabled;      // flag if =0 then nothing to mix at the moment
+    MIXCHNFLAGS bChannelFlags;
     uint8_t  bChannelType;  // 0=off, 1=left, 2=right, 3,4=adlib (if 0,3,4 -> everything ignored !)
     // current Instrument :
     uint16_t wInsSeg;       // DOS segment of current instrument data
@@ -74,8 +76,14 @@ typedef struct mix_channel_t
 
 typedef struct mix_channel_t MIXCHN;
 
+void     PUBLIC_CODE mixchn_set_flags(MIXCHN *self, MIXCHNFLAGS value);
+MIXCHNFLAGS PUBLIC_CODE mixchn_get_flags(MIXCHN *self);
 void     PUBLIC_CODE mixchn_set_enabled(MIXCHN *self, bool value);
 bool     PUBLIC_CODE mixchn_is_enabled(MIXCHN *self);
+void     PUBLIC_CODE mixchn_set_playing(MIXCHN *self, bool value);
+bool     PUBLIC_CODE mixchn_is_playing(MIXCHN *self);
+void     PUBLIC_CODE mixchn_set_mixing(MIXCHN *self, bool value);
+bool     PUBLIC_CODE mixchn_is_mixing(MIXCHN *self);
 void     PUBLIC_CODE mixchn_set_type(MIXCHN *self, uint8_t value);
 uint8_t  PUBLIC_CODE mixchn_get_type(MIXCHN *self);
 void     PUBLIC_CODE mixchn_set_instrument_num(MIXCHN *self, uint8_t value);
@@ -101,6 +109,9 @@ void     PUBLIC_CODE mixchn_set_command_parameter(MIXCHN *self, uint8_t value);
 uint8_t  PUBLIC_CODE mixchn_get_command_parameter(MIXCHN *self);
 
 /* Mixing channels list */
+
+#define MAX_CHANNELS 32
+    /* 0..31 channels */
 
 typedef MIXCHN channelsList_t[MAX_CHANNELS];
 

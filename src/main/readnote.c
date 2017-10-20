@@ -166,7 +166,7 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
             chn_setupNote(chn, chnState_cur_bNote, chnState_porta_flag);
         else
             if (chnState_cur_bNote == CHNNOTE_OFF)
-                mixchn_set_enabled(chn, false);
+                mixchn_set_playing(chn, false);
         /* read volume */
         if (_isVolume(chnState_cur_bVol))
         {

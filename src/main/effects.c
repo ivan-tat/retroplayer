@@ -612,7 +612,7 @@ void PUBLIC_CODE chn_setupNote(MIXCHN *chn, uint8_t note, bool keep)
             {
                 // restart instrument
                 chn->dSmpPos = (unsigned long)chn->wSmpStart << 16;
-                mixchn_set_enabled(chn, true);
+                mixchn_set_playing(chn, true);
             };
         };
     };
@@ -923,7 +923,7 @@ METHOD_INIT(porta)
     if (param)
         chn->bPortParam = param;
 
-    if (mixchn_is_enabled(chn))
+    if (mixchn_is_playing(chn))
         eff_porta_start(chn);
     else
         eff_porta_stop(chn);
@@ -1011,7 +1011,7 @@ METHOD_HANDLE(vibNorm)
 METHOD_TICK(vibNorm)
 {
     unsigned int pos;
-    if (mixchn_is_enabled(chn))
+    if (mixchn_is_playing(chn))
     {
         /* next position in table: */
         pos = (chn->bTabPos + (chn->bVibParam >> 4)) & 0x3f;
@@ -1040,7 +1040,7 @@ METHOD_STOP(vibNorm)
 METHOD_TICK(vibFine)
 {
     unsigned int pos;
-    if (mixchn_is_enabled(chn))
+    if (mixchn_is_playing(chn))
     {
         /* next position in table: */
         pos = (chn->bTabPos + (chn->bVibParam >> 4)) & 0x3f;
@@ -1352,7 +1352,7 @@ METHOD_INIT(special_patLoop)
 METHOD_TICK(special_noteCut)
 {
     if (! --chn->bDelayTicks)
-        mixchn_set_enabled(chn, false);
+        mixchn_set_playing(chn, false);
 }
 
 METHOD_INIT(special_noteDelay)
@@ -1380,11 +1380,11 @@ METHOD_TICK(special_noteDelay)
         if (note != CHNNOTE_EMPTY)
         {
             if (note == CHNNOTE_OFF)
-                mixchn_set_enabled(chn, false);
+                mixchn_set_playing(chn, false);
             else
             {
                 chn_setupNote(chn, note, 0);
-                mixchn_set_enabled(chn, true);
+                mixchn_set_playing(chn, true);
             };
         };
         if (chn->bSavVol != CHNINSVOL_EMPTY)

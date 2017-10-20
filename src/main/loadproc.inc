@@ -514,7 +514,10 @@ var
     for i:=0 to 31 do
     begin
         chn := @channel[i];
-        mixchn_set_enabled(chn, (header.channelset[i] and 128) = 0);
+        if ((header.channelset[i] and 128) = 0) then
+            mixchn_set_flags(chn, MIXCHNFL_ENABLED + MIXCHNFL_MIXING)
+        else
+            mixchn_set_flags(chn, 0);
         mixchn_set_type(chn, getchtyp(header.channelset[i] and 31));
         if  (mixchn_is_enabled(chn))
         and (mixchn_get_type(chn) > 0)

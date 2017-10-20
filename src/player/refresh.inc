@@ -55,31 +55,50 @@ procedure display_currow;
 {$I EFX_NAME.INC}
 
 procedure refr_channels;
-const types:array[0..4] of string[6] = ('OFF','Left','Right','Adlib1','Adlib2');
+const types:array[0..4] of string[2] = ('--','LT','RT','AM','AD');
 var i:byte;
     j:byte;
     chn: PMIXCHN;
     chtype: Byte;
+    chflags: TMIXCHNFLAGS;
   begin
     gotoxy(1,8);
-    textbackground(blue);textcolor(white);
-    i:=0;j:=0;
-    while i<usedchannels do
+    textbackground(blue);
+    textcolor(white);
+    i:=0;
+    j:=0;
+    while (i < usedchannels) do
     begin
         chn := @channel[i];
         chtype := mixchn_get_type(chn);
+        chflags := mixchn_get_flags(chn);
         if  (chtype < 3)
-        and ((usedchannels<17)
+        and ((usedchannels < 17)
         or  (chtype > 0)) then
-            { display only sample channels }
         begin
             inc(j);
-            write(' Chn ',(i+1):2,' (',types[chtype]:5,') ');
-            if (mixchn_is_enabled(chn)) then write('*') else write(' ');
-            if chn^.bSmpFlags and SMPFLAG_LOOP <> 0 then write('!') else write(' ');
-            if chn^.bEffFlags and EFFFLAG_CONTINUE <> 0 then write('c') else write(' ');
-            write('(',mixchn_get_instrument_num(chn):2,') ');
-            write('[');
+            write((i+1):2, ' (', types[chtype], ') ');
+            if (chflags and MIXCHNFL_ENABLED <> 0) then
+                write('e')
+            else
+                write('-');
+            if (chflags and MIXCHNFL_PLAYING <> 0) then
+                write('p')
+            else
+                write('-');
+            if (chflags and MIXCHNFL_MIXING <> 0) then
+                write('m')
+            else
+                write('-');
+            if (chn^.bSmpFlags and SMPFLAG_LOOP <> 0) then
+                write('l')
+            else
+                write('-');
+            if (chn^.bEffFlags and EFFFLAG_CONTINUE <> 0) then
+                write('c')
+            else
+                write('-');
+            write(' (',mixchn_get_instrument_num(chn):2,') [');
             if (mixchn_is_enabled(chn)) then
               begin
                 write_note(chn^.bNote);
@@ -87,9 +106,7 @@ var i:byte;
                 {write(',');write_note(chn^.bArpNotes[0]);write(',');write_note(chn^.bArpNotes[1]);}
               end
             else write('...');
-            write('] ');
-            write('<', mixchn_get_sample_period(chn):5, '>');
-            write(' ', mixchn_get_sample_step(chn)/64/1024:7:4);
+            write('] ', mixchn_get_sample_period(chn):5, ' ', mixchn_get_sample_step(chn)/64/1024:7:4);
             { Arpeggio test : }
             {write(' ', chn^.dArpSmpSteps[1].DD/64/1024:7:4);
             write(' ', chn^.dArpSmpSteps[2].DD/64/1024:7:4);}
@@ -153,7 +170,7 @@ var i:byte;
     for i:=0 to usedchannels-1 do
       begin
         chn := @channel[i];
-        n := ord(mixchn_is_enabled(chn)) * mixchn_get_instrument_num(chn) * ord(mixchn_get_type(chn) > 0);
+        n := ord(mixchn_is_playing(chn)) * mixchn_get_instrument_num(chn) * ord(mixchn_get_type(chn) > 0);
         if (chnlastinst[i] <> n) and (chnlastinst[i] > 0) then
         begin
             textcolor(white);
@@ -180,7 +197,7 @@ var i,n:byte;
     for i:=0 to usedchannels-1 do
       begin
         chn := @channel[i];
-        n := ord(mixchn_is_enabled(chn)) * mixchn_get_instrument_num(chn) * ord(mixchn_get_type(chn) > 0);
+        n := ord(mixchn_is_playing(chn)) * mixchn_get_instrument_num(chn) * ord(mixchn_get_type(chn) > 0);
         if (chnlastinst[i]<>n) and (chnlastinst[i]>0) and
            (samplepage*18<chnlastinst[i]) and (samplepage*18+19>chnlastinst[i]) then
           begin
