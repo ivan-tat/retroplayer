@@ -396,7 +396,6 @@ build_target $T_MAIN   inc-linux src/main/_wsquare.c
 build_target $T_MAIN   obj src/main/mixvars.c
 build_target $T_MAIN   obj src/main/muspat.c
 build_target $T_MAIN   obj src/main/s3mvars.c
-build_target $T_MAIN   obj src/main/loads3m.c
 build_target $T_MAIN   obj src/main/fillvars.c
 build_target $T_MAIN   obj src/main/voltab.c
 build_target $T_MAIN   obj src/main/posttab.c
@@ -407,6 +406,7 @@ build_target $T_MAIN   obj src/main/effects.c
 build_target $T_MAIN   obj src/main/readnote.c
 build_target $T_MAIN   obj src/main/mixing.c
 build_target $T_MAIN   obj src/main/filldma.c
+build_target $T_MAIN   obj src/main/loads3m.c
 build_target $T_MAIN   obj src/main/s3mplay.c
 fi
 
@@ -448,7 +448,6 @@ build_target $T_MAIN_TP   obj src/main/s3mtypes.pas
 build_target $T_MAIN_TP   obj src/main/mixvars.pas
 build_target $T_MAIN_TP   obj src/main/muspat.pas
 build_target $T_MAIN_TP   obj src/main/s3mvars.pas
-build_target $T_MAIN_TP   obj src/main/loads3m.pas
 build_target $T_MAIN_TP   obj src/main/fillvars.pas
 build_target $T_MAIN_TP   obj src/main/voltab.pas
 build_target $T_MAIN_TP   obj src/main/posttab.pas
@@ -460,6 +459,7 @@ build_target $T_MAIN_TP   obj src/main/effects.pas
 build_target $T_MAIN_TP   obj src/main/readnote.pas
 build_target $T_MAIN_TP   obj src/main/mixing.pas
 build_target $T_MAIN_TP   obj src/main/filldma.pas
+build_target $T_MAIN_TP   obj src/main/loads3m.pas
 build_target $T_MAIN_TP   obj src/main/s3mplay.pas
 build_target $T_PLAYER_TP exe-dos src/player/plays3m.pas
 build_target $T_PLAYER_TP exe-dos src/player/smalls3m.pas

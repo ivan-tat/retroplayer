@@ -41,7 +41,7 @@ CONST
       sample2large         = -12; { I can't handle samples >64511 }
 
 { variables for public }
-VAR load_Error:integer;
+VAR
     player_Error:integer;
 
 function  player_load_s3m(name: String): Boolean;

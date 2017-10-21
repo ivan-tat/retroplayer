@@ -44,11 +44,7 @@ procedure display_errormsg(err:integer);
     { I know case is stupid - like my code allways is :) }
     case err of
        0: write(' Hmm no error what''s wrong ? ');
-      -1: begin
-          if load_error=-1 then write(' Not enough memory for this module. ') else
-          if player_error=-1 then write(' Not enough memory for internal buffers. ');
-          write('PROGRAMMERS INFO: Try to lower Pascal heap or DMA buffer. ');
-          end;
+      -1: write(' Not enough DOS memory.');
       -2: write(' Wrong file format. Not a S3M ? ');
       -3: write(' File corrupt. ');
       -4: write(' File does not exist. ');
@@ -370,7 +366,7 @@ begin
   writeln('Free DOS memory before loading: ',getFreeDOSMemory shr 10, ' KiB');
   writeln('Free EMM memory before loading: ',getFreeEMMMemory, ' KiB');
   {$ENDIF}
-  if not player_load_s3m(filename) then display_errormsg(load_error);
+  if not player_load_s3m(filename) then display_errormsg(player_error);
   {$IFDEF DEBUGLOAD}
   writeln('Free DOS memory after loading: ',getFreeDOSMemory shr 10, ' KiB');
   writeln('Free EMM memory after loading: ',getFreeEMMMemory, ' KiB');

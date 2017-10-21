@@ -66,194 +66,9 @@ begin
 end;
 (*$I+*)
 
-type
-    TS3MLoader = packed record
-        f: File;
-        buffer: PArray;
-        inspara: array [0..MAX_INSTRUMENTS-1] of Word;
-        patpara: array [0..MAX_PATTERNS-1] of Word;
-        smppara: array [0..MAX_INSTRUMENTS-1] of LongInt;
-        pat_EM_pages: Word;
-        pat_EM_page: Word;
-        pat_EM_page_offset: Word;
-        smp_EM_pages: Word;
-        smp_EM_page: Word;
-    end;
-    PS3MLoader = ^TS3MLoader;
-
-function  s3mloader_new: PS3MLoader; forward;
-procedure s3mloader_clear(self: PS3MLoader); forward;
-procedure s3mloader_delete(var self: PS3MLoader); forward;
-function  s3mloader_allocbuf(self: PS3MLoader): Boolean; forward;
-function  s3mloader_load_pattern(self: PS3MLoader; index: Byte; pos: LongInt): Boolean; forward;
 function  s3mloader_load_instrument(self: PS3MLoader; index: Byte; var smppara: LongInt; pos: LongInt): Boolean; forward;
 procedure s3mloader_alloc_samples(self: PS3MLoader); forward;
 function  s3mloader_load_sample(self: PS3MLoader; index: Byte; pos: LongInt): Boolean; forward;
-procedure s3mloader_free(self: PS3MLoader); forward;
-
-function s3mloader_new: PS3MLoader;
-var
-    _seg: Word;
-begin
-    if (_dos_allocmem(_dos_para(sizeof(TS3MLoader)), _seg) = 0) then
-        s3mloader_new := ptr(_seg, 0)
-    else
-        s3mloader_new := nil;
-end;
-
-procedure s3mloader_clear(self: PS3MLoader);
-begin
-    if (self <> nil) then
-        memset(self^, 0, sizeof(TS3MLoader));
-end;
-
-procedure s3mloader_delete(var self: PS3MLoader);
-begin
-    if (self <> nil) then
-    begin
-        _dos_freemem(seg(self^));
-        self := nil;
-    end;
-end;
-
-function s3mloader_allocbuf(self: PS3MLoader): Boolean;
-var
-    _seg: Word;
-begin
-    if (self <> nil) then
-    begin
-        if (_dos_allocmem(_dos_para(10*1024), _seg) = 0) then
-        begin
-            self^.buffer := ptr(_seg, 0);
-            s3mloader_allocbuf := true;
-            exit;
-        end;
-    end;
-
-    s3mloader_allocbuf := false;
-end;
-
-procedure s3mloader_free(self: PS3MLoader);
-begin
-    if (self <> nil) then
-    begin
-        if (self^.buffer <> Nil) then
-        begin
-            _dos_freemem(seg(self^.buffer^));
-            self^.buffer := nil;
-        end;
-        close(self^.f);
-    end;
-end;
-
-function s3mloader_load_pattern(self: PS3MLoader; index: Byte; pos: LongInt): Boolean;
-var
-    length: Word;
-    pat_static: TMUSPAT;
-    pat: PMUSPAT;
-    _seg: Word;
-    p: Pointer;
-begin
-    s3mloader_load_pattern:=false;
-
-      if (pos = 0) then
-      begin
-        pat := patList_get(mod_Patterns, index);
-        muspat_clear(pat);
-        s3mloader_load_pattern := true;
-        exit;
-      end;
-
-      if (_fsetpos(self^.f, pos) <> 0) then
-      begin
-          Debug_Err(__FILE__, 's3mloader_load_pattern', 'Failed to read file.');
-          load_error := filecorrupt;
-          exit;
-      end;
-      if (_fread(@length, 2, 1, self^.f) <> 1) then
-      begin
-          Debug_Err(__FILE__, 's3mloader_load_pattern', 'Failed to read pattern.');
-          load_error := filecorrupt;
-          exit;
-      end;
-      {$IFDEF LOADINFO}
-      write('P',index,'(',length,')');
-      {$ENDIF}
-      if (length = 0) or (length > 10*1024) then
-      begin
-          Debug_Err(__FILE__, 's3mloader_load_pattern', 'Bad pattern size.');
-          load_error := filecorrupt;
-          exit;
-      end;
-      { read whole packed pattern }
-      if (_fread(self^.buffer, length - 2, 1, self^.f) <> 1) then
-      begin
-          Debug_Err(__FILE__, 's3mloader_load_pattern', 'Failed to read pattern.');
-          load_error := filecorrupt;
-          exit;
-      end;
-
-      pat := @pat_static;
-      muspat_clear(pat);
-      muspat_set_channels(pat, UsedChannels);
-      muspat_set_rows(pat, 64);
-
-      { first get memory : (if useEMS than try to put it into the EMS ... }
-      if useEMS and
-        patListIsInEM(mod_Patterns) and
-        (self^.pat_EM_page_offset < patListGetPatPerPage(mod_Patterns)) then
-        begin
-          muspat_set_EM_data(pat, true);
-          muspat_set_own_EM_handle(pat, false);
-          muspat_set_EM_data_handle(pat, patListGetHandle(mod_Patterns));
-          muspat_set_EM_data_page(pat, self^.pat_EM_page);
-          muspat_set_EM_data_offset(pat, self^.pat_EM_page_offset * 5 * UsedChannels * 64);
-          patList_set(mod_Patterns, index, pat);
-          p := muspat_map_EM_data(pat);
-          if (p = nil) then
-          begin
-              Debug_Err(__FILE__, 's3mloader_load_pattern', 'Failed to map EM for pattern.');
-              load_error := internal_failure;
-              exit;
-          end;
-        end
-      else
-        begin
-            if (_dos_allocmem(_dos_para(longint(64*5)*usedchannels + 15), _seg) <> 0) then
-            begin
-                Debug_Err(__FILE__, 's3mloader_load_pattern', 'Failed to allocate DOS memory for pattern.');
-                load_error := notenoughmem;
-                exit;
-            end;
-            p := ptr(_seg, 0);
-            muspat_set_EM_data(pat, false);
-            muspat_set_data(pat, p);
-            patList_set(mod_Patterns, index, pat);
-        end;
-
-      unpackPattern(self^.buffer, p, 64, UsedChannels);
-
-      pat := patList_get(mod_Patterns, index);
-      if (muspat_is_EM_data(pat)) then
-        begin
-          {$IFDEF LOADINFO}
-          write('E(',self^.pat_EM_page,',',self^.pat_EM_page_offset,')');
-          {$ENDIF}
-          { next position in EMS : }
-          inc(self^.pat_EM_page_offset);
-          if (self^.pat_EM_page_offset = patListGetPatPerPage(mod_Patterns)) and (self^.pat_EM_pages>0) then
-            begin
-              dec(self^.pat_EM_pages);
-              inc(self^.pat_EM_page);
-              self^.pat_EM_page_offset:=0;
-            end;
-        end;
-      {$IFDEF LOADINFO}
-      write('*');
-      {$ENDIF}
-
-    s3mloader_load_pattern:=true;
-end;
 
 function s3mloader_load_instrument(self: PS3MLoader; index: Byte; var smppara: LongInt; pos: LongInt): Boolean;
 var
@@ -603,6 +418,7 @@ var
     begin
         if (not s3mloader_load_pattern(self, i, self^.patpara[i] * 16)) then
         begin
+            load_error := self^.err;
             s3mloader_load := false;
             exit;
         end;
@@ -659,6 +475,7 @@ begin
         s3mloader_free(p);
         s3mloader_delete(p);
         player_free_module;
+        player_error := load_error;
         player_load_s3m := false;
         exit;
     end;
