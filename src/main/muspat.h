@@ -68,38 +68,39 @@ void     PUBLIC_CODE muspat_free(MUSPAT *self);
 
 /*** Patterns list ***/
 
-#define MAX_PATTERNS 100
-    /* 0..99 patterns */
+typedef uint16_t music_patterns_list_flags_t;
+typedef music_patterns_list_flags_t MUSPATLFLAGS;
 
-typedef struct musPatternsList_t
+#define MUSPATLFL_EM     (1<<0) /* data is in EM */
+#define MUSPATLFL_OWNHDL (1<<1) /* has own EM handle, needs to be freed when done */
+
+typedef struct music_patterns_list_t
 {
+    MUSPATLFLAGS flags;
     struct _dynarr_t list;
-    uint16_t patLength; /* length of one pattern */
-    bool useEM;         /* patterns in EM */
-    EMSHDL handle;      /* handle to access EM for patterns */
-    uint8_t patPerPage; /* count of patterns per page (<64!!!) */
+    EMSHDL handle;
 };
-typedef struct musPatternsList_t MUSPATLIST;
+typedef struct music_patterns_list_t MUSPATLIST;
+
+MUSPATLIST *PUBLIC_CODE muspatl_new(void);
+void        PUBLIC_CODE muspatl_clear(MUSPATLIST *self);
+void        PUBLIC_CODE muspatl_delete(MUSPATLIST **self);
+void        PUBLIC_CODE muspatl_set(MUSPATLIST *self, uint16_t index, MUSPAT *item);
+MUSPAT     *PUBLIC_CODE muspatl_get(MUSPATLIST *self, uint16_t index);
+bool        PUBLIC_CODE muspatl_set_count(MUSPATLIST *self, uint16_t value);
+uint16_t    PUBLIC_CODE muspatl_get_count(MUSPATLIST *self);
+void        PUBLIC_CODE muspatl_set_EM_data(MUSPATLIST *self, bool value);
+bool        PUBLIC_CODE muspatl_is_EM_data(MUSPATLIST *self);
+void        PUBLIC_CODE muspatl_set_own_EM_handle(MUSPATLIST *self, bool value);
+bool        PUBLIC_CODE muspatl_is_own_EM_handle(MUSPATLIST *self);
+void        PUBLIC_CODE muspatl_set_EM_handle(MUSPATLIST *self, EMSHDL value);
+EMSHDL      PUBLIC_CODE muspatl_get_EM_handle(MUSPATLIST *self);
+void        PUBLIC_CODE muspatl_set_EM_handle_name(MUSPATLIST *self);
+uint32_t    PUBLIC_CODE muspatl_get_used_EM(MUSPATLIST *self);
+void        PUBLIC_CODE muspatl_free(MUSPATLIST *self);
+
+/* Variables */
 
 extern MUSPATLIST *PUBLIC_DATA mod_Patterns;
-
-MUSPATLIST *PUBLIC_CODE patList_new(void);
-void        PUBLIC_CODE patList_clear(MUSPATLIST *self);
-void        PUBLIC_CODE patList_delete(MUSPATLIST **self);
-void        PUBLIC_CODE patList_set(MUSPATLIST *self, uint16_t index, MUSPAT *pat);
-MUSPAT     *PUBLIC_CODE patList_get(MUSPATLIST *self, uint16_t index);
-bool        PUBLIC_CODE patList_set_count(MUSPATLIST *self, uint16_t count);
-uint16_t    PUBLIC_CODE patList_get_count(MUSPATLIST *self);
-void        PUBLIC_CODE patListSetPatLength(MUSPATLIST *self, uint16_t value);
-uint16_t    PUBLIC_CODE patListGetPatLength(MUSPATLIST *self);
-void        PUBLIC_CODE patListSetUseEM(MUSPATLIST *self, bool value);
-bool        PUBLIC_CODE patListIsInEM(MUSPATLIST *self);
-void        PUBLIC_CODE patListSetHandle(MUSPATLIST *self, EMSHDL value);
-EMSHDL      PUBLIC_CODE patListGetHandle(MUSPATLIST *self);
-void        PUBLIC_CODE patListSetHandleName(MUSPATLIST *self);
-void        PUBLIC_CODE patListSetPatPerPage(MUSPATLIST *self, uint8_t value);
-uint8_t     PUBLIC_CODE patListGetPatPerPage(MUSPATLIST *self);
-uint32_t    PUBLIC_CODE patListGetUsedEM(MUSPATLIST *self);
-void        PUBLIC_CODE patListFree(MUSPATLIST *self);
 
 #endif  /* MUSPAT_H */

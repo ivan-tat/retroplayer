@@ -51,27 +51,22 @@ function  muspat_map_EM_data(self: PMUSPAT): Pointer;
 type
     PMUSPATLIST = Pointer;
 
-function  patList_new: PMUSPATLIST;
-procedure patList_clear(self: PMUSPATLIST);
-procedure patList_delete(var self: PMUSPATLIST);
-procedure patList_set(self: PMUSPATLIST; index: integer; pat: PMUSPAT);
-function  patList_get(self: PMUSPATLIST; index: integer): PMUSPAT;
-function  patList_set_count(self: PMUSPATLIST; count: Word): Boolean;
-function  patList_get_count(self: PMUSPATLIST): Word;
-procedure patListSetPatLength(self: PMUSPATLIST; value: Word);
-function  patListGetPatLength(self: PMUSPATLIST): Word;
-procedure patListSetUseEM(self: PMUSPATLIST; value: Boolean);
-function  patListIsInEM(self: PMUSPATLIST): Boolean;
-procedure patListSetHandle(self: PMUSPATLIST; value: TEMSHDL);
-function  patListGetHandle(self: PMUSPATLIST): TEMSHDL;
-procedure patListSetHandleName(self: PMUSPATLIST);
-procedure patListSetPatPerPage(self: PMUSPATLIST; value: Byte);
-function  patListGetPatPerPage(self: PMUSPATLIST): Byte;
-function  patListGetUsedEM(self: PMUSPATLIST): longint;
-procedure patListFree(self: PMUSPATLIST);
-
-const
-    MAX_PATTERNS = 100; (* 0..99 patterns *)
+function  muspatl_new: PMUSPATLIST;
+procedure muspatl_clear(self: PMUSPATLIST);
+procedure muspatl_delete(var self: PMUSPATLIST);
+procedure muspatl_set(self: PMUSPATLIST; index: Word; item: PMUSPAT);
+function  muspatl_get(self: PMUSPATLIST; index: Word): PMUSPAT;
+function  muspatl_set_count(self: PMUSPATLIST; value: Word): Boolean;
+function  muspatl_get_count(self: PMUSPATLIST): Word;
+procedure muspatl_set_EM_data(self: PMUSPATLIST; value: Boolean);
+function  muspatl_is_EM_data(self: PMUSPATLIST): Boolean;
+procedure muspatl_set_own_EM_handle(self: PMUSPATLIST; value: Boolean);
+function  muspatl_is_own_EM_handle(self: PMUSPATLIST): Boolean;
+procedure muspatl_set_EM_handle(self: PMUSPATLIST; value: TEMSHDL);
+function  muspatl_get_EM_handle(self: PMUSPATLIST): TEMSHDL;
+procedure muspatl_set_EM_handle_name(self: PMUSPATLIST);
+function  muspatl_get_used_EM(self: PMUSPATLIST): longint;
+procedure muspatl_free(self: PMUSPATLIST);
 
 var
     mod_Patterns: PMUSPATLIST;
@@ -107,23 +102,21 @@ function  muspat_get_EM_data_offset(self: PMUSPAT): Word; external;
 function  muspat_get_data(self: PMUSPAT): Pointer; external;
 function  muspat_map_EM_data(self: PMUSPAT): Pointer; external;
 
-function  patList_new: PMUSPATLIST; external;
-procedure patList_clear(self: PMUSPATLIST); external;
-procedure patList_delete(var self: PMUSPATLIST); external;
-procedure patList_set(self: PMUSPATLIST; index: integer; pat: PMUSPAT); external;
-function  patList_get(self: PMUSPATLIST; index: integer): PMUSPAT; external;
-function  patList_set_count(self: PMUSPATLIST; count: Word): Boolean; external;
-function  patList_get_count(self: PMUSPATLIST): Word; external;
-procedure patListSetPatLength(self: PMUSPATLIST; value: Word); external;
-function  patListGetPatLength(self: PMUSPATLIST): Word; external;
-procedure patListSetUseEM(self: PMUSPATLIST; value: Boolean); external;
-function  patListIsInEM(self: PMUSPATLIST): Boolean; external;
-procedure patListSetHandle(self: PMUSPATLIST; value: TEMSHDL); external;
-function  patListGetHandle(self: PMUSPATLIST): TEMSHDL; external;
-procedure patListSetHandleName(self: PMUSPATLIST); external;
-procedure patListSetPatPerPage(self: PMUSPATLIST; value: Byte); external;
-function  patListGetPatPerPage(self: PMUSPATLIST): Byte; external;
-function  patListGetUsedEM(self: PMUSPATLIST): longint; external;
-procedure patListFree(self: PMUSPATLIST); external;
+function  muspatl_new: PMUSPATLIST; external;
+procedure muspatl_clear(self: PMUSPATLIST); external;
+procedure muspatl_delete(var self: PMUSPATLIST); external;
+procedure muspatl_set(self: PMUSPATLIST; index: Word; item: PMUSPAT); external;
+function  muspatl_get(self: PMUSPATLIST; index: Word): PMUSPAT; external;
+function  muspatl_set_count(self: PMUSPATLIST; value: Word): Boolean; external;
+function  muspatl_get_count(self: PMUSPATLIST): Word; external;
+procedure muspatl_set_EM_data(self: PMUSPATLIST; value: Boolean); external;
+function  muspatl_is_EM_data(self: PMUSPATLIST): Boolean; external;
+procedure muspatl_set_own_EM_handle(self: PMUSPATLIST; value: Boolean); external;
+function  muspatl_is_own_EM_handle(self: PMUSPATLIST): Boolean; external;
+procedure muspatl_set_EM_handle(self: PMUSPATLIST; value: TEMSHDL); external;
+function  muspatl_get_EM_handle(self: PMUSPATLIST): TEMSHDL; external;
+procedure muspatl_set_EM_handle_name(self: PMUSPATLIST); external;
+function  muspatl_get_used_EM(self: PMUSPATLIST): longint; external;
+procedure muspatl_free(self: PMUSPATLIST); external;
 
 end.

@@ -168,10 +168,11 @@ bool PUBLIC_CODE s3mloader_load_pattern(S3MLOADER *self, uint8_t index, uint32_t
     MUSPAT *pat;
     uint16_t seg;
     void *p;
+    bool em;
 
     if (!pos)
     {
-        pat = patList_get(mod_Patterns, index);
+        pat = muspatl_get(mod_Patterns, index);
         muspat_clear(pat);
         return true;
     }
@@ -188,9 +189,7 @@ bool PUBLIC_CODE s3mloader_load_pattern(S3MLOADER *self, uint8_t index, uint32_t
         self->err = filecorrupt;
         return false;
     }
-    #ifdef DEBUGLOAD
-    printf("P%hu:%u", index, length);
-    #endif
+
     if ((!length) || (length > 10 * 1024))
     {
         DEBUG_ERR("s3mloader_load_pattern", "Bad pattern size.");
@@ -208,17 +207,31 @@ bool PUBLIC_CODE s3mloader_load_pattern(S3MLOADER *self, uint8_t index, uint32_t
     muspat_clear(pat);
     muspat_set_channels(pat, UsedChannels);
     muspat_set_rows(pat, 64);
+    muspat_set_size(pat, muspat_get_channels(pat) * muspat_get_rows(pat) * 5);
 
-    if (UseEMS
-    && patListIsInEM(mod_Patterns)
-    && (self->pat_EM_page_offset < patListGetPatPerPage(mod_Patterns)))
+    // try to put in EM
+    em = false;
+    if (muspatl_is_EM_data(mod_Patterns) && self->pat_EM_pages)
+    {
+        em = true;
+        if (self->pat_EM_page_offset + muspat_get_size(pat) > 16 * 1024)
+        {
+            self->pat_EM_page++;
+            self->pat_EM_page_offset = 0;
+            self->pat_EM_pages--;
+            if (!self->pat_EM_pages || (self->pat_EM_page_offset + muspat_get_size(pat) > 16 * 1024))
+                em = false;
+        }
+    }
+
+    if (em)
     {
         muspat_set_EM_data(pat, true);
         muspat_set_own_EM_handle(pat, false);
-        muspat_set_EM_data_handle(pat, patListGetHandle(mod_Patterns));
+        muspat_set_EM_data_handle(pat, muspatl_get_EM_handle(mod_Patterns));
         muspat_set_EM_data_page(pat, self->pat_EM_page);
-        muspat_set_EM_data_offset(pat, self->pat_EM_page_offset * 64 * 5 * UsedChannels);
-        patList_set(mod_Patterns, index, pat);
+        muspat_set_EM_data_offset(pat, self->pat_EM_page_offset);
+        muspatl_set(mod_Patterns, index, pat);
         p = muspat_map_EM_data(pat);
         if (!p)
         {
@@ -226,10 +239,11 @@ bool PUBLIC_CODE s3mloader_load_pattern(S3MLOADER *self, uint8_t index, uint32_t
             self->err = internal_failure;
             return false;
         }
+        self->pat_EM_page_offset += muspat_get_size(pat);
     }
     else
     {
-        if (_dos_allocmem(_dos_para(64 * 5 * UsedChannels), &seg))
+        if (_dos_allocmem(_dos_para(muspat_get_size(pat)), &seg))
         {
             DEBUG_ERR("s3mloader_load_pattern", "Failed to allocate DOS memory for pattern.");
             self->err = notenoughmem;
@@ -238,27 +252,19 @@ bool PUBLIC_CODE s3mloader_load_pattern(S3MLOADER *self, uint8_t index, uint32_t
         p = MK_FP(seg, 0);
         muspat_set_EM_data(pat, false);
         muspat_set_data(pat, p);
-        patList_set(mod_Patterns, index, pat);
+        muspatl_set(mod_Patterns, index, pat);
     }
 
-    unpackPattern(self->buffer, p, 64, UsedChannels);
-
-    pat = patList_get(mod_Patterns, index);
-
+    #ifdef DEBUGLOAD
     if (muspat_is_EM_data(pat))
-    {
-        #ifdef DEBUGLOAD
-        printf("E(%04X:%04X)", self->pat_EM_page, self->pat_EM_page_offset);
-        #endif
-        /* next position in EM: */
-        self->pat_EM_page_offset++;
-        if ((self->pat_EM_page_offset == patListGetPatPerPage(mod_Patterns)) && self->pat_EM_pages)
-        {
-            self->pat_EM_pages--;
-            self->pat_EM_page++;
-            self->pat_EM_page_offset = 0;
-        }
-    }
+        DEBUG_MSG_("s3mloader_load_pattern", "p=%hu, r/s=%u/%u, EM=%04X:%04X",
+            index, length, muspat_get_size(pat), muspat_get_EM_data_page(pat), muspat_get_EM_data_offset(pat));
+    else
+        DEBUG_MSG_("s3mloader_load_pattern", "p=%hu, r/s=%u/%u, DOS=%04X:%04X",
+            index, length, muspat_get_size(pat), muspat_get_data(pat));
+    #endif
+
+    unpackPattern(self->buffer, p, muspat_get_rows(pat), muspat_get_channels(pat));
 
     return true;
 }

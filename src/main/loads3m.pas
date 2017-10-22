@@ -17,13 +17,16 @@ uses
 
 (*$I defines.pas*)
 
+const
+    S3M_MAX_PATTERNS = 100;
+
 type
     TS3MLoader = packed record
         err: Integer;
         f: File;
         buffer: PArray;
         inspara: array [0..MAX_INSTRUMENTS-1] of Word;
-        patpara: array [0..MAX_PATTERNS-1] of Word;
+        patpara: array [0..S3M_MAX_PATTERNS-1] of Word;
         smppara: array [0..MAX_INSTRUMENTS-1] of LongInt;
         pat_EM_pages: Word;
         pat_EM_page: Word;

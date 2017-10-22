@@ -213,7 +213,14 @@ void PUBLIC_CODE muspat_free(MUSPAT *self)
     }
 }
 
-/*** Patterns list ***/
+/*** Music patterns list ***/
+
+#define _muspatl_set_EM_data(o, v)          o->flags = (o->flags & ~MUSPATLFL_EM) | (v ? MUSPATLFL_EM : 0)
+#define _muspatl_is_EM_data(o)              ((o->flags & MUSPATLFL_EM) != 0)
+#define _muspatl_set_own_EM_handle(o, v)    o->flags = (o->flags & ~MUSPATLFL_OWNHDL) | (v ? MUSPATLFL_OWNHDL : 0)
+#define _muspatl_is_own_EM_handle(o)        ((o->flags & MUSPATLFL_OWNHDL) != 0)
+#define _muspatl_set_EM_handle(o, v)        o->handle = v
+#define _muspatl_get_EM_handle(o)           o->handle
 
 static EMSNAME EMS_PATLIST_HANDLE_NAME = "patlist";
 
@@ -227,7 +234,7 @@ void __far _muspatl_free_item(void *self, void *item)
     muspat_free((MUSPAT *)item);
 }
 
-MUSPATLIST *PUBLIC_CODE patList_new(void)
+MUSPATLIST *PUBLIC_CODE muspatl_new(void)
 {
     uint16_t seg;
     MUSPATLIST *self;
@@ -242,13 +249,16 @@ MUSPATLIST *PUBLIC_CODE patList_new(void)
         return NULL;
 }
 
-void PUBLIC_CODE patList_clear(MUSPATLIST *self)
+void PUBLIC_CODE muspatl_clear(MUSPATLIST *self)
 {
     if (self)
+    {
         _dynarr_clear_list(&(self->list));
+        _muspatl_set_EM_handle(self, EMSBADHDL);
+    }
 }
 
-void PUBLIC_CODE patList_delete(MUSPATLIST **self)
+void PUBLIC_CODE muspatl_delete(MUSPATLIST **self)
 {
     if (self)
         if (*self)
@@ -258,14 +268,13 @@ void PUBLIC_CODE patList_delete(MUSPATLIST **self)
         }
 }
 
-
-void PUBLIC_CODE patList_set(MUSPATLIST *self, uint16_t index, MUSPAT *item)
+void PUBLIC_CODE muspatl_set(MUSPATLIST *self, uint16_t index, MUSPAT *item)
 {
     if (self)
         _dynarr_set_item(&(self->list), index, item);
 }
 
-MUSPAT *PUBLIC_CODE patList_get(MUSPATLIST *self, uint16_t index)
+MUSPAT *PUBLIC_CODE muspatl_get(MUSPATLIST *self, uint16_t index)
 {
     if (self)
         return _dynarr_get_item(&(self->list), index);
@@ -273,7 +282,7 @@ MUSPAT *PUBLIC_CODE patList_get(MUSPATLIST *self, uint16_t index)
         return NULL;
 }
 
-bool PUBLIC_CODE patList_set_count(MUSPATLIST *self, uint16_t count)
+bool PUBLIC_CODE muspatl_set_count(MUSPATLIST *self, uint16_t count)
 {
     if (self)
         return _dynarr_set_size(&(self->list), count);
@@ -281,7 +290,7 @@ bool PUBLIC_CODE patList_set_count(MUSPATLIST *self, uint16_t count)
         return false;
 }
 
-uint16_t PUBLIC_CODE patList_get_count(MUSPATLIST *self)
+uint16_t PUBLIC_CODE muspatl_get_count(MUSPATLIST *self)
 {
     if (self)
         return _dynarr_get_size(&(self->list));
@@ -289,98 +298,79 @@ uint16_t PUBLIC_CODE patList_get_count(MUSPATLIST *self)
         return 0;
 }
 
-void PUBLIC_CODE patListSetPatLength(MUSPATLIST *self, uint16_t value)
+void PUBLIC_CODE muspatl_set_EM_data(MUSPATLIST *self, bool value)
 {
     if (self)
-        self->patLength = value;
+        _muspatl_set_EM_data(self, value);
 }
 
-uint16_t PUBLIC_CODE patListGetPatLength(MUSPATLIST *self)
+bool PUBLIC_CODE muspatl_is_EM_data(MUSPATLIST *self)
 {
     if (self)
-        return self->patLength;
-    else
-        return 0;
-}
-
-void PUBLIC_CODE patListSetUseEM(MUSPATLIST *self, bool value)
-{
-    if (self)
-        self->useEM = value;
-}
-
-bool PUBLIC_CODE patListIsInEM(MUSPATLIST *self)
-{
-    if (self)
-        return self->useEM;
+        return _muspatl_is_EM_data(self);
     else
         return false;
 }
 
-void PUBLIC_CODE patListSetHandle(MUSPATLIST *self, EMSHDL value)
+void PUBLIC_CODE muspatl_set_own_EM_handle(MUSPATLIST *self, bool value)
 {
     if (self)
-        self->handle = value;
+        _muspatl_set_own_EM_handle(self, value);
 }
 
-EMSHDL PUBLIC_CODE patListGetHandle(MUSPATLIST *self)
+bool PUBLIC_CODE muspatl_is_own_EM_handle(MUSPATLIST *self)
 {
     if (self)
-        return self->handle;
+        return _muspatl_is_own_EM_handle(self);
     else
-        return 0;
+        return false;
 }
 
-void PUBLIC_CODE patListSetHandleName(MUSPATLIST *self)
+void PUBLIC_CODE muspatl_set_EM_handle(MUSPATLIST *self, EMSHDL value)
 {
     if (self)
-        if (self->useEM)
+        _muspatl_set_EM_handle(self, value);
+}
+
+EMSHDL PUBLIC_CODE muspatl_get_EM_handle(MUSPATLIST *self)
+{
+    if (self)
+        return _muspatl_get_EM_handle(self);
+    else
+        return EMSBADHDL;
+}
+
+void PUBLIC_CODE muspatl_set_EM_handle_name(MUSPATLIST *self)
+{
+    if (self)
+        if (_muspatl_is_own_EM_handle(self))
             emsSetHandleName(self->handle, EMS_PATLIST_HANDLE_NAME);
 }
 
-void PUBLIC_CODE patListSetPatPerPage(MUSPATLIST *self, uint8_t value)
+uint32_t PUBLIC_CODE muspatl_get_used_EM(MUSPATLIST *self)
 {
     if (self)
-        self->patPerPage = value;
-}
-
-uint8_t PUBLIC_CODE patListGetPatPerPage(MUSPATLIST *self)
-{
-    if (self)
-        return self->patPerPage;
-    else
-        return 0;
-}
-
-uint32_t PUBLIC_CODE patListGetUsedEM(MUSPATLIST *self)
-{
-    if (self)
-        if (self->useEM)
+        if (_muspatl_is_EM_data(self))
             return 16 * emsGetHandleSize(self->handle);
 
     return 0;
 }
 
-void PUBLIC_CODE patListFree(MUSPATLIST *self)
+void PUBLIC_CODE muspatl_free(MUSPATLIST *self)
 {
-    uint16_t count;
-    int i;
-    MUSPAT *pat;
-
     if (self)
     {
         _dynarr_free(&(self->list));
 
-        if (self->useEM)
-        {
+        if (_muspatl_is_own_EM_handle(self))
             emsFree(self->handle);
-            self->useEM = false;
-        }
+
+        muspatl_clear(self);
     }
 }
 
 #ifdef DEFINE_LOCAL_DATA
 
-extern MUSPATLIST *PUBLIC_DATA mod_Patterns;
+MUSPATLIST *PUBLIC_DATA mod_Patterns;
 
 #endif  /* DEFINE_LOCAL_DATA */

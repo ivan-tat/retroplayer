@@ -15,7 +15,7 @@ var
     pA:Parray;
     i,b:byte;
   begin
-    pat := patList_get(mod_Patterns, ORDER[ordr]);
+    pat := muspatl_get(mod_Patterns, ORDER[ordr]);
     if (muspat_is_EM_data(pat)) then
         pA := muspat_map_EM_data(pat)
     else
@@ -141,7 +141,7 @@ var
           end;
         lastrow:=0;
         { new pattern }
-        pat := patList_get(mod_Patterns, playState_pattern);
+        pat := muspatl_get(mod_Patterns, playState_pattern);
         if (muspat_is_EM_data(pat)) then
             muspat_map_EM_data(pat);
       end;

@@ -303,16 +303,16 @@ CONST SW_order:array[false..true] of string = ('Extended Order','Normal Order');
     gotoxy(1,3);write(' Samplerate: ',playGetSampleRate:5,'  ',sw_stereo[stereo],', ',sw_res[_16bit],
     ', ',sw_order[ST3order],', ',sw_qual[playOption_LowQuality]);
     gotoxy(1,4);write(' Free DOS memory : ',(getFreeDOSMemory shr 10):6,' KiB   Free EMS memory : ',getFreeEMMMemory:5,' KiB');
-    gotoxy(1,5);write(' Used EMS memory : ',(smpListGetUsedEM+patListGetUsedEM(mod_Patterns)):6,
-        ' KiB   <F1> - Help screen',
-        '':10,'Version : ',PLAYER_VERSION);
+    gotoxy(1,5);
+    write(' Used EMS memory : ', (smpListGetUsedEM + muspatl_get_used_EM(mod_Patterns)):6,
+        ' KiB   <F1> - Help screen          Version : ', PLAYER_VERSION);
   end;
 
 procedure refr_mainscr;
 var
     pat: PMUSPAT;
   begin
-    pat := patList_get(mod_Patterns, playState_pattern);
+    pat := muspatl_get(mod_Patterns, playState_pattern);
     textbackground(white);textcolor(black);
     gotoxy(8,1);write(playState_order:2);
     gotoxy(11,1);write(lastorder:2);

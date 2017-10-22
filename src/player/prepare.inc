@@ -120,7 +120,7 @@ var
     for w:=0 to 1 do begin gotoxy(w*28+20,1);write('    Chn ',2*w+1+startchn:2,'    '); end;
     scrLeave;
     lastrow:=playState_row;
-    pat := patList_get(mod_Patterns, playState_pattern);
+    pat := muspatl_get(mod_Patterns, playState_pattern);
     if (muspat_is_EM_data(pat)) then
         muspat_map_EM_data(pat);
   end;

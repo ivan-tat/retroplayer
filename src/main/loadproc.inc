@@ -4,7 +4,8 @@ const
 
 procedure setEMSnames;
 begin
-    patListSetHandleName(mod_Patterns);
+    if (muspatl_is_EM_data(mod_Patterns)) then
+        muspatl_set_EM_handle_name(mod_Patterns);
     if ( EMSsmp ) then
         emsSetHandleName( smpEMShandle, @smpname );
     if ( useEMS ) then
@@ -255,6 +256,8 @@ var
     p:pointer;
     pAr:PArray;
     chn: PMIXCHN;
+    patsize: Word;
+    patperpage: Word;
 
   BEGIN
     s3mloader_load := FALSE;
@@ -263,13 +266,13 @@ var
     fillchar(mod_Instruments^,MAX_INSTRUMENTS*sizeof(TInstr),0);
 
     (* Patterns list *)
-    mod_Patterns := patList_new;
+    mod_Patterns := muspatl_new;
     if (mod_Patterns = nil) then
     begin
         DEBUG_ERR(__FILE__, 's3mloader_load', 'Failed to initialize patterns.');
         exit;
     end;
-    patList_clear(mod_Patterns);
+    muspatl_clear(mod_Patterns);
 
     useEMS:=emsInstalled and useEMS and (emsGetFreePagesCount>1);
     { we need one page for saving mapping while playing }
@@ -304,7 +307,7 @@ var
     convert2pas(header.name,mod_Title,28);
     ordnum:=header.ordnum;
     insnum:=header.insnum;
-    patList_set_count(mod_Patterns, header.patnum);
+    muspatl_set_count(mod_Patterns, header.patnum);
     { setup flags }
     modOption_ST2Vibrato := header.flags and $01 <> 0;
     modOption_ST2Tempo := header.flags and $02 <> 0;
@@ -366,37 +369,35 @@ var
         exit;
     end;
 
-    if (_fread(@self^.patpara, patList_get_count(mod_Patterns) * 2, 1, self^.f) <> 1) then
+    if (_fread(@self^.patpara, muspatl_get_count(mod_Patterns) * 2, 1, self^.f) <> 1) then
     begin
         Debug_Err(__FILE__, 's3mloader_load', 'Failed to read patterns offsets.');
         load_error := filecorrupt;
         exit;
     end;
 
-    patListSetPatLength(mod_Patterns, 5 * 64 * UsedChannels);
+    patsize := UsedChannels * 64 * 5;
     {$IFDEF DEBUGLOAD}
-    writeln(' length of Patterns in memory: ', patListGetPatLength(mod_Patterns));
+    writeln('Pattern memory size: ', patsize);
     {$ENDIF}
+
     if useEMS then
     begin
         { we use EMS, then we need a page to save mapping in interrupt ! }
         savHandle:=emsAlloc(1); { 1 page is enough ? }
         { let's continue with loading: }
-        patListSetPatPerPage(mod_Patterns, (16 * 1024) div patListGetPatLength(mod_Patterns));
+        patperpage := 16 * 1024 div patsize;
         {$IFDEF DEBUGLOAD}
-        writeln(' Patterns per Page: ',patListGetPatPerPage(mod_Patterns));
+        writeln('Patterns per EM page: ', patperpage);
         {$ENDIF}
-        { try to allocate EMS for all patterns : }
-        self^.pat_EM_pages :=
-            (patList_get_count(mod_Patterns)+
-            (patListGetPatPerPage(mod_Patterns)-1)) div
-             patListGetPatPerPage(mod_Patterns);
+        self^.pat_EM_pages := (muspatl_get_count(mod_Patterns) + patperpage - 1) div patperpage;
 
         if (self^.pat_EM_pages > emsGetFreePagesCount) then
             self^.pat_EM_pages := emsGetFreePagesCount;
 
-        patListSetUseEM(mod_Patterns, true);
-        patListSetHandle(mod_Patterns, emsAlloc(self^.pat_EM_pages));
+        muspatl_set_EM_data(mod_Patterns, true);
+        muspatl_set_own_EM_handle(mod_Patterns, true);
+        muspatl_set_EM_handle(mod_Patterns, emsAlloc(self^.pat_EM_pages));
 
         self^.pat_EM_page_offset := 0;
         self^.pat_EM_page := 0;
@@ -414,7 +415,7 @@ var
         exit;
     end;
 
-    for i := 0 to patList_get_count(mod_Patterns) - 1 do
+    for i := 0 to muspatl_get_count(mod_Patterns) - 1 do
     begin
         if (not s3mloader_load_pattern(self, i, self^.patpara[i] * 16)) then
         begin

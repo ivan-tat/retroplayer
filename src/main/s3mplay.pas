@@ -144,8 +144,8 @@ var i:word;
     (* Patterns list *)
     if (mod_Patterns <> nil) then
     begin
-        patListFree(mod_Patterns);
-        patList_delete(mod_Patterns);
+        muspatl_free(mod_Patterns);
+        muspatl_delete(mod_Patterns);
     end;
     mod_isLoaded:=false;
   END;

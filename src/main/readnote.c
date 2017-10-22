@@ -311,7 +311,7 @@ void PUBLIC_CODE readnewnotes(void)
                         playState_gVolume_bFlag = false;
                         playState_patLoop_bNow = false;
                         playState_patDelay_bNow = playState_patDelayCount != 0;
-                        pat = patList_get(mod_Patterns, patIndex);
+                        pat = muspatl_get(mod_Patterns, patIndex);
                         status = pat_playRow(pat);
                     }
                     else

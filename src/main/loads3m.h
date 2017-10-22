@@ -19,13 +19,15 @@
 #include "main/s3mtypes.h"
 #include "main/muspat.h"
 
+#define S3M_MAX_PATTERNS 100
+
 typedef struct S3M_loader_t
 {
     int16_t err;
     FILE f;
     char *buffer;
     uint16_t inspara[MAX_INSTRUMENTS];
-    uint16_t patpara[MAX_PATTERNS];
+    uint16_t patpara[S3M_MAX_PATTERNS];
     uint32_t smppara[MAX_INSTRUMENTS];
     uint16_t pat_EM_pages;
     uint16_t pat_EM_page;
