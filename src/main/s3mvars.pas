@@ -11,6 +11,7 @@ unit s3mvars;
 interface
 
 uses
+    ems,
     s3mtypes;
 
 (*$I defines.pas*)
@@ -19,6 +20,7 @@ uses
 
 var
     UseEMS: boolean;
+    SavHandle: TEMSHDL;
 
 (* general module information *)
 
@@ -100,8 +102,7 @@ var
 implementation
 
 uses
-    dos_,
-    ems;
+    dos_;
 
 (*$l s3mvars.obj*)
 

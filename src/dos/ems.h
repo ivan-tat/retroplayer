@@ -28,6 +28,8 @@ typedef struct emsVersion_t EMSVER;
 typedef uint16_t emsError_t;
 typedef emsError_t EMSERR;
 
+#define E_EMS_SUCCESS 0
+
 typedef uint16_t emsHandle_t;
 typedef emsHandle_t EMSHDL;
 

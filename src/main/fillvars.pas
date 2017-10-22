@@ -36,7 +36,6 @@ var
     sndDMABuf: TSNDDMABUF;
     playOption_FPS: byte;
     playOption_LowQuality: boolean;
-    SavHandle: word;
 
 function  sndDMABufGetFrameOff(buf: PSNDDMABUF; index: byte): word;
 function  sndDMABufGetOffFromCount(buf: PSNDDMABUF; count: word): word;

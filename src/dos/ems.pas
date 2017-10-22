@@ -16,8 +16,17 @@ type
     TEMSVER = record
         Lo, Hi: byte;
     end;
+
+type
     TEMSERR = integer;
+
+const
+    E_EMS_SUCCESS = 0;
+
+type
     TEMSHDL = integer;
+
+type
     TEMSNAME = array [0..7] of char;
     PEMSNAME = ^TEMSNAME;
 

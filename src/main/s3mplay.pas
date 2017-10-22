@@ -164,7 +164,36 @@ PROCEDURE player_free;
     buffersreserved:=false;
   end;
 
-{$I LOADPROC.INC}
+function player_load_s3m(name: String): Boolean;
+var
+    p: PS3MLoader;
+begin
+    p := s3mloader_new;
+    if (p = nil) then
+    begin
+        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to initialize S3M loader.');
+        load_error := notenoughmem;
+        player_load_s3m := false;
+        exit;
+    end;
+    s3mloader_clear(p);
+
+    if (not s3mloader_load(p, name)) then
+    begin
+        Debug_Err(__FILE__, 'player_load_s3m', 'Failed to load S3M file.');
+        s3mloader_free(p);
+        s3mloader_delete(p);
+        player_free_module;
+        player_error := load_error;
+        player_load_s3m := false;
+        exit;
+    end;
+
+    s3mloader_free(p);
+    s3mloader_delete(p);
+
+    player_load_s3m := true;
+end;
 
 FUNCTION player_init_device(input:byte):boolean;
 {  input= 0 ... use settings in BLASTER unit
@@ -282,6 +311,8 @@ function playGetTempo:byte;
 var inside:boolean;
 
 procedure PlaySoundCallback; far;
+var
+    err: Boolean;
 begin
     while ( inside ) do
     begin
@@ -292,7 +323,19 @@ begin
     sndDMABuf.frameActive := (sndDMABuf.frameActive + 1) and (sndDMABuf.framesCount - 1);
     inside := false;
 
+    err := false;
+
+    if (UseEMS) then
+    begin
+        err := true;
+        if (emsSaveMap(SavHandle)) then
+            err := false;
+    end;
+
     fill_dmabuffer(mixbuf, @sndDMABuf);
+
+    if (UseEMS and not err) then
+        emsRestoreMap(SavHandle);
 end;
 
 procedure Initchannels;
@@ -416,13 +459,18 @@ var key:boolean;
     playStart:=true;
   end;
 
+const
+    _EM_map_name: TEMSNAME = 'saveMAP'#0;
+
 procedure s3mplayInit;
 var
     i: integer;
     _seg: word;
 begin
+    PROC386 := isCPU_i386;
+    useEMS := emsInstalled;
+
   inside:=false;
-  PROC386:=isCPU_i386;
   buffersreserved:=false;
   sounddevice:=false;
   initVolumeTable;
@@ -435,10 +483,21 @@ begin
   playOption_ST3Order:=false;   { Ok let's hear all patterns are saved ... }
   playOption_FPS := 70;
   playOption_LowQuality := false;
-  useEMS:=emsInstalled;      { more space for Modules ! }
-    if (_dos_allocmem((MAX_INSTRUMENTS*sizeof(TInstr) + 15) shr 4, _seg) <> 0) then
+
+    if (useEMS) then
     begin
-        writeln('[init] s3mplayInit: Failed to allocate DOS memory for instruments');
+        savHandle := emsAlloc(1); { 1 page is enough ? }
+        if (emsEC <> E_EMS_SUCCESS) then
+        begin
+            Debug_Err(__FILE__, 's3mplayInit', 'Failed to allocate EM handle for mapping.');
+            exit;
+        end;
+        emsSetHandleName(savHandle, @_EM_map_name);
+    end;
+
+    if (_dos_allocmem(_dos_para(MAX_INSTRUMENTS*sizeof(TInstr)), _seg) <> 0) then
+    begin
+        Debug_Err(__FILE__, 's3mplayInit', 'Failed to allocate DOS memory for instruments.');
         exit;
     end;
     mod_Instruments := ptr(_seg, 0);
@@ -455,6 +514,10 @@ procedure s3mplayDone;
 begin
     stop_play;
     player_free;
+    if (useEMS) then
+    begin
+        emsFree(savHandle);
+    end;
 end;
 
 procedure register_s3mplay; far; external;

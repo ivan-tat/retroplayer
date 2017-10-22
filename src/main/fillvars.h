@@ -45,11 +45,6 @@ extern uint8_t PUBLIC_DATA playOption_FPS;
     /* frames per second ... default is about 70Hz */
 extern bool    PUBLIC_DATA playOption_LowQuality;
 
-/* EMM */
-
-extern uint16_t PUBLIC_DATA SavHandle;
-    /* EMS handle for saving mapping while playing */
-
 //SNDDMABUF *PUBLIC_CODE sndDMABuf_new(void);
 //SNDDMABUF *PUBLIC_CODE sndDMABuf_copy(SNDDMABUF *instance);
 //void     PUBLIC_CODE sndDMABuf_delete(SNDDMABUF **instance);

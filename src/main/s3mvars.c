@@ -22,6 +22,7 @@
 /* EMS */
 
 bool PUBLIC_DATA UseEMS;
+EMSHDL PUBLIC_DATA SavHandle;
 
 /* general module information */
 

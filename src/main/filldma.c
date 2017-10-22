@@ -20,8 +20,6 @@
 
 // TODO: remove PUBLIC_CODE macros when done.
 
-static bool errorsav = false;
-
 void __near convert_8(void *outbuf, void *mixbuf, uint16_t count)
 {
     uint16_t *src;
@@ -114,19 +112,8 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
         memset(&(buf[sndDMABufGetFrameOff(&sndDMABuf, sndDMABuf.frameActive)]), 0, framesize);
         sndDMABuf.frameActive = 1 - sndDMABuf.frameActive;
     } else {
-        // before calling mixing routines: save EMM mapping !
-        if (UseEMS) {
-            errorsav = true;
-            if (emsSaveMap(SavHandle)) errorsav = false;
-        }
-
         // mix into the mixing buffer
         calcTick(mixbuf, framelen);
-
-        // now restore EMM mapping:
-        if (UseEMS) {
-            if (! errorsav) emsRestoreMap(SavHandle);
-        }
 
         sndDMABuf.frameLast = (sndDMABuf.frameLast + 1) & (sndDMABuf.framesCount - 1);
         dstoff = sndDMABufGetFrameOff(&sndDMABuf, sndDMABuf.frameLast);
@@ -142,8 +129,10 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
 
 void PUBLIC_CODE fill_DMAbuffer(void *mixbuf, SNDDMABUF *outbuf)
 {
-    if (! sdev_mode_16bit) {
-        do {
+    if (!sdev_mode_16bit)
+    {
+        do
+        {
             fill_8bit(mixbuf, outbuf);
         } while (outbuf->frameLast != outbuf->frameActive);
     }

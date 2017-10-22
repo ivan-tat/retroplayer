@@ -16,6 +16,7 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "dos/ems.h"
 #include "main/s3mtypes.h"
 
 // TODO: remove PUBLIC_DATA macros when done.
@@ -23,6 +24,8 @@
 /* EMS */
 
 extern bool PUBLIC_DATA UseEMS;
+extern EMSHDL PUBLIC_DATA SavHandle;
+    /* EM handle to save mapping while playing */
 
 /* general module information */
 
