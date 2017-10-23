@@ -56,26 +56,6 @@ extern bool PUBLIC_DATA playOption_ST3Order;
 extern bool PUBLIC_DATA playOption_LoopSong;
     /* flag if restart if we reach the end of the S3M module */
 
-/* instruments */
-
-extern instrumentsList_t *PUBLIC_DATA mod_Instruments;  /* pointer to data for all instruments */
-extern uint16_t PUBLIC_DATA InsNum;
-extern bool     PUBLIC_DATA EMSSmp;         /* samples in EMS ? */
-extern uint16_t PUBLIC_DATA SmpEMSHandle;   /* hanlde to access EMS for samples */
-
-//#define insList_get(num) (mod_Instruments[(num)-1])
-//#define insList_get(num) (struct instrument_t *)(MK_FP(FP_SEG(*mod_Instruments), FP_OFF(*mod_Instruments) + ((num) - 1) * sizeof(struct instrument_t)))
-#define insList_get(num) (struct instrument_t *)MK_FP(FP_SEG(mod_Instruments[0]) + ((num) - 1) * 5, 0)
-#define ins_isSample(ins) (ins->bType == 1)
-#define ins_isSampleLooped(ins) (ins->flags & 0x01 != 0)
-#define ins_getSampleLoopStart(ins) (ins->loopbeg)
-#define ins_getSampleLoopEnd(ins) (ins->flags & 0x01 ? ins->loopend : ins->slength)
-#define ins_getSampleRate(ins) (ins->c2speed)
-#define ins_getSampleData(ins) (void *)MK_FP(ins->memseg, 0)
-
-#define isSampleDataInEM(seg) (seg >= 0xf000)
-#define getSampleDataLogPageInEM(seg) (seg & 0x0fff)
-
 /* song arrangement */
 
 extern ordersList_t PUBLIC_DATA Order;

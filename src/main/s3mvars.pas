@@ -48,14 +48,6 @@ var
     playOption_ST3Order: boolean;
     playOption_LoopSong: boolean;
 
-(* instruments *)
-
-var
-    mod_Instruments: PInstrArray;
-    InsNum: word;
-    EMSSmp: boolean;
-    SmpEMSHandle: word;
-
 (* song arrangment *)
 
 var

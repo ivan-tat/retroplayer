@@ -46,37 +46,6 @@ typedef char modTitle_t[MOD_MAX_TITLE_LENGTH];
 
 typedef char modTrackerName_t[MOD_MAX_TRACKER_NAME_LENGTH];
 
-/* instrument */
-
-#define MAX_INSTRUMENTS 99
-    /* 1..99 samples */
-
-#define SMPFLAG_LOOP 0x01
-
-typedef struct instrument_t {
-    uint8_t  bType;         // 1: instrument
-    uint8_t  DOSname[12];
-    uint8_t  unused1;
-    uint16_t memseg;        // segment of sampledata
-    uint16_t slength;       // length of sample <= 64KB
-    uint16_t HI_length;     // <- not used !
-    uint16_t loopbeg;       // loop begin <= 64KB
-    uint16_t HI_loopbeg;    // <- not used !
-    uint16_t loopend;       // loop end <= 64KB
-    uint16_t HI_loopend;    // <- not used !
-    uint8_t  vol;           // default instrument volume
-    uint8_t  unused2;
-    uint8_t  packinfo;      // =0 or we can't play it !
-    uint8_t  flags;         // bit 0: loop (all other bits are ignored)
-    uint16_t c2speed;       // frequency at middle C (actually C-4)
-    uint16_t c2speed_hi;    // ignored
-    uint8_t  unused3[12];
-    uint8_t  IName[28];
-    uint32_t SCRS_ID;
-};
-
-typedef struct instrument_t instrumentsList_t[MAX_INSTRUMENTS];
-
 /* song arrangement */
 
 #define MAX_ORDERS 255

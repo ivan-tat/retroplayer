@@ -16,6 +16,7 @@
 #include <stdint.h>
 
 #include "cc/i86.h"
+#include "main/musins.h"
 #include "main/s3mtypes.h"
 
 /* Mixing channel */
@@ -88,8 +89,8 @@ void     PUBLIC_CODE mixchn_set_type(MIXCHN *self, uint8_t value);
 uint8_t  PUBLIC_CODE mixchn_get_type(MIXCHN *self);
 void     PUBLIC_CODE mixchn_set_instrument_num(MIXCHN *self, uint8_t value);
 uint8_t  PUBLIC_CODE mixchn_get_instrument_num(MIXCHN *self);
-void     PUBLIC_CODE mixchn_set_instrument(MIXCHN *self, struct instrument_t *value);
-struct instrument_t *PUBLIC_CODE mixchn_get_instrument(MIXCHN *self);
+void     PUBLIC_CODE mixchn_set_instrument(MIXCHN *self, MUSINS *value);
+MUSINS  *PUBLIC_CODE mixchn_get_instrument(MIXCHN *self);
 void     PUBLIC_CODE mixchn_set_sample_volume(MIXCHN *self, int16_t vol);
 uint8_t  PUBLIC_CODE mixchn_get_sample_volume(MIXCHN *self);
 void     PUBLIC_CODE mixchn_set_sample_period_limits(MIXCHN *self, uint16_t rate, bool amiga);

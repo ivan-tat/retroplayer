@@ -96,6 +96,7 @@ implementation
 uses
     watcom,
     ems,
+    musins,
     s3mvars,
     effvars,
     mixvars,

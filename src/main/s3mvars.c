@@ -47,13 +47,6 @@ bool PUBLIC_DATA modOption_Stereo;
 bool PUBLIC_DATA playOption_ST3Order;
 bool PUBLIC_DATA playOption_LoopSong;
 
-/* instruments */
-
-instrumentsList_t *PUBLIC_DATA mod_Instruments;
-uint16_t PUBLIC_DATA InsNum;
-bool     PUBLIC_DATA EMSSmp;
-uint16_t PUBLIC_DATA SmpEMSHandle;
-
 /* song arrangement */
 
 ordersList_t PUBLIC_DATA Order;

@@ -94,7 +94,7 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
 {
     unsigned char *patData;
     unsigned int patOffset;
-    struct instrument_t *ins;
+    MUSINS *ins;
     unsigned int cmd;
     unsigned char param;
 

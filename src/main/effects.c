@@ -547,7 +547,7 @@ void PUBLIC_CODE set_tempo(uint8_t value)
 
 void PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum)
 {
-    struct instrument_t *ins;
+    MUSINS *ins;
     unsigned int rate;
     unsigned int flags;
     ins = insList_get(insNum);
@@ -578,7 +578,7 @@ void PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum)
         mixchn_set_instrument_num(chn, 0);
 }
 
-uint16_t PUBLIC_CODE chn_calcNotePeriod(MIXCHN *chn, struct instrument_t *ins, uint8_t note)
+uint16_t PUBLIC_CODE chn_calcNotePeriod(MIXCHN *chn, MUSINS *ins, uint8_t note)
 {
     unsigned int period;
     // calc period with st3 finetune
@@ -587,7 +587,7 @@ uint16_t PUBLIC_CODE chn_calcNotePeriod(MIXCHN *chn, struct instrument_t *ins, u
     return mixchn_check_sample_period(chn, period);
 }
 
-uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, struct instrument_t *ins, uint8_t note)
+uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, MUSINS *ins, uint8_t note)
 {
     unsigned int period;
     period = chn_calcNotePeriod(chn, ins, note);
@@ -599,7 +599,7 @@ uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, struct instrument_t *ins, uin
 
 void PUBLIC_CODE chn_setupNote(MIXCHN *chn, uint8_t note, bool keep)
 {
-    struct instrument_t *ins;
+    MUSINS *ins;
     chn->bNote = note;
     mixchn_set_sample_period(chn, 0);   // clear it first - just to make sure we really set it
     if (mixchn_get_instrument_num(chn))
@@ -1104,7 +1104,7 @@ METHOD_INIT(arpeggio)
 METHOD_HANDLE(arpeggio)
 {
     uint8_t param, note;
-    struct instrument_t *ins;
+    MUSINS *ins;
 
     if (!chnState_arp_bFlag)
     {

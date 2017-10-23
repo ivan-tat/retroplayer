@@ -22,6 +22,7 @@ uses
     ems,
     sbctl,
     voltab,
+    musins,
     s3mvars,
     effvars,
     mixvars,

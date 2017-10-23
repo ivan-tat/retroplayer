@@ -19,6 +19,7 @@ implementation
 uses
     ems,
     s3mtypes,
+    musins,
     muspat,
     s3mvars,
     effvars,

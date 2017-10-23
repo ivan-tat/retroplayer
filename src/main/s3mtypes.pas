@@ -101,16 +101,6 @@ type
         SCRI_ID:array[0..3] of char;
     end;
 
-(* instruments *)
-
-const
-    MAX_INSTRUMENTS = 99; (* 1..99 instruments *)
-
-type
-    TInstr = array [0..16*5-1] of byte;
-    TInstrArray = array [0..MAX_INSTRUMENTS-1] of TInstr;
-    PInstrArray = ^TInstrArray;
-
 (* song arrangement *)
 
 type

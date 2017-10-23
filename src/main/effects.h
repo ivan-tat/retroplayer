@@ -16,6 +16,7 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "main/musins.h"
 #include "main/s3mtypes.h"
 #include "main/mixchn.h"
 
@@ -104,8 +105,8 @@ void PUBLIC_CODE set_tempo(uint8_t value);
 void PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum);
 
 /* remove if unused outside effects.c */
-uint16_t PUBLIC_CODE chn_calcNotePeriod(MIXCHN *chn, struct instrument_t *ins, uint8_t note);
-uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, struct instrument_t *ins, uint8_t note);
+uint16_t PUBLIC_CODE chn_calcNotePeriod(MIXCHN *chn, MUSINS *ins, uint8_t note);
+uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, MUSINS *ins, uint8_t note);
 
 void PUBLIC_CODE chn_setupNote(MIXCHN *chn, uint8_t note, bool keep);
 

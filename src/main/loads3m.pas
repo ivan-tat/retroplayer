@@ -13,6 +13,7 @@ interface
 uses
     types,
     s3mtypes,
+    musins,
     muspat;
 
 (*$I defines.pas*)

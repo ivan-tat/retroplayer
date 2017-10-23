@@ -81,14 +81,14 @@ uint8_t PUBLIC_CODE mixchn_get_instrument_num(MIXCHN *self)
     return self->bIns;
 }
 
-void PUBLIC_CODE mixchn_set_instrument(MIXCHN *self, struct instrument_t *value)
+void PUBLIC_CODE mixchn_set_instrument(MIXCHN *self, MUSINS *value)
 {
     self->wInsSeg = FP_SEG((void __far *)value);
 }
 
-struct instrument_t *PUBLIC_CODE mixchn_get_instrument(MIXCHN *self)
+MUSINS *PUBLIC_CODE mixchn_get_instrument(MIXCHN *self)
 {
-    return (struct instrument_t *)MK_FP(self->wInsSeg, 0);
+    return (MUSINS *)MK_FP(self->wInsSeg, 0);
 }
 
 void PUBLIC_CODE mixchn_set_sample_volume(MIXCHN *self, int16_t vol)
