@@ -4,6 +4,7 @@ program example_for_s3mplay;
 uses
     types,
     strutils,
+    string_,
     crt,
     dos,
     dos_,
@@ -305,7 +306,7 @@ CONST SW_order:array[false..true] of string = ('Extended Order','Normal Order');
     ', ',sw_order[ST3order],', ',sw_qual[playOption_LowQuality]);
     gotoxy(1,4);write(' Free DOS memory : ',(getFreeDOSMemory shr 10):6,' KiB   Free EMS memory : ',getFreeEMMMemory:5,' KiB');
     gotoxy(1,5);
-    write(' Used EMS memory : ', (smpListGetUsedEM + muspatl_get_used_EM(mod_Patterns)):6,
+    write(' Used EMS memory : ', (musinsl_get_used_EM(mod_Instruments) + muspatl_get_used_EM(mod_Patterns)):6,
         ' KiB   <F1> - Help screen          Version : ', PLAYER_VERSION);
   end;
 

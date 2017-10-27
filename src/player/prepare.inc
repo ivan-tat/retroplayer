@@ -129,27 +129,31 @@ var
 
 var chnlastinst:array[0..max_channels-1] of byte;
 
+function posstring(i: Byte): String;
+var
+    ins: PMUSINS;
+begin
+    ins := musinsl_get(mod_Instruments, i - 1);
+    if (musins_get_type(ins) = MUSINST_PCM) then
+    begin
+        if (musins_is_EM_data(ins)) then
+            posstring := 'E' + hexw(musins_get_EM_data_page(ins))
+        else
+            posstring := ' ' + hexw(seg(musins_get_data(ins)^))
+    end
+    else
+        posstring := '     ';
+end;
+
 procedure prep_inst;
 var i,l:word;
-function posstring(b:byte):string;
-var psmp:pSmpheader;
-  begin
-    psmp:=addr(mod_Instruments^[b-1]);
-    if psmp^.typ=1 then
-      begin
-        posstring:=hexw(psmp^.mempos)+'h';
-      end
-    else
-      begin
-        posstring:='     ';
-      end;
-  end;
   begin
     scrOpenInfoBackground(white, blue);
     writeln(' Sample positions in memory : ');
     l:=15;
     textcolor(yellow);
-    if useEMS then begin write(#10' EMS used by samples :',smpListGetUsedEM,' KB') end;
+    if (useEMS) then
+        write(#10' EMS used by samples: ', musinsl_get_used_EM(mod_Instruments), ' KiB');
     textcolor(white);
     for i:=1 to l do
       begin
@@ -172,8 +176,9 @@ var samplepage:byte;
 
 procedure prep_smp;
 const what:array[false..true] of string[3] = ('OFF','ON ');
-var i,j:byte;
-    Psmp:PSmpHeader;
+var i,j,k,l:byte;
+    ins: PMUSINS;
+    title: String[29];
   begin
     textcolor(white);textbackground(blue);
     window(1,7,80,25);clrscr;
@@ -195,12 +200,29 @@ var i,j:byte;
     for j:=1 to 18 do
       if i<insnum+1 then
         begin
-          psmp:=addr(mod_Instruments^[i-1]);
-          if j>1 then write(#10#13);
-          if pSmp^.typ=1 then textcolor(white) else textcolor(lightgray);
-          write(' ',i:2,'. ',leftformat(psmp^.name,28),' ',what[(psmp^.flags and 1) = 1],' ',
-                hexw(psmp^.loopbeg),'h ',hexw(psmp^.loopend),'h ',hexw(psmp^.length),'h ',pSmp^.c2speed:5,'Hz');
-          inc(i);
+            ins := musinsl_get(mod_Instruments, i - 1);
+            if (j > 1) then
+                write(#10#13);
+            if (musins_get_type(ins) = MUSINST_PCM) then
+                textcolor(white)
+            else
+                textcolor(lightgray);
+            strncpy(@(title[1]), musins_get_title(ins), 28);
+            title[0] := Chr(28);
+            title[29] := #0;
+            l := strlen(@(title[1]));
+            for k := l to 27 do
+                title[l + 1] := ' ';
+            write(
+                ' ', i:2, '. ',
+                title, ' ',
+                what[musins_is_looped(ins)], ' ',
+                hexw(musins_get_loop_start(ins)), 'h ',
+                hexw(musins_get_loop_end(ins)), 'h ',
+                hexw(musins_get_length(ins)), 'h ',
+                musins_get_rate(ins):5, 'Hz'
+            );
+            inc(i);
         end;
     scrLeave;
   end;

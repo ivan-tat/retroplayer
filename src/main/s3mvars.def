@@ -38,13 +38,6 @@ extrn modOption_Stereo: byte
 extrn playOption_ST3Order: byte
 extrn playOption_LoopSong: byte
 
-; instruments
-
-extrn mod_Instruments: dword
-extrn InsNum: word
-extrn SmpEMSHandle: word
-extrn EMSSmp: byte
-
 ; song arrangment
 
 extrn Order: byte

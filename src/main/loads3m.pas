@@ -80,9 +80,6 @@ const
     internal_failure    = -11;
     sample2large        = -12;
 
-const
-    smpname: TEMSNAME = 'Samples'#0;
-
 (*temporary solution for file I/O*)
 (*$I-*)
 function _fread(p: Pointer; size: Word; n: Word; var stream: File): Word;
@@ -126,130 +123,172 @@ var
     length:word;
     typ:byte;
     pAr:Parray;
-    Psmp:PSmpHeader;
+    ins: PMUSINS;
+    smp: TSmpHeader;
 begin
-      s3mloader_load_instrument:=false;
-      if (_fsetpos(self^.f, pos) <> 0) then
-      begin
-          Debug_Err(__FILE__, 's3mloader_load_instrument', 'Failed to read file.');
-          load_error := filecorrupt;
-          exit;
-      end;
-      {$IFDEF LOADINFO}
-      write('I',index);
-      {$ENDIF}
-      { now read instrument header : }
-      pSmp := @(mod_Instruments^[index]);
-      if (_fread(pSmp, sizeof(TSmpHeader), 1, self^.f) <> 1) then
-      begin
-          Debug_Err(__FILE__, 's3mloader_load_instrument', 'Failed to read instrument header.');
-          load_error := filecorrupt;
-          exit;
-      end;
-      if pSmp^.typ=1 then { that instrument is a sample }
+    if (_fsetpos(self^.f, pos) <> 0) then
+    begin
+        Debug_Err(__FILE__, 's3mloader_load_instrument', 'Failed to read file.');
+        load_error := filecorrupt;
+        s3mloader_load_instrument:=false;
+        exit;
+    end;
+
+    {$IFDEF LOADINFO}
+    write('I',index);
+    {$ENDIF}
+
+    ins := musinsl_get(mod_Instruments, index);
+    musins_clear(ins);
+
+    if (_fread(@smp, sizeof(TSmpHeader), 1, self^.f) <> 1) then
+    begin
+        Debug_Err(__FILE__, 's3mloader_load_instrument', 'Failed to read instrument header.');
+        load_error := filecorrupt;
+        s3mloader_load_instrument:=false;
+        exit;
+    end;
+
+    if (smp.typ = 1) then
+    begin
+        if (smp.packinfo <> 0) then
         begin
-          if pSmp^.packinfo <> 0 then
-          begin
-              Debug_Err(__FILE__, 's3mloader_load_instrument', 'Packed sample is not supported.');
-              load_error := packedsamples;
-              exit;
-          end;
-          { calc position in file : }
-          smppara:=(longint(256*256)*pSmp^.HI_mempos+pSmp^.mempos);
-          pSmp^.mempos:=0;
-          {$IFDEF LOADINFO}
-          write('!');
-          {$ENDIF}
-        end
-      else
-        begin
-          smppara:=0;
-          {$IFDEF LOADINFO}
-          write('$');
-          {$ENDIF}
+            Debug_Err(__FILE__, 's3mloader_load_instrument', 'Packed sample is not supported.');
+            load_error := packedsamples;
+            s3mloader_load_instrument:=false;
+            exit;
         end;
-      {$IFDEF LOADINFO}
-      write('*');
-      {$ENDIF}
-      s3mloader_load_instrument:=true;
+        musins_set_type(ins, MUSINST_PCM);
+        musins_set_length(ins, smp.length);
+        if (smp.flags and 1 <> 0) then
+        begin
+            musins_set_looped(ins, true);
+            musins_set_loop_start(ins, smp.loopbeg);
+            musins_set_loop_end(ins, smp.loopend);
+        end;
+        musins_set_volume(ins, smp.vol);
+        musins_set_rate(ins, smp.c2speed);
+        musins_set_title(ins, smp.name);
+        smppara := (longint(256*256) * smp.HI_mempos + smp.mempos);
+        {$IFDEF LOADINFO}
+        write('!');
+        {$ENDIF}
+    end
+    else
+    begin
+        musins_set_type(ins, MUSINST_EMPTY);
+        musins_set_title(ins, smp.name);
+        smppara:=0;
+        {$IFDEF LOADINFO}
+        write('$');
+        {$ENDIF}
+    end;
+
+    s3mloader_load_instrument := true;
 end;
 
 procedure s3mloader_alloc_samples(self: PS3MLoader);
 var
     w,w0:word;
     i:integer;
-    pSmp:PSMPheader;
+    ins: PMUSINS;
+    handle: TEMSHDL;
 begin
     if emsGetFreePagesCount=0 then
     begin
-        EMSsmp:=false;
+        DEBUG_WARN(__FILE__, 's3mloader_alloc_samples', 'Not enough EM for samples.');
+        musinsl_set_EM_data(mod_Instruments, false);
         exit;
     end;
+
     w:=0;
     for i:=0 to MAX_INSTRUMENTS-1 do
     begin
-        pSmp := @(mod_Instruments^[i]);
-        if pSmp^.typ=1 then { really a sample }
+        ins := musinsl_get(mod_Instruments, i);
+        if (musins_get_type(ins) = MUSINST_PCM) then
         begin
-            if (pSmp^.flags and 1 <> 0) then
-                w0:=pSmp^.loopend
+            if (musins_is_looped(ins)) then
+                w0 := musins_get_loop_end(ins)
             else
-                w0:=pSmp^.length;
+                w0 := musins_get_length(ins);
             w0 := w0 + 1024;
             w := w + w0 div (16*1024) + ord(w0 mod (16*1024)>0);
         end;
     end;
+
     {$IFDEF DEBUGLOAD}
     writeln(' Instruments to load : ',insnum);
     writeln(' EMS pages are needed for Samples : ',w);
     {$ENDIF}
-    { w = number of 16Kb pages in EMS }
+
     if (w > emsGetFreePagesCount) then
         w := emsGetFreePagesCount;
-    smpEMShandle := emsAlloc(w);
+
+    handle := emsAlloc(w);
+    if (emsEC <> E_EMS_SUCCESS) then
+    begin
+        DEBUG_ERR(__FILE__, 's3mloader_alloc_samples', 'Failed to allocate EM for samples');
+        musinsl_set_EM_data(mod_Instruments, false);
+        exit;
+    end;
+    musinsl_set_EM_data(mod_Instruments, true);
+    musinsl_set_EM_data_handle(mod_Instruments, handle);
+
+    self^.smp_EM_pages:=w;
+    self^.smp_EM_page:=0;
+
     {$IFDEF DEBUGLOAD}
     writeln(' EMS pages allocated for Samples : ',w);
     {$ENDIF}
-    self^.smp_EM_pages:=w;
-    self^.smp_EM_page:=0;
-    EMSsmp:=true;
 end;
 
 function s3mloader_load_sample(self: PS3MLoader; index: Byte; pos: LongInt): Boolean;
 var
       par:parray;
-      pSmp:pSmpHeader;
-      z,h:word;
+      ins: PMUSINS;
+      z,h,dh: Word;
       i:byte;
       smplen:word;
       _seg: word;
+      loopstart: Pointer;
+      loopsize: Word;
 begin
     s3mloader_load_sample := false;
 
-      if (_fsetpos(self^.f, pos) <> 0) then
-      begin
-          Debug_Err(__FILE__, 's3mloader_load_sample', 'Failed to read file.');
-          load_error := filecorrupt;
-          exit;
-      end;
-      pSmp := @(mod_Instruments^[index]);
-      if (pSmp^.flags and 1)=1 then smplen:=pSmp^.loopend else smplen:=pSmp^.length;
-      if smplen>64511 then
-      begin
-          Debug_Err(__FILE__, 's3mloader_load_sample', 'Sample too large.');
-          load_error := sample2large;
-          exit;
-      end;
-      {$IFDEF LOADINFO}
-      write('S',index,'(',smplen,')');
-      {$ENDIF}
-      z:=((smplen+1024) div (16*1024))+ord((smplen+1024) mod (16*1024)>0);
-      if useEMS and EMSsmp and (self^.smp_EM_pages>=z) then
+    if (_fsetpos(self^.f, pos) <> 0) then
+    begin
+        Debug_Err(__FILE__, 's3mloader_load_sample', 'Failed to read file.');
+        load_error := filecorrupt;
+        exit;
+    end;
+
+    ins := musinsl_get(mod_Instruments, index);
+
+    if (musins_is_looped(ins)) then
+        smplen := musins_get_loop_end(ins)
+    else
+        smplen := musins_get_length(ins);
+
+    if smplen>64511 then
+    begin
+        Debug_Err(__FILE__, 's3mloader_load_sample', 'Sample too large.');
+        load_error := sample2large;
+        exit;
+    end;
+
+    {$IFDEF LOADINFO}
+    write('S',index,'(',smplen,')');
+    {$ENDIF}
+
+    z:=((smplen+1024) div (16*1024))+ord((smplen+1024) mod (16*1024)>0);
+
+    if useEMS and musinsl_is_EM_data(mod_Instruments) and (self^.smp_EM_pages>=z) then
         begin
           {$IFDEF LOADINFO}
           write('E(',self^.smp_EM_page,'-',self^.smp_EM_page+z-1,')');
           {$ENDIF}
-          pSmp^.mempos:=$f000+self^.smp_EM_page; { and z-1 pages after }
+          musins_set_EM_data(ins, true);
+          musins_set_EM_data_page(ins, self^.smp_EM_page);
           for i:=0 to z-1 do
             if not emsMap(smpEMShandle,self^.smp_EM_page+i,i) then write('<EMS-ERROR>');
           inc(self^.smp_EM_page,z);
@@ -257,14 +296,15 @@ begin
         end
       else { we have to use normal memory (geeee) for this sample }
         begin
-            if (_dos_allocmem((smplen+1024+15) shr 4, _seg) <> 0) then
+            if (_dos_allocmem(_dos_para(smplen+1024), _seg) <> 0) then
             begin
                 Debug_Err(__FILE__, 's3mloader_load_sample', 'Failed to allocate DOS memory for sample data.');
                 load_error := notenoughmem;
                 exit;
             end;
-            par := ptr(_seg, 0);;
-            pSmp^.mempos:=seg(par^);
+            par := ptr(_seg, 0);
+            musins_set_EM_data(ins, false);
+            musins_set_data(ins, par);
         end;
         if (_fread(par, smplen, 1, self^.f) <> 1) then
         begin
@@ -272,38 +312,30 @@ begin
             load_error := filecorrupt;
             exit;
         end;
-      if (Psmp^.flags and 1)=1 then
-        { if loop then copy from loopstart : }
+
+    if (musins_is_looped(ins)) then
+    begin
+        h := 1024;
+        loopstart := @(par^[musins_get_loop_start(ins)]);
+        loopsize := musins_get_loop_end(ins) - musins_get_loop_start(ins);
+        while (h > 0) do
         begin
-          h:=1024;
-          while h>0 do
-            begin
-              if h>psmp^.loopend-psmp^.loopbeg+1 then
-                begin
-                  move(par^[psmp^.loopbeg],par^[smplen+1024-h],psmp^.loopend-psmp^.loopbeg);
-                  dec(h,psmp^.loopend-psmp^.loopbeg);
-                end
-              else
-                begin
-                  move(par^[psmp^.loopbeg],par^[smplen+1024-h],h);
-                  h:=0;
-                end;
-            end;
-        end
-      else fillchar(par^[smplen],1024,128);
-      {$IFDEF LOADINFO}
-      write('*');
-      {$ENDIF}
+            if (h > loopsize) then
+                dh := loopsize
+            else
+                dh := h;
+            memcpy(par^[smplen + 1024 - h], loopstart^, dh);
+            dec(h, dh);
+        end;
+    end
+    else
+        fillchar(par^[smplen], 1024, 128);
+
+    {$IFDEF LOADINFO}
+    write('*');
+    {$ENDIF}
 
     s3mloader_load_sample:=true;
-end;
-
-procedure setEMSnames;
-begin
-    if (muspatl_is_EM_data(mod_Patterns)) then
-        muspatl_set_EM_handle_name(mod_Patterns);
-    if ( EMSsmp ) then
-        emsSetHandleName( smpEMShandle, @smpname );
 end;
 
 procedure convert2pas(var from,topas;maxchars:byte);
@@ -345,17 +377,21 @@ var
     patsize: Word;
     patperpage: Word;
 
-  BEGIN
-    s3mloader_load := FALSE;
+begin
+    mod_Instruments := musinsl_new;
+    if (mod_Instruments = nil) then
+    begin
+        DEBUG_ERR(__FILE__, 's3mloader_load', 'Failed to initialize instruments.');
+        s3mloader_load := false;
+        exit;
+    end;
+    musinsl_clear(mod_Instruments);
 
-    { clear all samples }
-    fillchar(mod_Instruments^,MAX_INSTRUMENTS*sizeof(TInstr),0);
-
-    (* Patterns list *)
     mod_Patterns := muspatl_new;
     if (mod_Patterns = nil) then
     begin
         DEBUG_ERR(__FILE__, 's3mloader_load', 'Failed to initialize patterns.');
+        s3mloader_load := false;
         exit;
     end;
     muspatl_clear(mod_Patterns);
@@ -369,6 +405,7 @@ var
     begin
         Debug_Err(__FILE__, 's3mloader_load', 'Failed to open file.');
         load_error := filenotexist;
+        s3mloader_load := false;
         exit;
     end;
 
@@ -376,6 +413,7 @@ var
     begin
         Debug_Err(__FILE__, 's3mloader_load', 'Failed to read file''s header.');
         load_error := wrongformat;
+        s3mloader_load := false;
         exit;
     end;
 
@@ -386,6 +424,7 @@ var
     begin
         Debug_Err(__FILE__, 's3mloader_load', 'Unsupported file format.');
         load_error := wrongformat;
+        s3mloader_load := false;
         exit;
     end;
 
@@ -437,6 +476,7 @@ var
     begin
         Debug_Err(__FILE__, 's3mloader_load', 'Failed to read patterns order.');
         load_error := filecorrupt;
+        s3mloader_load := false;
         exit;
     end;
     { check order if there's one 'real' (playable) entry ... }
@@ -446,12 +486,14 @@ var
     begin
         Debug_Err(__FILE__, 's3mloader_load', 'Playable entry not found.');
         load_error := ordercorrupt;
+        s3mloader_load := false;
         exit;
     end;
     if (_fread(@self^.inspara, insnum * 2, 1, self^.f) <> 1) then
     begin
         Debug_Err(__FILE__, 's3mloader_load', 'Failed to read instruments headers.');
         load_error := filecorrupt;
+        s3mloader_load := false;
         exit;
     end;
 
@@ -459,6 +501,7 @@ var
     begin
         Debug_Err(__FILE__, 's3mloader_load', 'Failed to read patterns offsets.');
         load_error := filecorrupt;
+        s3mloader_load := false;
         exit;
     end;
 
@@ -534,8 +577,12 @@ var
     {$IFDEF DEBUGLOAD}
     writeln(#10);
     {$ENDIF}
-    { Just for fun set names for EMS handles (does only work for EMS>= v4.0) }
-    if ( emsVersion.Hi >= 4 ) then setEMSnames;
+
+    if (musinsl_is_EM_data(mod_Instruments)) then
+        musinsl_set_EM_handle_name(mod_Instruments);
+    if (muspatl_is_EM_data(mod_Patterns)) then
+        muspatl_set_EM_handle_name(mod_Patterns);
+
     mod_isLoaded := true;
     s3mloader_load := true;
 end;

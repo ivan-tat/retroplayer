@@ -69,8 +69,6 @@ function  playGetMasterVolume: byte;
 function  playGetPatternDelay: byte;
 function  playGetSampleRate: word;
 
-function  smpListGetUsedEM:longint;
-
 IMPLEMENTATION
 
 uses
@@ -115,41 +113,24 @@ VAR
     { some saved values for correct restoring former status : }
     oldexitproc  :pointer;
 
-PROCEDURE player_free_module;
-var i:word;
-    p:pointer;
-    psmp:PsmpHeader;
-  BEGIN
+procedure player_free_module;
+begin
     if not mod_isLoaded then exit;
-    { Free samples & instruments : }
-    for i:=0 to MAX_INSTRUMENTS-1 do
-      begin
-        psmp:=addr(mod_Instruments^[i]);
-        if (psmp^.typ=1) then
-          begin
-            if psmp^.mempos<$f000 then { no EMS instrument }
-              begin
-                p:=ptr(psmp^.mempos,0);
-                psmp^.mempos:=0;
-                if (p <> Nil) then
-                    _dos_freemem(seg(p^));
-              end;
-          end;
-        mod_Instruments^[i,0]:=0;
-      end;
-    if EMSsmp then { samples in EMS }
-      begin
-        emsFree(smpEMShandle);
-        EMSsmp:=false;
-      end;
-    (* Patterns list *)
+
+    if (mod_Instruments <> nil) then
+    begin
+        musinsl_free(mod_Instruments);
+        musinsl_delete(mod_Instruments);
+    end;
+
     if (mod_Patterns <> nil) then
     begin
         muspatl_free(mod_Patterns);
         muspatl_delete(mod_Patterns);
     end;
-    mod_isLoaded:=false;
-  END;
+
+    mod_isLoaded := false;
+end;
 
 PROCEDURE player_free;
   begin
@@ -371,14 +352,6 @@ function playGetSampleRate:word;
     playGetSampleRate:=Samplerate;
   end;
 
-function smpListGetUsedEM:longint;    { get size of samples in EMS }
-begin
-    if EMSsmp then
-        smpListGetUsedEM:=16*emsGetHandleSize(smpEMShandle)
-    else
-        smpListGetUsedEM:=0;
-end;
-
 procedure playSetOrder(new:boolean);
 var i:byte;
   begin
@@ -496,18 +469,7 @@ begin
         emsSetHandleName(savHandle, @_EM_map_name);
     end;
 
-    if (_dos_allocmem(_dos_para(MAX_INSTRUMENTS*sizeof(TInstr)), _seg) <> 0) then
-    begin
-        Debug_Err(__FILE__, 's3mplayInit', 'Failed to allocate DOS memory for instruments.');
-        exit;
-    end;
-    mod_Instruments := ptr(_seg, 0);
-
-  FOR i:=0 TO MAX_INSTRUMENTS-1 DO
-    BEGIN
-      mod_Instruments^[i,0]:=0;
-    END;
-
+    mod_Instruments := nil;
     mod_Patterns := nil;
 end;
 

@@ -24,7 +24,10 @@ const
     E_EMS_SUCCESS = 0;
 
 type
-    TEMSHDL = integer;
+    TEMSHDL = Word;
+
+const
+    EMSBADHDL = $ffff;
 
 type
     TEMSNAME = array [0..7] of char;
