@@ -5,6 +5,6 @@
 
 MIXER_TEXT segment word public use16 'CODE'
 
-extrn mixCalcSampleStep: far
+extrn _calc_sample_step: far
 
 MIXER_TEXT ends

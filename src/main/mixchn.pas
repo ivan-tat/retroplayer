@@ -10,7 +10,9 @@ unit mixchn;
 
 interface
 
-uses types;
+uses
+    types,
+    musins;
 
 (*$I defines.pas*)
 
@@ -29,7 +31,7 @@ type
     TChannel = packed record
         bChannelFlags: TMIXCHNFLAGS;
         bChannelType:   byte;
-        wInsSeg:        word;
+        pMusIns:        PMUSINS;
         wSmpSeg:        word;
         bIns:           byte;
         bNote:          byte;
@@ -108,11 +110,16 @@ procedure mixchn_set_sub_command(self: PMIXCHN; value: Byte);
 function  mixchn_get_sub_command(self: PMIXCHN): Byte;
 procedure mixchn_set_command_parameter(self: PMIXCHN; value: Byte);
 function  mixchn_get_command_parameter(self: PMIXCHN): Byte;
+procedure chn_setupInstrument(var chn: TChannel; insNum: byte);
+function  chn_calcNotePeriod(var chn: TChannel; rate: LongInt; note: byte): word;
+function  chn_calcNoteStep(var chn: TChannel; rate: LongInt; note: byte): longint;
+procedure chn_setupNote(var chn: TChannel; note: byte; keep: boolean);
 
 implementation
 
 uses
 	watcom,
+    s3mvars,
 	mixvars,
 	mixer;
 
@@ -149,5 +156,9 @@ procedure mixchn_set_sub_command(self: PMIXCHN; value: Byte); external;
 function  mixchn_get_sub_command(self: PMIXCHN): Byte; external;
 procedure mixchn_set_command_parameter(self: PMIXCHN; value: Byte); external;
 function  mixchn_get_command_parameter(self: PMIXCHN): Byte; external;
+procedure chn_setupInstrument(var chn: TChannel; insNum: byte); external;
+function  chn_calcNotePeriod(var chn: TChannel; rate: LongInt; note: byte): word; external;
+function  chn_calcNoteStep(var chn: TChannel; rate: LongInt; note: byte): longint; external;
+procedure chn_setupNote(var chn: TChannel; note: byte; keep: boolean); external;
 
 end.

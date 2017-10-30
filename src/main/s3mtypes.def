@@ -13,7 +13,7 @@ EFFFLAG_CONTINUE equ 001h
 TCHANNEL STRUC
     bChannelFlags   db ?
     bChannelType    db ?
-    wInsSeg         dw ?
+    pMusIns         dd ?
     wSmpSeg         dw ?
     bIns            db ?
     bNote           db ?

@@ -12,7 +12,7 @@ interface
 
 (*$I defines.pas*)
 
-function  mixCalcSampleStep(wPeriod: word): longint;
+function  _calc_sample_step(wPeriod: word): longint;
 
 implementation
 
@@ -21,6 +21,7 @@ uses
     mixvars;
 
 (*$l mixer.obj*)
-function  mixCalcSampleStep(wPeriod: word): longint; external;
+
+function  _calc_sample_step(wPeriod: word): longint; external;
 
 end.

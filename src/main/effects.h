@@ -102,14 +102,6 @@ extern bool     PUBLIC_DATA chnState_arp_bFlag;
 void PUBLIC_CODE set_speed(uint8_t value);
 void PUBLIC_CODE set_tempo(uint8_t value);
 
-void PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum);
-
-/* remove if unused outside effects.c */
-uint16_t PUBLIC_CODE chn_calcNotePeriod(MIXCHN *chn, MUSINS *ins, uint8_t note);
-uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, MUSINS *ins, uint8_t note);
-
-void PUBLIC_CODE chn_setupNote(MIXCHN *chn, uint8_t note, bool keep);
-
 bool PUBLIC_CODE chn_effInit(MIXCHN *chn, uint8_t param);
 void PUBLIC_CODE chn_effHandle(MIXCHN *chn);
 void PUBLIC_CODE chn_effTick(MIXCHN *chn);

@@ -5,7 +5,6 @@
 
 MIXING_TEXT segment word public use16 'CODE'
 
-extrn mapSampleData: far
 extrn calcTick: far
 
 MIXING_TEXT ends

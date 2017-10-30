@@ -24,6 +24,9 @@ const
     MUSINST_EMPTY = 0;
     MUSINST_PCM = 1;
 
+const
+    SMPFLAG_LOOP = $01;
+
 type
     TMUSINS = array [0..16*5-1] of Byte;
     PMUSINS = ^TMUSINS;

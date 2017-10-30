@@ -19,9 +19,10 @@
 
 // TODO: remove PUBLIC_CODE macros when done.
 
-extern uint32_t PUBLIC_CODE mixCalcSampleStep(uint16_t wPeriod);
+extern uint32_t PUBLIC_CODE _calc_sample_step(uint16_t wPeriod);
+
 #ifdef __WATCOMC__
-#pragma aux mixCalcSampleStep modify [ bx cx ];
+#pragma aux _calc_sample_step modify [ bx cx ];
 #endif
 
 #endif /* MIXER_H */

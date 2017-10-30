@@ -81,10 +81,6 @@ var
 
 procedure set_speed(value: byte);
 procedure set_tempo(value: byte);
-procedure chn_setupInstrument(var chn: TChannel; insNum: byte);
-function  chn_calcNotePeriod(var chn: TChannel; ins: pointer; note: byte): word;
-function  chn_calcNoteStep(var chn: TChannel; ins: pointer; note: byte): longint;
-procedure chn_setupNote(var chn: TChannel; note: byte; keep: boolean);
 function  chn_effInit(var chn: TChannel; param: byte): boolean;
 procedure chn_effHandle(var chn: TChannel);
 procedure chn_effTick(var chn: TChannel);
@@ -106,10 +102,6 @@ uses
 
 procedure set_speed(value: byte); external;
 procedure set_tempo(value: byte); external;
-procedure chn_setupInstrument(var chn: TChannel; insNum: byte); external;
-function  chn_calcNotePeriod(var chn: TChannel; ins: pointer; note: byte): word; external;
-function  chn_calcNoteStep(var chn: TChannel; ins: pointer; note: byte): longint; external;
-procedure chn_setupNote(var chn: TChannel; note: byte; keep: boolean); external;
 function  chn_effInit(var chn: TChannel; param: byte): boolean; external;
 procedure chn_effHandle(var chn: TChannel); external;
 procedure chn_effTick(var chn: TChannel); external;

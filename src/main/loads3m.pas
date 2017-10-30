@@ -80,6 +80,73 @@ const
     internal_failure    = -11;
     sample2large        = -12;
 
+type
+    THeader = record name:array[0..27] of char;
+        charEOF:char;  { should be 1Ah }
+        filetyp:byte;
+        dummy1 :word;
+        ordnum :word;
+        Insnum :word;
+        Patnum :word;
+        Flags  :word;
+        CWTV   :word;   (* "Created With Tracker Version" *)
+            (* bit  12    = always 1 -> created with Scream Tracker;
+               bits 11..8 = major tracker version;
+                     7..0 = minor tracker version. *)
+        FFv    :word; { fileformatversion }
+        SCRM_ID:longint; { should be 'SCRM' }
+        gvolume:byte;       { global volume }
+        initialspeed:byte;
+        initialtempo:byte;
+        mvolume:byte;       { mastervolume }
+        dummy2 :array[0..9] of byte;
+        special:word;       { not used up2now }
+        channelset:array[0..31] of byte;
+    end;
+
+(* instrument / sample *)
+
+type
+    TSmpHeader = packed record
+        typ:byte;
+        dosname:array[0..11] of char;
+        hi_mempos:byte;
+        mempos:word;
+        length:longint;
+        loopbeg:longint;
+        loopend:longint;
+        vol:byte;
+        dummy1:byte;
+        packinfo:byte;
+        Flags:byte;
+        c2speed:longint;
+        dummy2:longint;
+        GUS_addr:word;
+        SB_Flags:word;
+        SB_last:longint;
+        name:array[0..27] of char;
+        SCRS_ID:array[0..3] of char;
+    end;
+    PSmpHeader = ^TSmpHeader;
+
+(* adlib instrument *)
+
+type
+    TAdlHeader = packed record
+        typ:byte;
+        dosname:array[0..11] of char;
+        dummy1:array[0..2] of byte;
+        Data:array[0..11] of byte;
+        Vol:byte;
+        Dsk:byte;
+        dummy2:word;
+        C2spd:longint;
+        dummy3:array[0..11] of byte;
+        name:array[0..27] of char;
+        SCRI_ID:array[0..3] of char;
+    end;
+    PAdlHeader = ^TAdlHeader;
+
 (*temporary solution for file I/O*)
 (*$I-*)
 function _fread(p: Pointer; size: Word; n: Word; var stream: File): Word;

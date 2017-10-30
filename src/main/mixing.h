@@ -17,7 +17,6 @@
 
 #include "pascal.h"
 
-void *PUBLIC_CODE mapSampleData(uint16_t seg, uint16_t len);
 void  PUBLIC_CODE calcTick(void *outBuf, uint16_t len);
 
 #endif  /* MIXING_H */

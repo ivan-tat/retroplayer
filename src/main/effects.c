@@ -545,79 +545,6 @@ void PUBLIC_CODE set_tempo(uint8_t value)
         mixTickSamplesPerChannel = (long)mixSampleRate * 5 / (int)(value * 2);
 }
 
-void PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum)
-{
-    MUSINS *ins;
-    unsigned int rate;
-    unsigned int flags;
-    ins = insList_get(insNum);
-    if (ins_isSample(ins))
-    {
-        rate = ins_getSampleRate(ins);
-        if (rate)
-        {
-            mixchn_set_instrument_num(chn, insNum);
-            mixchn_set_instrument(chn, ins);
-            mixchn_set_sample_volume(chn, (ins->vol * playState_gVolume) >> 6);
-            mixchn_set_sample_data(chn, ins_getSampleData(ins));
-            flags = 0;
-            if (ins->flags & 0x01)
-                flags |= SMPFLAG_LOOP;
-            chn->bSmpFlags = flags;
-            chn->wSmpLoopStart = ins_getSampleLoopStart(ins);
-            chn->wSmpLoopEnd = ins_getSampleLoopEnd(ins);
-            chn->wSmpStart = 0; // reset start position
-            mixchn_set_sample_period_limits(chn, rate, modOption_AmigaLimits);
-        }
-        else
-            // don't play it - it's wrong !
-            mixchn_set_instrument_num(chn, 0);
-    }
-    else
-        // don't play it - it's wrong !
-        mixchn_set_instrument_num(chn, 0);
-}
-
-uint16_t PUBLIC_CODE chn_calcNotePeriod(MIXCHN *chn, MUSINS *ins, uint8_t note)
-{
-    unsigned int period;
-    // calc period with st3 finetune
-    period = (unsigned long)(MID_C_RATE * (unsigned long)getNotePeriod(note)) / ins_getSampleRate(ins);
-    // Now check borders
-    return mixchn_check_sample_period(chn, period);
-}
-
-uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, MUSINS *ins, uint8_t note)
-{
-    unsigned int period;
-    period = chn_calcNotePeriod(chn, ins, note);
-    if (period)
-        return mixCalcSampleStep(period);
-    else
-        return 0;
-}
-
-void PUBLIC_CODE chn_setupNote(MIXCHN *chn, uint8_t note, bool keep)
-{
-    MUSINS *ins;
-    chn->bNote = note;
-    mixchn_set_sample_period(chn, 0);   // clear it first - just to make sure we really set it
-    if (mixchn_get_instrument_num(chn))
-    {
-        ins = mixchn_get_instrument(chn);
-        if (ins_isSample(ins))
-        {
-            mixchn_setup_sample_period(chn, chn_calcNotePeriod(chn, ins, note));
-            if (! keep)
-            {
-                // restart instrument
-                chn->dSmpPos = (unsigned long)chn->wSmpStart << 16;
-                mixchn_set_playing(chn, true);
-            };
-        };
-    };
-}
-
 /*** Effects ***/
 
 uint8_t __near checkPara0(MIXCHN *chn, uint8_t param)
@@ -1032,7 +959,7 @@ METHOD_STOP(vibNorm)
     period = chn->wSmpPeriodOld;
     mixchn_set_sample_period(chn, period);
     if (period)
-        mixchn_set_sample_step(chn, mixCalcSampleStep(period));
+        mixchn_set_sample_step(chn, _calc_sample_step(period));
 }
 
 /*** Vibrato (fine) ***/
@@ -1105,6 +1032,7 @@ METHOD_HANDLE(arpeggio)
 {
     uint8_t param, note;
     MUSINS *ins;
+    uint32_t rate;
 
     if (!chnState_arp_bFlag)
     {
@@ -1123,9 +1051,16 @@ METHOD_HANDLE(arpeggio)
     chn->bArpNotes[1] = _packNote(note > NOTE_MAX ? NOTE_MAX : note);
 
     ins = mixchn_get_instrument(chn);
-    chn->dArpSmpSteps[0] = chn_calcNoteStep(chn, ins, chn->bNote);
-    chn->dArpSmpSteps[1] = chn_calcNoteStep(chn, ins, chn->bArpNotes[0]);
-    chn->dArpSmpSteps[2] = chn_calcNoteStep(chn, ins, chn->bArpNotes[0]);
+    if (ins)
+    {
+        rate = musins_get_rate(ins);
+        if (rate)
+        {
+            chn->dArpSmpSteps[0] = chn_calcNoteStep(chn, rate, chn->bNote);
+            chn->dArpSmpSteps[1] = chn_calcNoteStep(chn, rate, chn->bArpNotes[0]);
+            chn->dArpSmpSteps[2] = chn_calcNoteStep(chn, rate, chn->bArpNotes[1]);
+        }
+    }
 }
 
 METHOD_TICK(arpeggio)

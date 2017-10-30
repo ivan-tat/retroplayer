@@ -34,7 +34,7 @@ typedef struct mix_channel_t
     MIXCHNFLAGS bChannelFlags;
     uint8_t  bChannelType;  // 0=off, 1=left, 2=right, 3,4=adlib (if 0,3,4 -> everything ignored !)
     // current Instrument :
-    uint16_t wInsSeg;       // DOS segment of current instrument data
+    MUSINS  *pMusIns;
     uint16_t wSmpSeg;       // DOS segment of current sample data
     uint8_t  bIns;          // number of instrument is currently playing
     uint8_t  bNote;
@@ -108,6 +108,11 @@ void     PUBLIC_CODE mixchn_set_sub_command(MIXCHN *self, uint8_t value);
 uint8_t  PUBLIC_CODE mixchn_get_sub_command(MIXCHN *self);
 void     PUBLIC_CODE mixchn_set_command_parameter(MIXCHN *self, uint8_t value);
 uint8_t  PUBLIC_CODE mixchn_get_command_parameter(MIXCHN *self);
+void     PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum);
+uint16_t PUBLIC_CODE chn_calcNotePeriod(MIXCHN *chn, uint32_t rate, uint8_t note);
+uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, uint32_t rate, uint8_t note);
+void     PUBLIC_CODE chn_setupNote(MIXCHN *chn, uint8_t note, bool keep);
+
 
 /* Mixing channels list */
 

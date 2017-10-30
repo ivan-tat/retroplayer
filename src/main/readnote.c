@@ -155,8 +155,8 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
         /* reinit instrument data and keep sample position */
         if (chnState_cur_bIns)
         {
-            ins = insList_get(chnState_cur_bIns);
-            if (ins_isSample(ins))
+            ins = musinsl_get(mod_Instruments, chnState_cur_bIns - 1);
+            if (musins_get_type(ins) == MUSINST_PCM)
                 chn_setupInstrument(chn, chnState_cur_bIns);
             else
                 chnState_cur_bIns = 0;

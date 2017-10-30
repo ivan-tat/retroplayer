@@ -26,24 +26,6 @@
 
 // TODO: remove PUBLIC_CODE macros when done.
 
-void *PUBLIC_CODE mapSampleData(uint16_t seg, uint16_t len)
-{
-    unsigned int logPage;
-    unsigned char physPage, count;
-    if (isSampleDataInEM(seg)) {
-        logPage = getSampleDataLogPageInEM(seg);
-        physPage = 0;
-        count = (unsigned int)(((unsigned long)len + 0x3fff) >> 1) >> 13;
-        while (count--) {
-            if (! emsMap(SmpEMSHandle, logPage++, physPage++))
-                return MK_FP(0, 0);
-        };
-        return emsFramePtr;
-    } else {
-        return MK_FP(seg, 0);
-    };
-}
-
 void __near newTick(void)
 {
     mixTickSamplesPerChannelLeft = mixTickSamplesPerChannel;
@@ -64,6 +46,7 @@ void __near calcChannel(MIXCHN *chnInfo, bool callEffects, uint16_t count, void 
     uint8_t chtype;
     struct playSampleInfo_t smpInfo;
     unsigned int smpPos;
+    MUSINS *ins;
 
     chtype = mixchn_get_type(chnInfo);
     if (chtype == 0 || chtype > 2) return;
@@ -84,8 +67,14 @@ void __near calcChannel(MIXCHN *chnInfo, bool callEffects, uint16_t count, void 
     {
         if (mixchn_is_mixing(chnInfo))
         {
-            smpInfo.dData = mapSampleData(FP_SEG(mixchn_get_sample_data(chnInfo)), chnInfo->wSmpLoopEnd);
-            if (! smpInfo.dData) return; /* skip channel if EMS driver does not work correct */
+            ins = mixchn_get_instrument(chnInfo);
+            if (musins_is_EM_data(ins))
+                smpInfo.dData = musins_map_EM_data(ins);
+            else
+                smpInfo.dData = musins_get_data(ins);
+
+            if (!smpInfo.dData)
+                return;
 
             if (mixChannels == 2)
                 _MixSampleStereo8(outBuf, &smpInfo, FP_SEG(*volumetableptr), mixchn_get_sample_volume(chnInfo), count);
