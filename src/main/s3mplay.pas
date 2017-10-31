@@ -23,11 +23,6 @@ CONST
       { error constants }
       noerror              = 0;
       notenoughmem         = -1;
-      wrongformat          = -2;
-      filecorrupt          = -3;
-      filenotexist         = -4;
-      packedsamples        = -5; { sorry I don't know about DigiPlay 3.0 ADPCM packing
-                                   was anyway not used yet in S3Ms ... }
       Allreadyallocbuffers = -6; { don't try to allocate memory for buffers twice }
       nota386orhigher      = -7; { for playing any sound we need a 386 or higher -
                                    sorry but I optimized it for a 486 (pipeline etc.) and it
@@ -36,14 +31,13 @@ CONST
                                    the same price I got an slow 386SX in 1991) }
       nosounddevice        = -8; { before 'start playing' - set a sounddevice ! }
       noS3Minmemory        = -9; { before 'start playing' - load a S3M ! }
-      ordercorrupt         = -10; { if there's no playable entry in order -> that would cause an endless
-                                    loop in readnotes if you try to play it }
       internal_failure     = -11; { I'm sorry if this happend :( }
-      sample2large         = -12; { I can't handle samples >64511 }
+      E_failed_to_load_file = -100;
 
 { variables for public }
 VAR
-    player_Error:integer;
+    player_Error: Integer;
+    player_Error_msg: PChar;
 
 function  player_load_s3m(name: String): Boolean;
     (* load S3M module into memory *)
@@ -149,24 +143,30 @@ PROCEDURE player_free;
 function player_load_s3m(name: String): Boolean;
 var
     p: PS3MLoader;
+    cname: array [0..255] of Char;
 begin
     p := s3mloader_new;
     if (p = nil) then
     begin
+        player_error := E_failed_to_load_file;
+        player_error_msg := 'Failed to initialize S3M loader.';
         Debug_Err(__FILE__, 'player_load_s3m', 'Failed to initialize S3M loader.');
-        load_error := notenoughmem;
         player_load_s3m := false;
         exit;
     end;
     s3mloader_clear(p);
 
-    if (not s3mloader_load(p, name)) then
+    memcpy(cname, name[1], Ord(name[0]));
+    cname[Ord(name[0])] := Chr(0);
+
+    if (not s3mloader_load(p, cname)) then
     begin
+        player_error := E_failed_to_load_file;
+        player_error_msg := s3mloader_get_error(p);
         Debug_Err(__FILE__, 'player_load_s3m', 'Failed to load S3M file.');
         s3mloader_free(p);
         s3mloader_delete(p);
         player_free_module;
-        player_error := load_error;
         player_load_s3m := false;
         exit;
     end;
@@ -380,7 +380,8 @@ var key:boolean;
     count: word;
   begin
     playStart:=false;
-    player_error:=0;
+    player_error := 0;
+    player_error_msg := nil;
     playOption_LowQuality := LQ;
     A_stereo := A_Stereo and sdev_caps_stereo;
     A_16Bit := A_16Bit and sdev_caps_16bit;

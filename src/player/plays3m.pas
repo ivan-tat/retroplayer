@@ -41,25 +41,39 @@ var samplerate:word;
     screen_no:byte;  { current info on screen }
     startchn:byte;
 
-procedure display_errormsg(err:integer);
-  begin
-    { I know case is stupid - like my code allways is :) }
-    case err of
-       0: write(' Hmm no error what''s wrong ? ');
-      -1: write(' Not enough DOS memory.');
-      -2: write(' Wrong file format. Not a S3M ? ');
-      -3: write(' File corrupt. ');
-      -4: write(' File does not exist. ');
-      -7: write(' Need a 386 or higher. ');
-      -8: write(' No sounddevice set. (wrong code - shame on you programmer) ');
-    {$ifdef DEBUGLOAD}
-      -11: write(' Loading stoped by user!');
-    {$endif}
-    else write(' Somethings going wrong, but I dounno about that errorcode: ',err,'  ');
+procedure display_errormsg;
+var
+    s: PChar;
+begin
+    case player_error of
+    noerror:
+        s := 'No error';
+    notenoughmem:
+        s := 'Not enough memory';
+    Allreadyallocbuffers:
+        s := 'Buffers already allocated';
+    nota386orhigher:
+        s := 'Need a 386 or higher CPU';
+    nosounddevice:
+        s := 'No sound device is set';
+    noS3Minmemory:
+        s := 'No music module is loaded';
+    internal_failure:
+        s := 'Internal failure';
+    E_failed_to_load_file:
+        s := 'Failed to load file';
+    else
+        s := 'Unknown error';
     end;
+
+    if (player_error_msg <> nil) then
+        writeln('Error: ', s, ' (', player_error_msg, ')')
+    else
+        writeln('Error: ', s);
+
     writeln('PROGRAM HALTED.'#7);
-    halt;
-  end;
+    halt(1);
+end;
 
 var filename:string;
     c:char;
@@ -368,13 +382,13 @@ begin
   writeln('Free DOS memory before loading: ',getFreeDOSMemory shr 10, ' KiB');
   writeln('Free EMM memory before loading: ',getFreeEMMMemory, ' KiB');
   {$ENDIF}
-  if not player_load_s3m(filename) then display_errormsg(player_error);
+  if not player_load_s3m(filename) then display_errormsg;
   {$IFDEF DEBUGLOAD}
   writeln('Free DOS memory after loading: ',getFreeDOSMemory shr 10, ' KiB');
   writeln('Free EMM memory after loading: ',getFreeEMMMemory, ' KiB');
   {$ENDIF}
   writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');
-  if not player_init then display_errormsg(player_error);
+  if not player_init then display_errormsg;
   if not player_init_device(how2input) then begin writeln(' SoundBlaster not found sorry ... ');halt end;
   if disply_c then
     begin
@@ -388,7 +402,7 @@ begin
   save_chntyps;
   playOption_LoopSong:=true;
   screen_no:=1;startchn:=1;
-  if not playStart(stereo,_16bit,_LQ) then display_errormsg(player_error);
+  if not playStart(stereo,_16bit,_LQ) then display_errormsg;
   mainscreen;
   hide_cursor;
   repeat
