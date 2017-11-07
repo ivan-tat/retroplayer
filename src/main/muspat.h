@@ -42,9 +42,7 @@ typedef struct music_pattern_t
 #pragma pack(pop);
 typedef struct music_pattern_t MUSPAT;
 
-//MUSPAT  *PUBLIC_CODE muspat_new(void);
-void     PUBLIC_CODE muspat_clear(MUSPAT *self);
-//void     PUBLIC_CODE muspat_delete(MUSPAT **self);
+void     PUBLIC_CODE muspat_init(MUSPAT *self);
 void     PUBLIC_CODE muspat_set_EM_data(MUSPAT *self, bool value);
 bool     PUBLIC_CODE muspat_is_EM_data(MUSPAT *self);
 void     PUBLIC_CODE muspat_set_own_EM_handle(MUSPAT *self, bool value);

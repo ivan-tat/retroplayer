@@ -39,7 +39,7 @@
 #define _muspat_get_EM_data_offset(o)    o->data_off
 #define _muspat_get_EM_data(o)           MK_FP(emsFrameSeg, o->data_off)
 
-void PUBLIC_CODE muspat_clear(MUSPAT *self)
+void PUBLIC_CODE muspat_init(MUSPAT *self)
 {
     if (self)
     {
@@ -208,8 +208,6 @@ void PUBLIC_CODE muspat_free(MUSPAT *self)
             if (p)
                 _dos_freemem(FP_SEG(p));
         }
-
-        muspat_clear(self);
     }
 }
 
@@ -224,9 +222,9 @@ void PUBLIC_CODE muspat_free(MUSPAT *self)
 
 static EMSNAME EMS_PATLIST_HANDLE_NAME = "patlist";
 
-void __far _muspatl_clear_item(void *self, void *item)
+void __far _muspatl_init_item(void *self, void *item)
 {
-    muspat_clear((MUSPAT *)item);
+    muspat_init((MUSPAT *)item);
 }
 
 void __far _muspatl_free_item(void *self, void *item)
@@ -248,7 +246,7 @@ void PUBLIC_CODE muspatl_clear(MUSPATLIST *self)
 {
     if (self)
     {
-        dynarr_init(&(self->list), self, sizeof(MUSPAT), _muspatl_clear_item, _muspatl_free_item);
+        dynarr_init(&(self->list), self, sizeof(MUSPAT), _muspatl_init_item, _muspatl_free_item);
         _muspatl_set_EM_handle(self, EMSBADHDL);
     }
 }

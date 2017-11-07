@@ -27,7 +27,7 @@ type
     end;
     PMUSPAT = ^TMUSPAT;
 
-procedure muspat_clear(self: PMUSPAT);
+procedure muspat_init(self: PMUSPAT);
 procedure muspat_set_EM_data(self: PMUSPAT; value: Boolean);
 function  muspat_is_EM_data(self: PMUSPAT): Boolean;
 procedure muspat_set_own_EM_handle(self: PMUSPAT; value: Boolean);
@@ -81,7 +81,7 @@ uses
 
 (*$L muspat.obj*)
 
-procedure muspat_clear(self: PMUSPAT); external;
+procedure muspat_init(self: PMUSPAT); external;
 procedure muspat_set_EM_data(self: PMUSPAT; value: Boolean); external;
 function  muspat_is_EM_data(self: PMUSPAT): Boolean; external;
 procedure muspat_set_own_EM_handle(self: PMUSPAT; value: Boolean); external;

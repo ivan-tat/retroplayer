@@ -352,8 +352,10 @@ bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
 
     if (!pos)
     {
+        /*
         pat = muspatl_get(mod_Patterns, index);
-        muspat_clear(pat);
+        muspat_init(pat);   // is not necessary because it was already initialized by DYNARR's set_size().
+        */
         return true;
     }
 
@@ -384,7 +386,7 @@ bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
     }
 
     pat = &pat_static;
-    muspat_clear(pat);
+    muspat_init(pat);
     muspat_set_channels(pat, UsedChannels);
     muspat_set_rows(pat, 64);
     muspat_set_size(pat, muspat_get_channels(pat) * muspat_get_rows(pat) * 5);
