@@ -153,9 +153,10 @@ recompile_obj() {
     local f_nam="${f_obj%.obj}"
     local f_tmp="${f_nam}.tmp"
     local f_asm="${f_nam}.asm"
-    $W_DIS -a "$f_obj" >"$f_tmp"
+    $W_DIS -a -fi "$f_obj" >"$f_tmp"
     sed -r -e "s/(^DGROUP[[:space:]]+GROUP[[:space:]]+)CONST,CONST2,(_DATA)/\1\2/;\
-s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$)/_DATA\1/;" "$f_tmp" >"$f_asm"
+s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$)/_DATA\1/;\
+s/([[:space:],-+]{1})(7ffc|7ffd|7ffe|7fff|0ffffffff)([0-9a-f]{8}H)/\10\3/;" "$f_tmp" >"$f_asm"
     rm -f "$f_tmp"
     $W_AS -fo="$f_obj" "$f_asm"
 }
