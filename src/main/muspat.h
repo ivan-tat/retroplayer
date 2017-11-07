@@ -77,7 +77,7 @@ typedef music_patterns_list_flags_t MUSPATLFLAGS;
 typedef struct music_patterns_list_t
 {
     MUSPATLFLAGS flags;
-    struct _dynarr_t list;
+    DYNARR list;
     EMSHDL handle;
 };
 typedef struct music_patterns_list_t MUSPATLIST;

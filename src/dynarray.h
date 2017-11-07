@@ -20,34 +20,33 @@
 
 /*** Dynamic array virtual methods ***/
 
-typedef void __far _dynarr_clear_item_t(void *parent, void *item);
-typedef void __far _dynarr_free_item_t(void *parent, void *item);
+typedef void __far dynarr_init_item_t(void *parent, void *item);
+typedef void __far dynarr_free_item_t(void *parent, void *item);
 
 /*** Dynamic array structure ***/
 
 #pragma pack(push, 1);
-typedef struct _dynarr_t
+typedef struct dynarr_t
 {
     void *parent;
     uint16_t item_size;
     uint16_t size;
     void *list;
-    _dynarr_clear_item_t *clear_item;
-    _dynarr_free_item_t *free_item;
+    dynarr_init_item_t *init_item;
+    dynarr_free_item_t *free_item;
 };
 #pragma pack(pop);
+typedef struct dynarr_t DYNARR;
 
-struct _dynarr_t *
-         __far _dynarr_new(void);
-void     __far _dynarr_init(struct _dynarr_t *self, void *parent, uint16_t item_size,
-            _dynarr_clear_item_t clear_item,
-            _dynarr_free_item_t free_item);
-void     __far _dynarr_clear_list(struct _dynarr_t *self);
-void     __far _dynarr_delete(struct _dynarr_t **self);
-void     __far _dynarr_set_item(struct _dynarr_t *self, uint16_t index, void *item);
-void    *__far _dynarr_get_item(struct _dynarr_t *self, uint16_t index);
-bool     __far _dynarr_set_size(struct _dynarr_t *self, uint16_t size);
-uint16_t __far _dynarr_get_size(struct _dynarr_t *self);
-void     __far _dynarr_free(struct _dynarr_t *self);
+void     __far dynarr_init(DYNARR *self, void *parent, uint16_t item_size,
+            dynarr_init_item_t init_item,
+            dynarr_free_item_t free_item);
+void     __far dynarr_init_items(DYNARR *self, uint16_t index, uint16_t count);
+void     __far dynarr_free_items(DYNARR *self, uint16_t index, uint16_t count);
+void     __far dynarr_set_item(DYNARR *self, uint16_t index, void *item);
+void    *__far dynarr_get_item(DYNARR *self, uint16_t index);
+bool     __far dynarr_set_size(DYNARR *self, uint16_t size);
+uint16_t __far dynarr_get_size(DYNARR *self);
+void     __far dynarr_free(DYNARR *self);
 
 #endif  /* DYNARRAY_H */

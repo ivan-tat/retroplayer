@@ -237,14 +237,9 @@ void __far _muspatl_free_item(void *self, void *item)
 MUSPATLIST *PUBLIC_CODE muspatl_new(void)
 {
     uint16_t seg;
-    MUSPATLIST *self;
 
     if (!_dos_allocmem(_dos_para(sizeof(MUSPATLIST)), &seg))
-    {
-        self = MK_FP(seg, 0);
-        _dynarr_init(&(self->list), self, sizeof(MUSPAT), _muspatl_clear_item, _muspatl_free_item);
-        return self;
-    }
+        return MK_FP(seg, 0);
     else
         return NULL;
 }
@@ -253,7 +248,7 @@ void PUBLIC_CODE muspatl_clear(MUSPATLIST *self)
 {
     if (self)
     {
-        _dynarr_clear_list(&(self->list));
+        dynarr_init(&(self->list), self, sizeof(MUSPAT), _muspatl_clear_item, _muspatl_free_item);
         _muspatl_set_EM_handle(self, EMSBADHDL);
     }
 }
@@ -271,13 +266,13 @@ void PUBLIC_CODE muspatl_delete(MUSPATLIST **self)
 void PUBLIC_CODE muspatl_set(MUSPATLIST *self, uint16_t index, MUSPAT *item)
 {
     if (self)
-        _dynarr_set_item(&(self->list), index, item);
+        dynarr_set_item(&(self->list), index, item);
 }
 
 MUSPAT *PUBLIC_CODE muspatl_get(MUSPATLIST *self, uint16_t index)
 {
     if (self)
-        return _dynarr_get_item(&(self->list), index);
+        return dynarr_get_item(&(self->list), index);
     else
         return NULL;
 }
@@ -285,7 +280,7 @@ MUSPAT *PUBLIC_CODE muspatl_get(MUSPATLIST *self, uint16_t index)
 bool PUBLIC_CODE muspatl_set_count(MUSPATLIST *self, uint16_t count)
 {
     if (self)
-        return _dynarr_set_size(&(self->list), count);
+        return dynarr_set_size(&(self->list), count);
     else
         return false;
 }
@@ -293,7 +288,7 @@ bool PUBLIC_CODE muspatl_set_count(MUSPATLIST *self, uint16_t count)
 uint16_t PUBLIC_CODE muspatl_get_count(MUSPATLIST *self)
 {
     if (self)
-        return _dynarr_get_size(&(self->list));
+        return dynarr_get_size(&(self->list));
     else
         return 0;
 }
@@ -360,7 +355,7 @@ void PUBLIC_CODE muspatl_free(MUSPATLIST *self)
 {
     if (self)
     {
-        _dynarr_free(&(self->list));
+        dynarr_free(&(self->list));
 
         if (_muspatl_is_own_EM_handle(self))
             emsFree(self->handle);

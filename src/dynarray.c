@@ -15,17 +15,7 @@
 
 #include "dynarray.h"
 
-struct _dynarr_t *__far _dynarr_new(void)
-{
-    uint16_t seg;
-            
-    if (!_dos_allocmem(_dos_para(sizeof(struct _dynarr_t)), &seg))
-        return MK_FP(seg, 0);
-    else
-        return NULL;
-}
-
-void __far _dynarr_init(struct _dynarr_t *self, void *parent, uint16_t item_size, _dynarr_clear_item_t clear_item, _dynarr_free_item_t free_item)
+void __far dynarr_init(DYNARR *self, void *parent, uint16_t item_size, dynarr_init_item_t init_item, dynarr_free_item_t free_item)
 {
     if (self)
     {
@@ -33,69 +23,75 @@ void __far _dynarr_init(struct _dynarr_t *self, void *parent, uint16_t item_size
         self->item_size = item_size;
         self->size = 0;
         self->list = NULL;
-        self->clear_item = clear_item;
+        self->init_item = init_item;
         self->free_item = free_item;
     }
 }
 
-void *__near _dynarr_item_ptr(struct _dynarr_t *self, void *item, uint16_t index)
+void *__near dynarr_item_ptr(DYNARR *self, void *item, uint16_t index)
 {
     return MK_FP(FP_SEG(item), FP_OFF(item) + index * self->item_size);
 }
 
-void __far _dynarr_clear_list(struct _dynarr_t *self)
+void __far dynarr_init_items(DYNARR *self, uint16_t index, uint16_t count)
 {
-    uint16_t i;
+    uint16_t i, end;
 
     if (self)
-        if (self->list && self->size)
+        if (self->list && count)
         {
-            if (self->clear_item)
-                for (i = 0; i < self->size; i++)
-                    self->clear_item(self->parent, _dynarr_item_ptr(self, self->list, i));
+            if (self->init_item)
+            {
+                end = index + count;
+                for (i = index; i < end; i++)
+                    self->init_item(self->parent, dynarr_item_ptr(self, self->list, i));
+            }
             else
-                memset(self->list, 0, self->size * self->item_size);
+                memset(dynarr_item_ptr(self, self->list, index), 0, count * self->item_size);
         }
 }
 
-void __far _dynarr_delete(struct _dynarr_t **self)
+void __far dynarr_free_items(DYNARR *self, uint16_t index, uint16_t count)
 {
+    uint16_t i, end;
+
     if (self)
-        if (*self)
+        if (self->list && count && self->free_item)
         {
-            _dos_freemem(FP_SEG(*self));
-            *self = NULL;
+            end = index + count;
+            for (i = index; i < end; i++)
+                self->free_item(self->parent, dynarr_item_ptr(self, self->list, i));
         }
 }
 
-void __far _dynarr_set_item(struct _dynarr_t *self, uint16_t index, void *item)
+void __far dynarr_set_item(DYNARR *self, uint16_t index, void *item)
 {
     void *dest;
 
     if (self)
         if (self->list && index < self->size)
         {
-            dest = _dynarr_item_ptr(self, self->list, index);
+            dest = dynarr_item_ptr(self, self->list, index);
             if (item)
                 memcpy(dest, item, self->item_size);
             else
-                if (self->clear_item)
-                    self->clear_item(self->parent, dest);
+                if (self->init_item)
+                    self->init_item(self->parent, dest);
                 else
                     memset(dest, 0, self->item_size);
         }
 }
 
-void *__far _dynarr_get_item(struct _dynarr_t *self, uint16_t index)
+void *__far dynarr_get_item(DYNARR *self, uint16_t index)
 {
     if (self)
         if (self->list && index < self->size)
-            return _dynarr_item_ptr(self, self->list, index);
+            return dynarr_item_ptr(self, self->list, index);
 
     return NULL;
 }
 
-bool __far _dynarr_set_size(struct _dynarr_t *self, uint16_t size)
+bool __far dynarr_set_size(DYNARR *self, uint16_t size)
 {
     uint16_t seg, max, memsize, i;
     bool result;
@@ -127,18 +123,14 @@ bool __far _dynarr_set_size(struct _dynarr_t *self, uint16_t size)
 
                 if (result)
                 {
-                    memset(_dynarr_item_ptr(self, self->list, self->size), 0, (size - self->size) * self->item_size);
+                    dynarr_init_items(self, self->size, size - self->size);
                     self->size = size;
                 }
             }
             else
             {
                 // Shrink
-                if (self->free_item)
-                {
-                    for (i = size; i < self->size; i++)
-                        self->free_item(self->parent, _dynarr_item_ptr(self, self->list, i));
-                }
+                dynarr_free_items(self, size, self->size - size);
 
                 if (size)
                 {
@@ -164,7 +156,7 @@ bool __far _dynarr_set_size(struct _dynarr_t *self, uint16_t size)
     return result;
 }
 
-uint16_t __far _dynarr_get_size(struct _dynarr_t *self)
+uint16_t __far dynarr_get_size(DYNARR *self)
 {
     if (self)
         return self->size;
@@ -172,18 +164,13 @@ uint16_t __far _dynarr_get_size(struct _dynarr_t *self)
         return 0;
 }
 
-void __far _dynarr_free(struct _dynarr_t *self)
+void __far dynarr_free(DYNARR *self)
 {
-    uint16_t size, i;
-
     if (self)
     {
         if (self->list)
         {
-            if (self->free_item)
-                for (i = 0; i < self->size; i++)
-                    self->free_item(self->parent, _dynarr_item_ptr(self, self->list, i));
-
+            dynarr_free_items(self, 0, self->size);
             _dos_freemem(FP_SEG(self->list));
         }
     }

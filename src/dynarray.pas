@@ -13,15 +13,14 @@ interface
 
 (*$I defines.pas*)
 
-procedure _dynarr_new_;
-procedure _dynarr_init_;
-procedure _dynarr_clear_list_;
-procedure _dynarr_delete_;
-procedure _dynarr_set_item_;
-procedure _dynarr_get_item_;
-procedure _dynarr_set_size_;
-procedure _dynarr_get_size_;
-procedure _dynarr_free_;
+procedure dynarr_init_;
+procedure dynarr_init_items_;
+procedure dynarr_free_items_;
+procedure dynarr_set_item_;
+procedure dynarr_get_item_;
+procedure dynarr_set_size_;
+procedure dynarr_get_size_;
+procedure dynarr_free_;
 
 implementation
 
@@ -32,14 +31,13 @@ uses
 
 (*$L dynarray.obj*)
 
-procedure _dynarr_new_; external;
-procedure _dynarr_init_; external;
-procedure _dynarr_clear_list_; external;
-procedure _dynarr_delete_; external;
-procedure _dynarr_set_item_; external;
-procedure _dynarr_get_item_; external;
-procedure _dynarr_set_size_; external;
-procedure _dynarr_get_size_; external;
-procedure _dynarr_free_; external;
+procedure dynarr_init_; external;
+procedure dynarr_init_items_; external;
+procedure dynarr_free_items_; external;
+procedure dynarr_set_item_; external;
+procedure dynarr_get_item_; external;
+procedure dynarr_set_size_; external;
+procedure dynarr_get_size_; external;
+procedure dynarr_free_; external;
 
 end.
