@@ -440,10 +440,9 @@ build_target $T_HW_TP     obj src/hw/dma.pas
 build_target $T_HW_TP     obj src/hw/pic.pas
 build_target $T_HW_TP     obj src/hw/sndctl_t.pas
 build_target $T_HW_SB_TP  obj src/hw/sb/sbio.pas
-build_target $T_HW_SB_TP  obj src/hw/sb/sbctl.pas
 build_target $T_HW_SB_TP  obj src/hw/sb/detisr.pas
 build_target $T_HW_SB_TP  obj src/hw/sb/sndisr.pas
-build_target $T_HW_SB_TP  obj src/hw/sb/blaster.pas
+build_target $T_HW_SB_TP  obj src/hw/sb/sbctl.pas
 build_target $T_MAIN_TP   obj src/main/types.pas
 build_target $T_MAIN_TP   obj src/main/mixtypes.pas
 build_target $T_MAIN_TP   obj src/main/s3mtypes.pas

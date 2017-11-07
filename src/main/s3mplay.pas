@@ -79,7 +79,6 @@ uses
     pic,
     sndctl_t,
     sbctl,
-    blaster,
     effvars,
     mixvars,
     mixchn,
@@ -178,10 +177,6 @@ begin
 end;
 
 FUNCTION player_init_device(input:byte):boolean;
-{  input= 0 ... use settings in BLASTER unit
-        = 1 ... hardware autodetect SB
-        = 2 ... read blaster enviroment
-        = 3 ... input by hand }
   begin
     player_init_device:=false;
     if Input = 0 then { 'checkthem' not yet implemented } sounddevice:=true

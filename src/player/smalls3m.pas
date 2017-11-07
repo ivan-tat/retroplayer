@@ -5,7 +5,6 @@ uses
     crt,
     dos,
     sbctl,
-    blaster,
     s3mvars,
     s3mplay;
 

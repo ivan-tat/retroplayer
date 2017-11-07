@@ -12,7 +12,6 @@ uses
     malloc,
     debug,
     sbctl,
-    blaster,
     s3mtypes,
     musins,
     muspat,
