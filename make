@@ -379,6 +379,7 @@ build_target $T_CC     obj src/cc/string/strncpy.c
 build_target $T_CC     obj src/cc/string/strnicmp.c
 build_target $T_DEBUG  obj src/debug.c
 build_target $T_DOS    obj src/dos/ems.c
+build_target $T_MISC   obj src/common.c
 build_target $T_MISC   obj src/dynarray.c
 build_target $T_HW     obj src/hw/cpu.asm
 build_target $T_HW     obj src/hw/dma.c
@@ -434,6 +435,7 @@ build_target $T_CC_TP     obj src/cc/string_.pas
 build_target $T_CC_TP     obj src/cc/stdio.pas
 build_target $T_DEBUG_TP  obj src/debug.pas
 build_target $T_DOS_TP    obj src/dos/ems.pas
+build_target $T_MISC_TP   obj src/common.pas
 build_target $T_MISC_TP   obj src/dynarray.pas
 build_target $T_HW_TP     obj src/hw/cpu.pas
 build_target $T_HW_TP     obj src/hw/dma.pas

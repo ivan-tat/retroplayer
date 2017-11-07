@@ -16,6 +16,7 @@ cleandir() {
 }
 
 cleandir ./src
+$RM ./src/common.asm
 $RM ./src/debug.asm
 $RM ./src/dynarray.asm
 cleandir ./src/cc
