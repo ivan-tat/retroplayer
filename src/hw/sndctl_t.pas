@@ -20,7 +20,7 @@ const
     HWSMPFMTFL_SIGNED    = $80;
 
 type
-    THWSMPFMT = record
+    THWSMPFMT = packed record
         flags: THWSMPFMTFLAGS;
         channels: byte;
     end;

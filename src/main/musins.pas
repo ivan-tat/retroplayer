@@ -31,7 +31,7 @@ type
     TMUSINS = array [0..16*5-1] of Byte;
     PMUSINS = ^TMUSINS;
 
-procedure musins_clear(self: PMUSINS);
+procedure musins_init(self: PMUSINS);
 procedure musins_set_type(self: PMUSINS; value: TMUSINSTYPE);
 function  musins_get_type(self: PMUSINS): TMUSINSTYPE;
 procedure musins_set_looped(self: PMUSINS; value: Boolean);
@@ -67,7 +67,7 @@ type
     PMUSINSLIST = ^TMUSINSLIST;
 
 function  musinsl_new: PMUSINSLIST;
-procedure musinsl_clear(self: PMUSINSLIST);
+procedure musinsl_init(self: PMUSINSLIST);
 procedure musinsl_set_EM_data(self: PMUSINSLIST; value: Boolean);
 function  musinsl_is_EM_data(self: PMUSINSLIST): Boolean;
 function  musinsl_get(self: PMUSINSLIST; index: Word): PMUSINS;
@@ -93,7 +93,7 @@ uses
 
 (*$L musins.obj*)
 
-procedure musins_clear(self: PMUSINS); external;
+procedure musins_init(self: PMUSINS); external;
 procedure musins_set_type(self: PMUSINS; value: TMUSINSTYPE); external;
 function  musins_get_type(self: PMUSINS): TMUSINSTYPE; external;
 procedure musins_set_looped(self: PMUSINS; value: Boolean); external;
@@ -120,7 +120,7 @@ function  musins_get_title(self: PMUSINS): PChar; external;
 procedure musins_free(self: PMUSINS); external;
 
 function  musinsl_new: PMUSINSLIST; external;
-procedure musinsl_clear(self: PMUSINSLIST); external;
+procedure musinsl_init(self: PMUSINSLIST); external;
 procedure musinsl_set_EM_data(self: PMUSINSLIST; value: Boolean); external;
 function  musinsl_is_EM_data(self: PMUSINSLIST): Boolean; external;
 function  musinsl_get(self: PMUSINSLIST; index: Word): PMUSINS; external;

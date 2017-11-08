@@ -57,20 +57,16 @@ procedure dmaReleaseSingleChannel(ch: byte);
 procedure dmaReleaseChannels(mask: TDMAMask);
 
 type
-    TDMABUF = record
+    TDMABUF = packed record
         data: pointer;
         size: longint;
         unaligned: pointer;
     end;
     PDMABUF = ^TDMABUF;
 
-function  dmaBuf_new: PDMABUF;
-procedure dmaBuf_delete(var buf: PDMABUF);
-function  dmaBufAlloc(buf: PDMABUF; size: longint): boolean;
-procedure dmaBufFree(buf: PDMABUF);
-
-procedure dmaBufInit(buf: PDMABUF);
-procedure dmaBufDone(buf: PDMABUF);
+procedure dmaBuf_init(self: PDMABUF);
+function  dmaBuf_alloc(self: PDMABUF; size: longint): boolean;
+procedure dmaBuf_free(self: PDMABUF);
 
 implementation
 
@@ -98,13 +94,9 @@ procedure dmaHookChannels(mask: TDMAMask; owner: PDMAOwner); external;
 procedure dmaReleaseSingleChannel(ch: byte); external;
 procedure dmaReleaseChannels(mask: TDMAMask); external;
 
-function  dmaBuf_new: PDMABUF; external;
-procedure dmaBuf_delete(var buf: PDMABUF); external;
-function  dmaBufAlloc(buf: PDMABUF; size: longint): boolean; external;
-procedure dmaBufFree(buf: PDMABUF); external;
-
-procedure dmaBufInit(buf: PDMABUF); external;
-procedure dmaBufDone(buf: PDMABUF); external;
+procedure dmaBuf_init(self: PDMABUF); external;
+function  dmaBuf_alloc(self: PDMABUF; size: longint): boolean; external;
+procedure dmaBuf_free(self: PDMABUF); external;
 
 procedure register_dma; far; external;
 

@@ -13,7 +13,7 @@ interface
 (*$I defines.pas*)
 
 type
-    TEMSVER = record
+    TEMSVER = packed record
         Lo, Hi: byte;
     end;
 

@@ -16,7 +16,7 @@ type
     PS3MLoader = Pointer;
 
 function  s3mloader_new: PS3MLoader;
-procedure s3mloader_clear(self: PS3MLoader);
+procedure s3mloader_init(self: PS3MLoader);
 function  s3mloader_load(self: PS3MLoader; name: PChar): Boolean;
 function  s3mloader_get_error(self: PS3MLoader): PChar;
 procedure s3mloader_free(self: PS3MLoader);
@@ -33,6 +33,7 @@ uses
     dos,
     dos_,
     ems,
+    common,
     musins,
     muspat,
     s3mtypes,
@@ -42,7 +43,7 @@ uses
 (*$l loads3m.obj*)
 
 function  s3mloader_new: PS3MLoader; external;
-procedure s3mloader_clear(self: PS3MLoader); external;
+procedure s3mloader_init(self: PS3MLoader); external;
 function  s3mloader_load(self: PS3MLoader; name: PChar): Boolean; external;
 function  s3mloader_get_error(self: PS3MLoader): PChar; external;
 procedure s3mloader_free(self: PS3MLoader); external;

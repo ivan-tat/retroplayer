@@ -59,7 +59,7 @@ typedef struct instrument_t MUSINS;
 
 typedef struct instrument_t PCMSMP;
 
-void       PUBLIC_CODE musins_clear(MUSINS *self);
+void       PUBLIC_CODE musins_init(MUSINS *self);
 void       PUBLIC_CODE musins_set_type(MUSINS *self, MUSINSTYPE value);
 MUSINSTYPE PUBLIC_CODE musins_get_type(MUSINS *self);
 void       PUBLIC_CODE musins_set_looped(MUSINS *self, bool value);
@@ -94,7 +94,7 @@ typedef MUSINS instrumentsList_t[MAX_INSTRUMENTS];
 typedef instrumentsList_t MUSINSLIST;
 
 MUSINSLIST *PUBLIC_CODE musinsl_new(void);
-void        PUBLIC_CODE musinsl_clear(MUSINSLIST *self);
+void        PUBLIC_CODE musinsl_init(MUSINSLIST *self);
 void        PUBLIC_CODE musinsl_set_EM_data(MUSINSLIST *self, bool value);
 bool        PUBLIC_CODE musinsl_is_EM_data(MUSINSLIST *self);
 MUSINS     *PUBLIC_CODE musinsl_get(MUSINSLIST *self, uint16_t index);

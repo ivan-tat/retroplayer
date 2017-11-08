@@ -37,25 +37,20 @@ typedef struct soundDMABuffer_t {
 };
 typedef struct soundDMABuffer_t SNDDMABUF;
 
-extern SNDDMABUF PUBLIC_DATA sndDMABuf;
-
 /* player */
 
 extern uint8_t PUBLIC_DATA playOption_FPS;
     /* frames per second ... default is about 70Hz */
 extern bool    PUBLIC_DATA playOption_LowQuality;
 
-//SNDDMABUF *PUBLIC_CODE sndDMABuf_new(void);
-//SNDDMABUF *PUBLIC_CODE sndDMABuf_copy(SNDDMABUF *instance);
-//void     PUBLIC_CODE sndDMABuf_delete(SNDDMABUF **instance);
+void     PUBLIC_CODE snddmabuf_init(SNDDMABUF *self);
+bool     PUBLIC_CODE snddmabuf_alloc(SNDDMABUF *self, uint32_t dmaSize);
+uint16_t PUBLIC_CODE snddmabuf_get_frame_offset(SNDDMABUF *self, uint8_t index);
+void    *PUBLIC_CODE snddmabuf_get_frame(SNDDMABUF *self, uint8_t index);
+uint16_t PUBLIC_CODE snddmabuf_get_offset_from_count(SNDDMABUF *self, uint16_t count);
+uint16_t PUBLIC_CODE snddmabuf_get_count_from_offset(SNDDMABUF *self, uint16_t bufOff);
+void     PUBLIC_CODE snddmabuf_free(SNDDMABUF *self);
 
-uint16_t PUBLIC_CODE sndDMABufGetFrameOff(SNDDMABUF *buf, uint8_t index);
-uint16_t PUBLIC_CODE sndDMABufGetOffFromCount(SNDDMABUF *buf, uint16_t count);
-uint16_t PUBLIC_CODE sndDMABufGetCountFromOff(SNDDMABUF *buf, uint16_t bufOff);
-bool     PUBLIC_CODE sndDMABufAlloc(SNDDMABUF *buf, uint32_t dmaSize);
-void     PUBLIC_CODE sndDMABufFree(SNDDMABUF *buf);
-
-void     PUBLIC_CODE sndDMABufInit(SNDDMABUF *buf);
-void     PUBLIC_CODE sndDMABufDone(SNDDMABUF *buf);
+extern SNDDMABUF PUBLIC_DATA sndDMABuf;
 
 #endif  /* FILLVARS_H */

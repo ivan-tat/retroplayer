@@ -13,6 +13,8 @@
 #include "cc/dos.h"
 #include "cc/stdio.h"
 #include "cc/string.h"
+#include "debug.h"
+#include "common.h"
 #include "hw/dma.h"
 #include "hw/sb/sbctl.h"
 #include "main/s3mvars.h"
@@ -20,65 +22,133 @@
 
 /* TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done */
 
-uint16_t PUBLIC_CODE sndDMABufGetFrameOff(SNDDMABUF *buf, uint8_t index)
+void PUBLIC_CODE snddmabuf_init(SNDDMABUF *self)
 {
-    return index < buf->framesCount ? index * buf->frameSize : 0;
+    if (self)
+    {
+        self->buf = NULL;
+        clear_sample_format(&(self->format));
+        self->frameSize = 0;
+        self->framesCount = 0;
+        self->frameLast = 0;
+        self->frameActive = 0;
+        self->flags_locked = false;
+        self->flags_Slow = false;
+    }
 }
 
-uint16_t PUBLIC_CODE sndDMABufGetOffFromCount(SNDDMABUF *buf, uint16_t count)
+bool PUBLIC_CODE snddmabuf_alloc(SNDDMABUF *self, uint32_t dmaSize)
 {
-    unsigned int bufOff = count;
-    if (get_sample_format_bits(&(buf->format)) == 16) bufOff <<= 1;
-    if (get_sample_format_channels(&(buf->format)) == 2) bufOff <<= 1;
-    if (playOption_LowQuality) bufOff <<= 1;
+    DEBUG_BEGIN("snddmabuf_alloc");
+
+    if (self)
+    {
+        if (!self->buf)
+            self->buf = _new(DMABUF);
+
+        if (!self->buf)
+        {
+            DEBUG_FAIL("snddmabuf_alloc", "Failed to initialize DMA buffer object.");
+            return false;
+        }
+
+        if (dmaBuf_alloc(self->buf, dmaSize))
+        {
+            DEBUG_SUCCESS("snddmabuf_alloc");
+            return true;
+        }
+        else
+        {
+            DEBUG_FAIL("snddmabuf_alloc", "Failed to allocate DMA buffer.");
+            return false;
+        }
+    }
+    else
+    {
+        DEBUG_FAIL("snddmabuf_alloc", "Self is NULL.");
+        return false;
+    }
+}
+
+uint16_t __near _snddmabuf_get_frame_offset(SNDDMABUF *self, uint8_t index)
+{
+    return index < self->framesCount ? index * self->frameSize : 0;
+}
+
+uint16_t PUBLIC_CODE snddmabuf_get_frame_offset(SNDDMABUF *self, uint8_t index)
+{
+    if (self)
+        return _snddmabuf_get_frame_offset(self, index);
+    else
+        return 0;
+}
+
+void *PUBLIC_CODE snddmabuf_get_frame(SNDDMABUF *self, uint8_t index)
+{
+    void *data;
+
+    if (self && self->buf)
+    {
+        data = self->buf->data;
+        if (data)
+            return MK_FP(FP_SEG(data), FP_OFF(data) + _snddmabuf_get_frame_offset(self, index));
+    }
+
+    return NULL;
+}
+
+uint16_t PUBLIC_CODE snddmabuf_get_offset_from_count(SNDDMABUF *self, uint16_t count)
+{
+    uint16_t bufOff;
+
+    if (self)
+    {
+        bufOff = count;
+
+        if (get_sample_format_bits(&(self->format)) == 16)
+            bufOff <<= 1;
+
+        if (get_sample_format_channels(&(self->format)) == 2)
+            bufOff <<= 1;
+
+        if (playOption_LowQuality)
+            bufOff <<= 1;
+    }
+    else
+        bufOff = 0;
+
     return bufOff;
 }
 
-uint16_t PUBLIC_CODE sndDMABufGetCountFromOff(SNDDMABUF *buf, uint16_t bufOff)
+uint16_t PUBLIC_CODE snddmabuf_get_count_from_offset(SNDDMABUF *self, uint16_t bufOff)
 {
-    unsigned int count = bufOff;
-    if (get_sample_format_bits(&(buf->format)) == 16) count >>= 1;
-    if (get_sample_format_channels(&(buf->format)) == 2) count >>= 1;
-    if (playOption_LowQuality) count >>= 1;
+    uint16_t count;
+
+    if (self)
+    {
+        count = bufOff;
+
+        if (get_sample_format_bits(&(self->format)) == 16)
+            count >>= 1;
+
+        if (get_sample_format_channels(&(self->format)) == 2)
+            count >>= 1;
+
+        if (playOption_LowQuality)
+            count >>= 1;
+    }
+    else
+        count = 0;
+
     return count;
 }
 
-bool PUBLIC_CODE sndDMABufAlloc(SNDDMABUF *buf, uint32_t dmaSize)
+void PUBLIC_CODE snddmabuf_free(SNDDMABUF *self)
 {
-    return dmaBufAlloc(buf->buf, dmaSize);
-}
-
-void PUBLIC_CODE sndDMABufFree(SNDDMABUF *buf)
-{
-    if (buf->buf)
-        dmaBufFree(buf->buf);
-    clear_sample_format(&(buf->format));
-    buf->frameSize = 0;
-    buf->framesCount = 0;
-    buf->frameLast = 0;
-    buf->frameActive = 0;
-    buf->flags_locked = false;
-    buf->flags_Slow = false;
-}
-
-void PUBLIC_CODE sndDMABufInit(SNDDMABUF *buf)
-{
-    buf->buf = dmaBuf_new();
-    clear_sample_format(&(buf->format));
-    buf->frameSize = 0;
-    buf->framesCount = 0;
-    buf->frameLast = 0;
-    buf->frameActive = 0;
-    buf->flags_locked = false;
-    buf->flags_Slow = false;
-}
-
-void PUBLIC_CODE sndDMABufDone(SNDDMABUF *buf)
-{
-    if (buf->buf)
-    {
-        sndDMABufFree(buf);
-        dmaBufDone(buf->buf);
-        dmaBuf_delete(&(buf->buf));
-    };
+    if (self)
+        if (self->buf)
+        {
+            dmaBuf_free(self->buf);
+            _delete(self->buf);
+        }
 }

@@ -80,9 +80,7 @@ typedef struct music_patterns_list_t
 };
 typedef struct music_patterns_list_t MUSPATLIST;
 
-MUSPATLIST *PUBLIC_CODE muspatl_new(void);
-void        PUBLIC_CODE muspatl_clear(MUSPATLIST *self);
-void        PUBLIC_CODE muspatl_delete(MUSPATLIST **self);
+void        PUBLIC_CODE muspatl_init(MUSPATLIST *self);
 void        PUBLIC_CODE muspatl_set(MUSPATLIST *self, uint16_t index, MUSPAT *item);
 MUSPAT     *PUBLIC_CODE muspatl_get(MUSPATLIST *self, uint16_t index);
 bool        PUBLIC_CODE muspatl_set_count(MUSPATLIST *self, uint16_t value);

@@ -5,7 +5,7 @@ const
     scrHeight = 25;
 
 type
-    TWindowRect = record
+    TWindowRect = packed record
         visible: boolean;
         focused: boolean;
         fgColor, bgColor: byte;

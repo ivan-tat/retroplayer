@@ -285,108 +285,95 @@ void PUBLIC_CODE dmaReleaseChannels(dmaMask_t mask)
 
 /* Buffer */
 
-DMABUF *PUBLIC_CODE dmaBuf_new(void)
+void PUBLIC_CODE dmaBuf_init(DMABUF *self)
 {
-    uint16_t seg;
-    if (!_dos_allocmem(_dos_para(sizeof(DMABUF)), &seg))
-        return MK_FP(seg, 0);
-    else
-        return (void *)0;
-}
-
-void PUBLIC_CODE dmaBuf_delete(DMABUF **buf)
-{
-    if (buf)
+    if (self)
     {
-        if (*buf)
-        {
-            _dos_freemem(FP_SEG(*buf));
-            *buf = (void *)0;
-        };
-    };
+        self->data = NULL;
+        self->size = 0;
+        self->unaligned = NULL;
+    }
 }
 
-void __near _dmaBufClear(DMABUF *buf)
-{
-    buf->data = (void *)0;
-    buf->size = 0;
-    buf->unaligned = (void *)0;
-}
-
-bool PUBLIC_CODE dmaBufAlloc(DMABUF *buf, uint32_t size)
+bool PUBLIC_CODE dmaBuf_alloc(DMABUF *self, uint32_t size)
 {
     uint16_t seg, max;
     uint32_t bufStart, bufEnd, bufSize, dmaStart, dmaEnd, dmaSize;
     dmaSize = size;
 
-    if (buf && !buf->unaligned)
+    if (self)
     {
-        /* 64 KiB max. limit (for 8-bits channel) */
-        dmaSize = dmaSize > 0x10000 ? 0x10000 : ((dmaSize + 15) & 0x1fff0);
+        if (!self->data)
+        {
+            /* 64 KiB max. limit (for 8-bits channel) */
+            dmaSize = dmaSize > 0x10000 ? 0x10000 : ((dmaSize + 15) & 0x1fff0);
 
-        bufSize = dmaSize << 1;
-        if (_dos_allocmem(_dos_para(bufSize), &seg))
-            return false;
-        buf->unaligned = MK_FP(seg, 0);
+            bufSize = dmaSize << 1;
+            if (_dos_allocmem(_dos_para(bufSize), &seg))
+            {
+                DEBUG_FAIL("dmaBuf_alloc", "Failed to allocate DOS memory.");
+                return false;
+            }
 
-        bufStart = dmaGetLinearAddress(buf->unaligned);
-        bufEnd = bufStart + bufSize - 1;
+            self->unaligned = MK_FP(seg, 0);
 
-        DEBUG_MSG_("dmaBufAlloc",
-            "Allocated %lu bytes of DOS memory for DMA buffer at 0x%05lX-0x%05lX\r\n",
-            (uint32_t)bufSize, (uint32_t)bufStart, (uint32_t)bufEnd);
+            bufStart = dmaGetLinearAddress(self->unaligned);
+            bufEnd = bufStart + bufSize - 1;
 
-        dmaStart = bufStart;
-        dmaEnd = dmaStart + dmaSize - 1;
+            DEBUG_MSG_("dmaBuf_alloc",
+                "Allocated %lu bytes of DOS memory for DMA buffer at 0x%05lX-0x%05lX\r\n",
+                (uint32_t)bufSize, (uint32_t)bufStart, (uint32_t)bufEnd);
 
-        if (((uint32_t)dmaStart & 0xf0000) != ((uint32_t)dmaEnd & 0xf0000)) {
-            dmaStart = (bufStart & 0xf0000) + 0x10000;
+            dmaStart = bufStart;
             dmaEnd = dmaStart + dmaSize - 1;
+
+            if (((uint32_t)dmaStart & 0xf0000) != ((uint32_t)dmaEnd & 0xf0000))
+            {
+                dmaStart = (bufStart & 0xf0000) + 0x10000;
+                dmaEnd = dmaStart + dmaSize - 1;
+            }
+
+            self->size = dmaSize;
+            self->data = MK_FP(dmaStart >> 4, 0);
+
+            DEBUG_MSG_("dmaBuf_alloc",
+                "Using %lu bytes for DMA buffer at 0x%05lX-0x%05lX\r\n",
+                (uint32_t)self->size, (uint32_t)dmaStart, (uint32_t)dmaEnd);
+
+            if (dmaEnd < bufEnd)
+            {
+                DEBUG_MSG_("dmaBuf_alloc",
+                    "Freeing unused trailing %lu bytes of allocated DMA buffer\r\n",
+                    (uint32_t)(bufEnd - dmaEnd));
+
+                bufSize = dmaEnd - bufStart + 1;
+                _dos_setblock(_dos_para(bufSize), FP_SEG(self->unaligned), &max);
+            }
+
+            memset(self->data, 0, self->size);
+
+            return true;
         }
-
-        buf->size = dmaSize;
-        buf->data = MK_FP(dmaStart >> 4, 0);
-
-        DEBUG_MSG_("dmaBufAlloc",
-            "Using %lu bytes for DMA buffer at 0x%05lX-0x%05lX\r\n",
-            (uint32_t)buf->size, (uint32_t)dmaStart, (uint32_t)dmaEnd);
-
-        if (dmaEnd < bufEnd) {
-
-            DEBUG_MSG_("dmaBufAlloc",
-                "Freeing unused trailing %lu bytes of allocated DMA buffer\r\n",
-                (uint32_t)(bufEnd - dmaEnd));
-
-            bufSize = dmaEnd - bufStart + 1;
-            _dos_setblock(_dos_para(bufSize), FP_SEG(buf->unaligned), &max);
+        else
+        {
+            DEBUG_FAIL("dmaBuf_alloc", "Memory is already allocated.");
+            return false;
         }
-        memset(buf->data, 0, buf->size);
-
-        return true;
-    };
-    return false;
-}
-
-void PUBLIC_CODE dmaBufFree(DMABUF *buf)
-{
-    if (buf)
+    }
+    else
     {
-        if (buf->unaligned)
-            _dos_freemem(FP_SEG(buf->unaligned));
-        _dmaBufClear(buf);
-    };
+        DEBUG_FAIL("dmaBuf_alloc", "Self is NULL.");
+        return false;
+    }
 }
 
-void PUBLIC_CODE dmaBufInit(DMABUF *buf)
+void PUBLIC_CODE dmaBuf_free(DMABUF *self)
 {
-    if (buf)
-        _dmaBufClear(buf);
-}
-
-void PUBLIC_CODE dmaBufDone(DMABUF *buf)
-{
-    if (buf)
-        dmaBufFree(buf);
+    if (self)
+    {
+        if (self->unaligned)
+            _dos_freemem(FP_SEG(self->unaligned));
+    }
 }
 
 /*** Initialization ***/

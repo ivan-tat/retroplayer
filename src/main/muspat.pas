@@ -51,9 +51,7 @@ function  muspat_map_EM_data(self: PMUSPAT): Pointer;
 type
     PMUSPATLIST = Pointer;
 
-function  muspatl_new: PMUSPATLIST;
-procedure muspatl_clear(self: PMUSPATLIST);
-procedure muspatl_delete(var self: PMUSPATLIST);
+procedure muspatl_init(self: PMUSPATLIST);
 procedure muspatl_set(self: PMUSPATLIST; index: Word; item: PMUSPAT);
 function  muspatl_get(self: PMUSPATLIST; index: Word): PMUSPAT;
 function  muspatl_set_count(self: PMUSPATLIST; value: Word): Boolean;
@@ -102,9 +100,7 @@ function  muspat_get_EM_data_offset(self: PMUSPAT): Word; external;
 function  muspat_get_data(self: PMUSPAT): Pointer; external;
 function  muspat_map_EM_data(self: PMUSPAT): Pointer; external;
 
-function  muspatl_new: PMUSPATLIST; external;
-procedure muspatl_clear(self: PMUSPATLIST); external;
-procedure muspatl_delete(var self: PMUSPATLIST); external;
+procedure muspatl_init(self: PMUSPATLIST); external;
 procedure muspatl_set(self: PMUSPATLIST; index: Word; item: PMUSPAT); external;
 function  muspatl_get(self: PMUSPATLIST; index: Word): PMUSPAT; external;
 function  muspatl_set_count(self: PMUSPATLIST; value: Word): Boolean; external;

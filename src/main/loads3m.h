@@ -21,7 +21,7 @@
 typedef void S3MLOADER;
 
 S3MLOADER *PUBLIC_CODE s3mloader_new(void);
-void     PUBLIC_CODE s3mloader_clear(S3MLOADER *self);
+void     PUBLIC_CODE s3mloader_init(S3MLOADER *self);
 bool     PUBLIC_CODE s3mloader_load(S3MLOADER *self, const char *name);
 const char *PUBLIC_CODE s3mloader_get_error(S3MLOADER *self);
 void     PUBLIC_CODE s3mloader_free(S3MLOADER *self);

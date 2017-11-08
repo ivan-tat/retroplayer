@@ -15,6 +15,7 @@
 #include "debug.h"
 #include "cc/dos.h"
 #include "dos/ems.h"
+#include "common.h"
 #include "main/musins.h"
 #include "main/muspat.h"
 #include "main/s3mtypes.h"
@@ -250,7 +251,7 @@ void *PUBLIC_CODE s3mloader_new(void)
         return NULL;
 }
 
-void PUBLIC_CODE s3mloader_clear(S3MLOADER *self)
+void PUBLIC_CODE s3mloader_init(S3MLOADER *self)
 {
     if (self)
         memset(self, 0, sizeof(struct S3M_loader_t));
@@ -466,7 +467,7 @@ bool __near s3mloader_load_instrument(S3MLOADER *self, uint8_t index)
     }
 
     ins = musinsl_get(mod_Instruments, index);
-    musins_clear(ins);
+    musins_init(ins);
 
     if (!fread(&s3mins, sizeof(S3MINS), 1, SELF->f))
     {
@@ -706,15 +707,15 @@ bool PUBLIC_CODE s3mloader_load(S3MLOADER *self, const char *name)
         DEBUG_ERR("s3mloader_load", "Failed to initialize instruments.");
         return false;
     };
-    musinsl_clear(mod_Instruments);
+    musinsl_init(mod_Instruments);
 
-    mod_Patterns = muspatl_new();
+    mod_Patterns = _new(MUSPATLIST);
     if (!mod_Patterns)
     {
         DEBUG_ERR("s3mloader_load", "Failed to initialize patterns.");
         return false;
     }
-    muspatl_clear(mod_Patterns);
+    muspatl_init(mod_Patterns);
 
     UseEMS = UseEMS && emsInstalled && emsGetFreePagesCount();
 

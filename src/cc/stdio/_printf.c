@@ -29,7 +29,7 @@ void __far _writestdout(const char *str)
     pascal_write(str);
 }
 
-void __near _dataStream_clear(DATASTREAM *self)
+void __near _dataStream_init(DATASTREAM *self)
 {
     memset(self, 0, sizeof(DATASTREAM));
 }
@@ -134,7 +134,7 @@ void dataStreamWrite(DATASTREAM *self, const void *ptr, size_t len)
 
 void dataStreamInitMemory(DATASTREAM *self, void *ptr, size_t limit)
 {
-    _dataStream_clear(self);
+    _dataStream_init(self);
     self->type = DATASTREAM_TYPE_MEMORY;
     self->output = ptr;
     self->limit = limit;
@@ -142,7 +142,7 @@ void dataStreamInitMemory(DATASTREAM *self, void *ptr, size_t limit)
 
 void dataStreamInitStdOut(DATASTREAM *self, char *buf, size_t size)
 {
-    _dataStream_clear(self);
+    _dataStream_init(self);
     self->type = DATASTREAM_TYPE_STDOUT;
     self->termSize = 1;
     //self->term = 0;    /* already set */
@@ -153,7 +153,7 @@ void dataStreamInitStdOut(DATASTREAM *self, char *buf, size_t size)
 
 void dataStreamInitFile(DATASTREAM *self, FILE *stream, char *buf, size_t size)
 {
-    _dataStream_clear(self);
+    _dataStream_init(self);
     self->type = DATASTREAM_TYPE_FILE;
     self->buf = buf;
     self->bufSize = size;

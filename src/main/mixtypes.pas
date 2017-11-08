@@ -17,7 +17,7 @@ const
     MIXSMPFLAG_LOOP   = $02;
 
 type
-    TPlaySampleInfo = record
+    TPlaySampleInfo = packed record
         dData: pointer;
         dPos: longint;
         dStep: longint;

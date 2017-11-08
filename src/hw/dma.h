@@ -81,13 +81,9 @@ typedef struct dmaBuffer_t {
 };
 typedef struct dmaBuffer_t DMABUF;
 
-DMABUF *PUBLIC_CODE dmaBuf_new(void);
-void    PUBLIC_CODE dmaBuf_delete(DMABUF **buf);
-bool    PUBLIC_CODE dmaBufAlloc(DMABUF *buf, uint32_t size);
-void    PUBLIC_CODE dmaBufFree(DMABUF *buf);
-
-void    PUBLIC_CODE dmaBufInit(DMABUF *buf);
-void    PUBLIC_CODE dmaBufDone(DMABUF *buf);
+void    PUBLIC_CODE dmaBuf_init(DMABUF *self);
+bool    PUBLIC_CODE dmaBuf_alloc(DMABUF *self, uint32_t size);
+void    PUBLIC_CODE dmaBuf_free(DMABUF *self);
 
 /*** Initialization ***/
 

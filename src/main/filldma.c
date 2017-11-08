@@ -81,7 +81,7 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
     buf = outbuf->buf->data;
     framesize = outbuf->frameSize;
         // size to fill
-    framelen = sndDMABufGetCountFromOff(&sndDMABuf, framesize);
+    framelen = snddmabuf_get_count_from_offset(&sndDMABuf, framesize);
         // samples per channel to fill
 
     if (sndDMABuf.flags_locked) {
@@ -95,9 +95,9 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
             sndDMABuf.flags_Slow = true;
 
             /* simply fill the half with last correct mixed value */
-            dstoff = sndDMABufGetFrameOff(&sndDMABuf, sndDMABuf.frameActive);
+            dstoff = snddmabuf_get_frame_offset(&sndDMABuf, sndDMABuf.frameActive);
             sndDMABuf.frameActive = 1 - sndDMABuf.frameActive;
-            srcoff = sndDMABufGetFrameOff(&sndDMABuf, sndDMABuf.frameActive);
+            srcoff = snddmabuf_get_frame_offset(&sndDMABuf, sndDMABuf.frameActive);
             // FIXME: 8-bits stereo is two byte fill, not one
             memset(&(buf[dstoff]), *buf[srcoff + framesize - 1], framesize);
             return;
@@ -109,14 +109,14 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
 
     if (playState_songEnded) {
         // clear buffer
-        memset(&(buf[sndDMABufGetFrameOff(&sndDMABuf, sndDMABuf.frameActive)]), 0, framesize);
+        memset(&(buf[snddmabuf_get_frame_offset(&sndDMABuf, sndDMABuf.frameActive)]), 0, framesize);
         sndDMABuf.frameActive = 1 - sndDMABuf.frameActive;
     } else {
         // mix into the mixing buffer
         calcTick(mixbuf, framelen);
 
         sndDMABuf.frameLast = (sndDMABuf.frameLast + 1) & (sndDMABuf.framesCount - 1);
-        dstoff = sndDMABufGetFrameOff(&sndDMABuf, sndDMABuf.frameLast);
+        dstoff = snddmabuf_get_frame_offset(&sndDMABuf, sndDMABuf.frameLast);
 
         if (playOption_LowQuality)
             LQconvert_8(&(buf[dstoff << 1]), mixbuf, framesize);

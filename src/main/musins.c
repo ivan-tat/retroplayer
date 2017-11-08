@@ -19,7 +19,7 @@
 
 /*** Musical instrument ***/
 
-void PUBLIC_CODE musins_clear(MUSINS *self)
+void PUBLIC_CODE musins_init(MUSINS *self)
 {
     if (self)
         memset(self, 0, sizeof(MUSINS));
@@ -252,7 +252,7 @@ MUSINSLIST *PUBLIC_CODE musinsl_new(void)
         return NULL;
 }
 
-void PUBLIC_CODE musinsl_clear(MUSINSLIST *self)
+void PUBLIC_CODE musinsl_init(MUSINSLIST *self)
 {
     uint16_t i;
 

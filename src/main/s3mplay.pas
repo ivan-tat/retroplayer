@@ -75,6 +75,7 @@ uses
     crt,
     dos,
     ems,
+    common,
     loads3m,
     pic,
     sndctl_t,
@@ -119,7 +120,7 @@ begin
     if (mod_Patterns <> nil) then
     begin
         muspatl_free(mod_Patterns);
-        muspatl_delete(mod_Patterns);
+        _delete_(mod_Patterns);
     end;
 
     mod_isLoaded := false;
@@ -130,7 +131,7 @@ PROCEDURE player_free;
     player_free_module;
     restore_irq;
     freeVolumeTable;
-    sndDMABufDone(@sndDMABuf);
+    snddmabuf_free(@sndDMABuf);
     if (mixBuf <> Nil) then
     begin
         _dos_freemem(seg(mixBuf^));
@@ -153,7 +154,7 @@ begin
         player_load_s3m := false;
         exit;
     end;
-    s3mloader_clear(p);
+    s3mloader_init(p);
 
     memcpy(cname, name[1], Ord(name[0]));
     cname[Ord(name[0])] := Chr(0);
@@ -199,7 +200,7 @@ var p:pArray;
     { buffersreserved = false ! }
     if ( not allocVolumeTable ) then begin player_error:=notenoughmem;exit end;
 
-    if (not sndDMABufAlloc(@sndDMABuf, DMA_BUF_SIZE_MAX)) then
+    if (not snddmabuf_alloc(@sndDMABuf, DMA_BUF_SIZE_MAX)) then
     begin
         player_error := notenoughmem;
         exit;
@@ -209,7 +210,7 @@ var p:pArray;
     }
     if (_dos_allocmem((sndDMABuf.buf^.Size + 15) shr 4, _seg) <> 0) then
     begin
-        sndDMABufFree(@sndDMABuf);
+        snddmabuf_free(@sndDMABuf);
         freeVolumeTable;
         player_error:=notenoughmem;
         exit;
@@ -444,7 +445,7 @@ begin
   buffersreserved:=false;
   sounddevice:=false;
   initVolumeTable;
-  sndDMABufInit(@sndDMABuf);
+  snddmabuf_init(@sndDMABuf);
   mixBuf:=Nil;  (* FIXME: initMixBuf() *)
   Samplerate:=22000; { not the highest but nice sounding samplerate :) }
   mixSampleRate := Samplerate;

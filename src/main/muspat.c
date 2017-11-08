@@ -232,33 +232,13 @@ void __far _muspatl_free_item(void *self, void *item)
     muspat_free((MUSPAT *)item);
 }
 
-MUSPATLIST *PUBLIC_CODE muspatl_new(void)
-{
-    uint16_t seg;
-
-    if (!_dos_allocmem(_dos_para(sizeof(MUSPATLIST)), &seg))
-        return MK_FP(seg, 0);
-    else
-        return NULL;
-}
-
-void PUBLIC_CODE muspatl_clear(MUSPATLIST *self)
+void PUBLIC_CODE muspatl_init(MUSPATLIST *self)
 {
     if (self)
     {
         dynarr_init(&(self->list), self, sizeof(MUSPAT), _muspatl_init_item, _muspatl_free_item);
         _muspatl_set_EM_handle(self, EMSBADHDL);
     }
-}
-
-void PUBLIC_CODE muspatl_delete(MUSPATLIST **self)
-{
-    if (self)
-        if (*self)
-        {
-            _dos_freemem(FP_SEG(*self));
-            *self = NULL;
-        }
 }
 
 void PUBLIC_CODE muspatl_set(MUSPATLIST *self, uint16_t index, MUSPAT *item)
@@ -357,8 +337,6 @@ void PUBLIC_CODE muspatl_free(MUSPATLIST *self)
 
         if (_muspatl_is_own_EM_handle(self))
             emsFree(self->handle);
-
-        muspatl_clear(self);
     }
 }
 

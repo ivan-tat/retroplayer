@@ -20,7 +20,7 @@ const
     DMA_BUF_SIZE_MAX = 8*1024;
 
 type
-    TSNDDMABUF = record
+    TSNDDMABUF = packed record
         buf: PDMABUF;
         format: THWSMPFMT;
         frameSize: word;
@@ -37,34 +37,34 @@ var
     playOption_FPS: byte;
     playOption_LowQuality: boolean;
 
-function  sndDMABufGetFrameOff(buf: PSNDDMABUF; index: byte): word;
-function  sndDMABufGetOffFromCount(buf: PSNDDMABUF; count: word): word;
-function  sndDMABufGetCountFromOff(buf: PSNDDMABUF; off: word): word;
-function  sndDMABufAlloc(buf: PSNDDMABUF; size: longint): boolean;
-procedure sndDMABufFree(buf: PSNDDMABUF);
-
-procedure sndDMABufInit(buf: PSNDDMABUF);
-procedure sndDMABufDone(buf: PSNDDMABUF);
+procedure snddmabuf_init(self: PSNDDMABUF);
+function  snddmabuf_alloc(self: PSNDDMABUF; size: longint): boolean;
+function  snddmabuf_get_frame_offset(self: PSNDDMABUF; index: byte): word;
+function  snddmabuf_get_frame(self: PSNDDMABUF; index: byte): pointer;
+function  snddmabuf_get_offset_from_count(self: PSNDDMABUF; value: word): word;
+function  snddmabuf_get_count_from_offset(self: PSNDDMABUF; value: word): word;
+procedure snddmabuf_free(self: PSNDDMABUF);
 
 implementation
 
 uses
+    strutils,
     dos_,
     stdio,
     string_,
-    strutils,
+    debug,
+    common,
     sbctl,
     s3mvars;
 
 (*$l fillvars.obj*)
 
-function  sndDMABufGetFrameOff(buf: PSNDDMABUF; index: byte): word; external;
-function  sndDMABufGetOffFromCount(buf: PSNDDMABUF; count: word): word; external;
-function  sndDMABufGetCountFromOff(buf: PSNDDMABUF; off: word): word; external;
-function  sndDMABufAlloc(buf: PSNDDMABUF; size: longint): boolean; external;
-procedure sndDMABufFree(buf: PSNDDMABUF); external;
-
-procedure sndDMABufInit(buf: PSNDDMABUF); external;
-procedure sndDMABufDone(buf: PSNDDMABUF); external;
+procedure snddmabuf_init(self: PSNDDMABUF); external;
+function  snddmabuf_alloc(self: PSNDDMABUF; size: longint): boolean; external;
+function  snddmabuf_get_frame_offset(self: PSNDDMABUF; index: byte): word; external;
+function  snddmabuf_get_frame(self: PSNDDMABUF; index: byte): pointer; external;
+function  snddmabuf_get_offset_from_count(self: PSNDDMABUF; value: word): word; external;
+function  snddmabuf_get_count_from_offset(self: PSNDDMABUF; value: word): word; external;
+procedure snddmabuf_free(self: PSNDDMABUF); external;
 
 end.
