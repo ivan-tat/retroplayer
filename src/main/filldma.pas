@@ -25,7 +25,7 @@ uses
     sbctl,
     posttab,
     s3mvars,
-    mixvars,
+    mixer,
     mixing;
 
 (*$l filldma.obj*)

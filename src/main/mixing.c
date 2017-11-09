@@ -13,15 +13,12 @@
 #include "cc/string.h"
 #include "dos/ems.h"
 #include "main/s3mtypes.h"
-#include "main/mixtypes.h"
 #include "main/s3mvars.h"
 #include "main/effvars.h"
-#include "main/mixvars.h"
 #include "main/fillvars.h"
 #include "main/voltab.h"
 #include "main/effects.h"
 #include "main/mixer.h"
-#include "main/mixer_.h"
 #include "main/readnote.h"
 
 // TODO: remove PUBLIC_CODE macros when done.

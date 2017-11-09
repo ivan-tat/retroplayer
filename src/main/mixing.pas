@@ -24,11 +24,9 @@ uses
     musins,
     s3mvars,
     effvars,
-    mixvars,
     fillvars,
-    mixchn,
     mixer,
-    mixer_,
+    mixchn,
     effects,
     readnote;
 

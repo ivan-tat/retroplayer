@@ -95,7 +95,6 @@ uses
     musins,
     s3mvars,
     effvars,
-    mixvars,
     mixer;
 
 (*$l effects.obj*)

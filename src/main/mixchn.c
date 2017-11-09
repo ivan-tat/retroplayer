@@ -8,7 +8,6 @@
 #include <stdint.h>
 
 #include "main/s3mvars.h"
-#include "main/mixvars.h"
 #include "main/mixer.h"
 
 #include "main/mixchn.h"

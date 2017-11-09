@@ -15,7 +15,7 @@
 #include "main/posttab.h"
 #include "main/s3mvars.h"
 #include "main/fillvars.h"
-#include "main/mixvars.h"
+#include "main/mixer.h"
 #include "main/mixing.h"
 
 // TODO: remove PUBLIC_CODE macros when done.

@@ -23,11 +23,9 @@ uses
     muspat,
     s3mvars,
     effvars,
-    mixvars,
     mixchn,
     effects,
-    mixer,
-    mixer_;
+    mixer;
 
 (*$l readnote.obj*)
 

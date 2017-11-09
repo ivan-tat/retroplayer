@@ -1,10 +1,10 @@
-; mixtypes.def -- Assembler declarations for mixtypes.h.
+; mixer_t.def -- Assembler type declarations for "mixer_" library.
 ;
 ; This is free and unencumbered software released into the public domain.
 ; For more information, please refer to <http://unlicense.org>.
 
-ifndef MIXTYPES_DEF
-MIXTYPES_DEF equ 1
+ifndef MIXER_T_DEF
+MIXER_T_DEF equ 1
 
 MIXSMPFL_16BITS equ 001h
 MIXSMPFL_LOOP   equ 002h
@@ -19,4 +19,4 @@ TPlaySampleInfo struc
     wFlags      dw ?
 TPlaySampleInfo ends
 
-endif   ; MIXTYPES_DEF
+endif   ; MIXER_T_DEF

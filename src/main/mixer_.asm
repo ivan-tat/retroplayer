@@ -8,8 +8,7 @@
 
 DGROUP group _DATA
 
-include mixtypes.def
-include mixvars.def
+include mixer_t.def
 
 _DATA segment word public use16 'DATA'
 

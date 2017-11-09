@@ -120,7 +120,6 @@ implementation
 uses
 	watcom,
     s3mvars,
-	mixvars,
 	mixer;
 
 (*$l mixchn.obj*)

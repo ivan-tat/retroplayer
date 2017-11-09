@@ -14,7 +14,6 @@
 #include "main/s3mtypes.h"
 #include "main/s3mvars.h"
 #include "main/effvars.h"
-#include "main/mixvars.h"
 #include "main/mixer.h"
 #include "main/effects.h"
 
