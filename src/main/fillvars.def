@@ -22,7 +22,6 @@ _DATA segment word public use16 'DATA'
 
 extrn sndDMABuf: TSNDDMABUF
 extrn playOption_FPS: byte
-extrn playOption_LowQuality: byte
 
 _DATA ends
 

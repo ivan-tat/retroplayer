@@ -23,25 +23,33 @@
 
 /* DMA buffer for sound */
 
+typedef uint16_t sound_DMA_buffer_flags_t;
+typedef sound_DMA_buffer_flags_t SNDDMABUFFLAGS;
+
+#define SNDDMABUFFL_LOCKED (1<<0)
+#define SNDDMABUFFL_SLOW   (1<<1)
+#define SNDDMABUFFL_LQ     (1<<2)
+
 #define DMA_BUF_SIZE_MAX (8<<10)
 
-typedef struct soundDMABuffer_t {
+#pragma pack(push, 1);
+typedef struct sound_DMA_buffer_t
+{
+    SNDDMABUFFLAGS flags;
     DMABUF  *buf;
     HWSMPFMT format;
     uint16_t frameSize;
     uint8_t  framesCount;
     uint8_t  frameLast;
     uint8_t  frameActive;
-    bool     flags_locked;
-    bool     flags_Slow;
 };
-typedef struct soundDMABuffer_t SNDDMABUF;
+#pragma pack(pop);
+typedef struct sound_DMA_buffer_t SNDDMABUF;
 
 /* player */
 
 extern uint8_t PUBLIC_DATA playOption_FPS;
     /* frames per second ... default is about 70Hz */
-extern bool    PUBLIC_DATA playOption_LowQuality;
 
 void     PUBLIC_CODE snddmabuf_init(SNDDMABUF *self);
 bool     PUBLIC_CODE snddmabuf_alloc(SNDDMABUF *self, uint32_t dmaSize);

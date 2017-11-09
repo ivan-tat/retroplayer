@@ -321,7 +321,7 @@ bool PUBLIC_CODE dmaBuf_alloc(DMABUF *self, uint32_t size)
             bufEnd = bufStart + bufSize - 1;
 
             DEBUG_MSG_("dmaBuf_alloc",
-                "Allocated %lu bytes of DOS memory for DMA buffer at 0x%05lX-0x%05lX\r\n",
+                "Allocated %lu bytes of DOS memory for DMA buffer at 0x%05lX-0x%05lX.",
                 (uint32_t)bufSize, (uint32_t)bufStart, (uint32_t)bufEnd);
 
             dmaStart = bufStart;
@@ -337,13 +337,13 @@ bool PUBLIC_CODE dmaBuf_alloc(DMABUF *self, uint32_t size)
             self->data = MK_FP(dmaStart >> 4, 0);
 
             DEBUG_MSG_("dmaBuf_alloc",
-                "Using %lu bytes for DMA buffer at 0x%05lX-0x%05lX\r\n",
+                "Using %lu bytes for DMA buffer at 0x%05lX-0x%05lX.",
                 (uint32_t)self->size, (uint32_t)dmaStart, (uint32_t)dmaEnd);
 
             if (dmaEnd < bufEnd)
             {
                 DEBUG_MSG_("dmaBuf_alloc",
-                    "Freeing unused trailing %lu bytes of allocated DMA buffer\r\n",
+                    "Freeing unused trailing %lu bytes of allocated DMA buffer...",
                     (uint32_t)(bufEnd - dmaEnd));
 
                 bufSize = dmaEnd - bufStart + 1;

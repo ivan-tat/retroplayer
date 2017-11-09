@@ -53,8 +53,8 @@ function  player_init: Boolean;
 procedure player_free;
     (* free buffers used by player *)
 
-procedure playSetMode(m16bits, mStereo: boolean; mRate: word);
-function  playStart(var A_stereo, A_16Bit: Boolean; LQ: Boolean): Boolean;
+function  player_set_mode(f_16bits, f_stereo: Boolean; rate: Word; LQ: Boolean): Boolean;
+function  playStart: Boolean;
 procedure playSetMasterVolume(vol: Byte);
 procedure playSetOrder(new: Boolean);   (* look at ST3order *)
 function  playGetSpeed: byte;
@@ -62,6 +62,7 @@ function  playGetTempo: byte;
 function  playGetMasterVolume: byte;
 function  playGetPatternDelay: byte;
 function  playGetSampleRate: word;
+function  player_is_lq_mode: Boolean;
 
 IMPLEMENTATION
 
@@ -101,11 +102,16 @@ VAR
 (* UNUSED: filename: string; (* name of file currently in memory *)
     buffersreserved: boolean;
     sounddevice: boolean;
-    Samplerate: word;
-    { S3M flags : }
-    { own Flags : }
-    { some saved values for correct restoring former status : }
-    oldexitproc  :pointer;
+    player_mode_set: Boolean;
+    player_mode_bits: Byte;
+    player_mode_signed: Boolean;
+    player_mode_channels: Byte;
+    player_mode_rate: Word;
+    player_mode_lq: Boolean;
+    oldexitproc: Pointer;
+
+const
+    _EM_map_name: TEMSNAME = 'saveMAP'#0;
 
 procedure player_free_module;
 begin
@@ -127,7 +133,8 @@ begin
 end;
 
 PROCEDURE player_free;
-  begin
+begin
+    stop_play;
     player_free_module;
     restore_irq;
     freeVolumeTable;
@@ -138,7 +145,11 @@ PROCEDURE player_free;
         mixBuf := nil;
     end;
     buffersreserved:=false;
-  end;
+    if (useEMS) then
+    begin
+        emsFree(SavHandle);
+    end;
+end;
 
 function player_load_s3m(name: String): Boolean;
 var
@@ -194,10 +205,20 @@ FUNCTION player_init:boolean;
 var p:pArray;
     _seg: word;
   begin
+    DEBUG_BEGIN(__FILE__, 'player_init');
     player_init:=false;
     if not proc386 then begin player_error:=nota386orhigher;exit end;
+    if (useEMS) then
+    begin
+        SavHandle := emsAlloc(1); { 1 page is enough ? }
+        if (emsEC <> E_EMS_SUCCESS) then
+        begin
+            Debug_Err(__FILE__, 's3mplayInit', 'Failed to allocate EM handle for mapping.');
+            exit;
+        end;
+        emsSetHandleName(SavHandle, @_EM_map_name);
+    end;
     if buffersreserved then begin player_error:=Allreadyallocbuffers;player_init:=true;exit end;
-    { buffersreserved = false ! }
     if ( not allocVolumeTable ) then begin player_error:=notenoughmem;exit end;
 
     if (not snddmabuf_alloc(@sndDMABuf, DMA_BUF_SIZE_MAX)) then
@@ -222,58 +243,118 @@ var p:pArray;
     player_init:=true;
   end;
 
-PROCEDURE playSetMode(m16bits, mStereo: boolean; mRate: word);
+function _player_setup_mixer: Boolean;
 var
-    outbuf: PSNDDMABUF;
-    b: byte;
-    s: boolean;
-    c: byte;
-    r: word;
-    tmp: word;
-    i: byte;
-    fmt: THWSMPFMT;
+    tmp: Word;
+    rate: Word;
 begin
-    (*sbAdjustMode(mRate,mStereo,m16bits);*)
+    DEBUG_BEGIN(__FILE__, '_player_setup_mixer');
 
-    case m16bits of
+    if (player_mode_set) then
+    begin
+        rate := player_mode_rate;
+
+        if (player_mode_lq) then
+            rate := rate div 2;
+
+        (*
+        tmp := longint(1000000) div rate;
+        setMixMode(
+            player_mode_channels,
+            rate,
+            ((longint(1000000) div tmp) div playOption_FPS) + 1
+        );
+        *)
+        setMixMode(
+            player_mode_channels,
+            rate,
+            trunc(trunc(1000000 / trunc(1000000 / rate)) / playOption_FPS) + 1
+        );
+        DEBUG_SUCCESS(__FILE__, '_player_setup_mixer');
+        _player_setup_mixer := true;
+    end
+    else
+    begin
+        DEBUG_FAIL(__FILE__, '_player_setup_mixer', 'No play mode was set.');
+        _player_setup_mixer := false;
+    end;
+end;
+
+function _player_setup_outbuf(outbuf: PSNDDMABUF; spc: Word): Boolean;
+var
+    size: Word;
+    i, count: Byte;
+begin
+    DEBUG_BEGIN(__FILE__, '_player_setup_outbuf');
+
+    if (player_mode_set) then
+    begin
+        outbuf^.flags := 0;
+
+        if (player_mode_lq) then
+            outbuf^.flags := outbuf^.flags or SNDDMABUFFL_LQ;
+
+        set_sample_format(@(outbuf^.format),
+            player_mode_bits, player_mode_signed, player_mode_channels);
+
+        size := spc;
+        if (player_mode_bits = 16) then
+            size := size shl 1;
+
+        if (player_mode_channels = 2) then
+            size := size shl 1;
+
+        outbuf^.frameSize := size;
+
+        i := outbuf^.buf^.Size div size;
+        count := 1;
+        while (count < i) do
+            count := count shl 1;
+
+        if (player_mode_lq) then
+            count := count shr 1;
+
+        outbuf^.framesCount := count shr 1;
+        DEBUG_SUCCESS(__FILE__, '_player_setup_outbuf');
+        _player_setup_outbuf := true;
+    end
+    else
+    begin
+        DEBUG_FAIL(__FILE__, '_player_setup_outbuf', 'No play mode was set.');
+        _player_setup_outbuf := false;
+    end;
+end;
+
+function player_set_mode(f_16bits, f_stereo: Boolean; rate: Word; LQ: Boolean): Boolean;
+begin
+    DEBUG_BEGIN(__FILE__, 'player_set_mode');
+
+    case f_16bits of
         false:
             begin
-                b := 8;
-                s := false;
+                player_mode_bits := 8;
+                player_mode_signed := false;
             end;
         true:
             begin
-                b := 16;
-                s := true;
+                player_mode_bits := 16;
+                player_mode_signed := true;
             end;
     end;
 
-    case mStereo of
-        false: c := 1;
-        true: c := 2;
+    case f_stereo of
+        false:
+            player_mode_channels := 1;
+        true:
+            player_mode_channels := 2;
     end;
 
-    SampleRate := mRate;
+    player_mode_rate := rate;
+    player_mode_lq := LQ;
+    player_mode_set := true;
 
-    outbuf := @sndDMABuf;
-
-    r := mRate;
-    if (playOption_LowQuality) then r := r shr 1;
-
-    set_sample_format(@(outbuf^.format), b, s, c);
-    (*tmp := longint(1000000) div r;
-    setMixMode(c, r, ((longint(1000000) div tmp) div playOption_FPS)+1);*)
-    setMixMode(c, r, trunc(trunc(1000000/trunc(1000000/r))/playOption_FPS)+1);
-
-    outbuf^.frameSize := mixBufSamplesPerChannel;
-    if (b = 16) then outbuf^.frameSize := outbuf^.frameSize shl 1;
-    if (c = 2) then outbuf^.frameSize := outbuf^.frameSize shl 1;
-
-    i := outbuf^.buf^.Size div outbuf^.frameSize;
-    outbuf^.framesCount := 1;
-    while outbuf^.framesCount < i do outbuf^.framesCount := outbuf^.framesCount shl 1;
-    outbuf^.framesCount := outbuf^.framesCount shr 1;
-    if (playOption_LowQuality) then outbuf^.framesCount := outbuf^.framesCount shr 1;
+    DEBUG_SUCCESS(__FILE__, 'player_set_mode');
+    player_set_mode := true;
 end;
 
 function playGetSpeed:byte;
@@ -345,8 +426,13 @@ function playGetPatternDelay:byte;
 
 function playGetSampleRate:word;
   begin
-    playGetSampleRate:=Samplerate;
+    playGetSampleRate:=player_mode_rate;
   end;
+
+function player_is_lq_mode: Boolean;
+begin
+    player_is_lq_mode := player_mode_lq;
+end;
 
 procedure playSetOrder(new:boolean);
 var i:byte;
@@ -370,27 +456,81 @@ var i:byte;
       end;
   end;
 
-FUNCTION playStart(var A_stereo,A_16Bit:boolean;LQ:Boolean):boolean;
-var key:boolean;
-    p:parray;
-    count: word;
-  begin
-    playStart:=false;
+function playStart: Boolean;
+var
+    outbuf: PSNDDMABUF;
+    count: Word;
+    mode_stereo: Boolean;
+    mode_16bits: Boolean;
+begin
+    DEBUG_BEGIN(__FILE__, 'playStart');
+
     player_error := 0;
     player_error_msg := nil;
-    playOption_LowQuality := LQ;
-    A_stereo := A_Stereo and sdev_caps_stereo;
-    A_16Bit := A_16Bit and sdev_caps_16bit;
-    if not sounddevice then begin player_error:=nosounddevice;exit; end; { sorry no device was set }
-    if not mod_isLoaded then begin player_error:=noS3Minmemory;exit end; { hmm load it first ;) }
+
+    if (not sounddevice) then
+    begin
+        DEBUG_FAIL(__FILE__, 'playStart', 'No sound device was set.');
+        player_error := nosounddevice;
+        playStart := false;
+        exit;
+    end;
+
+    if (not player_mode_set) then
+    begin
+        DEBUG_FAIL(__FILE__, 'playStart', 'No play mode was set.');
+        player_error := internal_failure;
+        playStart := false;
+        exit;
+    end;
+
+    if (not mod_isLoaded) then
+    begin
+        DEBUG_FAIL(__FILE__, 'playStart', 'No music module was loaded.');
+        player_error := noS3Minmemory;
+        playStart := false;
+        exit;
+    end;
+
+    mode_16bits := player_mode_bits = 16;
+    mode_stereo := player_mode_channels = 2;
+
+    sbAdjustMode(player_mode_rate, mode_stereo, mode_16bits);
+
     set_ready_irq( @PlaySoundCallback );
-    Initblaster(a_16Bit,a_stereo,Samplerate);
-    playSetMode(a_16bit,a_stereo,Samplerate);
+    Initblaster(mode_16bits, mode_stereo, player_mode_rate);
+
+    if (mode_16bits) then
+        player_mode_bits := 16
+    else
+        player_mode_bits := 8;
+    if (mode_stereo) then
+        player_mode_channels := 2
+    else
+        player_mode_channels := 1;
+
+    player_set_mode(mode_16bits, mode_stereo, player_mode_rate, player_mode_lq);
+
+    if (not _player_setup_mixer) then
+    begin
+        DEBUG_FAIL(__FILE__, 'playStart', 'Failed to setup mixer.');
+        playStart := false;
+        exit;
+    end;
+
+    outbuf := @sndDMABuf;
+
+    if (not _player_setup_outbuf(outbuf, mixBufSamplesPerChannel)) then
+    begin
+        DEBUG_FAIL(__FILE__, 'playStart', 'Failed to setup output buffer.');
+        playStart := false;
+        exit;
+    end;
 
     (* now after loading we know if signed data or not *)
     calcVolumeTable( modOption_SignedData );
 
-    calcposttable(playState_mVolume,A_16bit);
+    calcposttable(playState_mVolume,mode_16bits);
     (* last tick -> goto next note: *)
     playState_tick:=1;
     (* next row to read from: *)
@@ -407,31 +547,28 @@ var key:boolean;
     set_tempo(initState_tempo);
     playSetOrder(playOption_ST3Order); { <- don't remove this ! it's important ! (setup lastorder) }
     playState_songEnded:=false;
-    sndDMABuf.flags_Slow := false;
+
     mixTickSamplesPerChannelLeft:=0;    (* emmidiately next tick *)
     Initchannels;
 
-    count := sndDMABuf.frameSize;
-    if (playOption_LowQuality) then count := count * 2;
+    count := outbuf^.frameSize;
+    if (player_mode_lq) then
+        count := count * 2;
 
-    (* loop through whole DMA buffer *)
-    sbSetupDMATransfer(sndDMABuf.buf^.Data, count * sndDMABuf.framesCount, true);
-
-    sndDMABuf.frameActive := sndDMABuf.framesCount - 1;
-    sndDMABuf.frameLast := sndDMABuf.framesCount;
+    outbuf^.frameActive := outbuf^.framesCount - 1;
+    outbuf^.frameLast := outbuf^.framesCount;
 
     (* calc all buffer parts *)
-    fill_dmabuffer(mixbuf, @sndDMABuf);
+    fill_dmabuffer(mixbuf, outbuf);
 
-    (* double buffering *)
-    play_firstblock( count );
+    (* loop through whole DMA buffer with double buffering *)
+    sbSetupDMATransfer(outbuf^.buf^.Data, count * outbuf^.framesCount, true);
+    sbSetupDSPTransfer(count, true);
 
     (* ok, now everything works in background *)
+    DEBUG_SUCCESS(__FILE__, 'playStart');
     playStart:=true;
-  end;
-
-const
-    _EM_map_name: TEMSNAME = 'saveMAP'#0;
+end;
 
 procedure s3mplayInit;
 var
@@ -440,44 +577,32 @@ var
 begin
     PROC386 := isCPU_i386;
     useEMS := emsInstalled;
-
-  inside:=false;
-  buffersreserved:=false;
-  sounddevice:=false;
-  initVolumeTable;
-  snddmabuf_init(@sndDMABuf);
-  mixBuf:=Nil;  (* FIXME: initMixBuf() *)
-  Samplerate:=22000; { not the highest but nice sounding samplerate :) }
-  mixSampleRate := Samplerate;
-  (* TODO: +mixChannels, +mixBufSamplesPerChannel *)
-  playOption_LoopSong:=false;
-  playOption_ST3Order:=false;   { Ok let's hear all patterns are saved ... }
-  playOption_FPS := 70;
-  playOption_LowQuality := false;
-
-    if (useEMS) then
-    begin
-        savHandle := emsAlloc(1); { 1 page is enough ? }
-        if (emsEC <> E_EMS_SUCCESS) then
-        begin
-            Debug_Err(__FILE__, 's3mplayInit', 'Failed to allocate EM handle for mapping.');
-            exit;
-        end;
-        emsSetHandleName(savHandle, @_EM_map_name);
-    end;
-
+    inside := false;
+    buffersreserved := false;
+    sounddevice := false;
+    player_mode_set := false;
+    player_mode_bits := 0;
+    player_mode_signed := false;
+    player_mode_channels := 0;
+    player_mode_rate := 0;
+    player_mode_lq := false;
+    playOption_LoopSong := false;
+    playOption_ST3Order := false;   { Ok let's hear all patterns are saved ... }
+    playOption_FPS := 70;
+    initVolumeTable;
+    mixBuf := nil;  (* FIXME: initMixBuf() *)
+    mixSampleRate := 0;
+    mixChannels := 0;
+    mixBufSamplesPerChannel := 0;
+    snddmabuf_init(@sndDMABuf);
+    SavHandle := EMSBADHDL;
     mod_Instruments := nil;
     mod_Patterns := nil;
 end;
 
 procedure s3mplayDone;
 begin
-    stop_play;
     player_free;
-    if (useEMS) then
-    begin
-        emsFree(savHandle);
-    end;
 end;
 
 procedure register_s3mplay; far; external;

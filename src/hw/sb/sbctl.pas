@@ -109,8 +109,7 @@ function  DetectSoundblaster(prot:boolean):Boolean;     (* detects Sound Blaster
 function  Detect_DSP_Addr(prot:boolean):Boolean;        (* detects DSP *)
 function  Detect_DMA_Channel_IRQ(prot:boolean):Boolean; (* detects DMA & IRQ channels *)
 function  Get_BlasterVersion:Word;                      (* reads the detected soundblaster version *)
-procedure play_firstBlock(length:word);
-procedure play_oneBlock(p:pointer;length:word);
+procedure sb_adjust_mode(var f_16bits, f_stereo: boolean; var rate: word);
 procedure Initblaster(var m16bits, mStereo: boolean; var mRate: word);
 procedure set_ready_irq(p:pointer);
 procedure restore_irq;
@@ -218,23 +217,12 @@ begin
     sdev_mode_stereo := m_stereo;
 end;
 
-(* call this if you want to do continues play *)
-procedure play_firstBlock(length:word);
-begin
-    sbSetupDSPTransfer( length, true );
-end;
-
-PROCEDURE play_oneBlock(p:pointer;length:word);
-{ call this if you want to play only ONE (!) block - I'm sure you can do
-  continues play with this proc. on SBs <SB16 (I have seen that often in
-  other sources, but it'll definitly not work on a SB16 ! It'll cause
-  'ticks' }
-begin
-    sbSetupDMATransfer( p, length, false );
-    sbSetupDSPTransfer( length, false );
-end;
-
 { -------------------- continue commenting here ---------------------- }
+
+procedure sb_adjust_mode(var f_16bits, f_stereo: boolean; var rate: word);
+begin
+    sbAdjustMode(rate, f_stereo, f_16bits); (* FIXME: +signed *)
+end;
 
 PROCEDURE Initblaster(var m16bits, mStereo: boolean; var mRate: word);
 begin
@@ -317,6 +305,9 @@ begin
     detect_dsp_addr := true;
 end;
 
+const
+    _sb_silence_u8: Byte = $80;
+
 function tryDetectIRQ( dmac: byte; m16bits: boolean ): boolean;
 var
     mRate: word;
@@ -334,7 +325,8 @@ begin
     dmaMaskSingleChannel( dmac );
     stop_play;
     Initblaster(m16bits, mStereo, mRate);
-    play_oneblock( ptr( 0, 0 ), 1 );
+    sbSetupDMATransfer( @_sb_silence_u8, 1, false );
+    sbSetupDSPTransfer( 1, false );
     delay( 10 );
 
     if ( check <> 0 ) then

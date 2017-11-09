@@ -26,14 +26,13 @@ void PUBLIC_CODE snddmabuf_init(SNDDMABUF *self)
 {
     if (self)
     {
+        self->flags = 0;
         self->buf = NULL;
         clear_sample_format(&(self->format));
         self->frameSize = 0;
         self->framesCount = 0;
         self->frameLast = 0;
         self->frameActive = 0;
-        self->flags_locked = false;
-        self->flags_Slow = false;
     }
 }
 
@@ -51,6 +50,8 @@ bool PUBLIC_CODE snddmabuf_alloc(SNDDMABUF *self, uint32_t dmaSize)
             DEBUG_FAIL("snddmabuf_alloc", "Failed to initialize DMA buffer object.");
             return false;
         }
+
+        dmaBuf_init(self->buf);
 
         if (dmaBuf_alloc(self->buf, dmaSize))
         {
@@ -111,7 +112,7 @@ uint16_t PUBLIC_CODE snddmabuf_get_offset_from_count(SNDDMABUF *self, uint16_t c
         if (get_sample_format_channels(&(self->format)) == 2)
             bufOff <<= 1;
 
-        if (playOption_LowQuality)
+        if (self->flags & SNDDMABUFFL_LQ)
             bufOff <<= 1;
     }
     else
@@ -134,7 +135,7 @@ uint16_t PUBLIC_CODE snddmabuf_get_count_from_offset(SNDDMABUF *self, uint16_t b
         if (get_sample_format_channels(&(self->format)) == 2)
             count >>= 1;
 
-        if (playOption_LowQuality)
+        if (self->flags & SNDDMABUFFL_LQ)
             count >>= 1;
     }
     else

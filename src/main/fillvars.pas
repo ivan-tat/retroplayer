@@ -16,26 +16,32 @@ uses
 
 (*$I defines.pas*)
 
+type
+    TSNDDMABUFFLAGS = Word;
+
+const
+    SNDDMABUFFL_LOCKED = 1 shl 0;
+    SNDDMABUFFL_SLOW   = 1 shl 1;
+    SNDDMABUFFL_LQ     = 1 shl 2;
+
 const
     DMA_BUF_SIZE_MAX = 8*1024;
 
 type
     TSNDDMABUF = packed record
+        flags: TSNDDMABUFFLAGS;
         buf: PDMABUF;
         format: THWSMPFMT;
         frameSize: word;
         framesCount: byte;
         frameLast: byte;
         frameActive: byte;
-        flags_locked: boolean;
-        flags_Slow: boolean;
     end;
     PSNDDMABUF = ^TSNDDMABUF;
 
 var
     sndDMABuf: TSNDDMABUF;
     playOption_FPS: byte;
-    playOption_LowQuality: boolean;
 
 procedure snddmabuf_init(self: PSNDDMABUF);
 function  snddmabuf_alloc(self: PSNDDMABUF; size: longint): boolean;

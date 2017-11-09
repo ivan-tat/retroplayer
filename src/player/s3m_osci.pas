@@ -32,7 +32,7 @@ var samplerate:word;
       writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');
       if not player_init then halt;
       if not player_init_device(2) then begin writeln(' Blaster enviroment not found sorry ... ');halt end;
-      playSetMode(_16bit,stereo,samplerate);
+      player_set_mode(_16bit,stereo,samplerate,false);
       playSetOrder(true);
       playOption_LoopSong:=true;
     end;
@@ -119,7 +119,8 @@ begin
   if (filename='') then halt;
   writeln;
   Init;
-  if not playStart(stereo,_16bit,false) then halt;
+  if (not player_set_mode(_16bit,stereo,samplerate,false)) then halt;
+  if (not playStart) then halt;
   writeln(#13#10' DMA buffer frame size: ', sndDMABuf.frameSize);
   writeln(#13#10' Stop playing and exit with <ESC> ');
   writeln('press any key to switch to oscillator ... ');
@@ -191,6 +192,5 @@ begin
     mov        ax,3
     int        10h
   end;
-  stop_play;
   player_free;
 end.

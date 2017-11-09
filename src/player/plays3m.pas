@@ -316,7 +316,7 @@ CONST SW_order:array[false..true] of string = ('Extended Order','Normal Order');
     gotoxy(50,6);write('EMS usage: ',switch[useEMS],' Loop S3M : ');
     textbackground(blue);textcolor(lightgray);
     gotoxy(1,3);write(' Samplerate: ',playGetSampleRate:5,'  ',sw_stereo[stereo],', ',sw_res[_16bit],
-    ', ',sw_order[ST3order],', ',sw_qual[playOption_LowQuality]);
+    ', ',sw_order[ST3order],', ',sw_qual[player_is_lq_mode]);
     gotoxy(1,4);write(' Free DOS memory : ',(getFreeDOSMemory shr 10):6,' KiB   Free EMS memory : ',getFreeEMMMemory:5,' KiB');
     gotoxy(1,5);
     write(' Used EMS memory : ', (musinsl_get_used_EM(mod_Instruments) + muspatl_get_used_EM(mod_Patterns)):6,
@@ -396,12 +396,12 @@ begin
     end;
   { And here we go :) }
   if volume>0 then playSetMasterVolume(volume);
-  playSetMode(_16bit,stereo,samplerate);
+  if (not player_set_mode(_16bit,stereo,samplerate,_LQ)) then display_errormsg;
   playSetOrder(ST3order);
   save_chntyps;
   playOption_LoopSong:=true;
   screen_no:=1;startchn:=1;
-  if not playStart(stereo,_16bit,_LQ) then display_errormsg;
+  if (not playStart) then display_errormsg;
   mainscreen;
   hide_cursor;
   repeat
@@ -485,10 +485,10 @@ begin
       end;
     if (c=#77) and (startchn<usedchannels) then begin inc(startchn);if screen_no=2 then prepare_scr; end;
     if (c=#75) and (startchn>1) then begin dec(startchn);if screen_no=2 then prepare_scr; end;
-  until (sndDMABuf.flags_Slow or (c=#27) or playState_songEnded);
-  if (sndDMABuf.flags_Slow) then writeln(' Sorry your PC is to slow ... ');
+  until ((sndDMABuf.flags and SNDDMABUFFL_SLOW <> 0) or (c=#27) or playState_songEnded);
+  if (sndDMABuf.flags and SNDDMABUFFL_SLOW <> 0) then
+        writeln(' Sorry your PC is to slow ... ');
   view_cursor;
-  stop_play;
   player_free;
   gotoxy(1,8);
   textcolor(white);textbackground(blue);

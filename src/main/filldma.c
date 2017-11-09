@@ -81,23 +81,26 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
     buf = outbuf->buf->data;
     framesize = outbuf->frameSize;
         // size to fill
-    framelen = snddmabuf_get_count_from_offset(&sndDMABuf, framesize);
+    framelen = snddmabuf_get_count_from_offset(outbuf, framesize);
         // samples per channel to fill
 
-    if (sndDMABuf.flags_locked) {
+    if (outbuf->flags & SNDDMABUFFL_LOCKED)
+    {
         wait = 0xffff;
-        while (wait && sndDMABuf.flags_locked) {
+        while (wait && (outbuf->flags & SNDDMABUFFL_LOCKED))
+        {
             wait--;
         }
-        if (sndDMABuf.flags_locked) {
+        if (outbuf->flags & SNDDMABUFFL_LOCKED)
+        {
             /* sorry your PC is to slow - maincode may ignore this flag */
             /* but it'll sound ugly :( */
-            sndDMABuf.flags_Slow = true;
+            outbuf->flags |= SNDDMABUFFL_SLOW;
 
             /* simply fill the half with last correct mixed value */
-            dstoff = snddmabuf_get_frame_offset(&sndDMABuf, sndDMABuf.frameActive);
-            sndDMABuf.frameActive = 1 - sndDMABuf.frameActive;
-            srcoff = snddmabuf_get_frame_offset(&sndDMABuf, sndDMABuf.frameActive);
+            dstoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameActive);
+            outbuf->frameActive = 1 - outbuf->frameActive;
+            srcoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameActive);
             // FIXME: 8-bits stereo is two byte fill, not one
             memset(&(buf[dstoff]), *buf[srcoff + framesize - 1], framesize);
             return;
@@ -105,26 +108,26 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
     }
     /* for check if too slow set a variable (flag that we are allready in calc) */
 
-    sndDMABuf.flags_locked = true;
+    outbuf->flags |= SNDDMABUFFL_LOCKED;
 
     if (playState_songEnded) {
         // clear buffer
-        memset(&(buf[snddmabuf_get_frame_offset(&sndDMABuf, sndDMABuf.frameActive)]), 0, framesize);
-        sndDMABuf.frameActive = 1 - sndDMABuf.frameActive;
+        memset(&(buf[snddmabuf_get_frame_offset(outbuf, outbuf->frameActive)]), 0, framesize);
+        outbuf->frameActive = 1 - outbuf->frameActive;
     } else {
         // mix into the mixing buffer
         calcTick(mixbuf, framelen);
 
-        sndDMABuf.frameLast = (sndDMABuf.frameLast + 1) & (sndDMABuf.framesCount - 1);
-        dstoff = snddmabuf_get_frame_offset(&sndDMABuf, sndDMABuf.frameLast);
+        outbuf->frameLast = (outbuf->frameLast + 1) & (outbuf->framesCount - 1);
+        dstoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameLast);
 
-        if (playOption_LowQuality)
+        if (outbuf->flags & SNDDMABUFFL_LQ)
             LQconvert_8(&(buf[dstoff << 1]), mixbuf, framesize);
         else
             convert_8(&(buf[dstoff]), mixbuf, framesize);
     }
 
-    sndDMABuf.flags_locked = false;
+    outbuf->flags &= ~SNDDMABUFFL_LOCKED;
 }
 
 void PUBLIC_CODE fill_DMAbuffer(void *mixbuf, SNDDMABUF *outbuf)
