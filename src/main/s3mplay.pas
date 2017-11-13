@@ -191,7 +191,7 @@ FUNCTION player_init_device(input:byte):boolean;
     player_init_device:=false;
     if Input = 0 then { 'checkthem' not yet implemented } sounddevice:=true
     else
-    if Input = 1 then Sounddevice:=DetectSoundblaster(true)
+    if Input = 1 then Sounddevice:=DetectSoundblaster
     else
     if Input = 2 then Sounddevice:=UseBlasterEnv
     else
@@ -409,7 +409,7 @@ procedure playSetMasterVolume(vol:byte);
   begin
     if vol>127 then vol:=127;
     playState_mVolume:=vol;
-    calcposttable(playState_mVolume, sdev_mode_16bit);
+    calcposttable(playState_mVolume, sdev_mode_16bits);
   end;
 
 function playGetMasterVolume:byte;

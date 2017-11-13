@@ -24,6 +24,7 @@ function hexw(value: word): TString4;
 function hexd(value: longint): TString8;
 function decb(value: byte): TString3;
 function leftformat(s: string; len: byte): string;
+function upstr(s: String): String;
 
 implementation
 
@@ -81,6 +82,17 @@ begin
     for i := length(s) to len do t := t + ' ';
     t := copy(t, 1, len);
     leftformat := t;
+end;
+
+function upstr(s: String): String;
+var
+    t: String;
+    i: Byte;
+begin
+    t[0] := Chr(length(s));
+    for i := 1 to length(s) do
+        t[i] := UpCase(s[i]);
+    upstr := t;
 end;
 
 end.

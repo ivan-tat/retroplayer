@@ -132,7 +132,7 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
 
 void PUBLIC_CODE fill_DMAbuffer(void *mixbuf, SNDDMABUF *outbuf)
 {
-    if (!sdev_mode_16bit)
+    if (!sdev_mode_16bits)
     {
         do
         {
