@@ -12,11 +12,10 @@ interface
 
 (*$I defines.pas*)
 
-var
-    post8bit :array[0..4095] of byte;
-    post16bit:array[0..4095] of word;
-
 procedure calcPostTable( vol: byte; use16bit: boolean );
+procedure convert_16s_8u;
+procedure convert_16s_mono_8u_mono_lq;
+procedure convert_16s_stereo_8u_stereo_lq;
 
 implementation
 
@@ -26,5 +25,8 @@ uses
 (*$l posttab.obj*)
 
 procedure calcPostTable( vol: byte; use16bit: boolean ); external;
+procedure convert_16s_8u; external;
+procedure convert_16s_mono_8u_mono_lq; external;
+procedure convert_16s_stereo_8u_stereo_lq; external;
 
 end.
