@@ -409,7 +409,7 @@ procedure playSetMasterVolume(vol:byte);
   begin
     if vol>127 then vol:=127;
     playState_mVolume:=vol;
-    calcposttable(playState_mVolume, sb_get_sample_bits = 16);
+    calcPostTable(playState_mVolume);
   end;
 
 function playGetMasterVolume:byte;
@@ -528,7 +528,7 @@ begin
     (* now after loading we know if signed data or not *)
     calcVolumeTable( modOption_SignedData );
 
-    calcposttable(playState_mVolume,mode_16bits);
+    calcPostTable(playState_mVolume);
     (* last tick -> goto next note: *)
     playState_tick:=1;
     (* next row to read from: *)

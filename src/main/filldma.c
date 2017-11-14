@@ -71,15 +71,17 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
         outbuf->frameLast = (outbuf->frameLast + 1) & (outbuf->framesCount - 1);
         dstoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameLast);
 
+        amplify_16s(mixbuf, framesize);
+
         if (outbuf->flags & SNDDMABUFFL_LQ)
         {
             if (sb_get_channels() == 2)
-                convert_16s_stereo_8u_stereo_lq(&(buf[dstoff << 1]), mixbuf, framesize);
+                clip_16s_stereo_8u_stereo_lq(&(buf[dstoff << 1]), mixbuf, framesize);
             else
-                convert_16s_mono_8u_mono_lq(&(buf[dstoff << 1]), mixbuf, framesize);
+                clip_16s_mono_8u_mono_lq(&(buf[dstoff << 1]), mixbuf, framesize);
         }
         else
-            convert_16s_8u(&(buf[dstoff]), mixbuf, framesize);
+            clip_16s_8u(&(buf[dstoff]), mixbuf, framesize);
     }
 
     outbuf->flags &= ~SNDDMABUFFL_LOCKED;

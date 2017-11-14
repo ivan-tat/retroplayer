@@ -12,37 +12,59 @@
 
 #include "main/posttab.h"
 
-static uint8_t  PUBLIC_DATA post8bit[4096];
-static uint16_t PUBLIC_DATA post16bit[4096];
+static int16_t amptab[2][256];
 
-void PUBLIC_CODE calcPostTable(uint8_t vol, bool use16bit)
+void PUBLIC_CODE calcPostTable(uint8_t volume)
 {
-    int16_t z, i, sample;
+    int16_t v, i;
 
-    if ( ! use16bit )
+    v = volume & 127;
+
+    for (i = 0; i < 256; i++)
     {
-        z = vol&127;
-        for( i = 0; i <= 4095; i++ )
-        {
-            sample = ( int16_t )( 127 + ( ( ( int32_t )( i - 2048 ) * z ) >> 7 ) );
-            if( sample < 0 ) sample = 0; else
-            if( sample > 255 ) sample = 255;
-            post8bit[ i ] = sample;
-        }
+        amptab[0][i] = i * v / 128;
+        amptab[1][i] = (int16_t)(((int32_t)((int16_t)((int8_t)i) * 256) * v) / 128);
     }
 }
 
-void convert_16s_8u(void *outbuf, void *mixbuf, uint16_t count)
+void amplify_16s(void *buf, uint16_t count)
 {
-    uint16_t *src;
-    uint8_t *dst;
+    int16_t *out;
+    int16_t s;
 
-    src = (uint16_t *)mixbuf;
+    if (count)
+    {
+        out = (int16_t *)buf;
+
+        do
+        {
+            s = *out;
+            *out = (amptab[0][(uint8_t)s] + amptab[1][(uint16_t)s >> 8]);
+            out++;
+            count--;
+        }
+        while (count);
+    }
+}
+
+void clip_16s_8u(void *outbuf, void *mixbuf, uint16_t count)
+{
+    int16_t *src;
+    uint8_t *dst;
+    int16_t s;
+
+    src = (int16_t *)mixbuf;
     dst = (uint8_t *)outbuf;
 
     do
     {
-        *dst = post8bit[*src + 2048];
+        s = *src;
+        if (s < -128)
+            s = -128;
+        else
+            if (s > 127)
+                s = 127;
+        *dst = (uint8_t)s + 128;
         src++;
         dst++;
         count--;
@@ -50,20 +72,25 @@ void convert_16s_8u(void *outbuf, void *mixbuf, uint16_t count)
     while (count);
 }
 
-void convert_16s_mono_8u_mono_lq(void *outbuf, void *mixbuf, uint16_t count)
+void clip_16s_mono_8u_mono_lq(void *outbuf, void *mixbuf, uint16_t count)
 {
-    uint16_t (*src)[1];
+    int16_t *src;
     uint8_t (*dst)[1];
-    uint8_t samp[2];
+    int16_t s;
 
-    src = (uint16_t *)mixbuf;
+    src = (int16_t *)mixbuf;
     dst = (uint8_t *)outbuf;
 
     do
     {
-        samp[0] = post8bit[*src[0] + 2048];
-        *dst[0] = samp[0];
-        *dst[1] = samp[0];
+        s = *src;
+        if (s < -128)
+            s = -128;
+        else
+            if (s > 127)
+                s = 127;
+        *dst[0] = s;
+        *dst[1] = s;
         src++;
         dst += 2;
         count--;
@@ -71,24 +98,34 @@ void convert_16s_mono_8u_mono_lq(void *outbuf, void *mixbuf, uint16_t count)
     while (count);
 }
 
-void convert_16s_stereo_8u_stereo_lq(void *outbuf, void *mixbuf, uint16_t count)
+void clip_16s_stereo_8u_stereo_lq(void *outbuf, void *mixbuf, uint16_t count)
 {
-    uint16_t (*src)[1];
+    int16_t (*src)[1];
     uint8_t (*dst)[1];
-    uint8_t samp[2];
+    int16_t s[2];
 
-    src = (uint16_t *)mixbuf;
+    src = (int16_t *)mixbuf;
     dst = (uint8_t *)outbuf;
 
     count >>= 1;
     do
     {
-        samp[0] = post8bit[*src[0] + 2048];
-        samp[1] = post8bit[*src[1] + 2048];
-        *dst[0] = samp[0];
-        *dst[1] = samp[1];
-        *dst[2] = samp[0];
-        *dst[3] = samp[1];
+        s[0] = *src[0];
+        s[1] = *src[1];
+        if (s[0] < -128)
+            s[0] = -128;
+        else
+            if (s[0] > 127)
+                s[0] = 127;
+        if (s[1] < -128)
+            s[1] = -128;
+        else
+            if (s[1] > 127)
+                s[1] = 127;
+        *dst[0] = s[0];
+        *dst[1] = s[1];
+        *dst[2] = s[0];
+        *dst[3] = s[1];
         src += 2;
         dst += 4;
         count--;
