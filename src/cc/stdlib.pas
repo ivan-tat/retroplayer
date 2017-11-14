@@ -22,13 +22,16 @@ procedure cc_free_;
 
 procedure cc_exit_;
 
+procedure custom_getenv_;
+
 implementation
 
 uses
     watcom,
     pascal,
     ctype,
-    errno_;
+    errno_,
+    dos;
 
 procedure pascal_halt(exitcode: word); far;
 begin
@@ -60,5 +63,13 @@ procedure cc_free_; external;
 
 (*$L stdlib/fexit.obj*)
 procedure cc_exit_; external;
+
+function pascal_getenv(name: String): String; near;
+begin
+    pascal_getenv := getenv(name);
+end;
+
+(*$L stdlib/getenv.obj*)
+procedure custom_getenv_; external;
 
 end.

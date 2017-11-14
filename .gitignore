@@ -78,6 +78,7 @@ src/cc/stdlib/atol.asm
 src/cc/stdlib/fexit.asm
 src/cc/stdlib/ffree.asm
 src/cc/stdlib/fmalloc.asm
+src/cc/stdlib/getenv.asm
 src/cc/stdlib/strtol.asm
 src/cc/string/memcmp.asm
 src/cc/string/memcpy.asm

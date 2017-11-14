@@ -61,6 +61,7 @@ $RM ./src/cc/stdlib/atol.asm
 $RM ./src/cc/stdlib/fexit.asm
 $RM ./src/cc/stdlib/ffree.asm
 $RM ./src/cc/stdlib/fmalloc.asm
+$RM ./src/cc/stdlib/getenv.asm
 $RM ./src/cc/stdlib/strtol.asm
 cleandir ./src/cc/string
 $RM ./src/cc/string/memcmp.asm

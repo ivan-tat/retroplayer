@@ -366,6 +366,7 @@ build_target $T_CC     obj src/cc/stdlib/atol.c
 build_target $T_CC     obj src/cc/stdlib/fexit.c
 build_target $T_CC     obj src/cc/stdlib/ffree.c
 build_target $T_CC     obj src/cc/stdlib/fmalloc.c
+build_target $T_CC     obj src/cc/stdlib/getenv.c
 build_target $T_CC     obj src/cc/stdlib/strtol.c
 build_target $T_CC     obj src/cc/string/memcmp.c
 build_target $T_CC     obj src/cc/string/memcpy.c

@@ -28,6 +28,8 @@ void  cc_free(void *ptr);
 
 void cc_exit(int status);
 
+char *custom_getenv(char *dest, const char *name, size_t maxlen);
+
 /* Aliases */
 
 #define atoi cc_atoi
