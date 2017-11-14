@@ -28,16 +28,6 @@ extern uint16_t PUBLIC_DATA sdev_hw_base;      /* base i/o address */
 extern uint8_t  PUBLIC_DATA sdev_hw_irq;       /* IRQ */
 extern uint8_t  PUBLIC_DATA sdev_hw_dma8;      /* DMA channel for 8bit play */
 extern uint8_t  PUBLIC_DATA sdev_hw_dma16;     /* DMA channel for 16bit play */
-extern bool     PUBLIC_DATA sdev_configured;   /* sound card is detected */
-extern bool     PUBLIC_DATA sdev_hwflags_base; /* DSP base I/O address is detected */
-extern bool     PUBLIC_DATA sdev_hwflags_irq;  /* IRQ channel is detected */
-extern bool     PUBLIC_DATA sdev_hwflags_dma8; /* DMA 8-bits channel is detected */
-extern bool     PUBLIC_DATA sdev_hwflags_dma16;/* DMA 16-bits channel is detected */
-extern uint16_t PUBLIC_DATA sdev_hw_dspv;      /* DSP chip version */
-extern uint8_t  PUBLIC_DATA sdev_irq_answer;   /* for detecting (private) */
-extern void    *PUBLIC_DATA sdev_irq_savedvec; /* for detecting (private) */
-
-extern SoundHWISRCallback_t *PUBLIC_DATA ISRUserCallback;   /* private */
 
 /* capabilities */
 
@@ -54,8 +44,7 @@ extern bool     PUBLIC_DATA sdev_mode_16bits;
 extern bool     PUBLIC_DATA sdev_mode_signed;
 extern bool     PUBLIC_DATA sdev_mode_stereo;
 
-void     PUBLIC_CODE setvolume(uint8_t vol);
-uint16_t PUBLIC_CODE sbReadDSPVersion(void);
+void     PUBLIC_CODE sb_set_volume(uint8_t value);
 void     PUBLIC_CODE sbAdjustMode(uint16_t *rate, bool *stereo, bool *_16bit);
 void     PUBLIC_CODE sbSetupMode(uint16_t freq, bool stereo);
 void     PUBLIC_CODE sbSetupDMATransfer(void *p, uint16_t count, bool autoinit);
@@ -71,6 +60,7 @@ bool     PUBLIC_CODE Detect_DSP_Addr(void);
 bool     PUBLIC_CODE Detect_DMA_Channel_IRQ(void);
 bool     PUBLIC_CODE DetectSoundblaster(void);
 bool     PUBLIC_CODE InputSoundblasterValues(void);
+bool     PUBLIC_CODE UseBlasterEnv(void);
 void     PUBLIC_CODE set_ready_irq(void *p);
 void     PUBLIC_CODE restore_irq(void);
 void     PUBLIC_CODE writelnSBConfig(void);

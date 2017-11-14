@@ -90,26 +90,25 @@ var
     sdev_mode_signed: boolean;
     sdev_mode_stereo: boolean;
 
-procedure setvolume( vol: byte );
-function  sbReadDSPVersion: word;
+procedure sb_set_volume(value: Byte);
 procedure sbAdjustMode( var rate: word; var stereo: boolean; var _16bit: boolean );
 procedure sbSetupMode( freq: word; stereo: boolean );
 procedure sbSetupDMATransfer( p: pointer; count: word; autoinit: boolean );
 function  sbGetDMACounter: word;
 procedure sbSetupDSPTransfer( len: word; auto: boolean );
+procedure Initblaster(var m16bits, mStereo: boolean; var mRate: word);
 procedure pause_play;
 procedure continue_play;
 procedure stop_play;
+procedure set_ready_irq(p:pointer);
+procedure restore_irq;
 
 procedure Forceto(typ, dma8, dma16, irq: Byte; dsp: Word);
-function  UseBlasterEnv:boolean;                        (* use values set in enviroment BLASTER *)
-function  InputSoundblasterValues:Boolean;              (* input Soundbaster values by hand (in textmode) *)
 function  Detect_DSP_Addr: Boolean;
 function  Detect_DMA_Channel_IRQ: Boolean;
 function  DetectSoundblaster: Boolean;
-procedure Initblaster(var m16bits, mStereo: boolean; var mRate: word);
-procedure set_ready_irq(p:pointer);
-procedure restore_irq;
+function  UseBlasterEnv: Boolean;
+function  InputSoundblasterValues: Boolean;
 procedure writelnSBConfig;
 
 implementation
@@ -121,6 +120,9 @@ uses
     i86,
     stdio,
     conio,
+    stdlib,
+    string_,
+    errno_,
     dos,
     debug,
     dma,
@@ -130,13 +132,9 @@ uses
     sndisr,
     crt;
 
-const
-    __FILE__ = 'sbctl.pas';
-
 (*$l sbctl.obj*)
 
-procedure setvolume( vol: byte ); external;
-function  sbReadDSPVersion: word; external;
+procedure sb_set_volume(value: Byte); external;
 procedure sbAdjustMode( var rate: word; var stereo: boolean; var _16bit: boolean ); external;
 procedure sbSetupMode( freq: word; stereo: boolean ); external;
 procedure sbSetupDMATransfer( p: pointer; count: word; autoinit: boolean ); external;
@@ -146,162 +144,16 @@ procedure Initblaster(var m16bits, mStereo: boolean; var mRate: word); external;
 procedure pause_play; external;
 procedure continue_play; external;
 procedure stop_play; external;
-
-(* Flags and variables for detect part *)
-var
-    sdev_configured: boolean;    (* sound card is detected *)
-    sdev_hwflags_base: boolean;  (* base i/o address is detected *)
-    sdev_hwflags_irq: boolean;   (* IRQ is detected *)
-    sdev_hwflags_dma8: boolean;  (* DMA 8-bit channel is detected *)
-    sdev_hwflags_dma16: boolean; (* DMA 8-bit channel is detected *)
-    sdev_hw_dspv: word;          (* DSP chip version *)
-    sdev_irq_answer: byte;       (* for detecting *)
-    sdev_irq_savedvec: pointer;  (*  "       "    *)
-
-(* ISR *)
-var
-    ISRUserCallback: PSoundHWISRCallback;
-
-procedure ISRDetectCallback(irq: Byte); far; external;
-procedure ISRSoundPlayback; far; external;
-
-procedure _sb_set_hw_dsp(typ: Byte; dspv: Word); far; external;
-procedure _sb_set_hw_flags(f_base, f_irq, f_dma8, f_dma16: Boolean); far; external;
-procedure _sb_set_hw_config(base: Word; irq, dma8, dma16: Byte); far; external;
-procedure _sb_set_mode(rate: Word; f_16bits, f_signed, f_stereo: Boolean); far; external;
+procedure set_ready_irq(p: Pointer); external;
+procedure restore_irq; external;
 
 procedure Forceto(typ, dma8, dma16, irq: Byte; dsp: Word); external;
 function  Detect_DSP_Addr: Boolean; external;
 function  Detect_DMA_Channel_IRQ: Boolean; external;
 function  DetectSoundblaster: Boolean; external;
-procedure set_ready_irq(p: Pointer); external;
-procedure restore_irq; external;
-procedure writelnSBConfig; external;
-
-type
-    TSBCFGFLAGS = Byte;
-
-const
-    SBCFGFL_TYPE  = 1 shl 0;
-    SBCFGFL_DSP   = 1 shl 1;
-    SBCFGFL_IRQ   = 1 shl 2;
-    SBCFGFL_DMA8  = 1 shl 3;
-    SBCFGFL_DMA16 = 1 shl 4;
-    SBCFGFL_BASE_MASK = SBCFGFL_TYPE or SBCFGFL_DSP or SBCFGFL_IRQ or SBCFGFL_DMA8;
-
-function _check_value_type(v: Byte): Boolean; near; external;
-function _check_value_dsp(v: Word): Boolean; near; external;
-function _check_value_irq(v: Byte): Boolean; near; external;
-function _check_value_dma(v: Byte): Boolean; near; external;
-
-function UseBlasterEnv:boolean;
-var
-    s, u: String;
-    typ,irq,dma8,dma16: Byte;
-    dsp: Word;
-    count, i: Byte;
-    er: Integer;
-    flags: TSBCFGFLAGS;
-    v: Word;
-begin
-    DEBUG_BEGIN(__FILE__, 'UseBlasterEnv');
-
-    _sb_set_hw_dsp(0, 0);
-    _sb_set_hw_flags(false, false, false, false);
-    _sb_set_hw_config($ffff, $ff, $ff, $ff);
-    _sb_set_mode(0, false, false, false);
-
-    s := upstr(getenv('BLASTER'));
-    if s='' then
-    begin
-        UseBlasterEnv := false;
-        exit;
-    end;
-
-    flags := 0;
-
-    (* BLASTER=A220 I? D? H? P??? T? *)
-
-    i := pos('T', s);
-    if (i > 0) then
-    begin
-        u := copy(s, i+1, 1);
-        val(u, v, er);
-        if ((er = 0)  and _check_value_type(v)) then
-        begin
-            typ := v;
-            flags := flags or SBCFGFL_TYPE;
-        end;
-    end;
-
-    i := pos('A', s);
-    if (i > 0) then
-    begin
-        u := copy(s, i+1, 3);
-        val(u, v, er);
-        v := (v div 100) * 256 + ((v div 10) mod 10) * 16 + (v mod 10);
-        if ((er = 0) and _check_value_dsp(v)) then
-        begin
-            dsp := v;
-            flags := flags or SBCFGFL_DSP;
-        end;
-    end;
-
-    i := pos('I',s);
-    if (i > 0) then
-    begin
-        if (s[i + 2] <> ' ') then
-            u := copy(s, i+1, 2)
-        else
-            u := copy(s, i+1, 1);
-        val(u, v, er);
-        if ((er = 0) and _check_value_irq(v)) then
-        begin
-            irq := v;
-            flags := flags or SBCFGFL_IRQ;
-        end;
-    end;
-
-    i := pos('D', s);
-    if (i > 0) then
-    begin
-        u := copy(s, i+1, 1);
-        val(u, v, er);
-        if ((er = 0) and _check_value_dma(v)) then
-        begin
-            dma8 := v;
-            flags := flags or SBCFGFL_DMA8;
-        end;
-    end;
-
-    i := pos('H', s);
-    if (i > 0) then
-    begin
-        u := copy(s, i+1, 1);
-        val(u, v, er);
-        if ((er = 0) and _check_value_dma(v)) then
-        begin
-            dma16 := v;
-            flags := flags or SBCFGFL_DMA16;
-        end;
-    end;
-
-    if (flags and SBCFGFL_BASE_MASK = SBCFGFL_BASE_MASK) then
-    begin
-        Forceto(typ, dma8, dma16, irq, dsp);
-    end
-    else
-    begin
-        DEBUG_FAIL(__FILE__, 'UseBlasterEnv', 'Configuration string is not complete.');
-        UseBlasterEnv := false;
-        exit;
-    end;
-
-    DEBUG_SUCCESS(__FILE__, 'UseBlasterEnv');
-    UseBlasterEnv := true;
-end;
-
+function  UseBlasterEnv: Boolean; external;
 function  InputSoundblasterValues: Boolean; external;
+procedure writelnSBConfig; external;
 
 procedure register_sbctl; far; external;
 
