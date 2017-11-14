@@ -56,27 +56,28 @@ typedef uint8_t SBCFGFLAGS;
 #define SBCFGFL_DMA16 (1 << 4)
 #define SBCFGFL_BASE_MASK (SBCFGFL_TYPE | SBCFGFL_DSP | SBCFGFL_IRQ | SBCFGFL_DMA8)
 
-static bool     PUBLIC_DATA sdev_configured;   /* sound card is detected */
-static bool     PUBLIC_DATA sdev_hwflags_base; /* DSP base I/O address is detected */
-static bool     PUBLIC_DATA sdev_hwflags_irq;  /* IRQ channel is detected */
-static bool     PUBLIC_DATA sdev_hwflags_dma8; /* DMA 8-bits channel is detected */
-static bool     PUBLIC_DATA sdev_hwflags_dma16;/* DMA 16-bits channel is detected */
-static uint16_t PUBLIC_DATA sdev_hw_dspv;      /* DSP chip version */
-static uint8_t  PUBLIC_DATA sdev_irq_answer;   /* for detecting */
-static void    *PUBLIC_DATA sdev_irq_savedvec; /* for detecting */
+static uint8_t  sdev_type;                  /* type */
+static char    *sdev_name;                  /* name */
+static bool     sdev_configured;            /* sound card is detected */
+static bool     sdev_hwflags_base;          /* DSP base I/O address is detected */
+static bool     sdev_hwflags_irq;           /* IRQ channel is detected */
+static bool     sdev_hwflags_dma8;          /* DMA 8-bits channel is detected */
+static bool     sdev_hwflags_dma16;         /* DMA 16-bits channel is detected */
+static uint16_t sdev_hw_base;               /* hardware config: DSP base I/O address */
+static uint8_t  sdev_hw_irq;                /* hardware config: IRQ channel */
+static uint8_t  sdev_hw_dma8;               /* hardware config: DMA channel for 8-bits play */
+static uint8_t  sdev_hw_dma16;              /* hardware config: DMA channel for 16-bits play */
+static uint16_t sdev_hw_dspv;               /* hardware config: DSP chip version */
+static bool     sdev_caps_mixer;            /* capabilities: mixer chip is present */
+static bool     sdev_caps_16bits;           /* 16-bits play is possible */
+static bool     sdev_caps_stereo;           /* stereo play is possible */
+static uint16_t sdev_caps_mono_maxrate;     /* max mono sample rate */
+static uint16_t sdev_caps_stereo_maxrate;   /* max stereo sample rate */
+static uint8_t  sdev_irq_answer;            /* for detecting */
+static void    *sdev_irq_savedvec;          /* for detecting */
 
-static SoundHWISRCallback_t *PUBLIC_DATA ISRUserCallback;
-/*
-    sdev_configured: boolean;
-    sdev_hwflags_base: boolean;
-    sdev_hwflags_irq: boolean;
-    sdev_hwflags_dma8: boolean;
-    sdev_hwflags_dma16: boolean;
-    sdev_hw_dspv: word;
-    sdev_irq_answer: byte;
-    sdev_irq_savedvec: pointer;
-    ISRUserCallback: PSoundHWISRCallback;
-*/
+static SoundHWISRCallback_t *ISRUserCallback;
+
 static const uint8_t _sb_silence_u8 = 0x80;
 
 void __far __pascal ISRDetectCallback(uint8_t irq)
@@ -117,7 +118,7 @@ void __near _sb_set_hw(uint8_t type, char *name, bool f_mixer, bool f_16bits, bo
     sdev_type = type;
     sdev_name = name;
     sdev_caps_mixer = f_mixer;
-    sdev_caps_16bit = f_16bits;
+    sdev_caps_16bits = f_16bits;
     sdev_caps_stereo = f_stereo;
     sdev_caps_mono_maxrate = rate_mono;
     sdev_caps_stereo_maxrate = rate_stereo;
@@ -250,11 +251,11 @@ void __near _sb_adjust_rate(uint16_t *rate, bool stereo, uint8_t *tc)
     }
 }
 
-void PUBLIC_CODE sbAdjustMode(uint16_t *rate, bool *stereo, bool *_16bit) {
+void PUBLIC_CODE sbAdjustMode(uint16_t *rate, bool *stereo, bool *_16bits) {
     uint8_t tc;
 
     *stereo = *stereo & sdev_caps_stereo;
-    *_16bit = *_16bit & sdev_caps_16bit;
+    *_16bits = *_16bits & sdev_caps_16bits;
     if (*stereo) {
         if (*rate < 4000) *rate = 4000;
         if (*rate > sdev_caps_stereo_maxrate) *rate = sdev_caps_stereo_maxrate;

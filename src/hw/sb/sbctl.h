@@ -20,23 +20,6 @@
 
 // TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
 
-/* hardware config */
-
-extern uint8_t  PUBLIC_DATA sdev_type;         /* type (private) */
-extern char    *PUBLIC_DATA sdev_name;         /* name */
-extern uint16_t PUBLIC_DATA sdev_hw_base;      /* base i/o address */
-extern uint8_t  PUBLIC_DATA sdev_hw_irq;       /* IRQ */
-extern uint8_t  PUBLIC_DATA sdev_hw_dma8;      /* DMA channel for 8bit play */
-extern uint8_t  PUBLIC_DATA sdev_hw_dma16;     /* DMA channel for 16bit play */
-
-/* capabilities */
-
-extern bool     PUBLIC_DATA sdev_caps_mixer;
-extern bool     PUBLIC_DATA sdev_caps_16bit;           /* 16bit play is possible */
-extern bool     PUBLIC_DATA sdev_caps_stereo;          /* stereo play is possible */
-extern uint16_t PUBLIC_DATA sdev_caps_mono_maxrate;    /* max mono samplerate */
-extern uint16_t PUBLIC_DATA sdev_caps_stereo_maxrate;  /* max stereo samplerate */
-
 /* transfer mode */
 
 extern uint16_t PUBLIC_DATA sdev_mode_rate;
@@ -45,7 +28,7 @@ extern bool     PUBLIC_DATA sdev_mode_signed;
 extern bool     PUBLIC_DATA sdev_mode_stereo;
 
 void     PUBLIC_CODE sb_set_volume(uint8_t value);
-void     PUBLIC_CODE sbAdjustMode(uint16_t *rate, bool *stereo, bool *_16bit);
+void     PUBLIC_CODE sbAdjustMode(uint16_t *rate, bool *stereo, bool *_16bits);
 void     PUBLIC_CODE sbSetupMode(uint16_t freq, bool stereo);
 void     PUBLIC_CODE sbSetupDMATransfer(void *p, uint16_t count, bool autoinit);
 uint16_t PUBLIC_CODE sbGetDMACounter(void);

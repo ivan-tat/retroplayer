@@ -72,26 +72,13 @@ interface
 *)
 
 var
-    sdev_type: Byte;
-    sdev_name: PChar;
-    sdev_hw_base: word;
-    sdev_hw_irq: byte;
-    sdev_hw_dma8: byte;
-    sdev_hw_dma16: byte;
-
-    sdev_caps_mixer: boolean;
-    sdev_caps_stereo: boolean;
-    sdev_caps_16bit: boolean;
-    sdev_caps_mono_maxrate: word;
-    sdev_caps_stereo_maxrate: word;
-
     sdev_mode_rate: word;
     sdev_mode_16bits: boolean;
     sdev_mode_signed: boolean;
     sdev_mode_stereo: boolean;
 
 procedure sb_set_volume(value: Byte);
-procedure sbAdjustMode( var rate: word; var stereo: boolean; var _16bit: boolean );
+procedure sbAdjustMode( var rate: word; var stereo: boolean; var _16bits: boolean );
 procedure sbSetupMode( freq: word; stereo: boolean );
 procedure sbSetupDMATransfer( p: pointer; count: word; autoinit: boolean );
 function  sbGetDMACounter: word;
@@ -135,7 +122,7 @@ uses
 (*$l sbctl.obj*)
 
 procedure sb_set_volume(value: Byte); external;
-procedure sbAdjustMode( var rate: word; var stereo: boolean; var _16bit: boolean ); external;
+procedure sbAdjustMode( var rate: word; var stereo: boolean; var _16bits: boolean ); external;
 procedure sbSetupMode( freq: word; stereo: boolean ); external;
 procedure sbSetupDMATransfer( p: pointer; count: word; autoinit: boolean ); external;
 function  sbGetDMACounter: word; external;
