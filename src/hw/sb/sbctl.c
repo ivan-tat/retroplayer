@@ -76,6 +76,13 @@ static uint16_t sdev_caps_stereo_maxrate;   /* max stereo sample rate */
 static uint8_t  sdev_irq_answer;            /* for detecting */
 static void    *sdev_irq_savedvec;          /* for detecting */
 
+/* transfer mode */
+
+static bool     sdev_mode_16bits;
+static bool     sdev_mode_signed;
+static bool     sdev_mode_stereo;
+static uint16_t sdev_mode_rate;
+
 static SoundHWISRCallback_t *ISRUserCallback;
 
 static const uint8_t _sb_silence_u8 = 0x80;
@@ -186,6 +193,26 @@ uint8_t __near sbMixerRead(uint8_t reg)
         return 0;
 }
 
+uint8_t PUBLIC_CODE sb_get_sample_bits(void)
+{
+    return sdev_mode_16bits ? 16 : 8;
+}
+
+bool PUBLIC_CODE sb_is_sample_signed(void)
+{
+    return sdev_mode_signed;
+}
+
+uint8_t PUBLIC_CODE sb_get_channels(void)
+{
+    return sdev_mode_stereo ? 2 : 1;
+}
+
+uint16_t PUBLIC_CODE sb_get_rate(void)
+{
+    return sdev_mode_rate;
+}
+
 void PUBLIC_CODE sb_set_volume(uint8_t value)
 {
     uint8_t b;
@@ -242,27 +269,39 @@ void __near _sb_set_speaker(bool state)
 
 void __near _sb_adjust_rate(uint16_t *rate, bool stereo, uint8_t *tc)
 {
-    if ((sdev_type == 6) || ! stereo) {
+    if (stereo)
+    {
+        if (*rate < 4000)
+            *rate = 4000;
+        if (*rate > sdev_caps_stereo_maxrate)
+            *rate = sdev_caps_stereo_maxrate;
+    }
+    else
+    {
+        if (*rate < 4000)
+            *rate = 4000;
+        if (*rate > sdev_caps_mono_maxrate)
+            *rate = sdev_caps_mono_maxrate;
+    }
+
+    if ((sdev_type == 6) || !stereo)
+    {
         *tc = 256 - 1000000 / *rate;
         *rate = 1000000 / (256 - *tc);
-    } else {
+    }
+    else
+    {
         *tc = 256 - 1000000 / (2 * *rate);
         *rate = (1000000 / (256 - *tc)) / 2;
     }
 }
 
-void PUBLIC_CODE sbAdjustMode(uint16_t *rate, bool *stereo, bool *_16bits) {
+void PUBLIC_CODE sbAdjustMode(uint16_t *rate, bool *stereo, bool *_16bits)
+{
     uint8_t tc;
 
     *stereo = *stereo & sdev_caps_stereo;
     *_16bits = *_16bits & sdev_caps_16bits;
-    if (*stereo) {
-        if (*rate < 4000) *rate = 4000;
-        if (*rate > sdev_caps_stereo_maxrate) *rate = sdev_caps_stereo_maxrate;
-    } else {
-        if (*rate < 4000) *rate = 4000;
-        if (*rate > sdev_caps_mono_maxrate) *rate = sdev_caps_mono_maxrate;
-    }
     _sb_adjust_rate(rate, *stereo, &tc);
 }
 

@@ -20,12 +20,10 @@
 
 // TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
 
-/* transfer mode */
-
-extern uint16_t PUBLIC_DATA sdev_mode_rate;
-extern bool     PUBLIC_DATA sdev_mode_16bits;
-extern bool     PUBLIC_DATA sdev_mode_signed;
-extern bool     PUBLIC_DATA sdev_mode_stereo;
+uint8_t  PUBLIC_CODE sb_get_sample_bits(void);
+bool     PUBLIC_CODE sb_is_sample_signed(void);
+uint8_t  PUBLIC_CODE sb_get_channels(void);
+uint16_t PUBLIC_CODE sb_get_rate(void);
 
 void     PUBLIC_CODE sb_set_volume(uint8_t value);
 void     PUBLIC_CODE sbAdjustMode(uint16_t *rate, bool *stereo, bool *_16bits);

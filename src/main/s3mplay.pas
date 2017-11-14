@@ -409,7 +409,7 @@ procedure playSetMasterVolume(vol:byte);
   begin
     if vol>127 then vol:=127;
     playState_mVolume:=vol;
-    calcposttable(playState_mVolume, sdev_mode_16bits);
+    calcposttable(playState_mVolume, sb_get_sample_bits = 16);
   end;
 
 function playGetMasterVolume:byte;

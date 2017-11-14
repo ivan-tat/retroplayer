@@ -4,8 +4,5 @@
 ; For more information, please refer to <http://unlicense.org>.
 
 _DATA segment word public use16 'DATA'
-extrn sdev_mode_rate: word
-extrn sdev_mode_16bits: byte
-extrn sdev_mode_signed: byte
-extrn sdev_mode_stereo: byte
+
 _DATA ends

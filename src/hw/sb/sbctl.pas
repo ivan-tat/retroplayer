@@ -71,11 +71,10 @@ interface
    SoundBlaster 16/ASP         4.xx
 *)
 
-var
-    sdev_mode_rate: word;
-    sdev_mode_16bits: boolean;
-    sdev_mode_signed: boolean;
-    sdev_mode_stereo: boolean;
+function  sb_get_sample_bits: Byte;
+function  sb_is_sample_signed: Boolean;
+function  sb_get_channels: Byte;
+function  sb_get_rate: Word;
 
 procedure sb_set_volume(value: Byte);
 procedure sbAdjustMode( var rate: word; var stereo: boolean; var _16bits: boolean );
@@ -120,6 +119,11 @@ uses
     crt;
 
 (*$l sbctl.obj*)
+
+function  sb_get_sample_bits: Byte; external;
+function  sb_is_sample_signed: Boolean; external;
+function  sb_get_channels: Byte; external;
+function  sb_get_rate: Word; external;
 
 procedure sb_set_volume(value: Byte); external;
 procedure sbAdjustMode( var rate: word; var stereo: boolean; var _16bits: boolean ); external;

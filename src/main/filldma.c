@@ -45,7 +45,7 @@ void __near LQconvert_8(void *outbuf, void *mixbuf, uint16_t count)
     src = (uint16_t *)mixbuf;
     dst = (uint8_t *)outbuf;
 
-    if (sdev_mode_stereo) {
+    if (sb_get_channels() == 2) {
         count >>= 1;
         do {
             samp[0] = post8bit[*src[0]+2048];
@@ -132,7 +132,7 @@ void __near fill_8bit(void *mixbuf, SNDDMABUF *outbuf)
 
 void PUBLIC_CODE fill_DMAbuffer(void *mixbuf, SNDDMABUF *outbuf)
 {
-    if (!sdev_mode_16bits)
+    if (sb_get_sample_bits() == 8)
     {
         do
         {
