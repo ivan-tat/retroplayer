@@ -4,6 +4,7 @@ program example_for_s3mplay;
 uses
     crt,
     dos,
+    string_,
     sbctl,
     s3mvars,
     s3mplay;
@@ -19,13 +20,18 @@ var samplerate:word;
     filename:string;
 
   procedure init;
+  var
+      name: array [0..255] of Char;
     begin
       { setup defaults: }
       Samplerate:=45454;
       Stereo:=stereo_calc;
       _16bit:=_16bit_calc;
       { end of default ... }
-      if not player_load_s3m(filename) then halt;
+      memcpy(name, filename[1], Ord(filename[0]));
+      name[Ord(filename[0])] := Chr(0);
+      if (not player_load_s3m(name)) then
+          halt;
       writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');
       if not player_init then halt;
       if not player_init_device(1) then begin writeln(' SoundBlaster not found sorry ... ');halt end;

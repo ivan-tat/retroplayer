@@ -449,13 +449,13 @@ build_target $T_MAIN_TP   obj src/main/types.pas
 build_target $T_MAIN_TP   obj src/main/s3mtypes.pas
 build_target $T_MAIN_TP   obj src/main/musins.pas
 build_target $T_MAIN_TP   obj src/main/muspat.pas
+build_target $T_MAIN_TP   obj src/main/effvars.pas
 build_target $T_MAIN_TP   obj src/main/s3mvars.pas
 build_target $T_MAIN_TP   obj src/main/fillvars.pas
 build_target $T_MAIN_TP   obj src/main/voltab.pas
 build_target $T_MAIN_TP   obj src/main/posttab.pas
 build_target $T_MAIN_TP   obj src/main/mixer.pas
 build_target $T_MAIN_TP   obj src/main/mixchn.pas
-build_target $T_MAIN_TP   obj src/main/effvars.pas
 build_target $T_MAIN_TP   obj src/main/effects.pas
 build_target $T_MAIN_TP   obj src/main/readnote.pas
 build_target $T_MAIN_TP   obj src/main/mixing.pas

@@ -4,6 +4,7 @@ program example_for_s3mplay;
 uses
     crt,
     dos,
+    string_,
     sbctl,
     s3mvars,
     fillvars,
@@ -27,8 +28,13 @@ var samplerate:word;
   procedure linie(x1,y1,x2,y2:word;f:byte); external;
 
   procedure init;
+  var
+      name: array [0..255] of Char;
     begin
-      if not player_load_s3m(filename) then halt;
+      memcpy(name, filename[1], Ord(filename[0]));
+      name[Ord(filename[0])] := Chr(0);
+      if (not player_load_s3m(name)) then
+          halt;
       writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');
       if not player_init then halt;
       if not player_init_device(2) then begin writeln(' Blaster enviroment not found sorry ... ');halt end;

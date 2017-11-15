@@ -75,6 +75,7 @@ begin
 end;
 
 var filename:string;
+    name: array [0..255] of Char;
     c:char;
     savchn:array[0..15] of byte;
 
@@ -381,7 +382,10 @@ begin
   writeln('Free DOS memory before loading: ',getFreeDOSMemory shr 10, ' KiB');
   writeln('Free EMM memory before loading: ',getFreeEMMMemory, ' KiB');
   {$ENDIF}
-  if not player_load_s3m(filename) then display_errormsg;
+  memcpy(name, filename[1], Ord(filename[0]));
+  name[Ord(filename[0])] := Chr(0);
+  if (not player_load_s3m(name)) then
+      display_errormsg;
   {$IFDEF DEBUGLOAD}
   writeln('Free DOS memory after loading: ',getFreeDOSMemory shr 10, ' KiB');
   writeln('Free EMM memory after loading: ',getFreeEMMMemory, ' KiB');

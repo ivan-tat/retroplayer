@@ -39,8 +39,15 @@ const
 
 function  _calc_sample_step(wPeriod: word): longint;
 
+type
+    TMIXBUF = packed record
+        buf: Pointer;
+        size: Word;
+    end;
+    PMIXBUF = ^TMIXBUF;
+
 var
-    mixBuf: pointer;
+    mixBuf: TMIXBUF;
     mixChannels: byte;
     mixSampleRate: word;
     mixBufSamplesPerChannel: word;
@@ -48,6 +55,9 @@ var
     mixTickSamplesPerChannel: word;
     mixTickSamplesPerChannelLeft: word;
 
+procedure mixbuf_init(self: PMIXBUF);
+function  mixbuf_alloc(self: PMIXBUF; size: Word): Boolean;
+procedure mixbuf_free(self: PMIXBUF);
 procedure setMixSampleRate(rate: word);
 procedure setMixChannels(channels: byte);
 procedure setMixBufSamplesPerChannel(count: word);
@@ -58,7 +68,11 @@ function  getCountFromMixBufOff(bufOff: word): word;
 implementation
 
 uses
-    watcom;
+    watcom,
+    i86,
+    string_,
+    dos_,
+    debug;
 
 (*$l mixer_.obj*)
 
@@ -71,6 +85,9 @@ procedure _MixSampleStereo8(outBuf: pointer; var smpInfo: TPlaySampleInfo;
 
 function  _calc_sample_step(wPeriod: word): longint; external;
 
+procedure mixbuf_init(self: PMIXBUF); external;
+function  mixbuf_alloc(self: PMIXBUF; size: Word): Boolean; external;
+procedure mixbuf_free(self: PMIXBUF); external;
 procedure setMixSampleRate(rate: word); external;
 procedure setMixChannels(channels: byte); external;
 procedure setMixBufSamplesPerChannel(count: word); external;

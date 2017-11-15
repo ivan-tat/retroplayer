@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 
+#include "main/effvars.h"
 #include "main/s3mvars.h"
 #include "main/mixer.h"
 
@@ -208,6 +209,14 @@ uint8_t PUBLIC_CODE mixchn_get_command_parameter(MIXCHN *self)
     return self->bParameter;
 }
 
+void PUBLIC_CODE mixchn_reset_wave_tables(MIXCHN *self)
+{
+    if (self)
+    {
+        self->wVibTab = FP_OFF(&sinuswave);
+        self->wTrmTab = FP_OFF(&sinuswave);
+    }
+}
 
 void PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum)
 {

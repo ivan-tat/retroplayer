@@ -12,6 +12,7 @@
 #pragma once
 #endif
 
+#include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -61,9 +62,18 @@ extern uint32_t PUBLIC_CODE _calc_sample_step(uint16_t wPeriod);
 #pragma aux _calc_sample_step modify [ bx cx ];
 #endif
 
-extern uint16_t (*PUBLIC_DATA mixBuf)[];
-    /* Mixing buffer for one frame.
-       Size depends on: sample rate, channels count, tempo, FPS (almost as DMA frame) */
+/* Mixing buffer for one frame.
+   Size depends on: sample rate, channels count, tempo, FPS (almost as DMA frame) */
+#pragma pack(push, 1);
+typedef struct mixing_buffer_t
+{
+    int16_t *buf;
+    uint16_t size;
+};
+#pragma pack(pop);
+typedef struct mixing_buffer_t MIXBUF;
+
+extern MIXBUF   PUBLIC_DATA mixBuf;
 extern uint16_t PUBLIC_DATA mixSampleRate;
 extern uint8_t  PUBLIC_DATA mixChannels;
 extern uint16_t PUBLIC_DATA mixBufSamplesPerChannel;
@@ -73,6 +83,9 @@ extern uint16_t PUBLIC_DATA mixTickSamplesPerChannel;
 extern uint16_t PUBLIC_DATA mixTickSamplesPerChannelLeft;
     /* Samples per channel left to next tick */
 
+void PUBLIC_CODE mixbuf_init(MIXBUF *self);
+bool PUBLIC_CODE mixbuf_alloc(MIXBUF *self, uint16_t size);
+void PUBLIC_CODE mixbuf_free(MIXBUF *self);
 extern void     PUBLIC_CODE setMixChannels(uint8_t channels);
 extern void     PUBLIC_CODE setMixSampleRate(uint16_t rate);
 extern void     PUBLIC_CODE setMixBufSamplesPerChannel(uint16_t count);

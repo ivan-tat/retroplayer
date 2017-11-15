@@ -108,6 +108,7 @@ void     PUBLIC_CODE mixchn_set_sub_command(MIXCHN *self, uint8_t value);
 uint8_t  PUBLIC_CODE mixchn_get_sub_command(MIXCHN *self);
 void     PUBLIC_CODE mixchn_set_command_parameter(MIXCHN *self, uint8_t value);
 uint8_t  PUBLIC_CODE mixchn_get_command_parameter(MIXCHN *self);
+void     PUBLIC_CODE mixchn_reset_wave_tables(MIXCHN *self);
 void     PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum);
 uint16_t PUBLIC_CODE chn_calcNotePeriod(MIXCHN *chn, uint32_t rate, uint8_t note);
 uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, uint32_t rate, uint8_t note);

@@ -5,10 +5,15 @@
 
 #include "defines.h"
 
+#include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
 
 #include "pascal.h"
+#include "cc/i86.h"
+#include "cc/string.h"
+#include "cc/dos.h"
+#include "debug.h"
 
 #include "main/mixer.h"
 
@@ -29,7 +34,7 @@ uint16_t ST3Periods[12] =
     1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
 };
 
-uint16_t (*PUBLIC_DATA mixBuf)[];
+MIXBUF   PUBLIC_DATA mixBuf;
 uint8_t  PUBLIC_DATA mixChannels;
 uint16_t PUBLIC_DATA mixSampleRate;
 uint16_t PUBLIC_DATA mixBufSamplesPerChannel;
@@ -43,6 +48,44 @@ void PUBLIC_CODE setMixChannels(uint8_t channels);
 void PUBLIC_CODE setMixSampleRate(uint16_t rate);
 void PUBLIC_CODE setMixBufSamplesPerChannel(uint16_t count);
 void PUBLIC_CODE setMixMode(uint8_t channels, uint16_t rate, uint16_t count);
+
+void PUBLIC_CODE mixbuf_init(MIXBUF *self)
+{
+    if (self)
+    {
+        self->buf = NULL;
+        mixSampleRate = 0;
+        mixChannels = 0;
+        mixBufSamplesPerChannel = 0;
+    }
+}
+
+bool PUBLIC_CODE mixbuf_alloc(MIXBUF *self, uint16_t size)
+{
+    uint16_t seg;
+
+    if (self)
+    {
+        if (!_dos_allocmem(_dos_para(size), &seg))
+        {
+            self->buf = MK_FP(seg, 0);
+            self->size = size;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void PUBLIC_CODE mixbuf_free(MIXBUF *self)
+{
+    if (self)
+        if (self->buf)
+        {
+            _dos_freemem(FP_SEG(self->buf));
+            self->buf = NULL;
+        }
+}
 
 void PUBLIC_CODE setMixChannels(uint8_t channels)
 {
