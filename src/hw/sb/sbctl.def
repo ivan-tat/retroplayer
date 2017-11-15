@@ -1,8 +1,0 @@
-; sbctl.def -- Assembler declarations for sbctl.c.
-;
-; This is free and unencumbered software released into the public domain.
-; For more information, please refer to <http://unlicense.org>.
-
-_DATA segment word public use16 'DATA'
-
-_DATA ends
