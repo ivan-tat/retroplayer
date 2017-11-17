@@ -4,6 +4,7 @@ program example_for_s3mplay;
 uses
     types,
     strutils,
+    stdio,
     string_,
     crt,
     dos,
@@ -24,6 +25,8 @@ uses
 
 {$I defines.pas}
 
+{$L plays3m.obj}
+
 const stereo_calc=true;
       _16bit_calc=false;
       switch:array[false..true] of string[3] = ('off','on ');
@@ -33,7 +36,7 @@ var samplerate:word;
     _16bit:Boolean;
     _LQ:boolean;
     ST3order:Boolean;
-    help:boolean;
+    opt_help:boolean;
     volume:byte;
     how2input:byte; { 1-autodetect,2-read blaster enviroment,3-input by hand }
     disply_c:boolean;
@@ -163,13 +166,6 @@ function prevorder(nr:byte):byte;
     prevorder:=nr;
   end;
 
-function upstr(s:string):string;
-var i:byte;
-  begin
-    for i:=1 to length(s) do s[i]:=upcase(s[i]);
-    upstr:=s;
-  end;
-
 procedure check_para(p:string);
 var t:string;
     b:byte;
@@ -197,7 +193,7 @@ var t:string;
             SampleRate:=w;
           end;
       end;
-    if (upcase(p[2])='H') or (p[2]='?') then { help } help:=true;
+    if (upcase(p[2])='H') or (p[2]='?') then { help } opt_help:=true;
     if upcase(p[2])='M' then { Mono - because default is stereo } stereo:=false;
     if p[2]='8' then { 8bit - default is 16bit } _16bit:=false;
     if upcase(p[2])='C' then { display SB config } disply_c:=true;
@@ -220,63 +216,9 @@ var t:string;
       end;
   end;
 
-procedure display_keys;
-  begin
-    writeln(' Keys while playing : '#13#10);
-    writeln(' <P> ... Pause (only on SB16)');
-    writeln(' <L> ... enable/disable loopflag');
-    writeln(' <D> ... doshelling :)');
-    writeln(' <Alt> <1>..<''>,<Q>..<R> - Switch On/Off channel 1..16 ');
-    writeln(' <+> ... Jump to next pattern');
-    writeln(' <-> ... Jump to previous pattern');
-    writeln(' <ESC> ... Stop playing');
-    writeln(' <F1> ... help screen');
-    writeln(' <F2> ... Display channel infos');
-    writeln(' <F3> ... Display current pattern');
-    writeln(' <F4> ... Display instrument infos');
-    writeln(' <F5> ... Display sample memory positions');
-    writeln(' <F6> ... Display debug information');
-  end;
-
-procedure display_help;
-  begin
-    writeln(' Usage :');
-    writeln('  PLAYS3M <options> <S3M Filename> '#13#10);
-    writeln('    þ Order does not matter');
-    writeln('    þ if no extension then ''.S3M'' is added');
-    writeln('    þ Options:  (use prefixes ''/'' or ''-'' to mark it as option)');
-    writeln('         /Vxxx    ... set master volume 0..255 ');
-    writeln('                      (default=0 - use master volume is specified in S3M)');
-    writeln('         /Sxxxxx  ... set samplerate ''4000...45454'' or ''4..46''(*1000)');
-    writeln('                      (higher SampleRate -> better quality !)');
-    writeln('         /H or /? ... Show this screen ');
-    writeln('                      (funny eh - yo you get it easier with no parameter)');
-    writeln('         /M       ... use mono mixing');
-    writeln('                      (default is stereo if it''s possible on your SB)');
-    writeln('         /8       ... use 8bit mixing');
-    writeln('                      (default is 16bit if it''s possible on your SB)');
-    writeln('         /C       ... display configuration after detecting');
-    writeln('                      (default is display not)');
-    writeln('         /ENV     ... use informations of blaster envirment');
-    writeln('         /CFG     ... input SB config by hand');
-    writeln('                      (default is SB hardware autodetect)');
-    writeln('         /O       ... handle order like ST3 does');
-    writeln('                      (default is my own way - play ALL patterns are defined');
-    writeln('                      in Order)');
-    writeln('         /NOEMS   ... don''t use EMS for playing (player won''t use any EMS ');
-    writeln('                      after this) - if there''s no free EMS, player''ll set');
-    writeln('                      also <don''t use EMS>');
-    writeln('         /LQ      ... use low quality mode');
-    writeln('         /Bxx     ... start at order xx (default is 0)');
-    writeln('         /Fxx     ... set Frames Per Second (default is 70Hz)');
-    if not help then writeln('Gimme a filename :)');
-    halt(1);
-  end;
-
-procedure display_playercfg;
-  begin
-    writelnSBconfig;
-  end;
+procedure display_keys; far; external;
+procedure display_help; far; external;
+procedure display_playercfg; far; external;
 
 procedure display_helpscreen;
   begin
@@ -363,7 +305,7 @@ begin
   Stereo:=stereo_calc;
   _16bit:=_16bit_calc;
   _LQ:=false;
-  help:=false;
+  opt_help:=false;
   volume:=0; { use volume given in S3M ... }
   how2input:=1; { autodetect SB }
   disply_c:=false;
@@ -376,7 +318,11 @@ begin
   exitproc:=@local_exit;
   for i:=1 to paramcount do
     check_para(paramstr(i));
-  if (filename='') then display_help;
+    if (length(filename) = 0) then
+    begin
+        display_help;
+        halt(1);
+    end;
   writeln;
   {$IFDEF DEBUGLOAD}
   writeln('Free DOS memory before loading: ',getFreeDOSMemory shr 10, ' KiB');

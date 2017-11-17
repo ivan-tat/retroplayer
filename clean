@@ -107,5 +107,6 @@ $RM ./src/main/s3mplay.asm
 $RM ./src/main/s3mvars.asm
 $RM ./src/main/voltab.asm
 cleandir ./src/player
+$RM ./src/player/plays3m.asm
 
 echo "Done."

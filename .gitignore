@@ -115,3 +115,4 @@ src/main/readnote.asm
 src/main/s3mplay.asm
 src/main/s3mvars.asm
 src/main/voltab.asm
+src/player/plays3m.asm
