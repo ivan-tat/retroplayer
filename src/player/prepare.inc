@@ -1,24 +1,3 @@
-(* Patterns *)
-
-var lastrow:byte;
-
-procedure prep_patterns;
-var
-    w:word;
-    pat: PMUSPAT;
-  begin
-    scrOpenInfoBackground(white, black);
-    textbackground(white);textcolor(black);
-    for w:=0 to 2 do begin gotoxy(w*28+6,1);write('    Chn ',2*w+startchn:2,'    '); end;
-    textbackground(black);textcolor(white);
-    for w:=0 to 1 do begin gotoxy(w*28+20,1);write('    Chn ',2*w+1+startchn:2,'    '); end;
-    scrLeave;
-    lastrow:=playState_row;
-    pat := muspatl_get(mod_Patterns, playState_pattern);
-    if (muspat_is_EM_data(pat)) then
-        muspat_map_EM_data(pat);
-  end;
-
 (* Instruments *)
 
 var chnlastinst:array[0..max_channels-1] of byte;

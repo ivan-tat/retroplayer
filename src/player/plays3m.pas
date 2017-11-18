@@ -288,6 +288,7 @@ end;
 {$I REFRESH.INC}  { refresh the different screens }
 
 {$I w_chn.inc}      { Channels window }
+{$I w_pat.inc}      { Patterns window }
 {$I w_dbg.inc}      { Debug window }
 
 (* Window's event router *)
