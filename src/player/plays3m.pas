@@ -275,6 +275,8 @@ begin
     window(1, 1, scrWidth, scrHeight);
 end;
 
+var chnlastinst:array[0..max_channels-1] of byte;
+
 procedure write_Note(b:byte);
 const
     nname: array[0..11] of string[2] =
@@ -289,6 +291,7 @@ end;
 
 {$I w_chn.inc}      { Channels window }
 {$I w_pat.inc}      { Patterns window }
+{$I w_ins.inc}      { Instruments window }
 {$I w_dbg.inc}      { Debug window }
 
 (* Window's event router *)
