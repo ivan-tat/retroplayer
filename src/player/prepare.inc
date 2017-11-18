@@ -1,33 +1,3 @@
-var
-    DebugWindowInstance: TWINDOWRECT;
-
-const
-    DebugWindow: PWINDOWRECT = nil;
-
-const
-    scrHeaderTop = 1;
-    scrHeaderBottom = 7;
-    scrHeaderLeft = 1;
-    scrHeaderRight = scrWidth;
-
-    scrInfoTop = scrHeaderBottom + 1;
-    scrInfoBottom = scrHeight;
-    scrInfoLeft = 1;
-    scrInfoRight = scrWidth;
-
-procedure scrOpenInfoBackground(textCol, bgCol: byte);
-begin
-    textcolor(textCol);
-    textbackground(bgCol);
-    window(scrInfoLeft, scrInfoTop, scrInfoRight, scrInfoBottom);
-    clrscr;
-end;
-
-procedure scrLeave;
-begin
-    window(1, 1, scrWidth, scrHeight);
-end;
-
 (* Channels *)
 
 procedure prep_channels;
@@ -157,32 +127,4 @@ var i,j,k,l:byte;
             inc(i);
         end;
     scrLeave;
-  end;
-
-(* Debug *)
-
-procedure prep_debug;
-begin
-    if (not window_is_created(DebugWindow)) then
-    begin
-        window_init(@DebugWindowInstance, lightgray, black, 1, 8, scrWidth, scrHeight);
-        DebugWindow := @DebugWindowInstance;
-    end;
-    window_show(DebugWindow);
-    window_leave(DebugWindow);
-end;
-
-(* Router *)
-
-procedure prepare_scr;
-  begin
-    case screen_no of
-      0: { help screen }      display_helpscreen;
-      1: { channel view }     prep_channels;
-      2: { pattern view }     prep_patterns;
-      3: { Instrument infos } prep_inst;
-      4: { sample infos }     prep_smp;
-      5: (* DEBUG *)          prep_debug;
-    end;
-    wassmp_scr:=screen_no=4;
   end;

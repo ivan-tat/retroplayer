@@ -251,8 +251,61 @@ var
     clreol;
   end;
 
+const
+    scrHeaderTop = 1;
+    scrHeaderBottom = 7;
+    scrHeaderLeft = 1;
+    scrHeaderRight = scrWidth;
+
+    scrInfoTop = scrHeaderBottom + 1;
+    scrInfoBottom = scrHeight;
+    scrInfoLeft = 1;
+    scrInfoRight = scrWidth;
+
+procedure scrOpenInfoBackground(textCol, bgCol: byte);
+begin
+    textcolor(textCol);
+    textbackground(bgCol);
+    window(scrInfoLeft, scrInfoTop, scrInfoRight, scrInfoBottom);
+    clrscr;
+end;
+
+procedure scrLeave;
+begin
+    window(1, 1, scrWidth, scrHeight);
+end;
+
 {$I PREPARE.INC}  { prepare the different screens }
 {$I REFRESH.INC}  { refresh the different screens }
+
+{$I w_dbg.inc}      { Debug window }
+
+(* Window's event router *)
+
+procedure prepare_scr;
+begin
+    case screen_no of
+      0: { help screen }      display_helpscreen;
+      1: { channel view }     prep_channels;
+      2: { pattern view }     prep_patterns;
+      3: { Instrument infos } prep_inst;
+      4: { sample infos }     prep_smp;
+      5: (* DEBUG *)          prep_debug;
+    end;
+    wassmp_scr:=screen_no=4;
+end;
+
+procedure refresh_scr;
+begin
+    case screen_no of
+      0: { Helpscreen (do not refrsh) };
+      1: { channel view }     refr_channels;
+      2: { pattern view }     refr_patterns;
+      3: { Instrument infos } refr_inst;
+      4: { sample infos }     refr_sample;
+      5: (* DEBUG *)          refr_debug;
+    end;
+end;
 
 var i:byte;
 
