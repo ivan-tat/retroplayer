@@ -276,6 +276,7 @@ begin
         else if b=254 then write('^^.') else write('...');
 end;
 
+{$I w_hlp.inc}      { Help window }
 {$I w_chn.inc}      { Channels window }
 {$I w_pat.inc}      { Patterns window }
 {$I w_ins.inc}      { Instruments window }
