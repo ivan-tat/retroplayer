@@ -286,12 +286,10 @@ begin
         else if b=254 then write('^^.') else write('...');
 end;
 
-{$I PREPARE.INC}  { prepare the different screens }
-{$I REFRESH.INC}  { refresh the different screens }
-
 {$I w_chn.inc}      { Channels window }
 {$I w_pat.inc}      { Patterns window }
 {$I w_ins.inc}      { Instruments window }
+{$I w_smp.inc}      { Samples window }
 {$I w_dbg.inc}      { Debug window }
 
 (* Window's event router *)
