@@ -17,20 +17,10 @@
 
 #include "pascal.h"
 #include "debug.h"
-#include "main/effects.h"
 
-#define noerror 0
-#define notenoughmem -1
-#define allreadyallocbuffers -6
-#define nota386orhigher -7
-#define nosounddevice -8
-#define noS3Minmemory -9
-#define internal_failure -11
-#define E_failed_to_load_file -100
-
-extern int16_t PUBLIC_DATA player_error;
-extern const char *PUBLIC_DATA player_error_msg;
-
+void     PUBLIC_CODE player_clear_error(void);
+bool     PUBLIC_CODE player_is_error(void);
+const char *PUBLIC_CODE player_get_error(void);
 bool     PUBLIC_CODE player_init(void);
 bool     PUBLIC_CODE player_init_device(uint8_t type);
 bool     PUBLIC_CODE player_set_mode(bool f_16bits, bool f_stereo, uint16_t rate, bool LQ);

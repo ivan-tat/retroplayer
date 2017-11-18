@@ -19,26 +19,9 @@ uses
 CONST
     PLAYER_VERSION: PChar = '1.70.1';
 
-CONST
-      { error constants }
-      noerror              = 0;
-      notenoughmem         = -1;
-      Allreadyallocbuffers = -6; { don't try to allocate memory for buffers twice }
-      nota386orhigher      = -7; { for playing any sound we need a 386 or higher -
-                                   sorry but I optimized it for a 486 (pipeline etc.) and it
-                                   runs fine on a 386 ;)
-                                   (Hey guys a 486DX is not that expensive - for
-                                   the same price I got an slow 386SX in 1991) }
-      nosounddevice        = -8; { before 'start playing' - set a sounddevice ! }
-      noS3Minmemory        = -9; { before 'start playing' - load a S3M ! }
-      internal_failure     = -11; { I'm sorry if this happend :( }
-      E_failed_to_load_file = -100;
-
-{ variables for public }
-VAR
-    player_Error: Integer;
-    player_Error_msg: PChar;
-
+procedure player_clear_error;
+function  player_is_error: Boolean;
+function  player_get_error: PChar;
 function  player_init: Boolean;
     (* init DMABuf,mixBuf,volumetable and some variables *)
 function  player_init_device(input: Byte): Boolean;
@@ -84,6 +67,9 @@ uses
 
 (*$l s3mplay.obj*)
 
+procedure player_clear_error; external;
+function  player_is_error: Boolean; external;
+function  player_get_error: PChar; external;
 function  player_init: Boolean; external;
 function  player_init_device(input: Byte): Boolean; external;
 function  player_set_mode(f_16bits, f_stereo: Boolean; rate: Word; LQ: Boolean): Boolean; external;

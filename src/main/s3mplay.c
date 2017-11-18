@@ -28,6 +28,74 @@
 
 #include "main/s3mplay.h"
 
+/* Error messages */
+
+typedef uint16_t player_error_t;
+
+enum
+{
+    E_PLAYER_SUCCESS,
+    E_PLAYER_INTERNAL,
+    E_PLAYER_UNSUPPORTED_CPU,
+    E_PLAYER_LOW_MEMORY,
+    E_PLAYER_NO_BUFFERS,
+    E_PLAYER_NO_SOUND_DEVICE,
+    E_PLAYER_NO_SOUND_MODE,
+    E_PLAYER_NO_MODULE,
+    E_PLAYER_LOADER,
+};
+
+static const struct player_error_msg_t
+{
+    player_error_t code;
+    char *msg;
+}
+PLAYER_ERRORS[] =
+{
+    {
+        E_PLAYER_INTERNAL,
+        "Internal failure"
+    },
+    {
+        E_PLAYER_UNSUPPORTED_CPU,
+        "Unsupported CPU"
+    },
+    {
+        E_PLAYER_LOW_MEMORY,
+        "Not enough memory"
+    },
+    {
+        E_PLAYER_NO_BUFFERS,
+        "No buffers were allocated"
+    },
+    {
+        E_PLAYER_NO_SOUND_DEVICE,
+        "No sound device was set"
+    },
+    {
+        E_PLAYER_NO_SOUND_MODE,
+        "No sound mode was set"
+    },
+    {
+        E_PLAYER_NO_MODULE,
+        "No music module was loaded"
+    },
+    {
+        E_PLAYER_LOADER,
+        NULL
+    },
+    {
+        E_PLAYER_SUCCESS,
+        "No error"
+    }
+};
+
+static const char PLAYER_ERROR_UNKNOWN[] = "Unknown error";
+
+/* Private variables */
+
+static player_error_t player_error;
+static const char    *player_error_msg;
 static bool     player_flags_i386;
 static bool     player_flags_bufalloc;
 static bool     player_flags_snddev;
@@ -40,6 +108,8 @@ static bool     player_mode_lq;
 static bool     inside;
 
 static EMSNAME _EM_map_name = "saveMAP";
+
+/* IRQ routines */
 
 void __far __pascal PlaySoundCallback(void)
 {
@@ -69,16 +139,47 @@ void __far __pascal PlaySoundCallback(void)
         emsRestoreMap(SavHandle);
 }
 
-/* player */
+/* Player */
+
+void PUBLIC_CODE player_clear_error(void)
+{
+    player_error = E_PLAYER_SUCCESS;
+    player_error_msg = NULL;
+}
+
+bool PUBLIC_CODE player_is_error(void)
+{
+    return player_error != E_PLAYER_SUCCESS;
+}
+
+const char *PUBLIC_CODE player_get_error(void)
+{
+    int i;
+
+    if (player_error == E_PLAYER_LOADER)
+        return player_error_msg;
+
+    i = 0;
+    while (PLAYER_ERRORS[i].code != E_PLAYER_SUCCESS)
+    {
+        if (PLAYER_ERRORS[i].code == player_error)
+            return PLAYER_ERRORS[i].msg;
+        i++;
+    }
+
+    return PLAYER_ERROR_UNKNOWN;
+}
 
 bool PUBLIC_CODE player_init(void)
 {
     DEBUG_BEGIN("player_init");
 
+    player_clear_error();
+
     if (!player_flags_i386)
     {
         DEBUG_FAIL("player_init", "CPU is not supported.");
-        player_error = nota386orhigher;
+        player_error = E_PLAYER_UNSUPPORTED_CPU;
         return false;
     }
 
@@ -88,24 +189,17 @@ bool PUBLIC_CODE player_init(void)
         if (emsEC != E_EMS_SUCCESS)
         {
             DEBUG_FAIL("player_init", "Failed to allocate EM handle for mapping.");
-            player_error = internal_failure;
+            player_error = E_PLAYER_INTERNAL;
             return false;
         }
         emsSetHandleName(SavHandle, &_EM_map_name);
-    }
-
-    if (player_flags_bufalloc)
-    {
-        DEBUG_FAIL("player_init", "Failed to initialize volume table.");
-        player_error = allreadyallocbuffers;
-        return true;
     }
 
     if (!volumetableptr)
         if (!allocVolumeTable())
         {
             DEBUG_FAIL("player_init", "Failed to initialize volume table.");
-            player_error = notenoughmem;
+            player_error = E_PLAYER_LOW_MEMORY;
             return false;
         }
 
@@ -113,7 +207,7 @@ bool PUBLIC_CODE player_init(void)
         if (!snddmabuf_alloc(&sndDMABuf, DMA_BUF_SIZE_MAX))
         {
             DEBUG_FAIL("player_init", "Failed to initialize sound buffer.");
-            player_error = notenoughmem;
+            player_error = E_PLAYER_LOW_MEMORY;
             return false;
         }
 
@@ -121,7 +215,7 @@ bool PUBLIC_CODE player_init(void)
         if (!mixbuf_alloc(&mixBuf, (sndDMABuf.buf->size * sizeof(int16_t)) / 2))
         {
             DEBUG_FAIL("player_init", "Failed to initialize mixing buffer.");
-            player_error = notenoughmem;
+            player_error = E_PLAYER_LOW_MEMORY;
             return false;
         }
     memset(mixBuf.buf, 0, mixBuf.size);
@@ -339,7 +433,7 @@ bool PUBLIC_CODE player_load_s3m(char *name)
     if (!p)
     {
         DEBUG_FAIL("player_load_s3m", "Failed to initialize S3M loader.");
-        player_error = E_failed_to_load_file;
+        player_error = E_PLAYER_LOADER;
         player_error_msg = "Failed to initialize S3M loader.";
         return false;
     }
@@ -348,7 +442,7 @@ bool PUBLIC_CODE player_load_s3m(char *name)
     if (!s3mloader_load(p, name))
     {
         DEBUG_FAIL("player_load_s3m", "Failed to load S3M file.");
-        player_error = E_failed_to_load_file;
+        player_error = E_PLAYER_LOADER;
         player_error_msg = s3mloader_get_error(p);
         s3mloader_free(p);
         s3mloader_delete(&p);
@@ -384,27 +478,31 @@ bool PUBLIC_CODE playStart(void)
 
     DEBUG_BEGIN("playStart");
 
-    player_error = 0;
-    player_error_msg = NULL;
+    if (!player_flags_bufalloc)
+    {
+        DEBUG_FAIL("player_init", "No sound buffers were allocated.");
+        player_error = E_PLAYER_NO_BUFFERS;
+        return false;
+    }
 
     if (!player_flags_snddev)
     {
         DEBUG_FAIL("playStart", "No sound device was set.");
-        player_error = nosounddevice;
+        player_error = E_PLAYER_NO_SOUND_DEVICE;
         return false;
     }
 
     if (!player_mode_set)
     {
         DEBUG_FAIL("playStart", "No play mode was set.");
-        player_error = internal_failure;
+        player_error = E_PLAYER_NO_SOUND_MODE;
         return false;
     }
 
     if (!mod_isLoaded)
     {
         DEBUG_FAIL("playStart", "No music module was loaded.");
-        player_error = noS3Minmemory;
+        player_error = E_PLAYER_NO_MODULE;
         return false;
     }
 

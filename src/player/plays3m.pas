@@ -43,39 +43,10 @@ var samplerate:word;
     screen_no:byte;  { current info on screen }
     startchn:byte;
 
-procedure display_errormsg;
-var
-    s: PChar;
-begin
-    case player_error of
-    noerror:
-        s := 'No error';
-    notenoughmem:
-        s := 'Not enough memory';
-    Allreadyallocbuffers:
-        s := 'Buffers already allocated';
-    nota386orhigher:
-        s := 'Need a 386 or higher CPU';
-    nosounddevice:
-        s := 'No sound device is set';
-    noS3Minmemory:
-        s := 'No music module is loaded';
-    internal_failure:
-        s := 'Internal failure';
-    E_failed_to_load_file:
-        s := 'Failed to load file';
-    else
-        s := 'Unknown error';
-    end;
+function getFreeDOSMemory: longint; far; external;
+function getFreeEMMMemory: longint; far; external;
 
-    if (player_error_msg <> nil) then
-        writeln('Error: ', s, ' (', player_error_msg, ')')
-    else
-        writeln('Error: ', s);
-
-    writeln('PROGRAM HALTED.'#7);
-    halt(1);
-end;
+procedure display_errormsg; far; external;
 
 var filename:string;
     name: array [0..255] of Char;
@@ -229,19 +200,6 @@ procedure display_helpscreen;
     window(1,1,80,25);
   end;
 
-function getFreeDOSMemory: longint;
-begin
-    getFreeDOSMemory := _memmax;
-end;
-
-function getFreeEMMMemory: longint;
-begin
-    if emsInstalled then
-        getFreeEMMMemory := emsGetFreePagesCount*16
-    else
-        getFreeEMMMemory := 0;
-end;
-
 procedure mainscreen;
 CONST SW_order:array[false..true] of string = ('Extended Order','Normal Order');
       SW_stereo:array[false..true] of string = ('Mono','Stereo');
@@ -330,14 +288,21 @@ begin
   {$ENDIF}
   memcpy(name, filename[1], Ord(filename[0]));
   name[Ord(filename[0])] := Chr(0);
-  if (not player_load_s3m(name)) then
-      display_errormsg;
+    if (not player_load_s3m(name)) then
+    begin
+        display_errormsg;
+        halt(1);
+    end;
   {$IFDEF DEBUGLOAD}
   writeln('Free DOS memory after loading: ',getFreeDOSMemory shr 10, ' KiB');
   writeln('Free EMM memory after loading: ',getFreeEMMMemory, ' KiB');
   {$ENDIF}
   writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');
-  if not player_init then display_errormsg;
+    if (not player_init) then
+    begin
+        display_errormsg;
+        halt(1);
+    end;
   if not player_init_device(how2input) then begin writeln(' SoundBlaster not found sorry ... ');halt end;
   if disply_c then
     begin
@@ -346,12 +311,20 @@ begin
     end;
   { And here we go :) }
   if volume>0 then playSetMasterVolume(volume);
-  if (not player_set_mode(_16bit,stereo,samplerate,_LQ)) then display_errormsg;
+    if (not player_set_mode(_16bit,stereo,samplerate,_LQ)) then
+    begin
+        display_errormsg;
+        halt(1);
+    end;
   playSetOrder(ST3order);
   save_chntyps;
   playOption_LoopSong:=true;
   screen_no:=1;startchn:=1;
-  if (not playStart) then display_errormsg;
+    if (not playStart) then
+    begin
+        display_errormsg;
+        halt(1);
+    end;
   mainscreen;
   hide_cursor;
   repeat
