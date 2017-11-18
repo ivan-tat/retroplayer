@@ -275,9 +275,19 @@ begin
     window(1, 1, scrWidth, scrHeight);
 end;
 
+procedure write_Note(b:byte);
+const
+    nname: array[0..11] of string[2] =
+        ('C-','C#','D-','D#','E-','F-', 'F#','G-','G#','A-','A#','B-');
+begin
+    if b<254 then write(nname[b and $0f],b shr 4)
+        else if b=254 then write('^^.') else write('...');
+end;
+
 {$I PREPARE.INC}  { prepare the different screens }
 {$I REFRESH.INC}  { refresh the different screens }
 
+{$I w_chn.inc}      { Channels window }
 {$I w_dbg.inc}      { Debug window }
 
 (* Window's event router *)

@@ -1,11 +1,3 @@
-(* Channels *)
-
-procedure prep_channels;
-begin
-    scrOpenInfoBackground(white, blue);
-    scrLeave;
-end;
-
 (* Patterns *)
 
 var lastrow:byte;
