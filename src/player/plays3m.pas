@@ -188,18 +188,8 @@ var t:string;
       end;
   end;
 
-procedure display_keys; far; external;
 procedure display_help; far; external;
 procedure display_playercfg; far; external;
-
-procedure display_helpscreen;
-  begin
-    textcolor(white);textbackground(blue);
-    window(1,8,80,25);clrscr;
-    writeln;
-    display_keys;
-    window(1,1,80,25);
-  end;
 
 procedure mainscreen;
 CONST SW_order:array[false..true] of string = ('Extended Order','Normal Order');
