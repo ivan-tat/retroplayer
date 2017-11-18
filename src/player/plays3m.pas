@@ -21,7 +21,8 @@ uses
     mixer,
     mixchn,
     effects,
-    s3mplay;
+    s3mplay,
+    screen;
 
 {$I defines.pas}
 

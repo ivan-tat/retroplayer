@@ -1,76 +1,8 @@
-(* Text window *)
-
-const
-    scrWidth = 80;
-    scrHeight = 25;
-
-type
-    TWindowRect = packed record
-        visible: boolean;
-        focused: boolean;
-        fgColor, bgColor: byte;
-        x0, y0, x1, y1: byte;
-        width, height: byte;
-    end;
-    PWindowRect = ^TWindowRect;
-
 var
-    DebugWindowInstance: TWindowRect;
+    DebugWindowInstance: TWINDOWRECT;
 
 const
-    DebugWindow: PWindowRect = nil;
-
-procedure createWindow(Self: PWindowRect; fgColor, bgColor: byte; x0, y0, x1, y1: byte);
-begin
-    Self^.visible := false;
-    Self^.focused := false;
-    Self^.fgColor := fgColor;
-    Self^.bgColor := bgColor;
-    Self^.x0 := x0;
-    Self^.y0 := y0;
-    Self^.x1 := x1;
-    Self^.y1 := y1;
-    Self^.width := x1-x0+1;
-    Self^.height := y1-y0+1;
-end;
-
-function isWindowCreated(Self: PWindowRect): boolean;
-begin
-    isWindowCreated := Self <> nil;
-end;
-
-procedure showWindow(Self: PWindowRect);
-begin
-    Window(Self^.x0, Self^.y0, Self^.x1, Self^.y1);
-    TextColor(Self^.fgColor);
-    TextBackground(Self^.bgColor);
-    ClrScr;
-    Self^.visible := true;
-    Self^.focused := true;
-end;
-
-procedure focusWindow(Self: PWindowRect);
-begin
-    if (Self^.visible) then
-    begin
-        Window(Self^.x0, Self^.y0, Self^.x1, Self^.y1);
-        TextColor(Self^.fgColor);
-        TextBackground(Self^.bgColor);
-        Self^.focused := true;
-    end;
-end;
-
-procedure leaveWindow(Self: PWindowRect);
-begin
-    Self^.focused := false;
-    Window(1, 1, scrWidth, scrHeight);
-end;
-
-procedure closeWindow(Self: PWindowRect);
-begin
-    if (Self^.focused) then leaveWindow(Self);
-    Self^.visible := false;
-end;
+    DebugWindow: PWINDOWRECT = nil;
 
 const
     scrHeaderTop = 1;
@@ -231,13 +163,13 @@ var i,j,k,l:byte;
 
 procedure prep_debug;
 begin
-    if (not isWindowCreated(DebugWindow)) then
+    if (not window_is_created(DebugWindow)) then
     begin
-        createWindow(@DebugWindowInstance, lightgray, black, 1, 8, scrWidth, scrHeight);
+        window_init(@DebugWindowInstance, lightgray, black, 1, 8, scrWidth, scrHeight);
         DebugWindow := @DebugWindowInstance;
     end;
-    showWindow(DebugWindow);
-    leaveWindow(DebugWindow);
+    window_show(DebugWindow);
+    window_leave(DebugWindow);
 end;
 
 (* Router *)

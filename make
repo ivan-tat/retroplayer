@@ -411,6 +411,7 @@ build_target $T_MAIN   obj src/main/mixing.c
 build_target $T_MAIN   obj src/main/filldma.c
 build_target $T_MAIN   obj src/main/loads3m.c
 build_target $T_MAIN   obj src/main/s3mplay.c
+build_target $T_MAIN   obj src/player/screen.c
 build_target $T_MAIN   obj src/player/plays3m.c
 fi
 
@@ -463,6 +464,7 @@ build_target $T_MAIN_TP   obj src/main/mixing.pas
 build_target $T_MAIN_TP   obj src/main/filldma.pas
 build_target $T_MAIN_TP   obj src/main/loads3m.pas
 build_target $T_MAIN_TP   obj src/main/s3mplay.pas
+build_target $T_PLAYER_TP exe-dos src/player/screen.pas
 build_target $T_PLAYER_TP exe-dos src/player/plays3m.pas
 build_target $T_PLAYER_TP exe-dos src/player/smalls3m.pas
 build_target $T_PLAYER_TP obj src/player/lines.asm

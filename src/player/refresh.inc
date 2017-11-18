@@ -219,9 +219,9 @@ var i,n:byte;
 
 procedure refr_debug;
 begin
-    if (isWindowCreated(DebugWindow)) then
+    if (window_is_created(DebugWindow)) then
     begin
-        focusWindow(DebugWindow);
+        window_focus(DebugWindow);
         gotoxy(1, 1);
         write('Mix. buf. channels:                      ', mixChannels:3);
         clreol;
@@ -261,7 +261,7 @@ begin
         gotoxy(1, 13);
         write('DMA buf. frames per second: ', playOption_FPS:3);
         clreol;
-        leaveWindow(DebugWindow);
+        window_leave(DebugWindow);
     end;
 end;
 
