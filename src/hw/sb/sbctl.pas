@@ -71,6 +71,7 @@ interface
    SoundBlaster 16/ASP         4.xx
 *)
 
+function  sb_get_name: PChar;
 function  sb_get_sample_bits: Byte;
 function  sb_is_sample_signed: Boolean;
 function  sb_get_channels: Byte;
@@ -120,6 +121,7 @@ uses
 
 (*$l sbctl.obj*)
 
+function  sb_get_name: PChar; external;
 function  sb_get_sample_bits: Byte; external;
 function  sb_is_sample_signed: Boolean; external;
 function  sb_get_channels: Byte; external;

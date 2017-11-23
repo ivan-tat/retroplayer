@@ -20,6 +20,7 @@
 
 // TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
 
+char    *PUBLIC_CODE sb_get_name(void);
 uint8_t  PUBLIC_CODE sb_get_sample_bits(void);
 bool     PUBLIC_CODE sb_is_sample_signed(void);
 uint8_t  PUBLIC_CODE sb_get_channels(void);

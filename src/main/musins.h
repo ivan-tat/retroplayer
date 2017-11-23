@@ -31,6 +31,7 @@ typedef music_instrument_type_t MUSINSTYPE;
 
 #define SMPFLAG_LOOP 0x01
 
+#define MUSINS_TITLE_LENGTH_MAX 28
 #pragma pack(push, 1);
 typedef struct instrument_t
 {
@@ -51,7 +52,7 @@ typedef struct instrument_t
     uint16_t c2speed;       // frequency at middle C (actually C-4)
     uint16_t c2speed_hi;    // ignored
     uint8_t  unused3[12];
-    uint8_t  IName[28];
+    uint8_t  IName[MUSINS_TITLE_LENGTH_MAX];
     uint32_t SCRS_ID;
 };
 #pragma pack(pop);

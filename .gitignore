@@ -117,3 +117,10 @@ src/main/s3mvars.asm
 src/main/voltab.asm
 src/player/plays3m.asm
 src/player/screen.asm
+src/player/w_chn.asm
+src/player/w_dbg.asm
+src/player/w_hlp.asm
+src/player/w_inf.asm
+src/player/w_ins.asm
+src/player/w_pat.asm
+src/player/w_smp.asm

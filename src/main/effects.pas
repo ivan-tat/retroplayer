@@ -86,11 +86,14 @@ procedure chn_effHandle(var chn: TChannel);
 procedure chn_effTick(var chn: TChannel);
 function  chn_effCanContinue(var chn: TChannel): boolean;
 procedure chn_effStop(var chn: TChannel);
+procedure chn_get_effect_desc(chn: PMIXCHN; __dest: PChar; __n: Word);
 
 implementation
 
 uses
     watcom,
+    string_,
+    stdio,
     ems,
     musins,
     s3mvars,
@@ -106,5 +109,6 @@ procedure chn_effHandle(var chn: TChannel); external;
 procedure chn_effTick(var chn: TChannel); external;
 function  chn_effCanContinue(var chn: TChannel): boolean; external;
 procedure chn_effStop(var chn: TChannel); external;
+procedure chn_get_effect_desc(chn: PMIXCHN; __dest: PChar; __n: Word); external;
 
 end.

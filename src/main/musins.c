@@ -205,7 +205,7 @@ uint32_t PUBLIC_CODE musins_get_rate(MUSINS *self)
 void PUBLIC_CODE musins_set_title(MUSINS *self, char *value)
 {
     if (self)
-        strncpy(self->IName, value, 28);
+        strncpy(self->IName, value, MUSINS_TITLE_LENGTH_MAX);
 }
 
 char *PUBLIC_CODE musins_get_title(MUSINS *self)

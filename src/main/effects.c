@@ -10,6 +10,8 @@
 
 #include "pascal.h"
 #include "cc/i86.h"
+#include "cc/string.h"
+#include "cc/stdio.h"
 #include "dos/ems.h"
 #include "main/s3mtypes.h"
 #include "main/s3mvars.h"
@@ -1406,3 +1408,224 @@ void PUBLIC_CODE chn_effStop(MIXCHN *chn)
     if (cmd <= MAXEFF)
         EFFECTS_LIST(main)[cmd]->stop(chn);
 }
+
+/*** Information ***/
+
+static const char *effect_name[MAXEFF] =
+{
+    "A: Set speed",
+    "B: Jump to order",
+    "C: Pattern break to",
+    NULL,
+    NULL,
+    NULL,
+    "G: Portamento to note",
+    "H: Vibrato (normal)",
+    "I: Tremor <N/A>",
+    "J: Arpeggio",
+    NULL,
+    NULL,
+    "M: <N/A>",
+    "N: <N/A>",
+    "O: Set sample offset",
+    "P: <N/A>",
+    NULL,
+    "R: Tremolo",
+    NULL,
+    "T: Set tempo",
+    "U: Vibrato (fine)",
+    "V: Set global volume"
+};
+
+static const char *effect_D_name[] =
+{
+    "D: Volume slide down (normal)",
+    "D: Volume slide up (normal)",
+    "D: Volume slide down (fine)",
+    "D: Volume slide up (fine)"
+};
+
+static const char *effect_E_name[] =
+{
+    "E: Pitch slide down (normal)",
+    "E: Pitch slide down (fine)",
+    "E: Pitch slide down (extra)"
+};
+
+static const char *effect_F_name[] =
+{
+    "F: Pitch slide up (normal)",
+    "F: Pitch slide up (fine)",
+    "F: Pitch slide up (extra)"
+};
+
+static const char *effect_K_name[] =
+{
+    "K: Vib. + Vol.down (normal)",
+    "K: Vib. + Vol.up (normal)",
+    "K: Vib. + Vol.down (fine)",
+    "K: Vib. + Vol.up (fine)"
+};
+
+static const char *effect_L_name[] =
+{
+    "L: Port. + Vol.down (normal)",
+    "L: Port. + Vol.up (normal)",
+    "L: Port. + Vol.down (fine)",
+    "L: Port. + Vol.up (fine)"
+};
+
+static const char *effect_Q_name[] =
+{
+    "Q: Retrigger note (no slide)",
+    "Q: Retrigger note (vol.down)",
+    "Q: Retrigger note (vol*2/3)",
+    "Q: Retrigger note (vol*1/2)",
+    "Q: Retrigger note (vol.up)",
+    "Q: Retrigger note (vol*3/2)",
+    "Q: Retrigger note (vol*2)"
+};
+
+static const char *effect_S_name[] =
+{
+    "S0: Set filter <N/A>",
+    "S1: Set glissando <N/A>",
+    "S2: Set finetune",
+    "S3: Set vibrato waveform",
+    "S4: Set tremolo waveform",
+    "S5: <N/A>",
+    "S6: <N/A>",
+    "S7: <N/A>",
+    "S8: Amiga command",
+    "S9: <N/A>",
+    "SA: Stereo control <N/A>",
+    "SB: Pattern loop",
+    "SC: Note cut",
+    "SD: Note delay",
+    "SE: Pattern delay",
+    "SF: Function repeat <N/A>"
+};
+static const char *effect_unknown[] =
+{
+    "Unknown effect"
+};
+
+#define _EFFECT_DESC_MAX 40
+
+void PUBLIC_CODE chn_get_effect_desc(MIXCHN *chn, char *__dest, uint16_t __n)
+{
+    char s[_EFFECT_DESC_MAX];
+    uint8_t cmd, parm;
+    bool valid;
+    const char *format;
+    const char **table;
+
+    valid = false;
+
+    if (chn)
+    {
+        cmd = mixchn_get_command(chn);
+        if (cmd)
+        {
+            if (cmd <= MAXEFF)
+            {
+                parm = mixchn_get_command_parameter(chn);
+
+                valid = true;
+                switch (cmd)
+                {
+                case EFFIDX_A_SET_SPEED:
+                case EFFIDX_B_JUMP:
+                case EFFIDX_C_PATTERN_BREAK:
+                case EFFIDX_I_TREMOR:
+                case EFFIDX_J_ARPEGGIO:
+                case EFFIDX_M:
+                case EFFIDX_N:
+                case EFFIDX_O:
+                case EFFIDX_P:
+                case EFFIDX_R_TREMOLO:
+                case EFFIDX_T_SET_TEMPO:
+                    format = "%s: %02hX";
+                    table = effect_name;
+                    break;
+                case EFFIDX_D_VOLUME_SLIDE:
+                    format = "%s: %02hX";
+                    table = effect_D_name;
+                    cmd = mixchn_get_sub_command(chn);
+                    parm = chn->bPortParam;
+                    break;
+                case EFFIDX_E_PITCH_DOWN:
+                    format = "%s: %02hX";
+                    table = effect_E_name;
+                    cmd = mixchn_get_sub_command(chn);
+                    break;
+                case EFFIDX_F_PITCH_UP:
+                    format = "%s: %02hX";
+                    table = effect_F_name;
+                    cmd = mixchn_get_sub_command(chn);
+                    break;
+                case EFFIDX_G_PORTAMENTO:
+                    format = "%s: %02hX";
+                    table = effect_name;
+                    parm = chn->bPortParam;
+                    break;
+                case EFFIDX_H_VIBRATO:
+                    format = "%s: %02hX";
+                    table = effect_name;
+                    parm = chn->bVibParam;
+                    break;
+                case EFFIDX_K_VIB_VOLSLIDE:
+                    format = "%s: %02hX";
+                    table = effect_K_name;
+                    cmd = mixchn_get_sub_command(chn);
+                    break;
+                case EFFIDX_L_PORTA_VOLSLIDE:
+                    format = "%s: %02hX";
+                    table = effect_L_name;
+                    cmd = mixchn_get_sub_command(chn);
+                    break;
+                case EFFIDX_Q_RETRIG_VOLSLIDE:
+                    format = "%s: %02hX";
+                    table = effect_Q_name;
+                    cmd = mixchn_get_sub_command(chn);
+                    break;
+                case EFFIDX_S_SPECIAL:
+                    format = "%s: %hX";
+                    table = effect_S_name;
+                    cmd = parm >> 4;
+                    parm &= 0x0f;
+                    break;
+                case EFFIDX_U_FINE_VIBRATO:
+                    format = "%s: %02hX";
+                    table = effect_name;
+                    parm = chn->bVibParam;
+                    break;
+                case EFFIDX_V_SET_GVOLUME:
+                    format = "%s: %hu";
+                    table = effect_name;
+                    break;
+                default:
+                    valid = false;
+                    break;
+                }
+            }
+            else
+            {
+                valid = true;
+                format = "%s: %02hX";
+                parm = cmd;
+                cmd = 0;
+                table = effect_unknown;
+            }
+        }
+    }
+
+    if (valid)
+        snprintf(s, _EFFECT_DESC_MAX, format, table[cmd], parm);
+    else
+        s[0] = 0;
+
+    strncpy(__dest, s, __n);
+}
+
+#undef _EFFECT_DESC_MAX

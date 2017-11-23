@@ -115,6 +115,8 @@ typedef uint8_t S3MINSTYPE;
 #define S3MINST_ACYM   0x06
 #define S3MINST_AHIHAT 0x07
 
+#define S3MINS_TITLE_LENGTH_MAX 28
+
 #pragma pack(push, 1);
 typedef struct S3M_instrument
 {
@@ -125,7 +127,7 @@ typedef struct S3M_instrument
         S3MPCMSMP sample;
         S3MADLIBINS adlib;
     } data;
-    char title[28];
+    char title[S3MINS_TITLE_LENGTH_MAX];
     uint32_t magic;
 };
 #pragma pack(pop);
@@ -514,6 +516,7 @@ bool __near s3mloader_load_instrument(S3MLOADER *self, uint8_t index)
         musins_set_type(ins, MUSINST_EMPTY);
         SELF->smppara[index] = 0;
     }
+    s3mins.title[S3MINS_TITLE_LENGTH_MAX - 1] = 0;  // for weird case
     musins_set_title(ins, s3mins.title);
 
     return true;

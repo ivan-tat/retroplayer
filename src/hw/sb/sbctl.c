@@ -193,6 +193,11 @@ uint8_t __near sbMixerRead(uint8_t reg)
         return 0;
 }
 
+char *PUBLIC_CODE sb_get_name(void)
+{
+    return sdev_name;
+}
+
 uint8_t PUBLIC_CODE sb_get_sample_bits(void)
 {
     return sdev_mode_16bits ? 16 : 8;

@@ -118,6 +118,5 @@ extern void PUBLIC_CODE pascal_window(uint8_t x1, uint8_t y1, uint8_t x2, uint8_
 #define textcolor(c)            pascal_textcolor(c)
 #define textmode(m)             pascal_textmode(m)
 #define window(x1, y1, x2, y2)  pascal_window(x1, y1, x2, y2)
-#define window(x1, y1, x2, y2)  pascal_window(x1, y1, x2, y2)
 
 #endif  /* CC_CONIO_H */

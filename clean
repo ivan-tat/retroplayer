@@ -109,5 +109,12 @@ $RM ./src/main/voltab.asm
 cleandir ./src/player
 $RM ./src/player/plays3m.asm
 $RM ./src/player/screen.asm
+$RM ./src/player/w_chn.asm
+$RM ./src/player/w_dbg.asm
+$RM ./src/player/w_hlp.asm
+$RM ./src/player/w_inf.asm
+$RM ./src/player/w_ins.asm
+$RM ./src/player/w_pat.asm
+$RM ./src/player/w_smp.asm
 
 echo "Done."

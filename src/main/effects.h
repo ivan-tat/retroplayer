@@ -107,5 +107,6 @@ void PUBLIC_CODE chn_effHandle(MIXCHN *chn);
 void PUBLIC_CODE chn_effTick(MIXCHN *chn);
 bool PUBLIC_CODE chn_effCanContinue(MIXCHN *chn);
 void PUBLIC_CODE chn_effStop(MIXCHN *chn);
+void PUBLIC_CODE chn_get_effect_desc(MIXCHN *chn, char *__dest, uint16_t __n);
 
 #endif  /* EFFECTS_H */

@@ -17,33 +17,58 @@
 
 #include "pascal.h"
 
-/* Text window */
+/* Screen window */
 
 #define scrWidth 80
 #define scrHeight 25
 
 #pragma pack(push, 1);
-typedef struct window_rect_t
+typedef struct screen_rect_t
 {
-    bool visible;
-    bool focused;
-    uint8_t fgColor, bgColor;
     uint8_t x0, y0, x1, y1;
-    uint8_t width, height;
 };
 #pragma pack(pop);
-typedef struct window_rect_t WINDOWRECT;
+typedef struct screen_rect_t SCRRECT;
 
-void PUBLIC_CODE window_init(
-    WINDOWRECT *self,
-    uint8_t fgColor, uint8_t bgColor,
-    uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1
+typedef uint16_t WINFLAGS;
+
+// state
+#define WINFL_VISIBLE     (1<<0)
+#define WINFL_FOCUSED     (1<<1)
+// events
+#define WINFL_FULLREDRAW  (1<<2)
+#define WINFL_FOCUSREDRAW (1<<3)
+#define WINFL_REDRAW      (WINFL_FULLREDRAW | WINFL_FOCUSREDRAW)
+
+typedef struct screen_window_t SCRWIN;
+#pragma pack(push, 1);
+typedef struct screen_window_t
+{
+    WINFLAGS flags;
+    SCRRECT rect;
+    void __far (*draw)(SCRWIN *self);
+    bool __far (*keypress)(SCRWIN *self, char key);
+};
+#pragma pack(pop);
+
+void     PUBLIC_CODE scrwin_init(
+    SCRWIN *self,
+    uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
+    void *draw,
+    void *keypress
 );
-
-bool PUBLIC_CODE window_is_created(WINDOWRECT *self);
-void PUBLIC_CODE window_show(WINDOWRECT *self);
-void PUBLIC_CODE window_focus(WINDOWRECT *self);
-void PUBLIC_CODE window_leave(WINDOWRECT *self);
-void PUBLIC_CODE window_close(WINDOWRECT *self);
+bool     PUBLIC_CODE scrwin_is_created(SCRWIN *self);
+void     PUBLIC_CODE scrwin_set_flags(SCRWIN *self, WINFLAGS value);
+WINFLAGS PUBLIC_CODE scrwin_get_flags(SCRWIN *self);
+void     PUBLIC_CODE scrwin_set_width(SCRWIN *self, uint8_t value);
+uint8_t  PUBLIC_CODE scrwin_get_width(SCRWIN *self);
+void     PUBLIC_CODE scrwin_set_height(SCRWIN *self, uint8_t value);
+uint8_t  PUBLIC_CODE scrwin_get_height(SCRWIN *self);
+void     PUBLIC_CODE scrwin_draw(SCRWIN *self);
+bool     PUBLIC_CODE scrwin_keypress(SCRWIN *self, char key);
+void     PUBLIC_CODE scrwin_show(SCRWIN *self);
+void     PUBLIC_CODE scrwin_focus(SCRWIN *self);
+void     PUBLIC_CODE scrwin_leave(SCRWIN *self);
+void     PUBLIC_CODE scrwin_close(SCRWIN *self);
 
 #endif  /* SCREEN_H */

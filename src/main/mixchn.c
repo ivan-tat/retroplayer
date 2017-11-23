@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include "main/effvars.h"
+#include "main/effects.h"
 #include "main/s3mvars.h"
 #include "main/mixer.h"
 
