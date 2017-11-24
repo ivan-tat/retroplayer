@@ -105,7 +105,7 @@ void __far win_instruments_draw(SCRWIN *self)
             for (i = 1; i <= 99; i++)
             {
                 write_no(i - 1, page_height, line_len);
-                posstring(&data, i + 1);
+                posstring(&data, i);
                 printf(": %s", &data);
             }
         }

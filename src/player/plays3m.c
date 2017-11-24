@@ -44,6 +44,14 @@ uint32_t PUBLIC_CODE getFreeEMMMemory(void)
         return 0;
 }
 
+void PUBLIC_CODE memstats(void)
+{
+    printf("Free DOS memory:........%6lu KiB", getFreeDOSMemory() >> 10);
+    clreol();
+    printf("Free expanded memory:...%6lu KiB", getFreeEMMMemory());
+    clreol();
+}
+
 void PUBLIC_CODE display_errormsg(void)
 {
     printf("PLAYER STATUS - ");

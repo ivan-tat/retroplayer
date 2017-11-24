@@ -44,7 +44,7 @@ void __near print_sample_num(uint8_t i, uint8_t first_line, uint8_t page_height)
     uint8_t n;
 
     n = chnlastinst[i];
-    gotoxy(1, first_line + n - samplepage * page_height);
+    gotoxy(1, first_line + n - 1 - samplepage * page_height);
     printf("%3hu.", n);
 }
 
@@ -77,23 +77,25 @@ void __far win_samples_draw(SCRWIN *self)
             if (page_height <= InsNum)
             {
                 samplepage = 0;
-                i = 1;
+                i = 0;
             }
             else
             {
                 i = samplepage * page_height;
-                if (i > InsNum)
+                if (i >= InsNum)
                 {
-                    samplepage = InsNum / page_height - 1;
-                    i = samplepage * page_height + 1;
+                    samplepage = InsNum / page_height;
+                    if (samplepage)
+                        samplepage--;
+                    i = samplepage * page_height;
                 }
             }
 
             height = scrwin_get_height(self);
             for (j = 1; j < height; j++)
-                if (i <= InsNum)
+                if (i < InsNum)
                 {
-                    ins = musinsl_get(mod_Instruments, i - 1);
+                    ins = musinsl_get(mod_Instruments, i);
 
                     strncpy(&title, musins_get_title(ins), MUSINS_TITLE_LENGTH_MAX);
 
@@ -112,7 +114,7 @@ void __far win_samples_draw(SCRWIN *self)
 
                     printf(
                         " %2hu. %s %2hu %5u %s %5u %5u %5u",
-                        i,
+                        i + 1,
                         title,
                         (uint8_t)8,
                         (uint16_t)musins_get_rate(ins),

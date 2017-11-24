@@ -28,6 +28,7 @@ extern uint8_t PUBLIC_DATA chnlastinst[MAX_CHANNELS];
 
 uint32_t PUBLIC_CODE getFreeDOSMemory(void);
 uint32_t PUBLIC_CODE getFreeEMMMemory(void);
+void     PUBLIC_CODE memstats(void);
 
 void __near get_note_name(char *__dest, uint8_t note);
 void __near __pascal write_Note(uint8_t note);
