@@ -16,7 +16,6 @@
 #include <stdint.h>
 
 #include "pascal.h"
-#include "hw/sb/sndisr_.h"
 
 // TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
 

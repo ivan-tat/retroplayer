@@ -12,24 +12,23 @@ interface
 
 (*$I defines.pas*)
 
-type
-    TIRQMask = word;
+procedure pic_enable;
+procedure pic_disable;
+procedure pic_eoi;
 
-procedure picEnableChannels(mask: TIRQMask);
-procedure picDisableChannels(mask: TIRQMask);
-procedure picEOI(irq: byte);
-function  picGetISR(irq: byte): pointer;
-procedure picSetISR(irq: byte; p: pointer);
+procedure pic_get_hooked_irq_channels;
+procedure pic_get_irq_owner;
+procedure pic_get_irq_handler;
+procedure pic_get_irq_data;
 
-type
-  TISRCallback = procedure (ch: byte);
-  PISRCallback = ^TISRCallback;
-
-procedure isrHookSingleChannel(ch: byte);
-procedure isrReleaseSingleChannel(ch: byte);
-procedure isrSetSingleChannelHandler(ch: byte; p: PISRCallback);
-function  isrGetSingleChannelHandler(ch: byte): PISRCallback;
-procedure isrClearSingleChannelHandler(ch: byte);
+procedure hwowner_hook_irq;
+procedure hwowner_hook_irq_channels;
+procedure hwowner_set_irq_handler;
+procedure hwowner_set_irq_channels_handler;
+procedure hwowner_clear_irq_handler;
+procedure hwowner_clear_irq_channels_handler;
+procedure hwowner_release_irq;
+procedure hwowner_release_irq_channels;
 
 implementation
 
@@ -37,28 +36,34 @@ uses
     pascal,
     dos_,
     stdio,
-    debug;
+    debug,
+    hwowner;
 
 (*$l isr.obj*)
 
-function getISR(ch: byte): pointer; external;
+procedure _isr_get; external;
 
 (*$l pic.obj*)
 
-procedure picEnableChannels(mask: TIRQMask); external;
-procedure picDisableChannels(mask: TIRQMask); external;
-procedure picEOI(irq: byte); external;
-function  picGetISR(irq: byte): pointer; external;
-procedure picSetISR(irq: byte; p: pointer); external;
+procedure pic_enable; external;
+procedure pic_disable; external;
+procedure pic_eoi; external;
 
-procedure isrHookSingleChannel(ch: byte); external;
-procedure isrReleaseSingleChannel(ch: byte); external;
-procedure isrSetSingleChannelHandler(ch: byte; p: PISRCallback); external;
-function  isrGetSingleChannelHandler(ch: byte): PISRCallback; external;
-procedure isrClearSingleChannelHandler(ch: byte); external;
+procedure pic_get_hooked_irq_channels; external;
+procedure pic_get_irq_owner; external;
+procedure pic_get_irq_handler; external;
+procedure pic_get_irq_data; external;
+
+procedure hwowner_hook_irq; external;
+procedure hwowner_hook_irq_channels; external;
+procedure hwowner_set_irq_handler; external;
+procedure hwowner_set_irq_channels_handler; external;
+procedure hwowner_clear_irq_handler; external;
+procedure hwowner_clear_irq_channels_handler; external;
+procedure hwowner_release_irq; external;
+procedure hwowner_release_irq_channels; external;
 
 procedure register_pic; far; external;
-procedure unregister_pic; far; external;
 
 begin
     register_pic;

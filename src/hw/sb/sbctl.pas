@@ -79,11 +79,11 @@ uses
     errno_,
     dos,
     debug,
+    hwowner,
     dma,
     pic,
+    sndctl_t,
     sbio,
-    detisr,
-    sndisr,
     crt;
 
 (*$l sbctl.obj*)

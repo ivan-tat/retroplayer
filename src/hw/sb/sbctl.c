@@ -16,14 +16,12 @@
 #include "cc/stdlib.h"
 #include "cc/string.h"
 #include "cc/errno.h"
+#include "debug.h"
+#include "hw/hwowner.h"
 #include "hw/dma.h"
 #include "hw/pic.h"
+#include "hw/sndctl_t.h"
 #include "hw/sb/sbio.h"
-#include "hw/sb/sndisr_.h"
-#include "hw/sb/sndisr.h"
-#include "hw/sb/detisr_.h"
-#include "hw/sb/detisr.h"
-#include "debug.h"
 
 #include "hw/sb/sbctl.h"
 
@@ -161,10 +159,6 @@ static bool     sdev_transfer_mode_signed;
 static uint8_t  sdev_transfer_mode_DSP_start;   // SB1-SB16
 static uint8_t  sdev_transfer_mode_DSP_mode;    // SB16 only
 
-/* IRQ */
-
-static SoundHWISRCallback_t *_ISR_user;
-
 static const uint8_t _sb_silence_u8 = 0x80;
 static const uint16_t _sb_silence_s16 = 0;
 
@@ -231,16 +225,24 @@ static const struct
     }
 };
 
-void __far __pascal _ISR_detect(uint8_t irq)
+/* Driver */
+
+static HWOWNER _sbdriver;
+
+/* ISR */
+
+static SoundHWISRCallback_t *_ISR_user;
+
+void __far _ISR_detect(SBDEV *self, uint8_t irq)
 {
     _disable();
 
     sbioDSPAcknowledgeIRQ(sdev_hw_base, false);
 
     if (irq >= 8)
-        picEOI(8);  /* secondary */
+        pic_eoi(8);  /* secondary */
 
-    picEOI(0);      /* primary */
+    pic_eoi(0);      /* primary */
 
     sdev_irq_answer = irq;
 
@@ -249,22 +251,22 @@ void __far __pascal _ISR_detect(uint8_t irq)
 
 void __near _sb_start_DSP_transfer(SBDEV *self);
 
-void __far __pascal _ISR_play(void)
+void __far _ISR_play(SBDEV *self, uint8_t irq)
 {
     _disable();
 
     sbioDSPAcknowledgeIRQ(sdev_hw_base, sdev_transfer_mode_16bits);
 
     if (sdev_hw_irq >= 8)
-        picEOI(8);  /* secondary */
+        pic_eoi(8);  /* secondary */
 
-    picEOI(0);  /* primary */
+    pic_eoi(0);  /* primary */
 
     if (_ISR_user)
         _ISR_user();
 
     if ((sdev_transfer_flags & SBTRFL_AUTOINIT) && !(sdev_caps_flags & SBCAPS_AUTOINIT))
-        _sb_start_DSP_transfer(SBDEV_REF_FIXME);
+        _sb_start_DSP_transfer(self);
 
     _enable();
 }
@@ -274,11 +276,9 @@ void PUBLIC_CODE sb_hook_IRQ(SBDEV *self, void *p)
     DEBUG_BEGIN("sb_hook_IRQ");
 
     _ISR_user = p;
-    SetSoundHWISRCallback(&_ISR_play);
-    sdev_irq_savedvec = picGetISR(sdev_hw_irq);
-    picSetISR(sdev_hw_irq, GetSoundHWISR());
+    hwowner_hook_irq(&_sbdriver, sdev_hw_irq, &_ISR_play, (void *)self);
     /* no changes for IRQ2 */
-    picDisableChannels((1 << sdev_hw_irq) & ~(1 << 2));
+    pic_disable((1 << sdev_hw_irq) & ~(1 << 2));
 
     DEBUG_END("sb_hook_IRQ");
 }
@@ -288,8 +288,8 @@ void PUBLIC_CODE sb_unhook_IRQ(SBDEV *self)
     DEBUG_BEGIN("sb_unhook_IRQ");
 
     /* no changes for IRQ2 */
-    picEnableChannels((1 << sdev_hw_irq) & ~(1 << 2));
-    picSetISR(sdev_hw_irq, sdev_irq_savedvec);
+    pic_enable((1 << sdev_hw_irq) & ~(1 << 2));
+    hwowner_release_irq(&_sbdriver, sdev_hw_irq);
 
     DEBUG_END("sb_unhook_IRQ");
 }
@@ -1075,8 +1075,7 @@ bool __near _sb_detect_DMA_IRQ(SBDEV *self)
     uint8_t i;
     uint8_t dmac;
     uint8_t dmamask;
-    uint8_t irq;
-    uint16_t irqmask;
+    IRQMASK irqmask;
 
     DEBUG_BEGIN("_sb_detect_DMA_IRQ");
 
@@ -1099,20 +1098,24 @@ bool __near _sb_detect_DMA_IRQ(SBDEV *self)
 
     _enable();
 
-    SetDetISRCallback(&_ISR_detect);
-
     irqmask = 0;
     for (i = 0; i < HW_IRQ_MAX; i++)
+        irqmask |= 1 << HW_IRQ_NUM[i];
+
+    irqmask &= ~pic_get_hooked_irq_channels();
+    if (!irqmask)
     {
-        irq = HW_IRQ_NUM[i];
-        irqmask |= 1 << irq;
-        oldv[i] = picGetISR(irq);
-        picSetISR(irq, GetDetISR(irq));
+        DEBUG_FAIL("_sb_detect_DMA_IRQ", "No free IRQ channels are available.");
+        return false;
+    }
+
+    if (!hwowner_hook_irq_channels(&_sbdriver, irqmask, &_ISR_detect, self))
+    {
+        DEBUG_FAIL("_sb_detect_DMA_IRQ", "Failed to hook IRQ channels.");
+        return false;
     }
     /* no changes for IRQ 2 */
-    irqmask &= ~(1 << 2);
-
-    picDisableChannels(irqmask);
+    pic_disable(irqmask & ~(1 << 2));
 
     i = 0;
     while ((!(sdev_hw_flags & SBHWFL_DMA8)) && (i < HW_DMA_MAX))
@@ -1126,10 +1129,14 @@ bool __near _sb_detect_DMA_IRQ(SBDEV *self)
         i++;
     }
 
-    for (i = 0; i < HW_IRQ_MAX; i++)
-        picSetISR(HW_IRQ_NUM[i], oldv[i]);
+    if (!hwowner_release_irq_channels(&_sbdriver, irqmask))
+    {
+        DEBUG_FAIL("_sb_detect_DMA_IRQ", "Failed to release IRQ channels.");
+        return false;
+    }
 
-    picEnableChannels(irqmask);
+    /* no changes for IRQ 2 */
+    pic_enable(irqmask & ~(1 << 2));
 
     if (!(sdev_hw_flags & SBHWFL_DMA8))
     {
@@ -1614,6 +1621,7 @@ void sbctl_init(void)
 {
     DEBUG_BEGIN("sbctl_init");
 
+    hwowner_init(&_sbdriver, "Internal SoundBlaster driver");
     sb_clear(SBDEV_REF_FIXME);
     _ISR_user = NULL;
 
@@ -1623,6 +1631,8 @@ void sbctl_init(void)
 void sbctl_done(void)
 {
     DEBUG_BEGIN("sbctl_done");
+
+    hwowner_free(&_sbdriver);
 
     DEBUG_END("sbctl_done");
 }

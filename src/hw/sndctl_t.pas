@@ -33,6 +33,10 @@ function  get_sample_format_channels(p: PHWSMPFMT): byte;
 function  get_sample_format_width(p: PHWSMPFMT): word;
 procedure clear_sample_format(p: PHWSMPFMT);
 
+type
+    TSoundHWISRCallback = procedure;
+    PSoundHWISRCallback = ^TSoundHWISRCallback;
+
 implementation
 
 (*$l sndctl_t.obj*)

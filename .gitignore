@@ -92,12 +92,11 @@ src/cc/string/strncpy.asm
 src/cc/string/strnicmp.asm
 src/dos/ems.asm
 src/hw/dma.asm
+src/hw/hwowner.asm
 src/hw/pic.asm
 src/hw/sndctl_t.asm
-src/hw/sb/detisr.asm
 src/hw/sb/sbctl.asm
 src/hw/sb/sbio.asm
-src/hw/sb/sndisr.asm
 src/main/_wramp.inc
 src/main/_wsinus.inc
 src/main/_wsquare.inc

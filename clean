@@ -76,13 +76,12 @@ $RM ./src/cc/string/strncpy.asm
 $RM ./src/cc/string/strnicmp.asm
 cleandir ./src/hw
 $RM ./src/hw/dma.asm
+$RM ./src/hw/hwowner.asm
 $RM ./src/hw/pic.asm
 $RM ./src/hw/sndctl_t.asm
 cleandir ./src/hw/sb
-$RM ./src/hw/sb/detisr.asm
 $RM ./src/hw/sb/sbctl.asm
 $RM ./src/hw/sb/sbio.asm
-$RM ./src/hw/sb/sndisr.asm
 cleandir ./src/dos
 $RM ./src/dos/ems.asm
 cleandir ./src/main

@@ -3,11 +3,11 @@
 ; This is free and unencumbered software released into the public domain.
 ; For more information, please refer to <http://unlicense.org>.
 
-.model large,pascal
+.model large,c
 .386p
 .387
 
-extern _ISRCallback: far
+extern _isr_callback: far
 
 deflabel macro name, index
     &name&index:
@@ -49,7 +49,8 @@ ISR:
         push    ax
         mov     ax,DGROUP
         mov     ds,ax
-        call    far ptr _ISRCallback
+        call    far ptr _isr_callback
+        add     sp,2
 
         pop     gs
         pop     fs
@@ -64,14 +65,16 @@ ISR:
         pop     eax
         iret
 
-public getISR
-getISR proc far ch: byte
+public isr_get
+isr_get proc far ch: byte
+        push    bx
         movzx   bx,[ch]
         shl     bx,1
         mov     ax,word ptr [ISR_tab][bx]
         mov     dx,cs
+        pop     bx
         ret
-getISR endp
+isr_get endp
 
 ISR_TEXT ends
 
