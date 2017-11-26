@@ -118,49 +118,31 @@ void __near fill_frame(void *mixbuf, SNDDMABUF *outbuf)
     if (playState_songEnded)
     {
         dstoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameActive);
-        switch (f_bits)
+        if (f_sign)
+            fill_value.u32 = 0;
+        else
+            switch (f_bits)
+            {
+            case 8:
+                fill_value.u16 = 0x8080;
+                break;
+            case 16:
+                fill_value.u32 = 0x80008000;
+                break;
+            default:
+                break;
+            }
+
+        switch (f_width)
         {
-        case 8:
-            switch (f_channels)
-            {
-            case 1:
-                if (f_sign)
-                    fill_value.u8 = 0;
-                else
-                    fill_value.u8 = 0x80;
-                fill_8(&(buf[dstoff]), fill_value.u8, framesize);
-                break;
-            case 2:
-                if (f_sign)
-                    fill_value.u16 = 0;
-                else
-                    fill_value.u16 = 0x8080;
-                fill_16(&(buf[dstoff]), fill_value.u16, framesize);
-                break;
-            default:
-                break;
-            }
+        case 1:
+            fill_8(&(buf[dstoff]), fill_value.u8, framesize);
             break;
-        case 16:
-            switch (f_channels)
-            {
-            case 1:
-                if (f_sign)
-                    fill_value.u16 = 0;
-                else
-                    fill_value.u16 = 0x8000;
-                fill_16(&(buf[dstoff]), fill_value.u16, framesize);
-                break;
-            case 2:
-                if (f_sign)
-                    fill_value.u32 = 0;
-                else
-                    fill_value.u32 = 0x80008000;
-                fill_32(&(buf[dstoff]), fill_value.u32, framesize);
-                break;
-            default:
-                break;
-            }
+        case 2:
+            fill_16(&(buf[dstoff]), fill_value.u16, framesize);
+            break;
+        case 4:
+            fill_32(&(buf[dstoff]), fill_value.u32, framesize);
             break;
         default:
             break;
