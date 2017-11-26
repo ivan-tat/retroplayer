@@ -399,9 +399,9 @@ begin
                   end;
                 if (upcase(c)='P') then
                   begin
-                    pause_play;
+                    sb_transfer_pause;
                     readkey;
-                    continue_play;
+                    sb_transfer_continue;
                     c:=#0;
                   end;
                 if (c='+') then

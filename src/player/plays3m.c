@@ -46,9 +46,9 @@ uint32_t PUBLIC_CODE getFreeEMMMemory(void)
 
 void PUBLIC_CODE memstats(void)
 {
-    printf("Free DOS memory:........%6lu KiB", getFreeDOSMemory() >> 10);
+    printf("Free DOS memory:........%6lu KiB" CRLF, getFreeDOSMemory() >> 10);
     clreol();
-    printf("Free expanded memory:...%6lu KiB", getFreeEMMMemory());
+    printf("Free expanded memory:...%6lu KiB" CRLF, getFreeEMMMemory());
     clreol();
 }
 
@@ -102,7 +102,7 @@ void PUBLIC_CODE display_help(void)
 
 void PUBLIC_CODE display_playercfg(void)
 {
-    writelnSBConfig();
+    sb_conf_dump();
 }
 
 uint8_t __near order_find_previous_entry(uint8_t nr)

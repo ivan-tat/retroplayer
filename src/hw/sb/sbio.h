@@ -10,9 +10,10 @@
 
 /* Sound Blaster hardware i/o errors */
 
-typedef uint16_t SBIOError_t;
+typedef uint16_t sbio_error_t;
+typedef sbio_error_t SBIOERR;
 
-extern __pascal sbioError;
+extern SBIOERR __pascal sbioError;
 
 #define E_SBIO_SUCCESS 0
 #define E_SBIO_DSP_RESET_FAILED 1
@@ -28,18 +29,20 @@ extern __pascal sbioError;
 #define SBIO_MIXER_VOICE_LEFT    0x32
 #define SBIO_MIXER_VOICE_RIGHT   0x33
 
-void    __far __pascal sbioMixerReset( uint16_t base );
-uint8_t __far __pascal sbioMixerRead( uint16_t base, uint8_t reg );
-void    __far __pascal sbioMixerWrite( uint16_t base, uint8_t reg, uint8_t data );
+void    PUBLIC_CODE sbioMixerReset(uint16_t base);
+uint8_t PUBLIC_CODE sbioMixerRead(uint16_t base, uint8_t reg);
+void    PUBLIC_CODE sbioMixerWrite(uint16_t base, uint8_t reg, uint8_t data);
 
 /* DSP */
 
-bool    __far __pascal sbioDSPReset( uint16_t base );
-uint8_t __far __pascal sbioDSPRead( uint16_t base );
-bool    __far __pascal sbioDSPWrite( uint16_t base, uint8_t data );
+bool    PUBLIC_CODE sbioDSPReset(uint16_t base);
+uint8_t PUBLIC_CODE sbioDSPRead(uint16_t base);
+bool    PUBLIC_CODE sbioDSPReadQueue(uint16_t base, uint8_t *data, uint16_t length);
+bool    PUBLIC_CODE sbioDSPWrite(uint16_t base, uint8_t data);
+bool    PUBLIC_CODE sbioDSPWriteQueue(uint16_t base, uint8_t *data, uint16_t length);
 
 /* IRQ */
 
-void __far __pascal sbioDSPAcknowledgeIRQ( uint16_t base, bool mode16bit );
+void PUBLIC_CODE sbioDSPAcknowledgeIRQ(uint16_t base, bool mode16bit);
 
 #endif /* _SBIO_H */

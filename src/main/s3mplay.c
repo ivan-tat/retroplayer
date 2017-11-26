@@ -111,7 +111,7 @@ static EMSNAME _EM_map_name = "saveMAP";
 
 /* IRQ routines */
 
-void __far __pascal PlaySoundCallback(void)
+void __far __pascal ISR_play(void)
 {
     bool err;
 
@@ -236,13 +236,13 @@ bool PUBLIC_CODE player_init_device(uint8_t type)
         player_flags_snddev = true;
         break;
     case 1:
-        player_flags_snddev = DetectSoundblaster();
+        player_flags_snddev = sb_conf_detect();
         break;
     case 2:
-        player_flags_snddev = UseBlasterEnv();
+        player_flags_snddev = sb_conf_env();
         break;
     case 3:
-        player_flags_snddev = InputSoundblasterValues();
+        player_flags_snddev = sb_conf_input();
         break;
     default:
         DEBUG_ERR("player_init_device", "Unknown method.");
@@ -471,8 +471,6 @@ void __near _player_reset_channels(void)
 
 bool PUBLIC_CODE playStart(void)
 {
-    bool mode_stereo;
-    bool mode_16bits;
     SNDDMABUF *outbuf;
     uint16_t count;
 
@@ -506,26 +504,13 @@ bool PUBLIC_CODE playStart(void)
         return false;
     }
 
-    mode_16bits = player_mode_bits == 16;
-    mode_stereo = player_mode_channels == 2;
+    sb_hook_IRQ(&ISR_play);
 
-    set_ready_irq(&PlaySoundCallback);
-
-    sbAdjustMode(&player_mode_rate, &mode_stereo, &mode_16bits);
-
-    Initblaster(&mode_16bits, &mode_stereo, &player_mode_rate);
-
-    if (mode_16bits)
-        player_mode_bits = 16;
-    else
-        player_mode_bits = 8;
-
-    if (mode_stereo)
-        player_mode_channels = 2;
-    else
-        player_mode_channels = 1;
-
-    player_set_mode(mode_16bits, mode_stereo, player_mode_rate, player_mode_lq);
+    sb_set_transfer_mode(player_mode_rate, player_mode_channels, player_mode_bits, player_mode_signed);
+    player_mode_rate = sb_get_rate();
+    player_mode_channels = sb_get_channels();
+    player_mode_bits = sb_get_sample_bits();
+    player_mode_signed = sb_is_sample_signed();
 
     if (!_player_setup_mixer())
     {
@@ -574,14 +559,17 @@ bool PUBLIC_CODE playStart(void)
     outbuf->frameActive = outbuf->framesCount - 1;
     outbuf->frameLast = outbuf->framesCount;
 
-    // calc all buffer parts
     fill_DMAbuffer(mixBuf.buf, outbuf);
 
-    // loop through whole DMA buffer with double buffering
-    sbSetupDMATransfer(outbuf->buf->data, count * (uint16_t)outbuf->framesCount, true);
-    sbSetupDSPTransfer(count, true);
+    sb_set_transfer_buffer(outbuf->buf->data, count, outbuf->framesCount, true);
 
-    // now everything works in background
+    if (!sb_transfer_start())
+    {
+        DEBUG_FAIL("playStart", "Failed to start transfer.");
+        player_error = E_PLAYER_INTERNAL;
+        return false;
+    }
+
     DEBUG_SUCCESS("playStart");
     return true;
 }
@@ -626,9 +614,9 @@ void PUBLIC_CODE player_free(void)
 {
     DEBUG_BEGIN("player_free");
 
-    stop_play();
+    sb_transfer_stop();
     player_free_module();
-    restore_irq();
+    sb_unhook_IRQ();
     freeVolumeTable();
     snddmabuf_free(&sndDMABuf);
     mixbuf_free(&mixBuf);

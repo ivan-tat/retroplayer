@@ -26,88 +26,136 @@
 #define DSP_WRITE_BUFFER_STATUS 0x0c // Read
 #define DSP_WRITE_DATA          0x0c // Write
 
-void __far __pascal sbioMixerReset( uint16_t base ) {
+void PUBLIC_CODE sbioMixerReset(uint16_t base)
+{
     unsigned int wait;
 
-    outp( base + MIXER_REG, 0 );
+    outp(base + MIXER_REG, 0);
 
-    for ( wait = 50; wait; wait-- ) __asm nop;
+    for (wait = 50; wait; wait--)
+        __asm nop;
 
-    outp( base + MIXER_DATA, 1 );
+    outp(base + MIXER_DATA, 1);
 
     sbioError = E_SBIO_SUCCESS;
 }
 
-uint8_t __far __pascal sbioMixerRead( uint16_t base, uint8_t reg ) {
-    outp( base + MIXER_REG, reg );
+uint8_t PUBLIC_CODE sbioMixerRead(uint16_t base, uint8_t reg)
+{
+    outp(base + MIXER_REG, reg);
     sbioError = E_SBIO_SUCCESS;
-    return inp( base + MIXER_DATA );
+    return inp(base + MIXER_DATA);
 }
 
-void __far __pascal sbioMixerWrite( uint16_t base, uint8_t reg, uint8_t data ) {
+void PUBLIC_CODE sbioMixerWrite(uint16_t base, uint8_t reg, uint8_t data)
+{
     uint8_t tmp;
-    outp( base + MIXER_REG, reg );
-    tmp = inp( base + MIXER_DATA );
-    outp( base + MIXER_DATA, data );
+
+    outp(base + MIXER_REG, reg);
+    tmp = inp(base + MIXER_DATA);
+    outp(base + MIXER_DATA, data);
     sbioError = E_SBIO_SUCCESS;
 }
 
-bool __far __pascal sbioDSPReset( uint16_t base ) {
+bool PUBLIC_CODE sbioDSPReset(uint16_t base)
+{
     unsigned int count;
     uint8_t tmp;
 
-    outp( base + DSP_RESET, 1 );
+    outp(base + DSP_RESET, 1);
 
     /* wait 3.3 microseconds */
-    for ( count = 5; count; count-- ) tmp = inp( base + DSP_RESET );
+    for (count = 5; count; count--)
+        tmp = inp(base + DSP_RESET);
 
-    outp( base + DSP_RESET, 0 );
+    outp(base + DSP_RESET, 0);
 
-    for ( count = 200; count; count-- ) {
+    for (count = 200; count; count--)
+    {
         /* read data from DSP */
-        tmp = sbioDSPRead( base );
-        if ( sbioError != E_SBIO_SUCCESS ) break;
-        if ( tmp == 0xaa ) return true;
+        tmp = sbioDSPRead(base);
+
+        if (sbioError != E_SBIO_SUCCESS)
+            break;
+
+        if (tmp == 0xaa)
+            return true;
     }
 
     sbioError = E_SBIO_DSP_RESET_FAILED;
     return false;
 }
 
-uint8_t __far __pascal sbioDSPRead( uint16_t base ) {
+uint8_t PUBLIC_CODE sbioDSPRead(uint16_t base)
+{
     unsigned int wait;
 
-    for ( wait = 0xffff; wait; wait-- ) {
-        if ( inp( base + DSP_DATA_AVAILABLE ) & 0x80 ) {
+    for (wait = 0xffff; wait; wait--)
+        if (inp(base + DSP_DATA_AVAILABLE) & 0x80)
+        {
             sbioError = E_SBIO_SUCCESS;
-            return inp( base + DSP_DATA_READ );
+            return inp(base + DSP_DATA_READ);
         }
-    }
 
     sbioError = E_SBIO_DSP_READ_FAILED;
     return 0;
 }
 
-bool __far __pascal sbioDSPWrite( uint16_t base, uint8_t data ) {
+bool PUBLIC_CODE sbioDSPReadQueue(uint16_t base, uint8_t *data, uint16_t length)
+{
+    uint8_t v;
+
+    while (length)
+    {
+        v = sbioDSPRead(base);
+
+        if (sbioError != E_SBIO_SUCCESS)
+            return false;
+
+        *data = v;
+        data++;
+        length--;
+    }
+
+    return true;
+}
+
+bool PUBLIC_CODE sbioDSPWrite(uint16_t base, uint8_t data)
+{
     unsigned int wait;
 
-    for ( wait = 0xffff; wait; wait-- ) {
-        if ( ( inp( base + DSP_WRITE_BUFFER_STATUS ) & 0x80 ) == 0 ) {
-            outp( base + DSP_WRITE_DATA, data );
+    for (wait = 0xffff; wait; wait--)
+        if (!(inp(base + DSP_WRITE_BUFFER_STATUS) & 0x80))
+        {
+            outp(base + DSP_WRITE_DATA, data);
             sbioError = E_SBIO_SUCCESS;
             return true;
         }
-    }
 
     sbioError = E_SBIO_DSP_WRITE_FAILED;
     return false;
 }
 
-void __far __pascal sbioDSPAcknowledgeIRQ( uint16_t base, bool mode16bit ) {
+bool PUBLIC_CODE sbioDSPWriteQueue(uint16_t base, uint8_t *data, uint16_t length)
+{
+    while (length)
+    {
+        if (!sbioDSPWrite(base, *data))
+            return false;
+
+        data++;
+        length--;
+    }
+
+    return true;
+}
+
+void PUBLIC_CODE sbioDSPAcknowledgeIRQ(uint16_t base, bool mode16bit)
+{
     unsigned char tmp;
 
-    if ( mode16bit )
-        tmp = inp( base + DSP_ACKNOWLEDGE_IRQ16 );
+    if (mode16bit)
+        tmp = inp(base + DSP_ACKNOWLEDGE_IRQ16);
     else
-        tmp = inp( base + DSP_ACKNOWLEDGE_IRQ8 );
+        tmp = inp(base + DSP_ACKNOWLEDGE_IRQ8);
 }

@@ -13,7 +13,7 @@ interface
 (*$I defines.pas*)
 
 type
-    TSBIOError = word;
+    TSBIOERR = Word;
 
 const
     E_SBIO_SUCCESS          = 0;
@@ -22,7 +22,7 @@ const
     E_SBIO_DSP_WRITE_FAILED = 3;
 
 var
-    sbioError: TSBIOError;
+    sbioError: TSBIOERR;
 
 const
     SBIO_MIXER_DAC_LEVEL     = $04;
@@ -32,24 +32,28 @@ const
     SBIO_MIXER_VOICE_LEFT    = $32;
     SBIO_MIXER_VOICE_RIGHT   = $33;
 
-procedure sbioMixerReset( base: word );
-function  sbioMixerRead( base: word; reg: byte ): byte;
-procedure sbioMixerWrite( base: word; reg, data: byte );
-function  sbioDSPReset( base: word ): boolean;
-function  sbioDSPRead( base: word ): byte;
-function  sbioDSPWrite( base: word; data: byte ): boolean;
-procedure sbioDSPAcknowledgeIRQ( base: word; mode16bit: boolean );
+procedure sbioMixerReset(base: Word);
+function  sbioMixerRead(base: Word; reg: Byte): Byte;
+procedure sbioMixerWrite(base: Word; reg, data: Byte);
+function  sbioDSPReset(base: Word): Boolean;
+function  sbioDSPRead(base: Word): Byte;
+function  sbioDSPReadQueue(base: Word; data: Pointer; length: Word): Boolean;
+function  sbioDSPWrite(base: Word; data: Byte): Boolean;
+function  sbioDSPWriteQueue(base: Word; data: Pointer; length: Word): Boolean;
+procedure sbioDSPAcknowledgeIRQ(base: Word; mode16bit: Boolean);
 
 implementation
 
 (*$l sbio.obj*)
 
-procedure sbioMixerReset( base: word ); external;
-function  sbioMixerRead( base: word; reg: byte ): byte; external;
-procedure sbioMixerWrite( base: word; reg, data: byte ); external;
-function  sbioDSPReset( base: word ): boolean; external;
-function  sbioDSPRead( base: word ): byte; external;
-function  sbioDSPWrite( base: word; data: byte ): boolean; external;
-procedure sbioDSPAcknowledgeIRQ( base: word; mode16bit: boolean ); external;
+procedure sbioMixerReset(base: Word); external;
+function  sbioMixerRead(base: Word; reg: Byte): Byte; external;
+procedure sbioMixerWrite(base: Word; reg, data: Byte); external;
+function  sbioDSPReset(base: Word): Boolean; external;
+function  sbioDSPRead(base: Word): Byte; external;
+function  sbioDSPReadQueue(base: Word; data: Pointer; length: Word): Boolean; external;
+function  sbioDSPWrite(base: Word; data: Byte): Boolean; external;
+function  sbioDSPWriteQueue(base: Word; data: Pointer; length: Word): Boolean; external;
+procedure sbioDSPAcknowledgeIRQ(base: Word; mode16bit: Boolean); external;
 
 end.
