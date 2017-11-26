@@ -22,7 +22,7 @@ implementation
 uses
     string_,
     ems,
-    sbctl,
+    sndctl_t,
     posttab,
     s3mvars,
     mixer,

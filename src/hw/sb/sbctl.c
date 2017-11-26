@@ -247,7 +247,7 @@ void __far __pascal _ISR_detect(uint8_t irq)
     _enable();
 }
 
-void __near _sb_start_DSP_transfer(void);
+void __near _sb_start_DSP_transfer(SBDEV *self);
 
 void __far __pascal _ISR_play(void)
 {
@@ -264,12 +264,12 @@ void __far __pascal _ISR_play(void)
         _ISR_user();
 
     if ((sdev_transfer_flags & SBTRFL_AUTOINIT) && !(sdev_caps_flags & SBCAPS_AUTOINIT))
-        _sb_start_DSP_transfer();
+        _sb_start_DSP_transfer(SBDEV_REF_FIXME);
 
     _enable();
 }
 
-void PUBLIC_CODE sb_hook_IRQ(void *p)
+void PUBLIC_CODE sb_hook_IRQ(SBDEV *self, void *p)
 {
     DEBUG_BEGIN("sb_hook_IRQ");
 
@@ -283,7 +283,7 @@ void PUBLIC_CODE sb_hook_IRQ(void *p)
     DEBUG_END("sb_hook_IRQ");
 }
 
-void PUBLIC_CODE sb_unhook_IRQ(void)
+void PUBLIC_CODE sb_unhook_IRQ(SBDEV *self)
 {
     DEBUG_BEGIN("sb_unhook_IRQ");
 
@@ -322,7 +322,7 @@ int __near _sb_find_model(SBMODEL model)
     return -1;
 }
 
-void __near _sb_set_hw(SBMODEL model, uint16_t dspv, char *name, SBCAPS flags, uint16_t rate_mono, uint16_t rate_stereo)
+void __near _sb_set_hw(SBDEV *self, SBMODEL model, uint16_t dspv, char *name, SBCAPS flags, uint16_t rate_mono, uint16_t rate_stereo)
 {
     sdev_model = model;
     sdev_dspv = dspv;
@@ -332,7 +332,7 @@ void __near _sb_set_hw(SBMODEL model, uint16_t dspv, char *name, SBCAPS flags, u
     sdev_caps_rate_stereo = rate_stereo;
 }
 
-void __near _sb_unset_hw(void)
+void __near _sb_unset_hw(SBDEV *self)
 {
     sdev_model = SBMODEL_UNKNOWN;
     sdev_dspv = 0;
@@ -342,7 +342,7 @@ void __near _sb_unset_hw(void)
     sdev_caps_rate_stereo = 0;
 }
 
-void __near _sb_set_hw_dsp(uint16_t dspv)
+void __near _sb_set_hw_dsp(SBDEV *self, uint16_t dspv)
 {
     int i;
 
@@ -354,6 +354,7 @@ void __near _sb_set_hw_dsp(uint16_t dspv)
     case 4:
         i = (dspv >> 8) - 1;
        _sb_set_hw(
+            self,
             SBMODELS[i].model,
             dspv,
             SBMODELS[i].name,
@@ -363,22 +364,22 @@ void __near _sb_set_hw_dsp(uint16_t dspv)
         );
         break;
     default:
-        _sb_unset_hw();
+        _sb_unset_hw(self);
         break;
     }
 }
 
-void __near _sb_set_hw_flags(SBHWFLAGS flags)
+void __near _sb_set_hw_flags(SBDEV *self, SBHWFLAGS flags)
 {
     sdev_hw_flags = flags;
 }
 
-void __near _sb_unset_hw_flags(void)
+void __near _sb_unset_hw_flags(SBDEV *self)
 {
     sdev_hw_flags = 0;
 }
 
-void __near _sb_set_hw_config(uint16_t base, uint8_t irq, uint8_t dma8, uint8_t dma16)
+void __near _sb_set_hw_config(SBDEV *self, uint16_t base, uint8_t irq, uint8_t dma8, uint8_t dma16)
 {
     sdev_hw_base = base;
     sdev_hw_irq = irq;
@@ -386,7 +387,7 @@ void __near _sb_set_hw_config(uint16_t base, uint8_t irq, uint8_t dma8, uint8_t 
     sdev_hw_dma16 = dma16;
 }
 
-void __near _sb_unset_hw_config(void)
+void __near _sb_unset_hw_config(SBDEV *self)
 {
     sdev_hw_base = -1;
     sdev_hw_irq = -1;
@@ -394,14 +395,14 @@ void __near _sb_unset_hw_config(void)
     sdev_hw_dma16 = -1;
 }
 
-void __near _sb_unset_transfer_mode_DSP_command(void)
+void __near _sb_unset_transfer_mode_DSP_command(SBDEV *self)
 {
     sdev_transfer_flags &= ~SBTRFL_COMMANDS;
     sdev_transfer_mode_DSP_start = 0;
     sdev_transfer_mode_DSP_mode = 0;
 }
 
-void __near _sb_unset_transfer_mode(void)
+void __near _sb_unset_transfer_mode(SBDEV *self)
 {
     sdev_transfer_flags &= ~SBTRFL_MODE;
     sdev_transfer_mode_rate = 0;
@@ -410,10 +411,10 @@ void __near _sb_unset_transfer_mode(void)
     sdev_transfer_mode_16bits = false;
     sdev_transfer_mode_signed = false;
 
-    _sb_unset_transfer_mode_DSP_command();
+    _sb_unset_transfer_mode_DSP_command(self);
 }
 
-void __near _sb_set_transfer_mode(bool f_mode, uint16_t m_rate, uint8_t m_timeconst, bool f_16bits, bool f_sign, bool f_stereo)
+void __near _sb_set_transfer_mode(SBDEV *self, bool f_mode, uint16_t m_rate, uint8_t m_timeconst, bool f_16bits, bool f_sign, bool f_stereo)
 {
     if (f_mode)
         sdev_transfer_flags |= SBTRFL_MODE;
@@ -426,10 +427,10 @@ void __near _sb_set_transfer_mode(bool f_mode, uint16_t m_rate, uint8_t m_timeco
     sdev_transfer_mode_16bits = f_16bits;
     sdev_transfer_mode_signed = f_sign;
 
-    _sb_unset_transfer_mode_DSP_command();
+    _sb_unset_transfer_mode_DSP_command(self);
 }
 
-void __near _sb_set_transfer_buffer(bool f_buffer, void *buffer, uint16_t frame_size, uint16_t frames_count, bool f_autoinit)
+void __near _sb_set_transfer_buffer(SBDEV *self, bool f_buffer, void *buffer, uint16_t frame_size, uint16_t frames_count, bool f_autoinit)
 {
     if (f_buffer)
         sdev_transfer_flags |= SBTRFL_BUFFER;
@@ -446,7 +447,7 @@ void __near _sb_set_transfer_buffer(bool f_buffer, void *buffer, uint16_t frame_
     sdev_transfer_frames_count = frames_count;
 }
 
-void __near _sb_unset_transfer_buffer(void)
+void __near _sb_unset_transfer_buffer(SBDEV *self)
 {
     sdev_transfer_flags &= ~(SBTRFL_BUFFER | SBTRFL_AUTOINIT);
     sdev_transfer_buffer = NULL;
@@ -455,13 +456,13 @@ void __near _sb_unset_transfer_buffer(void)
 }
 
 /* This routine may not work for all registers because of different timings. */
-void __near _sb_mixer_write(uint8_t reg, uint8_t data)
+void __near _sb_mixer_write(SBDEV *self, uint8_t reg, uint8_t data)
 {
     if (sdev_caps_flags & SBCAPS_MIXER)
         sbioMixerWrite(sdev_hw_base, reg, data);
 }
 
-uint8_t __near _sb_mixer_read(uint8_t reg)
+uint8_t __near _sb_mixer_read(SBDEV *self, uint8_t reg)
 {
     if (sdev_caps_flags & SBCAPS_MIXER)
         return sbioMixerRead(sdev_hw_base, reg);
@@ -469,32 +470,32 @@ uint8_t __near _sb_mixer_read(uint8_t reg)
         return 0;
 }
 
-char *PUBLIC_CODE sb_get_name(void)
+char *PUBLIC_CODE sb_get_name(SBDEV *self)
 {
     return sdev_name;
 }
 
-uint8_t PUBLIC_CODE sb_get_sample_bits(void)
+uint8_t PUBLIC_CODE sb_get_sample_bits(SBDEV *self)
 {
     return sdev_transfer_mode_16bits ? 16 : 8;
 }
 
-bool PUBLIC_CODE sb_is_sample_signed(void)
+bool PUBLIC_CODE sb_is_sample_signed(SBDEV *self)
 {
     return sdev_transfer_mode_signed;
 }
 
-uint8_t PUBLIC_CODE sb_get_channels(void)
+uint8_t PUBLIC_CODE sb_get_channels(SBDEV *self)
 {
     return sdev_transfer_mode_stereo ? 2 : 1;
 }
 
-uint16_t PUBLIC_CODE sb_get_rate(void)
+uint16_t PUBLIC_CODE sb_get_rate(SBDEV *self)
 {
     return sdev_transfer_mode_rate;
 }
 
-void PUBLIC_CODE sb_set_volume(uint8_t value)
+void PUBLIC_CODE sb_set_volume(SBDEV *self, uint8_t value)
 {
     uint8_t b;
 
@@ -502,29 +503,29 @@ void PUBLIC_CODE sb_set_volume(uint8_t value)
     {
         if (sdev_model == SBMODEL_SB16)
         {
-            _sb_mixer_write(SBIO_MIXER_MASTER_LEFT, value);
-            _sb_mixer_write(SBIO_MIXER_MASTER_RIGHT, value);
-            _sb_mixer_write(SBIO_MIXER_VOICE_LEFT, value);
-            _sb_mixer_write(SBIO_MIXER_VOICE_RIGHT, value);
+            _sb_mixer_write(self, SBIO_MIXER_MASTER_LEFT, value);
+            _sb_mixer_write(self, SBIO_MIXER_MASTER_RIGHT, value);
+            _sb_mixer_write(self, SBIO_MIXER_VOICE_LEFT, value);
+            _sb_mixer_write(self, SBIO_MIXER_VOICE_RIGHT, value);
         }
         else
         {
             if (value > 15)
                 value = 15;
             value |= value << 4;
-            _sb_mixer_write(SBIO_MIXER_MASTER_VOLUME, value);
-            _sb_mixer_write(SBIO_MIXER_DAC_LEVEL, value);
+            _sb_mixer_write(self, SBIO_MIXER_MASTER_VOLUME, value);
+            _sb_mixer_write(self, SBIO_MIXER_DAC_LEVEL, value);
         }
     }
 }
 
-void PUBLIC_CODE sb_set_transfer_buffer(void *buffer, uint16_t frame_size, uint16_t frames_count, bool autoinit)
+void PUBLIC_CODE sb_set_transfer_buffer(SBDEV *self, void *buffer, uint16_t frame_size, uint16_t frames_count, bool autoinit)
 {
     if (!(sdev_transfer_flags & SBTRFL_ACTIVE))
-        _sb_set_transfer_buffer(true, buffer, frame_size, frames_count, autoinit);
+        _sb_set_transfer_buffer(self, true, buffer, frame_size, frames_count, autoinit);
 }
 
-uint16_t __near _sb_read_DSP_version(void)
+uint16_t __near _sb_read_DSP_version(SBDEV *self)
 {
     union
     {
@@ -546,7 +547,7 @@ uint16_t __near _sb_read_DSP_version(void)
     return v.w;
 }
 
-void __near _sb_set_speaker(bool state)
+void __near _sb_set_speaker(SBDEV *self, bool state)
 {
     uint8_t cmd;
     uint16_t wait;
@@ -566,7 +567,7 @@ void __near _sb_set_speaker(bool state)
         delay(wait);
 }
 
-void __near _sb_adjust_rate(uint16_t *rate, bool stereo, uint8_t *tc)
+void __near _sb_adjust_rate(SBDEV *self, uint16_t *rate, bool stereo, uint8_t *tc)
 {
     uint8_t timeconst;
 
@@ -599,7 +600,7 @@ void __near _sb_adjust_rate(uint16_t *rate, bool stereo, uint8_t *tc)
     }
 }
 
-void __near _sb_adjust_transfer_mode(uint16_t *m_rate, uint8_t *m_tc, uint8_t *m_channels, uint8_t *m_bits, bool *f_sign)
+void __near _sb_adjust_transfer_mode(SBDEV *self, uint16_t *m_rate, uint8_t *m_tc, uint8_t *m_channels, uint8_t *m_bits, bool *f_sign)
 {
     bool m_stereo;
     bool m_16bits;
@@ -608,13 +609,13 @@ void __near _sb_adjust_transfer_mode(uint16_t *m_rate, uint8_t *m_tc, uint8_t *m
     m_16bits = (*m_bits == 16) && (sdev_caps_flags & SBCAPS_16BITS);
     *f_sign = *f_sign && (sdev_caps_flags & SBCAPS_16BITS); // adjust f_sign
 
-    _sb_adjust_rate(m_rate, m_stereo, m_tc);    // adjust m_rate
+    _sb_adjust_rate(self, m_rate, m_stereo, m_tc);  // adjust m_rate
 
     *m_channels = m_stereo ? 2 : 1; // adjust m_channels
     *m_bits = m_16bits ? 16 : 8;    // adjust m_bits
 }
 
-void PUBLIC_CODE sb_adjust_transfer_mode(uint16_t *m_rate, uint8_t *m_channels, uint8_t *m_bits, bool *f_sign)
+void PUBLIC_CODE sb_adjust_transfer_mode(SBDEV *self, uint16_t *m_rate, uint8_t *m_channels, uint8_t *m_bits, bool *f_sign)
 {
     uint8_t m_timeconst;
 
@@ -631,7 +632,7 @@ void PUBLIC_CODE sb_adjust_transfer_mode(uint16_t *m_rate, uint8_t *m_channels, 
             *f_sign ? 'Y' : 'N'
         );
 
-        _sb_adjust_transfer_mode(m_rate, &m_timeconst, m_channels, m_bits, f_sign);
+        _sb_adjust_transfer_mode(self, m_rate, &m_timeconst, m_channels, m_bits, f_sign);
 
         DEBUG_INFO_(
             "sb_adjust_transfer_mode",
@@ -648,7 +649,7 @@ void PUBLIC_CODE sb_adjust_transfer_mode(uint16_t *m_rate, uint8_t *m_channels, 
         DEBUG_FAIL("sb_adjust_transfer_mode", "No sound device.");
 }
 
-void PUBLIC_CODE sb_set_transfer_mode(uint16_t m_rate, uint8_t m_channels, uint8_t m_bits, bool f_sign)
+void PUBLIC_CODE sb_set_transfer_mode(SBDEV *self, uint16_t m_rate, uint8_t m_channels, uint8_t m_bits, bool f_sign)
 {
     uint8_t m_timeconst;
 
@@ -656,7 +657,7 @@ void PUBLIC_CODE sb_set_transfer_mode(uint16_t m_rate, uint8_t m_channels, uint8
 
     if (sdev_model != SBMODEL_UNKNOWN)
     {
-        _sb_adjust_transfer_mode(&m_rate, &m_timeconst, &m_channels, &m_bits, &f_sign);
+        _sb_adjust_transfer_mode(self, &m_rate, &m_timeconst, &m_channels, &m_bits, &f_sign);
 
         sdev_transfer_flags |= SBTRFL_MODE;
         sdev_transfer_mode_rate = m_rate;
@@ -672,7 +673,7 @@ void PUBLIC_CODE sb_set_transfer_mode(uint16_t m_rate, uint8_t m_channels, uint8
 
 }
 
-void __near _sb_set_DSP_time_constant(const uint8_t tc)
+void __near _sb_set_DSP_time_constant(SBDEV *self, const uint8_t tc)
 {
     uint8_t data[2];
 
@@ -681,7 +682,7 @@ void __near _sb_set_DSP_time_constant(const uint8_t tc)
     sbioDSPWriteQueue(sdev_hw_base, &data, 2);
 }
 
-void __near _sb_set_DSP_rate(const uint16_t rate)
+void __near _sb_set_DSP_rate(SBDEV *self, const uint16_t rate)
 {
     uint8_t data[3];
 
@@ -691,7 +692,7 @@ void __near _sb_set_DSP_rate(const uint16_t rate)
     sbioDSPWriteQueue(sdev_hw_base, &data, 3);
 }
 
-void __near _sb_setup_transfer_mode_DSP_commands(void)
+void __near _sb_setup_transfer_mode_DSP_commands(SBDEV *self)
 {
     uint8_t cmd, mode;
     uint16_t samplerate, midrate;
@@ -734,7 +735,7 @@ void __near _sb_setup_transfer_mode_DSP_commands(void)
     sdev_transfer_flags |= SBTRFL_COMMANDS;
 }
 
-void __near _sb_start_DSP_transfer(void)
+void __near _sb_start_DSP_transfer(SBDEV *self)
 {
     uint16_t frame_size;
     uint8_t data[4];
@@ -743,7 +744,7 @@ void __near _sb_start_DSP_transfer(void)
     frame_size = sdev_transfer_frame_size - 1;
 
     if (!(sdev_transfer_flags & SBTRFL_COMMANDS))
-        _sb_setup_transfer_mode_DSP_commands();
+        _sb_setup_transfer_mode_DSP_commands(self);
 
     switch (sdev_model)
     {
@@ -779,7 +780,7 @@ void __near _sb_start_DSP_transfer(void)
 }
 
 // count: number of bytes (for 8-bits channel) or number of words (for 16-bits channel)
-void __near _sb_start_DMA_transfer(void)
+void __near _sb_start_DMA_transfer(SBDEV *self)
 {
     uint32_t count;
     dmaMode_t mode;
@@ -800,7 +801,7 @@ void __near _sb_start_DMA_transfer(void)
     );
 }
 
-bool PUBLIC_CODE sb_transfer_start(void)
+bool PUBLIC_CODE sb_transfer_start(SBDEV *self)
 {
     uint8_t v;
 
@@ -820,29 +821,29 @@ bool PUBLIC_CODE sb_transfer_start(void)
 
     sbioDSPAcknowledgeIRQ(sdev_hw_base, false);
     sbioDSPAcknowledgeIRQ(sdev_hw_base, true);
-    sb_transfer_stop();
+    sb_transfer_stop(self);
 
     if (sdev_model == SBMODEL_SB16)
-        _sb_set_DSP_rate(sdev_transfer_mode_rate);
+        _sb_set_DSP_rate(self, sdev_transfer_mode_rate);
     else
     {
-        _sb_set_DSP_time_constant(sdev_transfer_mode_timeconst);
+        _sb_set_DSP_time_constant(self, sdev_transfer_mode_timeconst);
 
         if (sdev_model == SBMODEL_SBPRO)
         {
-            v = _sb_mixer_read(0x0e) | 0x20;   /* turn filter 'off' */
+            v = _sb_mixer_read(self, 0x0e) | 0x20;   /* turn filter 'off' */
 
             if (sdev_transfer_mode_stereo)
                 v |= 0x02;   /* turn stereo 'on' */
 
-            _sb_mixer_write(0x0e, v);
+            _sb_mixer_write(self, 0x0e, v);
         }
     }
 
-    _sb_set_speaker(true);
+    _sb_set_speaker(self, true);
 
-    _sb_start_DMA_transfer();
-    _sb_start_DSP_transfer();
+    _sb_start_DMA_transfer(self);
+    _sb_start_DSP_transfer(self);
 
     sdev_transfer_flags |= SBTRFL_ACTIVE;
 
@@ -850,7 +851,7 @@ bool PUBLIC_CODE sb_transfer_start(void)
     return true;
 }
 
-uint16_t PUBLIC_CODE sb_get_DMA_counter(void)
+uint16_t PUBLIC_CODE sb_get_DMA_counter(SBDEV *self)
 {
     if (sdev_transfer_flags & SBTRFL_ACTIVE)
         return dmaGetCounter(sdev_transfer_mode_16bits ? sdev_hw_dma16 : sdev_hw_dma8);
@@ -858,7 +859,7 @@ uint16_t PUBLIC_CODE sb_get_DMA_counter(void)
         return 0;
 }
 
-void __near _sb_transfer_stop_8(void)
+void __near _sb_transfer_stop_8(SBDEV *self)
 {
     uint8_t data[3];
     uint16_t length;
@@ -889,7 +890,7 @@ void __near _sb_transfer_stop_8(void)
     }
 }
 
-void __near _sb_transfer_stop_16(void)
+void __near _sb_transfer_stop_16(SBDEV *self)
 {
     uint8_t data[3];
     uint16_t length;
@@ -919,28 +920,28 @@ void __near _sb_transfer_stop_16(void)
     }
 }
 
-void PUBLIC_CODE sb_transfer_pause(void)
+void PUBLIC_CODE sb_transfer_pause(SBDEV *self)
 {
     if (sdev_transfer_flags & SBTRFL_ACTIVE)
         sbioDSPWrite(sdev_hw_base,
             sdev_transfer_mode_16bits ? DSPC_DMA16_HALT : DSPC_DMA8_HALT);
 }
 
-void PUBLIC_CODE sb_transfer_continue(void)
+void PUBLIC_CODE sb_transfer_continue(SBDEV *self)
 {
     if (sdev_transfer_flags & SBTRFL_ACTIVE)
         sbioDSPWrite(sdev_hw_base,
             sdev_transfer_mode_16bits ? DSPC_DMA16_CONTINUE : DSPC_DMA8_CONTINUE);
 }
 
-void PUBLIC_CODE sb_transfer_stop(void)
+void PUBLIC_CODE sb_transfer_stop(SBDEV *self)
 {
     uint8_t count;
     uint8_t chn;
     uint8_t mask;
 
-    _sb_transfer_stop_8();
-    _sb_transfer_stop_16();
+    _sb_transfer_stop_8(self);
+    _sb_transfer_stop_16(self);
 
     /* reset is the best way to make sure SB stops playing */
     sbioDSPReset(sdev_hw_base);
@@ -969,10 +970,10 @@ void PUBLIC_CODE sb_transfer_stop(void)
     if (count > 1)
         dmaMaskChannels(mask);
 
-    _sb_set_speaker(false);
+    _sb_set_speaker(self, false);
 }
 
-bool __near _sb_detect_DSP_base(void)
+bool __near _sb_detect_DSP_base(SBDEV *self)
 {
     uint16_t p;
     uint16_t i;
@@ -1011,7 +1012,7 @@ bool __near _sb_detect_DSP_base(void)
         DEBUG_INFO_("_sb_detect_DSP_base", "Found DSP at base port 0x04X.", p);
     #endif
 
-    sdev_dspv = _sb_read_DSP_version();
+    sdev_dspv = _sb_read_DSP_version(self);
     if (sbioError != E_SBIO_SUCCESS)
     {
         DEBUG_FAIL("_sb_detect_DSP_base", "Unable to get DSP chip version.");
@@ -1028,7 +1029,7 @@ bool __near _sb_detect_DSP_base(void)
     return true;
 }
 
-bool __near _sb_detect_IRQ(uint8_t dma, bool f_16bits)
+bool __near _sb_detect_IRQ(SBDEV *self, uint8_t dma, bool f_16bits)
 {
     DEBUG_BEGIN("_sb_detect_IRQ");
 
@@ -1039,10 +1040,10 @@ bool __near _sb_detect_IRQ(uint8_t dma, bool f_16bits)
     else
         sdev_hw_dma8 = dma;
 
-    sb_transfer_stop();
-    sb_set_transfer_buffer((void *)&_sb_silence_u8, 1, 1, false);
-    sb_set_transfer_mode(8000, 1, 8, false);
-    sb_transfer_start();
+    sb_transfer_stop(self);
+    sb_set_transfer_buffer(self, (void *)&_sb_silence_u8, 1, 1, false);
+    sb_set_transfer_mode(self, 8000, 1, 8, false);
+    sb_transfer_start(self);
     delay(10);
 
     if (sdev_irq_answer)
@@ -1068,7 +1069,7 @@ bool __near _sb_detect_IRQ(uint8_t dma, bool f_16bits)
     }
 }
 
-bool __near _sb_detect_DMA_IRQ(void)
+bool __near _sb_detect_DMA_IRQ(SBDEV *self)
 {
     void *oldv[HW_IRQ_MAX];
     uint8_t i;
@@ -1120,7 +1121,7 @@ bool __near _sb_detect_DMA_IRQ(void)
 
         DEBUG_MSG_("_sb_detect_DMA_IRQ", "- trying DMA channel %hu...", dmac);
 
-        _sb_detect_IRQ(dmac, false);
+        _sb_detect_IRQ(self, dmac, false);
 
         i++;
     }
@@ -1142,26 +1143,26 @@ bool __near _sb_detect_DMA_IRQ(void)
     return true;
 }
 
-bool PUBLIC_CODE sb_conf_detect(void)
+bool PUBLIC_CODE sb_conf_detect(SBDEV *self)
 {
     DEBUG_BEGIN("sb_conf_detect");
 
-    _sb_unset_hw_flags();
-    _sb_unset_hw();
-    _sb_set_transfer_mode(true, 8000, 1, calc_time_const(8000), 8, false);
+    _sb_unset_hw_flags(self);
+    _sb_unset_hw(self);
+    _sb_set_transfer_mode(self, true, 8000, 1, calc_time_const(8000), 8, false);
 
-    if (!_sb_detect_DSP_base())
+    if (!_sb_detect_DSP_base(self))
     {
         DEBUG_FAIL("sb_conf_detect", "No DSP base I/O address specified.");
         return false;
     }
 
     /* for the first set SB1.0 - should work on all SBs */
-    _sb_set_hw_dsp(_sb_get_model_dspv(SBMODEL_SB1));
+    _sb_set_hw_dsp(self, _sb_get_model_dspv(SBMODEL_SB1));
 
-    sb_transfer_stop();
+    sb_transfer_stop(self);
 
-    if (!_sb_detect_DMA_IRQ())
+    if (!_sb_detect_DMA_IRQ(self))
     {
         DEBUG_FAIL("sb_conf_detect", "Failed to find DMA and IRQ channels.");
         sdev_model = SBMODEL_UNKNOWN;
@@ -1170,7 +1171,7 @@ bool PUBLIC_CODE sb_conf_detect(void)
 
     sbioDSPReset(sdev_hw_base);
 
-    _sb_set_hw_dsp(sdev_dspv);
+    _sb_set_hw_dsp(self, sdev_dspv);
 
     if (sdev_model != SBMODEL_UNKNOWN)
     {
@@ -1184,7 +1185,7 @@ bool PUBLIC_CODE sb_conf_detect(void)
     }
 }
 
-void PUBLIC_CODE sb_conf_manual(SBCFGFLAGS flags, SBMODEL model, uint16_t base, uint8_t irq, uint8_t dma8, uint8_t dma16)
+void PUBLIC_CODE sb_conf_manual(SBDEV *self, SBCFGFLAGS flags, SBMODEL model, uint16_t base, uint8_t irq, uint8_t dma8, uint8_t dma16)
 {
     uint16_t dspv;
     SBHWFLAGS hwflags;
@@ -1206,20 +1207,20 @@ void PUBLIC_CODE sb_conf_manual(SBCFGFLAGS flags, SBMODEL model, uint16_t base, 
         if (flags & SBCFGFL_DMA16)
             hwflags |= SBHWFL_DMA16;
 
-        _sb_set_hw_dsp(dspv);
-        _sb_set_hw_flags(hwflags);
-        _sb_set_hw_config(base, irq, dma8, dma16);
+        _sb_set_hw_dsp(self, dspv);
+        _sb_set_hw_flags(self, hwflags);
+        _sb_set_hw_config(self, base, irq, dma8, dma16);
     }
     else
-        _sb_unset_hw();
+        _sb_unset_hw(self);
 
-    _sb_unset_transfer_buffer();
-    _sb_unset_transfer_mode();
+    _sb_unset_transfer_buffer(self);
+    _sb_unset_transfer_mode(self);
 }
 
 bool __near _check_value_type(long int v)
 {
-    return v <= 6;
+    return (v >= 1) && (v <= 6);
 }
 
 bool __near _check_value_dsp(long int v)
@@ -1373,7 +1374,7 @@ bool __near _select_DMA(uint8_t *v, uint8_t bits)
     return true;
 }
 
-bool PUBLIC_CODE sb_conf_input(void)
+bool PUBLIC_CODE sb_conf_input(SBDEV *self)
 {
     SBCFGFLAGS flags;
     SBMODEL model;
@@ -1420,13 +1421,13 @@ bool PUBLIC_CODE sb_conf_input(void)
     else
         dma16 = -1;
 
-    sb_conf_manual(flags, model, base, irq, dma8, dma16);
+    sb_conf_manual(self, flags, model, base, irq, dma8, dma16);
 
     DEBUG_SUCCESS("sb_conf_input");
     return true;
 }
 
-bool PUBLIC_CODE sb_conf_env(void)
+bool PUBLIC_CODE sb_conf_env(SBDEV *self)
 {
     char s[256], *param, *endptr;
     uint8_t type;
@@ -1439,11 +1440,11 @@ bool PUBLIC_CODE sb_conf_env(void)
 
     DEBUG_BEGIN("sb_conf_env");
 
-    _sb_unset_hw();
-    _sb_unset_hw_flags();
-    _sb_unset_hw_config();
-    _sb_unset_transfer_buffer();
-    _sb_unset_transfer_mode();
+    _sb_unset_hw(self);
+    _sb_unset_hw_flags(self);
+    _sb_unset_hw_config(self);
+    _sb_unset_transfer_buffer(self);
+    _sb_unset_transfer_mode(self);
 
     custom_getenv(s, "BLASTER", 255);
     len = strlen(s);
@@ -1547,7 +1548,7 @@ bool PUBLIC_CODE sb_conf_env(void)
             flags &= ~SBCFGFL_TYPE;
             break;
         }
-        sb_conf_manual(flags, model, base, irq, dma8, dma16);
+        sb_conf_manual(self, flags, model, base, irq, dma8, dma16);
     }
     else
     {
@@ -1559,7 +1560,7 @@ bool PUBLIC_CODE sb_conf_env(void)
     return true;
 }
 
-void PUBLIC_CODE sb_conf_dump(void)
+void PUBLIC_CODE sb_conf_dump(SBDEV *self)
 {
     int i;
 
@@ -1597,15 +1598,23 @@ void PUBLIC_CODE sb_conf_dump(void)
 
 /*** Initialization ***/
 
+void PUBLIC_CODE sb_clear(SBDEV *self)
+{
+    if (self)
+    {
+        _sb_unset_hw(self);
+        _sb_unset_hw_flags(self);
+        _sb_set_hw_config(self, 0x220, 7, 1, 5);
+        _sb_unset_transfer_buffer(self);
+        _sb_unset_transfer_mode(self);
+    }
+}
+
 void sbctl_init(void)
 {
     DEBUG_BEGIN("sbctl_init");
 
-    _sb_unset_hw();
-    _sb_unset_hw_flags();
-    _sb_set_hw_config(0x220, 7, 1, 5);
-    _sb_unset_transfer_buffer();
-    _sb_unset_transfer_mode();
+    sb_clear(SBDEV_REF_FIXME);
     _ISR_user = NULL;
 
     DEBUG_END("sbctl_init");

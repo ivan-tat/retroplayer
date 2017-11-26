@@ -399,9 +399,9 @@ begin
                   end;
                 if (upcase(c)='P') then
                   begin
-                    sb_transfer_pause;
+                    sb_transfer_pause(SBDEV_REF_FIXME);
                     readkey;
-                    sb_transfer_continue;
+                    sb_transfer_continue(SBDEV_REF_FIXME);
                     c:=#0;
                   end;
                 if (c='+') then

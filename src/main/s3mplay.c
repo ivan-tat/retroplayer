@@ -236,13 +236,13 @@ bool PUBLIC_CODE player_init_device(uint8_t type)
         player_flags_snddev = true;
         break;
     case 1:
-        player_flags_snddev = sb_conf_detect();
+        player_flags_snddev = sb_conf_detect(SBDEV_REF_FIXME);
         break;
     case 2:
-        player_flags_snddev = sb_conf_env();
+        player_flags_snddev = sb_conf_env(SBDEV_REF_FIXME);
         break;
     case 3:
-        player_flags_snddev = sb_conf_input();
+        player_flags_snddev = sb_conf_input(SBDEV_REF_FIXME);
         break;
     default:
         DEBUG_ERR("player_init_device", "Unknown method.");
@@ -504,13 +504,13 @@ bool PUBLIC_CODE playStart(void)
         return false;
     }
 
-    sb_hook_IRQ(&ISR_play);
+    sb_hook_IRQ(SBDEV_REF_FIXME, &ISR_play);
 
-    sb_set_transfer_mode(player_mode_rate, player_mode_channels, player_mode_bits, player_mode_signed);
-    player_mode_rate = sb_get_rate();
-    player_mode_channels = sb_get_channels();
-    player_mode_bits = sb_get_sample_bits();
-    player_mode_signed = sb_is_sample_signed();
+    sb_set_transfer_mode(SBDEV_REF_FIXME, player_mode_rate, player_mode_channels, player_mode_bits, player_mode_signed);
+    player_mode_rate = sb_get_rate(SBDEV_REF_FIXME);
+    player_mode_channels = sb_get_channels(SBDEV_REF_FIXME);
+    player_mode_bits = sb_get_sample_bits(SBDEV_REF_FIXME);
+    player_mode_signed = sb_is_sample_signed(SBDEV_REF_FIXME);
 
     if (!_player_setup_mixer())
     {
@@ -561,9 +561,9 @@ bool PUBLIC_CODE playStart(void)
 
     fill_DMAbuffer(mixBuf.buf, outbuf);
 
-    sb_set_transfer_buffer(outbuf->buf->data, count, outbuf->framesCount, true);
+    sb_set_transfer_buffer(SBDEV_REF_FIXME, outbuf->buf->data, count, outbuf->framesCount, true);
 
-    if (!sb_transfer_start())
+    if (!sb_transfer_start(SBDEV_REF_FIXME))
     {
         DEBUG_FAIL("playStart", "Failed to start transfer.");
         player_error = E_PLAYER_INTERNAL;
@@ -614,9 +614,9 @@ void PUBLIC_CODE player_free(void)
 {
     DEBUG_BEGIN("player_free");
 
-    sb_transfer_stop();
+    sb_transfer_stop(SBDEV_REF_FIXME);
     player_free_module();
-    sb_unhook_IRQ();
+    sb_unhook_IRQ(SBDEV_REF_FIXME);
     freeVolumeTable();
     snddmabuf_free(&sndDMABuf);
     mixbuf_free(&mixBuf);

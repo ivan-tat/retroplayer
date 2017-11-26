@@ -102,7 +102,7 @@ void PUBLIC_CODE display_help(void)
 
 void PUBLIC_CODE display_playercfg(void)
 {
-    sb_conf_dump();
+    sb_conf_dump(SBDEV_REF_FIXME);
 }
 
 uint8_t __near order_find_previous_entry(uint8_t nr)

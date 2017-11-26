@@ -76,13 +76,13 @@ void __far win_information_draw(SCRWIN *self)
             printf("%s", mod_TrackerName + 1);
             textcolor(_yellow);
             gotoxy(9, 4);
-            printf("%s", sb_get_name());
+            printf("%s", sb_get_name(SBDEV_REF_FIXME));
             gotoxy(43, 4);
-            printf("%05u", sb_get_rate());
+            printf("%05u", sb_get_rate(SBDEV_REF_FIXME));
             gotoxy(58, 4);
-            printf("%hu", sb_get_channels());
+            printf("%hu", sb_get_channels(SBDEV_REF_FIXME));
             gotoxy(65, 4);
-            printf("%02hu", sb_get_sample_bits());
+            printf("%02hu", sb_get_sample_bits(SBDEV_REF_FIXME));
             gotoxy(76, 4);
             printf(player_is_lq_mode() ? "Low" : "High");
         }
