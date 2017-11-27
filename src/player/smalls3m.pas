@@ -36,7 +36,7 @@ var samplerate:word;
       if not player_init then halt;
       if not player_init_device(1) then begin writeln(' SoundBlaster not found sorry ... ');halt end;
       player_set_mode(_16bit,stereo,samplerate,false);
-      playSetOrder(true);
+      player_set_order(true);
       playOption_LoopSong:=true;
     end;
 
@@ -51,7 +51,7 @@ begin
   writeln;
   Init;
   if (not player_set_mode(_16bit,stereo,samplerate,false)) then halt;
-  if (not playStart) then halt;
+  if (not player_play_start) then halt;
   writeln(#13#10' Return to player and stop playing with ''EXIT'' ... ');
   swapvectors;
   exec(getenv('COMSPEC'),'');

@@ -76,28 +76,28 @@ void __far win_information_draw(SCRWIN *self)
             printf("%s", mod_TrackerName + 1);
             textcolor(_yellow);
             gotoxy(9, 4);
-            printf("%s", sb_get_name(SBDEV_REF_FIXME));
+            printf("%s", player_device_get_name());
             gotoxy(43, 4);
-            printf("%05u", sb_get_rate(SBDEV_REF_FIXME));
+            printf("%05u", player_get_output_rate());
             gotoxy(58, 4);
-            printf("%hu", sb_get_channels(SBDEV_REF_FIXME));
+            printf("%hu", player_get_output_channels());
             gotoxy(65, 4);
-            printf("%02hu", sb_get_sample_bits(SBDEV_REF_FIXME));
+            printf("%02hu", player_get_output_bits());
             gotoxy(76, 4);
-            printf(player_is_lq_mode() ? "Low" : "High");
+            printf(player_get_output_lq() ? "Low" : "High");
         }
 
         pat = muspatl_get(mod_Patterns, playState_pattern);
 
         textcolor(_lightcyan);
         gotoxy(8, 2);
-        printf("%03u", playGetSpeed());
+        printf("%03u", player_get_speed());
         gotoxy(18, 2);
-        printf("%03u", playGetTempo());
+        printf("%03u", player_get_tempo());
         gotoxy(27, 2);
         printf("%02u", playState_gVolume);
         gotoxy(35, 2);
-        printf("%03u", playGetMasterVolume());
+        printf("%03u", player_get_master_volume());
         gotoxy(45, 2);
         printf(playOption_ST3Order ? "Extended" : "Normal");
         gotoxy(59, 2);
@@ -120,7 +120,7 @@ void __far win_information_draw(SCRWIN *self)
         gotoxy(45, 3);
         printf("%03u", playState_tick);
         gotoxy(56, 3);
-        printf("%02u", playGetPatternDelay());
+        printf("%02u", player_get_pattern_delay());
         gotoxy(65, 3);
         printf("%03u", playState_patLoopStartRow);
         gotoxy(69, 3);

@@ -17,12 +17,11 @@
 #include "main/musins.h"
 #include "main/muspat.h"
 #include "main/s3mvars.h"
+#include "main/s3mplay.h"
 #include "player/screen.h"
 #include "player/plays3m.h"
 
 #include "player/w_dbg.h"
-
-extern char *PUBLIC_DATA PLAYER_VERSION;
 
 void __far win_debug_init(SCRWIN *self)
 {

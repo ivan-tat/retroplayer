@@ -102,7 +102,7 @@ void PUBLIC_CODE display_help(void)
 
 void PUBLIC_CODE display_playercfg(void)
 {
-    sb_conf_dump(SBDEV_REF_FIXME);
+    player_device_dump_conf();
 }
 
 uint8_t __near order_find_previous_entry(uint8_t nr)
@@ -366,7 +366,37 @@ void __near __pascal winlist_free(void)
     DEBUG_END("winlist_free");
 }
 
-extern void __near __pascal winlist_free(void);
+/*** Main **/
+
+void PUBLIC_CODE plays3m_main(void)
+{
+    register_plays3m();
+
+    printf(
+        "Simple music player for DOS, version %s." CRLF
+        "Originally written by Andre Baresel, 1994-1995." CRLF
+        "Modified by Ivan Tatarinov <ivan-tat@ya.ru>, 2016-2017." CRLF
+        "This is free and unencumbered software released into the public domain." CRLF
+        "For more information, please refer to <http://unlicense.org>." CRLF,
+        PLAYER_VERSION
+    );
+
+    opt_help = false;
+    opt_filename[0] = 0;
+    opt_filename_c[0] = 0;
+    opt_devselect = DEVSEL_AUTO;
+    opt_mode_rate = 48000;
+    opt_mode_stereo = true;
+    opt_mode_16bits = false;    // not done yet
+    opt_mode_lq = false;
+    opt_dumpconf = false;
+    opt_mvolume = 0;            // use volume from file
+    opt_st3order = false;
+    opt_startpos = 0;
+    opt_loop = false;
+    opt_em = true;
+    opt_fps = playOption_FPS;
+}
 
 /*** Initialization ***/
 

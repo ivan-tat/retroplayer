@@ -99,6 +99,7 @@ static const char    *player_error_msg;
 static bool     player_flags_i386;
 static bool     player_flags_bufalloc;
 static bool     player_flags_snddev;
+static SBDEV   *player_device;
 static bool     player_mode_set;
 static uint8_t  player_mode_bits;
 static bool     player_mode_signed;
@@ -230,19 +231,30 @@ bool PUBLIC_CODE player_init_device(uint8_t type)
 {
     DEBUG_BEGIN("player_init_device");
 
+    if (type <= 3)
+    {
+        player_device = sb_new();
+        if (!player_device)
+        {
+            DEBUG_FAIL("player_init_device", "Failed to create sound device object.");
+            return false;
+        }
+        sb_init(player_device);
+    }
+
     switch (type)
     {
     case 0:
         player_flags_snddev = true;
         break;
     case 1:
-        player_flags_snddev = sb_conf_detect(SBDEV_REF_FIXME);
+        player_flags_snddev = sb_conf_detect(player_device);
         break;
     case 2:
-        player_flags_snddev = sb_conf_env(SBDEV_REF_FIXME);
+        player_flags_snddev = sb_conf_env(player_device);
         break;
     case 3:
-        player_flags_snddev = sb_conf_input(SBDEV_REF_FIXME);
+        player_flags_snddev = sb_conf_input(player_device);
         break;
     default:
         DEBUG_ERR("player_init_device", "Unknown method.");
@@ -260,6 +272,20 @@ bool PUBLIC_CODE player_init_device(uint8_t type)
         DEBUG_FAIL("player_init_device", NULL);
         return true;
     }
+}
+
+void PUBLIC_CODE player_device_dump_conf(void)
+{
+    if (player_flags_snddev)
+        sb_conf_dump(player_device);
+}
+
+char *PUBLIC_CODE player_device_get_name(void)
+{
+    if (player_flags_snddev)
+        return sb_get_name(player_device);
+    else
+        return NULL;
 }
 
 bool PUBLIC_CODE player_set_mode(bool f_16bits, bool f_stereo, uint16_t rate, bool LQ)
@@ -290,12 +316,22 @@ bool PUBLIC_CODE player_set_mode(bool f_16bits, bool f_stereo, uint16_t rate, bo
     return true;
 }
 
-uint16_t PUBLIC_CODE playGetSampleRate(void)
+uint16_t PUBLIC_CODE player_get_output_rate(void)
 {
     return player_mode_rate;
 }
 
-bool PUBLIC_CODE player_is_lq_mode(void)
+uint8_t PUBLIC_CODE player_get_output_channels(void)
+{
+    return player_mode_channels;
+}
+
+uint8_t PUBLIC_CODE player_get_output_bits(void)
+{
+    return player_mode_bits;
+}
+
+bool PUBLIC_CODE player_get_output_lq(void)
 {
     return player_mode_lq;
 }
@@ -375,7 +411,7 @@ bool __near _player_setup_outbuf(SNDDMABUF *outbuf, uint16_t spc)
     }
 }
 
-void PUBLIC_CODE playSetMasterVolume(uint8_t value)
+void PUBLIC_CODE player_set_master_volume(uint8_t value)
 {
     if (value > 127)
         value = 127;
@@ -383,7 +419,7 @@ void PUBLIC_CODE playSetMasterVolume(uint8_t value)
     calcPostTable(value);
 }
 
-uint8_t PUBLIC_CODE playGetMasterVolume(void)
+uint8_t PUBLIC_CODE player_get_master_volume(void)
 {
     return playState_mVolume;
 }
@@ -416,7 +452,7 @@ void __near _player_setup_patterns_order(void)
     LastOrder = i;
 }
 
-void PUBLIC_CODE playSetOrder(bool extended)
+void PUBLIC_CODE player_set_order(bool extended)
 {
     if (playOption_ST3Order != extended)
     {
@@ -469,12 +505,12 @@ void __near _player_reset_channels(void)
     }
 }
 
-bool PUBLIC_CODE playStart(void)
+bool PUBLIC_CODE player_play_start(void)
 {
     SNDDMABUF *outbuf;
     uint16_t count;
 
-    DEBUG_BEGIN("playStart");
+    DEBUG_BEGIN("player_play_start");
 
     if (!player_flags_bufalloc)
     {
@@ -485,36 +521,36 @@ bool PUBLIC_CODE playStart(void)
 
     if (!player_flags_snddev)
     {
-        DEBUG_FAIL("playStart", "No sound device was set.");
+        DEBUG_FAIL("player_play_start", "No sound device was set.");
         player_error = E_PLAYER_NO_SOUND_DEVICE;
         return false;
     }
 
     if (!player_mode_set)
     {
-        DEBUG_FAIL("playStart", "No play mode was set.");
+        DEBUG_FAIL("player_play_start", "No play mode was set.");
         player_error = E_PLAYER_NO_SOUND_MODE;
         return false;
     }
 
     if (!mod_isLoaded)
     {
-        DEBUG_FAIL("playStart", "No music module was loaded.");
+        DEBUG_FAIL("player_play_start", "No music module was loaded.");
         player_error = E_PLAYER_NO_MODULE;
         return false;
     }
 
-    sb_hook_IRQ(SBDEV_REF_FIXME, &ISR_play);
+    sb_hook_IRQ(player_device, &ISR_play);
 
-    sb_set_transfer_mode(SBDEV_REF_FIXME, player_mode_rate, player_mode_channels, player_mode_bits, player_mode_signed);
-    player_mode_rate = sb_get_rate(SBDEV_REF_FIXME);
-    player_mode_channels = sb_get_channels(SBDEV_REF_FIXME);
-    player_mode_bits = sb_get_sample_bits(SBDEV_REF_FIXME);
-    player_mode_signed = sb_is_sample_signed(SBDEV_REF_FIXME);
+    sb_set_transfer_mode(player_device, player_mode_rate, player_mode_channels, player_mode_bits, player_mode_signed);
+    player_mode_rate = sb_mode_get_rate(player_device);
+    player_mode_channels = sb_mode_get_channels(player_device);
+    player_mode_bits = sb_mode_get_bits(player_device);
+    player_mode_signed = sb_mode_is_signed(player_device);
 
     if (!_player_setup_mixer())
     {
-        DEBUG_FAIL("playStart", "Failed to setup mixer.");
+        DEBUG_FAIL("player_play_start", "Failed to setup mixer.");
         return false;
     }
 
@@ -522,7 +558,7 @@ bool PUBLIC_CODE playStart(void)
 
     if (!_player_setup_outbuf(outbuf, mixBufSamplesPerChannel))
     {
-        DEBUG_FAIL("playStart", "Failed to setup output buffer.");
+        DEBUG_FAIL("player_play_start", "Failed to setup output buffer.");
         return false;
     }
 
@@ -561,30 +597,53 @@ bool PUBLIC_CODE playStart(void)
 
     fill_DMAbuffer(mixBuf.buf, outbuf);
 
-    sb_set_transfer_buffer(SBDEV_REF_FIXME, outbuf->buf->data, count, outbuf->framesCount, true);
+    sb_set_transfer_buffer(player_device, outbuf->buf->data, count, outbuf->framesCount, true);
 
-    if (!sb_transfer_start(SBDEV_REF_FIXME))
+    if (!sb_transfer_start(player_device))
     {
-        DEBUG_FAIL("playStart", "Failed to start transfer.");
+        DEBUG_FAIL("player_play_start", "Failed to start transfer.");
         player_error = E_PLAYER_INTERNAL;
         return false;
     }
 
-    DEBUG_SUCCESS("playStart");
+    DEBUG_SUCCESS("player_play_start");
     return true;
 }
 
-uint8_t PUBLIC_CODE playGetSpeed(void)
+void PUBLIC_CODE player_play_pause(void)
+{
+    if (player_device)
+        sb_transfer_pause(player_device);
+}
+
+void PUBLIC_CODE player_play_continue(void)
+{
+    if (player_device)
+        sb_transfer_continue(player_device);
+}
+
+void PUBLIC_CODE player_play_stop(void)
+{
+    if (player_device)
+        sb_transfer_stop(player_device);
+}
+
+uint16_t PUBLIC_CODE player_get_DMA_counter(void)
+{
+    return sb_get_DMA_counter(player_device);
+}
+
+uint8_t PUBLIC_CODE player_get_speed(void)
 {
     return playState_speed;
 }
 
-uint8_t PUBLIC_CODE playGetTempo(void)
+uint8_t PUBLIC_CODE player_get_tempo(void)
 {
     return playState_tempo;
 }
 
-uint8_t PUBLIC_CODE playGetPatternDelay(void)
+uint8_t PUBLIC_CODE player_get_pattern_delay(void)
 {
     return playState_patDelayCount;
 }
@@ -610,17 +669,30 @@ void PUBLIC_CODE player_free_module(void)
     DEBUG_END("player_free_module");
 }
 
+void PUBLIC_CODE player_free_device(void)
+{
+    DEBUG_BEGIN("player_free_device");
+
+    if (player_device)
+    {
+        sb_transfer_stop(player_device);
+        sb_unhook_IRQ(player_device);
+        sb_delete(&player_device);
+    }
+
+    DEBUG_END("player_free_device");
+}
+
 void PUBLIC_CODE player_free(void)
 {
     DEBUG_BEGIN("player_free");
 
-    sb_transfer_stop(SBDEV_REF_FIXME);
+    player_play_stop();
     player_free_module();
-    sb_unhook_IRQ(SBDEV_REF_FIXME);
+    player_free_device();
     freeVolumeTable();
     snddmabuf_free(&sndDMABuf);
     mixbuf_free(&mixBuf);
-
     player_flags_bufalloc = false;
 
     if (UseEMS)
@@ -638,6 +710,7 @@ void __near s3mplay_init(void)
     player_flags_snddev = false;
     UseEMS = emsInstalled;
     inside = false;
+    player_device = NULL;
     player_mode_set = false;
     player_mode_bits = 0;
     player_mode_signed = false;

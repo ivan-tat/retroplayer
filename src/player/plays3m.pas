@@ -251,33 +251,16 @@ procedure winlist_refresh_all; external;
 function  winlist_keypress(c: Char): Boolean; external;
 procedure winlist_free; external;
 
+(*** Main ***)
+
+procedure plays3m_main; far; external;
+
 (*** Initialization ***)
 
 procedure register_plays3m; far; external;
 
 begin
-    register_plays3m;
-
-    writeln('Simple music player for DOS, version ', PLAYER_VERSION, '.');
-    writeln('Originally written by Andre Baresel, 1994-1995.');
-    writeln('Modified by Ivan Tatarinov <ivan-tat@ya.ru>, 2016-2017.');
-    writeln('This is free and unencumbered software released into the public domain.');
-    writeln('For more information, please refer to <http://unlicense.org>.');
-
-    opt_help := false;
-    opt_filename := '';
-    opt_devselect := DEVSEL_AUTO;
-    opt_mode_rate := 45454;
-    opt_mode_stereo := true;
-    opt_mode_16bits := false;   { not done yet }
-    opt_mode_lq := false;
-    opt_dumpconf := false;
-    opt_mvolume := 0;           { use volume from file }
-    opt_st3order := false;
-    opt_startpos := 0;
-    opt_loop := false;
-    opt_em := true;
-    opt_fps := playOption_FPS;
+    plays3m_main;
 
     for i := 1 to paramcount do
         check_para(paramstr(i));
@@ -331,7 +314,7 @@ begin
     end;
 
     if (opt_mvolume > 0) then
-        playSetMasterVolume(opt_mvolume);
+        player_set_master_volume(opt_mvolume);
 
     if (not player_set_mode(opt_mode_16bits, opt_mode_stereo, opt_mode_rate, opt_mode_lq)) then
     begin
@@ -339,7 +322,7 @@ begin
         halt(1);
     end;
 
-    playSetOrder(opt_st3order);
+    player_set_order(opt_st3order);
     initState_startOrder := opt_startpos;
     playOption_LoopSong := opt_loop;
     playOption_FPS := opt_fps;
@@ -352,7 +335,7 @@ begin
         halt(1);
     end;
 
-    if (not playStart) then
+    if (not player_play_start) then
     begin
         display_errormsg;
         halt(1);
@@ -399,9 +382,9 @@ begin
                   end;
                 if (upcase(c)='P') then
                   begin
-                    sb_transfer_pause(SBDEV_REF_FIXME);
+                    player_play_pause;
                     readkey;
-                    sb_transfer_continue(SBDEV_REF_FIXME);
+                    player_play_continue;
                     c:=#0;
                   end;
                 if (c='+') then

@@ -39,7 +39,7 @@ var samplerate:word;
       if not player_init then halt;
       if not player_init_device(2) then begin writeln(' Blaster enviroment not found sorry ... ');halt end;
       player_set_mode(_16bit,stereo,samplerate,false);
-      playSetOrder(true);
+      player_set_order(true);
       playOption_LoopSong:=true;
     end;
 
@@ -126,7 +126,7 @@ begin
   writeln;
   Init;
   if (not player_set_mode(_16bit,stereo,samplerate,false)) then halt;
-  if (not playStart) then halt;
+  if (not player_play_start) then halt;
   writeln(#13#10' DMA buffer frame size: ', sndDMABuf.frameSize);
   writeln(#13#10' Stop playing and exit with <ESC> ');
   writeln('press any key to switch to oscillator ... ');
@@ -154,10 +154,10 @@ begin
             chn := @channel[pos];
             bar(320*170+pos*15+10,10,mixchn_get_sample_volume(chn)*ord(mixchn_is_playing(chn)));
           end;
-          yl:=h^[sb_get_DMA_counter(SBDEV_REF_FIXME)] shr 1;
+          yl:=h^[player_get_DMA_counter] shr 1;
           for pos:=1 to 319 do
             begin
-              i:=sb_get_DMA_counter(SBDEV_REF_FIXME); { current position in DMA buffer }
+              i:=player_get_DMA_counter; { current position in DMA buffer }
               linie(pos-1,scr[pos-1],pos,scr[pos],1);
               scr[pos-1]:=yl;yl:=h^[i] shr 1;
               linie(pos-1,scr[pos-1],pos,yl,14);
@@ -175,11 +175,11 @@ begin
             chn := @channel[pos];
             bar(320*170+pos*15+10,10,mixchn_get_sample_volume(chn)*ord(mixchn_is_playing(chn)));
           end;
-          i:=sb_get_DMA_counter(SBDEV_REF_FIXME) and $fffe;
+          i:=player_get_DMA_counter and $fffe;
           yl:=h^[i] shr 2;yr:=h^[i+1] shr 2;
           for pos:=1 to 319 do
             begin
-              i:=sb_get_DMA_counter(SBDEV_REF_FIXME) and $fffe; { current position in DMA buffer }
+              i:=player_get_DMA_counter and $fffe; { current position in DMA buffer }
               if (i > sndDMABuf.frameSize) then b:=7 else b:=4;
               { left channel : }
               linie(pos-1,36+scr[pos-1],pos,36+scr[pos],1);
