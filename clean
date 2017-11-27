@@ -79,6 +79,7 @@ $RM ./src/hw/dma.asm
 $RM ./src/hw/hwowner.asm
 $RM ./src/hw/pic.asm
 $RM ./src/hw/sndctl_t.asm
+$RM ./src/hw/vga.asm
 cleandir ./src/hw/sb
 $RM ./src/hw/sb/sbctl.asm
 $RM ./src/hw/sb/sbio.asm

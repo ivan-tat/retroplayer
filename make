@@ -388,6 +388,7 @@ build_target $T_HW     obj src/hw/dma.c
 build_target $T_HW     obj src/hw/isr.asm
 build_target $T_HW     obj src/hw/pic.c
 build_target $T_HW     obj src/hw/sndctl_t.c
+build_target $T_HW     obj src/hw/vga.c
 build_target $T_HW_SB  obj src/hw/sb/sbio.c
 build_target $T_HW_SB  obj src/hw/sb/sbctl.c
 build_target $T_MAIN   inc-linux src/main/_wramp.c
@@ -448,6 +449,7 @@ build_target $T_HW_TP     obj src/hw/cpu.pas
 build_target $T_HW_TP     obj src/hw/dma.pas
 build_target $T_HW_TP     obj src/hw/pic.pas
 build_target $T_HW_TP     obj src/hw/sndctl_t.pas
+build_target $T_HW_TP     obj src/hw/vga.pas
 build_target $T_HW_SB_TP  obj src/hw/sb/sbio.pas
 build_target $T_HW_SB_TP  obj src/hw/sb/sbctl.pas
 build_target $T_MAIN_TP   obj src/main/types.pas

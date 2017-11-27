@@ -23,6 +23,7 @@ uses
     mixchn,
     effects,
     s3mplay,
+    vga,
     screen;
 
 {$I defines.pas}
@@ -75,21 +76,6 @@ procedure display_playercfg; far; external;
 function prevorder(nr: Byte): Byte; external;
 function nextord(nr: Byte): Byte; external;
 procedure write_Note(note: Byte); external;
-
-procedure vbios_set_mode(mode: Byte); assembler;
-asm
-    mov ah,00h
-    mov al,[mode]
-    int 10h
-end;
-
-procedure vbios_set_cursor_shape(start, stop: Byte); assembler;
-asm
-    mov ah,01h
-    mov cl,[stop]
-    mov ch,[start]
-    int 10h
-end;
 
 procedure channels_save_all;
 var
