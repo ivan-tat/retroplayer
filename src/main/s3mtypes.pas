@@ -20,14 +20,14 @@ const
     MOD_MAX_TITLE_LENGTH = 28;
 
 type
-    TModTitle = string [MOD_MAX_TITLE_LENGTH];
+    TModTitle = array [0..MOD_MAX_TITLE_LENGTH - 1] of Char;
     PModTitle = ^TModTitle;
 
 const
-    MOD_MAX_TRACKER_NAME_LENGTH = 31;
+    MOD_MAX_TRACKER_NAME_LENGTH = 32;
 
 type
-    TModTrackerName = string [MOD_MAX_TRACKER_NAME_LENGTH];
+    TModTrackerName = array [0..MOD_MAX_TRACKER_NAME_LENGTH - 1] of Char;
     PModTrackerName = ^TModTrackerName;
 
 const

@@ -36,7 +36,7 @@
 
 /* generic module information */
 
-#define MOD_MAX_TITLE_LENGTH 29
+#define MOD_MAX_TITLE_LENGTH 28
     /* including trailing zero */
 
 typedef char modTitle_t[MOD_MAX_TITLE_LENGTH];

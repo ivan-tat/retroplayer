@@ -2,6 +2,7 @@
 program example_for_s3mplay;
 
 uses
+    pascal,
     crt,
     dos,
     string_,
@@ -31,8 +32,7 @@ var samplerate:word;
   var
       name: array [0..255] of Char;
     begin
-      memcpy(name, filename[1], Ord(filename[0]));
-      name[Ord(filename[0])] := Chr(0);
+      strpastoc(@name, filename, 256);
       if (not player_load_s3m(name)) then
           halt;
       writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');

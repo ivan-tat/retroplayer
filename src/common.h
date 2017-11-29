@@ -14,7 +14,7 @@
 
 #include <stdint.h>
 
-void *__new(uint16_t size);
+void *__new(size_t size);
 void  __delete(void **p);
 
 void *PUBLIC_CODE _new_(uint16_t size);

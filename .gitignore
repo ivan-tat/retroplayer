@@ -45,6 +45,8 @@ scripts/ow/tmp/
 src/common.asm
 src/debug.asm
 src/dynarray.asm
+src/pascal.asm
+src/startup.asm
 src/cc/conio/inp.asm
 src/cc/conio/outp.asm
 src/cc/ctype/istable.asm

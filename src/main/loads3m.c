@@ -29,10 +29,12 @@
 
 /*** File header ***/
 
+#define S3M_TITLE_LENGTH 28
+
 #pragma pack(push, 1);
 typedef struct S3M_header
 {
-    char name[28];
+    char name[S3M_TITLE_LENGTH];
     char charEOF;       // = 0x1A
     uint8_t type;       // = 0x10
     uint8_t unused1[2];
@@ -751,20 +753,18 @@ bool PUBLIC_CODE s3mloader_load(S3MLOADER *self, const char *name)
 
     memset(mod_TrackerName, 0, MOD_MAX_TRACKER_NAME_LENGTH);
     snprintf(
-        &(mod_TrackerName[1]),
-        MOD_MAX_TRACKER_NAME_LENGTH - 1,
-        "Scream Tracker %c.%c%c",
+        mod_TrackerName,
+        MOD_MAX_TRACKER_NAME_LENGTH,
+        "Scream Tracker %c.%c%c module",
         '0' + ((header.cwtv >> 8) & 0x0f),
         '0' + ((header.cwtv >> 4) & 0x0f),
         '0' + (header.cwtv & 0x0f)
     );
-    mod_TrackerName[MOD_MAX_TRACKER_NAME_LENGTH-1] = 0;
-    mod_TrackerName[0] = strlen(&(mod_TrackerName[1]));
 
     memset(mod_Title, 0, MOD_MAX_TITLE_LENGTH);
-    strncpy(&(mod_Title[1]), header.name, MOD_MAX_TITLE_LENGTH - 1);
+    strncpy(mod_Title, header.name,
+        S3M_TITLE_LENGTH > MOD_MAX_TITLE_LENGTH ? MOD_MAX_TITLE_LENGTH : S3M_TITLE_LENGTH);
     mod_Title[MOD_MAX_TITLE_LENGTH - 1] = 0;
-    mod_Title[0] = strlen(&(mod_Title[1]));
 
     OrdNum = header.ordnum;
     InsNum = header.insnum;

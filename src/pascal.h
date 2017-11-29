@@ -12,6 +12,7 @@
 #pragma once
 #endif
 
+#include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -76,5 +77,16 @@ typedef struct pascalFile_t {
     char data[128];
 };
 typedef struct pascalFile_t PASCALFILE;
+
+void PUBLIC_CODE pascal_fillchar(void *dest, uint16_t size, uint8_t value);
+void PUBLIC_CODE pascal_move(void *src, void *dest, uint16_t size);
+
+#ifdef __WATCOMC__
+#pragma aux pascal_fillchar modify [ ax bx cx dx si di es ];
+#pragma aux pascal_move     modify [ ax bx cx dx si di es ];
+#endif
+
+void PUBLIC_CODE strpastoc(char *dest, char *src, uint16_t maxlen);
+void PUBLIC_CODE strctopas(char *dest, char *src, uint16_t maxlen);
 
 #endif  /* PASCAL_H */

@@ -9,6 +9,7 @@
 #include <stdbool.h>
 
 #include "pascal.h"
+#include "common.h"
 
 #include "cc/stdlib.h"
 
@@ -112,6 +113,7 @@ char *custom_getenv(char *dest, const char *name, size_t maxlen)
 
     pascal_getenv(_s, _n);
 
+    strpastoc(dest, _s, maxlen);
     len = _s[0];
     if (len >= maxlen)
         len = maxlen-1;

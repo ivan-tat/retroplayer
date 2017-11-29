@@ -42,7 +42,7 @@ void __far win_information_draw(SCRWIN *self)
             textcolor(_white);
             clrscr();
             gotoxy(2, 1);
-            printf("Title:........................... Tracker:...............................");
+            printf("Title:........................... Type:...............................");
             gotoxy(2, 2);
             printf("Speed:... Tempo:... GVol:.. MVol:... Order:........ Loop:...");
             gotoxy(2, 3);
@@ -67,13 +67,9 @@ void __far win_information_draw(SCRWIN *self)
             textcolor(_lightgreen);
             gotoxy(8, 1);
             textbackground(_blue);
-             // FIXME: pascal to C conversion
-            mod_Title[1 + mod_Title[0]] = 0;
-            printf("%s", mod_Title + 1);
-            gotoxy(44, 1);
-            // FIXME: pascal to C conversion
-            mod_TrackerName[1 + mod_TrackerName[0]] = 0;
-            printf("%s", mod_TrackerName + 1);
+            printf("%s", mod_Title);
+            gotoxy(41, 1);
+            printf("%s", mod_TrackerName);
             textcolor(_yellow);
             gotoxy(9, 4);
             printf("%s", player_device_get_name());

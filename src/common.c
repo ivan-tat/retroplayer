@@ -12,7 +12,7 @@
 
 #include "common.h"
 
-void *__new(uint16_t size)
+void *__new(size_t size)
 {
     uint16_t seg;
 

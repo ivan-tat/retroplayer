@@ -19,6 +19,8 @@ cleandir ./src
 $RM ./src/common.asm
 $RM ./src/debug.asm
 $RM ./src/dynarray.asm
+$RM ./src/pascal.asm
+$RM ./src/startup.asm
 cleandir ./src/cc
 cleandir ./src/cc/conio
 $RM ./src/cc/conio/inp.asm
