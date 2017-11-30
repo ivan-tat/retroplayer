@@ -92,6 +92,7 @@ src/cc/string/strlen.asm
 src/cc/string/strncmp.asm
 src/cc/string/strncpy.asm
 src/cc/string/strnicmp.asm
+src/cc/unistd/exv.asm
 src/dos/ems.asm
 src/hw/dma.asm
 src/hw/hwowner.asm

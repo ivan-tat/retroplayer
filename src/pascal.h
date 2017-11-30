@@ -71,6 +71,8 @@ _UNREGMETHOD(name)\
     exitproc = _EXITVARNAME(name);\
 }
 
+#define pascal_String_size 256
+
 /* File I/O */
 
 typedef struct pascalFile_t {
@@ -86,7 +88,7 @@ void PUBLIC_CODE pascal_move(void *src, void *dest, uint16_t size);
 #pragma aux pascal_move     modify [ ax bx cx dx si di es ];
 #endif
 
-void PUBLIC_CODE strpastoc(char *dest, char *src, uint16_t maxlen);
-void PUBLIC_CODE strctopas(char *dest, char *src, uint16_t maxlen);
+void PUBLIC_CODE strpastoc(char *dest, char const *src, uint16_t maxlen);
+void PUBLIC_CODE strctopas(char *dest, char const *src, uint16_t maxlen);
 
 #endif  /* PASCAL_H */

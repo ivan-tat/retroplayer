@@ -76,6 +76,8 @@ $RM ./src/cc/string/strlen.asm
 $RM ./src/cc/string/strncmp.asm
 $RM ./src/cc/string/strncpy.asm
 $RM ./src/cc/string/strnicmp.asm
+cleandir ./src/cc/unistd
+$RM ./src/cc/unistd/exv.asm
 cleandir ./src/hw
 $RM ./src/hw/dma.asm
 $RM ./src/hw/hwowner.asm

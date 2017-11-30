@@ -20,6 +20,7 @@ wlib -d="$DST" "$CLIB" ':getenv.c'
 # <dos.h>
 wlib -d="$DST" "$CLIB" ':dosret.c' ':d_getvec.c' ':d_setvec.c' ':opendos.c'
 wlib -d="$DST" "$CLIB" ':error086.asm' ':gtime086.asm'
+wlib -d="$DST" "$CLIB" ':exv.c' ':exve.c'
 # <stdlib.h>
 wlib -d="$DST" "$CLIB" ':atoi.c' ':atol.c' ':istable.c' ':strtol.c' ':errno.c'
 # <string.h>

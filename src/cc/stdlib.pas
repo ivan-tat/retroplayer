@@ -29,6 +29,7 @@ implementation
 uses
     watcom,
     pascal,
+    string_,
     ctype,
     errno_,
     dos;

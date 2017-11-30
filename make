@@ -378,6 +378,7 @@ build_target $T_CC     obj src/cc/string/strlen.c
 build_target $T_CC     obj src/cc/string/strncmp.c
 build_target $T_CC     obj src/cc/string/strncpy.c
 build_target $T_CC     obj src/cc/string/strnicmp.c
+build_target $T_CC     obj src/cc/unistd/exv.c
 build_target $T_DEBUG  obj src/debug.c
 build_target $T_DOS    obj src/dos/ems.c
 build_target $T_MISC   obj src/common.c
@@ -439,9 +440,10 @@ build_target $T_CC_TP     obj src/cc/ctype.pas
 build_target $T_CC_TP     obj src/cc/errno_.pas
 build_target $T_CC_TP     obj src/cc/dos_.pas
 build_target $T_CC_TP     obj src/cc/malloc.pas
-build_target $T_CC_TP     obj src/cc/stdlib.pas
 build_target $T_CC_TP     obj src/cc/string_.pas
+build_target $T_CC_TP     obj src/cc/stdlib.pas
 build_target $T_CC_TP     obj src/cc/stdio.pas
+build_target $T_CC_TP     obj src/cc/unistd.pas
 build_target $T_DEBUG_TP  obj src/debug.pas
 build_target $T_DOS_TP    obj src/dos/ems.pas
 build_target $T_MISC_TP   obj src/common.pas

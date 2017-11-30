@@ -14,6 +14,7 @@
 #include "cc/string.h"
 #include "cc/malloc.h"
 #include "cc/errno.h"
+#include "cc/unistd.h"
 #include "hw/sb/sbctl.h"
 #include "hw/vga.h"
 #include "dos/ems.h"
@@ -45,7 +46,7 @@
 #define DEVSEL_MANUAL   3
 
 static bool     opt_help;
-static char     opt_filename[256];
+static char     opt_filename[pascal_String_size];
 static uint8_t  opt_devselect;
 static uint16_t opt_mode_rate;
 static bool     opt_mode_stereo;
@@ -505,7 +506,7 @@ bool __near _opt_parse(char *s)
     if (s[0] != '-')
     {
         DEBUG_INFO_("_opt_parse", "opt_filename=\"%s\"", s);
-        strncpy(opt_filename, s, 256);
+        strncpy(opt_filename, s, pascal_String_size);
         return true;
     }
     param = s + 1;
@@ -652,8 +653,8 @@ bool __near _opt_parse(char *s)
 void PUBLIC_CODE plays3m_main(void)
 {
     int count, i;
-    char s[256];
-    bool quit;
+    char s[pascal_String_size];
+    bool quit, result;
     char c;
 
     register_plays3m();
@@ -685,7 +686,7 @@ void PUBLIC_CODE plays3m_main(void)
     count = custom_argc();
     for (i = 1; i < count; i++)
     {
-        custom_argv(s, 256, i);
+        custom_argv(s, pascal_String_size, i);
         printf("option=\"%s\"." CRLF, s);
         if (!_opt_parse(s))
             exit(1);
@@ -840,18 +841,19 @@ void PUBLIC_CODE plays3m_main(void)
                     playOption_LoopSong = !playOption_LoopSong;
                     c = 0;
                 }
-                /*
                 if (upcase(c) == 'D')
                 {
+                    winlist_hide_all();
                     vbios_set_mode(3);  // clear screen
-                    printf("Return to player with 'EXIT'..." CRLF);
-                    swapvectors();
-                    exec(getenv("COMSPEC"), "");
-                    swapvectors();
+                    textbackground(_black);
+                    textcolor(_lightgray);
+                    printf("Starting DOS shell... (to return to player use 'exit' command)" CRLF);
+                    custom_getenv(s, "COMSPEC", pascal_String_size);
+                    result = execv(s, NULL);
                     c = 0;
                     vbios_set_mode(3);
                     cursor_hide();
-                    if (doserror)
+                    if (result)
                     {
                         while (kbhit())
                             getch();
@@ -859,14 +861,13 @@ void PUBLIC_CODE plays3m_main(void)
                             "DOS error: %u." CRLF
                             "Error while running command interpreter." CRLF
                             "Press any key to continue...",
-                            doserror
+                            errno
                         );
                         getch();
                     }
                     desktop_clear();
                     winlist_show_all();
                 }
-                */
             }
         }
     }
@@ -886,7 +887,7 @@ void PUBLIC_CODE plays3m_main(void)
 
     #ifdef DEBUG
     printf("After all:" CRLF);
-    memstats;
+    memstats();
     #endif
 }
 

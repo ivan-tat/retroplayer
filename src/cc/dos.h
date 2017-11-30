@@ -16,6 +16,17 @@
 
 #include "pascal.h"
 
+/* Pascal >>> */
+#define pascal_DirStr_size 68
+#define pascal_NameStr_size 8
+#define pascal_ExtStr_size 4
+#define pascal_ComStr_size 128
+#define pascal_PathStr_size 80
+
+extern void PUBLIC_CODE pascal_swapvectors(void);
+extern void PUBLIC_CODE pascal_exec(char *name, char *cmdline);
+/* <<< Pascal */
+
 struct cc_dosdate_t {
     unsigned char  day;         /* 1-31 */
     unsigned char  month;       /* 1-12 */
@@ -83,6 +94,11 @@ uint16_t PUBLIC_CODE _cc_dos_setblock(uint16_t size, uint16_t seg, uint16_t *max
 /* Linkning */
 
 #ifdef __WATCOMC__
+
+/* Pascal >>> */
+#pragma aux pascal_swapvectors modify [ ax bx cx dx si di es ];
+#pragma aux pascal_exec        modify [ ax bx cx dx si di es ];
+/* <<< Pascal */
 
 #pragma aux _cc_dos_getdate "^";
 #pragma aux _cc_dos_gettime "^";

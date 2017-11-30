@@ -19,7 +19,7 @@ uint16_t PUBLIC_CODE custom_argc(void)
 
 void PUBLIC_CODE custom_argv(char *dest, uint16_t n, uint8_t i)
 {
-    char _s[256];
+    char _s[pascal_String_size];
 
     pascal_paramstr(_s, i);
     strpastoc(dest, _s, n);

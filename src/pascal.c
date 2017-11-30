@@ -11,7 +11,7 @@
 
 #include "pascal.h"
 
-void PUBLIC_CODE strpastoc(char *dest, char *src, uint16_t maxlen)
+void PUBLIC_CODE strpastoc(char *dest, char const *src, uint16_t maxlen)
 {
     uint16_t len;
 
@@ -22,16 +22,16 @@ void PUBLIC_CODE strpastoc(char *dest, char *src, uint16_t maxlen)
             len = maxlen - 1;
 
         if (len)
-            pascal_move(src + 1, dest, len);
+            pascal_move((void *)(src + 1), dest, len);
 
         if (maxlen - len)
-            pascal_fillchar(dest + len, maxlen - len, 0);
+            pascal_fillchar((void *)(dest + len), maxlen - len, 0);
     }
 }
 
-void PUBLIC_CODE strctopas(char *dest, char *src, uint16_t maxlen)
+void PUBLIC_CODE strctopas(char *dest, char const *src, uint16_t maxlen)
 {
-    char *endptr;
+    char const *endptr;
     uint16_t len;
 
     if (maxlen)
@@ -41,13 +41,13 @@ void PUBLIC_CODE strctopas(char *dest, char *src, uint16_t maxlen)
             endptr++;
         len = endptr - src;
 
-        if (maxlen > 256)
-            maxlen = 256;
+        if (maxlen > pascal_String_size)
+            maxlen = pascal_String_size;
         if (len > maxlen - 1)
             len = maxlen - 1;
 
         if (len)
-            pascal_move(src, dest + 1, len);
+            pascal_move((void *)src, dest + 1, len);
 
         dest[0] = len;
         len++;

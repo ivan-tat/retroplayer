@@ -1471,7 +1471,7 @@ bool PUBLIC_CODE sb_conf_input(SBDEV *self)
 
 bool PUBLIC_CODE sb_conf_env(SBDEV *self)
 {
-    char s[256], *param, *endptr;
+    char s[pascal_String_size], *param, *endptr;
     uint8_t type;
     uint16_t base;
     uint8_t irq, dma8, dma16;
@@ -1488,7 +1488,7 @@ bool PUBLIC_CODE sb_conf_env(SBDEV *self)
     _sb_unset_transfer_buffer(self);
     _sb_unset_transfer_mode(self);
 
-    custom_getenv(s, "BLASTER", 255);
+    custom_getenv(s, "BLASTER", pascal_String_size - 1);
     len = strlen(s);
     if (!len)
     {

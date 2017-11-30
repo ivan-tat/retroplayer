@@ -11,7 +11,13 @@ unit
 
 interface
 
+uses
+    dos;
+
 (*$I defines.pas*)
+
+procedure pascal_swapvectors;
+procedure pascal_exec(Name: PathStr; CmdLine: String);
 
 procedure __cc_set_errno_dos;
 
@@ -41,6 +47,16 @@ uses
     errno_,
     i86;
 
+procedure pascal_swapvectors;
+begin
+    Dos.SwapVectors;
+end;
+
+procedure pascal_exec(Name: PathStr; CmdLine: String);
+begin
+    Dos.Exec(Name, CmdLine);
+end;
+
 (*$L dos\dosret.obj*)
 procedure __cc_set_errno_dos; external;
 
@@ -68,6 +84,5 @@ function _dos_para(size: Word): Word; external;
 function _dos_allocmem(size: Word; var seg: Word): Word; external;
 function _dos_freemem(seg: Word): Word; external;
 function _dos_setblock(size: Word; seg: Word; var max: Word): Word; external;
-
 
 end.
