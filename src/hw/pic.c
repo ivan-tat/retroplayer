@@ -187,13 +187,19 @@ IRQMASK pic_get_hooked_irq_channels(void)
     return _isr_mask;
 }
 
-HWOWNER *pic_get_irq_owner(uint8_t ch)
+HWOWNERID pic_get_irq_owner(uint8_t ch)
 {
+    HWOWNER *owner;
+
     if (ch < IRQ_CHANNELS)
         if (_is_hooked(ch))
-            return _isr_list[ch].owner;
+        {
+            owner = _isr_list[ch].owner;
+            if (owner)
+                return hwowner_get_id(owner);
+        }
 
-    return NULL;
+    return 0;
 }
 
 ISROWNERCALLBACK *pic_get_irq_handler(uint8_t ch)

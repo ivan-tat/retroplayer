@@ -226,7 +226,7 @@ static const struct
 
 /* Driver */
 
-static HWOWNER _sbdriver;
+static HWOWNER *_sbdriver;
 
 /* ISR */
 
@@ -512,7 +512,7 @@ void PUBLIC_CODE sb_hook_IRQ(SBDEV *self, void *p)
     DEBUG_BEGIN("sb_hook_IRQ");
 
     _sb_set_isr_user(self, p);
-    hwowner_hook_irq(&_sbdriver, SELF->hw_irq, &_ISR_play, (void *)self);
+    hwowner_hook_irq(_sbdriver, SELF->hw_irq, &_ISR_play, (void *)self);
     /* no changes for IRQ2 */
     pic_disable((1 << SELF->hw_irq) & ~(1 << 2));
 
@@ -525,7 +525,7 @@ void PUBLIC_CODE sb_unhook_IRQ(SBDEV *self)
 
     /* no changes for IRQ2 */
     pic_enable((1 << SELF->hw_irq) & ~(1 << 2));
-    hwowner_release_irq(&_sbdriver, SELF->hw_irq);
+    hwowner_release_irq(_sbdriver, SELF->hw_irq);
 
     DEBUG_END("sb_unhook_IRQ");
 }
@@ -1144,7 +1144,7 @@ bool __near _sb_detect_DMA_IRQ(SBDEV *self)
         return false;
     }
 
-    if (!hwowner_hook_irq_channels(&_sbdriver, irqmask, &_ISR_detect, self))
+    if (!hwowner_hook_irq_channels(_sbdriver, irqmask, &_ISR_detect, self))
     {
         DEBUG_FAIL("_sb_detect_DMA_IRQ", "Failed to hook IRQ channels.");
         return false;
@@ -1164,7 +1164,7 @@ bool __near _sb_detect_DMA_IRQ(SBDEV *self)
         i++;
     }
 
-    if (!hwowner_release_irq_channels(&_sbdriver, irqmask))
+    if (!hwowner_release_irq_channels(_sbdriver, irqmask))
     {
         DEBUG_FAIL("_sb_detect_DMA_IRQ", "Failed to release IRQ channels.");
         return false;
@@ -1654,7 +1654,7 @@ void sbctl_init(void)
 {
     DEBUG_BEGIN("sbctl_init");
 
-    hwowner_init(&_sbdriver, "Internal SoundBlaster driver");
+    _sbdriver = hwowner_register("Internal SoundBlaster driver");
 
     DEBUG_END("sbctl_init");
 }
@@ -1663,7 +1663,7 @@ void sbctl_done(void)
 {
     DEBUG_BEGIN("sbctl_done");
 
-    hwowner_free(&_sbdriver);
+    hwowner_unregister(_sbdriver);
 
     DEBUG_END("sbctl_done");
 }

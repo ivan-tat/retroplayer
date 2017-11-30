@@ -19,21 +19,20 @@
 
 /* Hardware resource owner */
 
-typedef struct hw_owner_t
-{
-    uint16_t id;
-    const char *name;
-};
-typedef struct hw_owner_t HWOWNER;
+typedef uint16_t hw_owner_id_t;
+typedef hw_owner_id_t HWOWNERID;
+typedef void HWOWNER;
 
-void hwowner_clear(HWOWNER *self);
-void hwowner_init(HWOWNER *self, const char *name);
-void hwowner_free(HWOWNER *self);
+HWOWNER    *hwowner_register(const char *name);
+HWOWNERID   hwowner_get_id(HWOWNER *owner);
+const char *hwowner_get_name(HWOWNERID id);
+void        hwowner_unregister(HWOWNER *owner);
 
 #ifdef __WATCOMC__
-#pragma aux hwowner_clear "*";
-#pragma aux hwowner_init "*";
-#pragma aux hwowner_free "*";
+#pragma aux hwowner_register "*";
+#pragma aux hwowner_get_id "*";
+#pragma aux hwowner_get_name "*";
+#pragma aux hwowner_unregister "*";
 #endif
 
 /* Initialization */

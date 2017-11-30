@@ -35,7 +35,7 @@ typedef void __far isr_owner_cb_t(void *data, uint8_t ch);
 typedef isr_owner_cb_t ISROWNERCALLBACK;
 
 IRQMASK           pic_get_hooked_irq_channels(void);
-HWOWNER          *pic_get_irq_owner(uint8_t ch);
+HWOWNERID         pic_get_irq_owner(uint8_t ch);
 ISROWNERCALLBACK *pic_get_irq_handler(uint8_t ch);
 void             *pic_get_irq_data(uint8_t ch);
 

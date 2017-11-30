@@ -12,9 +12,10 @@ interface
 
 (*$I defines.pas*)
 
-procedure hwowner_clear;
-procedure hwowner_init;
-procedure hwowner_free;
+procedure hwowner_register;
+procedure hwowner_get_id;
+procedure hwowner_get_name;
+procedure hwowner_unregister;
 
 implementation
 
@@ -23,13 +24,15 @@ uses
     i86,
     dos_,
     string_,
+    common,
     debug;
 
 (*$l hwowner.obj*)
 
-procedure hwowner_clear; external;
-procedure hwowner_init; external;
-procedure hwowner_free; external;
+procedure hwowner_register; external;
+procedure hwowner_get_id; external;
+procedure hwowner_get_name; external;
+procedure hwowner_unregister; external;
 
 procedure register_hwowner; far; external;
 
