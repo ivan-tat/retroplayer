@@ -15,6 +15,7 @@
 #include "cc/stdio.h"
 #include "cc/string.h"
 #include "cc/dos.h"
+#include "common.h"
 #include "debug.h"
 
 #include "dos/ems.h"
@@ -95,55 +96,188 @@ const char *PUBLIC_CODE emsGetErrorMsg(void)
         if (EMS_ERRORS[i].code == emsEC)
             return EMS_ERRORS[i].msg;
         i++;
-    };
+    }
 
     return EMS_ERROR_UNKNOWN;
 }
 
-/* Initialize for Pascal linker */
+#define MAX_ITEMS 6
 
-typedef struct emsHandleEntry_t EMSENT;
-typedef struct emsHandleEntry_t
+#pragma pack(push, 1);
+typedef struct handle_entry_t HDLENT;
+typedef struct handle_entry_t
 {
-    EMSHDL handle;
-    EMSENT *next;
+    HDLENT *next;
+    EMSHDL items[MAX_ITEMS];
+};  // size of entry is 16 bytes
+#pragma pack(pop);
+
+#pragma pack(push, 1);
+typedef struct handles_list_t HANDLESLIST;
+typedef struct handles_list_t
+{
+    HDLENT *root;
 };
+#pragma pack(pop);
 
-static EMSENT *ems_hlist = (void *)0;
+static HANDLESLIST _handleslist;
 
-void __near ems_insert_handle(EMSHDL handle)
+
+/* Entry */
+
+void __near _entry_clear(HDLENT *self)
 {
-    uint16_t seg;
-    EMSENT *n;
+    int i;
 
-    if (!_dos_allocmem(_dos_para(sizeof(EMSENT)), &seg))
+    if (self)
     {
-        n = MK_FP(seg, 0);
-        n->handle = handle;
-        n->next = ems_hlist;
-        ems_hlist = n;
+        self->next = NULL;
+        for (i = 0; i < MAX_ITEMS; i++)
+            self->items[i] = EMSBADHDL;
     }
 }
 
-void __near ems_remove_handle(EMSHDL handle)
+int __near _entry_find_item(HDLENT *self, EMSHDL item)
 {
-    EMSENT *i, *h;
+    int i;
 
-    i = NULL;
-    h = ems_hlist;
-    while ((h != NULL) && (h->handle != handle))
+    for (i = 0; i < MAX_ITEMS; i++)
+        if (self->items[i] == item)
+            return i;
+
+    return -1;
+}
+
+bool __near _entry_is_empty(HDLENT *self)
+{
+    int i;
+
+    for (i = 0; i < MAX_ITEMS; i++)
+        if (self->items[i] != EMSBADHDL)
+            return false;
+
+    return true;
+}
+
+/* List */
+
+void __near _list_clear(HANDLESLIST *self)
+{
+    if (self)
+        self->root = NULL;
+}
+
+HDLENT *__near _list_find_item(HANDLESLIST *self, EMSHDL item, int *index)
+{
+    HDLENT *entry;
+    int i;
+
+    if (self)
     {
-        i = h;
-        h = h->next;
-    };
-    if (h != NULL)
+        entry = self->root;
+
+        while (entry)
+        {
+            i = _entry_find_item(entry, item);
+            if (i >= 0)
+            {
+                *index = i;
+                return entry;
+            }
+            entry = entry->next;
+        }
+    }
+
+    return NULL;
+}
+
+bool __near _list_add_item(HANDLESLIST *self, EMSHDL item)
+{
+    HDLENT *entry;
+    int i;
+
+    if (self)
     {
-        if (i != NULL)
-            i->next = h->next;
+        entry = _list_find_item(self, EMSBADHDL, &i);
+        if (entry)
+        {
+            entry->items[i] = item;
+            return true;
+        }
         else
-            ems_hlist = h->next;
-        _dos_freemem(FP_SEG(h));
-    };
+        {
+            entry = _new(HDLENT);
+            if (entry)
+            {
+                _entry_clear(entry);
+                entry->next = self->root;
+                entry->items[0] = item;
+                self->root = entry;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool __near _list_remove_item(HANDLESLIST *self, EMSHDL item)
+{
+    HDLENT *prev, *entry;
+    int i;
+
+    if (self)
+    {
+        prev = NULL;
+        entry = self->root;
+
+        while (entry)
+        {
+            i = _entry_find_item(entry, item);
+            if (i >= 0)
+            {
+                entry->items[i] = EMSBADHDL;
+                if (_entry_is_empty(entry))
+                {
+                    if (prev)
+                        prev->next = entry->next;
+                    else
+                        self->root = entry->next;
+
+                    _delete(entry);
+                }
+                return true;
+            }
+
+            prev = entry;
+            entry = entry->next;
+        }
+    }
+
+    return false;
+}
+
+bool __near _ems_free(EMSHDL handle);
+
+void __near _list_free(HANDLESLIST *self)
+{
+    HDLENT *entry;
+    EMSHDL item;
+    int i;
+
+    if (self)
+        while (self->root)
+        {
+            entry = self->root;
+            for (i = 0; i < MAX_ITEMS; i++)
+            {
+                item = entry->items[i];
+                if (item != EMSBADHDL)
+                    _ems_free(item);
+            }
+            self->root = entry->next;
+            _delete(entry);
+        }
 }
 
 #ifndef USE_INTRINSICS
@@ -184,7 +318,7 @@ bool PUBLIC_CODE emsGetVersion(void)
         emsVersion.Lo = regs.h.al & 0x0f;
         emsVersion.Hi = regs.h.al >> 4;
         return true;
-    };
+    }
 }
 
 uint16_t PUBLIC_CODE emsGetFrameSeg(void)
@@ -217,7 +351,7 @@ uint16_t PUBLIC_CODE emsGetFreePagesCount(void)
         return regs.w.bx;
 }
 
-EMSHDL PUBLIC_CODE emsAlloc(uint16_t pages)
+EMSHDL __near _ems_alloc(uint16_t pages)
 {
     union REGPACK regs;
 
@@ -227,13 +361,21 @@ EMSHDL PUBLIC_CODE emsAlloc(uint16_t pages)
     if (regs.h.ah)
     {
         emsEC = regs.h.ah;
-        return -1;
+        return EMSBADHDL;
     }
     else
-    {
-        ems_insert_handle(regs.w.dx);
         return regs.w.dx;
-    };
+}
+
+EMSHDL PUBLIC_CODE emsAlloc(uint16_t pages)
+{
+    EMSHDL h;
+
+    h = _ems_alloc(pages);
+    if (h != EMSBADHDL)
+        _list_add_item(&_handleslist, h);
+
+    return h;
 }
 
 bool PUBLIC_CODE emsResize(EMSHDL handle, uint16_t pages)
@@ -258,7 +400,7 @@ bool PUBLIC_CODE emsResize(EMSHDL handle, uint16_t pages)
         return false;
 }
 
-bool PUBLIC_CODE emsFree(EMSHDL handle)
+bool __near _ems_free(EMSHDL handle)
 {
     union REGPACK regs;
 
@@ -271,10 +413,18 @@ bool PUBLIC_CODE emsFree(EMSHDL handle)
         return false;
     }
     else
-    {
-        ems_remove_handle(regs.w.dx);
         return true;
-    };
+}
+
+bool PUBLIC_CODE emsFree(EMSHDL handle)
+{
+    if (_ems_free(handle))
+    {
+        _list_remove_item(&_handleslist, handle);
+        return true;
+    }
+
+    return false;
 }
 
 bool PUBLIC_CODE emsMap(EMSHDL handle, uint16_t logPage, uint8_t physPage)
@@ -373,7 +523,7 @@ void emsInit(void)
     emsEC = 0;
     emsFrameSeg = 0;
     emsFramePtr = NULL;
-    ems_hlist = NULL;
+    _list_clear(&_handleslist);
     emsInstalled = emsIsInstalled();
     if (emsInstalled)
     {
@@ -400,8 +550,7 @@ void emsInit(void)
 
 void emsDone(void)
 {
-    while (ems_hlist != NULL)
-        emsFree(ems_hlist->handle);
+    _list_free(&_handleslist);
 }
 
 DEFINE_REGISTRATION(ems, emsInit, emsDone)

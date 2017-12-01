@@ -444,9 +444,9 @@ build_target $T_CC_TP     obj src/cc/string_.pas
 build_target $T_CC_TP     obj src/cc/stdlib.pas
 build_target $T_CC_TP     obj src/cc/stdio.pas
 build_target $T_CC_TP     obj src/cc/unistd.pas
+build_target $T_MISC_TP   obj src/common.pas
 build_target $T_DEBUG_TP  obj src/debug.pas
 build_target $T_DOS_TP    obj src/dos/ems.pas
-build_target $T_MISC_TP   obj src/common.pas
 build_target $T_MISC_TP   obj src/dynarray.pas
 build_target $T_MISC_TP   obj src/pascal.pas
 build_target $T_MISC_TP   obj src/startup.pas

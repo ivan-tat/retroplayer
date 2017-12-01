@@ -63,6 +63,7 @@ uses
     stdio,
     stdlib,
     string_,
+    common,
     debug;
 
 (*$l ems.obj*)
