@@ -17,96 +17,230 @@
 
 #include "hw/hwowner.h"
 
+#pragma pack(push, 1);
+typedef struct hwowner_t HWOWNERITEM;
 typedef struct hwowner_t
 {
     HWOWNERID id;
     const char *name;
 };
+#pragma pack(pop);
 
+#define MAX_ITEMS 3
+
+#pragma pack(push, 1);
 typedef struct hwowner_entry_t HWOWNERENT;
 typedef struct hwowner_entry_t
 {
-    struct hwowner_t *owner;
     HWOWNERENT *next;
-};
+    HWOWNERITEM *items[MAX_ITEMS];
+};  // size of entry is 16 bytes
+#pragma pack(pop);
 
-#define OWNER ((struct hwowner_t *)owner)
+#pragma pack(push, 1);
+typedef struct hwowners_list_t HWOWNERSLIST;
+typedef struct hwowners_list_t
+{
+    HWOWNERENT *root;
+};
+#pragma pack(pop);
+
+#define OWNER ((HWOWNERITEM *)owner)
 
 static HWOWNERID _hwowner_id;
-static HWOWNERENT *_list;
+static HWOWNERSLIST _hwowners_list;
+
+/* Entry */
+
+void __near _entry_clear(HWOWNERENT *self)
+{
+    if (self)
+        memset(self, 0, sizeof(HWOWNERENT));
+}
+
+int __near _entry_find_item(HWOWNERENT *self, HWOWNERITEM *item)
+{
+    int i;
+
+    for (i = 0; i < MAX_ITEMS; i++)
+        if (self->items[i] == item)
+            return i;
+
+    return -1;
+}
+
+int __near _entry_find_item_by_id(HWOWNERENT *self, HWOWNERID id)
+{
+    int i;
+    HWOWNERITEM *item;
+
+    for (i = 0; i < MAX_ITEMS; i++)
+    {
+        item = self->items[i];
+        if (item && (item->id == id))
+            return i;
+    }
+
+    return -1;
+}
+
+bool __near _entry_is_empty(HWOWNERENT *self)
+{
+    int i;
+
+    for (i = 0; i < MAX_ITEMS; i++)
+        if (self->items[i])
+            return false;
+
+    return true;
+}
 
 /* List */
 
-bool __near _list_insert_entry(struct hwowner_t *owner)
+void __near _list_clear(HWOWNERSLIST *self)
+{
+    if (self)
+        self->root = NULL;
+}
+
+HWOWNERENT *__near _list_find_item(HWOWNERSLIST *self, HWOWNERITEM *item, int *index)
 {
     HWOWNERENT *entry;
+    int i;
 
-    entry = _new(HWOWNERENT);
-    if (entry)
+    if (self)
     {
-        entry->owner = owner;
-        entry->next = _list;
-        _list = entry;
-        return true;
-    }
-    else
-        return false;
-}
+        entry = self->root;
 
-HWOWNERENT *__near _list_find_entry(HWOWNER *owner)
-{
-    HWOWNERENT *entry;
-
-    entry = _list;
-
-    while (entry && (entry->owner != owner))
-        entry = entry->next;
-
-    return entry;
-}
-
-HWOWNERENT *__near _list_find_entry_by_id(HWOWNERID id)
-{
-    HWOWNERENT *entry;
-
-    entry = _list;
-
-    while (entry && (entry->owner->id != id))
-        entry = entry->next;
-
-    return entry;
-}
-
-bool __near _list_remove_entry(struct hwowner_t *owner)
-{
-    HWOWNERENT *prev, *cur;
-
-    prev = NULL;
-    cur = _list;
-
-    while (cur && (cur->owner != owner))
-    {
-        prev = cur;
-        cur = cur->next;
+        while (entry)
+        {
+            i = _entry_find_item(entry, item);
+            if (i >= 0)
+            {
+                *index = i;
+                return entry;
+            }
+            entry = entry->next;
+        }
     }
 
-    if (cur)
+    return NULL;
+}
+
+HWOWNERENT *__near _list_find_item_by_id(HWOWNERSLIST *self, HWOWNERID id, int *index)
+{
+    HWOWNERENT *entry;
+    int i;
+
+    if (self)
     {
-        if (prev)
-            prev->next = cur->next;
+        entry = self->root;
+
+        while (entry)
+        {
+            i = _entry_find_item_by_id(entry, id);
+            if (i >= 0)
+            {
+                *index = i;
+                return entry;
+            }
+            entry = entry->next;
+        }
+    }
+
+    return NULL;
+}
+
+bool __near _list_add_item(HWOWNERSLIST *self, HWOWNERITEM *item)
+{
+    HWOWNERENT *entry;
+    int i;
+
+    if (self)
+    {
+        entry = _list_find_item(self, NULL, &i);
+        if (entry)
+        {
+            entry->items[i] = item;
+            return true;
+        }
         else
-            _list = cur->next;
-
-        _delete(cur);
-        return true;
+        {
+            entry = _new(HWOWNERENT);
+            if (entry)
+            {
+                _entry_clear(entry);
+                entry->next = self->root;
+                entry->items[0] = item;
+                self->root = entry;
+                return true;
+            }
+        }
     }
-    else
-        return false;
+
+    return false;
+}
+
+bool __near _list_remove_item(HWOWNERSLIST *self, HWOWNERITEM *item)
+{
+    HWOWNERENT *prev, *entry;
+    int i;
+
+    if (self)
+    {
+        prev = NULL;
+        entry = self->root;
+
+        while (entry)
+        {
+            i = _entry_find_item(entry, item);
+            if (i >= 0)
+            {
+                entry->items[i] = NULL;
+                if (_entry_is_empty(entry))
+                {
+                    if (prev)
+                        prev->next = entry->next;
+                    else
+                        self->root = entry->next;
+
+                    _delete(entry);
+                }
+                return true;
+            }
+
+            prev = entry;
+            entry = entry->next;
+        }
+    }
+
+    return false;
+}
+
+void __near _list_free(HWOWNERSLIST *self)
+{
+    HWOWNERENT *entry;
+    HWOWNERITEM *item;
+    int i;
+
+    if (self)
+        while (self->root)
+        {
+            entry = self->root;
+            for (i = 0; i < MAX_ITEMS; i++)
+            {
+                item = entry->items[i];
+                if (item)
+                    _delete(item);
+            }
+            self->root = entry->next;
+            _delete(entry);
+        }
 }
 
 /* Entry */
 
-void hwowner_init(struct hwowner_t *self, const char *name)
+void hwowner_init(HWOWNERITEM *self, const char *name)
 {
     if (self)
     {
@@ -117,17 +251,21 @@ void hwowner_init(struct hwowner_t *self, const char *name)
 
 HWOWNER *hwowner_register(const char *name)
 {
-    struct hwowner_t *owner;
+    HWOWNERITEM *owner;
 
-    owner = _new(struct hwowner_t);
+    owner = _new(HWOWNERITEM);
     if (owner)
     {
         hwowner_init(owner, name);
-        DEBUG_INFO_("hwowner_register", "Registered HW owner \"%s\" with id=0x%04X.", name, owner->id);
-        return owner;
+        if (_list_add_item(&_hwowners_list, owner))
+        {
+            DEBUG_INFO_("hwowner_register", "Registered HW owner \"%s\" with id=0x%04X.", name, owner->id);
+            return owner;
+        }
     }
-    else
-        return NULL;
+
+    DEBUG_FAIL("hwowner_register", "Failed to registered HW owner.");
+    return NULL;
 }
 
 HWOWNERID hwowner_get_id(HWOWNER *owner)
@@ -140,11 +278,12 @@ HWOWNERID hwowner_get_id(HWOWNER *owner)
 
 const char *hwowner_get_name(HWOWNERID id)
 {
-    struct hwowner_entry_t *entry;
+    HWOWNERENT *entry;
+    int i;
 
-    entry = _list_find_entry_by_id(id);
+    entry = _list_find_item_by_id(&_hwowners_list, id, &i);
     if (entry)
-        return entry->owner->name;
+        return entry->items[i]->name;
     else
         return NULL;
 }
@@ -153,11 +292,13 @@ void hwowner_unregister(HWOWNER *owner)
 {
     HWOWNERID id;
     const char *name;
+
     if (owner)
     {
         id = OWNER->id;
         name = OWNER->name;
-        _list_remove_entry(owner);
+        _list_remove_item(&_hwowners_list, owner);
+        _delete(owner);
         DEBUG_INFO_("hwowner_unregister", "Unregistered HW owner \"%s\" with id=0x%04X.", name, id);
     }
 }
@@ -167,14 +308,12 @@ void hwowner_unregister(HWOWNER *owner)
 void __near _hwowner_init(void)
 {
     _hwowner_id = 0;
-    _list = NULL;
+    _list_clear(&_hwowners_list);
 }
 
 void __near _hwowner_done(void)
 {
-    while (_list)
-        if (!_list_remove_entry(_list->owner))
-            break;
+    _list_free(&_hwowners_list);
 }
 
 DEFINE_REGISTRATION(hwowner, _hwowner_init, _hwowner_done)
