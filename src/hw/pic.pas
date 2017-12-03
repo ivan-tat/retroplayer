@@ -12,15 +12,16 @@ interface
 
 (*$I defines.pas*)
 
-procedure pic_enable;
-procedure pic_disable;
-procedure pic_eoi;
-
 procedure pic_get_hooked_irq_channels;
 procedure pic_get_irq_owner;
 procedure pic_get_irq_handler;
 procedure pic_get_irq_data;
 
+procedure hwowner_enable_irq;
+procedure hwowner_enable_irq_channels;
+procedure hwowner_disable_irq;
+procedure hwowner_disable_irq_channels;
+procedure hwowner_eoi;
 procedure hwowner_hook_irq;
 procedure hwowner_hook_irq_channels;
 procedure hwowner_set_irq_handler;
@@ -45,15 +46,16 @@ procedure _isr_get; external;
 
 (*$l pic.obj*)
 
-procedure pic_enable; external;
-procedure pic_disable; external;
-procedure pic_eoi; external;
-
 procedure pic_get_hooked_irq_channels; external;
 procedure pic_get_irq_owner; external;
 procedure pic_get_irq_handler; external;
 procedure pic_get_irq_data; external;
 
+procedure hwowner_enable_irq; external;
+procedure hwowner_enable_irq_channels; external;
+procedure hwowner_disable_irq; external;
+procedure hwowner_disable_irq_channels; external;
+procedure hwowner_eoi; external;
 procedure hwowner_hook_irq; external;
 procedure hwowner_hook_irq_channels; external;
 procedure hwowner_set_irq_handler; external;

@@ -816,24 +816,14 @@ void PUBLIC_CODE plays3m_main(void)
                 if (c == '+')
                 {
                     lastrow = 0;
-                    playState_order = nextord(playState_order);
-                    playState_row = 0;
-                    playState_tick = 1;
-                    playState_pattern = Order[playState_order];
+                    player_set_pos(nextord(playState_order), 0, true);
                     c = 0;
                 }
                 if (c == '-')
                 {
-                    playState_order = prevorder(playState_order);
-                    playState_patDelayCount = 0;
-                    playState_patLoopActive = false;
-                    playState_patLoopCount = 0;
-                    playState_patLoopStartRow = 0;
-                    channels_stop_all();
                     lastrow = 0;
-                    playState_row = 0;
-                    playState_tick = 1;
-                    playState_pattern = Order[playState_order];
+                    player_set_pos(prevorder(playState_order), 0, false);
+                    channels_stop_all();
                     c = 0;
                 }
                 if (upcase(c) == 'L')

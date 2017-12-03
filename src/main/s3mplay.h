@@ -36,16 +36,21 @@ void     PUBLIC_CODE player_set_master_volume(uint8_t value);
 uint8_t  PUBLIC_CODE player_get_master_volume(void);
 void     PUBLIC_CODE player_set_order(bool extended);
 bool     PUBLIC_CODE player_load_s3m(char *name);
+void     player_set_pos(uint8_t start_order, uint8_t start_row, bool keep);
 bool     PUBLIC_CODE player_play_start(void);
 void     PUBLIC_CODE player_play_pause(void);
 void     PUBLIC_CODE player_play_continue(void);
 void     PUBLIC_CODE player_play_stop(void);
-uint16_t PUBLIC_CODE player_get_DMA_counter(void);
+uint16_t PUBLIC_CODE player_get_buffer_pos(void);
 uint8_t  PUBLIC_CODE player_get_speed(void);
 uint8_t  PUBLIC_CODE player_get_tempo(void);
 uint8_t  PUBLIC_CODE player_get_pattern_delay(void);
 void     PUBLIC_CODE player_free_module(void);
 void     PUBLIC_CODE player_free(void);
+
+#ifdef __WATCOMC__
+#pragma aux player_set_pos "*";
+#endif
 
 /*** Initialization ***/
 

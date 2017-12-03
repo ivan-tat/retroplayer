@@ -22,7 +22,9 @@
 
 /* I/O ports */
 
-typedef struct dmaIO_t {
+#pragma pack(push, 1);
+typedef struct dma_IO_t
+{
     uint8_t mask;
     uint8_t clear;
     uint8_t mode;
@@ -30,8 +32,10 @@ typedef struct dmaIO_t {
     uint8_t page;
     uint8_t count;
 };
+#pragma pack(pop);
 
-static const struct dmaIO_t _dmaIO[DMA_CHANNELS] = {
+static const struct dma_IO_t _dma_IO[DMA_CHANNELS] =
+{
     /* 8-bits transfers */
     { 0x0a, 0x0c, 0x0b, 0x00, 0x87, 0x01 },
     { 0x0a, 0x0c, 0x0b, 0x02, 0x83, 0x03 },
@@ -67,94 +71,92 @@ static const struct dmaIO_t _dmaIO[DMA_CHANNELS] = {
 
 /* Private data for DMA list */
 
-typedef struct dmaInfo_t {
-    dmaOwner_t *owner;
-};
+static struct
+{
+    HWOWNER *owner;
+} _dma_list[DMA_CHANNELS] = { NULL };
 
-/* FIXME: to link with Pascal linker we use static definition and local
- *  initialization. Remove these when done. */
-static struct dmaInfo_t _dmaList[DMA_CHANNELS] = { (void const *)0 };
+static DMAMASK _dma_mask = 0;
+
+#define _is_hooked(ch)      (_dma_mask & (1 << (ch)))
+#define _are_hooked(mask)   ((_dma_mask & mask) == mask)
+#define _hook(ch)           _dma_mask |= (1 << (ch))
+#define _release(ch)        _dma_mask &= ~(1 << (ch))
 
 /* Private methods for DMA list */
 
-void __near _dmaSetOwner(uint8_t ch, dmaOwner_t *owner)
+#define _dma_list_check_dma_owner(ch, _owner) (_dma_list[ch].owner == _owner)
+
+bool __near _dma_list_check_dma_channels_owner(DMAMASK mask, HWOWNER *owner)
 {
-    _dmaList[ch].owner = owner;
+    DMAMASK m;
+    uint8_t ch;
+
+    m = _dma_mask & mask;
+    ch = 0;
+    while (m)
+    {
+        if ((m & 1) && !(_dma_list_check_dma_owner(ch, owner)))
+            return false;
+        m >>= 1;
+        ch++;
+    }
+
+    return true;
 }
 
-dmaOwner_t *__near _dmaGetOwner(uint8_t ch)
+void __near _dma_list_hook_dma(uint8_t ch, HWOWNER *owner)
 {
-    return _dmaList[ch].owner;
+    _dma_list[ch].owner = owner;
+    _hook(ch);
 }
 
-bool __near _dmaIsAvailable(uint8_t ch)
+void __near _dma_list_release_dma(uint8_t ch)
 {
-    return (_dmaGetOwner(ch) != (void *)0);
+    _release(ch);
+    _dma_list[ch].owner = NULL;
 }
 
-void __near _dmaClearOwner(uint8_t ch)
+/* Private I/O methods */
+
+void __near _dmaio_mask(uint8_t ch)
 {
-    _dmaSetOwner(ch, (void *)0);
+    outp(_dma_IO[ch].mask, (ch & MASK_CHAN) | MASK_MASK);
 }
 
-void __near _dmaInit(uint8_t ch)
+void __near _dmaio_mask_channels(DMAMASK mask)
 {
-    _dmaClearOwner(ch);
+    if (mask & 0x0f)
+        outp(DMAIO_MASKMULTI_0, mask & 0x0f);
+
+    if (mask & 0xf0)
+        outp(DMAIO_MASKMULTI_1, mask >> 4);
 }
 
-void __near _dmaDone(uint8_t ch)
+void __near _dmaio_enable(uint8_t ch)
 {
-    _dmaClearOwner(ch);
+    outp(_dma_IO[ch].mask, ch & MASK_CHAN);
 }
 
-void __near _dmaListInit()
+void __near _dmaio_enable_channels(DMAMASK mask)
 {
-    int ch;
-    for (ch = 0; ch < DMA_CHANNELS; ch++)
-        _dmaInit(ch);
+    if (mask & 0x0f)
+        outp(DMAIO_ENABLEMULTI_0, mask & 0x0f);
+
+    if (mask & 0xf0)
+        outp(DMAIO_ENABLEMULTI_1, mask >> 4);
 }
 
-void __near _dmaListDone()
-{
-    int ch;
-    for (ch = 0; ch < DMA_CHANNELS; ch++)
-        _dmaDone(ch);
-}
-
-/*** Private I/O methods ***/
-
-void __near _dmaioMask(uint8_t ch)
-{
-    outp(_dmaIO[ch].mask, (ch & MASK_CHAN) | MASK_MASK);
-}
-
-void __near _dmaioMaskChannels(dmaMask_t mask)
-{
-    if (mask & 0x0f) outp(DMAIO_MASKMULTI_0, mask & 0x0f);
-    if (mask & 0xf0) outp(DMAIO_MASKMULTI_1, mask >> 4);
-}
-
-void __near _dmaioEnable(uint8_t ch)
-{
-    outp(_dmaIO[ch].mask, ch & MASK_CHAN);
-}
-
-void __near _dmaioEnableChannels(dmaMask_t mask)
-{
-    if (mask & 0x0f) outp(DMAIO_ENABLEMULTI_0, mask & 0x0f);
-    if (mask & 0xf0) outp(DMAIO_ENABLEMULTI_1, mask >> 4);
-}
-
-void __near _dmaioSetup(uint8_t ch, dmaMode_t mode, uint32_t linear, uint16_t count)
+void __near _dmaio_setup(uint8_t ch, DMAMODE mode, uint32_t linear, uint16_t count)
 {
     uint16_t addr;
     uint8_t page;
 
     /* clear flip-flop */
-    outp(_dmaIO[ch].clear, 0);
+    outp(_dma_IO[ch].clear, 0);
 
     /* set mode */
-    outp(_dmaIO[ch].mode, (mode & (~DMA_MODE_CHAN_MASK) | (ch & DMA_MODE_CHAN_MASK)));
+    outp(_dma_IO[ch].mode, (mode & (~DMA_MODE_CHAN_MASK) | (ch & DMA_MODE_CHAN_MASK)));
 
     if (ch < 4)
     {
@@ -169,118 +171,203 @@ void __near _dmaioSetup(uint8_t ch, dmaMode_t mode, uint32_t linear, uint16_t co
     count--;
 
     /* set memory address, page, count */
-    outp(_dmaIO[ch].addr, addr & 0xff);
-    outp(_dmaIO[ch].addr, (addr >> 8) & 0xff);
-    outp(_dmaIO[ch].page, page);
-    outp(_dmaIO[ch].count, count & 0xff);
-    outp(_dmaIO[ch].count, (count >> 8) & 0xff);
+    outp(_dma_IO[ch].addr, addr & 0xff);
+    outp(_dma_IO[ch].addr, (addr >> 8) & 0xff);
+    outp(_dma_IO[ch].page, page);
+    outp(_dma_IO[ch].count, count & 0xff);
+    outp(_dma_IO[ch].count, (count >> 8) & 0xff);
 }
 
-uint16_t __near _dmaioGetCounter(uint8_t ch)
+uint16_t __near _dmaio_get_counter(uint8_t ch)
 {
     uint8_t lo, hi;
 
     /* clear flip-flop */
-    outp(_dmaIO[ch].clear, 0);
+    outp(_dma_IO[ch].clear, 0);
 
-    lo = inp(_dmaIO[ch].count);
-    hi = inp(_dmaIO[ch].count);
+    lo = inp(_dma_IO[ch].count);
+    hi = inp(_dma_IO[ch].count);
     /* bytes|words left to send = result + 1 */
 
     return lo + (hi << 8);
 }
 
-/*** Public I/O methods ***/
+/*** Public methods ***/
 
-void PUBLIC_CODE dmaMaskSingleChannel(uint8_t ch)
-{
-    if (ch < DMA_CHANNELS) _dmaioMask(ch);
-}
-
-void PUBLIC_CODE dmaMaskChannels(dmaMask_t mask)
-{
-    _dmaioMaskChannels(mask);
-}
-
-void PUBLIC_CODE dmaEnableSingleChannel(uint8_t ch)
-{
-    if (ch < DMA_CHANNELS) _dmaioEnable(ch);
-}
-
-void PUBLIC_CODE dmaEnableChannels(dmaMask_t mask)
-{
-    _dmaioEnableChannels(mask);
-}
-
-uint32_t PUBLIC_CODE dmaGetLinearAddress(void *p)
+uint32_t dma_get_linear_address(void *p)
 {
     return ((uint32_t)(FP_SEG(p)) << 4) + FP_OFF(p);
 }
 
-void PUBLIC_CODE dmaSetupSingleChannel(uint8_t ch, dmaMode_t mode, uint32_t l, uint16_t count)
+DMAMASK dma_get_hooked_channels(void)
 {
+    return _dma_mask;
+}
+
+HWOWNERID dma_get_owner(uint8_t ch)
+{
+    HWOWNER *owner;
+
     if (ch < DMA_CHANNELS)
-    {
-        _dmaioMask(ch);
-        _dmaioSetup(ch, mode, l, count);
-        _dmaioEnable(ch);
-    };
+        if (_is_hooked(ch))
+        {
+            owner = _dma_list[ch].owner;
+            if (owner)
+                return hwowner_get_id(owner);
+        }
+
+    return 0;
 }
 
-uint16_t PUBLIC_CODE dmaGetCounter(uint8_t ch)
+bool hwowner_hook_dma(HWOWNER *self, uint8_t ch)
 {
-    return (ch < DMA_CHANNELS ? _dmaioGetCounter(ch) : 0);
+    if (self && (ch < DMA_CHANNELS))
+        if (!_is_hooked(ch))
+        {
+            _dma_list_hook_dma(ch, self);
+            return true;
+        }
+
+    return false;
 }
 
-/*** Public methods for DMA list ***/
-
-bool PUBLIC_CODE dmaIsAvailableSingleChannel(uint8_t ch)
+bool hwowner_hook_dma_channels(HWOWNER *self, DMAMASK mask)
 {
-    return (ch < DMA_CHANNELS ? _dmaIsAvailable(ch) : false);
+    DMAMASK m;
+    uint8_t ch;
+
+    if (self && mask)
+        if (!_are_hooked(mask))
+        {
+            m = mask;
+            ch = 0;
+            while (m)
+            {
+                if (m & 1)
+                    _dma_list_hook_dma(ch, self);
+                m >>= 1;
+                ch++;
+            }
+
+            return true;
+        }
+
+    return false;
 }
 
-dmaMask_t PUBLIC_CODE dmaGetAvailableChannels(void)
+bool hwowner_mask_dma(HWOWNER *self, uint8_t ch)
 {
-    dmaMask_t mask;
-    int ch;
-    mask = 0;
-    for (ch = 0; ch < DMA_CHANNELS; ch++)
-        if (_dmaIsAvailable(ch))
-            mask |= (1 << ch);
-    return mask;
+    if (self && (ch < DMA_CHANNELS))
+        if (_is_hooked(ch))
+            if (_dma_list_check_dma_owner(ch, self))
+            {
+                _dmaio_mask(ch);
+                return true;
+            }
+
+    return false;
 }
 
-dmaOwner_t *PUBLIC_CODE dmaGetSingleChannelOwner(uint8_t ch)
+bool hwowner_mask_dma_channels(HWOWNER *self, DMAMASK mask)
 {
-    return (ch < DMA_CHANNELS ? _dmaGetOwner(ch) : (void *)0);
+    if (self && mask)
+        if (_are_hooked(mask))
+            if (_dma_list_check_dma_channels_owner(mask, self))
+            {
+                _dmaio_mask_channels(_dma_mask & mask);
+                return true;
+            }
+
+    return false;
 }
 
-void PUBLIC_CODE dmaHookSingleChannel(uint8_t ch, dmaOwner_t *owner)
+bool hwowner_enable_dma(HWOWNER *self, uint8_t ch)
 {
-    if ((ch < DMA_CHANNELS) && _dmaIsAvailable(ch))
-        _dmaSetOwner(ch, owner);
+    if (self && (ch < DMA_CHANNELS))
+        if (_is_hooked(ch))
+            if (_dma_list_check_dma_owner(ch, self))
+            {
+                _dmaio_enable(ch);
+                return true;
+            }
+
+    return false;
 }
 
-void PUBLIC_CODE dmaHookChannels(dmaMask_t mask, dmaOwner_t *owner)
+bool hwowner_enable_dma_channels(HWOWNER *self, DMAMASK mask)
 {
-    int ch;
-    for (ch = 0; ch < DMA_CHANNELS; ch++)
-        if ((mask & (1 << ch)) && _dmaIsAvailable(ch))
-            dmaHookSingleChannel(ch, owner);
+    if (self && mask)
+        if (_are_hooked(mask))
+            if (_dma_list_check_dma_channels_owner(mask, self))
+            {
+                _dmaio_enable_channels(mask);
+                return true;
+            }
+
+    return false;
 }
 
-void PUBLIC_CODE dmaReleaseSingleChannel(uint8_t ch)
+bool hwowner_setup_dma_transfer(HWOWNER *self, uint8_t ch, DMAMODE mode, uint32_t l, uint16_t count)
 {
-    if ((ch < DMA_CHANNELS) && (!_dmaIsAvailable(ch)))
-        _dmaClearOwner(ch);
+    if (self && (ch < DMA_CHANNELS))
+        if (_is_hooked(ch))
+            if (_dma_list_check_dma_owner(ch, self))
+            {
+                _dmaio_mask(ch);
+                _dmaio_setup(ch, mode, l, count);
+                _dmaio_enable(ch);
+                return true;
+            }
+
+    return false;
 }
 
-void PUBLIC_CODE dmaReleaseChannels(dmaMask_t mask)
+uint16_t hwowner_get_dma_counter(HWOWNER *self, uint8_t ch)
 {
-    int ch;
-    for (ch = 0; ch < DMA_CHANNELS; ch++)
-        if (mask & (1 << ch))
-            dmaReleaseSingleChannel(ch);
+    if (self && (ch < DMA_CHANNELS))
+        if (_is_hooked(ch))
+            if (_dma_list_check_dma_owner(ch, self))
+                return _dmaio_get_counter(ch);
+
+    return 0;
+}
+
+bool hwowner_release_dma(HWOWNER *self, uint8_t ch)
+{
+    if (self && (ch < DMA_CHANNELS))
+        if (_is_hooked(ch))
+            if (_dma_list_check_dma_owner(ch, self))
+            {
+                _dma_list_release_dma(ch);
+                return true;
+            }
+
+    return false;
+}
+
+bool hwowner_release_dma_channels(HWOWNER *self, DMAMASK mask)
+{
+    DMAMASK m;
+    uint8_t ch;
+
+    if (self && mask)
+        if (_are_hooked(mask))
+            if (_dma_list_check_dma_channels_owner(mask, self))
+            {
+                m = mask;
+                ch = 0;
+                while (m)
+                {
+                    if (m & 1)
+                        _dma_list_release_dma(ch);
+                    m >>= 1;
+                    ch++;
+                }
+
+                return true;
+            }
+
+    return false;
 }
 
 /* Buffer */
@@ -317,7 +404,7 @@ bool PUBLIC_CODE dmaBuf_alloc(DMABUF *self, uint32_t size)
 
             self->unaligned = MK_FP(seg, 0);
 
-            bufStart = dmaGetLinearAddress(self->unaligned);
+            bufStart = dma_get_linear_address(self->unaligned);
             bufEnd = bufStart + bufSize - 1;
 
             DEBUG_MSG_("dmaBuf_alloc",
@@ -380,12 +467,22 @@ void PUBLIC_CODE dmaBuf_free(DMABUF *self)
 
 void dmaInit(void)
 {
-    _dmaListInit();
+    uint8_t i;
+
+    for (i = 0; i < DMA_CHANNELS; i++)
+        _dma_list[i].owner = NULL;
+
+    _dma_mask = 0;
 }
 
 void dmaDone(void)
 {
-    _dmaListDone();
+    uint8_t i;
+
+    for (i = 0; i < DMA_CHANNELS; i++)
+        _dma_list[i].owner = NULL;
+
+    _dma_mask = 0;
 }
 
 DEFINE_REGISTRATION(dma, dmaInit, dmaDone)

@@ -16,6 +16,7 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "hw/hwowner.h"
 
 // TODO: remove PUBLIC_CODE macros when done.
 
@@ -25,7 +26,8 @@
 
 /* Transfer mode register */
 
-typedef uint8_t dmaMode_t;
+typedef uint8_t dma_mode_t;
+typedef dma_mode_t DMAMODE;
 
 /* channel select */
 #define DMA_MODE_CHAN_MASK    0x03
@@ -50,40 +52,56 @@ typedef uint8_t dmaMode_t;
 #define DMA_MODE_BLOCK        0x80
 #define DMA_MODE_CASCADE      0xc0
 
-typedef uint8_t dmaMask_t;
+typedef uint8_t dma_mask_t;
+typedef dma_mask_t DMAMASK;
 
-void     PUBLIC_CODE dmaMaskSingleChannel(uint8_t ch);
-void     PUBLIC_CODE dmaMaskChannels(dmaMask_t mask);
-void     PUBLIC_CODE dmaEnableSingleChannel(uint8_t ch);
-void     PUBLIC_CODE dmaEnableChannels(dmaMask_t mask);
-uint32_t PUBLIC_CODE dmaGetLinearAddress(void *p);
-void     PUBLIC_CODE dmaSetupSingleChannel(uint8_t ch, dmaMode_t mode, uint32_t l, uint16_t count);
-uint16_t PUBLIC_CODE dmaGetCounter(uint8_t ch);
+uint32_t dma_get_linear_address(void *p);
 
 /*** Sharing DMA channels ***/
 
-typedef void dmaOwner_t;
+DMAMASK   dma_get_hooked_channels(void);
+HWOWNERID dma_get_owner(uint8_t ch);
 
-bool        PUBLIC_CODE dmaIsAvailableSingleChannel(uint8_t ch);
-dmaMask_t   PUBLIC_CODE dmaGetAvailableChannels(void);
-dmaOwner_t *PUBLIC_CODE dmaGetSingleChannelOwner(uint8_t ch);
-void        PUBLIC_CODE dmaHookSingleChannel(uint8_t ch, dmaOwner_t *owner);
-void        PUBLIC_CODE dmaHookChannels(dmaMask_t mask, dmaOwner_t *owner);
-void        PUBLIC_CODE dmaReleaseSingleChannel(uint8_t ch);
-void        PUBLIC_CODE dmaReleaseChannels(dmaMask_t mask);
+bool     hwowner_hook_dma(HWOWNER *self, uint8_t ch);
+bool     hwowner_hook_dma_channels(HWOWNER *self, DMAMASK mask);
+bool     hwowner_mask_dma(HWOWNER *self, uint8_t ch);
+bool     hwowner_mask_dma_channels(HWOWNER *self, DMAMASK mask);
+bool     hwowner_enable_dma(HWOWNER *self, uint8_t ch);
+bool     hwowner_enable_dma_channels(HWOWNER *self, DMAMASK mask);
+bool     hwowner_setup_dma_transfer(HWOWNER *self, uint8_t ch, DMAMODE mode, uint32_t l, uint16_t count);
+uint16_t hwowner_get_dma_counter(HWOWNER *self, uint8_t ch);
+bool     hwowner_release_dma(HWOWNER *self, uint8_t ch);
+bool     hwowner_release_dma_channels(HWOWNER *self, DMAMASK mask);
 
 /*** Buffer ***/
 
-typedef struct dmaBuffer_t {
+typedef struct dma_buffer_t
+{
     void    *data;
     uint32_t size;
     void    *unaligned;
 };
-typedef struct dmaBuffer_t DMABUF;
+typedef struct dma_buffer_t DMABUF;
 
 void    PUBLIC_CODE dmaBuf_init(DMABUF *self);
 bool    PUBLIC_CODE dmaBuf_alloc(DMABUF *self, uint32_t size);
 void    PUBLIC_CODE dmaBuf_free(DMABUF *self);
+
+#ifdef __WATCOMC__
+#pragma aux dma_get_linear_address "*";
+#pragma aux dma_get_hooked_channels "*";
+#pragma aux dma_get_owner "*";
+#pragma aux hwowner_hook_dma "*";
+#pragma aux hwowner_hook_dma_channels "*";
+#pragma aux hwowner_mask_dma "*";
+#pragma aux hwowner_mask_dma_channels "*";
+#pragma aux hwowner_enable_dma "*";
+#pragma aux hwowner_enable_dma_channels "*";
+#pragma aux hwowner_setup_dma_transfer "*";
+#pragma aux hwowner_get_dma_counter "*";
+#pragma aux hwowner_release_dma "*";
+#pragma aux hwowner_release_dma_channels "*";
+#endif
 
 /*** Initialization ***/
 

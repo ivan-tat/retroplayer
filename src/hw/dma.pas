@@ -12,49 +12,21 @@ interface
 
 (*$I defines.pas*)
 
-type
-    TDMAMode = byte;
+procedure dma_get_linear_address;
 
-const
-    DMA_MODE_CHAN_MASK    = $03;
-    DMA_MODE_TRAN_MASK    = $0c;
-    DMA_MODE_TRAN_VERIFY  = $00;
-    DMA_MODE_TRAN_WRITE   = $04;
-    DMA_MODE_TRAN_READ    = $08;
-    DMA_MODE_TRAN_ILLEGAL = $0c;
-    DMA_MODE_INIT_MASK    = $10;
-    DMA_MODE_INIT_SINGLE  = $00;
-    DMA_MODE_INIT_AUTO    = $10;
-    DMA_MODE_ADDR_MASK    = $20;
-    DMA_MODE_ADDR_INCR    = $00;
-    DMA_MODE_ADDR_DECR    = $20;
-    DMA_MODE_MASK         = $c0;
-    DMA_MODE_DEMAND       = $00;
-    DMA_MODE_SINGLE       = $40;
-    DMA_MODE_BLOCK        = $80;
-    DMA_MODE_CASCADE      = $c0;
+procedure dma_get_hooked_channels;
+procedure dma_get_owner;
 
-type
-    TDMAMask = byte;
-
-type
-    PDMAOwner = pointer;
-
-procedure dmaMaskSingleChannel(ch: byte);
-procedure dmaMaskChannels(mask: TDMAMask);
-procedure dmaEnableSingleChannel(ch: byte);
-procedure dmaEnableChannels(mask: TDMAMask);
-function  dmaGetLinearAddress(p: pointer): longint;
-procedure dmaSetupSingleChannel(ch: byte; mode: TDMAMode; l: longint; count: word);
-function  dmaGetCounter(ch: byte): word;
-
-function  dmaIsAvailableSingleChannel(ch: byte): boolean;
-function  dmaGetAvailableChannels: TDMAMask;
-function  dmaGetSingleChannelOwner(ch: byte): PDMAOwner;
-procedure dmaHookSingleChannel(ch: byte; owner: PDMAOwner);
-procedure dmaHookChannels(mask: TDMAMask; owner: PDMAOwner);
-procedure dmaReleaseSingleChannel(ch: byte);
-procedure dmaReleaseChannels(mask: TDMAMask);
+procedure hwowner_hook_dma;
+procedure hwowner_hook_dma_channels;
+procedure hwowner_mask_dma;
+procedure hwowner_mask_dma_channels;
+procedure hwowner_enable_dma;
+procedure hwowner_enable_dma_channels;
+procedure hwowner_setup_dma_transfer;
+procedure hwowner_get_dma_counter;
+procedure hwowner_release_dma;
+procedure hwowner_release_dma_channels;
 
 type
     TDMABUF = packed record
@@ -64,9 +36,9 @@ type
     end;
     PDMABUF = ^TDMABUF;
 
-procedure dmaBuf_init(self: PDMABUF);
-function  dmaBuf_alloc(self: PDMABUF; size: longint): boolean;
-procedure dmaBuf_free(self: PDMABUF);
+procedure dmaBuf_init;
+procedure dmaBuf_alloc;
+procedure dmaBuf_free;
 
 implementation
 
@@ -74,29 +46,30 @@ uses
     dos_,
     stdio,
     string_,
-    debug;
+    debug,
+    hwowner;
 
 (*$l dma.obj*)
 
-procedure dmaMaskSingleChannel(ch: byte); external;
-procedure dmaMaskChannels(mask: TDMAMask); external;
-procedure dmaEnableSingleChannel(ch: byte); external;
-procedure dmaEnableChannels(mask: TDMAMask); external;
-function  dmaGetLinearAddress(p: pointer): longint; external;
-procedure dmaSetupSingleChannel(ch: byte; mode: TDMAMode; l: longint; count: word); external;
-function  dmaGetCounter(ch: byte): word; external;
+procedure dma_get_linear_address; external;
 
-function  dmaIsAvailableSingleChannel(ch: byte): boolean; external;
-function  dmaGetAvailableChannels: TDMAMask; external;
-function  dmaGetSingleChannelOwner(ch: byte): PDMAOwner; external;
-procedure dmaHookSingleChannel(ch: byte; owner: PDMAOwner); external;
-procedure dmaHookChannels(mask: TDMAMask; owner: PDMAOwner); external;
-procedure dmaReleaseSingleChannel(ch: byte); external;
-procedure dmaReleaseChannels(mask: TDMAMask); external;
+procedure dma_get_hooked_channels; external;
+procedure dma_get_owner; external;
 
-procedure dmaBuf_init(self: PDMABUF); external;
-function  dmaBuf_alloc(self: PDMABUF; size: longint): boolean; external;
-procedure dmaBuf_free(self: PDMABUF); external;
+procedure hwowner_hook_dma; external;
+procedure hwowner_hook_dma_channels; external;
+procedure hwowner_mask_dma; external;
+procedure hwowner_mask_dma_channels; external;
+procedure hwowner_enable_dma; external;
+procedure hwowner_enable_dma_channels; external;
+procedure hwowner_setup_dma_transfer; external;
+procedure hwowner_get_dma_counter; external;
+procedure hwowner_release_dma; external;
+procedure hwowner_release_dma_channels; external;
+
+procedure dmaBuf_init; external;
+procedure dmaBuf_alloc; external;
+procedure dmaBuf_free; external;
 
 procedure register_dma; far; external;
 

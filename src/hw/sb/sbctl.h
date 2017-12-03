@@ -17,8 +17,6 @@
 
 #include "pascal.h"
 
-// TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
-
 typedef void SBDEV;
 
 typedef uint8_t SBMODEL;
@@ -38,30 +36,55 @@ typedef uint8_t SBCFGFLAGS;
 #define SBCFGFL_DMA16   (1 << 4)
 #define SBCFGFL_BASE_MASK (SBCFGFL_TYPE | SBCFGFL_BASE | SBCFGFL_IRQ | SBCFGFL_DMA8)
 
-SBDEV   *PUBLIC_CODE sb_new(void);
-void     PUBLIC_CODE sb_init(SBDEV *self);
-void     PUBLIC_CODE sb_conf_manual(SBDEV *self, SBCFGFLAGS flags, SBMODEL model, uint16_t base, uint8_t irq, uint8_t dma8, uint8_t dma16);
-bool     PUBLIC_CODE sb_conf_detect(SBDEV *self);
-bool     PUBLIC_CODE sb_conf_env(SBDEV *self);
-bool     PUBLIC_CODE sb_conf_input(SBDEV *self);
-void     PUBLIC_CODE sb_conf_dump(SBDEV *self);
-char    *PUBLIC_CODE sb_get_name(SBDEV *self);
-void     PUBLIC_CODE sb_hook_IRQ(SBDEV *self, void *p);
-void     PUBLIC_CODE sb_unhook_IRQ(SBDEV *self);
-void     PUBLIC_CODE sb_set_volume(SBDEV *self, uint8_t value);
-void     PUBLIC_CODE sb_set_transfer_buffer(SBDEV *self, void *buffer, uint16_t frame_size, uint16_t frames_count, bool autoinit);
-void     PUBLIC_CODE sb_adjust_transfer_mode(SBDEV *self, uint16_t *m_rate, uint8_t *m_channels, uint8_t *m_bits, bool *f_sign);
-void     PUBLIC_CODE sb_set_transfer_mode(SBDEV *self, uint16_t m_rate, uint8_t m_channels, uint8_t m_bits, bool f_sign);
-uint8_t  PUBLIC_CODE sb_mode_get_bits(SBDEV *self);
-bool     PUBLIC_CODE sb_mode_is_signed(SBDEV *self);
-uint8_t  PUBLIC_CODE sb_mode_get_channels(SBDEV *self);
-uint16_t PUBLIC_CODE sb_mode_get_rate(SBDEV *self);
-bool     PUBLIC_CODE sb_transfer_start(SBDEV *self);
-uint16_t PUBLIC_CODE sb_get_DMA_counter(SBDEV *self);
-void     PUBLIC_CODE sb_transfer_pause(SBDEV *self);
-void     PUBLIC_CODE sb_transfer_continue(SBDEV *self);
-void     PUBLIC_CODE sb_transfer_stop(SBDEV *self);
-void     PUBLIC_CODE sb_delete(SBDEV **self);
+SBDEV   *sb_new(void);
+void     sb_init(SBDEV *self);
+void     sb_conf_manual(SBDEV *self, SBCFGFLAGS flags, SBMODEL model, uint16_t base, uint8_t irq, uint8_t dma8, uint8_t dma16);
+bool     sb_conf_detect(SBDEV *self);
+bool     sb_conf_env(SBDEV *self);
+bool     sb_conf_input(SBDEV *self);
+void     sb_conf_dump(SBDEV *self);
+char    *sb_get_name(SBDEV *self);
+void     sb_set_volume(SBDEV *self, uint8_t value);
+bool     sb_adjust_transfer_mode(SBDEV *self, uint16_t *m_rate, uint8_t *m_channels, uint8_t *m_bits, bool *f_sign);
+bool     sb_set_transfer_mode(SBDEV *self, uint16_t m_rate, uint8_t m_channels, uint8_t m_bits, bool f_sign);
+bool     sb_set_transfer_buffer(SBDEV *self, void *buffer, uint16_t frame_size, uint16_t frames_count, bool autoinit, void *callback);
+uint8_t  sb_mode_get_bits(SBDEV *self);
+bool     sb_mode_is_signed(SBDEV *self);
+uint8_t  sb_mode_get_channels(SBDEV *self);
+uint16_t sb_mode_get_rate(SBDEV *self);
+bool     sb_transfer_start(SBDEV *self);
+uint32_t sb_get_buffer_pos(SBDEV *self);
+bool     sb_transfer_pause(SBDEV *self);
+bool     sb_transfer_continue(SBDEV *self);
+bool     sb_transfer_stop(SBDEV *self);
+void     sb_free(SBDEV *self);
+void     sb_delete(SBDEV **self);
+
+#ifdef __WATCOMC__
+#pragma aux sb_new "*";
+#pragma aux sb_init "*";
+#pragma aux sb_conf_manual "*";
+#pragma aux sb_conf_detect "*";
+#pragma aux sb_conf_env "*";
+#pragma aux sb_conf_input "*";
+#pragma aux sb_conf_dump "*";
+#pragma aux sb_get_name "*";
+#pragma aux sb_set_volume "*";
+#pragma aux sb_set_transfer_buffer "*";
+#pragma aux sb_adjust_transfer_mode "*";
+#pragma aux sb_set_transfer_mode "*";
+#pragma aux sb_mode_get_bits "*";
+#pragma aux sb_mode_is_signed "*";
+#pragma aux sb_mode_get_channels "*";
+#pragma aux sb_mode_get_rate "*";
+#pragma aux sb_transfer_start "*";
+#pragma aux sb_get_buffer_pos "*";
+#pragma aux sb_transfer_pause "*";
+#pragma aux sb_transfer_continue "*";
+#pragma aux sb_transfer_stop "*";
+#pragma aux sb_free "*";
+#pragma aux sb_delete "*";
+#endif
 
 /* Initialization */
 

@@ -112,7 +112,7 @@ static EMSNAME _EM_map_name = "saveMAP";
 
 /* IRQ routines */
 
-void __far __pascal ISR_play(void)
+void __far ISR_play(void)
 {
     bool err;
 
@@ -505,6 +505,31 @@ void __near _player_reset_channels(void)
     }
 }
 
+void __near _player_set_initial_state(void)
+{
+    set_speed(initState_speed);
+    set_tempo(initState_tempo);
+    _player_reset_channels();
+}
+
+void player_set_pos(uint8_t start_order, uint8_t start_row, bool keep)
+{
+    // Module
+    playState_tick = 1;         // last tick (go to next row)
+    playState_row = start_row;  // next row to read from
+    playState_order = start_order;          // next order to read from
+    playState_pattern = Order[start_order]; // next pattern to read from
+
+    if (!keep)
+    {
+        // reset pattern effects:
+        playState_patDelayCount = 0;
+        playState_patLoopActive = false;
+        playState_patLoopCount = 0;
+        playState_patLoopStartRow = 0;
+    }
+}
+
 bool PUBLIC_CODE player_play_start(void)
 {
     SNDDMABUF *outbuf;
@@ -540,19 +565,23 @@ bool PUBLIC_CODE player_play_start(void)
         return false;
     }
 
-    sb_hook_IRQ(player_device, &ISR_play);
+    // 1. Setup output mode
 
     sb_set_transfer_mode(player_device, player_mode_rate, player_mode_channels, player_mode_bits, player_mode_signed);
-    player_mode_rate = sb_mode_get_rate(player_device);
+    player_mode_rate     = sb_mode_get_rate(player_device);
     player_mode_channels = sb_mode_get_channels(player_device);
-    player_mode_bits = sb_mode_get_bits(player_device);
-    player_mode_signed = sb_mode_is_signed(player_device);
+    player_mode_bits     = sb_mode_get_bits(player_device);
+    player_mode_signed   = sb_mode_is_signed(player_device);
+
+    // 2. Setup mixer mode
 
     if (!_player_setup_mixer())
     {
         DEBUG_FAIL("player_play_start", "Failed to setup mixer.");
         return false;
     }
+
+    // 3. Setup output buffer
 
     outbuf = &sndDMABuf;
 
@@ -562,42 +591,35 @@ bool PUBLIC_CODE player_play_start(void)
         return false;
     }
 
-    // now after loading we know if signed data or not
-    calcVolumeTable(modOption_SignedData);
-
-    calcPostTable(playState_mVolume);
-
-    _player_setup_patterns_order();
-
-    playState_tick = 1; // last tick (go to next row)
-    playState_row = 0;  // next row to read from
-    playState_order = initState_startOrder;     // next order to read from
-    playState_pattern = Order[playState_order]; // next pattern to read from
-
-    // reset pattern effects:
-    playState_patDelayCount = 0;
-    playState_patLoopActive = false;
-    playState_patLoopStartRow = 0;
-
-    set_speed(initState_speed);
-    set_tempo(initState_tempo);
-
-    playState_songEnded = false;
-
-    mixTickSamplesPerChannelLeft = 0;   // emmidiately next tick
-
-    _player_reset_channels();
-
     count = outbuf->frameSize;
     if (player_mode_lq)
         count *= 2;
 
+    sb_set_transfer_buffer(player_device, outbuf->buf->data, count, outbuf->framesCount, true, &ISR_play);
+
+    // 4. Setup mixer tables
+
+    // now after loading we know if signed data or not
+    calcVolumeTable(modOption_SignedData);
+    calcPostTable(playState_mVolume);
+
+    // 5. Setup playing state
+
+    _player_setup_patterns_order();
+    _player_set_initial_state();
+    player_set_pos(initState_startOrder, 0, false);
+
+    mixTickSamplesPerChannelLeft = 0;   // emmidiately next tick
+
+    playState_songEnded = false;    // resume playing
+
+    // 6. Prefill output buffer
+
     outbuf->frameActive = outbuf->framesCount - 1;
     outbuf->frameLast = outbuf->framesCount;
-
     fill_DMAbuffer(mixBuf.buf, outbuf);
 
-    sb_set_transfer_buffer(player_device, outbuf->buf->data, count, outbuf->framesCount, true);
+    // 7. Start sound
 
     if (!sb_transfer_start(player_device))
     {
@@ -628,9 +650,9 @@ void PUBLIC_CODE player_play_stop(void)
         sb_transfer_stop(player_device);
 }
 
-uint16_t PUBLIC_CODE player_get_DMA_counter(void)
+uint16_t PUBLIC_CODE player_get_buffer_pos(void)
 {
-    return sb_get_DMA_counter(player_device);
+    return sb_get_buffer_pos(player_device);
 }
 
 uint8_t PUBLIC_CODE player_get_speed(void)
@@ -675,8 +697,7 @@ void PUBLIC_CODE player_free_device(void)
 
     if (player_device)
     {
-        sb_transfer_stop(player_device);
-        sb_unhook_IRQ(player_device);
+        sb_free(player_device);
         sb_delete(&player_device);
     }
 

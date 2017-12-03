@@ -39,6 +39,6 @@ uint8_t  PUBLIC_CODE get_sample_format_channels(HWSMPFMT *p);
 uint16_t PUBLIC_CODE get_sample_format_width(HWSMPFMT *p);
 void     PUBLIC_CODE clear_sample_format(HWSMPFMT *p);
 
-typedef void PUBLIC_CODE SoundHWISRCallback_t(void);
+typedef void __far SoundHWISRCallback_t(void);
 
 #endif  /* SNDCTL_T_H */

@@ -23,8 +23,7 @@ implementation
 uses
     pascal,
     i86,
-    dos_,
-    debug;
+    dos_;
 
 (*$l common.obj*)
 

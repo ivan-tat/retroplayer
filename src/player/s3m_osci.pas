@@ -154,10 +154,10 @@ begin
             chn := @channel[pos];
             bar(320*170+pos*15+10,10,mixchn_get_sample_volume(chn)*ord(mixchn_is_playing(chn)));
           end;
-          yl:=h^[player_get_DMA_counter] shr 1;
+          yl:=h^[player_get_buffer_pos] shr 1;
           for pos:=1 to 319 do
             begin
-              i:=player_get_DMA_counter; { current position in DMA buffer }
+              i:=player_get_buffer_pos; { current position in DMA buffer }
               linie(pos-1,scr[pos-1],pos,scr[pos],1);
               scr[pos-1]:=yl;yl:=h^[i] shr 1;
               linie(pos-1,scr[pos-1],pos,yl,14);
@@ -175,11 +175,11 @@ begin
             chn := @channel[pos];
             bar(320*170+pos*15+10,10,mixchn_get_sample_volume(chn)*ord(mixchn_is_playing(chn)));
           end;
-          i:=player_get_DMA_counter and $fffe;
+          i:=player_get_buffer_pos and $fffe;
           yl:=h^[i] shr 2;yr:=h^[i+1] shr 2;
           for pos:=1 to 319 do
             begin
-              i:=player_get_DMA_counter and $fffe; { current position in DMA buffer }
+              i:=player_get_buffer_pos and $fffe; { current position in DMA buffer }
               if (i > sndDMABuf.frameSize) then b:=7 else b:=4;
               { left channel : }
               linie(pos-1,36+scr[pos-1],pos,36+scr[pos],1);

@@ -83,16 +83,9 @@ static const uint8_t PIC2_VEC = 0x70;
 
 extern void *__far __cdecl isr_get(uint8_t ch);
 
-void pic_enable(IRQMASK mask)
-{
-    if (mask & 0xff)
-        outp(PIC1_IO_OCW1, inp(PIC1_IO_OCW1) | (uint8_t)(mask & 0xff));
+/* Private PIC I/O */
 
-    if (mask & 0xff00)
-        outp(PIC2_IO_OCW1, inp(PIC2_IO_OCW1) | (uint8_t)(mask >> 8));
-}
-
-void pic_disable(IRQMASK mask)
+void __near _picio_enable_irq_channels(IRQMASK mask)
 {
     if (mask & 0xff)
         outp(PIC1_IO_OCW1, inp(PIC1_IO_OCW1) & (uint8_t)(~(mask & 0xff)));
@@ -101,12 +94,23 @@ void pic_disable(IRQMASK mask)
         outp(PIC2_IO_OCW1, inp(PIC2_IO_OCW1) & (uint8_t)(~(mask >> 8)));
 }
 
-void pic_eoi(uint8_t ch)
+void __near _picio_disable_irq_channels(IRQMASK mask)
 {
-    if (ch >= 8)
-        outp(PIC2_IO_OCW2, OCW2_COMMAND_OCW2 | OCW2_CMD_NONSPEC_EOI);
+    if (mask & 0xff)
+        outp(PIC1_IO_OCW1, inp(PIC1_IO_OCW1) | (uint8_t)(mask & 0xff));
 
-    outp(PIC1_IO_OCW2, OCW2_COMMAND_OCW2 | OCW2_CMD_NONSPEC_EOI);
+    if (mask & 0xff00)
+        outp(PIC2_IO_OCW1, inp(PIC2_IO_OCW1) | (uint8_t)(mask >> 8));
+}
+
+void __near _picio_eoi1(uint8_t mode)
+{
+    outp(PIC1_IO_OCW2, OCW2_COMMAND_OCW2 | mode);
+}
+
+void __near _picio_eoi2(uint8_t mode)
+{
+    outp(PIC2_IO_OCW2, OCW2_COMMAND_OCW2 | mode);
 }
 
 /* Sharing IRQ channels */
@@ -124,9 +128,30 @@ static struct
 
 static IRQMASK _isr_mask = 0;
 
-#define _is_hooked(ch)  (_isr_mask & (1 << (ch)))
-#define _hook(ch)       _isr_mask |= (1 << (ch))
-#define _release(ch)    _isr_mask &= ~(1 << (ch))
+#define _is_hooked(ch)      (_isr_mask & (1 << (ch)))
+#define _are_hooked(mask)   ((_isr_mask & mask) == mask)
+#define _hook(ch)           _isr_mask |= (1 << (ch))
+#define _release(ch)        _isr_mask &= ~(1 << (ch))
+
+#define _isr_list_check_irq_owner(ch, _owner) (_isr_list[ch].owner == _owner)
+
+bool __near _isr_list_check_irq_channels_owner(IRQMASK mask, HWOWNER *owner)
+{
+    IRQMASK m;
+    uint8_t i;
+
+    m = _isr_mask & mask;
+    i = 0;
+    while (m)
+    {
+        if ((m & 1) && !(_isr_list_check_irq_owner(i, owner)))
+            return false;
+        m >>= 1;
+        i++;
+    }
+
+    return true;
+}
 
 void __near _isr_list_item_clear(uint8_t ch)
 {
@@ -178,9 +203,9 @@ void __far __cdecl _isr_callback(uint8_t ch)
             return;
         }
     }
-
-    pic_eoi(ch);
 }
+
+/* Public methods */
 
 IRQMASK pic_get_hooked_irq_channels(void)
 {
@@ -220,19 +245,71 @@ void *pic_get_irq_data(uint8_t ch)
     return NULL;
 }
 
+/* HWOWNER methods */
+
+bool hwowner_enable_irq(HWOWNER *self, uint8_t ch)
+{
+    return hwowner_enable_irq_channels(self, 1 << ch);
+}
+
+bool hwowner_enable_irq_channels(HWOWNER *self, IRQMASK mask)
+{
+    if (self && mask)
+        if (_are_hooked(mask))
+            if (_isr_list_check_irq_channels_owner(mask, self))
+            {
+                _picio_enable_irq_channels(mask);
+                return true;
+            }
+
+    return false;
+}
+
+bool hwowner_disable_irq(HWOWNER *self, uint8_t ch)
+{
+    return hwowner_disable_irq_channels(self, 1 << ch);
+}
+
+bool hwowner_disable_irq_channels(HWOWNER *self, IRQMASK mask)
+{
+    if (self && mask)
+        if (_are_hooked(mask))
+            if (_isr_list_check_irq_channels_owner(mask, self))
+            {
+                _picio_disable_irq_channels(mask);
+                return true;
+            }
+
+    return false;
+}
+
+bool hwowner_eoi(HWOWNER *self, uint8_t ch)
+{
+    if (self && (ch < IRQ_CHANNELS))
+        if (_is_hooked(ch))
+            if (_isr_list_check_irq_owner(ch, self))
+            {
+                if (ch >= 8)
+                    _picio_eoi2(OCW2_CMD_NONSPEC_EOI);
+
+                _picio_eoi1(OCW2_CMD_NONSPEC_EOI);
+                return true;
+            }
+
+    return false;
+}
+
 bool hwowner_hook_irq(HWOWNER *self, uint8_t ch, ISROWNERCALLBACK *handler, void *data)
 {
     if (self && (ch < IRQ_CHANNELS))
     {
         if (_is_hooked(ch))
         {
-            if (_isr_list[ch].owner == self)
+            if (_isr_list_check_irq_owner(ch, self))
             {
                 _isr_list_item_set_handler(ch, handler, data);
                 return true;
             }
-            else
-                return false;
         }
         else
         {
@@ -247,42 +324,32 @@ bool hwowner_hook_irq(HWOWNER *self, uint8_t ch, ISROWNERCALLBACK *handler, void
 bool hwowner_hook_irq_channels(HWOWNER *self, IRQMASK mask, ISROWNERCALLBACK *handler, void *data)
 {
     IRQMASK m;
-    uint8_t ch;
+    uint8_t i;
 
-    if ((!self) || (!mask))
-        return false;
+    if (self && mask)
+        if (!_are_hooked(mask))
+        {
+            m = mask;
+            i = 0;
+            while (m)
+            {
+                if (m & 1)
+                    _isr_list_hook_irq(i, self, handler, data);
+                m >>= 1;
+                i++;
+            }
 
-    /* Check owner */
-    m = _isr_mask & mask;
-    ch = 0;
-    while (m)
-    {
-        if ((m & 1) && (_isr_list[ch].owner != self))
-            return false;
-        m >>= 1;
-        ch++;
-    }
+            return true;
+        }
 
-    /* Hook */
-    m = mask;
-    ch = 0;
-    while (m)
-    {
-        if (m & 1)
-            if (!hwowner_hook_irq_channels(self, ch, handler, data))
-                return false;
-        m >>= 1;
-        ch++;
-    }
-
-    return true;
+    return false;
 }
 
 bool hwowner_set_irq_handler(HWOWNER *self, uint8_t ch, ISROWNERCALLBACK *handler, void *data)
 {
     if (self && (ch < IRQ_CHANNELS))
         if (_is_hooked(ch))
-            if (_isr_list[ch].owner == self)
+            if (_isr_list_check_irq_owner(ch, self))
             {
                 _isr_list_item_set_handler(ch, handler, data);
                 return true;
@@ -294,32 +361,33 @@ bool hwowner_set_irq_handler(HWOWNER *self, uint8_t ch, ISROWNERCALLBACK *handle
 bool hwowner_set_irq_channels_handler(HWOWNER *self, IRQMASK mask, ISROWNERCALLBACK *handler, void *data)
 {
     IRQMASK m;
-    uint8_t ch;
+    uint8_t i;
 
-    /* Check hooked */
-    if ((_isr_mask & mask) != mask)
-        return false;
+    if (self && mask)
+        if (_are_hooked(mask))
+            if (_isr_list_check_irq_channels_owner(mask, self))
+            {
+                m = mask;
+                i = 0;
+                while (m)
+                {
+                    if (m & 1)
+                        _isr_list_item_set_handler(i, handler, data);
+                    m >>= 1;
+                    i++;
+                }
 
-    /* Set handler */
-    m = mask;
-    ch = 0;
-    while (m)
-    {
-        if (m & 1)
-            if (!hwowner_set_irq_handler(self, ch, handler, data))
-                return false;
-        m >>= 1;
-        ch++;
-    }
+                return true;
+            }
 
-    return true;
+    return false;
 }
 
 bool hwowner_clear_irq_handler(HWOWNER *self, uint8_t ch)
 {
     if (self && (ch < IRQ_CHANNELS))
         if (_is_hooked(ch))
-            if (_isr_list[ch].owner == self)
+            if (_isr_list_check_irq_owner(ch, self))
             {
                 _isr_list_item_clear_handler(ch);
                 return true;
@@ -331,32 +399,33 @@ bool hwowner_clear_irq_handler(HWOWNER *self, uint8_t ch)
 bool hwowner_clear_irq_channels_handler(HWOWNER *self, IRQMASK mask)
 {
     IRQMASK m;
-    uint8_t ch;
+    uint8_t i;
 
-    /* Check hooked */
-    if ((!self) || ((_isr_mask & mask) != mask))
-        return false;
+    if (self && mask)
+        if (_are_hooked(mask))
+            if (_isr_list_check_irq_channels_owner(mask, self))
+            {
+                m = mask;
+                i = 0;
+                while (m)
+                {
+                    if (m & 1)
+                        _isr_list_item_clear_handler(i);
+                    m >>= 1;
+                    i++;
+                }
 
-    /* Clear handler */
-    m = mask;
-    ch = 0;
-    while (m)
-    {
-        if (m & 1)
-            if (!hwowner_clear_irq_handler(self, ch))
-                return false;
-        m >>= 1;
-        ch++;
-    }
+                return true;
+            }
 
-    return true;
+    return false;
 }
 
 bool hwowner_release_irq(HWOWNER *self, uint8_t ch)
 {
     if (self && (ch < IRQ_CHANNELS))
         if (_is_hooked(ch))
-            if (_isr_list[ch].owner == self)
+            if (_isr_list_check_irq_owner(ch, self))
             {
                 _isr_list_release_irq(ch);
                 return true;
@@ -368,53 +437,54 @@ bool hwowner_release_irq(HWOWNER *self, uint8_t ch)
 bool hwowner_release_irq_channels(HWOWNER *self, IRQMASK mask)
 {
     IRQMASK m;
-    uint8_t ch;
+    uint8_t i;
 
-    /* Check hooked */
-    if ((!self) || ((_isr_mask & mask) != mask))
-        return false;
+    if (self && mask)
+        if (_are_hooked(mask))
+            if (_isr_list_check_irq_channels_owner(mask, self))
+            {
+                m = mask;
+                i = 0;
+                while (m)
+                {
+                    if (m & 1)
+                        _isr_list_release_irq(i);
+                    m >>= 1;
+                    i++;
+                }
 
-    /* Release */
-    m = mask;
-    ch = 0;
-    while (m)
-    {
-        if (m & 1)
-            if (!hwowner_release_irq(self, ch))
-                return false;
-        m >>= 1;
-        ch++;
-    }
+                return true;
+            }
 
-    return true;
+    return false;
 }
 
 /* Initialization */
 
-void __near isr_init(void)
+void __near pic_init(void)
 {
-    int ch;
+    int i;
 
-    for (ch = 0; ch < IRQ_CHANNELS; ch++)
-        _isr_list_item_clear(ch);
+    for (i = 0; i < IRQ_CHANNELS; i++)
+        _isr_list_item_clear(i);
 
     _isr_mask = 0;
 }
 
-void __near isr_done(void)
+void __near pic_done(void)
 {
     IRQMASK m;
-    int ch;
+    int i;
 
     m = _isr_mask;
-    ch = 0;
+    i = 0;
     while (m)
     {
         if (m & 1)
-            _isr_list_release_irq(ch);
+            _isr_list_release_irq(i);
         m >>= 1;
-        ch++;
+        i++;
     }
 }
 
-DEFINE_REGISTRATION(pic, isr_init, isr_done)
+DEFINE_REGISTRATION(pic, pic_init, pic_done)
