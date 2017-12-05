@@ -21,7 +21,7 @@ var
 
 procedure initVolumeTable;
 function  allocVolumeTable: boolean;
-procedure calcVolumeTable( sign: boolean );
+procedure calcVolumeTable;
 procedure freeVolumeTable;
 
 implementation
@@ -33,7 +33,7 @@ uses
 (*$l voltab.obj*)
 procedure initVolumeTable; external;
 function  allocVolumeTable: boolean; external;
-procedure calcVolumeTable( sign: boolean ); external;
+procedure calcVolumeTable; external;
 procedure freeVolumeTable; external;
 
 end.

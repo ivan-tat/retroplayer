@@ -25,7 +25,7 @@ extern voltab_t *PUBLIC_DATA volumetableptr;
 
 void PUBLIC_CODE initVolumeTable(void);
 bool PUBLIC_CODE allocVolumeTable(void);
-void PUBLIC_CODE calcVolumeTable(bool sign);
+void PUBLIC_CODE calcVolumeTable(void);
 void PUBLIC_CODE freeVolumeTable(void);
 
 #endif  /* VOLTAB_H */

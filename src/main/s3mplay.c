@@ -600,7 +600,7 @@ bool PUBLIC_CODE player_play_start(void)
     // 4. Setup mixer tables
 
     // now after loading we know if signed data or not
-    calcVolumeTable(modOption_SignedData);
+    calcVolumeTable();
     calcPostTable(playState_mVolume);
 
     // 5. Setup playing state

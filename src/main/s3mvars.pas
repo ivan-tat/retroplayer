@@ -39,7 +39,6 @@ var
     modOption_CostumeFlag: boolean;
     modOption_VolZeroOptim: boolean;
     modOption_AmigaLimits: boolean;
-    modOption_SignedData: boolean;
     modOption_Stereo: boolean;
 
 (* play options *)

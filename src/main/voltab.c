@@ -32,30 +32,18 @@ bool PUBLIC_CODE allocVolumeTable(void)
         return false;
 }
 
-void PUBLIC_CODE calcVolumeTable(bool sign)
+void PUBLIC_CODE calcVolumeTable(void)
 {
     uint8_t vol;
     uint16_t sample;
     int16_t *voltab = (int16_t *)volumetableptr;
 
-    if (sign)
-    {
-        for (vol = 0; vol <= 64; vol++)
-            for (sample = 0; sample <= 255; sample++)
-            {
-                *voltab = (int16_t)(vol * (int16_t)((int8_t)(sample))) >> 6;
-                voltab++;
-            };
-    }
-    else
-    {
-        for (vol = 0; vol <= 64; vol++)
-            for (sample = 0; sample <= 255; sample++)
-            {
-                *voltab = (int16_t)(vol * (int16_t)((int8_t)(sample - 128))) >> 6;
-                voltab++;
-            };
-    };
+    for (vol = 0; vol <= 64; vol++)
+        for (sample = 0; sample <= 255; sample++)
+        {
+            *voltab = (int16_t)(vol * (int16_t)((int8_t)sample)) >> 6;
+            voltab++;
+        }
 }
 
 void PUBLIC_CODE freeVolumeTable(void)
@@ -64,5 +52,5 @@ void PUBLIC_CODE freeVolumeTable(void)
     {
         _dos_freemem(FP_SEG(volumetableptr));
         volumetableptr = NULL;
-    };
+    }
 }

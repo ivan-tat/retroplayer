@@ -39,7 +39,6 @@ bool PUBLIC_DATA modOption_SBfilter;
 bool PUBLIC_DATA modOption_CostumeFlag;
 bool PUBLIC_DATA modOption_VolZeroOptim;
 bool PUBLIC_DATA modOption_AmigaLimits;
-bool PUBLIC_DATA modOption_SignedData;
 bool PUBLIC_DATA modOption_Stereo;
 
 /* play options */

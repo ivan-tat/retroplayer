@@ -234,6 +234,7 @@ typedef struct S3M_loader_t
     S3MERR err;
     FILE *f;
     char *buffer;
+    bool signed_data;
     uint16_t inspara[S3M_MAX_INSTRUMENTS];
     uint16_t patpara[S3M_MAX_PATTERNS];
     uint32_t smppara[S3M_MAX_INSTRUMENTS];
@@ -279,6 +280,48 @@ bool __near s3mloader_allocbuf(S3MLOADER *self)
             return true;
 
     return false;
+}
+
+void __near s3mloader_alloc_patterns(S3MLOADER *self)
+{
+    uint16_t patsize;
+    uint16_t patperpage;
+    uint16_t freepages;
+    EMSHDL handle;
+
+    patsize = UsedChannels * 64 * 5;
+    #ifdef DEBUGLOAD
+    DEBUG_INFO_(NULL, "Pattern memory size: %u.", patsize);
+    #endif
+
+    if (UseEMS)
+    {
+        // let's continue with loading:
+        patperpage = 16 * 1024 / patsize;
+        #ifdef DEBUGLOAD
+        DEBUG_INFO_(NULL, "Patterns per EM page: %u.", patperpage);
+        #endif
+        SELF->pat_EM_pages = (muspatl_get_count(mod_Patterns) + patperpage - 1) / patperpage;
+
+        freepages = emsGetFreePagesCount();
+        if (SELF->pat_EM_pages > freepages)
+            SELF->pat_EM_pages = freepages;
+
+        handle = emsAlloc(SELF->pat_EM_pages);
+        if (emsEC != E_EMS_SUCCESS)
+        {
+            DEBUG_ERR("s3mloader_load", "Failed to allocate EM for patterns.");
+            muspatl_set_EM_data(mod_Patterns, false);
+            return;
+        }
+
+        muspatl_set_EM_data(mod_Patterns, true);
+        muspatl_set_own_EM_handle(mod_Patterns, true);
+        muspatl_set_EM_handle(mod_Patterns, handle);
+
+        SELF->pat_EM_page_offset = 0;
+        SELF->pat_EM_page = 0;
+    }
 }
 
 void __near _unpack_pattern(uint8_t *src, uint8_t *dst, uint8_t maxrow, uint8_t maxchn)
@@ -585,6 +628,21 @@ void __near s3mloader_alloc_samples(S3MLOADER *self)
     #endif
 }
 
+void __near convert_sign_8(void *data, uint32_t size)
+{
+    char *p;
+    uint32_t count;
+
+    p = data;
+    count = size;
+    while (count)
+    {
+        *p ^= 0x80;
+        p++;
+        count--;
+    }
+}
+
 bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
 {
     char *data;
@@ -658,6 +716,9 @@ bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
         return false;
     }
 
+    if (!SELF->signed_data)
+        convert_sign_8(data, smpsize);
+
     if (musins_is_looped(ins))
     {
         h = memsize - smpsize;
@@ -702,9 +763,6 @@ bool PUBLIC_CODE s3mloader_load(S3MLOADER *self, const char *name)
     void *p;
     char *par;
     MIXCHN *chn;
-    uint16_t patsize;
-    uint16_t patperpage;
-    uint16_t freepages;
     uint16_t count;
 
     mod_Instruments = musinsl_new();
@@ -776,13 +834,12 @@ bool PUBLIC_CODE s3mloader_load(S3MLOADER *self, const char *name)
     modOption_AmigaLimits  = (header.flags & 0x10) != 0;
     modOption_SBfilter     = (header.flags & 0x20) != 0;
     modOption_CostumeFlag  = (header.flags & 0x80) != 0;
-
-    modOption_SignedData = (header.ffv == 1);
-    playState_gVolume = header.gvolume;
-    playState_mVolume = header.mvolume & 0x7f;
-    modOption_Stereo = (header.mvolume & 0x80 != 0);
-    initState_speed = header.initialspeed;
-    initState_tempo = header.initialtempo;
+    modOption_Stereo       = ((header.mvolume & 0x80) != 0);
+    playState_gVolume   = header.gvolume;
+    playState_mVolume   = header.mvolume & 0x7f;
+    initState_speed     = header.initialspeed;
+    initState_tempo     = header.initialtempo;
+    SELF->signed_data   = (header.ffv == 1);
 
     maxused = 0;
     for (i = 0; i < 32; i++)
@@ -835,38 +892,14 @@ bool PUBLIC_CODE s3mloader_load(S3MLOADER *self, const char *name)
         return false;
     }
 
-    patsize = UsedChannels * 64 * 5;
-    #ifdef DEBUGLOAD
-    DEBUG_INFO_(NULL, "Pattern memory size: %u.", patsize);
-    #endif
-
-    if (UseEMS)
-    {
-        // let's continue with loading:
-        patperpage = 16 * 1024 / patsize;
-        #ifdef DEBUGLOAD
-        DEBUG_INFO_(NULL, "Patterns per EM page: %u.", patperpage);
-        #endif
-        SELF->pat_EM_pages = (muspatl_get_count(mod_Patterns) + patperpage - 1) / patperpage;
-
-        freepages = emsGetFreePagesCount();
-        if (SELF->pat_EM_pages > freepages)
-            SELF->pat_EM_pages = freepages;
-
-        muspatl_set_EM_data(mod_Patterns, true);
-        muspatl_set_own_EM_handle(mod_Patterns, true);
-        muspatl_set_EM_handle(mod_Patterns, emsAlloc(SELF->pat_EM_pages));
-
-        SELF->pat_EM_page_offset = 0;
-        SELF->pat_EM_page = 0;
-    }
-
     if (!s3mloader_allocbuf(self))
     {
         DEBUG_ERR("s3mloader_load", "Failed to allocate DOS memory for buffer.");
         SELF->err = E_S3M_DOS_MEM_ALLOC;
         return false;
     }
+
+    s3mloader_alloc_patterns(self);
 
     count = muspatl_get_count(mod_Patterns);
     for (i = 0; i < count; i++)
