@@ -14,7 +14,7 @@
 /*
 unsigned _cc_dos_para(unsigned size)
 */
-uint16_t PUBLIC_CODE _cc_dos_para(uint16_t size)
+uint16_t PUBLIC_CODE _cc_dos_para(uint32_t size)
 {
     return __cc_dos_para(size);
 }

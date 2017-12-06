@@ -58,7 +58,7 @@ void _cc_dos_setvect(unsigned num, void __far *p);
 /*
 unsigned _cc_dos_para(unsigned size);
 */
-uint16_t PUBLIC_CODE _cc_dos_para(uint16_t size);
+uint16_t PUBLIC_CODE _cc_dos_para(uint32_t size);
 
 #endif  /* !USE_INTRINSICS */
 

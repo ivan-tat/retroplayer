@@ -35,7 +35,7 @@ procedure _cc_dos_allocmem;
 procedure _cc_dos_freemem;
 procedure _cc_dos_setblock;
 *)
-function _dos_para(size: Word): Word;
+function _dos_para(size: LongInt): Word;
 function _dos_allocmem(size: Word; var seg: Word): Word;
 function _dos_freemem(seg: Word): Word;
 function _dos_setblock(size: Word; seg: Word; var max: Word): Word;
@@ -80,7 +80,7 @@ procedure _cc_dos_allocmem; external;
 procedure _cc_dos_freemem; external;
 procedure _cc_dos_setblock; external;
 *)
-function _dos_para(size: Word): Word; external;
+function _dos_para(size: LongInt): Word; external;
 function _dos_allocmem(size: Word; var seg: Word): Word; external;
 function _dos_freemem(seg: Word): Word; external;
 function _dos_setblock(size: Word; seg: Word; var max: Word): Word; external;
