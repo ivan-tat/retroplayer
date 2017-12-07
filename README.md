@@ -59,3 +59,7 @@ Plans for the future:
 * Sound Blaster Programming Information Version 0.90 (1995) by Andre Baresel & Craig Jackson
 
 * TECH Help! 6.0 (1994) by Flambeaux Software
+
+* [The Dark Corner BBS](http://www.dcee.net/) (sound and music file formats description, sound hardware programming, old players and much more)
+
+* [SWAG](http://www.retroarchive.org/swag/) (a free collection of source code and program examples for the PASCAL programming language)
