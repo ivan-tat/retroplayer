@@ -11,11 +11,12 @@ unit filldma;
 interface
 
 uses
+    mixer,
     fillvars;
 
 (*$I defines.pas*)
 
-procedure fill_DMAbuffer(mixbuf: pointer; outbuf: PSNDDMABUF);
+procedure fill_DMAbuffer;
 
 implementation
 
@@ -25,10 +26,9 @@ uses
     sndctl_t,
     posttab,
     s3mvars,
-    mixer,
     mixing;
 
 (*$l filldma.obj*)
-procedure fill_DMAbuffer(mixbuf: pointer; outbuf: PSNDDMABUF); external;
+procedure fill_DMAbuffer; external;
 
 end.

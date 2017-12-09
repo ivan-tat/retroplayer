@@ -27,43 +27,36 @@ type
         wFlags: word;
     end;
 
-procedure _MixSampleMono8(outBuf: pointer; var smpInfo: TPlaySampleInfo;
-    volTab: word; vol: byte; count: word);
-procedure _MixSampleStereo8(outBuf: pointer; var smpInfo: TPlaySampleInfo;
-    volTab: word; vol: byte; count: word);
+procedure _MixSampleMono8;
+procedure _MixSampleStereo8;
 
 const
     ST3Periods: array [0..11] of word = (
         1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
     );
 
-function  _calc_sample_step(wPeriod: word): longint;
+procedure _calc_sample_step;
 
 type
     TMIXBUF = packed record
         buf: Pointer;
         size: Word;
+        channels: Byte;
+        samples_per_channel: Word;
     end;
     PMIXBUF = ^TMIXBUF;
 
 var
     mixBuf: TMIXBUF;
-    mixChannels: byte;
-    mixSampleRate: word;
-    mixBufSamplesPerChannel: word;
-    mixBufSamples: word;
-    mixTickSamplesPerChannel: word;
-    mixTickSamplesPerChannelLeft: word;
 
-procedure mixbuf_init(self: PMIXBUF);
-function  mixbuf_alloc(self: PMIXBUF; size: Word): Boolean;
-procedure mixbuf_free(self: PMIXBUF);
-procedure setMixSampleRate(rate: word);
-procedure setMixChannels(channels: byte);
-procedure setMixBufSamplesPerChannel(count: word);
-procedure setMixMode(channels: byte; rate, count: word);
-function  getMixBufOffFromCount(count: word): word;
-function  getCountFromMixBufOff(bufOff: word): word;
+procedure mixbuf_init;
+procedure mixbuf_alloc;
+procedure mixbuf_set_channels;
+procedure mixbuf_set_samples_per_channel;
+procedure mixbuf_set_mode;
+procedure mixbuf_get_offset_from_count;
+procedure mixbuf_get_count_from_offset;
+procedure mixbuf_free;
 
 implementation
 
@@ -76,23 +69,20 @@ uses
 
 (*$l mixer_.obj*)
 
-procedure _MixSampleMono8(outBuf: pointer; var smpInfo: TPlaySampleInfo;
-    volTab: word; vol: byte; count: word); external;
-procedure _MixSampleStereo8(outBuf: pointer; var smpInfo: TPlaySampleInfo;
-    volTab: word; vol: byte; count: word); external;
+procedure _MixSampleMono8; external;
+procedure _MixSampleStereo8; external;
 
 (*$l mixer.obj*)
 
-function  _calc_sample_step(wPeriod: word): longint; external;
+procedure _calc_sample_step; external;
 
-procedure mixbuf_init(self: PMIXBUF); external;
-function  mixbuf_alloc(self: PMIXBUF; size: Word): Boolean; external;
-procedure mixbuf_free(self: PMIXBUF); external;
-procedure setMixSampleRate(rate: word); external;
-procedure setMixChannels(channels: byte); external;
-procedure setMixBufSamplesPerChannel(count: word); external;
-procedure setMixMode(channels: byte; rate, count: word); external;
-function  getMixBufOffFromCount(count: word): word; external;
-function  getCountFromMixBufOff(bufOff: word): word; external;
+procedure mixbuf_init; external;
+procedure mixbuf_alloc; external;
+procedure mixbuf_set_channels; external;
+procedure mixbuf_set_samples_per_channel; external;
+procedure mixbuf_set_mode; external;
+procedure mixbuf_get_offset_from_count; external;
+procedure mixbuf_get_count_from_offset; external;
+procedure mixbuf_free; external;
 
 end.

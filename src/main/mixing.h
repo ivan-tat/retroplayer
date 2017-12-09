@@ -16,7 +16,12 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "main/mixer.h"
 
-void  PUBLIC_CODE calcTick(void *outBuf, uint16_t len);
+void sound_fill_buffer(MIXBUF *mb, uint16_t len);
+
+#ifdef __WATCOMC__
+#pragma aux sound_fill_buffer "*";
+#endif
 
 #endif  /* MIXING_H */

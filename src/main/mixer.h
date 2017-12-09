@@ -56,41 +56,48 @@ extern uint16_t PUBLIC_DATA ST3Periods[12];
 
 #define getNotePeriod(note) ((ST3Periods[(note) & 0x0f] << 4) >> ((note) >> 4))
 
-extern uint32_t PUBLIC_CODE _calc_sample_step(uint16_t wPeriod);
-
-#ifdef __WATCOMC__
-#pragma aux _calc_sample_step modify [ bx cx ];
-#endif
+uint32_t _calc_sample_step(uint16_t period, uint16_t rate);
 
 /* Mixing buffer for one frame.
    Size depends on: sample rate, channels count, tempo, FPS (almost as DMA frame) */
+
 #pragma pack(push, 1);
 typedef struct mixing_buffer_t
 {
     int16_t *buf;
     uint16_t size;
+    uint8_t channels;
+    uint16_t samples_per_channel;
 };
 #pragma pack(pop);
 typedef struct mixing_buffer_t MIXBUF;
 
-extern MIXBUF   PUBLIC_DATA mixBuf;
-extern uint16_t PUBLIC_DATA mixSampleRate;
-extern uint8_t  PUBLIC_DATA mixChannels;
-extern uint16_t PUBLIC_DATA mixBufSamplesPerChannel;
-extern uint16_t PUBLIC_DATA mixBufSamples;
-extern uint16_t PUBLIC_DATA mixTickSamplesPerChannel;
-    /* Samples per channel per tick - depends on sample rate and tempo */
-extern uint16_t PUBLIC_DATA mixTickSamplesPerChannelLeft;
-    /* Samples per channel left to next tick */
+void     mixbuf_init(MIXBUF *self);
+bool     mixbuf_alloc(MIXBUF *self, uint16_t size);
+void     mixbuf_set_channels(MIXBUF *self, uint8_t value);
+void     mixbuf_set_samples_per_channel(MIXBUF *self, uint16_t value);
+void     mixbuf_set_mode(MIXBUF *self, uint8_t channels, uint16_t samples_per_channel);
+uint16_t mixbuf_get_offset_from_count(MIXBUF *self, uint16_t value);
+uint16_t mixbuf_get_count_from_offset(MIXBUF *self, uint16_t value);
+void     mixbuf_free(MIXBUF *self);
 
-void PUBLIC_CODE mixbuf_init(MIXBUF *self);
-bool PUBLIC_CODE mixbuf_alloc(MIXBUF *self, uint16_t size);
-void PUBLIC_CODE mixbuf_free(MIXBUF *self);
-extern void     PUBLIC_CODE setMixChannels(uint8_t channels);
-extern void     PUBLIC_CODE setMixSampleRate(uint16_t rate);
-extern void     PUBLIC_CODE setMixBufSamplesPerChannel(uint16_t count);
-extern void     PUBLIC_CODE setMixMode(uint8_t channels, uint16_t rate, uint16_t count);
-extern uint16_t PUBLIC_CODE getMixBufOffFromCount(uint16_t count);
-extern uint16_t PUBLIC_CODE getCountFromMixBufOff(uint16_t bufOff);
+/* Variables */
+
+extern MIXBUF mixBuf;
+
+/* Linking */
+
+#ifdef __WATCOMC__
+#pragma aux _calc_sample_step "*";
+#pragma aux mixBuf "*";
+#pragma aux mixbuf_init "*";
+#pragma aux mixbuf_alloc "*";
+#pragma aux mixbuf_set_channels "*";
+#pragma aux mixbuf_set_samples_per_channel "*";
+#pragma aux mixbuf_set_mode "*";
+#pragma aux mixbuf_get_offset_from_count "*";
+#pragma aux mixbuf_get_count_from_offset "*";
+#pragma aux mixbuf_free "*";
+#endif
 
 #endif /* MIXER_H */

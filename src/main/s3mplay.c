@@ -134,7 +134,7 @@ void __far ISR_play(void)
             err = false;
     }
 
-    fill_DMAbuffer(mixBuf.buf, &sndDMABuf);
+    fill_DMAbuffer(&mixBuf, &sndDMABuf);
 
     if (UseEMS & !err)
         emsRestoreMap(SavHandle);
@@ -213,7 +213,7 @@ bool PUBLIC_CODE player_init(void)
         }
 
     if (!mixBuf.buf)
-        if (!mixbuf_alloc(&mixBuf, (sndDMABuf.buf->size * sizeof(int16_t)) / 2))
+        if (!mixbuf_alloc(&mixBuf, sndDMABuf.buf->size * sizeof(int16_t) / 2))  // (16 bits)
         {
             DEBUG_FAIL("player_init", "Failed to initialize mixing buffer.");
             player_error = E_PLAYER_LOW_MEMORY;
@@ -334,35 +334,6 @@ uint8_t PUBLIC_CODE player_get_output_bits(void)
 bool PUBLIC_CODE player_get_output_lq(void)
 {
     return player_mode_lq;
-}
-
-bool __near _player_setup_mixer(void)
-{
-    uint16_t rate;
-
-    DEBUG_BEGIN("_player_setup_mixer");
-
-    if (player_mode_set)
-    {
-        rate = player_mode_rate;
-
-        if (player_mode_lq)
-            rate /= 2;
-
-        setMixMode(
-            player_mode_channels,
-            rate,
-            ((1000000L / (uint16_t)(1000000L / rate)) / playOption_FPS) + 1
-        );
-
-        DEBUG_SUCCESS("_player_setup_mixer");
-        return true;
-    }
-    else
-    {
-        DEBUG_FAIL("_player_setup_mixer", "No play mode was set.");
-        return false;
-    }
 }
 
 bool __near _player_setup_outbuf(SNDDMABUF *outbuf, uint16_t spc)
@@ -507,8 +478,8 @@ void __near _player_reset_channels(void)
 
 void __near _player_set_initial_state(void)
 {
-    set_speed(initState_speed);
-    set_tempo(initState_tempo);
+    playState_set_speed(initState_speed);
+    playState_set_tempo(initState_tempo);
     _player_reset_channels();
 }
 
@@ -533,7 +504,7 @@ void player_set_pos(uint8_t start_order, uint8_t start_row, bool keep)
 bool PUBLIC_CODE player_play_start(void)
 {
     SNDDMABUF *outbuf;
-    uint16_t count;
+    uint16_t frame_size;
 
     DEBUG_BEGIN("player_play_start");
 
@@ -573,33 +544,34 @@ bool PUBLIC_CODE player_play_start(void)
     player_mode_bits     = sb_mode_get_bits(player_device);
     player_mode_signed   = sb_mode_is_signed(player_device);
 
+    playState_rate = player_mode_lq ? player_mode_rate / 2 : player_mode_rate;
+
     // 2. Setup mixer mode
 
-    if (!_player_setup_mixer())
-    {
-        DEBUG_FAIL("player_play_start", "Failed to setup mixer.");
-        return false;
-    }
+    mixbuf_set_mode(
+        &mixBuf,
+        player_mode_channels,
+        ((1000000L / (uint16_t)(1000000L / playState_rate)) / playOption_FPS) + 1
+    );
 
     // 3. Setup output buffer
 
     outbuf = &sndDMABuf;
 
-    if (!_player_setup_outbuf(outbuf, mixBufSamplesPerChannel))
+    if (!_player_setup_outbuf(outbuf, mixBuf.samples_per_channel))
     {
         DEBUG_FAIL("player_play_start", "Failed to setup output buffer.");
         return false;
     }
 
-    count = outbuf->frameSize;
+    frame_size = outbuf->frameSize;
     if (player_mode_lq)
-        count *= 2;
+        frame_size *= 2;
 
-    sb_set_transfer_buffer(player_device, outbuf->buf->data, count, outbuf->framesCount, true, &ISR_play);
+    sb_set_transfer_buffer(player_device, outbuf->buf->data, frame_size, outbuf->framesCount, true, &ISR_play);
 
     // 4. Setup mixer tables
 
-    // now after loading we know if signed data or not
     calcVolumeTable();
     calcPostTable(playState_mVolume);
 
@@ -609,15 +581,14 @@ bool PUBLIC_CODE player_play_start(void)
     _player_set_initial_state();
     player_set_pos(initState_startOrder, 0, false);
 
-    mixTickSamplesPerChannelLeft = 0;   // emmidiately next tick
-
+    playState_tick_samples_per_channel_left = 0;    // emmidiately next tick
     playState_songEnded = false;    // resume playing
 
     // 6. Prefill output buffer
 
     outbuf->frameActive = outbuf->framesCount - 1;
     outbuf->frameLast = outbuf->framesCount;
-    fill_DMAbuffer(mixBuf.buf, outbuf);
+    fill_DMAbuffer(&mixBuf, outbuf);
 
     // 7. Start sound
 

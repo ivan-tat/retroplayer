@@ -17,10 +17,10 @@
 
 #include "main/mixer.h"
 
-uint32_t PUBLIC_CODE _calc_sample_step(uint16_t wPeriod)
+uint32_t _calc_sample_step(uint16_t period, uint16_t rate)
 {
     long long int a = (long long int) 1712 * 8363 << 16;
-    long int b = (long int)wPeriod * (long int)mixSampleRate;
+    long int b = (long int)period * (long int)rate;
     b = a / b;
     return b;
 }
@@ -29,38 +29,26 @@ uint32_t PUBLIC_CODE _calc_sample_step(uint16_t wPeriod)
 
 #ifdef DEFINE_LOCAL_DATA
 
-uint16_t ST3Periods[12] =
+static uint16_t ST3Periods[12] =
 {
     1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
 };
 
-MIXBUF   PUBLIC_DATA mixBuf;
-uint8_t  PUBLIC_DATA mixChannels;
-uint16_t PUBLIC_DATA mixSampleRate;
-uint16_t PUBLIC_DATA mixBufSamplesPerChannel;
-uint16_t PUBLIC_DATA mixBufSamples;
-uint16_t PUBLIC_DATA mixTickSamplesPerChannel;
-uint16_t PUBLIC_DATA mixTickSamplesPerChannelLeft;
+static MIXBUF mixBuf;
 
 #endif
 
-void PUBLIC_CODE setMixChannels(uint8_t channels);
-void PUBLIC_CODE setMixSampleRate(uint16_t rate);
-void PUBLIC_CODE setMixBufSamplesPerChannel(uint16_t count);
-void PUBLIC_CODE setMixMode(uint8_t channels, uint16_t rate, uint16_t count);
-
-void PUBLIC_CODE mixbuf_init(MIXBUF *self)
+void mixbuf_init(MIXBUF *self)
 {
     if (self)
     {
         self->buf = NULL;
-        mixSampleRate = 0;
-        mixChannels = 0;
-        mixBufSamplesPerChannel = 0;
+        self->channels = 0;
+        self->samples_per_channel = 0;
     }
 }
 
-bool PUBLIC_CODE mixbuf_alloc(MIXBUF *self, uint16_t size)
+bool mixbuf_alloc(MIXBUF *self, uint16_t size)
 {
     uint16_t seg;
 
@@ -77,7 +65,7 @@ bool PUBLIC_CODE mixbuf_alloc(MIXBUF *self, uint16_t size)
     return false;
 }
 
-void PUBLIC_CODE mixbuf_free(MIXBUF *self)
+void mixbuf_free(MIXBUF *self)
 {
     if (self)
         if (self->buf)
@@ -87,49 +75,53 @@ void PUBLIC_CODE mixbuf_free(MIXBUF *self)
         }
 }
 
-void PUBLIC_CODE setMixChannels(uint8_t channels)
+void mixbuf_set_channels(MIXBUF *self, uint8_t value)
 {
-    mixChannels = channels;
-    setMixBufSamplesPerChannel(mixBufSamplesPerChannel);
+    self->channels = value;
+    mixbuf_set_samples_per_channel(self, self->samples_per_channel);
 }
 
-void PUBLIC_CODE setMixSampleRate(uint16_t rate)
+void mixbuf_set_samples_per_channel(MIXBUF *self, uint16_t value)
 {
-    mixSampleRate = rate;
+    self->samples_per_channel = value;
 }
 
-void PUBLIC_CODE setMixBufSamplesPerChannel(uint16_t count)
+void mixbuf_set_mode(MIXBUF *self, uint8_t channels, uint16_t samples_per_channel)
 {
-    mixBufSamplesPerChannel = count;
-    mixBufSamples = mixChannels * count;
+    self->channels = channels;
+    mixbuf_set_samples_per_channel(self, samples_per_channel);
 }
 
-void PUBLIC_CODE setMixMode(uint8_t channels, uint16_t rate, uint16_t count)
+uint16_t mixbuf_get_offset_from_count(MIXBUF *self, uint16_t value)
 {
-    mixChannels = channels;
-    mixSampleRate = rate;
-    setMixBufSamplesPerChannel(count);
+    uint16_t result;
+
+    if (self)
+    {
+        result = value;
+
+        if (self->channels == 2)
+            result <<= 1;
+
+        return result * sizeof(int16_t);    // (16 bits)
+    }
+
+    return 0;
 }
 
-uint16_t PUBLIC_CODE getMixBufOffFromCount(uint16_t count)
+uint16_t mixbuf_get_count_from_offset(MIXBUF *self, uint16_t value)
 {
-    uint16_t bufOff;
+    uint16_t result;
 
-    bufOff = count;
+    if (self)
+    {
+        result = value;
 
-    if (mixChannels == 2)
-        bufOff <<= 1;
+        if (self->channels == 2)
+            result >>= 1;
 
-    return bufOff << 1; /* int16_t (*buf)[]*/
-}
+        return result / sizeof(int16_t);    // (16 bits)
+    }
 
-uint16_t PUBLIC_CODE getCountFromMixBufOff(uint16_t bufOff)
-{
-    uint16_t count;
-
-    count = bufOff;
-    if (mixChannels == 2)
-        count >>= 1;
-
-    return count >> 1;  /* int16_t (*buf)[]*/
+    return 0;
 }

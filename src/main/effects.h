@@ -99,9 +99,6 @@ extern uint32_t PUBLIC_DATA chnState_porta_dSmpStepOld;
 extern bool     PUBLIC_DATA chnState_arp_bFlag;
     /* a little one for arpeggio */
 
-void PUBLIC_CODE set_speed(uint8_t value);
-void PUBLIC_CODE set_tempo(uint8_t value);
-
 bool PUBLIC_CODE chn_effInit(MIXCHN *chn, uint8_t param);
 void PUBLIC_CODE chn_effHandle(MIXCHN *chn);
 void PUBLIC_CODE chn_effTick(MIXCHN *chn);

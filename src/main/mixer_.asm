@@ -16,8 +16,8 @@ dwofs macro name, no
         dw      offset &name&no
 endm
 
-LOOP_MONO_LENGTH equ 16
-LOOP_MONO_SHIFT equ 4
+LOOP_MONO_SHIFT equ 3
+LOOP_MONO_LENGTH equ (1 shl LOOP_MONO_SHIFT)
 
 ; mono innerloop table:
 counter = 0
@@ -27,8 +27,8 @@ rept LOOP_MONO_LENGTH
         counter = counter + 1
 endm
 
-LOOP_STEREO_LENGTH equ 16
-LOOP_STEREO_SHIFT equ 4
+LOOP_STEREO_SHIFT equ 3
+LOOP_STEREO_LENGTH equ (1 shl LOOP_STEREO_SHIFT)
 
 ; stereo innerloop table:
 counter = 0
@@ -66,10 +66,9 @@ local _step: dword
         xor     ax,ax
 _MixSampleMono8@_no0:
         mov     [_count],cx
-        shl     ax,1
+        shl     ax,1    ; (16 bits)
         les     di,[_dOutBuf]
         sub     di,ax
-        ;sub     si,ax
         mov     bx,ax
         mov     ax,ds:[innerloop_mono_tab+bx]
         lgs     bx,[_dSmpInfo]
@@ -92,7 +91,7 @@ innerloop_mono&no:
         add     esi,[_step]     ; next sample pos
         adc     si,0            ; next sample pos (carry flag into account)
         mov     ax,fs:[ebx+ebx] ; convert PCM value with volumetable
-        add     es:[di+pos],ax  ; mix result to out buffer
+        add     es:[di+pos],ax  ; (16 bits) mix result to out buffer
 endm
 
 z = 0
@@ -100,9 +99,9 @@ pos = 0
 rept LOOP_MONO_LENGTH
     innerloop_mono %z
     z = z + 1
-    pos = pos + 2
+    pos = pos + 2   ; (16 bits)
 endm
-        add     di,LOOP_MONO_LENGTH*2
+        add     di,LOOP_MONO_LENGTH*2   ; (16 bits)
         dec     [_count]
         jnz     innerloop_mono0
 
@@ -143,7 +142,7 @@ local _step: dword
         xor     ax,ax
 _MixSampleStereo8@_no0:
         mov     [_count],cx
-        shl     ax,1
+        shl     ax,1    ; (16 bits)
         les     di,[_dOutBuf]
         sub     di,ax
         sub     di,ax
@@ -170,7 +169,7 @@ innerloop_stereo&no:
         add     esi,[_step]     ; next sample pos
         adc     si,0            ; next sample pos (carry flag into account)
         mov     ax,fs:[ebx+ebx] ; convert PCM value with volumetable
-        add     es:[di+pos],ax  ; mix result to out buffer
+        add     es:[di+pos],ax  ; (16 bits) mix result to out buffer
 endm
 
 z = 0
@@ -178,9 +177,9 @@ pos = 0
 rept LOOP_STEREO_LENGTH
     innerloop_stereo %z
     z = z + 1
-    pos = pos + 4
+    pos = pos + 2*2
 endm
-        add     di,LOOP_STEREO_LENGTH*4
+        add     di,LOOP_STEREO_LENGTH*2*2   ; (16 bits)
         dec     [_count]
         jnz     innerloop_stereo0
 

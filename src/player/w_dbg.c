@@ -36,6 +36,7 @@ void __far win_debug_init(SCRWIN *self)
 void __far win_debug_draw(SCRWIN *self)
 {
     uint8_t y;
+    MIXBUF *mixbuf;
     SNDDMABUF *sndbuf;
     DMABUF *dmabuf;
 
@@ -119,21 +120,22 @@ void __far win_debug_draw(SCRWIN *self)
             printf("%s", PLAYER_VERSION);
         }
 
+        mixbuf = &mixBuf;
         sndbuf = &sndDMABuf;
-        dmabuf = sndDMABuf.buf;
+        dmabuf = sndbuf->buf;
         gotoxy(36, 4);
         textcolor(_yellow);
-        printf("%5u", mixChannels);
+        printf("%5u", mixbuf->channels);
         gotoxy(36, 5);
-        printf("%5u", mixSampleRate);
+        printf("%5u", playState_rate);
         gotoxy(36, 6);
-        printf("%5u", mixBufSamplesPerChannel);
+        printf("%5u", mixbuf->samples_per_channel);
         gotoxy(36, 7);
-        printf("%5u", mixBufSamples);
+        printf("%5u", mixbuf->channels * mixbuf->samples_per_channel);
         gotoxy(36, 8);
-        printf("%5u", mixTickSamplesPerChannel);
+        printf("%5u", playState_tick_samples_per_channel);
         gotoxy(36, 9);
-        printf("%5u", mixTickSamplesPerChannelLeft);
+        printf("%5u", playState_tick_samples_per_channel_left);
         gotoxy(68, 4);
         printf("%04X:%04X", FP_SEG(dmabuf->unaligned), FP_OFF(dmabuf->unaligned));
         gotoxy(68, 5);

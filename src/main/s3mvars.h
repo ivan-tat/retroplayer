@@ -68,18 +68,21 @@ extern uint16_t PUBLIC_DATA initState_startOrder;
 
 /* play state */
 
-extern bool    PUBLIC_DATA playState_songEnded;
-extern uint8_t PUBLIC_DATA playState_tempo;
-extern uint8_t PUBLIC_DATA playState_speed;
-extern uint8_t PUBLIC_DATA playState_gVolume;
-extern uint8_t PUBLIC_DATA playState_mVolume;
+extern bool     PUBLIC_DATA playState_songEnded;
+extern uint16_t PUBLIC_DATA playState_rate;
+extern uint8_t  PUBLIC_DATA playState_tempo;
+extern uint8_t  PUBLIC_DATA playState_speed;
+extern uint8_t  PUBLIC_DATA playState_gVolume;
+extern uint8_t  PUBLIC_DATA playState_mVolume;
+extern uint16_t PUBLIC_DATA playState_tick_samples_per_channel;
 
 /* position in song - you can change it while playing to jump arround */
 
-extern uint8_t PUBLIC_DATA playState_order;
-extern uint8_t PUBLIC_DATA playState_pattern;
-extern uint8_t PUBLIC_DATA playState_row;
-extern uint8_t PUBLIC_DATA playState_tick;
+extern uint8_t  PUBLIC_DATA playState_order;
+extern uint8_t  PUBLIC_DATA playState_pattern;
+extern uint8_t  PUBLIC_DATA playState_row;
+extern uint8_t  PUBLIC_DATA playState_tick;
+extern uint16_t PUBLIC_DATA playState_tick_samples_per_channel_left;
 
 /* pattern loop */
 
@@ -90,5 +93,13 @@ extern uint8_t PUBLIC_DATA playState_patLoopStartRow;
 /* pattern delay */
 
 extern uint8_t PUBLIC_DATA playState_patDelayCount;
+
+void playState_set_speed(uint8_t value);
+void playState_set_tempo(uint8_t value);
+
+#ifdef __WATCOMC__
+#pragma aux playState_set_speed "*";
+#pragma aux playState_set_tempo "*";
+#endif
 
 #endif  /* S3MVARS_H */

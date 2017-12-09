@@ -65,10 +65,12 @@ var
 
 var
     playState_songEnded: boolean;
+    playState_rate: Word;
     playState_tempo: byte;
     playState_speed: byte;
     playState_gVolume: byte;
     playState_mVolume: byte;
+    playState_tick_samples_per_channel: Word;
 
 (* position in song - you can change it while playing to jump arround *)
 
@@ -77,6 +79,7 @@ var
     playState_pattern: byte;
     playState_row: byte;
     playState_tick: byte;
+    playState_tick_samples_per_channel_left: Word;
 
 (* pattern loop *)
 
@@ -90,11 +93,18 @@ var
 var
     playState_patDelayCount: byte;
 
+procedure playState_set_speed;
+procedure playState_set_tempo;
+
 implementation
 
 uses
+    watcom,
     dos_;
 
 (*$l s3mvars.obj*)
+
+procedure playState_set_speed; external;
+procedure playState_set_tempo; external;
 
 end.

@@ -530,22 +530,6 @@ DEFINE_EFFECTS_LIST(main) =
     // Z
 };
 
-void PUBLIC_CODE set_speed(uint8_t value)
-{
-    if (value > 0)
-        playState_speed = value;
-}
-
-void PUBLIC_CODE set_tempo(uint8_t value)
-{
-    if (value >= 32)
-        playState_tempo = value;
-    else
-        value = playState_tempo;
-    if (value)
-        mixTickSamplesPerChannel = (long)mixSampleRate * 5 / (int)(value * 2);
-}
-
 /*** Effects ***/
 
 uint8_t __near checkPara0(MIXCHN *chn, uint8_t param)
@@ -604,7 +588,7 @@ METHOD_STOP(none)
 METHOD_INIT(setSpeed)
 {
     param = checkPara0not(chn, param);
-    set_speed(param);
+    playState_set_speed(param);
     return true;
 }
 
@@ -613,7 +597,7 @@ METHOD_INIT(setSpeed)
 METHOD_INIT(setTempo)
 {
     param = checkPara0not(chn, param);
-    set_tempo(param);
+    playState_set_tempo(param);
     return true;
 }
 
@@ -960,7 +944,7 @@ METHOD_STOP(vibNorm)
     period = chn->wSmpPeriodOld;
     mixchn_set_sample_period(chn, period);
     if (period)
-        mixchn_set_sample_step(chn, _calc_sample_step(period));
+        mixchn_set_sample_step(chn, _calc_sample_step(period, playState_rate));
 }
 
 /*** Vibrato (fine) ***/

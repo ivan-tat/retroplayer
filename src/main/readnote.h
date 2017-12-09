@@ -17,6 +17,10 @@
 
 #include "pascal.h"
 
-void PUBLIC_CODE readnewnotes(void);
+void readnewnotes(void);
+
+#ifdef __WATCOMC__
+#pragma aux readnewnotes "*";
+#endif
 
 #endif  /* READNOTE_H */

@@ -79,8 +79,6 @@ var
     chnState_porta_dSmpStepOld: longint;
     chnState_arp_bFlag: boolean;
 
-procedure set_speed(value: byte);
-procedure set_tempo(value: byte);
 function  chn_effInit(var chn: TChannel; param: byte): boolean;
 procedure chn_effHandle(var chn: TChannel);
 procedure chn_effTick(var chn: TChannel);
@@ -102,8 +100,6 @@ uses
 
 (*$l effects.obj*)
 
-procedure set_speed(value: byte); external;
-procedure set_tempo(value: byte); external;
 function  chn_effInit(var chn: TChannel; param: byte): boolean; external;
 procedure chn_effHandle(var chn: TChannel); external;
 procedure chn_effTick(var chn: TChannel); external;

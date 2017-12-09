@@ -12,18 +12,18 @@
 
 #include "main/posttab.h"
 
-static int16_t amptab[2][256];
+static int16_t amptab[2][0x100];
 
 void PUBLIC_CODE calcPostTable(uint8_t volume)
 {
     int16_t v, i;
 
-    v = volume & 127;
+    v = volume & 0x7f;
 
-    for (i = 0; i < 256; i++)
+    for (i = 0; i < 0x100; i++)
     {
-        amptab[0][i] = i * v / 128;
-        amptab[1][i] = (int16_t)(((int32_t)((int16_t)((int8_t)i) * 256) * v) / 128);
+        amptab[0][i] = i * v / 0x80;
+        amptab[1][i] = (int16_t)(((int32_t)((int16_t)((int8_t)i) * 0x100) * v) / 0x80);
     }
 }
 
@@ -32,18 +32,14 @@ void amplify_16s(void *buf, uint16_t count)
     int16_t *out;
     int16_t s;
 
-    if (count)
-    {
-        out = (int16_t *)buf;
+    out = (int16_t *)buf;
 
-        do
-        {
-            s = *out;
-            *out = (amptab[0][(uint8_t)s] + amptab[1][(uint16_t)s >> 8]);
-            out++;
-            count--;
-        }
-        while (count);
+    while (count)
+    {
+        s = *out;
+        *out = (amptab[0][(uint8_t)s] + amptab[1][(uint16_t)s >> 8]);
+        out++;
+        count--;
     }
 }
 
@@ -56,7 +52,7 @@ void clip_16s_8u(void *outbuf, void *mixbuf, uint16_t count)
     src = (int16_t *)mixbuf;
     dst = (uint8_t *)outbuf;
 
-    do
+    while (count)
     {
         s = *src;
         if (s < -128)
@@ -69,7 +65,6 @@ void clip_16s_8u(void *outbuf, void *mixbuf, uint16_t count)
         dst++;
         count--;
     }
-    while (count);
 }
 
 void clip_16s_mono_8u_mono_lq(void *outbuf, void *mixbuf, uint16_t count)
@@ -81,7 +76,7 @@ void clip_16s_mono_8u_mono_lq(void *outbuf, void *mixbuf, uint16_t count)
     src = (int16_t *)mixbuf;
     dst = (uint8_t *)outbuf;
 
-    do
+    while (count)
     {
         s = *src;
         if (s < -128)
@@ -95,7 +90,6 @@ void clip_16s_mono_8u_mono_lq(void *outbuf, void *mixbuf, uint16_t count)
         dst += 2;
         count--;
     }
-    while (count);
 }
 
 void clip_16s_stereo_8u_stereo_lq(void *outbuf, void *mixbuf, uint16_t count)
@@ -108,7 +102,7 @@ void clip_16s_stereo_8u_stereo_lq(void *outbuf, void *mixbuf, uint16_t count)
     dst = (uint8_t *)outbuf;
 
     count >>= 1;
-    do
+    while (count)
     {
         s[0] = *src[0];
         s[1] = *src[1];
@@ -130,5 +124,4 @@ void clip_16s_stereo_8u_stereo_lq(void *outbuf, void *mixbuf, uint16_t count)
         dst += 4;
         count--;
     }
-    while (count);
 }

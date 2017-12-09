@@ -12,15 +12,12 @@ interface
 
 (*$I defines.pas*)
 
-type
-    PS3MLoader = Pointer;
-
-function  s3mloader_new: PS3MLoader;
-procedure s3mloader_init(self: PS3MLoader);
-function  s3mloader_load(self: PS3MLoader; name: PChar): Boolean;
-function  s3mloader_get_error(self: PS3MLoader): PChar;
-procedure s3mloader_free(self: PS3MLoader);
-procedure s3mloader_delete(var self: PS3MLoader);
+procedure s3mloader_new;
+procedure s3mloader_init;
+procedure s3mloader_load;
+procedure s3mloader_get_error;
+procedure s3mloader_free;
+procedure s3mloader_delete;
 
 implementation
 
@@ -42,11 +39,11 @@ uses
 
 (*$l loads3m.obj*)
 
-function  s3mloader_new: PS3MLoader; external;
-procedure s3mloader_init(self: PS3MLoader); external;
-function  s3mloader_load(self: PS3MLoader; name: PChar): Boolean; external;
-function  s3mloader_get_error(self: PS3MLoader): PChar; external;
-procedure s3mloader_free(self: PS3MLoader); external;
-procedure s3mloader_delete(var self: PS3MLoader); external;
+procedure s3mloader_new; external;
+procedure s3mloader_init; external;
+procedure s3mloader_load; external;
+procedure s3mloader_get_error; external;
+procedure s3mloader_free; external;
+procedure s3mloader_delete; external;
 
 end.

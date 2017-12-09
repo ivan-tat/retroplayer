@@ -257,7 +257,7 @@ PATFLOWSTATE __near pat_playRow(MUSPAT *pat)
 
 /**********************************************************************/
 
-void PUBLIC_CODE readnewnotes(void)
+void readnewnotes(void)
 {
     char firstPlay;
     PATFLOWSTATE status;

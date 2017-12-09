@@ -12,7 +12,7 @@ interface
 
 (*$I defines.pas*)
 
-procedure calcTick(dOutBuf: pointer; wLen: word);
+procedure sound_fill_buffer;
 
 implementation
 
@@ -32,6 +32,6 @@ uses
 
 (*$l mixing.obj*)
 
-procedure calcTick(dOutBuf: pointer; wLen: word); external;
+procedure sound_fill_buffer; external;
 
 end.

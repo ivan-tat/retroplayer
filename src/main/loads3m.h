@@ -20,11 +20,20 @@
 
 typedef void S3MLOADER;
 
-S3MLOADER *PUBLIC_CODE s3mloader_new(void);
-void     PUBLIC_CODE s3mloader_init(S3MLOADER *self);
-bool     PUBLIC_CODE s3mloader_load(S3MLOADER *self, const char *name);
-const char *PUBLIC_CODE s3mloader_get_error(S3MLOADER *self);
-void     PUBLIC_CODE s3mloader_free(S3MLOADER *self);
-void     PUBLIC_CODE s3mloader_delete(S3MLOADER **self);
-    
+S3MLOADER *s3mloader_new(void);
+void     s3mloader_init(S3MLOADER *self);
+bool     s3mloader_load(S3MLOADER *self, const char *name);
+const char *s3mloader_get_error(S3MLOADER *self);
+void     s3mloader_free(S3MLOADER *self);
+void     s3mloader_delete(S3MLOADER **self);
+
+#ifdef __WATCOMC__
+#pragma aux s3mloader_new "*";
+#pragma aux s3mloader_init "*";
+#pragma aux s3mloader_load "*";
+#pragma aux s3mloader_get_error "*";
+#pragma aux s3mloader_free "*";
+#pragma aux s3mloader_delete "*";
+#endif
+
 #endif  /* LOADS3M_H */
