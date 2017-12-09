@@ -30,6 +30,10 @@ type
 procedure _MixSampleMono8;
 procedure _MixSampleStereo8;
 
+procedure fill_8;
+procedure fill_16;
+procedure fill_32;
+
 const
     ST3Periods: array [0..11] of word = (
         1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
@@ -73,6 +77,10 @@ procedure _MixSampleMono8; external;
 procedure _MixSampleStereo8; external;
 
 (*$l mixer.obj*)
+
+procedure fill_8; external;
+procedure fill_16; external;
+procedure fill_32; external;
 
 procedure _calc_sample_step; external;
 

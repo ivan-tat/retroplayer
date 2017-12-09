@@ -20,6 +20,8 @@
 
 // TODO: remove PUBLIC_CODE macros when done.
 
+/* Sample playing */
+
 #define MIXSMPFL_16BITS 0x01
 #define MIXSMPFL_LOOP   0x02
 
@@ -51,6 +53,14 @@ extern void PUBLIC_CODE _MixSampleStereo8(
     uint8_t vol,
     uint16_t count
 );
+
+/* Filling */
+
+void fill_8(void *dest, uint8_t value, uint16_t count);
+void fill_16(void *dest, uint16_t value, uint16_t count);
+void fill_32(void *dest, uint32_t value, uint16_t count);
+
+/* Playing */
 
 extern uint16_t PUBLIC_DATA ST3Periods[12];
 
@@ -88,6 +98,11 @@ extern MIXBUF mixBuf;
 /* Linking */
 
 #ifdef __WATCOMC__
+#pragma aux _MixSampleMono8 "*";
+#pragma aux _MixSampleMono16 "*";
+#pragma aux fill_8 "*";
+#pragma aux fill_16 "*";
+#pragma aux fill_32 "*";
 #pragma aux _calc_sample_step "*";
 #pragma aux mixBuf "*";
 #pragma aux mixbuf_init "*";

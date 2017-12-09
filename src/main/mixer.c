@@ -38,6 +38,43 @@ static MIXBUF mixBuf;
 
 #endif
 
+/* Filling */
+
+void fill_8(void *dest, uint8_t value, uint16_t count)
+{
+    memset(dest, value, count);
+}
+
+void fill_16(void *dest, uint16_t value, uint16_t count)
+{
+    register uint16_t *p;
+    register uint16_t n;
+
+    p = dest;
+    while (n)
+    {
+        *p = value;
+        p++;
+        n--;
+    }
+}
+
+void fill_32(void *dest, uint32_t value, uint16_t count)
+{
+    register uint32_t *p;
+    register uint16_t n;
+
+    p = dest;
+    while (n)
+    {
+        *p = value;
+        p++;
+        n--;
+    }
+}
+
+/* Mixing buffer */
+
 void mixbuf_init(MIXBUF *self)
 {
     if (self)

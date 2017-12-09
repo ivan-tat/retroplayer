@@ -19,39 +19,6 @@
 
 // TODO: remove PUBLIC_CODE macros when done.
 
-void __near fill_8(void *dest, uint8_t value, uint16_t count)
-{
-    memset(dest, value, count);
-}
-
-void __near fill_16(void *dest, uint16_t value, uint16_t count)
-{
-    register uint16_t *p;
-    register uint16_t n;
-
-    p = dest;
-    while (n)
-    {
-        *p = value;
-        p++;
-        n--;
-    }
-}
-
-void __near fill_32(void *dest, uint32_t value, uint16_t count)
-{
-    register uint32_t *p;
-    register uint16_t n;
-
-    p = dest;
-    while (n)
-    {
-        *p = value;
-        p++;
-        n--;
-    }
-}
-
 void __near fill_frame(MIXBUF *mb, SNDDMABUF *outbuf)
 {
     void *mixbuf;
@@ -119,87 +86,49 @@ void __near fill_frame(MIXBUF *mb, SNDDMABUF *outbuf)
 
     outbuf->flags |= SNDDMABUFFL_LOCKED;
 
-    if (playState_songEnded)
-    {
-        dstoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameActive);
-        if (f_sign)
-            fill_value.u32 = 0;
-        else
-            switch (f_bits)
-            {
-            case 8:
-                fill_value.u16 = 0x8080;
-                break;
-            case 16:
-                fill_value.u32 = 0x80008000;
-                break;
-            default:
-                break;
-            }
+    sound_fill_buffer(mb, frame_spc);
 
-        switch (f_width)
+    amplify_16s(mixbuf, frame_len); // (16 bits)
+
+    outbuf->frameLast = (outbuf->frameLast + 1) & (outbuf->framesCount - 1);
+    dstoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameLast);
+
+    if (outbuf->flags & SNDDMABUFFL_LQ)
+    {
+        switch (f_bits)
         {
-        case 1:
-            fill_8(&(buf[dstoff]), fill_value.u8, frame_len);
+        case 8:
+            if (get_sample_format_channels(&(outbuf->format)) == 2)
+                clip_16s_stereo_8u_stereo_lq(&(buf[dstoff << 1]), mixbuf, frame_len);
+            else
+                clip_16s_mono_8u_mono_lq(&(buf[dstoff << 1]), mixbuf, frame_len);
             break;
-        case 2:
-            fill_16(&(buf[dstoff]), fill_value.u16, frame_len);
+        /*
+        case 16:
+            if (get_sample_format_channels(&(outbuf->format)) == 2)
+                clip_16_stereo_16_stereo_lq(&(buf[dstoff << 1]), mixbuf, frame_len);
+            else
+                clip_16_mono_16_mono_lq(&(buf[dstoff << 1]), mixbuf, frame_len);
             break;
-        case 4:
-            fill_32(&(buf[dstoff]), fill_value.u32, frame_len);
-            break;
+        */
         default:
             break;
         }
-
-        outbuf->frameActive = 1 - outbuf->frameActive;
     }
     else
     {
-        sound_fill_buffer(mb, frame_spc);
-
-        outbuf->frameLast = (outbuf->frameLast + 1) & (outbuf->framesCount - 1);
-        dstoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameLast);
-
-        amplify_16s(mixbuf, frame_len);
-
-        if (outbuf->flags & SNDDMABUFFL_LQ)
+        switch (f_bits)
         {
-            switch (f_bits)
-            {
-            case 8:
-                if (get_sample_format_channels(&(outbuf->format)) == 2)
-                    clip_16s_stereo_8u_stereo_lq(&(buf[dstoff << 1]), mixbuf, frame_len);
-                else
-                    clip_16s_mono_8u_mono_lq(&(buf[dstoff << 1]), mixbuf, frame_len);
-                break;
-            /*
-            case 16:
-                if (get_sample_format_channels(&(outbuf->format)) == 2)
-                    clip_16_stereo_16_stereo_lq(&(buf[dstoff << 1]), mixbuf, frame_len);
-                else
-                    clip_16_mono_16_mono_lq(&(buf[dstoff << 1]), mixbuf, frame_len);
-                break;
-            */
-            default:
-                break;
-            }
-        }
-        else
-        {
-            switch (f_bits)
-            {
-            case 8:
-                clip_16s_8u(&(buf[dstoff]), mixbuf, frame_len);
-                break;
-            /*
-            case 16:
-                clip_16_16(&(buf[dstoff]), mixbuf, frame_len);
-                break;
-            */
-            default:
-                break;
-            }
+        case 8:
+            clip_16s_8u(&(buf[dstoff]), mixbuf, frame_len);
+            break;
+        /*
+        case 16:
+            clip_16_16(&(buf[dstoff]), mixbuf, frame_len);
+            break;
+        */
+        default:
+            break;
         }
     }
 

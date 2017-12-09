@@ -116,7 +116,7 @@ void __near song_mix_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_t
     chn->dSmpPos = (chn->dSmpPos & 0xffff) + ((unsigned long)smpPos << 16);
 }
 
-void __near song_fill_buffer(MIXBUF *mb, uint16_t len)
+void __near song_play(MIXBUF *mb, uint16_t len)
 {
     void *outBuf;
     uint16_t bufSize;
@@ -126,55 +126,62 @@ void __near song_fill_buffer(MIXBUF *mb, uint16_t len)
     bool callEffects;
     MIXCHN *chn;
 
-    /* clear mixing buffer */
     outBuf = mb->buf;
     bufSize = mixbuf_get_offset_from_count(mb, len);
-    memset(outBuf, 0, bufSize);
 
-    bufOff = 0;
-
-    if (playState_tick_samples_per_channel_left)
+    if (!playState_songEnded)
     {
-        callEffects = false;
-    }
-    else
-    {
-        callEffects = true;
-        song_new_tick(mb);
-    }
+        bufOff = 0;
 
-    while (! playState_songEnded)
-    {
-        count = mixbuf_get_count_from_offset(mb, bufSize - bufOff);
-        if (count > playState_tick_samples_per_channel_left)
-            count = playState_tick_samples_per_channel_left;
-            /* finish that tick and loop to fill the whole mixing buffer */
-
-        if (!count)
-            break;
-
-        for (i = 0; i < UsedChannels; i++)
+        if (playState_tick_samples_per_channel_left)
         {
-            chn = &(Channel[i]);
-            if (mixchn_is_enabled(chn))
-                song_mix_channel(chn, callEffects, mb, count,
-                    bufOff + (mb->channels == 2 && mixchn_get_type(chn) == 2 ? 2 : 0));
+            callEffects = false;
         }
-
-        playState_tick_samples_per_channel_left -= count;
-        bufOff += mixbuf_get_offset_from_count(mb, count);
-
-        if (bufOff < bufSize)
+        else
         {
             callEffects = true;
             song_new_tick(mb);
         }
-        else
-            break;
+
+        while (! playState_songEnded)
+        {
+            count = mixbuf_get_count_from_offset(mb, bufSize - bufOff);
+            if (count > playState_tick_samples_per_channel_left)
+                count = playState_tick_samples_per_channel_left;
+                /* finish that tick and loop to fill the whole mixing buffer */
+
+            if (!count)
+                break;
+
+            for (i = 0; i < UsedChannels; i++)
+            {
+                chn = &(Channel[i]);
+                if (mixchn_is_enabled(chn))
+                    song_mix_channel(chn, callEffects, mb, count,
+                        bufOff + (mb->channels == 2 && mixchn_get_type(chn) == 2 ? 2 : 0));
+            }
+
+            playState_tick_samples_per_channel_left -= count;
+            bufOff += mixbuf_get_offset_from_count(mb, count);
+
+            if (bufOff < bufSize)
+            {
+                callEffects = true;
+                song_new_tick(mb);
+            }
+            else
+                break;
+        }
     }
 }
 
 void sound_fill_buffer(MIXBUF *mb, uint16_t len)
 {
-    song_fill_buffer(mb, len);
+    uint16_t size;
+
+    /* clear mixing buffer */
+    size = mixbuf_get_offset_from_count(mb, len);
+    memset(mb->buf, 0, size);
+
+    song_play(mb, len);
 }
