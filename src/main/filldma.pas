@@ -22,6 +22,9 @@ implementation
 
 uses
     string_,
+(*$ifdef DEBUG*)
+    stdio,
+(*$endif*)
     ems,
     sndctl_t,
     posttab,

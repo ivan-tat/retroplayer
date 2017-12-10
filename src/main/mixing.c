@@ -45,13 +45,14 @@ void __near song_new_tick(MIXBUF *mb)
     }
 }
 
-void __near song_mix_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_t count, uint16_t bufOff)
+void __near song_play_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_t count, uint16_t bufOff)
 {
     void *outBuf;
     uint8_t chtype;
     struct playSampleInfo_t smpInfo;
     unsigned int smpPos;
     MUSINS *ins;
+    uint8_t vol;
 
     outBuf = MK_FP(FP_SEG(mb->buf), FP_OFF(mb->buf) + bufOff);
     chtype = mixchn_get_type(chn);
@@ -76,8 +77,10 @@ void __near song_mix_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_t
     /* first check for correct position inside sample */
     if (smpPos < chn->wSmpLoopEnd)
     {
-        if (mixchn_is_mixing(chn))
+        vol = mixchn_get_sample_volume(chn);
+        if (mixchn_is_mixing(chn) && vol)
         {
+            vol--;
             ins = mixchn_get_instrument(chn);
             if (musins_is_EM_data(ins))
                 smpInfo.dData = musins_map_EM_data(ins);
@@ -88,9 +91,9 @@ void __near song_mix_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_t
                 return;
 
             if (mb->channels == 2)
-                _MixSampleStereo8(outBuf, &smpInfo, FP_SEG(*volumetableptr), mixchn_get_sample_volume(chn), count);
+                _MixSampleStereo8(outBuf, &smpInfo, FP_SEG(*volumetableptr), vol, count);
             else
-                _MixSampleMono8(outBuf, &smpInfo, FP_SEG(*volumetableptr), mixchn_get_sample_volume(chn), count);
+                _MixSampleMono8(outBuf, &smpInfo, FP_SEG(*volumetableptr), vol, count);
         }
         else
         {
@@ -157,8 +160,8 @@ void __near song_play(MIXBUF *mb, uint16_t len)
             {
                 chn = &(Channel[i]);
                 if (mixchn_is_enabled(chn))
-                    song_mix_channel(chn, callEffects, mb, count,
-                        bufOff + (mb->channels == 2 && mixchn_get_type(chn) == 2 ? 2 : 0));
+                    song_play_channel(chn, callEffects, mb, count,
+                        bufOff + (mb->channels == 2 && mixchn_get_type(chn) == 2 ? sizeof(int32_t) : 0));   // NOTE: mixbuf is 32 bits
             }
 
             playState_tick_samples_per_channel_left -= count;

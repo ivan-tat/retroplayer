@@ -727,11 +727,9 @@ bool __near _sb_setup_transfer_mode_DSP_commands(SBDEV *self)
 bool __near _sb_start_DSP_transfer(SBDEV *self)
 {
     declare_Self;
-    uint16_t frame_size;
+    uint16_t frame_len;
     uint8_t data[4];
     uint16_t length;
-
-    frame_size = _Self->transfer_frame_size - 1;
 
     if (!(_Self->transfer_flags & SBTRFL_COMMANDS))
         if (!_sb_setup_transfer_mode_DSP_commands(_Self))
@@ -740,27 +738,34 @@ bool __near _sb_start_DSP_transfer(SBDEV *self)
             return false;
         }
 
+    frame_len = _Self->transfer_frame_size;
+
     switch (_Self->model)
     {
     case SBMODEL_SB1:
+        frame_len--;
         data[0] = _Self->transfer_mode_DSP_start;
-        data[1] = frame_size & 0xff;
-        data[2] = frame_size >> 8;
+        data[1] = frame_len & 0xff;
+        data[2] = frame_len >> 8;
         length = 3;
         break;
     case SBMODEL_SB2:
     case SBMODEL_SBPRO:
+        frame_len--;
         data[0] = DSPC_SET_SIZE;
-        data[1] = frame_size & 0xff;
-        data[2] = frame_size >> 8;
+        data[1] = frame_len & 0xff;
+        data[2] = frame_len >> 8;
         data[3] = _Self->transfer_mode_DSP_start;
         length = 4;
         break;
     case SBMODEL_SB16:
+        if (_Self->transfer_mode_bits == 16)
+            frame_len >>= 1;
+        frame_len--;
         data[0] = _Self->transfer_mode_DSP_start;
         data[1] = _Self->transfer_mode_DSP_mode;
-        data[2] = frame_size & 0xff;
-        data[3] = frame_size >> 8;
+        data[2] = frame_len & 0xff;
+        data[3] = frame_len >> 8;
         length = 4;
         break;
     default:

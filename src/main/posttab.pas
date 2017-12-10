@@ -12,23 +12,46 @@ interface
 
 (*$I defines.pas*)
 
-procedure calcPostTable(volume: Byte);
-procedure amplify_16s;
-procedure clip_16s_8u;
-procedure clip_16s_mono_8u_mono_lq;
-procedure clip_16s_stereo_8u_stereo_lq;
+procedure amptab_set_volume;
+procedure amplify_s32;
+procedure clip_s32_u8;
+procedure clip_s32_s8;
+procedure clip_s32_u16;
+procedure clip_s32_s16;
+procedure clip_s32_u8_lq;
+procedure clip_s32_s8_lq;
+procedure clip_s32_u16_lq;
+procedure clip_s32_s16_lq;
+procedure clip_s32_u8_lq_stereo;
+procedure clip_s32_s8_lq_stereo;
+procedure clip_s32_u16_lq_stereo;
+procedure clip_s32_s16_lq_stereo;
 
 implementation
 
 uses
+(*$ifdef DEBUG*)
+    watcom,
+    stdio;
+(*$else*)
     watcom;
+(*$endif*)
 
 (*$l posttab.obj*)
 
-procedure calcPostTable(volume: Byte); external;
-procedure amplify_16s; external;
-procedure clip_16s_8u; external;
-procedure clip_16s_mono_8u_mono_lq; external;
-procedure clip_16s_stereo_8u_stereo_lq; external;
+procedure amptab_set_volume; external;
+procedure amplify_s32; external;
+procedure clip_s32_u8; external;
+procedure clip_s32_s8; external;
+procedure clip_s32_u16; external;
+procedure clip_s32_s16; external;
+procedure clip_s32_u8_lq; external;
+procedure clip_s32_s8_lq; external;
+procedure clip_s32_u16_lq; external;
+procedure clip_s32_s16_lq; external;
+procedure clip_s32_u8_lq_stereo; external;
+procedure clip_s32_s8_lq_stereo; external;
+procedure clip_s32_u16_lq_stereo; external;
+procedure clip_s32_s16_lq_stereo; external;
 
 end.

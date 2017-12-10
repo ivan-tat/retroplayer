@@ -83,7 +83,7 @@ typedef struct mixing_buffer_t
 typedef struct mixing_buffer_t MIXBUF;
 
 void     mixbuf_init(MIXBUF *self);
-bool     mixbuf_alloc(MIXBUF *self, uint16_t size);
+bool     mixbuf_alloc(MIXBUF *self, uint16_t len);
 void     mixbuf_set_channels(MIXBUF *self, uint8_t value);
 void     mixbuf_set_samples_per_channel(MIXBUF *self, uint16_t value);
 void     mixbuf_set_mode(MIXBUF *self, uint8_t channels, uint16_t samples_per_channel);

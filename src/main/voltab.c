@@ -9,44 +9,59 @@
 #include "cc/string.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
+#ifdef DEBUG
+# include "cc/stdio.h"
+#endif
 
 #include "main/voltab.h"
 
 // TODO: remove PUBLIC_CODE macros when done.
 
-void PUBLIC_CODE initVolumeTable(void)
+void voltab_init(void)
 {
     volumetableptr = NULL;
 }
 
-bool PUBLIC_CODE allocVolumeTable(void)
+bool voltab_alloc(void)
 {
     uint16_t seg;
+
     if (!_dos_allocmem(_dos_para(sizeof(voltab_t)), &seg))
     {
         volumetableptr = MK_FP(seg, 0);
         memset(volumetableptr, 0, sizeof(voltab_t));
         return true;
     }
-    else
-        return false;
+
+    return false;
 }
 
-void PUBLIC_CODE calcVolumeTable(void)
+void voltab_calc(void)
 {
     uint8_t vol;
-    uint16_t sample;
-    int16_t *voltab = (int16_t *)volumetableptr;
+    int16_t sample, *p = (int16_t *)volumetableptr;
+    #ifdef DEBUG
+    FILE *f;
+    #endif
 
-    for (vol = 0; vol <= 64; vol++)
-        for (sample = 0; sample <= 255; sample++)
+    for (vol = 1; vol <= 64; vol++)
+        for (sample = 0; !(sample & 0x100); sample++)
         {
-            *voltab = (int16_t)(vol * (int16_t)((int8_t)sample)) >> 6;
-            voltab++;
+            *p = (((int16_t)((int8_t)(sample & 0xff))) * vol) << 2;
+            p++;
         }
+
+    #ifdef DEBUG
+    f = fopen("_vol", "wb+");
+    if (f)
+    {
+        fwrite(volumetableptr, sizeof(voltab_t), 1, f);
+        fclose(f);
+    }
+    #endif
 }
 
-void PUBLIC_CODE freeVolumeTable(void)
+void voltab_free(void)
 {
     if (volumetableptr)
     {

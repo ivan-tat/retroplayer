@@ -13,27 +13,30 @@ interface
 (*$I defines.pas*)
 
 type
-    voltab_t = array[0..64,0..255] of integer;
-    voltab_p = ^voltab_t;
+    TVOLTAB = array [0..63, 0..255] of Integer;
+    PVOLTAB = ^TVOLTAB;
 
 var
-    VolumeTablePtr: voltab_p;
+    VolumeTablePtr: PVOLTAB;
 
-procedure initVolumeTable;
-function  allocVolumeTable: boolean;
-procedure calcVolumeTable;
-procedure freeVolumeTable;
+procedure voltab_init;
+procedure voltab_alloc;
+procedure voltab_calc;
+procedure voltab_free;
 
 implementation
 
 uses
     string_,
+(*$ifdef DEBUG*)
+    stdio,
+(*$endif*)
     dos_;
 
 (*$l voltab.obj*)
-procedure initVolumeTable; external;
-function  allocVolumeTable: boolean; external;
-procedure calcVolumeTable; external;
-procedure freeVolumeTable; external;
+procedure voltab_init; external;
+procedure voltab_alloc; external;
+procedure voltab_calc; external;
+procedure voltab_free; external;
 
 end.

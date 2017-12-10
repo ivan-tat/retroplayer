@@ -12,21 +12,6 @@ interface
 
 (*$I defines.pas*)
 
-const
-    MIXSMPFLAG_16BITS = $01;
-    MIXSMPFLAG_LOOP   = $02;
-
-type
-    TPlaySampleInfo = packed record
-        dData: pointer;
-        dPos: longint;
-        dStep: longint;
-        wLen: word;
-        wLoopStart: word;
-        wLoopEnd: word;
-        wFlags: word;
-    end;
-
 procedure _MixSampleMono8;
 procedure _MixSampleStereo8;
 

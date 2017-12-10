@@ -9,119 +9,477 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#ifdef DEBUG
+# include "cc/stdio.h"
+#endif
 
 #include "main/posttab.h"
 
-static int16_t amptab[2][0x100];
-
-void PUBLIC_CODE calcPostTable(uint8_t volume)
+#pragma pack(push, 1)
+typedef union sample_32_t
 {
-    int16_t v, i;
+    uint8_t u8[4];
+    int8_t s8[4];
+    uint16_t u16[2];
+    int16_t s16[2];
+    uint32_t u32;
+    int32_t s32;
+};
+#pragma pack(pop);
 
-    v = volume & 0x7f;
+static int32_t amptab[3][0x100];
 
+#define MID_VOL (1 << 7)
+
+#define CLIP_MIN -0x8000L
+#define CLIP_MAX 0x7fffL
+
+void amptab_set_volume(uint8_t volume)
+{
+    int16_t vol;
+    int32_t *p, s, d;
+    int16_t i;
+    #ifdef DEBUG
+    FILE *f;
+    #endif
+
+    vol = volume;
+    if (vol > MID_VOL)
+        vol = MID_VOL;
+
+    p = amptab;
+
+    // i = sample & 0xff
+    // s0[i] = (u32)((u8)i) * vol / MID_VOL
+    s = 0;
+    d = vol;
     for (i = 0; i < 0x100; i++)
     {
-        amptab[0][i] = i * v / 0x80;
-        amptab[1][i] = (int16_t)(((int32_t)((int16_t)((int8_t)i) * 0x100) * v) / 0x80);
+        *p = s / MID_VOL;
+        p++;
     }
+
+    // i = (sample & 0xff00) >> 8
+    // s1[i] = ((u32)(((u8)s_in)) << 8) * vol / MID_VOL
+    s = 0;
+    //d = (vol << 8) / MID_VOL;
+    d <<= 1;
+    for (i = 0; i < 0x100; i++)
+    {
+        *p = s;
+        s += d;
+        p++;
+    }
+
+    // i = (sample & 0xff0000) >> 16
+    // s2[i] = ((s32)(((s8)i)) << 16) * vol / MID_VOL
+    s = 0;
+    //d = (vol << 16) / MID_VOL;
+    d <<= 8;
+    for (i = 0; i < 0x80; i++)
+    {
+        *p = s;
+        s += d;
+        p++;
+    }
+
+    s = -(((int32_t)vol) << 16);
+    for (i = 0; i < 0x80; i++)
+    {
+        *p = s;
+        s += d;
+        p++;
+    }
+
+    #ifdef DEBUG
+    f = fopen("_amp0", "wb+");
+    if (f)
+    {
+        fwrite(&amptab[0], 256*4, 1, f);
+        fclose(f);
+    }
+    f = fopen("_amp1", "wb+");
+    if (f)
+    {
+        fwrite(&amptab[1], 256*4, 1, f);
+        fclose(f);
+    }
+    f = fopen("_amp2", "wb+");
+    if (f)
+    {
+        fwrite(&amptab[2], 256*4, 1, f);
+        fclose(f);
+    }
+    #endif
 }
 
-void amplify_16s(void *buf, uint16_t count)
+void amplify_s32(int32_t *buf, uint16_t count)
 {
-    int16_t *out;
-    int16_t s;
+    union sample_32_t *out;
 
-    out = (int16_t *)buf;
+    out = (union sample_32_t *)buf;
 
     while (count)
     {
-        s = *out;
-        *out = (amptab[0][(uint8_t)s] + amptab[1][(uint16_t)s >> 8]);
+        out->s32 = amptab[0][out->u8[0]] + amptab[1][out->u8[1]] + amptab[2][out->u8[2]];
         out++;
         count--;
     }
 }
 
-void clip_16s_8u(void *outbuf, void *mixbuf, uint16_t count)
+void clip_s32_u8(void *outbuf, int32_t *mixbuf, uint16_t count)
 {
-    int16_t *src;
-    uint8_t *dst;
-    int16_t s;
+    int32_t *src, s;
+    uint8_t *out;
 
-    src = (int16_t *)mixbuf;
-    dst = (uint8_t *)outbuf;
+    src = mixbuf;
+    out = (uint8_t *)outbuf;
 
     while (count)
     {
         s = *src;
-        if (s < -128)
-            s = -128;
+        if (s < CLIP_MIN)
+            s = CLIP_MIN;
         else
-            if (s > 127)
-                s = 127;
-        *dst = (uint8_t)s + 128;
+            if (s > CLIP_MAX)
+                s = CLIP_MAX;
+
+        *out = (uint8_t)(((uint16_t)s & 0xff00) >> 8) ^ 0x80;
+
         src++;
-        dst++;
+        out++;
         count--;
     }
 }
 
-void clip_16s_mono_8u_mono_lq(void *outbuf, void *mixbuf, uint16_t count)
+void clip_s32_s8(void *outbuf, int32_t *mixbuf, uint16_t count)
 {
-    int16_t *src;
-    uint8_t (*dst)[1];
-    int16_t s;
+    int32_t *src, s;
+    int8_t *out;
 
-    src = (int16_t *)mixbuf;
-    dst = (uint8_t *)outbuf;
+    src = mixbuf;
+    out = (int8_t *)outbuf;
 
     while (count)
     {
         s = *src;
-        if (s < -128)
-            s = -128;
+        if (s < CLIP_MIN)
+            s = CLIP_MIN;
         else
-            if (s > 127)
-                s = 127;
-        *dst[0] = s;
-        *dst[1] = s;
+            if (s > CLIP_MAX)
+                s = CLIP_MAX;
+
+        *out = (int8_t)(((uint16_t)s & 0xff00) >> 8);
+
         src++;
-        dst += 2;
+        out++;
         count--;
     }
 }
 
-void clip_16s_stereo_8u_stereo_lq(void *outbuf, void *mixbuf, uint16_t count)
+void clip_s32_u16(void *outbuf, int32_t *mixbuf, uint16_t count)
 {
-    int16_t (*src)[1];
-    uint8_t (*dst)[1];
-    int16_t s[2];
+    int32_t *src, s;
+    uint16_t *out;
 
-    src = (int16_t *)mixbuf;
-    dst = (uint8_t *)outbuf;
+    src = mixbuf;
+    out = (uint16_t *)outbuf;
 
-    count >>= 1;
     while (count)
     {
-        s[0] = *src[0];
-        s[1] = *src[1];
-        if (s[0] < -128)
-            s[0] = -128;
+        s = *src;
+        if (s < CLIP_MIN)
+            s = CLIP_MIN;
         else
-            if (s[0] > 127)
-                s[0] = 127;
-        if (s[1] < -128)
-            s[1] = -128;
+            if (s > CLIP_MAX)
+                s = CLIP_MAX;
+
+        *out = (uint16_t)s ^ 0x8000;
+
+        src++;
+        out++;
+        count--;
+    }
+}
+
+void clip_s32_s16(void *outbuf, int32_t *mixbuf, uint16_t count)
+{
+    int32_t *src, s;
+    int16_t *out;
+
+    src = mixbuf;
+    out = (int16_t *)outbuf;
+
+    while (count)
+    {
+        s = *src;
+        if (s < CLIP_MIN)
+            s = CLIP_MIN;
         else
-            if (s[1] > 127)
-                s[1] = 127;
-        *dst[0] = s[0];
-        *dst[1] = s[1];
-        *dst[2] = s[0];
-        *dst[3] = s[1];
+            if (s > CLIP_MAX)
+                s = CLIP_MAX;
+
+        *out = (int16_t)s;
+
+        src++;
+        out++;
+        count--;
+    }
+}
+
+void clip_s32_u8_lq(void *outbuf, int32_t *mixbuf, uint16_t count)
+{
+    int32_t *src, s;
+    uint16_t *out;
+
+    src = mixbuf;
+    out = (uint16_t *)outbuf;
+
+    while (count)
+    {
+        s = src[0];
+
+        if (s < CLIP_MIN)
+            s = CLIP_MIN;
+        else
+            if (s > CLIP_MAX)
+                s = CLIP_MAX;
+
+        *out = (((uint16_t)s & 0xff00) + (((uint16_t)s & 0xff00) > 8)) ^ 0x8080;
+
+        src++;
+        out++;
+        count--;
+    }
+}
+
+void clip_s32_s8_lq(void *outbuf, int32_t *mixbuf, uint16_t count)
+{
+    int32_t *src, s;
+    uint16_t *out;
+
+    src = mixbuf;
+    out = (uint16_t *)outbuf;
+
+    while (count)
+    {
+        s = src[0];
+
+        if (s < CLIP_MIN)
+            s = CLIP_MIN;
+        else
+            if (s > CLIP_MAX)
+                s = CLIP_MAX;
+
+        *out = ((uint16_t)s & 0xff00) + (((uint16_t)s & 0xff00) > 8);
+
+        src++;
+        out++;
+        count--;
+    }
+}
+
+void clip_s32_u16_lq(void *outbuf, int32_t *mixbuf, uint16_t count)
+{
+    int32_t *src, s;
+    uint16_t *out;
+
+    src = mixbuf;
+    out = (uint16_t *)outbuf;
+
+    while (count)
+    {
+        s = src[0];
+
+        if (s < CLIP_MIN)
+            s = CLIP_MIN;
+        else
+            if (s > CLIP_MAX)
+                s = CLIP_MAX;
+
+        s ^= 0x8000;
+        out[0] = (uint16_t)s;
+        out[1] = (uint16_t)s;
+
+        src++;
+        out += 2;
+        count--;
+    }
+}
+
+void clip_s32_s16_lq(void *outbuf, int32_t *mixbuf, uint16_t count)
+{
+    int32_t *src, s;
+    int16_t *out;
+
+    src = mixbuf;
+    out = (int16_t *)outbuf;
+
+    while (count)
+    {
+        s = src[0];
+
+        if (s < CLIP_MIN)
+            s = CLIP_MIN;
+        else
+            if (s > CLIP_MAX)
+                s = CLIP_MAX;
+
+        out[0] = (int16_t)s;
+        out[1] = (int16_t)s;
+
+        src++;
+        out += 2;
+        count--;
+    }
+}
+
+void clip_s32_u8_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count)
+{
+    int32_t *src, s[2];
+    uint16_t *out, v;
+
+    src = mixbuf;
+    out = (uint16_t *)outbuf;
+
+    while (count)
+    {
+        s[0] = src[0];
+        s[1] = src[1];
+
+        if (s[0] < CLIP_MIN)
+            s[0] = CLIP_MIN;
+        else
+            if (s[0] > CLIP_MAX)
+                s[0] = CLIP_MAX;
+
+        if (s[1] < CLIP_MIN)
+            s[1] = CLIP_MIN;
+        else
+            if (s[1] > CLIP_MAX)
+                s[1] = CLIP_MAX;
+
+        v = ((((uint16_t)s[0] & 0xff00) >> 8) + ((uint16_t)s[1] & 0xff00)) ^ 0x8080;
+
+        out[0] = v;
+        out[1] = v;
+
         src += 2;
-        dst += 4;
+        out += 2;
+        count--;
+    }
+}
+
+void clip_s32_s8_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count)
+{
+    int32_t *src, s[2];
+    uint16_t *out, v;
+
+    src = mixbuf;
+    out = (uint16_t *)outbuf;
+
+    while (count)
+    {
+        s[0] = src[0];
+        s[1] = src[1];
+
+        if (s[0] < CLIP_MIN)
+            s[0] = CLIP_MIN;
+        else
+            if (s[0] > CLIP_MAX)
+                s[0] = CLIP_MAX;
+
+        if (s[1] < CLIP_MIN)
+            s[1] = CLIP_MIN;
+        else
+            if (s[1] > CLIP_MAX)
+                s[1] = CLIP_MAX;
+
+        v = (((uint16_t)s[0] & 0xff00) >> 8) + ((uint16_t)s[1] & 0xff00);
+
+        out[0] = v;
+        out[1] = v;
+
+        src += 2;
+        out += 2;
+        count--;
+    }
+}
+
+void clip_s32_u16_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count)
+{
+    int32_t *src, s[2];
+    uint32_t *out;
+    union sample_32_t v;
+
+    src = mixbuf;
+    out = (uint32_t *)outbuf;
+
+    while (count)
+    {
+        s[0] = src[0];
+        s[1] = src[1];
+
+        if (s[0] < CLIP_MIN)
+            s[0] = CLIP_MIN;
+        else
+            if (s[0] > CLIP_MAX)
+                s[0] = CLIP_MAX;
+
+        if (s[1] < CLIP_MIN)
+            s[1] = CLIP_MIN;
+        else
+            if (s[1] > CLIP_MAX)
+                s[1] = CLIP_MAX;
+
+        v.u16[0] = (uint16_t)s[0];
+        v.u16[1] = (uint16_t)s[1];
+        v.u32 ^= 0x80008000L;
+
+        out[0] = v.u32;
+        out[1] = v.u32;
+
+        src += 2;
+        out += 2;
+        count--;
+    }
+}
+
+void clip_s32_s16_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count)
+{
+    int32_t *src, s[2];
+    uint32_t *out;
+    union sample_32_t v;
+
+    src = mixbuf;
+    out = (uint32_t *)outbuf;
+
+    while (count)
+    {
+        s[0] = src[0];
+        s[1] = src[1];
+
+        if (s[0] < CLIP_MIN)
+            s[0] = CLIP_MIN;
+        else
+            if (s[0] > CLIP_MAX)
+                s[0] = CLIP_MAX;
+
+        if (s[1] < CLIP_MIN)
+            s[1] = CLIP_MIN;
+        else
+            if (s[1] > CLIP_MAX)
+                s[1] = CLIP_MAX;
+
+        v.s16[0] = (int16_t)s[0];
+        v.s16[1] = (int16_t)s[1];
+        v.u32 ^= 0x80008000L;
+
+        out[0] = v.u32;
+        out[1] = v.u32;
+
+        src += 2;
+        out += 2;
         count--;
     }
 }

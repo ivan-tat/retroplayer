@@ -197,7 +197,7 @@ bool PUBLIC_CODE player_init(void)
     }
 
     if (!volumetableptr)
-        if (!allocVolumeTable())
+        if (!voltab_alloc())
         {
             DEBUG_FAIL("player_init", "Failed to initialize volume table.");
             player_error = E_PLAYER_LOW_MEMORY;
@@ -213,7 +213,7 @@ bool PUBLIC_CODE player_init(void)
         }
 
     if (!mixBuf.buf)
-        if (!mixbuf_alloc(&mixBuf, sndDMABuf.buf->size * sizeof(int16_t) / 2))  // (16 bits)
+        if (!mixbuf_alloc(&mixBuf, sndDMABuf.buf->size / 2))
         {
             DEBUG_FAIL("player_init", "Failed to initialize mixing buffer.");
             player_error = E_PLAYER_LOW_MEMORY;
@@ -387,7 +387,7 @@ void PUBLIC_CODE player_set_master_volume(uint8_t value)
     if (value > 127)
         value = 127;
     playState_mVolume = value;
-    calcPostTable(value);
+    amptab_set_volume(value);
 }
 
 uint8_t PUBLIC_CODE player_get_master_volume(void)
@@ -572,8 +572,8 @@ bool PUBLIC_CODE player_play_start(void)
 
     // 4. Setup mixer tables
 
-    calcVolumeTable();
-    calcPostTable(playState_mVolume);
+    voltab_calc();
+    amptab_set_volume(playState_mVolume);
 
     // 5. Setup playing state
 
@@ -682,7 +682,7 @@ void PUBLIC_CODE player_free(void)
     player_play_stop();
     player_free_module();
     player_free_device();
-    freeVolumeTable();
+    voltab_free();
     snddmabuf_free(&sndDMABuf);
     mixbuf_free(&mixBuf);
     player_flags_bufalloc = false;
@@ -697,6 +697,11 @@ void PUBLIC_CODE player_free(void)
 
 void __near s3mplay_init(void)
 {
+    #ifdef DEBUG
+    _debug_stream[0] = fopen("_STREAM0", "wb");
+    _debug_stream[1] = fopen("_STREAM1", "wb");
+    #endif
+
     player_flags_i386 = isCPU_i386();
     player_flags_bufalloc = false;
     player_flags_snddev = false;
@@ -712,7 +717,7 @@ void __near s3mplay_init(void)
     playOption_LoopSong = false;
     playOption_ST3Order = false;
     playOption_FPS = 70;
-    initVolumeTable();
+    voltab_init();
     mixbuf_init(&mixBuf);
     snddmabuf_init(&sndDMABuf);
     SavHandle = EMSBADHDL;
@@ -723,6 +728,12 @@ void __near s3mplay_init(void)
 void __near s3mplay_done(void)
 {
     player_free();
+    #ifdef DEBUG
+    if (_debug_stream[0])
+        fclose(_debug_stream[0]);
+    if (_debug_stream[1])
+        fclose(_debug_stream[1]);
+    #endif
 }
 
 DEFINE_REGISTRATION(s3mplay, s3mplay_init, s3mplay_done)

@@ -16,6 +16,11 @@ uses
 
 (*$I defines.pas*)
 
+(*$ifdef DEBUG*)
+var
+    _debug_stream: array [0..1] of Pointer;
+(*$endif*)
+
 (* EMM *)
 
 var

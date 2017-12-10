@@ -47,6 +47,10 @@ public _MixSampleMono8
 _MixSampleMono8 proc far _dOutBuf: dword, _dSmpInfo: dword, _wVolTabSeg: word, _bVol: byte, _wCount: word
 local _count: word
 local _step: dword
+        push    ax
+        push    bx
+        push    cx
+        push    dx
         push    si
         push    di
         push    ds
@@ -66,10 +70,11 @@ local _step: dword
         xor     ax,ax
 _MixSampleMono8@_no0:
         mov     [_count],cx
-        shl     ax,1    ; (16 bits)
-        les     di,[_dOutBuf]
-        sub     di,ax
+        shl     ax,1
         mov     bx,ax
+        les     di,[_dOutBuf]
+        shl     ax,1    ; NOTE: mixbuf is 32 bits
+        sub     di,ax
         mov     ax,ds:[innerloop_mono_tab+bx]
         lgs     bx,[_dSmpInfo]
         mov     ds,word ptr gs:[bx][TPlaySampleInfo.dData+2]
@@ -78,6 +83,7 @@ _MixSampleMono8@_no0:
         add     si,word ptr gs:[bx][TPlaySampleInfo.dData]
         mov     edx,gs:[bx][TPlaySampleInfo.dStep]
         rol     edx,16
+        mov     [_step],edx
         xor     ebx,ebx
         mov     bh,[_bVol]
         mov     fs,[_wVolTabSeg]
@@ -87,11 +93,11 @@ align 2
 
 innerloop_mono macro no
 innerloop_mono&no:
-        mov     bl,ds:[si]      ; get PCM value
-        add     esi,[_step]     ; next sample pos
-        adc     si,0            ; next sample pos (carry flag into account)
-        mov     ax,fs:[ebx+ebx] ; convert PCM value with volumetable
-        add     es:[di+pos],ax  ; (16 bits) mix result to out buffer
+        mov     bl,ds:[si]                  ; get PCM value
+        add     esi,[_step]                 ; next sample pos
+        adc     si,0                        ; next sample pos (carry flag into account)
+        movsx   eax,word ptr fs:[ebx+ebx]   ; convert PCM value with volumetable
+        add     es:[di+pos],eax             ; (NOTE: mixbuf is 32 bits) mix result to out buffer
 endm
 
 z = 0
@@ -99,9 +105,9 @@ pos = 0
 rept LOOP_MONO_LENGTH
     innerloop_mono %z
     z = z + 1
-    pos = pos + 2   ; (16 bits)
+    pos = pos + 4   ; NOTE: mixbuf is 32 bits
 endm
-        add     di,LOOP_MONO_LENGTH*2   ; (16 bits)
+        add     di,LOOP_MONO_LENGTH*4   ; NOTE: mixbuf is 32 bits
         dec     [_count]
         jnz     innerloop_mono0
 
@@ -116,6 +122,10 @@ endm
         pop     ds
         pop     di
         pop     si
+        pop     dx
+        pop     cx
+        pop     bx
+        pop     ax
         ret
 _MixSampleMono8 endp
 
@@ -123,6 +133,10 @@ public _MixSampleStereo8
 _MixSampleStereo8 proc far _dOutBuf: dword, _dSmpInfo: dword, _wVolTabSeg: word, _bVol: byte, _wCount: word
 local _count: word
 local _step: dword
+        push    ax
+        push    bx
+        push    cx
+        push    dx
         push    si
         push    di
         push    ds
@@ -142,11 +156,12 @@ local _step: dword
         xor     ax,ax
 _MixSampleStereo8@_no0:
         mov     [_count],cx
-        shl     ax,1    ; (16 bits)
-        les     di,[_dOutBuf]
-        sub     di,ax
-        sub     di,ax
+        shl     ax,1
         mov     bx,ax
+        les     di,[_dOutBuf]
+        shl     ax,1    ; NOTE: mixbuf is 32 bits
+        sub     di,ax
+        sub     di,ax
         mov     ax,ds:[innerloop_stereo_tab+bx]
         lgs     bx,[_dSmpInfo]
         mov     ds,word ptr gs:[bx][TPlaySampleInfo.dData+2]
@@ -165,11 +180,11 @@ align 2
 
 innerloop_stereo macro no
 innerloop_stereo&no:
-        mov     bl,ds:[si]      ; get PCM value
-        add     esi,[_step]     ; next sample pos
-        adc     si,0            ; next sample pos (carry flag into account)
-        mov     ax,fs:[ebx+ebx] ; convert PCM value with volumetable
-        add     es:[di+pos],ax  ; (16 bits) mix result to out buffer
+        mov     bl,ds:[si]                  ; get PCM value
+        add     esi,[_step]                 ; next sample pos
+        adc     si,0                        ; next sample pos (carry flag into account)
+        movsx   eax,word ptr fs:[ebx+ebx]   ; convert PCM value with volumetable
+        add     es:[di+pos],eax             ; (NOTE: mixbuf is 32 bits) mix result to out buffer
 endm
 
 z = 0
@@ -177,9 +192,9 @@ pos = 0
 rept LOOP_STEREO_LENGTH
     innerloop_stereo %z
     z = z + 1
-    pos = pos + 2*2
+    pos = pos + 4*2   ; NOTE: mixbuf is 32 bits
 endm
-        add     di,LOOP_STEREO_LENGTH*2*2   ; (16 bits)
+        add     di,LOOP_STEREO_LENGTH*4*2 ; NOTE: mixbuf is 32 bits
         dec     [_count]
         jnz     innerloop_stereo0
 
@@ -194,6 +209,10 @@ endm
         pop     ds
         pop     di
         pop     si
+        pop     dx
+        pop     cx
+        pop     bx
+        pop     ax
         ret
 _MixSampleStereo8 endp
 

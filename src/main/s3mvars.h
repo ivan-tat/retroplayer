@@ -21,6 +21,15 @@
 
 // TODO: remove PUBLIC_DATA macros when done.
 
+#ifdef DEBUG
+// write sound output streams to files (mixing buffer and DMA buffer)
+#include "cc/stdio.h"
+extern FILE *_debug_stream[2];
+#endif
+#ifdef __WATCOMC__
+#pragma aux _debug_stream "*";
+#endif
+
 /* EMS */
 
 extern bool PUBLIC_DATA UseEMS;

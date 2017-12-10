@@ -673,7 +673,7 @@ void PUBLIC_CODE plays3m_main(void)
     opt_devselect = DEVSEL_AUTO;
     opt_mode_rate = 48000;
     opt_mode_stereo = true;
-    opt_mode_16bits = false;    // not done yet
+    opt_mode_16bits = true;
     opt_mode_lq = false;
     opt_dumpconf = false;
     opt_mvolume = 0;            // use volume from file

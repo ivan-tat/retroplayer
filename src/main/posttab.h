@@ -17,19 +17,37 @@
 
 #include "pascal.h"
 
-void PUBLIC_CODE calcPostTable(uint8_t vol);
+void amptab_set_volume(uint8_t vol);
 
-void amplify_16s(void *buf, uint16_t count);
-void clip_16s_8u(void *outbuf, void *mixbuf, uint16_t count);
-void clip_16s_mono_8u_mono_lq(void *outbuf, void *mixbuf, uint16_t count);
-void clip_16s_stereo_8u_stereo_lq(void *outbuf, void *mixbuf, uint16_t count);
+void amplify_s32(int32_t *buf, uint16_t count);
+void clip_s32_u8(void *outbuf, int32_t *mixbuf, uint16_t count);
+void clip_s32_s8(void *outbuf, int32_t *mixbuf, uint16_t count);
+void clip_s32_u16(void *outbuf, int32_t *mixbuf, uint16_t count);
+void clip_s32_s16(void *outbuf, int32_t *mixbuf, uint16_t count);
+void clip_s32_u8_lq(void *outbuf, int32_t *mixbuf, uint16_t count);
+void clip_s32_s8_lq(void *outbuf, int32_t *mixbuf, uint16_t count);
+void clip_s32_u16_lq(void *outbuf, int32_t *mixbuf, uint16_t count);
+void clip_s32_s16_lq(void *outbuf, int32_t *mixbuf, uint16_t count);
+void clip_s32_u8_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count);
+void clip_s32_s8_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count);
+void clip_s32_u16_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count);
+void clip_s32_s16_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count);
 
-/* Set name mangling to none for editing purposes */
 #ifdef __WATCOMC__
-#pragma aux amplify_16s "*";
-#pragma aux clip_16s_8u "*";
-#pragma aux clip_16s_mono_8u_mono_lq "*";
-#pragma aux clip_16s_stereo_8u_stereo_lq "*";
+#pragma aux amptab_set_volume "*";
+#pragma aux amplify_s32 "*";
+#pragma aux clip_s32_u8 "*";
+#pragma aux clip_s32_s8 "*";
+#pragma aux clip_s32_u16 "*";
+#pragma aux clip_s32_s16 "*";
+#pragma aux clip_s32_u8_lq "*";
+#pragma aux clip_s32_s8_lq "*";
+#pragma aux clip_s32_u16_lq "*";
+#pragma aux clip_s32_s16_lq "*";
+#pragma aux clip_s32_u8_lq_stereo "*";
+#pragma aux clip_s32_s8_lq_stereo "*";
+#pragma aux clip_s32_u16_lq_stereo "*";
+#pragma aux clip_s32_s16_lq_stereo "*";
 #endif
 
 #endif  /* POSTTAB_H */

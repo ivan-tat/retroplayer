@@ -85,12 +85,14 @@ void mixbuf_init(MIXBUF *self)
     }
 }
 
-bool mixbuf_alloc(MIXBUF *self, uint16_t size)
+bool mixbuf_alloc(MIXBUF *self, uint16_t len)
 {
     uint16_t seg;
+    uint32_t size;
 
     if (self)
     {
+        size = len * sizeof(int32_t);   // NOTE: mixbuf is 32 bits
         if (!_dos_allocmem(_dos_para(size), &seg))
         {
             self->buf = MK_FP(seg, 0);
@@ -140,7 +142,7 @@ uint16_t mixbuf_get_offset_from_count(MIXBUF *self, uint16_t value)
         if (self->channels == 2)
             result <<= 1;
 
-        return result * sizeof(int16_t);    // (16 bits)
+        return result * sizeof(int32_t);    // NOTE: mixbuf is 32 bits
     }
 
     return 0;
@@ -157,7 +159,7 @@ uint16_t mixbuf_get_count_from_offset(MIXBUF *self, uint16_t value)
         if (self->channels == 2)
             result >>= 1;
 
-        return result / sizeof(int16_t);    // (16 bits)
+        return result / sizeof(int32_t);    // NOTE: mixbuf is 32 bits
     }
 
     return 0;

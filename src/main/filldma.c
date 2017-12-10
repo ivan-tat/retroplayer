@@ -17,13 +17,40 @@
 #include "main/mixer.h"
 #include "main/mixing.h"
 
+#include "main/filldma.h"
+
 // TODO: remove PUBLIC_CODE macros when done.
+
+typedef void clip_proc_t(void *, int32_t *, uint16_t);
+
+static clip_proc_t *clip_procs[] =  // NOTE: mixbuf is 32 bits
+{
+    &clip_s32_u8,
+    &clip_s32_s8,
+    &clip_s32_u16,
+    &clip_s32_s16,
+    &clip_s32_u8_lq,
+    &clip_s32_s8_lq,
+    &clip_s32_u16_lq,
+    &clip_s32_s16_lq,
+    &clip_s32_u8_lq_stereo,
+    &clip_s32_s8_lq_stereo,
+    &clip_s32_u16_lq_stereo,
+    &clip_s32_s16_lq_stereo
+};
+
+#define CLIP_8 0
+#define CLIP_16 2
+#define CLIP_8_LQ 4
+#define CLIP_16_LQ 6
+#define CLIP_8_LQ_STEREO 8
+#define CLIP_16_LQ_STEREO 10
 
 void __near fill_frame(MIXBUF *mb, SNDDMABUF *outbuf)
 {
     void *mixbuf;
     uint8_t f_bits;
-    bool f_sign;
+    bool f_signed;
     uint8_t f_channels;
     uint8_t f_width;
     uint16_t wait, frame_size, frame_spc, frame_len, srcoff, dstoff;
@@ -34,11 +61,12 @@ void __near fill_frame(MIXBUF *mb, SNDDMABUF *outbuf)
         uint16_t u16;
         uint32_t u32;
     } fill_value;
+    int8_t clip;
 
     mixbuf = mb->buf;
 
     f_bits = get_sample_format_bits(&(outbuf->format));
-    f_sign = is_sample_format_signed(&(outbuf->format));
+    f_signed = is_sample_format_signed(&(outbuf->format));
     f_channels = get_sample_format_channels(&(outbuf->format));
     f_width = get_sample_format_width(&(outbuf->format));
 
@@ -88,29 +116,43 @@ void __near fill_frame(MIXBUF *mb, SNDDMABUF *outbuf)
 
     sound_fill_buffer(mb, frame_spc);
 
-    amplify_16s(mixbuf, frame_len); // (16 bits)
+    amplify_s32(mixbuf, frame_len); // NOTE: mixbuf is 32 bits
 
     outbuf->frameLast = (outbuf->frameLast + 1) & (outbuf->framesCount - 1);
     dstoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameLast);
 
+    clip = -1;
+
     if (outbuf->flags & SNDDMABUFFL_LQ)
     {
-        switch (f_bits)
+        //dstoff <<= 1;
+        switch (f_channels)
         {
-        case 8:
-            if (get_sample_format_channels(&(outbuf->format)) == 2)
-                clip_16s_stereo_8u_stereo_lq(&(buf[dstoff << 1]), mixbuf, frame_len);
-            else
-                clip_16s_mono_8u_mono_lq(&(buf[dstoff << 1]), mixbuf, frame_len);
+        case 1:
+            switch (f_bits)
+            {
+            case 8:
+                clip = CLIP_8_LQ;
+                break;
+            case 16:
+                clip = CLIP_16_LQ;
+                break;
+            default:
+                break;
+            }
             break;
-        /*
-        case 16:
-            if (get_sample_format_channels(&(outbuf->format)) == 2)
-                clip_16_stereo_16_stereo_lq(&(buf[dstoff << 1]), mixbuf, frame_len);
-            else
-                clip_16_mono_16_mono_lq(&(buf[dstoff << 1]), mixbuf, frame_len);
-            break;
-        */
+        case 2:
+            switch (f_bits)
+            {
+            case 8:
+                clip = CLIP_8_LQ_STEREO;
+                break;
+            case 16:
+                clip = CLIP_16_LQ_STEREO;
+                break;
+            default:
+                break;
+            }
         default:
             break;
         }
@@ -120,16 +162,33 @@ void __near fill_frame(MIXBUF *mb, SNDDMABUF *outbuf)
         switch (f_bits)
         {
         case 8:
-            clip_16s_8u(&(buf[dstoff]), mixbuf, frame_len);
+            clip = CLIP_8;
             break;
-        /*
         case 16:
-            clip_16_16(&(buf[dstoff]), mixbuf, frame_len);
+            clip = CLIP_16;
             break;
-        */
         default:
             break;
         }
+    }
+
+    if (clip >= 0)
+    {
+        if (f_signed)
+            clip++;
+
+        #ifdef DEBUG
+        if (_debug_stream[0])
+            fwrite(mixbuf, frame_len * sizeof(int32_t), 1, _debug_stream[0]);
+        #endif
+
+        if (clip_procs[clip])
+            clip_procs[clip](&(buf[dstoff]), mixbuf, frame_len);
+
+        #ifdef DEBUG
+        if (_debug_stream[1])
+            fwrite(&(buf[dstoff]), frame_size, 1, _debug_stream[1]);
+        #endif
     }
 
     outbuf->flags &= ~SNDDMABUFFL_LOCKED;
