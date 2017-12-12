@@ -73,30 +73,27 @@ void fill_32(void *dest, uint32_t value, uint16_t count)
     }
 }
 
-/* Mixing buffer */
+/* Sample buffer */
 
-void mixbuf_init(MIXBUF *self)
+void smpbuf_init(SMPBUF *self)
 {
     if (self)
     {
         self->buf = NULL;
-        self->channels = 0;
-        self->samples_per_channel = 0;
+        self->len = 0;
     }
 }
 
-bool mixbuf_alloc(MIXBUF *self, uint16_t len)
+bool smpbuf_alloc(SMPBUF *self, uint16_t len)
 {
     uint16_t seg;
-    uint32_t size;
 
     if (self)
     {
-        size = len * sizeof(int32_t);   // NOTE: mixbuf is 32 bits
-        if (!_dos_allocmem(_dos_para(size), &seg))
+        if (!_dos_allocmem(_dos_para(len * sizeof(int16_t)), &seg))
         {
             self->buf = MK_FP(seg, 0);
-            self->size = size;
+            self->len = len;
             return true;
         }
     }
@@ -104,7 +101,23 @@ bool mixbuf_alloc(MIXBUF *self, uint16_t len)
     return false;
 }
 
-void mixbuf_free(MIXBUF *self)
+int16_t *smpbuf_get(SMPBUF *self)
+{
+    if (self)
+        return self->buf;
+
+    return NULL;
+}
+
+uint16_t smpbuf_get_length(SMPBUF *self)
+{
+    if (self)
+        return self->len;
+
+    return 0;
+}
+
+void smpbuf_free(SMPBUF *self)
 {
     if (self)
         if (self->buf)
@@ -114,21 +127,87 @@ void mixbuf_free(MIXBUF *self)
         }
 }
 
+/* Mixing buffer */
+
+void mixbuf_init(MIXBUF *self)
+{
+    if (self)
+    {
+        self->buf = NULL;
+        self->len = 0;
+        self->channels = 0;
+        self->samples_per_channel = 0;
+    }
+}
+
+bool mixbuf_alloc(MIXBUF *self, uint16_t len)
+{
+    uint16_t seg;
+
+    if (self)
+    {
+        if (!_dos_allocmem(_dos_para(len * sizeof(int32_t)), &seg))
+        {
+            self->buf = MK_FP(seg, 0);
+            self->len = len;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int32_t *mixbuf_get(MIXBUF *self)
+{
+    if (self)
+        return self->buf;
+
+    return NULL;
+}
+
+uint16_t mixbuf_get_length(MIXBUF *self)
+{
+    if (self)
+        return self->len;
+
+    return 0;
+}
+
 void mixbuf_set_channels(MIXBUF *self, uint8_t value)
 {
-    self->channels = value;
-    mixbuf_set_samples_per_channel(self, self->samples_per_channel);
+    if (self)
+        self->channels = value;
+}
+
+uint8_t mixbuf_get_channels(MIXBUF *self)
+{
+    if (self)
+        return self->channels;
+
+    return 0;
 }
 
 void mixbuf_set_samples_per_channel(MIXBUF *self, uint16_t value)
 {
-    self->samples_per_channel = value;
+    if (self)
+        self->samples_per_channel = value;
+}
+
+uint16_t mixbuf_get_samples_per_channel(MIXBUF *self)
+{
+    if (self)
+        return self->samples_per_channel;
+
+    return 0;
 }
 
 void mixbuf_set_mode(MIXBUF *self, uint8_t channels, uint16_t samples_per_channel)
 {
-    self->channels = channels;
-    mixbuf_set_samples_per_channel(self, samples_per_channel);
+    if (self)
+    {
+        self->channels = channels;
+        self->samples_per_channel = samples_per_channel;
+    }
 }
 
 uint16_t mixbuf_get_offset_from_count(MIXBUF *self, uint16_t value)
@@ -142,7 +221,7 @@ uint16_t mixbuf_get_offset_from_count(MIXBUF *self, uint16_t value)
         if (self->channels == 2)
             result <<= 1;
 
-        return result * sizeof(int32_t);    // NOTE: mixbuf is 32 bits
+        return result * sizeof(int32_t);
     }
 
     return 0;
@@ -159,8 +238,18 @@ uint16_t mixbuf_get_count_from_offset(MIXBUF *self, uint16_t value)
         if (self->channels == 2)
             result >>= 1;
 
-        return result / sizeof(int32_t);    // NOTE: mixbuf is 32 bits
+        return result / sizeof(int32_t);
     }
 
     return 0;
+}
+
+void mixbuf_free(MIXBUF *self)
+{
+    if (self)
+        if (self->buf)
+        {
+            _dos_freemem(FP_SEG(self->buf));
+            self->buf = NULL;
+        }
 }

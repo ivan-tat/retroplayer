@@ -68,14 +68,31 @@ extern uint16_t PUBLIC_DATA ST3Periods[12];
 
 uint32_t _calc_sample_step(uint16_t period, uint16_t rate);
 
-/* Mixing buffer for one frame.
+/* Sample buffer for at least one frame */
+
+#pragma pack(push, 1);
+typedef struct sample_buffer_t
+{
+    int16_t *buf;
+    uint16_t len;
+};
+#pragma pack(pop);
+typedef struct sample_buffer_t SMPBUF;
+
+void     smpbuf_init(SMPBUF *self);
+bool     smpbuf_alloc(SMPBUF *self, uint16_t len);
+int16_t *smpbuf_get(SMPBUF *self);
+uint16_t smpbuf_get_length(SMPBUF *self);
+void     smpbuf_free(SMPBUF *self);
+
+/* Mixing buffer for at least one frame.
    Size depends on: sample rate, channels count, tempo, FPS (almost as DMA frame) */
 
 #pragma pack(push, 1);
 typedef struct mixing_buffer_t
 {
-    int16_t *buf;
-    uint16_t size;
+    int32_t *buf;
+    uint16_t len;
     uint8_t channels;
     uint16_t samples_per_channel;
 };
@@ -84,8 +101,12 @@ typedef struct mixing_buffer_t MIXBUF;
 
 void     mixbuf_init(MIXBUF *self);
 bool     mixbuf_alloc(MIXBUF *self, uint16_t len);
+int32_t *mixbuf_get(MIXBUF *self);
+uint16_t mixbuf_get_length(MIXBUF *self);
 void     mixbuf_set_channels(MIXBUF *self, uint8_t value);
+uint8_t  mixbuf_get_channels(MIXBUF *self);
 void     mixbuf_set_samples_per_channel(MIXBUF *self, uint16_t value);
+uint16_t mixbuf_get_samples_per_channel(MIXBUF *self);
 void     mixbuf_set_mode(MIXBUF *self, uint8_t channels, uint16_t samples_per_channel);
 uint16_t mixbuf_get_offset_from_count(MIXBUF *self, uint16_t value);
 uint16_t mixbuf_get_count_from_offset(MIXBUF *self, uint16_t value);
@@ -93,6 +114,7 @@ void     mixbuf_free(MIXBUF *self);
 
 /* Variables */
 
+extern SMPBUF smpbuf;
 extern MIXBUF mixBuf;
 
 /* Linking */
@@ -104,11 +126,21 @@ extern MIXBUF mixBuf;
 #pragma aux fill_16 "*";
 #pragma aux fill_32 "*";
 #pragma aux _calc_sample_step "*";
+#pragma aux smpbuf "*";
+#pragma aux smpbuf_init "*";
+#pragma aux smpbuf_alloc "*";
+#pragma aux smpbuf_get "*";
+#pragma aux smpbuf_get_length "*";
+#pragma aux smpbuf_free "*";
 #pragma aux mixBuf "*";
 #pragma aux mixbuf_init "*";
 #pragma aux mixbuf_alloc "*";
+#pragma aux mixbuf_get "*";
+#pragma aux mixbuf_get_length "*";
 #pragma aux mixbuf_set_channels "*";
+#pragma aux mixbuf_get_channels "*";
 #pragma aux mixbuf_set_samples_per_channel "*";
+#pragma aux mixbuf_get_samples_per_channel "*";
 #pragma aux mixbuf_set_mode "*";
 #pragma aux mixbuf_get_offset_from_count "*";
 #pragma aux mixbuf_get_count_from_offset "*";

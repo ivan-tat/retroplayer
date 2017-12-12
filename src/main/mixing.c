@@ -161,7 +161,7 @@ void __near song_play(MIXBUF *mb, uint16_t len)
                 chn = &(Channel[i]);
                 if (mixchn_is_enabled(chn))
                     song_play_channel(chn, callEffects, mb, count,
-                        bufOff + (mb->channels == 2 && mixchn_get_type(chn) == 2 ? sizeof(int32_t) : 0));   // NOTE: mixbuf is 32 bits
+                        bufOff + (mixbuf_get_channels(mb) == 2 && mixchn_get_type(chn) == 2 ? sizeof(int32_t) : 0));   // NOTE: mixbuf is 32 bits
             }
 
             playState_tick_samples_per_channel_left -= count;

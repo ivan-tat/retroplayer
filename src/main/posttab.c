@@ -113,11 +113,13 @@ void amptab_set_volume(uint8_t volume)
     #endif
 }
 
-void amplify_s32(int32_t *buf, uint16_t count)
+// "mb" is mixing buffer
+
+void amplify_s32(int32_t *mb, uint16_t count)
 {
     union sample_32_t *out;
 
-    out = (union sample_32_t *)buf;
+    out = (union sample_32_t *)mb;
 
     while (count)
     {
@@ -127,12 +129,12 @@ void amplify_s32(int32_t *buf, uint16_t count)
     }
 }
 
-void clip_s32_u8(void *outbuf, int32_t *mixbuf, uint16_t count)
+void clip_s32_u8(void *outbuf, int32_t *mb, uint16_t count)
 {
     int32_t *src, s;
     uint8_t *out;
 
-    src = mixbuf;
+    src = mb;
     out = (uint8_t *)outbuf;
 
     while (count)
@@ -152,12 +154,12 @@ void clip_s32_u8(void *outbuf, int32_t *mixbuf, uint16_t count)
     }
 }
 
-void clip_s32_s8(void *outbuf, int32_t *mixbuf, uint16_t count)
+void clip_s32_s8(void *outbuf, int32_t *mb, uint16_t count)
 {
     int32_t *src, s;
     int8_t *out;
 
-    src = mixbuf;
+    src = mb;
     out = (int8_t *)outbuf;
 
     while (count)
@@ -177,12 +179,12 @@ void clip_s32_s8(void *outbuf, int32_t *mixbuf, uint16_t count)
     }
 }
 
-void clip_s32_u16(void *outbuf, int32_t *mixbuf, uint16_t count)
+void clip_s32_u16(void *outbuf, int32_t *mb, uint16_t count)
 {
     int32_t *src, s;
     uint16_t *out;
 
-    src = mixbuf;
+    src = mb;
     out = (uint16_t *)outbuf;
 
     while (count)
@@ -202,12 +204,12 @@ void clip_s32_u16(void *outbuf, int32_t *mixbuf, uint16_t count)
     }
 }
 
-void clip_s32_s16(void *outbuf, int32_t *mixbuf, uint16_t count)
+void clip_s32_s16(void *outbuf, int32_t *mb, uint16_t count)
 {
     int32_t *src, s;
     int16_t *out;
 
-    src = mixbuf;
+    src = mb;
     out = (int16_t *)outbuf;
 
     while (count)
@@ -227,12 +229,12 @@ void clip_s32_s16(void *outbuf, int32_t *mixbuf, uint16_t count)
     }
 }
 
-void clip_s32_u8_lq(void *outbuf, int32_t *mixbuf, uint16_t count)
+void clip_s32_u8_lq(void *outbuf, int32_t *mb, uint16_t count)
 {
     int32_t *src, s;
     uint16_t *out;
 
-    src = mixbuf;
+    src = mb;
     out = (uint16_t *)outbuf;
 
     while (count)
@@ -253,12 +255,12 @@ void clip_s32_u8_lq(void *outbuf, int32_t *mixbuf, uint16_t count)
     }
 }
 
-void clip_s32_s8_lq(void *outbuf, int32_t *mixbuf, uint16_t count)
+void clip_s32_s8_lq(void *outbuf, int32_t *mb, uint16_t count)
 {
     int32_t *src, s;
     uint16_t *out;
 
-    src = mixbuf;
+    src = mb;
     out = (uint16_t *)outbuf;
 
     while (count)
@@ -279,12 +281,12 @@ void clip_s32_s8_lq(void *outbuf, int32_t *mixbuf, uint16_t count)
     }
 }
 
-void clip_s32_u16_lq(void *outbuf, int32_t *mixbuf, uint16_t count)
+void clip_s32_u16_lq(void *outbuf, int32_t *mb, uint16_t count)
 {
     int32_t *src, s;
     uint16_t *out;
 
-    src = mixbuf;
+    src = mb;
     out = (uint16_t *)outbuf;
 
     while (count)
@@ -307,12 +309,12 @@ void clip_s32_u16_lq(void *outbuf, int32_t *mixbuf, uint16_t count)
     }
 }
 
-void clip_s32_s16_lq(void *outbuf, int32_t *mixbuf, uint16_t count)
+void clip_s32_s16_lq(void *outbuf, int32_t *mb, uint16_t count)
 {
     int32_t *src, s;
     int16_t *out;
 
-    src = mixbuf;
+    src = mb;
     out = (int16_t *)outbuf;
 
     while (count)
@@ -334,12 +336,12 @@ void clip_s32_s16_lq(void *outbuf, int32_t *mixbuf, uint16_t count)
     }
 }
 
-void clip_s32_u8_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count)
+void clip_s32_u8_lq_stereo(void *outbuf, int32_t *mb, uint16_t count)
 {
     int32_t *src, s[2];
     uint16_t *out, v;
 
-    src = mixbuf;
+    src = mb;
     out = (uint16_t *)outbuf;
 
     while (count)
@@ -370,12 +372,12 @@ void clip_s32_u8_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count)
     }
 }
 
-void clip_s32_s8_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count)
+void clip_s32_s8_lq_stereo(void *outbuf, int32_t *mb, uint16_t count)
 {
     int32_t *src, s[2];
     uint16_t *out, v;
 
-    src = mixbuf;
+    src = mb;
     out = (uint16_t *)outbuf;
 
     while (count)
@@ -406,13 +408,13 @@ void clip_s32_s8_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count)
     }
 }
 
-void clip_s32_u16_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count)
+void clip_s32_u16_lq_stereo(void *outbuf, int32_t *mb, uint16_t count)
 {
     int32_t *src, s[2];
     uint32_t *out;
     union sample_32_t v;
 
-    src = mixbuf;
+    src = mb;
     out = (uint32_t *)outbuf;
 
     while (count)
@@ -445,13 +447,13 @@ void clip_s32_u16_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count)
     }
 }
 
-void clip_s32_s16_lq_stereo(void *outbuf, int32_t *mixbuf, uint16_t count)
+void clip_s32_s16_lq_stereo(void *outbuf, int32_t *mb, uint16_t count)
 {
     int32_t *src, s[2];
     uint32_t *out;
     union sample_32_t v;
 
-    src = mixbuf;
+    src = mb;
     out = (uint32_t *)outbuf;
 
     while (count)

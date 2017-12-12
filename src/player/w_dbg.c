@@ -39,6 +39,8 @@ void __far win_debug_draw(SCRWIN *self)
     MIXBUF *mixbuf;
     SNDDMABUF *sndbuf;
     DMABUF *dmabuf;
+    uint8_t channels;
+    uint16_t samples_per_channel;
 
     if (scrwin_is_created(self))
     {
@@ -125,13 +127,15 @@ void __far win_debug_draw(SCRWIN *self)
         dmabuf = sndbuf->buf;
         gotoxy(36, 4);
         textcolor(_yellow);
-        printf("%5u", mixbuf->channels);
+        channels = mixbuf_get_channels(mixbuf);
+        samples_per_channel = mixbuf_get_samples_per_channel(mixbuf);
+        printf("%5u", channels);
         gotoxy(36, 5);
         printf("%5u", playState_rate);
         gotoxy(36, 6);
-        printf("%5u", mixbuf->samples_per_channel);
+        printf("%5u", samples_per_channel);
         gotoxy(36, 7);
-        printf("%5u", mixbuf->channels * mixbuf->samples_per_channel);
+        printf("%5u", channels * samples_per_channel);
         gotoxy(36, 8);
         printf("%5u", playState_tick_samples_per_channel);
         gotoxy(36, 9);

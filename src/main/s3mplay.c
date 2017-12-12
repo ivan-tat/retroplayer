@@ -173,6 +173,8 @@ const char *PUBLIC_CODE player_get_error(void)
 
 bool PUBLIC_CODE player_init(void)
 {
+    uint16_t len;
+
     DEBUG_BEGIN("player_init");
 
     player_clear_error();
@@ -212,14 +214,23 @@ bool PUBLIC_CODE player_init(void)
             return false;
         }
 
-    if (!mixBuf.buf)
-        if (!mixbuf_alloc(&mixBuf, sndDMABuf.buf->size / 2))
+    len = sndDMABuf.buf->size / 2;  // half DMA transfer buffer size (but in samples)
+
+    if (!smpbuf_get(&smpbuf))
+        if (!smpbuf_alloc(&smpbuf, len))
+        {
+            DEBUG_FAIL("player_init", "Failed to initialize sample buffer.");
+            player_error = E_PLAYER_LOW_MEMORY;
+            return false;
+        }
+
+    if (!mixbuf_get(&mixBuf))
+        if (!mixbuf_alloc(&mixBuf, len))
         {
             DEBUG_FAIL("player_init", "Failed to initialize mixing buffer.");
             player_error = E_PLAYER_LOW_MEMORY;
             return false;
         }
-    memset(mixBuf.buf, 0, mixBuf.size);
 
     player_flags_bufalloc = true;
 
@@ -558,7 +569,7 @@ bool PUBLIC_CODE player_play_start(void)
 
     outbuf = &sndDMABuf;
 
-    if (!_player_setup_outbuf(outbuf, mixBuf.samples_per_channel))
+    if (!_player_setup_outbuf(outbuf, mixbuf_get_samples_per_channel(&mixBuf)))
     {
         DEBUG_FAIL("player_play_start", "Failed to setup output buffer.");
         return false;
@@ -685,6 +696,7 @@ void PUBLIC_CODE player_free(void)
     voltab_free();
     snddmabuf_free(&sndDMABuf);
     mixbuf_free(&mixBuf);
+    smpbuf_free(&smpbuf);
     player_flags_bufalloc = false;
 
     if (UseEMS)
@@ -718,6 +730,7 @@ void __near s3mplay_init(void)
     playOption_ST3Order = false;
     playOption_FPS = 70;
     voltab_init();
+    smpbuf_init(&smpbuf);
     mixbuf_init(&mixBuf);
     snddmabuf_init(&sndDMABuf);
     SavHandle = EMSBADHDL;
