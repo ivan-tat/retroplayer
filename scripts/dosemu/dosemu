@@ -1,0 +1,41 @@
+#!/bin/bash
+# This script must be run in GNU/Linux.
+# Packages used: coreutils, grep.
+
+set -e
+. ./setup.conf
+
+echo_info() {
+    echo -n -e "\e[0m" >&2
+    echo "$1" >&2
+}
+echo_warn() {
+    echo -n -e "\e[33m" >&2
+    echo "$1" >&2
+    echo -n -e "\e[0m" >&2
+}
+
+if [ ! -f "$ENV_PROJECT_INIT" ]; then
+    cat >"$ENV_PROJECT_INIT" <<EOF
+@echo off
+call $DOS_DJGPP_INIT
+call $DOS_WATCOM_INIT
+call $DOS_TP_INIT
+cd $DOS_PROJECT_DIR
+${DOS_PROJECT_DIR:0:2}
+EOF
+    echo_info "Created '$ENV_PROJECT_INIT' file."
+else
+    echo_warn "Skip: File '$ENV_PROJECT_INIT' already exists."
+fi
+
+if ! grep -F -x "call $DOS_PROJECT_INIT" "$ENV_DRIVE_C_DIR/autoexec.bat" >/dev/null; then
+    cat >>"$ENV_DRIVE_C_DIR/autoexec.bat" <<EOT
+call $DOS_PROJECT_INIT
+EOT
+    echo_info "Updated '$ENV_DRIVE_C_DIR/autoexec.bat' file."
+else
+    echo_warn "Skip: File '$ENV_DRIVE_C_DIR/autoexec.bat' already updated."
+fi
+
+echo_info 'DOSEMU setup is finished.'

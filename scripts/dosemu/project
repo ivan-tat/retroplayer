@@ -1,0 +1,34 @@
+#!/bin/bash
+# This script must be run in GNU/Linux.
+# Packages used: coreutils, git.
+
+set -e
+. ./setup.conf
+
+echo_info() {
+    echo -n -e "\e[0m" >&2
+    echo "$1" >&2
+}
+echo_warn() {
+    echo -n -e "\e[33m" >&2
+    echo "$1" >&2
+    echo -n -e "\e[0m" >&2
+}
+
+if [ ! -e "$SYS_PROJECT_DIR" ]; then
+    mkdir -p "$SYS_PROJECT_DIR"
+    git clone https://github.com/ivan-tat/retroplayer.git "$SYS_PROJECT_DIR"
+    echo_info "Created '$SYS_PROJECT_DIR' directory."
+else
+    echo_warn "Skip: Target '$SYS_PROJECT_DIR' already exists."
+fi
+
+if [ ! -e "$ENV_PROJECT_DIR" ]; then
+    mkdir -p `dirname "$ENV_PROJECT_DIR"`
+    ln -s "$SYS_PROJECT_DIR" "$ENV_PROJECT_DIR"
+    echo_info "Created '$ENV_PROJECT_DIR' symlink."
+else
+    echo_warn "Skip: Target '$ENV_PROJECT_DIR' already exists."
+fi
+
+echo_info 'Project setup is finished.'

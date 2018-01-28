@@ -1,4 +1,10 @@
 #!/bin/sh
 # This script must be run in GNU/Linux.
+
 set -e
-cp -i djgpp.bat watcom.bat tp.bat init.bat ~/.dosemu/drive_c
+
+./watcom
+./djgpp
+./tp
+./project
+./dosemu

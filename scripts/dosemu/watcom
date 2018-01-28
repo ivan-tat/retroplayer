@@ -1,0 +1,84 @@
+#!/bin/bash
+# This script must be run in GNU/Linux.
+# Packages used: coreutils, wget, unzip, grep, sudo.
+
+set -e
+. ./setup.conf
+
+echo_info() {
+    echo -n -e "\e[0m" >&2
+    echo "$1" >&2
+}
+echo_warn() {
+    echo -n -e "\e[33m" >&2
+    echo "$1" >&2
+    echo -n -e "\e[0m" >&2
+}
+
+if [ ! -e "$SYS_WATCOM_LATEST_DIR" ]; then
+    wget -c 'https://github.com/open-watcom/travis-ci-ow-builds/archive/master.zip' -O "$TMPDIR/watcom.zip"
+    rm -rf "$TMPDIR/watcom"
+    unzip -q "$TMPDIR/watcom.zip" -d "$TMPDIR/watcom"
+    sudo mv "$TMPDIR/watcom/travis-ci-ow-builds-master" "$SYS_WATCOM_LATEST_DIR"
+    rm -rf "$TMPDIR/watcom"
+    echo_info "Created '$SYS_WATCOM_LATEST_DIR' directory."
+else
+    echo_warn "Skip: Target '$SYS_WATCOM_LATEST_DIR' already exists."
+fi
+
+if [ ! -e "$SYS_WATCOM_DIR" ]; then
+    sudo ln -s -r "$SYS_WATCOM_LATEST_DIR" "$SYS_WATCOM_DIR"
+    echo_info "Created '$SYS_WATCOM_DIR' symlink."
+else
+    echo_warn "Skip: Target '$SYS_WATCOM_DIR' already exists."
+fi
+
+if [ ! -e "$ENV_WATCOM_DIR" ]; then
+    ln -s "$SYS_WATCOM_DIR" "$ENV_WATCOM_DIR"
+    echo_info "Created '$ENV_WATCOM_DIR' symlink."
+else
+    echo_warn "Skip: Target '$ENV_WATCOM_DIR' already exists."
+fi
+
+if [ ! -f "$ENV_WATCOM_INIT" ]; then
+    cat >"$ENV_WATCOM_INIT" <<EOF
+@echo off
+set WATCOM=$DOS_WATCOM_DIR
+set PATH=%WATCOM%\\binw;%PATH%
+set EDPATH=%WATCOM%\\eddat
+set INCLUDE=%WATCOM%\\h
+EOF
+    echo_info "Created '$ENV_WATCOM_INIT' file."
+else
+    echo_warn "Skip: File '$ENV_WATCOM_INIT' already exists."
+fi
+
+if [ ! -f "$SYS_WATCOM_CONF" ]; then
+    cat > "$SYS_WATCOM_CONF" <<EOF
+export WATCOM="$SYS_WATCOM_DIR"
+case \`uname -m\` in
+x86_64)
+    export PATH=\$WATCOM/binl64:\$WATCOM/binl:\$PATH
+    ;;
+*)
+    export PATH=\$WATCOM/binl:\$PATH
+    ;;
+esac
+export EDPATH=\$WATCOM/eddat
+export INCLUDE=\$WATCOM/h
+EOF
+    echo_info "Created '$SYS_WATCOM_CONF' file."
+else
+    echo_warn "Skip: File '$SYS_WATCOM_CONF' already exists."
+fi
+
+if ! grep -F -x ". \"$SYS_WATCOM_CONF\"" ~/.bashrc >/dev/null ; then
+    cat >> ~/.bashrc <<EOT
+. "$SYS_WATCOM_CONF"
+EOT
+    echo_info "Updated '~/.bashrc' file."
+else
+    echo_warn "Skip: File '~/.bashrc' already updated."
+fi
+
+echo_info 'WATCOM setup is finished.'

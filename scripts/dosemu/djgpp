@@ -1,0 +1,56 @@
+#!/bin/bash
+# This script must be run in GNU/Linux.
+# Packages used: coreutils, wget, unzip.
+
+set -e
+. ./setup.conf
+
+echo_info() {
+    echo -n -e "\e[0m" >&2
+    echo "$1" >&2
+}
+echo_warn() {
+    echo -n -e "\e[33m" >&2
+    echo "$1" >&2
+    echo -n -e "\e[0m" >&2
+}
+
+if [ ! -d "$ENV_DJGPP_DIR" ]; then
+    mkdir -p "$ENV_DJGPP_DIR"
+
+    # v2/djdev205.zip      - DJGPP development kit 2.05
+    # v2gnu/bsh205bbr4.zip - GNU Bash 2.05b for DJGPP V2
+    # v2gnu/fil41br2.zip   - GNU fileutils 4.1 for DJGPP V2
+    # v2gnu/fnd4233br5.zip - GNU findutils 4.2.33 for DJGPP V2
+    # v2gnu/grep228b.zip   - GNU Grep 2.28 for DJGPP V2
+    # v2gnu/sed44b.zip     - GNU sed 4.4 for DJGPP V2
+    # v2gnu/txt20br2.zip   - GNU Textutils 2.0 for DJGPP V2
+    for f in \
+    v2/djdev205.zip \
+    v2gnu/bsh205bbr4.zip \
+    v2gnu/fil41br2.zip \
+    v2gnu/fnd4233br5.zip \
+    v2gnu/grep228b.zip \
+    v2gnu/sed44b.zip \
+    v2gnu/txt20br2.zip; do \
+        mkdir -p "$TMPDIR/djgpp/${f%/*}"
+        wget -c -U '' "http://www.delorie.com/pub/djgpp/current/$f" -O "$TMPDIR/djgpp/$f"
+        unzip -q -u -o "$TMPDIR/djgpp/$f" -d "$ENV_DJGPP_DIR"
+    done
+    echo_info "Created '$ENV_DJGPP_DIR' directory."
+else
+    echo_warn "Skip: Directory '$ENV_DJGPP_DIR' already exists."
+fi
+
+if [ ! -f "$ENV_DJGPP_INIT" ]; then
+    cat >"$ENV_DJGPP_INIT" <<EOF
+@echo off
+set DJGPP=$DOS_DJGPP_DIR\\djgpp.env
+set PATH=$DOS_DJGPP_DIR\\bin;%PATH%
+EOF
+    echo_info "Created '$ENV_DJGPP_INIT' file."
+else
+    echo_warn "Skip: File '$ENV_DJGPP_INIT' already exists."
+fi
+
+echo_info 'DJGPP setup is done.'

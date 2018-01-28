@@ -1,0 +1,35 @@
+#!/bin/bash
+# This script must be run in GNU/Linux.
+# Packages used: coreutils.
+
+set -e
+. ./setup.conf
+
+echo_info() {
+    echo -n -e "\e[0m" >&2
+    echo "$1" >&2
+}
+echo_warn() {
+    echo -n -e "\e[33m" >&2
+    echo "$1" >&2
+    echo -n -e "\e[0m" >&2
+}
+
+if [ ! -e "$ENV_TP_DIR" ]; then
+    echo_warn "Error: You must manually install TP into '$ENV_TP_DIR' directory."
+    exit 1
+else
+    echo_warn "Skip: Target '$ENV_TP_DIR' already exists."
+fi
+
+if [ ! -f "$ENV_TP_INIT" ]; then
+    cat >"$ENV_TP_INIT" <<EOF
+@echo off
+set PATH=$DOS_TP_DIR\\bin;%PATH%
+EOF
+    echo_info "Created '$ENV_TP_INIT' file."
+else
+    echo_warn "Skip: File '$ENV_TP_INIT' already exists."
+fi
+
+echo_info 'TP setup is finished.'
