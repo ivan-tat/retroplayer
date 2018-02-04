@@ -9,6 +9,7 @@
 
 #define DEBUG 1
 #define DEBUGLOAD 1
+#define DEBUG_WRITE_OUTPUT_STREAM 0
 //#define DEFINE_LOCAL_DATA 1
 //#define USE_INTRINSICS 1
 

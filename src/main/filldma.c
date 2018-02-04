@@ -177,18 +177,20 @@ void __near fill_frame(MIXBUF *mb, SNDDMABUF *outbuf)
         if (f_signed)
             clip++;
 
-        #ifdef DEBUG
-        if (_debug_stream[0])
-            fwrite(mixbuf, frame_len * sizeof(int32_t), 1, _debug_stream[0]);
-        #endif
+        if (DEBUG_WRITE_OUTPUT_STREAM)
+        {
+            if (_debug_stream[0])
+                fwrite (mixbuf, frame_len * sizeof (int32_t), 1, _debug_stream[0]);
+        }
 
         if (clip_procs[clip])
             clip_procs[clip](&(buf[dstoff]), mixbuf, frame_len);
 
-        #ifdef DEBUG
-        if (_debug_stream[1])
-            fwrite(&(buf[dstoff]), frame_size, 1, _debug_stream[1]);
-        #endif
+        if (DEBUG_WRITE_OUTPUT_STREAM)
+        {
+            if (_debug_stream[1])
+                fwrite (& (buf[dstoff]), frame_size, 1, _debug_stream[1]);
+        }
     }
 
     outbuf->flags &= ~SNDDMABUFFL_LOCKED;

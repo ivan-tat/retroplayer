@@ -16,10 +16,10 @@ uses
 
 (*$I defines.pas*)
 
-(*$ifdef DEBUG*)
+(*$ifdef DEBUG_WRITE_OUTPUT_STREAM*)
 var
     _debug_stream: array [0..1] of Pointer;
-(*$endif*)
+(*$endif*)  (* DEBUG_WRITE_OUTPUT_STREAM *)
 
 (* EMM *)
 
