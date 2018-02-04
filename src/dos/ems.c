@@ -540,12 +540,9 @@ void emsInit(void)
             DEBUG_ERR("emsInit", "Failed to get EMS version.");
         }
     }
-    #ifdef DEBUG
-    if (!emsInstalled)
-    {
-        DEBUG_MSG("emsInit", "No EMS is available.");
-    }
-    #endif
+    if (DEBUG)
+        if (!emsInstalled)
+            DEBUG_MSG ("emsInit", "No EMS is available.");
 }
 
 void emsDone(void)

@@ -1096,10 +1096,9 @@ bool __near _sb_detect_DSP_base(SBDEV *self)
         return false;
     }
 
-    #ifdef DEBUG
-    if (_Self->hw_flags & SBHWFL_BASE)
-        DEBUG_INFO_("_sb_detect_DSP_base", "Found DSP at base port 0x%04X.", p);
-    #endif
+    if (DEBUG)
+        if (_Self->hw_flags & SBHWFL_BASE)
+            DEBUG_INFO_ ("_sb_detect_DSP_base", "Found DSP at base port 0x%04X.", p);
 
     _Self->dspv = _sb_read_DSP_version(_Self);
     if (sbioError != E_SBIO_SUCCESS)
@@ -1141,10 +1140,11 @@ bool __near _sb_detect_IRQ(SBDEV *self, uint8_t dma, uint8_t bits)
 
     if (_Self->hw_irq != 0xff)
     {
-        #ifdef DEBUG
-        DEBUG_INFO_("_sb_detect_IRQ", "Found IRQ channel %hu.", _Self->hw_irq);
-        #endif
-        DEBUG_SUCCESS("_sb_detect_IRQ");
+        if (DEBUG)
+        {
+            DEBUG_INFO_ ("_sb_detect_IRQ", "Found IRQ channel %hu.", _Self->hw_irq);
+            DEBUG_SUCCESS ("_sb_detect_IRQ");
+        }
 
         if (bits == 16)
             _Self->hw_flags |= SBHWFL_DMA16;

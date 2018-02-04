@@ -91,26 +91,27 @@ void amptab_set_volume(uint8_t volume)
         p++;
     }
 
-    #ifdef DEBUG
-    f = fopen("_amp0", "wb+");
-    if (f)
+    if (DEBUG)
     {
-        fwrite(&amptab[0], 256*4, 1, f);
-        fclose(f);
+        f = fopen ("_amp0", "wb+");
+        if (f)
+        {
+            fwrite (&amptab[0], 256*4, 1, f);
+            fclose (f);
+        }
+        f = fopen ("_amp1", "wb+");
+        if (f)
+        {
+            fwrite (&amptab[1], 256*4, 1, f);
+            fclose (f);
+        }
+        f = fopen ("_amp2", "wb+");
+        if (f)
+        {
+            fwrite (&amptab[2], 256*4, 1, f);
+            fclose (f);
+        }
     }
-    f = fopen("_amp1", "wb+");
-    if (f)
-    {
-        fwrite(&amptab[1], 256*4, 1, f);
-        fclose(f);
-    }
-    f = fopen("_amp2", "wb+");
-    if (f)
-    {
-        fwrite(&amptab[2], 256*4, 1, f);
-        fclose(f);
-    }
-    #endif
 }
 
 // "mb" is mixing buffer

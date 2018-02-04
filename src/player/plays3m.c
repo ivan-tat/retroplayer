@@ -870,17 +870,17 @@ void PUBLIC_CODE plays3m_main(void)
     clrscr();
     cursor_show();
 
-    #ifdef DEBUG
-    if (sndDMABuf.flags & SNDDMABUFFL_SLOW)
-        DEBUG_FAIL("plays3m_main", "PC is too slow");
-    #endif
+    if (DEBUG)
+        if (sndDMABuf.flags & SNDDMABUFFL_SLOW)
+            DEBUG_FAIL ("plays3m_main", "PC is too slow");
 
     player_free();
 
-    #ifdef DEBUG
-    printf("After all:" CRLF);
-    memstats();
-    #endif
+    if (DEBUG)
+    {
+        printf ("After all:" CRLF);
+        memstats ();
+    }
 }
 
 /*** Initialization ***/

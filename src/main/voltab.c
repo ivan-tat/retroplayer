@@ -51,14 +51,15 @@ void voltab_calc(void)
             p++;
         }
 
-    #ifdef DEBUG
-    f = fopen("_vol", "wb+");
-    if (f)
+    if (DEBUG)
     {
-        fwrite(volumetableptr, sizeof(voltab_t), 1, f);
-        fclose(f);
+        f = fopen ("_vol", "wb+");
+        if (f)
+        {
+            fwrite (volumetableptr, sizeof (voltab_t), 1, f);
+            fclose (f);
+        }
     }
-    #endif
 }
 
 void voltab_free(void)
