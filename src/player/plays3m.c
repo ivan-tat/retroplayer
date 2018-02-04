@@ -700,10 +700,11 @@ void PUBLIC_CODE plays3m_main(void)
 
     UseEMS = opt_em;
 
-    #ifdef DEBUGLOAD
-    printf("Before loading:" CRLF);
-    memstats();
-    #endif
+    if (DEBUG_FILE_S3M_LOAD)
+    {
+        printf ("Before loading:" CRLF);
+        memstats ();
+    }
 
     if (!player_load_s3m(opt_filename))
     {
@@ -711,10 +712,11 @@ void PUBLIC_CODE plays3m_main(void)
         exit(1);
     }
 
-    #ifdef DEBUGLOAD
-    printf("After loading:" CRLF);
-    memstats();
-    #endif
+    if (DEBUG_FILE_S3M_LOAD)
+    {
+        printf ("After loading:" CRLF);
+        memstats ();
+    }
 
     printf("Song \"%s\" loaded (%s)." CRLF, mod_Title, mod_TrackerName);
 

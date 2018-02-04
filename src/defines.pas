@@ -4,7 +4,7 @@
 (*$define _DEFINES_PAS_INCLUDED*)
 
 (*$define DEBUG*)
-(*$define DEBUGLOAD*)
+(*$define DEBUG_FILE_S3M_LOAD*)
 (*-$define DEBUG_WRITE_OUTPUT_STREAM*)
 
 (*$else*)   (* _DEFINES_PAS_INCLUDED *)
@@ -15,10 +15,10 @@ const
 (*$else*)
     DEBUG = false;
 (*$endif*)
-(*$ifdef DEBUGLOAD*)
-    DEBUGLOAD = true;
+(*$ifdef DEBUG_FILE_S3M_LOAD*)
+    DEBUG_FILE_S3M_LOAD = true;
 (*$else*)
-    DEBUGLOAD = false;
+    DEBUG_FILE_S3M_LOAD = false;
 (*$endif*)
 (*$ifdef DEBUG_WRITE_OUTPUT_STREAM*)
     DEBUG_WRITE_OUTPUT_STREAM = true;

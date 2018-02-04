@@ -294,17 +294,15 @@ void __near s3mloader_alloc_patterns(S3MLOADER *self)
     EMSHDL handle;
 
     patsize = UsedChannels * 64 * 5;
-    #ifdef DEBUGLOAD
-    DEBUG_INFO_(NULL, "Pattern memory size: %u.", patsize);
-    #endif
+    if (DEBUG_FILE_S3M_LOAD)
+        DEBUG_INFO_ (NULL, "Pattern memory size: %u.", patsize);
 
     if (UseEMS)
     {
         // let's continue with loading:
         patperpage = 16 * 1024 / patsize;
-        #ifdef DEBUGLOAD
-        DEBUG_INFO_(NULL, "Patterns per EM page: %u.", patperpage);
-        #endif
+        if (DEBUG_FILE_S3M_LOAD)
+            DEBUG_INFO_ (NULL, "Patterns per EM page: %u.", patperpage);
         _Self->pat_EM_pages = (muspatl_get_count(mod_Patterns) + patperpage - 1) / patperpage;
 
         freepages = emsGetFreePagesCount();
@@ -491,14 +489,15 @@ bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
         muspatl_set(mod_Patterns, index, pat);
     }
 
-    #ifdef DEBUGLOAD
-    if (muspat_is_EM_data(pat))
-        DEBUG_MSG_("s3mloader_load_pattern", "p=%hu, r/s=%u/%u, EM=%04X:%04X",
-            index, length, muspat_get_size(pat), muspat_get_EM_data_page(pat), muspat_get_EM_data_offset(pat));
-    else
-        DEBUG_MSG_("s3mloader_load_pattern", "p=%hu, r/s=%u/%u, DOS=%04X:%04X",
-            index, length, muspat_get_size(pat), muspat_get_data(pat));
-    #endif
+    if (DEBUG_FILE_S3M_LOAD)
+    {
+        if (muspat_is_EM_data (pat))
+            DEBUG_MSG_ ("s3mloader_load_pattern", "p=%hu, r/s=%u/%u, EM=%04X:%04X",
+                index, length, muspat_get_size (pat), muspat_get_EM_data_page (pat), muspat_get_EM_data_offset (pat));
+        else
+            DEBUG_MSG_ ("s3mloader_load_pattern", "p=%hu, r/s=%u/%u, DOS=%04X:%04X",
+                index, length, muspat_get_size (pat), muspat_get_data (pat));
+    }
 
     _unpack_pattern(_Self->buffer, p, muspat_get_rows(pat), muspat_get_channels(pat));
 
@@ -609,10 +608,11 @@ void __near s3mloader_alloc_samples(S3MLOADER *self)
         }
     }
 
-    #ifdef DEBUGLOAD
-    DEBUG_INFO_(NULL, "Instruments to load: %u.", InsNum);
-    DEBUG_INFO_(NULL, "EM pages are needed for samples: %u.", pages);
-    #endif
+    if (DEBUG_FILE_S3M_LOAD)
+    {
+        DEBUG_INFO_ (NULL, "Instruments to load: %u.", InsNum);
+        DEBUG_INFO_ (NULL, "EM pages are needed for samples: %u.", pages);
+    }
 
     if (pages > emsGetFreePagesCount())
         pages = emsGetFreePagesCount();
@@ -630,9 +630,8 @@ void __near s3mloader_alloc_samples(S3MLOADER *self)
     _Self->smp_EM_pages = pages;
     _Self->smp_EM_page = 0;
 
-    #ifdef DEBUGLOAD
-    DEBUG_INFO_(NULL, "EM pages allocated for samples: %u.", pages);
-    #endif
+    if (DEBUG_FILE_S3M_LOAD)
+        DEBUG_INFO_ (NULL, "EM pages allocated for samples: %u.", pages);
 }
 
 void __near convert_sign_8(void *data, uint32_t size)
@@ -688,9 +687,8 @@ bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
 
     if (UseEMS && musinsl_is_EM_data(mod_Instruments) && (_Self->smp_EM_pages >= pages))
     {
-        #ifdef DEBUGLOAD
-        DEBUG_INFO_(NULL, "sample=%02u, data=EM:%u-%u.", index, _Self->smp_EM_page, _Self->smp_EM_page + pages - 1);
-        #endif
+        if (DEBUG_FILE_S3M_LOAD)
+            DEBUG_INFO_ (NULL, "sample=%02u, data=EM:%u-%u.", index, _Self->smp_EM_page, _Self->smp_EM_page + pages - 1);
         musins_set_EM_data(ins, true);
         musins_set_EM_data_page(ins, _Self->smp_EM_page);
         data = musins_map_EM_data(ins);
@@ -710,9 +708,8 @@ bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
             _Self->err = E_S3M_DOS_MEM_ALLOC;
             return false;
         }
-        #ifdef DEBUGLOAD
-        DEBUG_INFO_(NULL, "sample=%02u, data=DOS:0x%04X0.", index, seg);
-        #endif
+        if (DEBUG_FILE_S3M_LOAD)
+            DEBUG_INFO_ (NULL, "sample=%02u, data=DOS:0x%04X0.", index, seg);
         data = MK_FP(seg, 0);
         musins_set_EM_data(ins, false);
         musins_set_data(ins, data);
@@ -866,9 +863,8 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
         mixchn_set_type(chn, chtype);
     }
     UsedChannels = maxused;
-    #ifdef DEBUGLOAD
-    DEBUG_INFO_(NULL, "Channels: %hu", UsedChannels);
-    #endif
+    if (DEBUG_FILE_S3M_LOAD)
+        DEBUG_INFO_ (NULL, "Channels: %hu", UsedChannels);
 
     if (!fread(&Order, OrdNum, 1, _Self->f))
     {
