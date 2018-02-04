@@ -108,17 +108,42 @@ PROJDIR="$PWD"
 LASTDIR="$PROJDIR"
 
 W_AS="wasm -zq"
+# Description of options:
+# -zq             operate quietly
 W_CC='wcc'
 export WCC="-3 -fp3 -ml -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu"
-# disable optimization:
-# "-oc" - disable <call followed by return> to jump optimization;
-# reason: "wdis" incorrectly writes "je near ptr <near_extern_label>"
-#   (without "near ptr")
+# Description of options for "wcc":
+# -3              386 instructions
+# -fp3            generate floating-point code (80387 FPU code)
+# -ml             memory model (large - large code/large data)
+# -oc             disable <call followed by return> to <jump> optimization
+#                 reason: "wdis" incorrectly writes "je near ptr <near_extern_label>"
+#                 (without "near ptr")
+# -oi             expand intrinsic functions inline
+# -q              operate quietly (display only error messages)
+# -r              save/restore segment registers across calls
+# -s              remove stack overflow checks
+# -zdp            DS is pegged to DGROUP
+# -zff            FS floats (i.e. not fixed to a segment)
+# -zgf            GS floats (i.e. not fixed to a segment)
+# -zl             remove default library information
+# -zls            remove automatically inserted symbols
+# -zp=1           pack structure members with alignment (1)
+# -zu             SS != DGROUP (i.e., do not assume stack is in data segment)
 W_CL='wcl'
 W_CL386='wcl386'
 W_DIS='wdis'
 W_LIB='wlib'
 PC='tpc -gd -q -v -$d+,e-,g+,l+,n+'
+# Description of options for "tpc":
+# -gd             detailed map file
+# -q              quiet compile
+# -v              debug information in EXE
+# -$d+            debug information (yes)
+# -$e-            80x87 emulation (no)
+# -$g+            80286 instructions (yes)
+# -$l+            local debug symbols (yes)
+# -$n+            80x87 instructions (yes)
 
 _dir="$PROJDIR/src"
 if [ -n "$INCLUDE" ]; then
