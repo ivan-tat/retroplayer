@@ -100,24 +100,16 @@ uint16_t PUBLIC_CODE _cc_dos_setblock(uint16_t size, uint16_t seg, uint16_t *max
 #pragma aux pascal_exec        modify [ ax bx cx dx si di es ];
 /* <<< Pascal */
 
-#pragma aux _cc_dos_getdate "^";
-#pragma aux _cc_dos_gettime "^";
-#pragma aux _cc_dos_getvect "^";
-#pragma aux _cc_dos_setvect "^";
+#pragma aux _cc_dos_getdate "*";
+#pragma aux _cc_dos_gettime "*";
+#pragma aux _cc_dos_getvect "*";
+#pragma aux _cc_dos_setvect "*";
 #ifndef USE_INTRINSICS
-/*
-#pragma aux _cc_dos_para "^";
-*/
-#pragma aux _cc_dos_para "_DOS_PARA";
+#pragma aux _cc_dos_para "*";
 #endif
-/*
-#pragma aux _cc_dos_allocmem "^";
-#pragma aux _cc_dos_freemem "^";
-#pragma aux _cc_dos_setblock "^";
-*/
-#pragma aux _cc_dos_allocmem "_DOS_ALLOCMEM";
-#pragma aux _cc_dos_freemem  "_DOS_FREEMEM";
-#pragma aux _cc_dos_setblock "_DOS_SETBLOCK";
+#pragma aux _cc_dos_allocmem "*";
+#pragma aux _cc_dos_freemem "*";
+#pragma aux _cc_dos_setblock "*";
 
 #endif  /* __WATCOMC__ */
 

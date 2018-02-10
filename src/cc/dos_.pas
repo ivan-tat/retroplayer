@@ -29,16 +29,10 @@ procedure _cc_dos_gettime;
 procedure _cc_dos_getvect;
 procedure _cc_dos_setvect;
 
-(*
 procedure _cc_dos_para;
 procedure _cc_dos_allocmem;
 procedure _cc_dos_freemem;
 procedure _cc_dos_setblock;
-*)
-function _dos_para(size: LongInt): Word;
-function _dos_allocmem(size: Word; var seg: Word): Word;
-function _dos_freemem(seg: Word): Word;
-function _dos_setblock(size: Word; seg: Word; var max: Word): Word;
 
 implementation
 
@@ -74,15 +68,9 @@ procedure _cc_dos_getvect; external;
 procedure _cc_dos_setvect; external;
 
 (*$L dos\mem086.obj*)
-(*
 procedure _cc_dos_para; external;
 procedure _cc_dos_allocmem; external;
 procedure _cc_dos_freemem; external;
 procedure _cc_dos_setblock; external;
-*)
-function _dos_para(size: LongInt): Word; external;
-function _dos_allocmem(size: Word; var seg: Word): Word; external;
-function _dos_freemem(seg: Word): Word; external;
-function _dos_setblock(size: Word; seg: Word; var max: Word): Word; external;
 
 end.
