@@ -42,4 +42,14 @@ char *custom_getenv(char *dest, const char *name, size_t maxlen);
 
 #define exit cc_exit
 
+#ifdef __WATCOMC__
+#pragma aux cc_atoi "*";
+#pragma aux cc_atol "*";
+#pragma aux cc_strtol "*";
+#pragma aux cc_malloc "*";
+#pragma aux cc_free "*";
+#pragma aux cc_exit "*";
+#pragma aux custom_getenv "*";
+#endif
+
 #endif  /* CC_STDLIB_H */

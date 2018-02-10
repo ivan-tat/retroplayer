@@ -12,17 +12,17 @@ interface
 
 (*$I defines.pas*)
 
-procedure cc_atoi_;
-procedure cc_atol_;
+procedure cc_atoi;
+procedure cc_atol;
 
-procedure cc_strtol_;
+procedure cc_strtol;
 
-procedure cc_malloc_;
-procedure cc_free_;
+procedure cc_malloc;
+procedure cc_free;
 
-procedure cc_exit_;
+procedure cc_exit;
 
-procedure custom_getenv_;
+procedure custom_getenv;
 
 implementation
 
@@ -50,20 +50,20 @@ begin
 end;
 
 (*$L stdlib/atoi.obj*)
-procedure cc_atoi_; external;
+procedure cc_atoi; external;
 (*$L stdlib/atol.obj*)
-procedure cc_atol_; external;
+procedure cc_atol; external;
 
 (*$L stdlib/strtol.obj*)
-procedure cc_strtol_; external;
+procedure cc_strtol; external;
 
 (*$L stdlib/fmalloc.obj*)
-procedure cc_malloc_; external;
+procedure cc_malloc; external;
 (*$L stdlib/ffree.obj*)
-procedure cc_free_; external;
+procedure cc_free; external;
 
 (*$L stdlib/fexit.obj*)
-procedure cc_exit_; external;
+procedure cc_exit; external;
 
 function pascal_getenv(name: String): String; near;
 begin
@@ -71,6 +71,6 @@ begin
 end;
 
 (*$L stdlib/getenv.obj*)
-procedure custom_getenv_; external;
+procedure custom_getenv; external;
 
 end.
