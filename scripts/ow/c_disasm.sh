@@ -54,6 +54,8 @@ disasm atol.obj ATOL_TEXT
 disasm istable.obj ISTABLE_TEXT
 disasm strtol.obj STRTOL_TEXT
 disasm errno.obj ERRNO_TEXT
+disasm crwdata.obj CRWDATA_TEXT
+disasm pspptr.obj PSPPTR_TEXT
 # <string.h>
 disasm memcmp.obj MEMCMP_TEXT
 disasm memcpy.obj MEMCPY_TEXT

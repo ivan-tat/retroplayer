@@ -40,6 +40,7 @@
 ./src/cc/stdlib/
 ./src/cc/stdlib/atoi.asm
 ./src/cc/stdlib/atol.asm
+./src/cc/stdlib/crwdata.asm
 ./src/cc/stdlib/fexit.asm
 ./src/cc/stdlib/ffree.asm
 ./src/cc/stdlib/fmalloc.asm

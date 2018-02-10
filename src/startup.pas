@@ -19,10 +19,13 @@ procedure pascal_paramstr(var dest: String; i: Byte);
 function  custom_argc: Word;
 procedure custom_argv(dest: PChar; n: Word; i: Byte);
 
+procedure custom_startup;
+
 implementation
 
 uses
-    pascal;
+    pascal,
+    stdlib;
 
 function pascal_paramcount: Word;
 begin
@@ -35,8 +38,8 @@ begin
 end;
 
 (*$l startup.obj*)
-
 function  custom_argc: Word; external;
 procedure custom_argv(dest: PChar; n: Word; i: Byte); external;
+procedure custom_startup; external;
 
 end.

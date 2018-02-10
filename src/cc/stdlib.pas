@@ -12,6 +12,9 @@ interface
 
 (*$I defines.pas*)
 
+const
+    _cc_psp: Word = 0;
+
 procedure cc_atoi;
 procedure cc_atol;
 
@@ -64,6 +67,8 @@ procedure cc_free; external;
 
 (*$L stdlib/fexit.obj*)
 procedure cc_exit; external;
+
+(*$L stdlib/crwdata.obj*)
 
 function pascal_getenv(name: String): String; near;
 begin

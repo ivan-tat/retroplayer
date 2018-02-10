@@ -18,6 +18,8 @@
 #include "pascal.h"
 #include "cc/errno.h"
 
+extern uint16_t _cc_psp;
+
 int  cc_atoi(const char *src);
 long cc_atol(const char *src);
 
@@ -32,6 +34,8 @@ char *custom_getenv(char *dest, const char *name, size_t maxlen);
 
 /* Aliases */
 
+#define _psp _cc_psp
+
 #define atoi cc_atoi
 #define atol cc_atol
 
@@ -43,6 +47,7 @@ char *custom_getenv(char *dest, const char *name, size_t maxlen);
 #define exit cc_exit
 
 #ifdef __WATCOMC__
+#pragma aux _cc_psp "*";
 #pragma aux cc_atoi "*";
 #pragma aux cc_atol "*";
 #pragma aux cc_strtol "*";

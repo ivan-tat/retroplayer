@@ -23,6 +23,7 @@ wlib -d="$DST" "$CLIB" ':error086.asm' ':gtime086.asm'
 wlib -d="$DST" "$CLIB" ':exv.c' ':exve.c'
 # <stdlib.h>
 wlib -d="$DST" "$CLIB" ':atoi.c' ':atol.c' ':istable.c' ':strtol.c' ':errno.c'
+wlib -d="$DST" "$CLIB" ':crwdata' ':pspptr.c'
 # <string.h>
 wlib -d="$DST" "$CLIB" ':memcmp.c' ':memcpy.c' ':memset.c'
 wlib -d="$DST" "$CLIB" ':strchr.c' ':strlen.c' ':strncmp.c' ':strncpy.c' ':strnicmp.c'

@@ -25,4 +25,8 @@ extern void     PUBLIC_CODE pascal_paramstr(char *dest, uint8_t i);
 uint16_t PUBLIC_CODE custom_argc(void);
 void     PUBLIC_CODE custom_argv(char *dest, uint16_t n, uint8_t i);
 
+/*** Initialization ***/
+
+bool PUBLIC_CODE custom_startup(void);
+
 #endif  /* STARTUP_H */

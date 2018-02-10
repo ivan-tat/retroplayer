@@ -657,6 +657,15 @@ void PUBLIC_CODE plays3m_main(void)
     bool quit, result;
     char c;
 
+    if (!custom_startup())
+        return;
+
+    /* TODO: make separate custom_main() */
+
+    /* TODO: all modules initialization goes here */
+    // This is the place where all modules must be manually initialized in the right order.
+    // Actually this is automatically done by Pascal linker at the moment and
+    // must be fixed in the future.
     register_plays3m();
 
     printf(

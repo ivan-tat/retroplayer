@@ -390,6 +390,7 @@ build_target $T_CC     obj src/cc/stdio/vsnprntf.c
 build_target $T_CC     obj src/cc/stdio/vsprintf.c
 build_target $T_CC     obj src/cc/stdlib/atoi.c
 build_target $T_CC     obj src/cc/stdlib/atol.c
+build_target $T_CC     obj src/cc/stdlib/crwdata.c
 build_target $T_CC     obj src/cc/stdlib/fexit.c
 build_target $T_CC     obj src/cc/stdlib/ffree.c
 build_target $T_CC     obj src/cc/stdlib/fmalloc.c
