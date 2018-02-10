@@ -13,12 +13,12 @@ interface
 (*$I defines.pas*)
 
 (*
-procedure _cc_inp;
-procedure _cc_outp;
+procedure cc_inp;
+procedure cc_outp;
 *)
+procedure cc_kbhit;
+procedure cc_getch;
 
-function  pascal_keypressed: Boolean;
-function  pascal_readkey: Char;
 procedure pascal_clreol;
 procedure pascal_clrscr;
 procedure pascal_gotoxy(x, y: Byte);
@@ -30,29 +30,26 @@ procedure pascal_window(x1, y1, x2, y2: Byte);
 implementation
 
 uses
+    i86,
     crt;
 
 (*$L conio\inp.obj*)
 (*
-procedure _cc_inp; external;
+procedure cc_inp; external;
 *)
 
 (*$L conio\outp.obj*)
 (*
-procedure _cc_outp; external;
+procedure cc_outp; external;
 *)
 
+(*$L conio\kbhit.obj*)
+procedure cc_kbhit; external;
+
+(*$L conio\getch.obj*)
+procedure cc_getch; external;
+
 (* CRT Unit *)
-
-function pascal_keypressed: Boolean;
-begin
-    pascal_keypressed := crt.KeyPressed;
-end;
-
-function pascal_readkey: Char;
-begin
-    pascal_readkey := crt.ReadKey;
-end;
 
 procedure pascal_clreol;
 begin

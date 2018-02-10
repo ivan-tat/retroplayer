@@ -47,8 +47,10 @@ src/debug.asm
 src/dynarray.asm
 src/pascal.asm
 src/startup.asm
+src/cc/conio/getch.asm
 src/cc/conio/inp.asm
 src/cc/conio/outp.asm
+src/cc/conio/kbhit.asm
 src/cc/ctype/istable.asm
 src/cc/dos/d_getvec.asm
 src/cc/dos/d_setvec.asm

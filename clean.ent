@@ -1,7 +1,9 @@
 ./src/
 ./src/cc/
 ./src/cc/conio/
+./src/cc/conio/getch.asm
 ./src/cc/conio/inp.asm
+./src/cc/conio/kbhit.asm
 ./src/cc/conio/outp.asm
 ./src/cc/ctype/
 ./src/cc/ctype/istable.asm

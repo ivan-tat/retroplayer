@@ -41,23 +41,10 @@ extern void cc_outp(unsigned int port, char value);
 
 #endif  /* !__WATCOMC__ */
 
-#define inp cc_inp
-#define outp cc_outp
-
 /*** Keyboard functions ***/
 
-extern bool PUBLIC_CODE pascal_keypressed(void);
-extern char PUBLIC_CODE pascal_readkey(void);
-
-#ifdef __WATCOMC__
-#pragma aux pascal_keypressed modify [bx cx dx si di es];
-#pragma aux pascal_readkey    modify [bx cx dx si di es];
-#endif
-
-/* Aliases */
-
-#define kbhit() pascal_keypressed()
-#define getch() pascal_readkey()
+extern bool cc_kbhit(void);
+extern char cc_getch(void);
 
 /*** Text-mode functions ***/
 
@@ -111,6 +98,16 @@ extern void PUBLIC_CODE pascal_window(uint8_t x1, uint8_t y1, uint8_t x2, uint8_
 
 /* Aliases */
 
+#define inp cc_inp
+#define outp cc_outp
+
+/*** Keyboard functions ***/
+
+#define kbhit cc_kbhit
+#define getch cc_getch
+
+/*** Text-mode functions ***/
+
 #define clreol()                pascal_clreol()
 #define clrscr()                pascal_clrscr()
 #define gotoxy(x, y)            pascal_gotoxy(x, y)
@@ -118,5 +115,12 @@ extern void PUBLIC_CODE pascal_window(uint8_t x1, uint8_t y1, uint8_t x2, uint8_
 #define textcolor(c)            pascal_textcolor(c)
 #define textmode(m)             pascal_textmode(m)
 #define window(x1, y1, x2, y2)  pascal_window(x1, y1, x2, y2)
+
+#ifdef __WATCOMC__
+//#pragma aux cc_inp "*";
+//#pragma aux cc_outp "*";
+#pragma aux cc_kbhit "*";
+#pragma aux cc_getch "*";
+#endif
 
 #endif  /* CC_CONIO_H */
