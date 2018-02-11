@@ -1,0 +1,3 @@
+#!/bin/sh
+# This script must be run in GNU/Linux
+dosbox -userconf -conf test1.conf
