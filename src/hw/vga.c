@@ -9,6 +9,7 @@
 
 #include "pascal.h"
 #include "cc/i86.h"
+#include "cc/conio.h"
 #include "debug.h"
 
 #include "hw/vga.h"
@@ -30,6 +31,16 @@ void PUBLIC_CODE vbios_set_cursor_shape(uint8_t start, uint8_t stop)
     regs.h.cl = stop;
     regs.h.ch = start;
     intr(0x10, &regs);
+}
+
+void PUBLIC_CODE vga_wait_vsync(void)
+{
+    _disable();
+
+    while ((inp(0x3da) & 8) == 0);
+    while ((inp(0x3da) & 8) != 0);
+
+    _enable();
 }
 
 /* Initialization */

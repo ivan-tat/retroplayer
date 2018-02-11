@@ -15,17 +15,22 @@ interface
 procedure vbios_set_mode(mode: Byte);
 procedure vbios_set_cursor_shape(start, stop: Byte);
 
+procedure vga_wait_vsync;
+
 implementation
 
 uses
     pascal,
     i86,
+    conio,
     debug;
 
 (*$l vga.obj*)
 
 procedure vbios_set_mode(mode: Byte); external;
 procedure vbios_set_cursor_shape(start, stop: Byte); external;
+
+procedure vga_wait_vsync; external;
 
 procedure register_vga; far; external;
 

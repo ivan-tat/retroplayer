@@ -7,6 +7,7 @@ uses
     dos,
     string_,
     sbctl,
+    vga,
     s3mvars,
     fillvars,
     mixchn,
@@ -84,22 +85,6 @@ var samplerate:word;
     @@e:
     end;
 
-  procedure waitretrace; assembler;
-    asm
-      { waitraster : }
-      cli
-      mov     dx,03dah
-@@raster1:
-      in      al,dx
-      and     al,8
-      jz      @@raster1
-@@raster2:
-      in      al,dx
-      and     al,8
-      jnz     @@raster2
-      sti
-    end;
-
 var pos:word;
     i:word;
     h:Parray;
@@ -148,7 +133,7 @@ begin
       h:=sndDMABuf.buf^.Data;
       while not keypressed do
         begin
-          waitretrace;
+          vga_wait_vsync;
           for pos:=0 to usedchannels-1 do
           begin
             chn := @channel[pos];
