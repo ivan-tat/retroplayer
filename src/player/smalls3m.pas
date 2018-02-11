@@ -2,60 +2,41 @@
 program example_for_s3mplay;
 
 uses
+    watcom,
+    types,
     pascal,
+    startup,
+    strutils,
+    conio,
+    stdio,
+    stdlib,
+    string_,
+    unistd,
     crt,
     dos,
-    string_,
+    dos_,
+    ems,
+    malloc,
+    errno_,
+    debug,
     sbctl,
+    vga,
+    s3mtypes,
+    musins,
+    muspat,
     s3mvars,
+    fillvars,
+    mixer,
+    mixchn,
+    effects,
     s3mplay;
 
 (*$I defines.pas*)
 
-const stereo_calc=true;
-      _16bit_calc=false;        { 16bit play not yet possible }
+(*$L smalls3m.obj*)
 
-var samplerate:word;
-    Stereo:Boolean;
-    _16bit:Boolean;
-    filename:string;
-
-  procedure init;
-  var
-      name: array [0..255] of Char;
-    begin
-      { setup defaults: }
-      Samplerate:=45454;
-      Stereo:=stereo_calc;
-      _16bit:=_16bit_calc;
-      { end of default ... }
-      strpastoc(@name, filename, 256);
-      if (not player_load_s3m(name)) then
-          halt;
-      writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');
-      if not player_init then halt;
-      if not player_init_device(1) then begin writeln(' SoundBlaster not found sorry ... ');halt end;
-      player_set_mode(_16bit,stereo,samplerate,false);
-      player_set_order(true);
-      playOption_LoopSong:=true;
-    end;
+procedure smalls3m_main; far; external;
 
 begin
-  textbackground(black);textcolor(lightgray);
-  clrscr;
-  writeln(' SMART-S3M-PLAYER for SoundBlasters written by Cyder of Green Apple');
-  writeln(' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-  writeln(' Version : ',PLAYER_VERSION);
-  filename:=paramstr(1);
-  if (filename='') then halt;
-  writeln;
-  Init;
-  if (not player_set_mode(_16bit,stereo,samplerate,false)) then halt;
-  if (not player_play_start) then halt;
-  writeln(#13#10' Return to player and stop playing with ''EXIT'' ... ');
-  swapvectors;
-  exec(getenv('COMSPEC'),'');
-  swapvectors;
-  writeln('DOSerror :',doserror,' (if 8 -> not enough memory for COMMAND.COM)');
-  player_free;
+    smalls3m_main;
 end.

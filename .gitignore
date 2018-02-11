@@ -123,6 +123,7 @@ src/main/s3mvars.asm
 src/main/voltab.asm
 src/player/plays3m.asm
 src/player/screen.asm
+src/player/smalls3m.asm
 src/player/w_chn.asm
 src/player/w_dbg.asm
 src/player/w_hlp.asm

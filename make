@@ -449,6 +449,7 @@ build_target $T_MAIN   obj src/player/w_ins.c
 build_target $T_MAIN   obj src/player/w_smp.c
 build_target $T_MAIN   obj src/player/w_dbg.c
 build_target $T_MAIN   obj src/player/plays3m.c
+build_target $T_MAIN   obj src/player/smalls3m.c
 fi
 
 if [ -n "$DJGPP" ]; then
