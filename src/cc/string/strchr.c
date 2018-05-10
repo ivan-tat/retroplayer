@@ -16,15 +16,15 @@ char *cc_strchr(const char *s, int c)
     {
         ptr = s;
         count = ~0;
-        while (*ptr != c && count)
+        while (*ptr && *ptr != c && count)
         {
             ptr++;
             count--;
         }
 
-        if (count)
+        if (*ptr == c)
             return (char *)ptr;
-    };
+    }
 
     return NULL;
 }
