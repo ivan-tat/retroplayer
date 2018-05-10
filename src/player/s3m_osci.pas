@@ -15,38 +15,65 @@ uses
 
 (*$I defines.pas*)
 
-const stereo_calc=true ;
-      _16bit_calc=false;        { 16bit play not yet possible }
+const
+    def_rate = 45454;
+    def_stereo = true;
+    def_16bits = false;
+    def_lq = false;
 
 type Parray = ^TArray;
      TArray = array[0..10000] of byte;
 
-var samplerate:word;
-    Stereo:Boolean;
-    _16bit:Boolean;
-    filename:string;
+var opt_rate: Word;
+    opt_stereo: Boolean;
+    opt_16bits: Boolean;
+    opt_lq: Boolean;
+    opt_filename: String;
+    drawseg: Word;
 
   {$L LINES.OBJ}
   procedure linie(x1,y1,x2,y2:word;f:byte); external;
 
-  procedure init;
-  var
-      name: array [0..255] of Char;
+procedure s3mosci_init;
+var
+    name: array [0..255] of Char;
+begin
+    strpastoc (@name, opt_filename, 256);
+    if (not player_load_s3m (name)) then
+        halt;
+
+    writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');
+
+    if (not player_init) then
+        halt;
+
+    if (not player_init_device(2)) then
     begin
-      strpastoc(@name, filename, 256);
-      if (not player_load_s3m(name)) then
-          halt;
-      writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');
-      if not player_init then halt;
-      if not player_init_device(2) then begin writeln(' Blaster enviroment not found sorry ... ');halt end;
-      player_set_mode(_16bit,stereo,samplerate,false);
-      player_set_order(true);
-      playOption_LoopSong:=true;
+        writeln(' Blaster enviroment not found sorry ... ');
+        halt;
     end;
 
-  procedure bar(o,b,l:word); assembler;
+    player_set_mode (opt_16bits, opt_stereo, opt_rate, opt_lq);
+    player_set_order (true);
+    playOption_LoopSong := true;
+end;
+
+procedure vga_clear_page_320x200x8(c: Byte);
+begin
     asm
-      mov      ax,0a000h
+    mov        ax,[drawseg]
+    mov        es,ax
+    xor        di,di
+    mov        cx,32000
+    mov        al,[c]
+    mov        ah,al
+    rep stosw
+    end;
+end;
+
+procedure bar(o,b,l:word); assembler;
+    asm
+      mov      ax,[drawseg]
       mov      es,ax
       mov      di,[o]
       mov      bx,320
@@ -92,46 +119,45 @@ var pos:word;
     scr2:array[0..319] of byte;
     b:byte;
     yl,yr:integer;
-    drawseg:word;
     chn: PMIXCHN;
 
 begin
-  { setup defaults: }
-  Samplerate:=45454;drawseg:=$a000;
-  Stereo:=stereo_calc;
-  _16bit:=_16bit_calc;
-  filename:=paramstr(1);
-  { end of default ... }
-  textbackground(black);textcolor(lightgray);
-  clrscr;
-  writeln(' OSCI-S3M-PLAYER for SoundBlasters written by Cyder of Green Apple');
-  writeln(' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
-  writeln(' Version : ',PLAYER_VERSION);
-  if (filename='') then halt;
-  writeln;
-  Init;
-  if (not player_set_mode(_16bit,stereo,samplerate,false)) then halt;
-  if (not player_play_start) then halt;
-  writeln(#13#10' DMA buffer frame size: ', sndDMABuf.frameSize);
-  writeln(#13#10' Stop playing and exit with <ESC> ');
-  writeln('press any key to switch to oscillator ... ');
-  readkey;
-  asm
-    mov        ax,13h
-    int        10h
-    { Fill the screen with blue (in standard palette) : }
-    mov        ax,0a000h
-    mov        es,ax
-    xor        di,di
-    mov        cx,32000
-    mov        ax,0101h
-    rep stosw
-  end;
-  { DIsplay Oscilator : }
-  if not stereo then
+    opt_rate := def_rate;
+    opt_stereo := def_stereo;
+    opt_16bits := def_16bits;
+    opt_lq := def_lq;
+    opt_filename := paramstr(1);
+    drawseg := $a000;
+
+    textbackground(black);
+    textcolor(lightgray);
+    clrscr;
+    writeln(' OSCI-S3M-PLAYER for SoundBlasters written by Cyder of Green Apple');
+    writeln(' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~');
+    writeln(' Version : ',PLAYER_VERSION);
+
+    if (opt_filename='') then halt;
+    writeln;
+    s3mosci_init;
+
+    if (not player_set_mode (opt_16bits, opt_stereo, opt_rate, opt_lq)) then
+        halt;
+
+    if (not player_play_start) then
+        halt;
+
+    writeln('DMA buffer frame size: ', sndDMABuf.frameSize);
+    writeln('Stop playing and exit with <ESC>');
+    writeln('Press any key to switch to oscillator...');
+    readkey;
+
+    vbios_set_mode($13);
+    vga_clear_page_320x200x8(1);
+    { DIsplay Oscilator : }
+    if (not opt_stereo) then
     begin
-      h:=sndDMABuf.buf^.Data;
-      while not keypressed do
+        h := sndDMABuf.buf^.Data;
+        while not keypressed do
         begin
           vga_wait_vsync;
           for pos:=0 to usedchannels-1 do
@@ -179,9 +205,8 @@ begin
           scr2[319]:=yr;
         end;
     end;
-  asm
-    mov        ax,3
-    int        10h
-  end;
-  player_free;
+
+    vbios_set_mode(3);
+
+    player_free;
 end.
