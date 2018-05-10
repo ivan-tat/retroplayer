@@ -1815,7 +1815,8 @@ bool sb_conf_input(SBDEV *self)
 bool sb_conf_env(SBDEV *self)
 {
     declare_Self;
-    char s[pascal_String_size], *param, *endptr;
+    char *envsb, *s, *param, *endptr;
+    uint16_t s_seg;
     uint8_t type;
     uint16_t base;
     uint8_t irq, dma8, dma16;
@@ -1832,15 +1833,22 @@ bool sb_conf_env(SBDEV *self)
     _sb_unset_transfer_buffer(_Self);
     _sb_unset_transfer_mode(_Self);
 
-    custom_getenv(s, "BLASTER", pascal_String_size - 1);
-    len = strlen(s);
+    envsb = getenv("BLASTER");
+    len = strlen(envsb);
     if (!len)
     {
         DEBUG_FAIL("sb_conf_env", "BLASTER environment variable is not set.");
         return false;
     }
+    if (_dos_allocmem(_dos_para(len + 1), &s_seg))
+    {
+        DEBUG_FAIL("sb_conf_env", "Not enough DOS memory.");
+        return false;
+    }
+    s = MK_FP(s_seg, 0);
     for (i = 0; i < len; i++)
-        s[i] = toupper(s[i]);
+        s[i] = toupper(envsb[i]);
+    s[len] = 0;
 
     flags = 0;
 
@@ -1910,6 +1918,8 @@ bool sb_conf_env(SBDEV *self)
             flags |= SBCFGFL_DMA16;
         }
     }
+
+    _cc_dos_freemem(s_seg);
 
     if (flags & SBCFGFL_BASE_MASK == SBCFGFL_BASE_MASK)
     {

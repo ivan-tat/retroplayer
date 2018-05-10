@@ -57,11 +57,30 @@ show_usage (void)
 void PUBLIC_CODE
 smalls3m_main (void)
 {
+    char *comspec;
     char s[pascal_String_size];
     int result;
 
     if (!custom_startup ())
         return;
+
+    if (!environ_init ())
+    {
+        printf (
+            "Failed to setup DOS environment variables." CRLF
+        );
+        return;
+    }
+
+    comspec = getenv ("COMSPEC");
+    if (!comspec)
+    {
+        printf (
+            "Failed to get `%s' environment variable." CRLF,
+            "COMSPEC"
+        );
+        return;
+    }
 
     textbackground (_black);
     textcolor (_lightgray);
@@ -123,9 +142,7 @@ smalls3m_main (void)
 
     printf (CRLF "Type 'EXIT' to return to player and stop playing." CRLF);
 
-    custom_getenv (s, "COMSPEC", pascal_String_size);
-
-    result = execv (s, NULL);
+    result = execv (comspec, NULL);
     if (result != EZERO)
         printf (
             "DOS error: %u." CRLF

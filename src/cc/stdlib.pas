@@ -25,7 +25,14 @@ procedure cc_free;
 
 procedure cc_exit;
 
-procedure custom_getenv;
+var
+    cc_environ: Pointer;
+
+procedure cc_getenv;
+procedure cc_unsetenv;
+procedure cc_setenv;
+
+procedure environ_init;
 
 implementation
 
@@ -35,7 +42,8 @@ uses
     string_,
     ctype,
     errno_,
-    dos;
+    dos,
+    dos_;
 
 procedure pascal_halt(exitcode: word); far;
 begin
@@ -68,14 +76,39 @@ procedure cc_free; external;
 (*$L stdlib/fexit.obj*)
 procedure cc_exit; external;
 
+(* Internals *)
+
 (*$L stdlib/crwdata.obj*)
 
-function pascal_getenv(name: String): String; near;
-begin
-    pascal_getenv := getenv(name);
-end;
+type
+    dosenvlist_p = ^dosenvlist_t;
+    dosenvlist_t = packed record
+        arr: PChar;
+        size: Word;
+    end;
+
+type
+    envstrlist_t = packed record
+        arr: Pointer;
+        size: Word;
+    end;
+
+var
+    _dos_env: dosenvlist_t;
+    _env_list: envstrlist_t;
+
+(* Publics *)
+
+(*$L stdlib/_env.obj*)
+procedure environ_init; external;
 
 (*$L stdlib/getenv.obj*)
-procedure custom_getenv; external;
+procedure cc_getenv; external;
+
+(*$L stdlib/unsetenv.obj*)
+procedure cc_unsetenv; external;
+
+(*$L stdlib/setenv.obj*)
+procedure cc_setenv; external;
 
 end.

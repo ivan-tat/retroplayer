@@ -389,6 +389,7 @@ build_target $T_CC     obj src/cc/stdio/vfprintf.c
 build_target $T_CC     obj src/cc/stdio/vprintf.c
 build_target $T_CC     obj src/cc/stdio/vsnprntf.c
 build_target $T_CC     obj src/cc/stdio/vsprintf.c
+build_target $T_CC     obj src/cc/stdlib/_env.c
 build_target $T_CC     obj src/cc/stdlib/atoi.c
 build_target $T_CC     obj src/cc/stdlib/atol.c
 build_target $T_CC     obj src/cc/stdlib/crwdata.c
@@ -396,7 +397,9 @@ build_target $T_CC     obj src/cc/stdlib/fexit.c
 build_target $T_CC     obj src/cc/stdlib/ffree.c
 build_target $T_CC     obj src/cc/stdlib/fmalloc.c
 build_target $T_CC     obj src/cc/stdlib/getenv.c
+build_target $T_CC     obj src/cc/stdlib/setenv.c
 build_target $T_CC     obj src/cc/stdlib/strtol.c
+build_target $T_CC     obj src/cc/stdlib/unsetenv.c
 build_target $T_CC     obj src/cc/string/memcmp.c
 build_target $T_CC     obj src/cc/string/memcpy.c
 build_target $T_CC     obj src/cc/string/memset.c

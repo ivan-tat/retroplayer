@@ -77,6 +77,7 @@ src/cc/stdio/vfprintf.asm
 src/cc/stdio/vprintf.asm
 src/cc/stdio/vsnprntf.asm
 src/cc/stdio/vsprintf.asm
+src/cc/stdlib/_env.asm
 src/cc/stdlib/atoi.asm
 src/cc/stdlib/atol.asm
 src/cc/stdlib/crwdata.asm
@@ -84,7 +85,9 @@ src/cc/stdlib/fexit.asm
 src/cc/stdlib/ffree.asm
 src/cc/stdlib/fmalloc.asm
 src/cc/stdlib/getenv.asm
+src/cc/stdlib/setenv.asm
 src/cc/stdlib/strtol.asm
+src/cc/stdlib/unsetenv.asm
 src/cc/string/memcmp.asm
 src/cc/string/memcpy.asm
 src/cc/string/memset.asm

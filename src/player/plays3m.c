@@ -648,6 +648,37 @@ bool __near _opt_parse(char *s)
     return false;
 }
 
+/*** Shell ***/
+
+void run_os_shell(void)
+{
+    char *comspec;
+    bool result;
+    char c;
+
+    vbios_set_mode(3);  // clear screen
+    textbackground(_black);
+    textcolor(_lightgray);
+    printf("Starting DOS shell... (to return to player use 'exit' command)" CRLF);
+    comspec = getenv("COMSPEC");
+    result = execv(comspec, NULL);
+    c = 0;
+    vbios_set_mode(3);  // restore text-mode
+    cursor_hide();
+    if (result)
+    {
+        while (kbhit())
+            getch();
+        printf(
+            "DOS error: %u." CRLF
+            "Error while running command interpreter." CRLF
+            "Press any key to continue...",
+            errno
+        );
+        getch();
+    }
+}
+
 /*** Main **/
 
 void PUBLIC_CODE plays3m_main(void)
@@ -666,12 +697,27 @@ void PUBLIC_CODE plays3m_main(void)
     // This is the place where all modules must be manually initialized in the right order.
     // Actually this is automatically done by Pascal linker at the moment and
     // must be fixed in the future.
+    /*
+    register_debug();
+    register_hwowner();
+    register_pic();
+    register_dma();
+    register_ems();
+    register_vga();
+    register_sbctl();
+    register_s3mplay();
     register_plays3m();
+    */
+    if (!environ_init())
+    {
+        printf("Failed to setup DOS environment variables." CRLF);
+        return;
+    }
 
     printf(
         "Simple music player for DOS, version %s." CRLF
         "Originally written by Andre Baresel, 1994-1995." CRLF
-        "Modified by Ivan Tatarinov <ivan-tat@ya.ru>, 2016-2017." CRLF
+        "Modified by Ivan Tatarinov <ivan-tat@ya.ru>, 2016-2018." CRLF
         "This is free and unencumbered software released into the public domain." CRLF
         "For more information, please refer to <http://unlicense.org>." CRLF,
         PLAYER_VERSION
@@ -845,27 +891,7 @@ void PUBLIC_CODE plays3m_main(void)
                 if (upcase(c) == 'D')
                 {
                     winlist_hide_all();
-                    vbios_set_mode(3);  // clear screen
-                    textbackground(_black);
-                    textcolor(_lightgray);
-                    printf("Starting DOS shell... (to return to player use 'exit' command)" CRLF);
-                    custom_getenv(s, "COMSPEC", pascal_String_size);
-                    result = execv(s, NULL);
-                    c = 0;
-                    vbios_set_mode(3);
-                    cursor_hide();
-                    if (result)
-                    {
-                        while (kbhit())
-                            getch();
-                        printf(
-                            "DOS error: %u." CRLF
-                            "Error while running command interpreter." CRLF
-                            "Press any key to continue...",
-                            errno
-                        );
-                        getch();
-                    }
+                    run_os_shell();
                     desktop_clear();
                     winlist_show_all();
                 }

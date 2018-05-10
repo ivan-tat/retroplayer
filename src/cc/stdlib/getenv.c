@@ -7,38 +7,29 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "pascal.h"
 #include "common.h"
+#include "cc/i86.h"
 #include "cc/string.h"
-
+#include "cc/dos.h"
+#include "cc/errno.h"
 #include "cc/stdlib.h"
+#include "cc/stdlib/_env.h"
 
-extern void __near __pascal pascal_getenv(char *dest, const char *name);
-
-#ifdef __WATCOMC__
-#pragma aux pascal_getenv modify [ax bx cx dx si di es];
-#endif
-
-char *custom_getenv(char *dest, const char *name, size_t maxlen)
+char *cc_getenv(const char *name)
 {
-    char _n[pascal_String_size];
-    char _s[pascal_String_size];
-    size_t len;
+    uint16_t nlen;
+    struct dosenvlist_t *dosenv;
+    char *value;
 
-    strncpy(&_n[1], name, pascal_String_size - 1);
-    len = strlen(name);
-    if (len > pascal_String_size - 1)
-        len = pascal_String_size - 1;
-    _n[0] = len;
-    pascal_getenv(_s, _n);
-    strpastoc(dest, _s, maxlen);
-    len = _s[0];
-    if (len > maxlen - 1)
-        len = maxlen - 1;
-    if (len > 0)
-        memcpy(dest, &_s[1], len);
-    dest[len] = 0;
+    if (_env_name_check(name, &nlen))
+        return NULL;
 
-    return dest;
+    dosenv = &_dos_env;
+    value = _dosenv_find(dosenv, name, nlen);
+    if (value)
+        value = &(value[nlen + 1]);
+    return value;
 }

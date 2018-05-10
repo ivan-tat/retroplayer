@@ -20,6 +20,8 @@
 
 extern uint16_t _cc_psp;
 
+extern char **cc_environ;
+
 int  cc_atoi(const char *src);
 long cc_atol(const char *src);
 
@@ -30,11 +32,19 @@ void  cc_free(void *ptr);
 
 void cc_exit(int status);
 
-char *custom_getenv(char *dest, const char *name, size_t maxlen);
+char   *cc_getenv(const char *name);
+int16_t cc_unsetenv(const char *name);
+int16_t cc_setenv(const char *name, const char *value, int16_t overwrite);
+
+/* Initialization */
+
+bool environ_init(void);
 
 /* Aliases */
 
 #define _psp _cc_psp
+
+#define environ cc_environ
 
 #define atoi cc_atoi
 #define atol cc_atol
@@ -46,15 +56,25 @@ char *custom_getenv(char *dest, const char *name, size_t maxlen);
 
 #define exit cc_exit
 
+#define getenv cc_getenv
+#define unsetenv cc_unsetenv
+#define setenv cc_setenv
+
+/* Linking */
+
 #ifdef __WATCOMC__
 #pragma aux _cc_psp "*";
+#pragma aux cc_environ "*";
 #pragma aux cc_atoi "*";
 #pragma aux cc_atol "*";
 #pragma aux cc_strtol "*";
 #pragma aux cc_malloc "*";
 #pragma aux cc_free "*";
 #pragma aux cc_exit "*";
-#pragma aux custom_getenv "*";
+#pragma aux cc_getenv "*";
+#pragma aux cc_unsetenv "*";
+#pragma aux cc_setenv "*";
+#pragma aux environ_init "*";
 #endif
 
 #endif  /* CC_STDLIB_H */
