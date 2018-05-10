@@ -1,2 +1,12 @@
-Andre Baresel
-Ivan Tatarinov, <ivan-tat@ya.ru>
+Original authors:
+
+    Andre Baresel, 1994, 1995.
+
+Main developers:
+
+    Ivan Tatarinov, Tambov, Russia, <ivan-tat@ya.ru>, 2016, 2017, 2018.
+
+Contributors:
+
+    Kai Pijpstra, Groningen, the Netherlands, 1996.
+    Supplied: Pascal unit to handle DOS environment variables.
