@@ -6,6 +6,8 @@ uses
     crt,
     dos,
     string_,
+    stdio,
+    stdlib,
     sbctl,
     vga,
     s3mvars,
@@ -34,29 +36,8 @@ var opt_rate: Word;
   {$L LINES.OBJ}
   procedure linie(x1,y1,x2,y2:word;f:byte); external;
 
-procedure s3mosci_init;
-var
-    name: array [0..255] of Char;
-begin
-    strpastoc (@name, opt_filename, 256);
-    if (not player_load_s3m (name)) then
-        halt;
-
-    writeln(' ''',mod_Title,''' loaded ... (was saved with ',mod_TrackerName,')');
-
-    if (not player_init) then
-        halt;
-
-    if (not player_init_device(2)) then
-    begin
-        writeln(' Blaster enviroment not found sorry ... ');
-        halt;
-    end;
-
-    player_set_mode (opt_16bits, opt_stereo, opt_rate, opt_lq);
-    player_set_order (true);
-    playOption_LoopSong := true;
-end;
+(*$L playosci.obj*)
+procedure playosci_init; far; external;
 
 procedure vga_clear_page_320x200x8(c: Byte);
 begin
@@ -138,7 +119,7 @@ begin
 
     if (opt_filename='') then halt;
     writeln;
-    s3mosci_init;
+    playosci_init;
 
     if (not player_set_mode (opt_16bits, opt_stereo, opt_rate, opt_lq)) then
         halt;
