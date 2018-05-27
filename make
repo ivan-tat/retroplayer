@@ -423,6 +423,7 @@ build_target $T_HW     obj src/hw/dma.c
 build_target $T_HW     obj src/hw/isr.asm
 build_target $T_HW     obj src/hw/pic.c
 build_target $T_HW     obj src/hw/sndctl_t.c
+build_target $T_HW     obj src/hw/line.asm
 build_target $T_HW     obj src/hw/vga.c
 build_target $T_HW_SB  obj src/hw/sb/sbio.c
 build_target $T_HW_SB  obj src/hw/sb/sbctl.c
@@ -509,11 +510,10 @@ build_target $T_MAIN_TP   obj src/main/mixing.pas
 build_target $T_MAIN_TP   obj src/main/filldma.pas
 build_target $T_MAIN_TP   obj src/main/loads3m.pas
 build_target $T_MAIN_TP   obj src/main/s3mplay.pas
-build_target $T_PLAYER_TP exe-dos src/player/screen.pas
+build_target $T_PLAYER_TP obj src/player/screen.pas
 build_target $T_PLAYER_TP exe-dos src/player/plays3m.pas
 build_target $T_PLAYER_TP exe-dos src/player/smalls3m.pas
-build_target $T_PLAYER_TP obj src/player/lines.asm
-build_target $T_PLAYER_TP exe-dos src/player/s3m_osci.pas
+build_target $T_PLAYER_TP exe-dos src/player/playosci.pas
 fi
 
 cd "$PROJDIR"

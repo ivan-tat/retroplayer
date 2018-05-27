@@ -17,30 +17,12 @@
 
 #include "pascal.h"
 
-extern uint16_t opt_rate;
-extern bool opt_stereo;
-extern bool opt_16bits;
-extern bool opt_lq;
-extern char opt_filename[pascal_String_size];
-extern uint16_t drawseg;
-
-void PUBLIC_CODE playosci_init (void);
-//void PUBLIC_CODE playosci_main (void);
-
-/*** Initialization ***/
-
-DECLARE_REGISTRATION(playosci)
+void __far playosci_main (void);
 
 /* Linking */
 
 #ifdef __WATCOMC__
-#pragma aux opt_rate "*";
-#pragma aux opt_stereo "*";
-#pragma aux opt_16bits "*";
-#pragma aux opt_lq "*";
-#pragma aux opt_filename "*";
-#pragma aux drawseg "*";
-#pragma aux playosci_init "*";
+#pragma aux playosci_main "*";
 #endif
 
 #endif  /* PLAYOSCI_H */

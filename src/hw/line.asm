@@ -1,16 +1,14 @@
-.model large,pascal
+.model large, pascal
 .386
 
 DGROUP group _DATA
 
 _DATA segment word public use16 'DATA'
-col       db ?
-dabklein_ dw ?
-extrn     drawseg: word
+extrn drawseg: word
 _DATA ends
 
-LINES_TEXT segment word public use16 'CODE'
-assume cs:LINES_TEXT,ds:DGROUP
+LINE_TEXT segment word public use16 'CODE'
+assume cs:LINE_TEXT,ds:DGROUP
 
 ; think about to creat different parts for
 ;    1.  deltax>deltay
@@ -21,17 +19,15 @@ assume cs:LINES_TEXT,ds:DGROUP
 ; ist mir eben (29.4) noch eingefallen:
 ; weitere optimierung fuer seknrechte und waagerechte linien
 
-public linie
-linie proc near x1:WORD,y1:WORD,x2:WORD,y2:WORD,farbe:BYTE
-;      push   bp
-      mov    ax,drawseg
+public vga_line
+vga_line proc far x1:WORD,y1:WORD,x2:WORD,y2:WORD,farbe:BYTE
+local dabgross: word
+      mov    ax,[drawseg]
       mov    es,ax
-      mov    al,farbe
-      mov    col,al
-      mov    di,x1
-      mov    si,x2
-      mov    cx,y1
-      mov    dx,y2
+      mov    di,[x1]
+      mov    si,[x2]
+      mov    cx,[y1]
+      mov    dx,[y2]
       cmp    cx,dx
       jle    l1
       xchg   cx,dx
@@ -45,7 +41,7 @@ l1:
       mov    dx,320
       mul    dx
       add    di,ax
-      mov    al,farbe
+      mov    al,[farbe]
       mov    es:[di],al
       jmp    ende
 not_equal:
@@ -57,7 +53,7 @@ not_equal:
       neg    si
 dx_p:
       sub    dx,cx               ; dx immer > cx
-      mov    bp,ax
+      mov    [dabgross],ax
       push   dx
       mov    ax,cx               ; ax = y1
       mov    dx,320
@@ -68,7 +64,7 @@ dx_p:
       jge    dx_gr               ; Jump if dx>dy damit ax=x und y = 0 (x ist Laufvariable)
       ;  dy>dx    ....... Y ist Laufvar
       xchg   si,dx
-      mov    al,col
+      mov    al,[farbe]
       mov    cx,si               ; cx wird counter
       shl    dx,1
       mov    si,dx
@@ -79,7 +75,7 @@ dx_p:
       ; after this :
       ;               dx = dabgross_add
       ;               di = Pointposition
-      ;               bp = dabgross
+      ;               ---- dabgross
       ;               cx = Counter
       ;               bx = akt_wert
       ;               si = dabklein_add
@@ -95,12 +91,12 @@ l2:
       loop   l2
       jmp    ende
 l4:
-      add    di,bp
+      add    di,[dabgross]
       add    bx,dx
       loop   l2
       jmp    ende
 dx_gr: ; X ist Laufvariable
-      mov    al,col
+      mov    al,[farbe]
       mov    cx,si               ; cx wird counter
       shl    dx,1
       mov    si,dx
@@ -111,7 +107,7 @@ dx_gr: ; X ist Laufvariable
       ; after this :
       ;               dx = dabgross_add
       ;               di = Pointposition
-      ;               bp = dabgross
+      ;               ---- dabgross
       ;               dabklein - in Dataseg
       ;               cx = Counter
       ;               bx = akt_wert
@@ -121,7 +117,7 @@ dx_gr: ; X ist Laufvariable
 
 sl:
       mov    es:[di],al
-      add    di,bp
+      add    di,[dabgross]
       cmp    bx,0
       jge    dabgr
       add    bx,si
@@ -132,10 +128,9 @@ dabgr:
       add    bx,dx
       loop   sl
 ende:
-;      pop    bp
       ret
-linie endp
+vga_line endp
 
-LINES_TEXT ends
+LINE_TEXT ends
 
 end
