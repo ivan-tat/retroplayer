@@ -264,7 +264,7 @@ HWOWNER *hwowner_register(const char *name)
         }
     }
 
-    DEBUG_FAIL("hwowner_register", "Failed to registered HW owner.");
+    DEBUG_FAIL("hwowner_register", "Failed to register HW owner.");
     return NULL;
 }
 
