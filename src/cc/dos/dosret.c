@@ -29,12 +29,12 @@ static const signed char _doserr[MAX_ERR] =
     CC_ENODEV,  /* 15: Invalid drive specified */
     CC_EACCES,  /* 16: Can't remove current dir */
     CC_EXDEV,   /* 17: Not same device */
-    CC_ENOENT,  /* 18: No more matching files */
+    CC_ENOENT   /* 18: No more matching files */
 };
 
 unsigned __cc_set_errno_dos(unsigned code)
 {
-    if (code <= MAX_ERR)
+    if (code < MAX_ERR)
     {
         cc_errno = _doserr[code];
         return code;

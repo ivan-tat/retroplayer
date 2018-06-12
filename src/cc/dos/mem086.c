@@ -27,20 +27,17 @@ unsigned _cc_dos_allocmem(unsigned size, unsigned *seg)
 uint16_t PUBLIC_CODE _cc_dos_allocmem(uint16_t size, uint16_t *seg)
 {
     union CC_REGPACK regs;
+    uint16_t error;
 
     regs.w.bx = size;
     regs.h.ah = 0x48;
     cc_intr(0x21, &regs);
-    if (regs.w.flags & CC_INTR_CF)
-    {
+    error = __cc_doserror(&regs);
+    if (error)
         *seg = regs.w.bx;
-        return __cc_doserror(regs.w.ax);
-    }
     else
-    {
         *seg = regs.w.ax;
-        return 0;
-    };
+    return error;
 }
 
 /*
@@ -53,10 +50,7 @@ uint16_t PUBLIC_CODE _cc_dos_freemem(uint16_t seg)
     regs.w.es = seg;
     regs.h.ah = 0x49;
     cc_intr(0x21, &regs);
-    if (regs.w.flags & CC_INTR_CF)
-        return __cc_doserror(regs.w.ax);
-    else
-        return 0;
+    return __cc_doserror(&regs);
 }
 
 /*
@@ -65,16 +59,14 @@ unsigned _cc_dos_setblock(unsigned size, unsigned seg, unsigned *max)
 uint16_t PUBLIC_CODE _cc_dos_setblock(uint16_t size, uint16_t seg, uint16_t *max)
 {
     union CC_REGPACK regs;
+    uint16_t error;
 
     regs.w.bx = size;
     regs.w.es = seg;
     regs.h.ah = 0x4a;
     cc_intr(0x21, &regs);
-    if (regs.w.flags & CC_INTR_CF)
-    {
+    error = __cc_doserror(&regs);
+    if (error)
         *max = regs.w.bx;
-        return __cc_doserror(regs.w.ax);
-    }
-    else
-        return 0;
+    return error;
 }

@@ -13,10 +13,10 @@
 #include "cc/dos/dosret.h"
 #include "cc/dos/error086.h"
 
-unsigned __cc_doserror(unsigned code)
+unsigned __cc_doserror(union CC_REGPACK *regs)
 {
-    if (code)
-        return __cc_set_errno_dos(code);
+    if (regs->w.flags & CC_INTR_CF)
+        return __cc_set_errno_dos(regs->w.ax);
     else
         return 0;
 }

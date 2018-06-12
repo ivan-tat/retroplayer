@@ -12,14 +12,14 @@
 #pragma once
 #endif
 
-unsigned __cc_doserror(unsigned code);
+#include "cc/i86.h"
+
+unsigned __cc_doserror(union CC_REGPACK *regs);
 
 /* Linking */
 
 #ifdef __WATCOMC__
-
-#pragma aux __cc_doserror "^";
-
+#pragma aux __cc_doserror "*";
 #endif
 
 #endif  /* CC_DOS_ERROR086_H */
