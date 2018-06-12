@@ -252,6 +252,11 @@ bool PUBLIC_CODE player_init_device(uint8_t type)
         }
         sb_init(player_device);
     }
+    else
+    {
+        DEBUG_ERR("player_init_device", "Unknown method.");
+        return false;
+    }
 
     switch (type)
     {
@@ -268,8 +273,6 @@ bool PUBLIC_CODE player_init_device(uint8_t type)
         player_flags_snddev = sb_conf_input(player_device);
         break;
     default:
-        DEBUG_ERR("player_init_device", "Unknown method.");
-        player_flags_snddev = false;
         break;
     }
 
@@ -281,7 +284,7 @@ bool PUBLIC_CODE player_init_device(uint8_t type)
     else
     {
         DEBUG_FAIL("player_init_device", NULL);
-        return true;
+        return false;
     }
 }
 
