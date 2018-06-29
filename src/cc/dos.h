@@ -114,6 +114,25 @@ typedef struct cc_dosmcb_t
 unsigned _cc_dos_getpsp(void);
 unsigned _cc_dos_getmasterpsp(void);
 
+/* File's attributes (bit-field) */
+
+#define _CC_A_NORMAL    0x00    // normal file
+#define _CC_A_RDONLY    0x01    // read-only file
+#define _CC_A_HIDDEN    0x02    // hidden file
+#define _CC_A_SYSTEM    0x04    // system file
+#define _CC_A_VOLID     0x08    // volume-ID entry
+#define _CC_A_SUBDIR    0x10    // subdirectory
+#define _CC_A_ARCH      0x20    // archive file
+
+/*
+unsigned _cc_dos_creat(const char *fname, unsigned attr, int *fd);
+unsigned _cc_dos_creatnew(const char *fname, unsigned attr, int *fd);
+unsigned _cc_dos_open(const char *fname, unsigned mode, int *fd);
+*/
+uint16_t PUBLIC_CODE _cc_dos_creat(const char *fname, uint16_t attr, int16_t *fd);
+uint16_t PUBLIC_CODE _cc_dos_creatnew(const char *fname, uint16_t attr, int16_t *fd);
+uint16_t PUBLIC_CODE _cc_dos_open(const char *fname, uint16_t mode, int16_t *fd);
+
 /* Aliases */
 
 #define dosdate_t cc_dosdate_t
@@ -138,6 +157,18 @@ unsigned _cc_dos_getmasterpsp(void);
 #define _dos_getpsp       _cc_dos_getpsp
 #define _dos_getmasterpsp _cc_dos_getmasterpsp
 
+#define _A_NORMAL   _CC_A_NORMAL
+#define _A_RDONLY   _CC_A_RDONLY
+#define _A_HIDDEN   _CC_A_HIDDEN
+#define _A_SYSTEM   _CC_A_SYSTEM
+#define _A_VOLID    _CC_A_SYSTEM
+#define _A_SUBDIR   _CC_A_SUBDIR
+#define _A_ARCH     _CC_A_ARCH
+
+#define _dos_creat      _cc_dos_creat
+#define _dos_creatnew   _cc_dos_creatnew
+#define _dos_open       _cc_dos_open
+
 /* Linkning */
 
 #ifdef __WATCOMC__
@@ -159,6 +190,9 @@ unsigned _cc_dos_getmasterpsp(void);
 #pragma aux _cc_dos_setblock "*";
 #pragma aux _cc_dos_getpsp "*";
 #pragma aux _cc_dos_getmasterpsp "*";
+#pragma aux _cc_dos_creat "*";
+#pragma aux _cc_dos_creatnew "*";
+#pragma aux _cc_dos_open "*";
 
 #endif  /* __WATCOMC__ */
 

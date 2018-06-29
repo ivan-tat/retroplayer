@@ -47,7 +47,9 @@ disasm error086.obj ERROR086_TEXT
 disasm exv.obj EXV_TEXT
 disasm exve.obj EXVE_TEXT
 disasm gtime086.obj GTIME086_TEXT
+disasm creatdos.obj CREATDOS_TEXT
 disasm opendos.obj OPENDOS_TEXT
+disasm filedos.obj FILEDOS_TEXT
 # <stdlib.h>
 disasm atoi.obj ATOI_TEXT
 disasm atol.obj ATOL_TEXT

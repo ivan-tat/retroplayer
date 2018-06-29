@@ -77,6 +77,10 @@ procedure _cc_dos_setblock;
 procedure _cc_dos_getpsp;
 procedure _cc_dos_getmasterpsp;
 
+procedure _cc_dos_creat;
+procedure _cc_dos_creatnew;
+procedure _cc_dos_open;
+
 implementation
 
 uses
@@ -119,5 +123,12 @@ procedure _cc_dos_setblock; external;
 (*$L dos\psp.obj*)
 procedure _cc_dos_getpsp; external;
 procedure _cc_dos_getmasterpsp; external;
+
+(*$L dos\creatdos.obj*)
+procedure _cc_dos_creat; external;
+procedure _cc_dos_creatnew; external;
+
+(*$L dos\opendos.obj*)
+procedure _cc_dos_open; external;
 
 end.

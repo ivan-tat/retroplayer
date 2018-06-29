@@ -367,12 +367,14 @@ build_target $T_CC     obj src/cc/conio/kbhit.c
 build_target $T_CC     obj src/cc/conio/outp.c
 build_target $T_CC     obj src/cc/ctype/istable.c
 build_target $T_CC     obj src/cc/errno/errno.c
+build_target $T_CC     obj src/cc/dos/creatdos.c
 build_target $T_CC     obj src/cc/dos/d_getvec.c
 build_target $T_CC     obj src/cc/dos/d_setvec.c
 build_target $T_CC     obj src/cc/dos/dosret.c
 build_target $T_CC     obj src/cc/dos/error086.c
 build_target $T_CC     obj src/cc/dos/gtime086.c
 build_target $T_CC     obj src/cc/dos/mem086.c
+build_target $T_CC     obj src/cc/dos/opendos.c
 build_target $T_CC     obj src/cc/dos/psp.c
 build_target $T_CC     obj src/cc/malloc/memmax.c
 build_target $T_CC     obj src/cc/stdio/_printf.c
