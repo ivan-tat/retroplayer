@@ -84,6 +84,9 @@ procedure _cc_dos_open;
 procedure _cc_dos_read;
 procedure _cc_dos_write;
 
+procedure _cc_dos_close;
+procedure _cc_dos_commit;
+
 implementation
 
 uses
@@ -137,5 +140,9 @@ procedure _cc_dos_open; external;
 (*$L dos\io086.obj*)
 procedure _cc_dos_read; external;
 procedure _cc_dos_write; external;
+
+(*$L dos\filedos.obj*)
+procedure _cc_dos_close; external;
+procedure _cc_dos_commit; external;
 
 end.

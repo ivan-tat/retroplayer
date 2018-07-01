@@ -130,12 +130,16 @@ unsigned _cc_dos_creatnew(const char *fname, unsigned attr, int *fd);
 unsigned _cc_dos_open(const char *fname, unsigned mode, int *fd);
 unsigned _cc_dos_read(int fd, void __far *buf, unsigned count, unsigned *numbytes);
 unsigned _cc_dos_write(int fd, void __far *buf, unsigned count, unsigned *numbytes);
+unsigned _cc_dos_close(int fd);
+unsigned _cc_dos_commit(int fd);
 */
 uint16_t PUBLIC_CODE _cc_dos_creat(const char *fname, uint16_t attr, int16_t *fd);
 uint16_t PUBLIC_CODE _cc_dos_creatnew(const char *fname, uint16_t attr, int16_t *fd);
 uint16_t PUBLIC_CODE _cc_dos_open(const char *fname, uint16_t mode, int16_t *fd);
 uint16_t PUBLIC_CODE _cc_dos_read(int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes);
 uint16_t PUBLIC_CODE _cc_dos_write(int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes);
+uint16_t PUBLIC_CODE _cc_dos_close(int16_t fd);
+uint16_t PUBLIC_CODE _cc_dos_commit(int16_t fd);
 
 /* Aliases */
 
@@ -174,6 +178,8 @@ uint16_t PUBLIC_CODE _cc_dos_write(int16_t fd, void __far *buf, uint16_t count, 
 #define _dos_open       _cc_dos_open
 #define _dos_read       _cc_dos_read
 #define _dos_write      _cc_dos_write
+#define _dos_close      _cc_dos_close
+#define _dos_commit     _cc_dos_commit
 
 /* Linkning */
 
@@ -201,6 +207,8 @@ uint16_t PUBLIC_CODE _cc_dos_write(int16_t fd, void __far *buf, uint16_t count, 
 #pragma aux _cc_dos_open "*";
 #pragma aux _cc_dos_read "*";
 #pragma aux _cc_dos_write "*";
+#pragma aux _cc_dos_close "*";
+#pragma aux _cc_dos_commit "*";
 
 #endif  /* __WATCOMC__ */
 
