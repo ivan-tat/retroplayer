@@ -124,6 +124,19 @@ unsigned _cc_dos_getmasterpsp(void);
 #define _CC_A_SUBDIR    0x10    // subdirectory
 #define _CC_A_ARCH      0x20    // archive file
 
+/* File mode (bit-field) */
+
+#define CC_O_RDONLY_DOS     0       // open for read only
+#define CC_O_WRONLY_DOS     1       // open for write only
+#define CC_O_RDWR_DOS       2       // open for read and write
+#define CC_O_NOINHERIT_DOS  0x80    // file is not inherited by child process (DOS only)
+
+/* Symbolic constants for the _cc_dos_seek() function */
+
+#define CC_SEEK_SET_DOS 0   // Seek relative to the start of file
+#define CC_SEEK_CUR_DOS 1   // Seek relative to current position
+#define CC_SEEK_END_DOS 2   // Seek relative to the end of the file
+
 /*
 unsigned _cc_dos_creat(const char *fname, unsigned attr, int *fd);
 unsigned _cc_dos_creatnew(const char *fname, unsigned attr, int *fd);
@@ -174,6 +187,15 @@ uint16_t PUBLIC_CODE _cc_dos_seek(int16_t fd, int32_t offset, int16_t kind, int3
 #define _A_VOLID    _CC_A_VOLID
 #define _A_SUBDIR   _CC_A_SUBDIR
 #define _A_ARCH     _CC_A_ARCH
+
+#define O_RDONLY_DOS    CC_O_RDONLY_DOS
+#define O_WRONLY_DOS    CC_O_WRONLY_DOS
+#define O_RDWR_DOS      CC_O_RDWR_DOS
+#define O_NOINHERIT_DOS CC_O_NOINHERIT_DOS
+
+#define SEEK_SET_DOS    CC_SEEK_SET_DOS
+#define SEEK_CUR_DOS    CC_SEEK_CUR_DOS
+#define SEEK_END_DOS    CC_SEEK_END_DOS
 
 #define _dos_creat      _cc_dos_creat
 #define _dos_creatnew   _cc_dos_creatnew
