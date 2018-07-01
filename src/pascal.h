@@ -73,13 +73,6 @@ _UNREGMETHOD(name)\
 
 #define pascal_String_size 256
 
-/* File I/O */
-
-typedef struct pascalFile_t {
-    char data[128];
-};
-typedef struct pascalFile_t PASCALFILE;
-
 void PUBLIC_CODE pascal_fillchar(void *dest, uint16_t size, uint8_t value);
 void PUBLIC_CODE pascal_move(void *src, void *dest, uint16_t size);
 
