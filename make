@@ -373,6 +373,7 @@ build_target $T_CC     obj src/cc/dos/d_setvec.c
 build_target $T_CC     obj src/cc/dos/dosret.c
 build_target $T_CC     obj src/cc/dos/error086.c
 build_target $T_CC     obj src/cc/dos/gtime086.c
+build_target $T_CC     obj src/cc/dos/io086.c
 build_target $T_CC     obj src/cc/dos/mem086.c
 build_target $T_CC     obj src/cc/dos/opendos.c
 build_target $T_CC     obj src/cc/dos/psp.c

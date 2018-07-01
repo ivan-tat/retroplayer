@@ -21,7 +21,7 @@ wlib -d="$DST" "$CLIB" ':getenv.c'
 wlib -d="$DST" "$CLIB" ':dosret.c' ':d_getvec.c' ':d_setvec.c'
 wlib -d="$DST" "$CLIB" ':error086.asm' ':gtime086.asm'
 wlib -d="$DST" "$CLIB" ':exv.c' ':exve.c'
-wlib -d="$DST" "$CLIB" ':creatdos.c' ':opendos.c' ':filedos.c'
+wlib -d="$DST" "$CLIB" ':creatdos.c' ':opendos.c' ':filedos.c' ':io086.asm'
 # <stdlib.h>
 wlib -d="$DST" "$CLIB" ':atoi.c' ':atol.c' ':istable.c' ':strtol.c' ':errno.c'
 wlib -d="$DST" "$CLIB" ':crwdata' ':pspptr.c'

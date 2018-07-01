@@ -128,10 +128,14 @@ unsigned _cc_dos_getmasterpsp(void);
 unsigned _cc_dos_creat(const char *fname, unsigned attr, int *fd);
 unsigned _cc_dos_creatnew(const char *fname, unsigned attr, int *fd);
 unsigned _cc_dos_open(const char *fname, unsigned mode, int *fd);
+unsigned _cc_dos_read(int fd, void __far *buf, unsigned count, unsigned *numbytes);
+unsigned _cc_dos_write(int fd, void __far *buf, unsigned count, unsigned *numbytes);
 */
 uint16_t PUBLIC_CODE _cc_dos_creat(const char *fname, uint16_t attr, int16_t *fd);
 uint16_t PUBLIC_CODE _cc_dos_creatnew(const char *fname, uint16_t attr, int16_t *fd);
 uint16_t PUBLIC_CODE _cc_dos_open(const char *fname, uint16_t mode, int16_t *fd);
+uint16_t PUBLIC_CODE _cc_dos_read(int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes);
+uint16_t PUBLIC_CODE _cc_dos_write(int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes);
 
 /* Aliases */
 
@@ -168,6 +172,8 @@ uint16_t PUBLIC_CODE _cc_dos_open(const char *fname, uint16_t mode, int16_t *fd)
 #define _dos_creat      _cc_dos_creat
 #define _dos_creatnew   _cc_dos_creatnew
 #define _dos_open       _cc_dos_open
+#define _dos_read       _cc_dos_read
+#define _dos_write      _cc_dos_write
 
 /* Linkning */
 
@@ -193,6 +199,8 @@ uint16_t PUBLIC_CODE _cc_dos_open(const char *fname, uint16_t mode, int16_t *fd)
 #pragma aux _cc_dos_creat "*";
 #pragma aux _cc_dos_creatnew "*";
 #pragma aux _cc_dos_open "*";
+#pragma aux _cc_dos_read "*";
+#pragma aux _cc_dos_write "*";
 
 #endif  /* __WATCOMC__ */
 

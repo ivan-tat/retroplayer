@@ -50,6 +50,7 @@ disasm gtime086.obj GTIME086_TEXT
 disasm creatdos.obj CREATDOS_TEXT
 disasm opendos.obj OPENDOS_TEXT
 disasm filedos.obj FILEDOS_TEXT
+disasm io086.obj IO086_TEXT
 # <stdlib.h>
 disasm atoi.obj ATOI_TEXT
 disasm atol.obj ATOL_TEXT
