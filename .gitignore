@@ -62,6 +62,8 @@ src/cc/dos/gtime086.asm
 src/cc/dos/io086.asm
 src/cc/dos/mem086.asm
 src/cc/dos/opendos.asm
+src/cc/dos/psp.asm
+src/cc/dos/seekdos.asm
 src/cc/errno/errno.asm
 src/cc/i86/delay.asm
 src/cc/i86/disable.asm

@@ -378,6 +378,7 @@ build_target $T_CC     obj src/cc/dos/io086.c
 build_target $T_CC     obj src/cc/dos/mem086.c
 build_target $T_CC     obj src/cc/dos/opendos.c
 build_target $T_CC     obj src/cc/dos/psp.c
+build_target $T_CC     obj src/cc/dos/seekdos.c
 build_target $T_CC     obj src/cc/malloc/memmax.c
 build_target $T_CC     obj src/cc/stdio/_printf.c
 build_target $T_CC     obj src/cc/stdio/fclose.c

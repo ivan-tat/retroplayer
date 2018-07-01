@@ -19,6 +19,7 @@
 ./src/cc/dos/mem086.asm
 ./src/cc/dos/opendos.asm
 ./src/cc/dos/psp.asm
+./src/cc/dos/seek.asm
 ./src/cc/errno/
 ./src/cc/errno/errno.asm
 ./src/cc/i86/
