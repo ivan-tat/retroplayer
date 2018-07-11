@@ -379,6 +379,11 @@ build_target $T_CC     obj src/cc/dos/mem086.c
 build_target $T_CC     obj src/cc/dos/opendos.c
 build_target $T_CC     obj src/cc/dos/psp.c
 build_target $T_CC     obj src/cc/dos/seekdos.c
+build_target $T_CC     obj src/cc/io/close.c
+build_target $T_CC     obj src/cc/io/lseek.c
+build_target $T_CC     obj src/cc/io/open.c
+build_target $T_CC     obj src/cc/io/read.c
+build_target $T_CC     obj src/cc/io/write.c
 build_target $T_CC     obj src/cc/malloc/memmax.c
 build_target $T_CC     obj src/cc/stdio/_printf.c
 build_target $T_CC     obj src/cc/stdio/fclose.c
@@ -483,6 +488,7 @@ build_target $T_CC_TP     obj src/cc/ctype.pas
 build_target $T_CC_TP     obj src/cc/errno_.pas
 build_target $T_CC_TP     obj src/cc/dos_.pas
 build_target $T_CC_TP     obj src/cc/malloc.pas
+build_target $T_CC_TP     obj src/cc/io.pas
 build_target $T_CC_TP     obj src/cc/stdlib.pas
 build_target $T_CC_TP     obj src/cc/stdio.pas
 build_target $T_CC_TP     obj src/cc/unistd.pas

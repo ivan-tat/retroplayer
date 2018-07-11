@@ -69,6 +69,11 @@ src/cc/errno/errno.asm
 src/cc/i86/delay.asm
 src/cc/i86/disable.asm
 src/cc/i86/enable.asm
+src/cc/io/close.asm
+src/cc/io/lseek.asm
+src/cc/io/open.asm
+src/cc/io/read.asm
+src/cc/io/write.asm
 src/cc/malloc/memmax.asm
 src/cc/stdio/_printf.asm
 src/cc/stdio/fclose.asm

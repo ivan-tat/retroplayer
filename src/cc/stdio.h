@@ -60,7 +60,7 @@ typedef int32_t fpos_t;
 /* Methods */
 
 FILE  *cc_fopen(const char *path, const char *mode);
-void   cc_fclose(FILE *stream);
+int    cc_fclose(FILE *stream);
 int    cc_fsetpos(FILE *stream, fpos_t pos);
 size_t cc_fread(void *ptr, size_t size, size_t n, FILE *stream);
 size_t cc_fwrite(void *ptr, size_t size, size_t n, FILE *stream);

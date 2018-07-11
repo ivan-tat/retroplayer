@@ -51,6 +51,12 @@ disasm creatdos.obj CREATDOS_TEXT
 disasm opendos.obj OPENDOS_TEXT
 disasm filedos.obj FILEDOS_TEXT
 disasm io086.obj IO086_TEXT
+# <io.h>
+disasm _clse.obj _CLSE_TEXT
+disasm close.obj CLOSE_TEXT
+disasm open.obj OPEN_TEXT
+disasm read.obj READ_TEXT
+disasm write.obj WRITE_TEXT
 # <stdio.h>
 disasm fclose.obj FCLOSE_TEXT
 disasm fopen.obj FOPEN_TEXT

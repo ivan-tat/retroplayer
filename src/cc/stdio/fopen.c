@@ -9,75 +9,156 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "debugfn.h"
 #include "cc/i86.h"
+#include "cc/errno.h"
 #include "cc/dos.h"
 #include "cc/string.h"
-
 #include "cc/stdio.h"
-#include "cc/stdio/_io.h"
+#include "cc/fcntl.h"
+#include "cc/io.h"
+
+static const struct
+{
+    uint16_t openflags;
+    uint16_t filemode;
+} FILE_MODES[6] =
+{
+    /* r */
+        O_RDONLY,
+        //pascal_fmInput,   // HINT: not used in Turbo Pascal 7.0
+        pascal_fmInOut,
+    /* w */
+        O_WRONLY | O_CREAT | O_TRUNC,
+        //pascal_fmOutput,  // HINT: not used in Turbo Pascal 7.0
+        pascal_fmInOut,
+    /* a */
+        O_WRONLY | O_CREAT | O_APPEND,
+        //pascal_fmOutput,  // HINT: not used in Turbo Pascal 7.0
+        pascal_fmInOut,
+    /* r+ */
+        O_RDWR,
+        pascal_fmInOut,
+    /* w+ */
+        O_RDWR | O_CREAT | O_TRUNC,
+        pascal_fmInOut,
+    /* a+ */
+        O_RDWR | O_CREAT | O_APPEND,
+        pascal_fmInOut,
+};
+
+int __get_mode(const char *mode)
+{
+    const char *m;
+    char m_read, m_write, m_append, m_binary, m_plus;
+    bool result;
+    int i;
+
+    m_read = 0;
+    m_write = 0;
+    m_append = 0;
+    m_binary = 0;
+    m_plus = 0;
+    m = mode;
+    result = true;
+    while (*m && result)
+    {
+        switch (*m)
+        {
+        case 'r':
+            if (m_read)
+                result = false;
+            m_read++;
+            break;
+        case 'w':
+            if (m_write)
+                result = false;
+            m_write++;
+            break;
+        case 'a':
+            if (m_append)
+                result = false;
+            m_append++;
+            break;
+        case 'b':
+            if (m_binary)
+                result = false;
+            m_binary++;
+            break;
+        case '+':
+            if (m_plus)
+                result = false;
+            m_plus++;
+            break;
+        default:
+            result = false;
+            break;
+        }
+        m++;
+    }
+    if (result && (m_read + m_write + m_append == 1))
+    {
+        i = 0;
+        if (m_write)    i += 1;
+        if (m_append)   i += 2;
+        if (m_plus)     i += 3;
+        return i;
+    }
+    else
+        return -1;
+}
 
 FILE *cc_fopen(const char *path, const char *mode)
 {
     uint16_t seg;
     FILE *stream;
-    const char *m;
-    bool m_read;
-    bool m_write;
-    bool m_plus;
-    bool result;
+    int i;
+    int fd;
+    int openflags;
+    int openmode;
 
-    if (!_dos_allocmem(_dos_para(sizeof(FILE)), &seg))
+    if ((!path) || (!mode))
     {
-        stream = MK_FP(seg, 0);
-        pascal_assign(stream, path);
+        cc_errno = EINVAL;
+        pascal_InOutRes = EINOUTRES_NOT_ASSIGNED;
+        return NULL;
+    }
 
-        if (mode)
-        {
-            m_read = false;
-            m_write = false;
-            m_plus = false;
-            m = mode;
-            while (*m)
-            {
-                switch (*m)
-                {
-                    case 'r':
-                        m_read = true;
-                        break;
-                    case 'w':
-                        m_write = true;
-                        break;
-                    case '+':
-                        m_plus = true;
-                        break;
-                };
-                m++;
-            };
-        }
-        else
-        {
-            m_read = true;
-            m_write = false;
-            m_plus = true;
-        };
+    i = __get_mode(mode);
+    if (i < 0)
+    {
+        cc_errno = CC_EINVAL;
+        pascal_InOutRes = EINOUTRES_NOT_ASSIGNED;
+        return NULL;
+    }
 
-        if (m_read)
-        {
-            result = pascal_reset(stream);
-        }
-        else
-            if (m_write)
-            {
-                result = pascal_rewrite(stream);
-            }
-            else
-                result = false;
+    if (_dos_allocmem(_dos_para(sizeof(FILE)), &seg))
+    {
+        pascal_InOutRes = EINOUTRES_NOT_ASSIGNED;
+        return NULL;
+    }
 
-        if (result)
-            return stream;
-        else
-            _dos_freemem(FP_SEG(stream));
-    };
+    stream = MK_FP(seg, 0);
 
-    return NULL;
+    openflags = FILE_MODES[i].openflags;
+    openmode = _CC_A_NORMAL;
+
+    cc_errno = CC_EZERO;
+    fd = cc_open(path, openflags, openmode);
+    if (fd != -1)
+    {
+        cc_memset(stream, 0, sizeof(FILE));
+        stream->handle = fd;
+        stream->mode = FILE_MODES[i].filemode;
+        stream->rec_size = 1;
+        strncpy(stream->name, path, pascal_PathStr_size);
+        pascal_InOutRes = EINOUTRES_SUCCESS;
+        return stream;
+    }
+    else
+    {
+        _dos_freemem(FP_SEG(stream));
+        pascal_InOutRes = EINOUTRES_NOT_OPENED;
+        return NULL;
+    }
 }

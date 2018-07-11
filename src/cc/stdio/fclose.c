@@ -7,17 +7,54 @@
 
 #include "pascal.h"
 #include "cc/i86.h"
+#include "cc/errno.h"
 #include "cc/dos.h"
 #include "cc/string.h"
+#include "cc/io.h"
 
 #include "cc/stdio.h"
-#include "cc/stdio/_io.h"
 
-void cc_fclose(FILE *stream)
+int cc_fclose(FILE *stream)
 {
-    if (stream)
+    if (stream == NULL)
     {
-        pascal_close(stream);
-        _dos_freemem(FP_SEG(stream));
-    };
+        cc_errno = CC_EINVAL;
+        pascal_InOutRes = EINOUTRES_NOT_OPENED;
+        return -1;
+    }
+
+    switch (stream->mode)
+    {
+    case pascal_fmClosed:
+        cc_errno = CC_EINVAL;
+        pascal_InOutRes = EINOUTRES_NOT_OPENED;
+        return -1;
+    case pascal_fmInput:
+    case pascal_fmOutput:
+    case pascal_fmInOut:
+        if (stream->handle > 4)
+        {
+            if (!cc_close(stream->handle))
+            {
+                _cc_dos_freemem(FP_SEG(stream));
+                pascal_InOutRes = EINOUTRES_SUCCESS;
+                return 0;
+            }
+            else
+            {
+                pascal_InOutRes = _cc_doserrno;
+                return -1;
+            }
+        }
+        else
+        {
+            _cc_dos_freemem(FP_SEG(stream));
+            pascal_InOutRes = EINOUTRES_SUCCESS;
+            return 0;
+        }
+    default:
+        cc_errno = CC_EINVAL;
+        pascal_InOutRes = EINOUTRES_NOT_ASSIGNED;
+        return -1;
+    }
 }

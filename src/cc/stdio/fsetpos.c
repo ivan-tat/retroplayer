@@ -7,18 +7,47 @@
 
 #include "pascal.h"
 #include "cc/i86.h"
+#include "cc/errno.h"
 #include "cc/dos.h"
 #include "cc/string.h"
+#include "cc/io.h"
 
 #include "cc/stdio.h"
-#include "cc/stdio/_io.h"
 
 int cc_fsetpos(FILE *stream, fpos_t pos)
 {
-    if (stream)
+    int result;
+
+    if (stream == NULL)
     {
-        return pascal_seek(stream, pos) ? 0 : -1;
+        cc_errno = CC_EINVAL;
+        return 0;
     }
-    else
-        return -1;
+
+    switch (stream->mode)
+    {
+    case pascal_fmClosed:
+        cc_errno = CC_EBADF;
+        pascal_InOutRes = EINOUTRES_NOT_OPENED;
+        return 0;
+    case pascal_fmInput:
+    case pascal_fmOutput:
+    case pascal_fmInOut:
+        result = cc_lseek(stream->handle, pos, CC_SEEK_SET);
+        if (result == -1)
+        {
+            pascal_InOutRes = _cc_doserrno;
+            return -1;
+        }
+        else
+        {
+            pascal_InOutRes = EINOUTRES_SUCCESS;
+            return 0;
+        }
+    default:
+        cc_errno = CC_EBADF;
+        pascal_InOutRes = EINOUTRES_NOT_ASSIGNED;
+        return 0;
+    }
+    return -1;
 }

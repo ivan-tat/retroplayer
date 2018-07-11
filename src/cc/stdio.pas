@@ -35,60 +35,12 @@ implementation
 uses
     watcom,
     pascal,
+    debugfn,
     errno_,
     ctype,
     dos_,
-    string_;
-
-procedure pascal_assign(var f: file; path: pchar); far;
-begin
-    System.Assign(f, path);
-end;
-
-function pascal_reset(var f: file): boolean; far;
-begin
-    (*$I-*)
-    System.Reset(f, 1);
-    (*$I+*)
-    pascal_reset := IOResult = 0;
-end;
-
-function pascal_rewrite(var f: file): boolean; far;
-begin
-    (*$I-*)
-    System.Rewrite(f, 1);
-    (*$I+*)
-    pascal_rewrite := IOResult = 0;
-end;
-
-procedure pascal_close(var f: file); far;
-begin
-    System.Close(f);
-end;
-
-function pascal_seek(var f: file; pos: longint): boolean; far;
-begin
-    (*$I-*)
-    System.Seek(f, pos);
-    (*$I+*)
-    pascal_seek := IOResult = 0;
-end;
-
-function pascal_blockread(var f: file; var buf; size: word; var actual: word): boolean; far;
-begin
-    (*$I-*)
-    System.BlockRead(f, buf, size, actual);
-    (*$I+*)
-    pascal_blockread := IOResult = 0;
-end;
-
-function pascal_blockwrite(var f: file; var buf; size: word; var actual: word): boolean; far;
-begin
-    (*$I-*)
-    System.BlockWrite(f, buf, size, actual);
-    (*$I+*)
-    pascal_blockwrite := IOResult = 0;
-end;
+    string_,
+    io;
 
 procedure pascal_write(s: pchar); far;
 begin

@@ -22,6 +22,8 @@ wlib -d="$DST" "$CLIB" ':dosret.c' ':d_getvec.c' ':d_setvec.c'
 wlib -d="$DST" "$CLIB" ':error086.asm' ':gtime086.asm'
 wlib -d="$DST" "$CLIB" ':exv.c' ':exve.c'
 wlib -d="$DST" "$CLIB" ':creatdos.c' ':opendos.c' ':filedos.c' ':io086.asm'
+# <io.h>
+wlib -d="$DST" "$CLIB" ':open.c' ':close.c' ':_clse.c' ':read.c' ':write.c'
 # <stdio.h>
 wlib -d="$DST" "$CLIB" ':fopen.c' ':fclose.c' ':fread.c' ':fwrite.c'
 # <stdlib.h>
