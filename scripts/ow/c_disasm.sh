@@ -19,7 +19,7 @@ disasm() {
 s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$)/_DATA\1/;\
 s/^_TEXT([[:space:]]+(SEGMENT[[:space:]]+|ENDS[[:space:]]*))/$segname\1/;\
 s/(^[[:space:]]*ASSUME[[:space:]]+.+:)_TEXT/\1$segname/g" "$f_tmp" >"$f_asm"
-    rm "$f_tmp" "$f_obj"
+    rm "$f_tmp"
 }
 
 DST=tmp
@@ -51,6 +51,11 @@ disasm creatdos.obj CREATDOS_TEXT
 disasm opendos.obj OPENDOS_TEXT
 disasm filedos.obj FILEDOS_TEXT
 disasm io086.obj IO086_TEXT
+# <stdio.h>
+disasm fclose.obj FCLOSE_TEXT
+disasm fopen.obj FOPEN_TEXT
+disasm fread.obj FREAD_TEXT
+disasm fwrite.obj FWRITE_TEXT
 # <stdlib.h>
 disasm atoi.obj ATOI_TEXT
 disasm atol.obj ATOL_TEXT

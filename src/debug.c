@@ -9,7 +9,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
-
 #include "cc/i86.h"
 #include "cc/conio.h"
 #include "cc/stdlib.h"

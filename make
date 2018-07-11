@@ -417,6 +417,7 @@ build_target $T_CC     obj src/cc/string/strncpy.c
 build_target $T_CC     obj src/cc/string/strnicmp.c
 build_target $T_CC     obj src/cc/unistd/exv.c
 build_target $T_DEBUG  obj src/debug.c
+build_target $T_DEBUG  obj src/debugfn.c
 build_target $T_DOS    obj src/dos/ems.c
 build_target $T_MISC   obj src/common.c
 build_target $T_MISC   obj src/dynarray.c
@@ -473,6 +474,8 @@ fi
 unset _dir
 build_target $T_WATCOM_TP obj src/watcom.pas
 build_target $T_TP        obj src/pascal.pas
+build_target $T_CC_TP     obj src/cc/string_.pas
+build_target $T_DEBUG_TP  obj src/debugfn.pas
 build_target $T_TP        obj src/strutils.pas
 build_target $T_CC_TP     obj src/cc/i86.pas
 build_target $T_CC_TP     obj src/cc/conio.pas
@@ -480,7 +483,6 @@ build_target $T_CC_TP     obj src/cc/ctype.pas
 build_target $T_CC_TP     obj src/cc/errno_.pas
 build_target $T_CC_TP     obj src/cc/dos_.pas
 build_target $T_CC_TP     obj src/cc/malloc.pas
-build_target $T_CC_TP     obj src/cc/string_.pas
 build_target $T_CC_TP     obj src/cc/stdlib.pas
 build_target $T_CC_TP     obj src/cc/stdio.pas
 build_target $T_CC_TP     obj src/cc/unistd.pas

@@ -9,7 +9,7 @@
 
 #include "pascal.h"
 
-#if DEFINE_LOCAL_DATA
+#ifdef DEFINE_LOCAL_DATA
 
 static int16_t cc_errno;
 

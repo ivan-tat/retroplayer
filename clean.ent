@@ -70,6 +70,7 @@
 ./src/cc/unistd/exv.asm
 ./src/common.asm
 ./src/debug.asm
+./src/debugfn.asm
 ./src/dos/
 ./src/dos/ems.asm
 ./src/dynarray.asm

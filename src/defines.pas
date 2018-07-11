@@ -6,6 +6,9 @@
 (*$define DEBUG*)
 (*$define DEBUG_FILE_S3M_LOAD*)
 (*-$define DEBUG_WRITE_OUTPUT_STREAM*)
+(*$define DEFINE_LOCAL_DATA*)
+(*-$define USE_INTRINSICS*)
+
 
 (*$else*)   (* _DEFINES_PAS_INCLUDED *)
 
@@ -24,6 +27,16 @@ const
     DEBUG_WRITE_OUTPUT_STREAM = true;
 (*$else*)
     DEBUG_WRITE_OUTPUT_STREAM = false;
+(*$endif*)
+(*$ifdef DEFINE_LOCAL_DATA*)
+    DEFINE_LOCAL_DATA = true;
+(*$else*)
+    DEFINE_LOCAL_DATA = false;
+(*$endif*)
+(*$ifdef USE_INTRINSICS*)
+    USE_INTRINSICS = true;
+(*$else*)
+    USE_INTRINSICS = false;
 (*$endif*)
 
 (*$endif*)  (* _DEFINES_PAS_INCLUDED *)

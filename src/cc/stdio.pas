@@ -12,6 +12,9 @@ interface
 
 (*$I defines.pas*)
 
+var
+    pascal_InOutRes: Integer absolute InOutRes;
+
 procedure cc_fclose_;
 procedure cc_fopen_;
 procedure cc_fread_;

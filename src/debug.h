@@ -72,6 +72,18 @@ void PUBLIC_CODE Debug_End(const char *file, const char *method);
 void PUBLIC_CODE Debug_Fail(const char *file, const char *method, const char *msg);
 void PUBLIC_CODE Debug_Success(const char *file, const char *method);
 
+/* Linking */
+
+#ifdef __WATCOMC__
+#pragma aux _DEBUG_LOG "*";
+#pragma aux _DEBUG_BEGIN "*";
+#pragma aux _DEBUG_END "*";
+#pragma aux _DEBUG_FAIL "*";
+#pragma aux _DEBUG_SUCCESS "*";
+#pragma aux _DEBUG_REG "*";
+#pragma aux _DEBUG_UNREG "*";
+#endif
+
 /*** Initialization ***/
 
 DECLARE_REGISTRATION(debug)

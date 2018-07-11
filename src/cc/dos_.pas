@@ -16,6 +16,13 @@ uses
 
 (*$I defines.pas*)
 
+(*$ifdef DEFINE_LOCAL_DATA*)
+
+var
+    _cc_doserrno: Integer;
+
+(*$endif*)
+
 (* DOS Program Segment Prefix *)
 
 type

@@ -16,6 +16,8 @@
 
 #include "pascal.h"
 
+extern int _cc_doserrno;
+
 /* Pascal >>> */
 #define pascal_DirStr_size 68
 #define pascal_NameStr_size 8
@@ -215,6 +217,7 @@ uint16_t PUBLIC_CODE _cc_dos_seek(int16_t fd, int32_t offset, int16_t kind, int3
 #pragma aux pascal_exec        modify [ ax bx cx dx si di es ];
 /* <<< Pascal */
 
+#pragma aux _cc_doserrno "*";
 #pragma aux _cc_dos_getdate "*";
 #pragma aux _cc_dos_gettime "*";
 #pragma aux _cc_dos_getvect "*";

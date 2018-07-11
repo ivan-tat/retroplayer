@@ -9,14 +9,47 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "cc/errno.h"
 #include "cc/dos.h"
 #include "cc/dos/dosret.h"
 #include "cc/dos/error086.h"
 
+#ifdef DEFINE_LOCAL_DATA
+
+int _cc_doserrno;
+
+#endif
+
+/*
+ * Requirements:
+ *      DOS 3.0+
+ *
+ * Description:
+ *      AX = extended error code
+ *      BH = error class
+ *      BL = suggested action
+ *      CH = location (where the error occured)
+ */
+unsigned __near __geterrorinfo(void)
+{
+    union CC_REGPACK regs;
+
+    regs.h.ah = 0x59;
+    regs.w.bx = 0;
+    cc_intr(0x21, &regs);
+    return regs.w.ax;
+}
+
 unsigned __cc_doserror(union CC_REGPACK *regs)
 {
     if (regs->w.flags & CC_INTR_CF)
-        return __cc_set_errno_dos(regs->w.ax);
+    {
+        _cc_doserrno = __geterrorinfo();    // FIXME: if DOS < 3.0, then use regs.w.ax
+        return __cc_set_errno_dos(_cc_doserrno);
+    }
     else
-        return 0;
+    {
+        _cc_doserrno = 0;
+        return CC_EZERO;
+    }
 }

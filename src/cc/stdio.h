@@ -24,6 +24,16 @@
 
 /*** File I/O ***/
 
+#define EINOUTRES_SUCCESS 0
+#define EINOUTRES_READ 100
+#define EINOUTRES_WRITE 101
+#define EINOUTRES_NOT_ASSIGNED 102
+#define EINOUTRES_NOT_OPENED 103
+#define EINOUTRES_NOT_INPUT 104
+#define EINOUTRES_NOT_OUTPUT 105
+
+extern int PUBLIC_DATA pascal_InOutRes;
+
 #define pascal_UnusedHandle 0
 
 #define pascal_fmClosed 0xD7B0
