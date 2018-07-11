@@ -43,7 +43,7 @@ void __far _DEBUG_get_xnum(uint32_t value, char len, char *dest)
  *      #define MAX 16
  *      char s[MAX*4+1];
  *      _DEBUG_get_xline(_hexdigits, 12, MAX, s);
- *      // s = "30 31 32 33 34 35 36 37 38 39 41 42 43          0123456789ABC";
+ *      // s = "30 31 32 33 34 35 36 37 38 39 41 42             0123456789AB";
  *
  *  Description:
  *      Destination must be of the size (max*4+1) bytes to hold the result.
