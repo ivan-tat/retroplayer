@@ -44,6 +44,7 @@ disasm dosret.obj DOSRET_TEXT
 disasm d_getvec.obj D_GETVEC_TEXT
 disasm d_setvec.obj D_SETVEC_TEXT
 disasm error086.obj ERROR086_TEXT
+disasm dosexter.obj DOSEXTER_TEXT
 disasm exv.obj EXV_TEXT
 disasm exve.obj EXVE_TEXT
 disasm gtime086.obj GTIME086_TEXT

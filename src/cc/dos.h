@@ -16,7 +16,18 @@
 
 #include "pascal.h"
 
+/* DOS errors */
+
 extern int _cc_doserrno;
+
+struct CC_DOSERROR {
+    int exterror;
+    char errclass;
+    char action;
+    char locus;
+};
+
+int cc_dosexterr(struct CC_DOSERROR *err);
 
 /* Pascal >>> */
 #define pascal_DirStr_size 68
@@ -160,6 +171,10 @@ uint16_t PUBLIC_CODE _cc_dos_seek(int16_t fd, int32_t offset, int16_t kind, int3
 
 /* Aliases */
 
+#define DOSERROR CC_DOSERROR
+
+#define dosexterr cc_dosexterr
+
 #define dosdate_t cc_dosdate_t
 #define dostime_t cc_dostime_t
 
@@ -218,6 +233,7 @@ uint16_t PUBLIC_CODE _cc_dos_seek(int16_t fd, int32_t offset, int16_t kind, int3
 /* <<< Pascal */
 
 #pragma aux _cc_doserrno "*";
+#pragma aux cc_dosexterr "*";
 #pragma aux _cc_dos_getdate "*";
 #pragma aux _cc_dos_gettime "*";
 #pragma aux _cc_dos_getvect "*";

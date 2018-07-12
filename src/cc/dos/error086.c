@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "cc/i86.h"
 #include "cc/errno.h"
 #include "cc/dos.h"
 #include "cc/dos/dosret.h"
@@ -20,31 +21,19 @@ int _cc_doserrno;
 
 #endif
 
-/*
- * Requirements:
- *      DOS 3.0+
- *
- * Description:
- *      AX = extended error code
- *      BH = error class
- *      BL = suggested action
- *      CH = location (where the error occured)
- */
-unsigned __near __geterrorinfo(void)
-{
-    union CC_REGPACK regs;
-
-    regs.h.ah = 0x59;
-    regs.w.bx = 0;
-    cc_intr(0x21, &regs);
-    return regs.w.ax;
-}
-
 unsigned __cc_doserror(union CC_REGPACK *regs)
 {
+    int olderr;
+    struct CC_DOSERROR err;
+
     if (regs->w.flags & CC_INTR_CF)
     {
-        _cc_doserrno = __geterrorinfo();    // FIXME: if DOS < 3.0, then use regs.w.ax
+        olderr = _cc_doserrno;
+        // FIXME: if DOS < 3.0, then use regs.w.ax
+        if (!cc_dosexterr(&err))
+            _cc_doserrno = err.exterror;
+        else
+            _cc_doserrno = olderr;
         return __cc_set_errno_dos(_cc_doserrno);
     }
     else

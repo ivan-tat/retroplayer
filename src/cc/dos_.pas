@@ -70,6 +70,8 @@ procedure __cc_set_errno_dos;
 
 procedure __cc_doserror;
 
+procedure cc_dosexterr;
+
 procedure _cc_dos_getdate;
 procedure _cc_dos_gettime;
 
@@ -119,6 +121,9 @@ procedure __cc_set_errno_dos; external;
 
 (*$L dos\error086.obj*)
 procedure __cc_doserror; external;
+
+(*$L dos\dosexter.obj*)
+procedure cc_dosexterr; external;
 
 (*$L dos\gtime086.obj*)
 procedure _cc_dos_getdate; external;

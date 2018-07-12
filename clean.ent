@@ -10,6 +10,7 @@
 ./src/cc/dos/
 ./src/cc/dos/creatdos.asm
 ./src/cc/dos/d_getvec.asm
+./src/cc/dos/dosexter.asm
 ./src/cc/dos/dosret.asm
 ./src/cc/dos/d_setvec.asm
 ./src/cc/dos/error086.asm
