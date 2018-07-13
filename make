@@ -253,7 +253,7 @@ mkexe_c_linux() {
     export WCL386="-q -3 -fp3 -fpi87 -om -bcl=linux"
     $W_CL386 -fo="$f_obj" -fe="$f_exe" "$f_name"
     rm -f "$f_obj"
-    export WCL386="$WCC_OLD"
+    export WCL386="$WCL386_OLD"
 }
 
 mkinc_linux() {
