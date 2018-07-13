@@ -436,6 +436,7 @@ build_target $T_HW     obj src/hw/isr.asm
 build_target $T_HW     obj src/hw/pic.c
 build_target $T_HW     obj src/hw/sndctl_t.c
 build_target $T_HW     obj src/hw/line.asm
+build_target $T_HW     obj src/hw/vbios.c
 build_target $T_HW     obj src/hw/vga.c
 build_target $T_HW_SB  obj src/hw/sb/sbio.c
 build_target $T_HW_SB  obj src/hw/sb/sbctl.c
@@ -484,6 +485,7 @@ build_target $T_CC_TP     obj src/cc/string_.pas
 build_target $T_DEBUG_TP  obj src/debugfn.pas
 build_target $T_TP        obj src/strutils.pas
 build_target $T_CC_TP     obj src/cc/i86.pas
+build_target $T_HW_TP     obj src/hw/vbios.pas
 build_target $T_CC_TP     obj src/cc/conio.pas
 build_target $T_CC_TP     obj src/cc/ctype.pas
 build_target $T_CC_TP     obj src/cc/errno_.pas

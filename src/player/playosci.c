@@ -11,6 +11,7 @@
 #include "cc/stdlib.h"
 #include "cc/string.h"
 #include "cc/conio.h"
+#include "hw/vbios.h"
 #include "hw/vga.h"
 #include "main/s3mvars.h"
 #include "main/fillvars.h"

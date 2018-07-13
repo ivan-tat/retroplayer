@@ -15,9 +15,6 @@ interface
 var
     drawseg: Word;
 
-procedure vbios_set_mode(mode: Byte);
-procedure vbios_set_cursor_shape(start, stop: Byte);
-
 procedure vga_wait_vsync;
 procedure vga_clear_page_320x200x8(c: Byte);
 procedure vga_line(x1, y1, x2, y2: Word; f: Byte);
@@ -33,9 +30,6 @@ uses
     debug;
 
 (*$l vga.obj*)
-
-procedure vbios_set_mode(mode: Byte); external;
-procedure vbios_set_cursor_shape(start, stop: Byte); external;
 
 procedure vga_wait_vsync; external;
 procedure vga_clear_page_320x200x8(c: Byte); external;

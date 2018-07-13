@@ -18,9 +18,6 @@
 
 extern uint16_t PUBLIC_DATA drawseg;
 
-void PUBLIC_CODE vbios_set_mode(uint8_t mode);
-void PUBLIC_CODE vbios_set_cursor_shape(uint8_t start, uint8_t stop);
-
 void PUBLIC_CODE vga_wait_vsync(void);
 void PUBLIC_CODE vga_clear_page_320x200x8(char c);
 void PUBLIC_CODE vga_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t f);

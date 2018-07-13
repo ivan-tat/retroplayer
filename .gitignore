@@ -116,6 +116,7 @@ src/dos/ems.asm
 src/hw/dma.asm
 src/hw/hwowner.asm
 src/hw/pic.asm
+src/hw/vbios.asm
 src/hw/vga.asm
 src/hw/sndctl_t.asm
 src/hw/sb/sbctl.asm

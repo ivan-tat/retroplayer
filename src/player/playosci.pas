@@ -11,6 +11,7 @@ uses
     stdlib,
     conio,
     sbctl,
+    vbios,
     vga,
     s3mvars,
     fillvars,

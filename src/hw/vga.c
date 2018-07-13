@@ -12,27 +12,9 @@
 #include "cc/conio.h"
 #include "cc/string.h"
 #include "debug.h"
+#include "hw/vbios.h"
 
 #include "hw/vga.h"
-
-void PUBLIC_CODE vbios_set_mode(uint8_t mode)
-{
-    union REGPACK regs;
-
-    regs.h.ah = 0;
-    regs.h.al = mode;
-    intr(0x10, &regs);
-}
-
-void PUBLIC_CODE vbios_set_cursor_shape(uint8_t start, uint8_t stop)
-{
-    union REGPACK regs;
-
-    regs.h.ah = 1;
-    regs.h.cl = stop;
-    regs.h.ch = start;
-    intr(0x10, &regs);
-}
 
 void PUBLIC_CODE vga_wait_vsync(void)
 {

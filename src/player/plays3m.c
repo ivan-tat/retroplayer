@@ -16,6 +16,7 @@
 #include "cc/errno.h"
 #include "cc/unistd.h"
 #include "hw/sb/sbctl.h"
+#include "hw/vbios.h"
 #include "hw/vga.h"
 #include "dos/ems.h"
 #include "main/mixer.h"

@@ -29,6 +29,7 @@ uses
     mixchn,
     effects,
     s3mplay,
+    vbios,
     vga,
     screen;
 

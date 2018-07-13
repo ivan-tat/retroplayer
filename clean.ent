@@ -89,6 +89,7 @@
 ./src/hw/sb/sbctl.asm
 ./src/hw/sb/sbio.asm
 ./src/hw/sndctl_t.asm
+./src/hw/vbios.asm
 ./src/hw/vga.asm
 ./src/main/
 ./src/main/effects.asm
