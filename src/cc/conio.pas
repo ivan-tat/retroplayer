@@ -20,7 +20,7 @@ procedure cc_kbhit;
 procedure cc_getch;
 
 procedure cc_clreol;
-procedure pascal_clrscr;
+procedure cc_clrscr;
 procedure pascal_gotoxy(x, y: Byte);
 procedure pascal_textbackground(color: Byte);
 procedure pascal_textcolor(color: Byte);
@@ -53,12 +53,10 @@ procedure cc_getch; external;
 (*$L conio\clreol.obj*)
 procedure cc_clreol; external;
 
-(* CRT Unit *)
+(*$L conio\clrscr.obj*)
+procedure cc_clrscr; external;
 
-procedure pascal_clrscr;
-begin
-    crt.ClrScr;
-end;
+(* CRT Unit *)
 
 procedure pascal_gotoxy(x, y: Byte);
 begin

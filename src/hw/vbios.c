@@ -121,10 +121,10 @@ void vbios_scroll_up(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t cou
     regs.h.ah = 6;
     regs.h.al = count;
     regs.h.bh = color;
-    regs.h.dl = x0;
-    regs.h.dh = y0;
-    regs.h.cl = x1;
-    regs.h.ch = y1;
+    regs.h.cl = x0;
+    regs.h.ch = y0;
+    regs.h.dl = x1;
+    regs.h.dh = y1;
     intr(0x10, &regs);
 }
 
@@ -142,9 +142,9 @@ void vbios_scroll_down(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t c
     regs.h.ah = 7;
     regs.h.al = count;
     regs.h.bh = color;
-    regs.h.dl = x0;
-    regs.h.dh = y0;
-    regs.h.cl = x1;
-    regs.h.ch = y1;
+    regs.h.cl = x0;
+    regs.h.ch = y0;
+    regs.h.dl = x1;
+    regs.h.dh = y1;
     intr(0x10, &regs);
 }
