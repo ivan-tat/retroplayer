@@ -361,6 +361,7 @@ build_target $T_CC     obj src/cc/i86/disable.c
 build_target $T_CC     obj src/cc/i86/dointr.asm
 build_target $T_CC     obj src/cc/i86/enable.c
 build_target $T_CC     obj src/cc/i86/intr.asm
+build_target $T_CC     obj src/cc/conio/clreol.c
 build_target $T_CC     obj src/cc/conio/getch.c
 build_target $T_CC     obj src/cc/conio/inp.c
 build_target $T_CC     obj src/cc/conio/kbhit.c

@@ -19,7 +19,7 @@ procedure cc_outp;
 procedure cc_kbhit;
 procedure cc_getch;
 
-procedure pascal_clreol;
+procedure cc_clreol;
 procedure pascal_clrscr;
 procedure pascal_gotoxy(x, y: Byte);
 procedure pascal_textbackground(color: Byte);
@@ -31,6 +31,7 @@ implementation
 
 uses
     i86,
+    vbios,
     crt;
 
 (*$L conio\inp.obj*)
@@ -49,12 +50,10 @@ procedure cc_kbhit; external;
 (*$L conio\getch.obj*)
 procedure cc_getch; external;
 
-(* CRT Unit *)
+(*$L conio\clreol.obj*)
+procedure cc_clreol; external;
 
-procedure pascal_clreol;
-begin
-    crt.ClrEol;
-end;
+(* CRT Unit *)
 
 procedure pascal_clrscr;
 begin

@@ -13,6 +13,8 @@
 //#define DEFINE_LOCAL_DATA 1
 //#define USE_INTRINSICS 1
 
+#define CONFIG_VBIOS_ENABLE_LIGHT_PEN 1
+
 #define CRLF "\r\n"
 //#define CRLF "\n"
 

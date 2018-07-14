@@ -9,6 +9,7 @@
 (*$define DEFINE_LOCAL_DATA*)
 (*-$define USE_INTRINSICS*)
 
+(*$define CONFIG_VBIOS_ENABLE_LIGHT_PEN*)
 
 (*$else*)   (* _DEFINES_PAS_INCLUDED *)
 
@@ -38,5 +39,11 @@ const
 (*$else*)
     USE_INTRINSICS = false;
 (*$endif*)
+
+(*$ifdef CONFIG_VBIOS_ENABLE_LIGHT_PEN*)
+    CONFIG_VBIOS_ENABLE_LIGHT_PEN = true;
+(*$else*)
+    CONFIG_VBIOS_ENABLE_LIGHT_PEN = false;
+(*$endif*);
 
 (*$endif*)  (* _DEFINES_PAS_INCLUDED *)

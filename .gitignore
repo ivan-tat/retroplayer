@@ -48,6 +48,7 @@ src/debugfn.asm
 src/dynarray.asm
 src/pascal.asm
 src/startup.asm
+src/cc/conio/clreol.asm
 src/cc/conio/getch.asm
 src/cc/conio/inp.asm
 src/cc/conio/outp.asm

@@ -73,12 +73,21 @@ extern char cc_getch(void);
 #define _white          15
 #define _blink          128
 
+#pragma pack(push, 1);
+typedef union text_rect_t {
+    struct {
+        uint8_t x, y;
+    } rect;
+    uint16_t value;
+};
+#pragma pack(pop);
+
 extern uint16_t PUBLIC_DATA lastmode;
 extern uint8_t  PUBLIC_DATA textattr;
-extern uint16_t PUBLIC_DATA windmin;
-extern uint16_t PUBLIC_DATA windmax;
+extern union text_rect_t PUBLIC_DATA windmin;
+extern union text_rect_t PUBLIC_DATA windmax;
 
-extern void PUBLIC_CODE pascal_clreol(void);
+void cc_clreol(void);
 extern void PUBLIC_CODE pascal_clrscr(void);
 extern void PUBLIC_CODE pascal_gotoxy(uint8_t x, uint8_t y);
 extern void PUBLIC_CODE pascal_textbackground(uint8_t color);
@@ -87,7 +96,6 @@ extern void PUBLIC_CODE pascal_textmode(uint16_t mode);
 extern void PUBLIC_CODE pascal_window(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 
 #ifdef __WATCOMC__
-#pragma aux pascal_clreol         modify [ax bx cx dx si di es];
 #pragma aux pascal_clrscr         modify [ax bx cx dx si di es];
 #pragma aux pascal_gotoxy         modify [ax bx cx dx si di es];
 #pragma aux pascal_textbackground modify [ax bx cx dx si di es];
@@ -108,7 +116,7 @@ extern void PUBLIC_CODE pascal_window(uint8_t x1, uint8_t y1, uint8_t x2, uint8_
 
 /*** Text-mode functions ***/
 
-#define clreol()                pascal_clreol()
+#define clreol                  cc_clreol
 #define clrscr()                pascal_clrscr()
 #define gotoxy(x, y)            pascal_gotoxy(x, y)
 #define textbackground(c)       pascal_textbackground(c)
@@ -116,11 +124,14 @@ extern void PUBLIC_CODE pascal_window(uint8_t x1, uint8_t y1, uint8_t x2, uint8_
 #define textmode(m)             pascal_textmode(m)
 #define window(x1, y1, x2, y2)  pascal_window(x1, y1, x2, y2)
 
+/* Linking */
+
 #ifdef __WATCOMC__
 //#pragma aux cc_inp "*";
 //#pragma aux cc_outp "*";
 #pragma aux cc_kbhit "*";
 #pragma aux cc_getch "*";
+#pragma aux cc_clreol "*";
 #endif
 
 #endif  /* CC_CONIO_H */
