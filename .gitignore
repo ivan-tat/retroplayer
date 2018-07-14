@@ -51,6 +51,7 @@ src/startup.asm
 src/cc/conio/clreol.asm
 src/cc/conio/clrscr.asm
 src/cc/conio/getch.asm
+src/cc/conio/gotoxy.asm
 src/cc/conio/inp.asm
 src/cc/conio/outp.asm
 src/cc/conio/kbhit.asm

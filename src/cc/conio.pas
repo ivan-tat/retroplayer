@@ -21,7 +21,7 @@ procedure cc_getch;
 
 procedure cc_clreol;
 procedure cc_clrscr;
-procedure pascal_gotoxy(x, y: Byte);
+procedure cc_gotoxy;
 procedure pascal_textbackground(color: Byte);
 procedure pascal_textcolor(color: Byte);
 procedure pascal_textmode(mode: Word);
@@ -56,12 +56,10 @@ procedure cc_clreol; external;
 (*$L conio\clrscr.obj*)
 procedure cc_clrscr; external;
 
-(* CRT Unit *)
+(*$L conio\gotoxy.obj*)
+procedure cc_gotoxy; external;
 
-procedure pascal_gotoxy(x, y: Byte);
-begin
-    crt.GotoXY(x, y);
-end;
+(* CRT Unit *)
 
 procedure pascal_textbackground(color: Byte);
 begin

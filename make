@@ -364,6 +364,7 @@ build_target $T_CC     obj src/cc/i86/intr.asm
 build_target $T_CC     obj src/cc/conio/clreol.c
 build_target $T_CC     obj src/cc/conio/clrscr.c
 build_target $T_CC     obj src/cc/conio/getch.c
+build_target $T_CC     obj src/cc/conio/gotoxy.c
 build_target $T_CC     obj src/cc/conio/inp.c
 build_target $T_CC     obj src/cc/conio/kbhit.c
 build_target $T_CC     obj src/cc/conio/outp.c
