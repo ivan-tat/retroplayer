@@ -38,6 +38,10 @@ Plans for the future:
 
 ## Links
 
+* [FreeDOS](http://www.freedos.org/) (a complete, free, DOS-compatible operating system)
+
+* [GnuDOS](https://www.gnu.org/software/gnudos/) (a library designed to help new users of the GNU system, who are coming from a DOS background)
+
 * [DOSEMU](http://www.dosemu.org/) (DOS emulator with LFN support)
 
 * [DOSBox](http://www.dosbox.com/) (DOS emulator with good hardware support)
@@ -52,13 +56,15 @@ Plans for the future:
 
 * [Free Pascal](http://freepascal.org/) (advanced open source Pascal compiler for Pascal and Object Pascal for various platforms)
 
-* Turbo Pascal 7.0 compiler for DOS (will be dropped)
-
-* Turbo Assembler 3.0 compiler for DOS (dropped, use `wasm`)
+* Borland/Turbo Pascal 7.0 compiler for DOS (will be dropped)
 
 * Sound Blaster Programming Information Version 0.90 (1995) by Andre Baresel & Craig Jackson
 
-* TECH Help! 6.0 (1994) by Flambeaux Software
+* [Sound Blaster Series Hardware Programming Guide](https://pdos.csail.mit.edu/6.828/2008/readings/hardware/SoundBlaster.pdf) (1993-1996) by Creative Technology Ltd.
+
+* [Sound Programming](https://soundprogramming.net/) by Jason Champion (collection of synthesizer, sampler, sequencer, drum machine, keyboard, and guitar synth manuals, specifications, and demos)
+
+* [TECH Help! 6.0](http://www.techhelpmanual.com/) (1994) by Flambeaux Software (DOS Technical Reference and PC, AT, and PS/2 BIOS and Hardware References)
 
 * [The Dark Corner BBS](http://www.dcee.net/) (sound and music file formats description, sound hardware programming, old players and much more)
 
