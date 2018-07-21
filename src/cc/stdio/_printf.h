@@ -58,4 +58,15 @@ void dataStreamInitFile(DATASTREAM *self, FILE *stream, char *buf, size_t size);
 
 void _dsprintf(DATASTREAM *stream, const char *format, va_list ap);
 
+/* Linking */
+
+#ifdef __WATCOMC__
+#pragma aux dataStreamFlush "*";
+#pragma aux dataStreamWrite "*";
+#pragma aux dataStreamInitMemory "*";
+#pragma aux dataStreamInitStdOut "*";
+#pragma aux dataStreamInitFile "*";
+#pragma aux _dsprintf "*";
+#endif
+
 #endif  /* CC_STDIO_PRINTF_H */
