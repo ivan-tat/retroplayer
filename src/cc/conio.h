@@ -17,6 +17,8 @@
 
 #include "pascal.h"
 
+/*** General I/O ***/
+
 #ifdef __WATCOMC__
 
 char cc_inp(unsigned int port);
@@ -40,11 +42,6 @@ extern char cc_inp(unsigned int port);
 extern void cc_outp(unsigned int port, char value);
 
 #endif  /* !__WATCOMC__ */
-
-/*** Keyboard functions ***/
-
-extern bool cc_kbhit(void);
-extern char cc_getch(void);
 
 /*** Text-mode functions ***/
 
@@ -82,56 +79,127 @@ typedef union text_rect_t {
 };
 #pragma pack(pop);
 
-extern uint16_t PUBLIC_DATA lastmode;
-extern uint8_t  PUBLIC_DATA textattr;
-extern union text_rect_t PUBLIC_DATA windmin;
-extern union text_rect_t PUBLIC_DATA windmax;
+/* Private */
+
+extern bool     cc_gotbreak;
+extern char     cc_lastkey;
+extern uint16_t cc_screenwidth;
+extern uint16_t cc_screenheight;
+extern uint8_t  cc_textattrorig;
+
+/* Publics */
+
+extern bool     cc_checkbreak;
+extern bool     cc_checkeof;
+extern bool     cc_checksnow;
+extern bool     cc_directvideo;
+extern uint16_t cc_lastmode;
+extern uint8_t  cc_textattr;
+extern union text_rect_t cc_windmin;
+extern union text_rect_t cc_windmax;
 
 void cc_clreol(void);
 void cc_clrscr(void);
 void cc_gotoxy(uint8_t x, uint8_t y);
+void cc_window(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 extern void PUBLIC_CODE pascal_textbackground(uint8_t color);
 extern void PUBLIC_CODE pascal_textcolor(uint8_t color);
-extern void PUBLIC_CODE pascal_textmode(uint16_t mode);
-extern void PUBLIC_CODE pascal_window(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
+void cc_textmode(uint16_t mode);
 
 #ifdef __WATCOMC__
 #pragma aux pascal_textbackground modify [ax bx cx dx si di es];
 #pragma aux pascal_textcolor      modify [ax bx cx dx si di es];
-#pragma aux pascal_textmode       modify [ax bx cx dx si di es];
-#pragma aux pascal_window         modify [ax bx cx dx si di es];
 #endif
+
+/*** Keyboard functions ***/
+
+extern bool cc_kbhit(void);
+extern char cc_getch(void);
+
+/*** Initialization ***/
+
+/* Private */
+
+void _cc_console_set_mode(uint16_t mode);
+void _cc_console_on_mode_change(void);
+void _cc_console_on_start(void);
+
+/* Publics */
+
+void cc_console_init(void);
 
 /* Aliases */
 
+/*** General I/O ***/
+
 #define inp cc_inp
 #define outp cc_outp
+
+/*** Text-mode variables ***/
+
+#define checkbreak      cc_checkbreak;
+#define checkeof        cc_checkeof;
+#define checksnow       cc_checksnow;
+#define directvideo     cc_directvideo;
+#define lastmode        cc_lastmode;
+#define textattr        cc_textattr;
+#define windmin         cc_windmin;
+#define windmax         cc_windmax;
+
+/*** Text-mode functions ***/
+
+#define textmode       cc_textmode
+#define window         cc_window
+#define clrscr         cc_clrscr
+#define clreol         cc_clreol
+#define gotoxy         cc_gotoxy
+#define textbackground(c)       pascal_textbackground(c)
+#define textcolor(c)            pascal_textcolor(c)
 
 /*** Keyboard functions ***/
 
 #define kbhit cc_kbhit
 #define getch cc_getch
 
-/*** Text-mode functions ***/
+/*** Initialization ***/
 
-#define clreol                  cc_clreol
-#define clrscr                  cc_clrscr
-#define gotoxy                  cc_gotoxy
-#define textbackground(c)       pascal_textbackground(c)
-#define textcolor(c)            pascal_textcolor(c)
-#define textmode(m)             pascal_textmode(m)
-#define window(x1, y1, x2, y2)  pascal_window(x1, y1, x2, y2)
+#define console_init cc_console_init
 
 /* Linking */
 
 #ifdef __WATCOMC__
 //#pragma aux cc_inp "*";
 //#pragma aux cc_outp "*";
+
+#pragma aux cc_gotbreak "*";
+#pragma aux cc_lastkey "*";
+#pragma aux cc_screenwidth "*";
+#pragma aux cc_screenheight "*";
+#pragma aux cc_textattrorig "*";
+
+#pragma aux cc_checkbreak "*";
+#pragma aux cc_checkeof "*";
+#pragma aux cc_checksnow "*";
+#pragma aux cc_directvideo "*";
+#pragma aux cc_lastmode "*";
+#pragma aux cc_textattr "*";
+#pragma aux cc_windmin "*";
+#pragma aux cc_windmax "*";
+
+#pragma aux cc_textmode "*";
+#pragma aux cc_window "*";
+#pragma aux cc_clrscr "*";
+#pragma aux cc_clreol "*";
+#pragma aux cc_gotoxy "*";
+
 #pragma aux cc_kbhit "*";
 #pragma aux cc_getch "*";
-#pragma aux cc_clreol "*";
-#pragma aux cc_clrscr "*";
-#pragma aux cc_gotoxy "*";
+
+#pragma aux _cc_console_on_mode_change "*";
+#pragma aux _cc_console_set_mode "*";
+#pragma aux _cc_console_on_start "*";
+#pragma aux cc_console_init "*";
+
 #endif
 
 #endif  /* CC_CONIO_H */

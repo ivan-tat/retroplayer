@@ -24,35 +24,6 @@
 
 /*** File I/O ***/
 
-#define EINOUTRES_SUCCESS 0
-#define EINOUTRES_READ 100
-#define EINOUTRES_WRITE 101
-#define EINOUTRES_NOT_ASSIGNED 102
-#define EINOUTRES_NOT_OPENED 103
-#define EINOUTRES_NOT_INPUT 104
-#define EINOUTRES_NOT_OUTPUT 105
-
-extern int PUBLIC_DATA pascal_InOutRes;
-
-#define pascal_UnusedHandle 0
-
-#define pascal_fmClosed 0xD7B0
-#define pascal_fmInput  0xD7B1
-#define pascal_fmOutput 0xD7B2
-#define pascal_fmInOut  0xD7B3
-
-#pragma pack(push, 1);
-typedef struct pascal_File_t {
-    uint16_t handle;
-    uint16_t mode;
-    uint16_t rec_size;
-    char private_data[26];
-    char user_data[16];
-    char name[pascal_PathStr_size];
-};
-#pragma pack(pop);
-typedef struct pascal_File_t PASCALFILE;
-
 typedef PASCALFILE FILE;
 
 typedef int32_t fpos_t;

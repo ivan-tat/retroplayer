@@ -52,5 +52,6 @@ var
 procedure plays3m_main; far; external;
 
 begin
+    _cc_startup;
     plays3m_main;
 end.

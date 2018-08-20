@@ -61,8 +61,7 @@ smalls3m_main (void)
     char s[pascal_String_size];
     int result;
 
-    if (!custom_startup ())
-        return;
+    console_init ();
 
     if (!environ_init ())
     {

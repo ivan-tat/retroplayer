@@ -24,5 +24,6 @@ uses
 procedure playosci_main; far; external;
 
 begin
+    _cc_startup;
     playosci_main;
 end.

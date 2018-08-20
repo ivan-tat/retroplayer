@@ -17,5 +17,5 @@ void cc_clreol(void)
     struct vbios_cursor_state_t cursor;
 
     vbios_query_cursor_state(0, &cursor);
-    vbios_scroll_up(cursor.x, cursor.y, windmax.rect.x, cursor.y, 0, textattr);
+    vbios_scroll_up(cursor.x, cursor.y, cc_windmax.rect.x, cursor.y, 0, cc_textattr);
 }

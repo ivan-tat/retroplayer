@@ -12,9 +12,6 @@ interface
 
 (*$I defines.pas*)
 
-var
-    pascal_InOutRes: Integer absolute InOutRes;
-
 procedure cc_fclose;
 procedure cc_fopen;
 procedure cc_fread;
@@ -35,6 +32,7 @@ implementation
 uses
     watcom,
     pascal,
+    startup,
     debugfn,
     errno_,
     ctype,

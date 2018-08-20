@@ -29,9 +29,12 @@ cd $DST
 disasm i4d.obj I4D_TEXT
 disasm i4m.obj I4M_TEXT
 disasm i8d086.obj I8D086_TEXT
+disasm xmsg.obj XMSG_TEXT
+disasm cstart.obj CSTART_TEXT
 # <conio.h>
 disasm inp.obj INP_TEXT
 disasm outp.obj OUTP_TEXT
+disasm delay.obj DELAY_TEXT
 # <i86.h>
 disasm intr.obj INTR_TEXT
 disasm dointr.obj DOINTR_TEXT
@@ -59,11 +62,17 @@ disasm open.obj OPEN_TEXT
 disasm read.obj READ_TEXT
 disasm write.obj WRITE_TEXT
 # <stdio.h>
+disasm iob.obj IOB_TEXT
+disasm iobaddr.obj IOBADDR_TEXT
 disasm fclose.obj FCLOSE_TEXT
 disasm fopen.obj FOPEN_TEXT
 disasm fread.obj FREAD_TEXT
 disasm fwrite.obj FWRITE_TEXT
 # <stdlib.h>
+disasm atexit.obj ATEXIT_TEXT
+disasm exit.obj EXIT_TEXT
+disasm _exit.obj _EXIT_TEXT
+disasm abort.obj ABORT_TEXT
 disasm atoi.obj ATOI_TEXT
 disasm atol.obj ATOL_TEXT
 disasm istable.obj ISTABLE_TEXT

@@ -17,8 +17,14 @@
 
 #include "pascal.h"
 
-// TODO: remove PUBLIC_CODE macros when done.
+extern bool isCPU_8086(void);
+extern bool isCPU_i386(void);
 
-extern bool PUBLIC_CODE isCPU_i386(void);
+/* Linking */
+
+#ifdef __WATCOMC__
+#pragma aux isCPU_8086 "*";
+#pragma aux isCPU_i386 "*";
+#endif
 
 #endif /* CPU_H */

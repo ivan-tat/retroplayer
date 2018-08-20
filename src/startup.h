@@ -14,6 +14,69 @@
 
 #include <stdint.h>
 
+#include "pascal.h"
+
+/* File I/O */
+
+// File handle
+#define pascal_UnusedHandle 0
+
+// File mode
+#define pascal_fmClosed 0xD7B0
+#define pascal_fmInput  0xD7B1
+#define pascal_fmOutput 0xD7B2
+#define pascal_fmInOut  0xD7B3
+
+// Constants (same as in "dos.h")
+#define pascal_PathStr_size 80
+
+#pragma pack(push, 1);
+typedef struct pascal_File_t {
+    uint16_t handle;
+    uint16_t mode;
+    uint16_t rec_size;
+    char private_data[26];
+    char user_data[16];
+    char name[pascal_PathStr_size];
+};
+#pragma pack(pop);
+
+typedef struct pascal_File_t PASCALFILE;
+
+// cc_InOutRes variable
+#define EINOUTRES_SUCCESS 0
+#define EINOUTRES_READ 100
+#define EINOUTRES_WRITE 101
+#define EINOUTRES_NOT_ASSIGNED 102
+#define EINOUTRES_NOT_OPENED 103
+#define EINOUTRES_NOT_INPUT 104
+#define EINOUTRES_NOT_OUTPUT 105
+
+/* Global variables */
+
+extern uint16_t     cc_PrefixSeg;
+extern void __far  *cc_ErrorAddr;
+extern void *(__far cc_ExitProc);
+extern int16_t      cc_ExitCode;
+extern int          cc_InOutRes;
+extern uint8_t      cc_Test8086;
+extern PASCALFILE   cc_Input;
+extern PASCALFILE   cc_Output;
+
+/* Internal variables */
+#define _CC_ATEXIT_MAX 32
+extern void *__far _cc_ExitList[_CC_ATEXIT_MAX];
+extern uint8_t _cc_ExitCount;
+
+//void _cc_on_exit(void);   // internal
+
+// No return.
+void _cc_ExitWithError(int16_t status, void __far *addr);
+// No return.
+void _cc_Exit(int16_t status);
+
+/* Arguments handling */
+
 extern uint16_t PUBLIC_CODE pascal_paramcount(void);
 extern void     PUBLIC_CODE pascal_paramstr(char *dest, uint8_t i);
 
@@ -22,11 +85,32 @@ extern void     PUBLIC_CODE pascal_paramstr(char *dest, uint8_t i);
 #pragma aux pascal_paramstr   modify [ ax bx cx dx si di es ];
 #endif
 
-uint16_t PUBLIC_CODE custom_argc(void);
-void     PUBLIC_CODE custom_argv(char *dest, uint16_t n, uint8_t i);
+uint16_t custom_argc(void);
+void     custom_argv(char *dest, uint16_t n, uint8_t i);
 
-/*** Initialization ***/
+/* Application startup */
 
-bool PUBLIC_CODE custom_startup(void);
+void _cc_startup(void);
+
+/* Linking */
+
+#ifdef __WATCOMC__
+#pragma aux cc_PrefixSeg "*";
+#pragma aux cc_ErrorAddr "*";
+#pragma aux cc_ExitProc "*";
+#pragma aux cc_ExitCode "*";
+#pragma aux cc_InOutRes "*";
+#pragma aux cc_Test8086 "*";
+#pragma aux cc_Input "*";
+#pragma aux cc_Output "*";
+#pragma aux _cc_ExitList "*";
+#pragma aux _cc_ExitCount "*";
+//#pragma aux _cc_on_exit "*";
+#pragma aux custom_argc "*";
+#pragma aux custom_argv "*";
+#pragma aux _cc_startup "*";
+#pragma aux _cc_ExitWithError "*";
+#pragma aux _cc_Exit "*";
+#endif
 
 #endif  /* STARTUP_H */

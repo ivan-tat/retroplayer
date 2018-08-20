@@ -14,6 +14,7 @@ interface
 
 procedure vbiosda_get_text_width;
 procedure vbiosda_get_text_height;
+procedure vbiosda_get_ega_misc_info;
 procedure vbios_set_mode;
 procedure vbios_set_cursor_shape;
 procedure vbios_set_cursor_pos;
@@ -24,6 +25,11 @@ procedure vbios_read_light_pen;
 procedure vbios_set_active_page;
 procedure vbios_scroll_up;
 procedure vbios_scroll_down;
+procedure vbios_get_character_and_attribute;
+procedure vbios_query_video_info;
+procedure vbios_load_rom_font_8x8;
+procedure vbios_query_font_info;
+procedure vbios_use_alternate_print_screen;
 
 implementation
 
@@ -36,6 +42,7 @@ uses
 
 procedure vbiosda_get_text_width; external;
 procedure vbiosda_get_text_height; external;
+procedure vbiosda_get_ega_misc_info; external;
 procedure vbios_set_mode; external;
 procedure vbios_set_cursor_shape; external;
 procedure vbios_set_cursor_pos; external;
@@ -46,5 +53,10 @@ procedure vbios_read_light_pen; external;
 procedure vbios_set_active_page; external;
 procedure vbios_scroll_up; external;
 procedure vbios_scroll_down; external;
+procedure vbios_get_character_and_attribute; external;
+procedure vbios_query_video_info; external;
+procedure vbios_load_rom_font_8x8; external;
+procedure vbios_query_font_info; external;
+procedure vbios_use_alternate_print_screen; external;
 
 end.

@@ -19,11 +19,15 @@
 void cc_gotoxy(uint8_t x, uint8_t y)
 {
     int sx, sy;
-    sx = windmin.rect.x + x - 1;
-    if ((sx >= windmin.rect.x) && (sx <= windmax.rect.x))
+
+    if (x && y)
     {
-        sy = windmin.rect.y + y - 1;
-        if ((sy >= windmin.rect.y) && (sy <= windmax.rect.y))
-            vbios_set_cursor_pos(0, sx, sy);
+        sx = cc_windmin.rect.x + x - 1;
+        if ((sx >= cc_windmin.rect.x) && (sx <= cc_windmax.rect.x))
+        {
+            sy = cc_windmin.rect.y + y - 1;
+            if ((sy >= cc_windmin.rect.y) && (sy <= cc_windmax.rect.y))
+                vbios_set_cursor_pos(0, sx, sy);
+        }
     }
 }

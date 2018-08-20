@@ -1,4 +1,4 @@
-/* clrscr.c -- part of custom "conio" library.
+/* textmode.c -- part of custom "conio" library.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -6,14 +6,16 @@
 #include "defines.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "cc/i86.h"
 #include "hw/vbios.h"
 
 #include "cc/conio.h"
 
-void cc_clrscr(void)
+void cc_textmode(uint16_t mode)
 {
-    vbios_scroll_up(cc_windmin.rect.x, cc_windmin.rect.y, cc_windmax.rect.x, cc_windmax.rect.y, 0, cc_textattr);
-    vbios_set_cursor_pos(0, cc_windmin.rect.x, cc_windmin.rect.y);
+    _cc_console_set_mode(mode);
+    _cc_console_on_mode_change();
+    cc_textattr = cc_textattrorig;
 }

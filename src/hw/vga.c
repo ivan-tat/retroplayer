@@ -10,6 +10,7 @@
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/conio.h"
+#include "cc/stdlib.h"
 #include "cc/string.h"
 #include "debug.h"
 #include "hw/vbios.h"

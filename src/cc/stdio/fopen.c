@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "startup.h"
 #include "debugfn.h"
 #include "cc/i86.h"
 #include "cc/errno.h"
@@ -120,7 +121,7 @@ FILE *cc_fopen(const char *path, const char *mode)
     if ((!path) || (!mode))
     {
         cc_errno = EINVAL;
-        pascal_InOutRes = EINOUTRES_NOT_ASSIGNED;
+        cc_InOutRes = EINOUTRES_NOT_ASSIGNED;
         return NULL;
     }
 
@@ -128,13 +129,13 @@ FILE *cc_fopen(const char *path, const char *mode)
     if (i < 0)
     {
         cc_errno = CC_EINVAL;
-        pascal_InOutRes = EINOUTRES_NOT_ASSIGNED;
+        cc_InOutRes = EINOUTRES_NOT_ASSIGNED;
         return NULL;
     }
 
     if (_dos_allocmem(_dos_para(sizeof(FILE)), &seg))
     {
-        pascal_InOutRes = EINOUTRES_NOT_ASSIGNED;
+        cc_InOutRes = EINOUTRES_NOT_ASSIGNED;
         return NULL;
     }
 
@@ -152,13 +153,13 @@ FILE *cc_fopen(const char *path, const char *mode)
         stream->mode = FILE_MODES[i].filemode;
         stream->rec_size = 1;
         strncpy(stream->name, path, pascal_PathStr_size);
-        pascal_InOutRes = EINOUTRES_SUCCESS;
+        cc_InOutRes = EINOUTRES_SUCCESS;
         return stream;
     }
     else
     {
         _dos_freemem(FP_SEG(stream));
-        pascal_InOutRes = EINOUTRES_NOT_OPENED;
+        cc_InOutRes = EINOUTRES_NOT_OPENED;
         return NULL;
     }
 }

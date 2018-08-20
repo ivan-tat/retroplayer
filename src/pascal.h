@@ -16,11 +16,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/*** System unit ***/
+#include <startup.h>
 
 /* Initialization */
 
-extern void *PUBLIC_DATA exitproc;
+/*extern void *PUBLIC_DATA exitproc;*/
 
 /* Use init()/done() methods in C only */
 /* Use register_*()/unregister_*() methods in Pascal only */
@@ -54,21 +54,22 @@ _UNREGMETHOD(name);
 #endif
 
 #define DEFINE_REGISTRATION(name, init, done) \
-static void *_EXITVARNAME(name) = (void *)0;\
+/*static void *_EXITVARNAME(name) = (void *)0;*/\
 \
 _REGMETHOD(name)\
 {\
     LOG_REGMETHOD(name, init)\
     init();\
-    _EXITVARNAME(name) = exitproc;\
-    exitproc = _UNREGNAME(name);\
+    cc_atexit((void *__far)_UNREGNAME(name));\
+    /*_EXITVARNAME(name) = exitproc;*/\
+    /*exitproc = _UNREGNAME(name);*/\
 }\
 \
 _UNREGMETHOD(name)\
 {\
     LOG_UNREGMETHOD(name, done)\
     done();\
-    exitproc = _EXITVARNAME(name);\
+    /*exitproc = _EXITVARNAME(name);*/\
 }
 
 #define pascal_String_size 256

@@ -11,6 +11,7 @@
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
+#include "cc/stdlib.h"
 #include "cc/string.h"
 #include "common.h"
 #include "debug.h"

@@ -37,6 +37,7 @@ uses
     pascal,
     dos_,
     stdio,
+    stdlib,
     debug,
     hwowner;
 

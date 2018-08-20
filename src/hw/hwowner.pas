@@ -23,6 +23,7 @@ uses
     pascal,
     i86,
     dos_,
+    stdlib,
     string_,
     common,
     debug;

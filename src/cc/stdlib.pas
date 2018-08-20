@@ -12,8 +12,7 @@ interface
 
 (*$I defines.pas*)
 
-const
-    _cc_psp: Word = 0;
+procedure cc_atexit;
 
 procedure cc_atoi;
 procedure cc_atol;
@@ -39,16 +38,12 @@ implementation
 uses
     watcom,
     pascal,
+    startup,
     string_,
     ctype,
     errno_,
     dos,
     dos_;
-
-procedure pascal_halt(exitcode: word); far;
-begin
-    System.Halt(exitcode);
-end;
 
 procedure pascal_getmem(var p: pointer; size: word); far;
 begin
@@ -59,6 +54,9 @@ procedure pascal_freemem(p: pointer; size: word); far;
 begin
     System.FreeMem(p, size);
 end;
+
+(*$L stdlib/atexit.obj*)
+procedure cc_atexit; external;
 
 (*$L stdlib/atoi.obj*)
 procedure cc_atoi; external;
@@ -73,7 +71,7 @@ procedure cc_malloc; external;
 (*$L stdlib/ffree.obj*)
 procedure cc_free; external;
 
-(*$L stdlib/fexit.obj*)
+(*$L stdlib/exit.obj*)
 procedure cc_exit; external;
 
 (* Internals *)

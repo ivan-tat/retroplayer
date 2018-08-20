@@ -12,11 +12,14 @@ interface
 
 (*$I defines.pas*)
 
-function  isCPU_i386: boolean;
+procedure isCPU_8086;
+procedure isCPU_i386;
 
 implementation
 
 (*$l cpu.obj*)
-function  isCPU_i386: boolean; external;
+
+procedure isCPU_8086; external;
+procedure isCPU_i386; external;
 
 end.

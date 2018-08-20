@@ -232,16 +232,16 @@ void cc_environ_free(void)
 
 /* Initialization */
 
-static void *_oldexit_environ = NULL;
+/*static void *_oldexit_environ = NULL;*/
 
 void __far environ_done(void);
 
 bool environ_init(void)
 {
-    exitproc = environ_done;
+    cc_atexit(&environ_done);
 
-    _cc_psp = _dos_getmasterpsp();
-    _psp_get_dosenv(_cc_psp, &_dos_env);
+    cc_PrefixSeg = _dos_getmasterpsp();
+    _psp_get_dosenv(cc_PrefixSeg, &_dos_env);
 
     return cc_environ_init();
 }
@@ -249,5 +249,5 @@ bool environ_init(void)
 void __far environ_done(void)
 {
     cc_environ_free();
-    exitproc = _oldexit_environ;
+    /*exitproc = _oldexit_environ;*/
 }

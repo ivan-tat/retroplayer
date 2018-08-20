@@ -25,6 +25,7 @@ implementation
 uses
     pascal,
     i86,
+    stdlib,
     string_,
     conio,
     debug;

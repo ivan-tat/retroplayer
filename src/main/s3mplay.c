@@ -10,6 +10,7 @@
 
 #include "pascal.h"
 #include "cc/stdio.h"
+#include "cc/stdlib.h"
 #include "cc/string.h"
 #include "cc/dos.h"
 #include "common.h"

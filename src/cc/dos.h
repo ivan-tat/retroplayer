@@ -27,7 +27,14 @@ struct CC_DOSERROR {
     char locus;
 };
 
+extern far _cc_local_int24(void);
+
 int cc_dosexterr(struct CC_DOSERROR *err);
+
+/* Console I/O */
+
+void     _cc_dos_console_out(uint8_t c);
+uint16_t _cc_dos_console_in(void);
 
 /* Pascal >>> */
 #define pascal_DirStr_size 68
@@ -169,11 +176,16 @@ uint16_t PUBLIC_CODE _cc_dos_read(int16_t fd, void __far *buf, uint16_t count, u
 uint16_t PUBLIC_CODE _cc_dos_write(int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes);
 uint16_t PUBLIC_CODE _cc_dos_seek(int16_t fd, int32_t offset, int16_t kind, int32_t *newoffset);
 
+void _cc_dos_terminate(uint8_t code);
+
 /* Aliases */
 
 #define DOSERROR CC_DOSERROR
 
 #define dosexterr cc_dosexterr
+
+#define _dos_console_out _cc_dos_console_out
+#define _dos_console_in  _cc_dos_console_in
 
 #define dosdate_t cc_dosdate_t
 #define dostime_t cc_dostime_t
@@ -223,7 +235,9 @@ uint16_t PUBLIC_CODE _cc_dos_seek(int16_t fd, int32_t offset, int16_t kind, int3
 #define _dos_write      _cc_dos_write
 #define _dos_seek       _cc_dos_seek
 
-/* Linkning */
+#define _dos_terminate _cc_dos_terminate
+
+/* Linking */
 
 #ifdef __WATCOMC__
 
@@ -234,6 +248,9 @@ uint16_t PUBLIC_CODE _cc_dos_seek(int16_t fd, int32_t offset, int16_t kind, int3
 
 #pragma aux _cc_doserrno "*";
 #pragma aux cc_dosexterr "*";
+#pragma aux _cc_local_int24 "*";
+#pragma aux _cc_dos_console_out "*";
+#pragma aux _cc_dos_console_in "*";
 #pragma aux _cc_dos_getdate "*";
 #pragma aux _cc_dos_gettime "*";
 #pragma aux _cc_dos_getvect "*";
@@ -254,6 +271,7 @@ uint16_t PUBLIC_CODE _cc_dos_seek(int16_t fd, int32_t offset, int16_t kind, int3
 #pragma aux _cc_dos_read "*";
 #pragma aux _cc_dos_write "*";
 #pragma aux _cc_dos_seek "*";
+#pragma aux _cc_dos_terminate "*";
 
 #endif  /* __WATCOMC__ */
 

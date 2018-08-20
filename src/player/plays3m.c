@@ -689,9 +689,6 @@ void PUBLIC_CODE plays3m_main(void)
     bool quit, result;
     char c;
 
-    if (!custom_startup())
-        return;
-
     /* TODO: make separate custom_main() */
 
     /* TODO: all modules initialization goes here */
@@ -709,10 +706,13 @@ void PUBLIC_CODE plays3m_main(void)
     register_s3mplay();
     register_plays3m();
     */
+
+    console_init ();
+
     if (!environ_init())
     {
         printf("Failed to setup DOS environment variables." CRLF);
-        return;
+        exit(1);
     }
 
     printf(

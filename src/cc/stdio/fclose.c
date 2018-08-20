@@ -6,6 +6,7 @@
 #include "defines.h"
 
 #include "pascal.h"
+#include "startup.h"
 #include "cc/i86.h"
 #include "cc/errno.h"
 #include "cc/dos.h"
@@ -19,7 +20,7 @@ int cc_fclose(FILE *stream)
     if (stream == NULL)
     {
         cc_errno = CC_EINVAL;
-        pascal_InOutRes = EINOUTRES_NOT_OPENED;
+        cc_InOutRes = EINOUTRES_NOT_OPENED;
         return -1;
     }
 
@@ -27,7 +28,7 @@ int cc_fclose(FILE *stream)
     {
     case pascal_fmClosed:
         cc_errno = CC_EINVAL;
-        pascal_InOutRes = EINOUTRES_NOT_OPENED;
+        cc_InOutRes = EINOUTRES_NOT_OPENED;
         return -1;
     case pascal_fmInput:
     case pascal_fmOutput:
@@ -37,24 +38,24 @@ int cc_fclose(FILE *stream)
             if (!cc_close(stream->handle))
             {
                 _cc_dos_freemem(FP_SEG(stream));
-                pascal_InOutRes = EINOUTRES_SUCCESS;
+                cc_InOutRes = EINOUTRES_SUCCESS;
                 return 0;
             }
             else
             {
-                pascal_InOutRes = _cc_doserrno;
+                cc_InOutRes = _cc_doserrno;
                 return -1;
             }
         }
         else
         {
             _cc_dos_freemem(FP_SEG(stream));
-            pascal_InOutRes = EINOUTRES_SUCCESS;
+            cc_InOutRes = EINOUTRES_SUCCESS;
             return 0;
         }
     default:
         cc_errno = CC_EINVAL;
-        pascal_InOutRes = EINOUTRES_NOT_ASSIGNED;
+        cc_InOutRes = EINOUTRES_NOT_ASSIGNED;
         return -1;
     }
 }

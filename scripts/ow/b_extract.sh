@@ -11,6 +11,7 @@ DST=tmp
 mkdir -p "$DST"
 # Watcom specific
 wlib -d="$DST" "$CLIB" ':i4d' ':i4m' ':i8d086'
+wlib -d="$DST" "$CLIB" ':xmsg.c' ':cstart.c'
 # <conio.h>
 wlib -d="$DST" "$CLIB" ':inp.c' ':outp.c'
 # <i86.h>
@@ -26,8 +27,10 @@ wlib -d="$DST" "$CLIB" ':creatdos.c' ':opendos.c' ':filedos.c' ':io086.asm'
 # <io.h>
 wlib -d="$DST" "$CLIB" ':open.c' ':close.c' ':_clse.c' ':read.c' ':write.c'
 # <stdio.h>
+wlib -d="$DST" "$CLIB" ':iob.c' ':iobaddr.c'
 wlib -d="$DST" "$CLIB" ':fopen.c' ':fclose.c' ':fread.c' ':fwrite.c'
 # <stdlib.h>
+wlib -d="$DST" "$CLIB" ':atexit.c' ':exit.c' ':_exit.c' ':abort.c'
 wlib -d="$DST" "$CLIB" ':atoi.c' ':atol.c' ':istable.c' ':strtol.c' ':errno.c'
 wlib -d="$DST" "$CLIB" ':crwdata' ':pspptr.c'
 # <string.h>

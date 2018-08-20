@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "startup.h"
 #include "cc/i86.h"
 #include "cc/errno.h"
 #include "cc/dos.h"
@@ -30,11 +31,11 @@ size_t cc_fwrite(void *ptr, size_t size, size_t n, FILE *stream)
     {
     case pascal_fmClosed:
         cc_errno = CC_EBADF;
-        pascal_InOutRes = EINOUTRES_NOT_OPENED;
+        cc_InOutRes = EINOUTRES_NOT_OPENED;
         return 0;
     case pascal_fmInput:
         cc_errno = CC_EACCES;
-        pascal_InOutRes = EINOUTRES_NOT_OUTPUT;
+        cc_InOutRes = EINOUTRES_NOT_OUTPUT;
         return 0;
     case pascal_fmOutput:
     case pascal_fmInOut:
@@ -42,16 +43,16 @@ size_t cc_fwrite(void *ptr, size_t size, size_t n, FILE *stream)
         actual = cc_write(stream->handle, ptr, size * n);
         if (actual > 0)
         {
-            pascal_InOutRes = EINOUTRES_SUCCESS;
+            cc_InOutRes = EINOUTRES_SUCCESS;
             return actual / size;
         }
         {
-            pascal_InOutRes = _cc_doserrno;
+            cc_InOutRes = _cc_doserrno;
             return 0;
         }
     default:
         cc_errno = CC_EBADF;
-        pascal_InOutRes = EINOUTRES_NOT_ASSIGNED;
+        cc_InOutRes = EINOUTRES_NOT_ASSIGNED;
         return 0;
     }
 }

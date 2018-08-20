@@ -54,6 +54,7 @@ uses
     cpu,
     dos_,
     stdio,
+    stdlib,
     string_,
     debug,
     strutils,

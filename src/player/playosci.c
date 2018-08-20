@@ -168,15 +168,13 @@ void __near update_osci_stereo(void)
 
 void __far playosci_main (void)
 {
-    if (!custom_startup ())
-        return;
+    console_init ();
 
     if (!environ_init ())
     {
         printf ("Failed to setup DOS environment variables." CRLF);
         return;
     }
-
     textbackground (_black);
     textcolor (_lightgray);
     clrscr ();

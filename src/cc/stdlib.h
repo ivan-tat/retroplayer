@@ -16,11 +16,14 @@
 #include <stdarg.h>
 
 #include "pascal.h"
+#include "startup.h"
 #include "cc/errno.h"
 
-extern uint16_t _cc_psp;
-
 extern char **cc_environ;
+
+#define CC_ATEXIT_MAX _CC_ATEXIT_MAX
+
+int cc_atexit(void (*__far function)());
 
 int  cc_atoi(const char *src);
 long cc_atol(const char *src);
@@ -42,9 +45,13 @@ bool environ_init(void);
 
 /* Aliases */
 
-#define _psp _cc_psp
+#define _psp cc_PrefixSeg
+
+#define ATEXIT_MAX CC_ATEXIT_MAX
 
 #define environ cc_environ
+
+#define atexit cc_atexit
 
 #define atoi cc_atoi
 #define atol cc_atol
@@ -63,8 +70,8 @@ bool environ_init(void);
 /* Linking */
 
 #ifdef __WATCOMC__
-#pragma aux _cc_psp "*";
 #pragma aux cc_environ "*";
+#pragma aux cc_atexit "*";
 #pragma aux cc_atoi "*";
 #pragma aux cc_atol "*";
 #pragma aux cc_strtol "*";

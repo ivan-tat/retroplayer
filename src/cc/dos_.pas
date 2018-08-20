@@ -72,6 +72,11 @@ procedure __cc_doserror;
 
 procedure cc_dosexterr;
 
+procedure _cc_local_int24;
+
+procedure _cc_dos_console_out;
+procedure _cc_dos_console_in;
+
 procedure _cc_dos_getdate;
 procedure _cc_dos_gettime;
 
@@ -99,6 +104,8 @@ procedure _cc_dos_write;
 
 procedure _cc_dos_seek;
 
+procedure _cc_dos_terminate;
+
 implementation
 
 uses
@@ -124,6 +131,13 @@ procedure __cc_doserror; external;
 
 (*$L dos\dosexter.obj*)
 procedure cc_dosexterr; external;
+
+(*$L dos\int24.obj*)
+procedure _cc_local_int24; external;
+
+(*$L dos\coniodos.obj*)
+procedure _cc_dos_console_out; external;
+procedure _cc_dos_console_in; external;
 
 (*$L dos\gtime086.obj*)
 procedure _cc_dos_getdate; external;
@@ -162,5 +176,8 @@ procedure _cc_dos_write; external;
 
 (*$L dos\seekdos.obj*)
 procedure _cc_dos_seek; external;
+
+(*$L dos\dosterm.obj*)
+procedure _cc_dos_terminate; external;
 
 end.

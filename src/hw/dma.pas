@@ -45,6 +45,7 @@ implementation
 uses
     dos_,
     stdio,
+    stdlib,
     string_,
     debug,
     hwowner;
