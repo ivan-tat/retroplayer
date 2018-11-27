@@ -10,10 +10,12 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "startup/ints.h"
 #include "hw/cpu.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
 #include "cc/stdlib.h"
+#include "cc/string.h"
 
 #include "startup.h"
 
@@ -27,13 +29,19 @@ static void __far  *cc_ErrorAddr = NULL;
 static void (*__far cc_ExitProc) = NULL;
 static int16_t      cc_ExitCode = 0;
 static uint8_t      cc_Test8086 = 0;
-static PASCALFILE   cc_Input;
-static PASCALFILE   cc_Output;
+static _cc_iobuf    cc_Input;
+static _cc_iobuf    cc_Output;
 
 static void *__far _cc_ExitList[_CC_ATEXIT_MAX] = { 0 };
 static uint8_t _cc_ExitCount = 0;
 
 #endif
+
+#define STDINBUF_SIZE 128
+#define STDOUTBUF_SIZE 128
+
+static uint8_t _stdin_buf[STDINBUF_SIZE];
+static uint8_t _stdout_buf[STDOUTBUF_SIZE];
 
 // Saved critical interrupt vectors
 #define SAVEINTVEC_COUNT 19
@@ -46,42 +54,172 @@ static void __far *SaveIntVecs[SAVEINTVEC_COUNT];
 
 /* Internal file handling */
 
-void __near cc_AssignFile(PASCALFILE *f, char *name)
+void __near cc_AssignFile (_cc_iobuf *f, void *buffer, uint16_t size, char *name);
+void __near cc_SetFileBuffer (_cc_iobuf *f, void *buffer, uint16_t size);
+void __near cc_SetFileMode (_cc_iobuf *f, uint16_t mode);
+void __near cc_SetFileInput (_cc_iobuf *f);
+void __near cc_SetFileOutput (_cc_iobuf *f);
+void __near cc_SetFileInOut (_cc_iobuf *f);
+uint16_t __far _sysio_file_open (_cc_iobuf *f);
+void     __far _sysio_close_0 (_cc_iobuf *f);
+void     __far _sysio_close_1 (_cc_iobuf *f);
+void     __far _sysio_close (_cc_iobuf *f, char mode);
+uint16_t __far _sysio_call (_cc_iobuf *f, char num);
+void     __far _sysio_file_close (_cc_iobuf *f);
+uint16_t __far _sysio_call_1 (_cc_iobuf *f);
+uint16_t __far _sysio_call_2 (_cc_iobuf *f);
+
+void __near cc_AssignFile (_cc_iobuf *f, void *buffer, uint16_t size, char *name)
+{
+    f->handle = cc_UnusedHandle;
+    f->mode = cc_fmClosed;
+    f->unknown = 0;
+    f->pos = 0;
+    f->data_size = 0;
+    f->buffer = buffer;
+    f->proc[0] = _sysio_file_open;
+    f->proc[1] = NULL;
+    f->proc[2] = NULL;
+    f->proc[3] = NULL;
+    memset (f->user_data, 0, 26);
+    strncpy (f->name, name, cc_PathStr_size);
+}
+
+void __near cc_SetFileBuffer (_cc_iobuf *f, void *buffer, uint16_t size)
+{
+    f->rec_size = size;
+    f->buffer = buffer;
+    f->pos = 0;
+    f->data_size = 0;
+}
+
+void __near cc_SetFileMode (_cc_iobuf *f, uint16_t mode)
+{
+    switch (f->mode)
+    {
+    case cc_fmInput:
+    case cc_fmOutput:
+        _sysio_close_1 (f);
+        // continuing...
+
+    case cc_fmClosed:
+        f->mode = mode;
+        f->pos = 0;
+        f->data_size = 0;
+        if (_sysio_call (f, 0))
+            f->mode = cc_fmClosed;
+        break;
+
+    default:
+        cc_InOutRes = EINOUTRES_NOT_ASSIGNED;
+        break;
+    }
+}
+
+void __near cc_SetFileInput (_cc_iobuf *f)
+{
+    cc_SetFileMode (f, cc_fmInput);
+}
+
+void __near cc_SetFileOutput (_cc_iobuf *f)
+{
+    cc_SetFileMode (f, cc_fmOutput);
+}
+
+void __near cc_SetFileInOut (_cc_iobuf *f)
+{
+    cc_SetFileMode (f, cc_fmInOut);
+}
+
+uint16_t __far _sysio_file_open (_cc_iobuf *f)
+{
+    // TODO
+    return 0;
+}
+
+void __far _sysio_close_0 (_cc_iobuf *f)
+{
+    _sysio_close (f, 0);
+}
+
+void __far _sysio_close_1 (_cc_iobuf *f)
+{
+    _sysio_close (f, 1);
+}
+
+void __far _sysio_close (_cc_iobuf *f, char mode)
+{
+    switch (f->mode)
+    {
+    case cc_fmOutput:
+        _sysio_call (f, 1);
+        // continuing...
+
+    case cc_fmInput:
+        if (mode)
+        {
+            _sysio_call (f, 3);
+            f->mode = cc_fmClosed;
+        }
+        break;
+
+    default:
+        cc_InOutRes = EINOUTRES_NOT_OPENED;
+        break;
+    }
+}
+
+// Returns zero on success.
+uint16_t __far _sysio_call (_cc_iobuf *f, char num)
+{
+    uint16_t status;
+
+    status = f->proc[num](f);
+    if (!status)
+        cc_InOutRes = status;
+
+    return status;
+}
+
+void __far _sysio_file_close (_cc_iobuf *f)
 {
     // TODO
 }
 
-void __near cc_SetFileInput(PASCALFILE *f)
+// Returns zero on success.
+uint16_t __far _sysio_call_1 (_cc_iobuf *f)
 {
-    // TODO
+    uint16_t status;
+
+    status = f->proc[1](f);
+    if (!status)
+        cc_InOutRes = status;
+
+    return status;
 }
 
-void __near cc_SetFileOutput(PASCALFILE *f)
+// Returns zero on success.
+uint16_t __far _sysio_call_2 (_cc_iobuf *f)
 {
-    // TODO
-}
+    uint16_t status;
 
-void __near _sysio_close_1(PASCALFILE *f)
-{
-    // TODO
+    status = f->proc[2](f);
+    if (!status)
+        cc_InOutRes = status;
+
+    return status;
 }
 
 /* Error handling */
 
-// No return.
-void __interrupt LocalInt0(void)
+void __far __stdcall _cc_local_int0(void __far *addr, uint16_t flags)
 {
-    // TODO
+    _cc_ExitWithError(200, addr);
 }
 
-void __interrupt LocalInt23(void)
+void __far __stdcall _cc_local_int23(void __far *addr, uint16_t flags)
 {
-    // TODO
-}
-
-void __interrupt LocalInt3f(void)
-{
-    // TODO
+    _cc_ExitWithError(255, NULL);
 }
 
 #define _sys_print_char(c) _cc_dos_console_out(c);
@@ -177,14 +315,13 @@ void _cc_startup(void)
     for (i = 0; i < SAVEINTVEC_COUNT; i++)
         SaveIntVecs[i] = _cc_dos_getvect(SaveIntVecIndexes[i]);
 
-    _cc_dos_setvect(0, LocalInt0);
-    _cc_dos_setvect(0x23, LocalInt23);
-    _cc_dos_setvect(0x24, _cc_local_int24);
-    _cc_dos_setvect(0x3f, LocalInt3f);
+    _cc_dos_setvect(0, _cc_local_int0_asm);
+    _cc_dos_setvect(0x23, _cc_local_int23_asm);
+    _cc_dos_setvect(0x24, _cc_local_int24_asm);
 */
-    cc_AssignFile(&cc_Input, "");
+    cc_AssignFile(&cc_Input, _stdin_buf, STDINBUF_SIZE, "");
     cc_SetFileInput(&cc_Input);
-    cc_AssignFile(&cc_Output, "");
+    cc_AssignFile(&cc_Output, _stdout_buf, STDOUTBUF_SIZE, "");
     cc_SetFileOutput(&cc_Output);
 }
 

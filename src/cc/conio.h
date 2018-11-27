@@ -102,14 +102,12 @@ void cc_clreol(void);
 void cc_clrscr(void);
 void cc_gotoxy(uint8_t x, uint8_t y);
 void cc_window(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
-extern void PUBLIC_CODE pascal_textbackground(uint8_t color);
-extern void PUBLIC_CODE pascal_textcolor(uint8_t color);
+void cc_textbackground(uint8_t color);
+void cc_textcolor(uint8_t color);
+void cc_lowvideo(void);
+void cc_highvideo(void);
+void cc_normvideo(void);
 void cc_textmode(uint16_t mode);
-
-#ifdef __WATCOMC__
-#pragma aux pascal_textbackground modify [ax bx cx dx si di es];
-#pragma aux pascal_textcolor      modify [ax bx cx dx si di es];
-#endif
 
 /*** Keyboard functions ***/
 
@@ -153,8 +151,11 @@ void cc_console_init(void);
 #define clrscr         cc_clrscr
 #define clreol         cc_clreol
 #define gotoxy         cc_gotoxy
-#define textbackground(c)       pascal_textbackground(c)
-#define textcolor(c)            pascal_textcolor(c)
+#define textbackground(c)       cc_textbackground(c)
+#define textcolor(c)            cc_textcolor(c)
+#define lowvideo(c)    cc_lowvideo(c)
+#define highvideo(c)   cc_highvideo(c)
+#define normvideo(c)   cc_normvideo(c)
 
 /*** Keyboard functions ***/
 
@@ -191,6 +192,11 @@ void cc_console_init(void);
 #pragma aux cc_clrscr "*";
 #pragma aux cc_clreol "*";
 #pragma aux cc_gotoxy "*";
+#pragma aux cc_textbackground "*";
+#pragma aux cc_textcolor "*";
+#pragma aux cc_lowvideo "*";
+#pragma aux cc_highvideo "*";
+#pragma aux cc_normvideo "*";
 
 #pragma aux cc_kbhit "*";
 #pragma aux cc_getch "*";

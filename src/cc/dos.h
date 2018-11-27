@@ -15,6 +15,8 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "cc/dos/limits.h"
+#include "cc/dos/int24.h"
 
 /* DOS errors */
 
@@ -27,25 +29,12 @@ struct CC_DOSERROR {
     char locus;
 };
 
-extern far _cc_local_int24(void);
-
 int cc_dosexterr(struct CC_DOSERROR *err);
 
 /* Console I/O */
 
 void     _cc_dos_console_out(uint8_t c);
 uint16_t _cc_dos_console_in(void);
-
-/* Pascal >>> */
-#define pascal_DirStr_size 68
-#define pascal_NameStr_size 8
-#define pascal_ExtStr_size 4
-#define pascal_ComStr_size 128
-#define pascal_PathStr_size 80
-
-extern void PUBLIC_CODE pascal_swapvectors(void);
-extern void PUBLIC_CODE pascal_exec(char *name, char *cmdline);
-/* <<< Pascal */
 
 struct cc_dosdate_t {
     unsigned char  day;         /* 1-31 */
@@ -178,6 +167,9 @@ uint16_t PUBLIC_CODE _cc_dos_seek(int16_t fd, int32_t offset, int16_t kind, int3
 
 void _cc_dos_terminate(uint8_t code);
 
+extern void PUBLIC_CODE pascal_swapvectors(void);
+extern void PUBLIC_CODE pascal_exec(char *name, char *cmdline);
+
 /* Aliases */
 
 #define DOSERROR CC_DOSERROR
@@ -248,7 +240,6 @@ void _cc_dos_terminate(uint8_t code);
 
 #pragma aux _cc_doserrno "*";
 #pragma aux cc_dosexterr "*";
-#pragma aux _cc_local_int24 "*";
 #pragma aux _cc_dos_console_out "*";
 #pragma aux _cc_dos_console_in "*";
 #pragma aux _cc_dos_getdate "*";

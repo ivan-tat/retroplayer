@@ -17,14 +17,14 @@ extern int16_t PUBLIC_DATA pascal_doserror;
 
 int cc_execv(const char *filename, char *const argv[])
 {
-    char pathstr[pascal_PathStr_size];
+    char pathstr[cc_PathStr_size];
     char cmdline[pascal_String_size];
     int n;
     size_t len, part;
     char *arg;
     bool space;
 
-    strctopas(pathstr, filename, pascal_PathStr_size);
+    strctopas(pathstr, filename, cc_PathStr_size);
     len = 0;
     n = 0;
     while ((arg = argv[n]) && (len < pascal_String_size - 1))

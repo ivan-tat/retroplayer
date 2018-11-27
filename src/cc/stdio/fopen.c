@@ -27,25 +27,25 @@ static const struct
 {
     /* r */
         O_RDONLY,
-        //pascal_fmInput,   // HINT: not used in Turbo Pascal 7.0
-        pascal_fmInOut,
+        //cc_fmInput,   // HINT: not used in Turbo Pascal 7.0
+        cc_fmInOut,
     /* w */
         O_WRONLY | O_CREAT | O_TRUNC,
-        //pascal_fmOutput,  // HINT: not used in Turbo Pascal 7.0
-        pascal_fmInOut,
+        //cc_fmOutput,  // HINT: not used in Turbo Pascal 7.0
+        cc_fmInOut,
     /* a */
         O_WRONLY | O_CREAT | O_APPEND,
-        //pascal_fmOutput,  // HINT: not used in Turbo Pascal 7.0
-        pascal_fmInOut,
+        //cc_fmOutput,  // HINT: not used in Turbo Pascal 7.0
+        cc_fmInOut,
     /* r+ */
         O_RDWR,
-        pascal_fmInOut,
+        cc_fmInOut,
     /* w+ */
         O_RDWR | O_CREAT | O_TRUNC,
-        pascal_fmInOut,
+        cc_fmInOut,
     /* a+ */
         O_RDWR | O_CREAT | O_APPEND,
-        pascal_fmInOut,
+        cc_fmInOut,
 };
 
 int __get_mode(const char *mode)
@@ -152,7 +152,7 @@ FILE *cc_fopen(const char *path, const char *mode)
         stream->handle = fd;
         stream->mode = FILE_MODES[i].filemode;
         stream->rec_size = 1;
-        strncpy(stream->name, path, pascal_PathStr_size);
+        strncpy(stream->name, path, cc_PathStr_size);
         cc_InOutRes = EINOUTRES_SUCCESS;
         return stream;
     }

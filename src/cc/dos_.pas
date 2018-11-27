@@ -72,7 +72,7 @@ procedure __cc_doserror;
 
 procedure cc_dosexterr;
 
-procedure _cc_local_int24;
+procedure _cc_local_int24_asm;
 
 procedure _cc_dos_console_out;
 procedure _cc_dos_console_in;
@@ -133,7 +133,7 @@ procedure __cc_doserror; external;
 procedure cc_dosexterr; external;
 
 (*$L dos\int24.obj*)
-procedure _cc_local_int24; external;
+procedure _cc_local_int24_asm; external;
 
 (*$L dos\coniodos.obj*)
 procedure _cc_dos_console_out; external;

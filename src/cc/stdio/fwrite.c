@@ -29,16 +29,16 @@ size_t cc_fwrite(void *ptr, size_t size, size_t n, FILE *stream)
 
     switch (stream->mode)
     {
-    case pascal_fmClosed:
+    case cc_fmClosed:
         cc_errno = CC_EBADF;
         cc_InOutRes = EINOUTRES_NOT_OPENED;
         return 0;
-    case pascal_fmInput:
+    case cc_fmInput:
         cc_errno = CC_EACCES;
         cc_InOutRes = EINOUTRES_NOT_OUTPUT;
         return 0;
-    case pascal_fmOutput:
-    case pascal_fmInOut:
+    case cc_fmOutput:
+    case cc_fmInOut:
         // FIXME: 64KiB limit for now
         actual = cc_write(stream->handle, ptr, size * n);
         if (actual > 0)

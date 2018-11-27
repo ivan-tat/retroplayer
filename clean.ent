@@ -9,6 +9,7 @@
 ./src/cc/conio/inp.asm
 ./src/cc/conio/kbhit.asm
 ./src/cc/conio/outp.asm
+./src/cc/conio/textcol.asm
 ./src/cc/conio/textmode.asm
 ./src/cc/conio/window.asm
 ./src/cc/ctype/
@@ -134,4 +135,5 @@
 ./src/player/w_ins.asm
 ./src/player/w_pat.asm
 ./src/player/w_smp.asm
+./src/startup/
 ./src/startup.asm

@@ -44,8 +44,11 @@ procedure cc_window;
 procedure cc_clrscr;
 procedure cc_clreol;
 procedure cc_gotoxy;
-procedure pascal_textbackground(color: Byte);
-procedure pascal_textcolor(color: Byte);
+procedure cc_textbackground;
+procedure cc_textcolor;
+procedure cc_lowvideo;
+procedure cc_highvideo;
+procedure cc_normvideo;
 
 procedure cc_kbhit;
 procedure cc_getch;
@@ -88,15 +91,12 @@ procedure cc_gotoxy; external;
 
 (* CRT Unit *)
 
-procedure pascal_textbackground(color: Byte);
-begin
-    crt.TextBackground(color);
-end;
-
-procedure pascal_textcolor(color: Byte);
-begin
-    crt.TextColor(color);
-end;
+(*$L conio\textcol.obj*)
+procedure cc_textbackground; external;
+procedure cc_textcolor; external;
+procedure cc_lowvideo; external;
+procedure cc_highvideo; external;
+procedure cc_normvideo; external;
 
 (*$L conio\kbhit.obj*)
 procedure cc_kbhit; external;

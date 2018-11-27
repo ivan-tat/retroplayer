@@ -26,13 +26,13 @@ int cc_fclose(FILE *stream)
 
     switch (stream->mode)
     {
-    case pascal_fmClosed:
+    case cc_fmClosed:
         cc_errno = CC_EINVAL;
         cc_InOutRes = EINOUTRES_NOT_OPENED;
         return -1;
-    case pascal_fmInput:
-    case pascal_fmOutput:
-    case pascal_fmInOut:
+    case cc_fmInput:
+    case cc_fmOutput:
+    case cc_fmInOut:
         if (stream->handle > 4)
         {
             if (!cc_close(stream->handle))

@@ -52,6 +52,7 @@ implementation
 uses
     pascal,
     cpu,
+    string_,
     dos_;
 
 function pascal_paramcount: Word;
@@ -69,8 +70,15 @@ begin
     System.Halt(status);
 end;
 
+(*$l startup\ints.obj*)
+
+procedure _cc_local_int0_asm; external;
+procedure _cc_local_int23_asm; external;
+
 (*$l startup.obj*)
 
+procedure _cc_local_int0; external;
+procedure _cc_local_int23; external;
 function  custom_argc: Word; external;
 procedure custom_argv(dest: PChar; n: Word; i: Byte); external;
 (*procedure _cc_on_exit; external;*)

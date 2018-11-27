@@ -24,7 +24,7 @@
 
 /*** File I/O ***/
 
-typedef PASCALFILE FILE;
+typedef _cc_iobuf FILE;
 
 typedef int32_t fpos_t;
 

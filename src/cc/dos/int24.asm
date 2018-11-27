@@ -13,8 +13,8 @@ DGROUP group _DATA
 INT24_TEXT segment word public use16 'CODE'
 assume cs:INT24_TEXT,ds:DGROUP
 
-public _cc_local_int24
-_cc_local_int24:
+public _cc_local_int24_asm
+_cc_local_int24_asm:
 ; In:
 ;   BP:SI = device header
 ;   DI = bits 0-7 are error code

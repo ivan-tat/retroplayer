@@ -27,13 +27,13 @@ int cc_fsetpos(FILE *stream, fpos_t pos)
 
     switch (stream->mode)
     {
-    case pascal_fmClosed:
+    case cc_fmClosed:
         cc_errno = CC_EBADF;
         cc_InOutRes = EINOUTRES_NOT_OPENED;
         return 0;
-    case pascal_fmInput:
-    case pascal_fmOutput:
-    case pascal_fmInOut:
+    case cc_fmInput:
+    case cc_fmOutput:
+    case cc_fmInOut:
         result = cc_lseek(stream->handle, pos, CC_SEEK_SET);
         if (result == -1)
         {
