@@ -12,9 +12,9 @@ interface
 
 (*$I defines.pas*)
 
-procedure cc_delay_;
-procedure cc_intr_;
-procedure _cc_DoINTR_;
+procedure cc_delay;
+procedure cc_intr;
+procedure _cc_DoINTR;
 
 implementation
 
@@ -29,12 +29,12 @@ begin
 end;
 
 (*$L i86\delay.obj*)
-procedure cc_delay_; external;
+procedure cc_delay; external;
 
 (*$L i86\intr.obj*)
-procedure cc_intr_; external;
+procedure cc_intr; external;
 
 (*$L i86\dointr.obj*)
-procedure _cc_DoINTR_; external;
+procedure _cc_DoINTR; external;
 
 end.

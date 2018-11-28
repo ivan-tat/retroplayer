@@ -129,4 +129,15 @@ extern void _cc_enable(void);
  #define MK_FP(__s,__o) (((unsigned short)(__s)):>((void __near *)(__o)))
 #endif
 
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux cc_delay "*";
+#pragma aux cc_intr "*";
+//#pragma aux _cc_disable "*";
+//#pragma aux _cc_enable "*";
+
+#endif  /* __WATCOMC__ */
+
 #endif  /* CC_I86_H */

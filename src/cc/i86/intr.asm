@@ -1,14 +1,14 @@
 .387
 
-public cc_intr_
-extrn _cc_DoINTR_: byte
+extrn _cc_DoINTR: byte
 
 DGROUP group _DATA
 
 INTR_TEXT segment byte public use16 'CODE'
 assume cs:INTR_TEXT, ds:DGROUP, ss:DGROUP
 
-cc_intr_:
+public cc_intr
+cc_intr proc far
 ; int num (ax)
 ; union REGPACK *regs (cx:bx)
     push    dx
@@ -18,11 +18,12 @@ cc_intr_:
     mov     dx,cx
     mov     ax,bx
     mov     bx,si
-    call    far ptr _cc_DoINTR_
+    call    far ptr _cc_DoINTR
     pop     di
     pop     si
     pop     dx
-    retf
+    ret
+cc_intr endp
 
 INTR_TEXT ends
 

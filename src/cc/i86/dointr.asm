@@ -13,14 +13,13 @@ _es     dw ?
 _flags  dw ?
 REGPACK ends
 
-public _cc_DoINTR_
-
 DGROUP group _DATA
 
 DOINTR_TEXT segment word public use16 'CODE'
 assume cs:DOINTR_TEXT, ds:DGROUP, ss:DGROUP
 
-_cc_DoINTR_:
+public _cc_DoINTR
+_cc_DoINTR proc far
 ; int num (bx)
 ; union REGPACK *regs (dx:ax)
     push    bp
@@ -56,7 +55,8 @@ _cc_DoINTR_:
     add     sp,4
     pop     ds
     pop     bp
-    retf
+    ret
+_cc_DoINTR endp
 
 doit:
 ; union REGPACK *regs (dx:ax)
