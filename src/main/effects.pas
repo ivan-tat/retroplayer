@@ -79,12 +79,12 @@ var
     chnState_porta_dSmpStepOld: longint;
     chnState_arp_bFlag: boolean;
 
-function  chn_effInit(var chn: TChannel; param: byte): boolean;
-procedure chn_effHandle(var chn: TChannel);
-procedure chn_effTick(var chn: TChannel);
-function  chn_effCanContinue(var chn: TChannel): boolean;
-procedure chn_effStop(var chn: TChannel);
-procedure chn_get_effect_desc(chn: PMIXCHN; __dest: PChar; __n: Word);
+procedure chn_effInit;
+procedure chn_effHandle;
+procedure chn_effTick;
+procedure chn_effCanContinue;
+procedure chn_effStop;
+procedure chn_get_effect_desc;
 
 implementation
 
@@ -100,11 +100,11 @@ uses
 
 (*$l effects.obj*)
 
-function  chn_effInit(var chn: TChannel; param: byte): boolean; external;
-procedure chn_effHandle(var chn: TChannel); external;
-procedure chn_effTick(var chn: TChannel); external;
-function  chn_effCanContinue(var chn: TChannel): boolean; external;
-procedure chn_effStop(var chn: TChannel); external;
-procedure chn_get_effect_desc(chn: PMIXCHN; __dest: PChar; __n: Word); external;
+procedure chn_effInit; external;
+procedure chn_effHandle; external;
+procedure chn_effTick; external;
+procedure chn_effCanContinue; external;
+procedure chn_effStop; external;
+procedure chn_get_effect_desc; external;
 
 end.

@@ -19,8 +19,6 @@
 #include "main/mixer.h"
 #include "main/effects.h"
 
-// TODO: remove PUBLIC_CODE macros when done.
-
 #define get_i8_value(off, pos) *(int8_t *)MK_FP(FP_SEG(&wavetab), off + pos)
 
 /*** Effects ***/
@@ -1349,7 +1347,7 @@ METHOD_TICK(special)
 
 /*** General effects handling ***/
 
-bool PUBLIC_CODE chn_effInit(MIXCHN *chn, uint8_t param)
+bool chn_effInit(MIXCHN *chn, uint8_t param)
 {
     uint8_t cmd;
     cmd = mixchn_get_command(chn);
@@ -1359,7 +1357,7 @@ bool PUBLIC_CODE chn_effInit(MIXCHN *chn, uint8_t param)
         return false;
 }
 
-void PUBLIC_CODE chn_effHandle(MIXCHN *chn)
+void chn_effHandle(MIXCHN *chn)
 {
     uint8_t cmd;
     cmd = mixchn_get_command(chn);
@@ -1367,7 +1365,7 @@ void PUBLIC_CODE chn_effHandle(MIXCHN *chn)
         EFFECTS_LIST(main)[cmd]->handle(chn);
 }
 
-void PUBLIC_CODE chn_effTick(MIXCHN *chn)
+void chn_effTick(MIXCHN *chn)
 {
     uint8_t cmd;
     cmd = mixchn_get_command(chn);
@@ -1375,7 +1373,7 @@ void PUBLIC_CODE chn_effTick(MIXCHN *chn)
         EFFECTS_LIST(main)[cmd]->tick(chn);
 }
 
-bool PUBLIC_CODE chn_effCanContinue(MIXCHN *chn)
+bool chn_effCanContinue(MIXCHN *chn)
 {
     uint8_t cmd;
     cmd = mixchn_get_command(chn);
@@ -1385,7 +1383,7 @@ bool PUBLIC_CODE chn_effCanContinue(MIXCHN *chn)
         return false;
 }
 
-void PUBLIC_CODE chn_effStop(MIXCHN *chn)
+void chn_effStop(MIXCHN *chn)
 {
     uint8_t cmd;
     cmd = mixchn_get_command(chn);
@@ -1496,7 +1494,7 @@ static const char *effect_unknown[] =
 
 #define _EFFECT_DESC_MAX 40
 
-void PUBLIC_CODE chn_get_effect_desc(MIXCHN *chn, char *__dest, uint16_t __n)
+void chn_get_effect_desc(MIXCHN *chn, char *__dest, uint16_t __n)
 {
     char s[_EFFECT_DESC_MAX];
     uint8_t cmd, parm;

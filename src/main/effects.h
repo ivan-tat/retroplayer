@@ -20,8 +20,6 @@
 #include "main/s3mtypes.h"
 #include "main/mixchn.h"
 
-// TODO: remove PUBLIC_CODE and PUBLIC_DATA macros when done.
-
 #define EFFGROUP_EMPTY   0
 #define EFFGROUP_GLOBAL  1
 #define EFFGROUP_PATTERN 2
@@ -64,14 +62,14 @@
 
 /* Flow control variables */
 // TODO: make portable: place it to a structure and pass pointer to all effect's methods
-extern bool    PUBLIC_DATA playState_jumpToOrder_bFlag;
-extern uint8_t PUBLIC_DATA playState_jumpToOrder_bPos;
-extern bool    PUBLIC_DATA playState_patBreak_bFlag;
-extern uint8_t PUBLIC_DATA playState_patBreak_bPos;
-extern bool    PUBLIC_DATA playState_patLoop_bNow;
-extern bool    PUBLIC_DATA playState_gVolume_bFlag;
-extern uint8_t PUBLIC_DATA playState_gVolume_bValue;
-extern bool    PUBLIC_DATA playState_patDelay_bNow;
+extern bool    playState_jumpToOrder_bFlag;
+extern uint8_t playState_jumpToOrder_bPos;
+extern bool    playState_patBreak_bFlag;
+extern uint8_t playState_patBreak_bPos;
+extern bool    playState_patLoop_bNow;
+extern bool    playState_gVolume_bFlag;
+extern uint8_t playState_gVolume_bValue;
+extern bool    playState_patDelay_bNow;
 
 /* Channel state */
 
@@ -82,28 +80,63 @@ extern bool    PUBLIC_DATA playState_patDelay_bNow;
 /* [Andre] things about pattern delay */
 
 /* save effect,parameter for pattern delay */
-extern uint16_t PUBLIC_DATA chnState_patDelay_bCommandSaved;
-extern uint8_t  PUBLIC_DATA chnState_patDelay_bParameterSaved;
+extern uint16_t chnState_patDelay_bCommandSaved;
+extern uint8_t  chnState_patDelay_bParameterSaved;
 
 /* [Andre] normaly it will be a copie of es:[di], but in */
 /* [Andre] pattern delay = 0 -> ignore note */
-extern uint8_t PUBLIC_DATA chnState_cur_bNote;
-extern uint8_t PUBLIC_DATA chnState_cur_bIns;   /* the same thing for instrument */
-extern uint8_t PUBLIC_DATA chnState_cur_bVol;   /* and for volume */
+extern uint8_t chnState_cur_bNote;
+extern uint8_t chnState_cur_bIns;   /* the same thing for instrument */
+extern uint8_t chnState_cur_bVol;   /* and for volume */
 
 /* to save portamento values : */
-extern bool     PUBLIC_DATA chnState_porta_flag;
-extern uint16_t PUBLIC_DATA chnState_porta_wSmpPeriodOld;
-extern uint32_t PUBLIC_DATA chnState_porta_dSmpStepOld;
+extern bool     chnState_porta_flag;
+extern uint16_t chnState_porta_wSmpPeriodOld;
+extern uint32_t chnState_porta_dSmpStepOld;
 
-extern bool     PUBLIC_DATA chnState_arp_bFlag;
+extern bool     chnState_arp_bFlag;
     /* a little one for arpeggio */
 
-bool PUBLIC_CODE chn_effInit(MIXCHN *chn, uint8_t param);
-void PUBLIC_CODE chn_effHandle(MIXCHN *chn);
-void PUBLIC_CODE chn_effTick(MIXCHN *chn);
-bool PUBLIC_CODE chn_effCanContinue(MIXCHN *chn);
-void PUBLIC_CODE chn_effStop(MIXCHN *chn);
-void PUBLIC_CODE chn_get_effect_desc(MIXCHN *chn, char *__dest, uint16_t __n);
+bool chn_effInit(MIXCHN *chn, uint8_t param);
+void chn_effHandle(MIXCHN *chn);
+void chn_effTick(MIXCHN *chn);
+bool chn_effCanContinue(MIXCHN *chn);
+void chn_effStop(MIXCHN *chn);
+void chn_get_effect_desc(MIXCHN *chn, char *__dest, uint16_t __n);
+
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux playState_jumpToOrder_bFlag "*";
+#pragma aux playState_jumpToOrder_bPos "*";
+#pragma aux playState_patBreak_bFlag "*";
+#pragma aux playState_patBreak_bPos "*";
+#pragma aux playState_patLoop_bNow "*";
+#pragma aux playState_gVolume_bFlag "*";
+#pragma aux playState_gVolume_bValue "*";
+#pragma aux playState_patDelay_bNow "*";
+
+#pragma aux chnState_patDelay_bCommandSaved "*";
+#pragma aux chnState_patDelay_bParameterSaved "*";
+
+#pragma aux chnState_cur_bNote "*";
+#pragma aux chnState_cur_bIns "*";
+#pragma aux chnState_cur_bVol "*";
+
+#pragma aux chnState_porta_flag "*";
+#pragma aux chnState_porta_wSmpPeriodOld "*";
+#pragma aux chnState_porta_dSmpStepOld "*";
+
+#pragma aux chnState_arp_bFlag "*";
+
+#pragma aux chn_effInit "*";
+#pragma aux chn_effHandle "*";
+#pragma aux chn_effTick "*";
+#pragma aux chn_effCanContinue "*";
+#pragma aux chn_effStop "*";
+#pragma aux chn_get_effect_desc "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* EFFECTS_H */
