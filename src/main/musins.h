@@ -108,7 +108,7 @@ void        PUBLIC_CODE musinsl_delete(MUSINSLIST **self);
 /*** Variables ***/
 
 extern instrumentsList_t *mod_Instruments;  /* pointer to data for all instruments */
-extern uint16_t InsNum;
+extern uint16_t mod_InstrumentsCount;
 extern bool     EMSSmp;         /* samples in EMS ? */
 extern uint16_t SmpEMSHandle;   /* hanlde to access EMS for samples */
 
@@ -154,7 +154,7 @@ extern uint16_t SmpEMSHandle;   /* hanlde to access EMS for samples */
 #pragma aux musinsl_delete "*";
 
 #pragma aux mod_Instruments "*";
-#pragma aux InsNum "*";
+#pragma aux mod_InstrumentsCount "*";
 #pragma aux EMSSmp "*";
 #pragma aux SmpEMSHandle "*";
 

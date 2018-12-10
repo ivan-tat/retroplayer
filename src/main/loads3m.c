@@ -610,7 +610,7 @@ void __near s3mloader_alloc_samples(S3MLOADER *self)
 
     if (DEBUG_FILE_S3M_LOAD)
     {
-        DEBUG_INFO_ (NULL, "Instruments to load: %u.", InsNum);
+        DEBUG_INFO_ (NULL, "Instruments to load: %u.", mod_InstrumentsCount);
         DEBUG_INFO_ (NULL, "EM pages are needed for samples: %u.", pages);
     }
 
@@ -831,7 +831,7 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
     mod_Title[MOD_MAX_TITLE_LENGTH - 1] = 0;
 
     OrdNum = header.ordnum;
-    InsNum = header.insnum;
+    mod_InstrumentsCount = header.insnum;
     muspatl_set_count(mod_Patterns, header.patnum);
     modOption_ST2Vibrato   = (header.flags & 0x01) != 0;
     modOption_ST2Tempo     = (header.flags & 0x02) != 0;
@@ -883,7 +883,7 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
         _Self->err = E_S3M_PATTERNS_ORDER;
         return false;
     }
-    if (!fread(&(_Self->inspara), InsNum * 2, 1, _Self->f))
+    if (!fread(&(_Self->inspara), mod_InstrumentsCount * 2, 1, _Self->f))
     {
         DEBUG_ERR("s3mloader_load", "Failed to read instruments headers.");
         _Self->err = E_S3M_FILE_READ;
@@ -911,7 +911,7 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
         if (!s3mloader_load_pattern(_Self, i))
             return false;
 
-    count = InsNum;
+    count = mod_InstrumentsCount;
     for (i = 0; i < count; i++)
         if (!s3mloader_load_instrument(_Self, i))
             return false;

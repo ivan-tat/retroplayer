@@ -333,7 +333,7 @@ void PUBLIC_CODE musinsl_delete(MUSINSLIST **self)
 /* instruments */
 
 instrumentsList_t *mod_Instruments;
-uint16_t InsNum;
+uint16_t mod_InstrumentsCount;
 bool     EMSSmp;
 uint16_t SmpEMSHandle;
 

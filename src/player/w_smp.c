@@ -74,7 +74,7 @@ void __far win_samples_draw(SCRWIN *self)
             clreol();
             gotoxy(1, 2);
 
-            if (page_height <= InsNum)
+            if (page_height <= mod_InstrumentsCount)
             {
                 samplepage = 0;
                 i = 0;
@@ -82,9 +82,9 @@ void __far win_samples_draw(SCRWIN *self)
             else
             {
                 i = samplepage * page_height;
-                if (i >= InsNum)
+                if (i >= mod_InstrumentsCount)
                 {
-                    samplepage = InsNum / page_height;
+                    samplepage = mod_InstrumentsCount / page_height;
                     if (samplepage)
                         samplepage--;
                     i = samplepage * page_height;
@@ -93,7 +93,7 @@ void __far win_samples_draw(SCRWIN *self)
 
             height = scrwin_get_height(self);
             for (j = 1; j < height; j++)
-                if (i < InsNum)
+                if (i < mod_InstrumentsCount)
                 {
                     ins = musinsl_get(mod_Instruments, i);
 
@@ -177,7 +177,7 @@ bool __far win_samples_keypress(SCRWIN *self, char c)
         if (c == ']')
         {
             page_height = scrwin_get_height(self);
-            if ((samplepage + 1) * page_height + 1 <= InsNum)
+            if ((samplepage + 1) * page_height + 1 <= mod_InstrumentsCount)
             {
                 samplepage++;
                 scrwin_set_flags(self, scrwin_get_flags(self) | WINFL_FULLREDRAW);

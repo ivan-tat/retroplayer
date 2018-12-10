@@ -79,7 +79,7 @@ procedure musinsl_delete;
 
 var
     mod_Instruments: PMUSINSLIST;
-    InsNum: word;
+    mod_InstrumentsCount: word;
     EMSSmp: boolean;
     SmpEMSHandle: TEMSHDL;
 
