@@ -75,7 +75,7 @@ void __near pattern_seekRow(PATDESC *desc, unsigned int row)
 {
     desc->row = row;
     desc->channel = 0;
-    desc->offset = 5 * UsedChannels * row;
+    desc->offset = 5 * mod_ChannelsCount * row;
 }
 
 void __near pattern_close(PATDESC *desc)
@@ -97,7 +97,7 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
     unsigned int cmd;
     unsigned char param;
 
-    if (desc->channel >= UsedChannels)
+    if (desc->channel >= mod_ChannelsCount)
         return false;
 
     patData = desc->data;
@@ -176,18 +176,18 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
         chn_effHandle(chn);
     }
 
-    return desc->channel < UsedChannels;
+    return desc->channel < mod_ChannelsCount;
 }
 
 bool __near pat_skipNextChannel(PATDESC *desc)
 {
-    if (desc->channel >= UsedChannels)
+    if (desc->channel >= mod_ChannelsCount)
         return false;
 
     desc->channel++;
     desc->offset += 5;
 
-    return desc->channel < UsedChannels;
+    return desc->channel < mod_ChannelsCount;
 }
 
 /**********************************************************************/
@@ -206,9 +206,9 @@ PATFLOWSTATE __near pat_playRow(MUSPAT *pat)
 
     pattern_seekRow(&patDesc, playState_row);
 
-    for (i = 0; i < UsedChannels; i++)
+    for (i = 0; i < mod_ChannelsCount; i++)
     {
-        chn = &Channel[i];
+        chn = &mod_Channels[i];
         if (mixchn_get_type(chn) <= 2)
         {
             if (!pat_playNextChannel(&patDesc, chn))

@@ -484,9 +484,9 @@ void __near _player_reset_channels(void)
     int i;
     MIXCHN *chn;
 
-    for (i = 0; i < UsedChannels; i++)
+    for (i = 0; i < mod_ChannelsCount; i++)
     {
-        chn = &Channel[i];
+        chn = &mod_Channels[i];
         mixchn_reset_wave_tables(chn);
     }
 }

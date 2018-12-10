@@ -301,7 +301,7 @@ void PUBLIC_CODE chn_setupNote(MIXCHN *chn, uint8_t note, bool keep)
 
 #ifdef DEFINE_LOCAL_DATA
 
-channelsList_t PUBLIC_DATA Channel;
-uint8_t PUBLIC_DATA UsedChannels;
+channelsList_t mod_Channels;
+uint8_t mod_ChannelsCount;
 
 #endif  /* DEFINE_LOCAL_DATA */

@@ -41,9 +41,9 @@ void __near draw_channels_volume(void)
     int16_t i;
     MIXCHN *chn;
 
-    for (i = 0; i < UsedChannels; i++)
+    for (i = 0; i < mod_ChannelsCount; i++)
     {
-        chn = & (Channel[i]);
+        chn = & (mod_Channels[i]);
         vga_bar (320 * 170 + i * 15 + 10, 10, mixchn_is_playing (chn) ? mixchn_get_sample_volume (chn) : 0);
     }
 }

@@ -156,9 +156,9 @@ void __near song_play(MIXBUF *mb, uint16_t len)
             if (!count)
                 break;
 
-            for (i = 0; i < UsedChannels; i++)
+            for (i = 0; i < mod_ChannelsCount; i++)
             {
-                chn = &(Channel[i]);
+                chn = &(mod_Channels[i]);
                 if (mixchn_is_enabled(chn))
                     song_play_channel(chn, callEffects, mb, count,
                         bufOff + (mixbuf_get_channels(mb) == 2 && mixchn_get_type(chn) == 2 ? sizeof(int32_t) : 0));   // NOTE: mixbuf is 32 bits

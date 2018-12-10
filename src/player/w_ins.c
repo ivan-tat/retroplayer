@@ -110,9 +110,9 @@ void __far win_instruments_draw(SCRWIN *self)
             }
         }
 
-        for (i = 0; i < UsedChannels; i++)
+        for (i = 0; i < mod_ChannelsCount; i++)
         {
-            chn = &Channel[i];
+            chn = &mod_Channels[i];
 
             if (mixchn_is_playing(chn) && (mixchn_get_type(chn) > 0))
                 n = mixchn_get_instrument_num(chn);

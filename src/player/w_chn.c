@@ -62,13 +62,13 @@ void __far win_channels_draw(SCRWIN *self)
         textcolor(_lightgray);
         i = 0;
         count = 0;
-        while (i < UsedChannels)
+        while (i < mod_ChannelsCount)
         {
-            chn = &Channel[i];
+            chn = &mod_Channels[i];
             type = mixchn_get_type(chn);
             flags = mixchn_get_flags(chn);
             if  ((type < 3)
-            &&  ((UsedChannels < 17)
+            &&  ((mod_ChannelsCount < 17)
             ||   (type > 0)))
             {
                 count++;

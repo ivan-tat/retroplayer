@@ -50,8 +50,8 @@ ordersList_t Order;
 uint16_t OrdNum;
 uint8_t  LastOrder;
 
-channelsList_t Channel;
-uint8_t UsedChannels;
+channelsList_t mod_Channels;
+uint8_t mod_ChannelsCount;
 
 /* initial state */
 

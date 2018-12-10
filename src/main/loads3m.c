@@ -293,7 +293,7 @@ void __near s3mloader_alloc_patterns(S3MLOADER *self)
     uint16_t freepages;
     EMSHDL handle;
 
-    patsize = UsedChannels * 64 * 5;
+    patsize = mod_ChannelsCount * 64 * 5;
     if (DEBUG_FILE_S3M_LOAD)
         DEBUG_INFO_ (NULL, "Pattern memory size: %u.", patsize);
 
@@ -439,7 +439,7 @@ bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
 
     pat = &pat_static;
     muspat_init(pat);
-    muspat_set_channels(pat, UsedChannels);
+    muspat_set_channels(pat, mod_ChannelsCount);
     muspat_set_rows(pat, 64);
     muspat_set_size(pat, muspat_get_channels(pat) * muspat_get_rows(pat) * 5);
 
@@ -850,7 +850,7 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
     maxused = 0;
     for (i = 0; i < 32; i++)
     {
-        chn = &(Channel[i]);
+        chn = &(mod_Channels[i]);
         chtype = getchtyp(header.channelset[i] & 31);
         if ((header.channelset[i] & 128) == 0)
         {
@@ -862,9 +862,9 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
             mixchn_set_flags(chn, 0);
         mixchn_set_type(chn, chtype);
     }
-    UsedChannels = maxused;
+    mod_ChannelsCount = maxused;
     if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_INFO_ (NULL, "Channels: %hu", UsedChannels);
+        DEBUG_INFO_ (NULL, "Channels: %hu", mod_ChannelsCount);
 
     if (!fread(&Order, OrdNum, 1, _Self->f))
     {

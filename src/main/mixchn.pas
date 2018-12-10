@@ -76,8 +76,8 @@ type
         (* all public/private data for every channel *)
 
 var
-    Channel: TChannelArray;
-    UsedChannels: byte;
+    mod_Channels: TChannelArray;
+    mod_ChannelsCount: byte;
 
 procedure mixchn_set_flags;
 procedure mixchn_get_flags;

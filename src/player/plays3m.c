@@ -415,7 +415,7 @@ void __near channels_save_all(void)
 
     for (i = 0; i < MAX_CHANNELS; i++)
     {
-        chn = &(Channel[i]);
+        chn = &(mod_Channels[i]);
         savchn[i] = mixchn_get_type(chn);
     }
 }
@@ -424,7 +424,7 @@ void __near channels_swap(uint8_t index)
 {
     MIXCHN *chn;
 
-    chn = &(Channel[index]);
+    chn = &(mod_Channels[index]);
 
     if (mixchn_get_type(chn) == 0)
         mixchn_set_type(chn, savchn[index]);
@@ -436,7 +436,7 @@ void __near channels_toggle_mixing(uint8_t index)
 {
     MIXCHN *chn;
 
-    chn = &(Channel[index]);
+    chn = &(mod_Channels[index]);
     mixchn_set_mixing(chn, !mixchn_is_mixing(chn));
 }
 
@@ -445,9 +445,9 @@ void __near channels_stop_all(void)
     int i;
     MIXCHN *chn;
 
-    for (i = 0; i < UsedChannels; i++)
+    for (i = 0; i < mod_ChannelsCount; i++)
     {
-        chn = &(Channel[i]);
+        chn = &(mod_Channels[i]);
         mixchn_set_flags(chn, mixchn_get_flags(chn) & ~MIXCHNFL_PLAYING);
     }
 }

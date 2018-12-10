@@ -124,8 +124,8 @@ typedef MIXCHN channelsList_t[MAX_CHANNELS];
 
 /*** Variables ***/
 
-extern channelsList_t Channel;  /* all public/private data for every channel */
-extern uint8_t UsedChannels;    /* possible values : 1..32 (kill all Adlib) */
+extern channelsList_t mod_Channels;  /* all public/private data for every channel */
+extern uint8_t mod_ChannelsCount;    /* possible values : 1..32 (kill all Adlib) */
 
 /*** Linking ***/
 
@@ -168,8 +168,8 @@ extern uint8_t UsedChannels;    /* possible values : 1..32 (kill all Adlib) */
 #pragma aux chn_calcNoteStep "*";
 #pragma aux chn_setupNote "*";
 
-#pragma aux Channel "*";
-#pragma aux UsedChannels "*";
+#pragma aux mod_Channels "*";
+#pragma aux mod_ChannelsCount "*";
 
 #endif  /* __WATCOMC__ */
 

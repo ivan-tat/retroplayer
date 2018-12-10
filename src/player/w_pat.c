@@ -50,7 +50,7 @@ void __near __pascal display_row(uint8_t ordr, uint8_t row)
     else
         p = muspat_get_data(pat);
 
-    p = &(p[(row * UsedChannels + startchn - 1) * 5]);
+    p = &(p[(row * mod_ChannelsCount + startchn - 1) * 5]);
 
     textbackground(_black);
     textcolor(_lightgray);
@@ -62,7 +62,7 @@ void __near __pascal display_row(uint8_t ordr, uint8_t row)
     {
         textcolor(_lightgray);
 
-        if (i < UsedChannels)
+        if (i < mod_ChannelsCount)
         {
             _note = p[0];
             _ins  = p[1];
@@ -227,7 +227,7 @@ bool __far win_pattern_keypress(SCRWIN *self, char c)
         else
         if (c == 77)
         {
-            if (startchn < UsedChannels)
+            if (startchn < mod_ChannelsCount)
             {
                 startchn++;
                 scrwin_set_flags(self, scrwin_get_flags(self) | WINFL_FULLREDRAW);
