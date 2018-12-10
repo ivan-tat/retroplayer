@@ -123,7 +123,7 @@ void *PUBLIC_CODE musins_map_EM_data(MUSINS *self)
             physPage = 0;
             count = (uint16_t)(((uint32_t)musins_get_length(self) + 0x3fff) >> 1) >> 13;
             while (count--)
-                if (!emsMap(SmpEMSHandle, page++, physPage++))
+                if (!emsMap(mod_Samples_EMHandle, page++, physPage++))
                     return NULL;
         }
         return musins_get_data(self);
@@ -264,13 +264,13 @@ void PUBLIC_CODE musinsl_init(MUSINSLIST *self)
 void PUBLIC_CODE musinsl_set_EM_data(MUSINSLIST *self, bool value)
 {
     if (self)
-        EMSSmp = value;
+        mod_Samples_EMData = value;
 }
 
 bool PUBLIC_CODE musinsl_is_EM_data(MUSINSLIST *self)
 {
     if (self)
-        return EMSSmp;
+        return mod_Samples_EMData;
     else
         return false;
 }
@@ -286,19 +286,19 @@ MUSINS *PUBLIC_CODE musinsl_get(MUSINSLIST *self, uint16_t index)
 void PUBLIC_CODE musinsl_set_EM_data_handle(MUSINSLIST *self, EMSHDL value)
 {
     if (self)
-        SmpEMSHandle = value;
+        mod_Samples_EMHandle = value;
 }
 
 void PUBLIC_CODE musinsl_set_EM_handle_name(MUSINSLIST *self)
 {
     if (self)
-        emsSetHandleName(SmpEMSHandle, &EMS_INSLIST_HANDLE_NAME);
+        emsSetHandleName(mod_Samples_EMHandle, &EMS_INSLIST_HANDLE_NAME);
 }
 
 uint32_t PUBLIC_CODE musinsl_get_used_EM(MUSINSLIST *self)
 {
-    if (EMSSmp)
-        return (uint32_t) emsGetHandleSize(SmpEMSHandle) << 4;
+    if (mod_Samples_EMData)
+        return (uint32_t) emsGetHandleSize(mod_Samples_EMHandle) << 4;
     else
         return 0;
 }
@@ -310,11 +310,11 @@ void PUBLIC_CODE musinsl_free(MUSINSLIST *self)
     for (i = 0; i < MAX_INSTRUMENTS; i++)
         musins_free(musinsl_get(mod_Instruments, i));
 
-    if (EMSSmp)
+    if (mod_Samples_EMData)
     {
-        emsFree(SmpEMSHandle);
-        SmpEMSHandle = EMSBADHDL;
-        EMSSmp = false;
+        emsFree(mod_Samples_EMHandle);
+        mod_Samples_EMHandle = EMSBADHDL;
+        mod_Samples_EMData = false;
     }
 }
 
@@ -334,7 +334,7 @@ void PUBLIC_CODE musinsl_delete(MUSINSLIST **self)
 
 instrumentsList_t *mod_Instruments;
 uint16_t mod_InstrumentsCount;
-bool     EMSSmp;
-uint16_t SmpEMSHandle;
+bool     mod_Samples_EMData;
+uint16_t mod_Samples_EMHandle;
 
 #endif  /* DEFINE_LOCAL_DATA */

@@ -109,8 +109,8 @@ void        PUBLIC_CODE musinsl_delete(MUSINSLIST **self);
 
 extern instrumentsList_t *mod_Instruments;  /* pointer to data for all instruments */
 extern uint16_t mod_InstrumentsCount;
-extern bool     EMSSmp;         /* samples in EMS ? */
-extern uint16_t SmpEMSHandle;   /* hanlde to access EMS for samples */
+extern bool     mod_Samples_EMData;     /* samples in EMS ? */
+extern uint16_t mod_Samples_EMHandle;   /* hanlde to access EMS for samples */
 
 /*** Linking ***/
 
@@ -155,8 +155,8 @@ extern uint16_t SmpEMSHandle;   /* hanlde to access EMS for samples */
 
 #pragma aux mod_Instruments "*";
 #pragma aux mod_InstrumentsCount "*";
-#pragma aux EMSSmp "*";
-#pragma aux SmpEMSHandle "*";
+#pragma aux mod_Samples_EMData "*";
+#pragma aux mod_Samples_EMHandle "*";
 
 #endif  /* __WATCOMC__ */
 

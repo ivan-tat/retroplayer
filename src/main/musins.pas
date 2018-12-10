@@ -80,8 +80,8 @@ procedure musinsl_delete;
 var
     mod_Instruments: PMUSINSLIST;
     mod_InstrumentsCount: word;
-    EMSSmp: boolean;
-    SmpEMSHandle: TEMSHDL;
+    mod_Samples_EMData: boolean;
+    mod_Samples_EMHandle: TEMSHDL;
 
 implementation
 
