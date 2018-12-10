@@ -168,6 +168,15 @@ void __near update_osci_stereo(void)
 
 void __far playosci_main (void)
 {
+    register_debug ();
+    register_hwowner ();
+    register_pic ();
+    register_dma ();
+    register_ems ();
+    register_vga ();
+    register_sbctl ();
+    register_s3mplay ();
+
     console_init ();
 
     if (!environ_init ())

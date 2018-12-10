@@ -40,6 +40,8 @@ procedure dmaBuf_init;
 procedure dmaBuf_alloc;
 procedure dmaBuf_free;
 
+procedure register_dma;
+
 implementation
 
 uses
@@ -72,8 +74,6 @@ procedure dmaBuf_init; external;
 procedure dmaBuf_alloc; external;
 procedure dmaBuf_free; external;
 
-procedure register_dma; far; external;
+procedure register_dma; external;
 
-begin
-    register_dma;
 end.

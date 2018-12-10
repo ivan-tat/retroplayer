@@ -47,6 +47,8 @@ procedure player_get_pattern_delay;
 procedure player_free_module;
 procedure player_free;
 
+procedure register_s3mplay;
+
 implementation
 
 uses
@@ -104,8 +106,6 @@ procedure player_get_pattern_delay; external;
 procedure player_free_module; external;
 procedure player_free; external;
 
-procedure register_s3mplay; far; external;
+procedure register_s3mplay; external;
 
-begin
-    register_s3mplay;
 end.

@@ -61,6 +61,15 @@ smalls3m_main (void)
     char s[pascal_String_size];
     int result;
 
+    register_debug ();
+    register_hwowner ();
+    register_pic ();
+    register_dma ();
+    register_ems ();
+    register_vga ();
+    register_sbctl ();
+    register_s3mplay ();
+
     console_init ();
 
     if (!environ_init ())

@@ -15,10 +15,13 @@
 #include "cc/malloc.h"
 #include "cc/errno.h"
 #include "cc/unistd.h"
+#include "dos/ems.h"
+#include "hw/hwowner.h"
+#include "hw/pic.h"
+#include "hw/dma.h"
 #include "hw/sb/sbctl.h"
 #include "hw/vbios.h"
 #include "hw/vga.h"
-#include "dos/ems.h"
 #include "main/mixer.h"
 #include "main/fillvars.h"
 #include "main/musins.h"
@@ -691,21 +694,15 @@ void PUBLIC_CODE plays3m_main(void)
 
     /* TODO: make separate custom_main() */
 
-    /* TODO: all modules initialization goes here */
-    // This is the place where all modules must be manually initialized in the right order.
-    // Actually this is automatically done by Pascal linker at the moment and
-    // must be fixed in the future.
-    /*
-    register_debug();
-    register_hwowner();
-    register_pic();
-    register_dma();
-    register_ems();
-    register_vga();
-    register_sbctl();
-    register_s3mplay();
-    register_plays3m();
-    */
+    register_debug ();
+    register_hwowner ();
+    register_pic ();
+    register_dma ();
+    register_ems ();
+    register_vga ();
+    register_sbctl ();
+    register_s3mplay ();
+    register_plays3m ();
 
     console_init ();
 
@@ -934,4 +931,4 @@ void __near plays3m_done(void)
     DEBUG_END("plays3m_done");
 }
 
-DEFINE_REGISTRATION(plays3m, plays3m_init, plays3m_done)
+DEFINE_REGISTRATION (plays3m, plays3m_init, plays3m_done)

@@ -39,6 +39,8 @@ procedure sb_transfer_stop;
 procedure sb_free;
 procedure sb_delete;
 
+procedure register_sbctl;
+
 implementation
 
 uses
@@ -87,8 +89,6 @@ procedure sb_transfer_stop; external;
 procedure sb_free; external;
 procedure sb_delete; external;
 
-procedure register_sbctl; far; external;
+procedure register_sbctl; external;
 
-begin
-  register_sbctl;
 end.

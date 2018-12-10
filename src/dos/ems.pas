@@ -54,6 +54,8 @@ procedure emsRestoreMap;
 procedure emsGetHandleSize;
 procedure emsSetHandleName;
 
+procedure register_ems;
+
 implementation
 
 uses
@@ -81,8 +83,6 @@ procedure emsRestoreMap; external;
 procedure emsGetHandleSize; external;
 procedure emsSetHandleName; external;
 
-procedure register_ems; far; external;
+procedure register_ems; external;
 
-begin
-    register_ems;
 end.

@@ -20,6 +20,8 @@ procedure vga_clear_page_320x200x8;
 procedure vga_line;
 procedure vga_bar(o, b, l: Word);
 
+procedure register_vga;
+
 implementation
 
 uses
@@ -79,8 +81,6 @@ asm
     @@e:
 end;
 
-procedure register_vga; far; external;
+procedure register_vga; external;
 
-begin
-    register_vga;
 end.

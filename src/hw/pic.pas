@@ -31,6 +31,8 @@ procedure hwowner_clear_irq_channels_handler;
 procedure hwowner_release_irq;
 procedure hwowner_release_irq_channels;
 
+procedure register_pic;
+
 implementation
 
 uses
@@ -66,8 +68,6 @@ procedure hwowner_clear_irq_channels_handler; external;
 procedure hwowner_release_irq; external;
 procedure hwowner_release_irq_channels; external;
 
-procedure register_pic; far; external;
+procedure register_pic; external;
 
-begin
-    register_pic;
 end.

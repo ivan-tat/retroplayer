@@ -17,6 +17,8 @@ procedure hwowner_get_id;
 procedure hwowner_get_name;
 procedure hwowner_unregister;
 
+procedure register_hwowner;
+
 implementation
 
 uses
@@ -35,8 +37,6 @@ procedure hwowner_get_id; external;
 procedure hwowner_get_name; external;
 procedure hwowner_unregister; external;
 
-procedure register_hwowner; far; external;
+procedure register_hwowner; external;
 
-begin
-    register_hwowner;
 end.

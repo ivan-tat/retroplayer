@@ -30,6 +30,8 @@ procedure Debug_End(filename: PChar; method: PChar);
 procedure Debug_Fail(filename: PChar; method: PChar; msg: PChar);
 procedure Debug_Success(filename: PChar; method: PChar);
 
+procedure register_debug;
+
 implementation
 
 uses
@@ -60,8 +62,6 @@ procedure Debug_End(filename: PChar; method: PChar); external;
 procedure Debug_Fail(filename: PChar; method: PChar; msg: PChar); external;
 procedure Debug_Success(filename: PChar; method: PChar); external;
 
-procedure register_debug; far; external;
+procedure register_debug; external;
 
-begin
-    register_debug;
 end.
