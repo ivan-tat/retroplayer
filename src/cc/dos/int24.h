@@ -20,10 +20,12 @@
  */
 extern __far _cc_local_int24_asm(void);
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux _cc_local_int24_asm "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* CC_DOS_INT24_H */

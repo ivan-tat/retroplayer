@@ -13,8 +13,9 @@ interface
 
 (*$I defines.pas*)
 
-procedure __new_;
-procedure __delete_;
+procedure __new;
+procedure __delete;
+
 function  _new_(size: Word): Pointer;
 procedure _delete_(var p: Pointer);
 
@@ -27,8 +28,9 @@ uses
 
 (*$l common.obj*)
 
-procedure __new_; external;
-procedure __delete_; external;
+procedure __new; external;
+procedure __delete; external;
+
 function  _new_(size: Word): Pointer; external;
 procedure _delete_(var p: Pointer); external;
 

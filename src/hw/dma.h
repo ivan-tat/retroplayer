@@ -87,10 +87,19 @@ void    PUBLIC_CODE dmaBuf_init(DMABUF *self);
 bool    PUBLIC_CODE dmaBuf_alloc(DMABUF *self, uint32_t size);
 void    PUBLIC_CODE dmaBuf_free(DMABUF *self);
 
+/*** Initialization ***/
+
+DECLARE_REGISTRATION (dma)
+
+/*** Linking ***/
+
 #ifdef __WATCOMC__
+
 #pragma aux dma_get_linear_address "*";
+
 #pragma aux dma_get_hooked_channels "*";
 #pragma aux dma_get_owner "*";
+
 #pragma aux hwowner_hook_dma "*";
 #pragma aux hwowner_hook_dma_channels "*";
 #pragma aux hwowner_mask_dma "*";
@@ -101,10 +110,14 @@ void    PUBLIC_CODE dmaBuf_free(DMABUF *self);
 #pragma aux hwowner_get_dma_counter "*";
 #pragma aux hwowner_release_dma "*";
 #pragma aux hwowner_release_dma_channels "*";
-#endif
 
-/*** Initialization ***/
+#pragma aux dmaBuf_init "*";
+#pragma aux dmaBuf_alloc "*";
+#pragma aux dmaBuf_free "*";
 
-DECLARE_REGISTRATION(dma)
+#pragma aux register_dma "*";
+#pragma aux unregister_dma "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* DMA_H */

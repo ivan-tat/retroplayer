@@ -20,8 +20,12 @@
 
 void sound_fill_buffer(MIXBUF *mb, uint16_t len);
 
+/*** Linking ***/
+
 #ifdef __WATCOMC__
+
 #pragma aux sound_fill_buffer "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* MIXING_H */

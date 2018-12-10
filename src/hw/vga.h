@@ -16,22 +16,33 @@
 
 #include "pascal.h"
 
-extern uint16_t PUBLIC_DATA drawseg;
+extern uint16_t drawseg;
 
 void PUBLIC_CODE vga_wait_vsync(void);
 void PUBLIC_CODE vga_clear_page_320x200x8(char c);
-void PUBLIC_CODE vga_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t f);
+
+extern void PUBLIC_CODE vga_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t f);
 extern void PUBLIC_CODE vga_bar(uint16_t o, uint16_t b, uint16_t l);
 
+/*** Initialization ***/
+
+DECLARE_REGISTRATION (vga)
+
+/*** Linking ***/
+
 #ifdef __WATCOMC__
-#pragma aux vga_line    modify [ ax bx cx dx si di es ];
-#pragma aux vga_bar     modify [ ax bx cx dx si di es ];
-#endif
 
-/* Initialization */
+#pragma aux drawseg "*";
 
-DECLARE_REGISTRATION(vga)
+#pragma aux vga_wait_vsync "*";
+#pragma aux vga_clear_page_320x200x8 "*";
 
-/* Linking */
+#pragma aux vga_line "*" modify [ ax bx cx dx si di es ];
+#pragma aux vga_bar  "*" modify [ ax bx cx dx si di es ];
+
+#pragma aux register_vga "*";
+#pragma aux unregister_vga "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* VGA_H */

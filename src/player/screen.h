@@ -71,4 +71,25 @@ void     PUBLIC_CODE scrwin_focus(SCRWIN *self);
 void     PUBLIC_CODE scrwin_leave(SCRWIN *self);
 void     PUBLIC_CODE scrwin_close(SCRWIN *self);
 
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux scrwin_init "*";
+#pragma aux scrwin_is_created "*";
+#pragma aux scrwin_set_flags "*";
+#pragma aux scrwin_get_flags "*";
+#pragma aux scrwin_set_width "*";
+#pragma aux scrwin_get_width "*";
+#pragma aux scrwin_set_height "*";
+#pragma aux scrwin_get_height "*";
+#pragma aux scrwin_draw "*";
+#pragma aux scrwin_keypress "*";
+#pragma aux scrwin_show "*";
+#pragma aux scrwin_focus "*";
+#pragma aux scrwin_leave "*";
+#pragma aux scrwin_close "*";
+
+#endif  /* __WATCOMC__ */
+
 #endif  /* SCREEN_H */

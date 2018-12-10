@@ -466,7 +466,7 @@ void PUBLIC_CODE dmaBuf_free(DMABUF *self)
 
 /*** Initialization ***/
 
-void dmaInit(void)
+void __near dma_init (void)
 {
     uint8_t i;
 
@@ -476,7 +476,7 @@ void dmaInit(void)
     _dma_mask = 0;
 }
 
-void dmaDone(void)
+void __near dma_done (void)
 {
     uint8_t i;
 
@@ -486,4 +486,4 @@ void dmaDone(void)
     _dma_mask = 0;
 }
 
-DEFINE_REGISTRATION(dma, dmaInit, dmaDone)
+DEFINE_REGISTRATION (dma, dma_init, dma_done)

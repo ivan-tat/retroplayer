@@ -18,7 +18,7 @@
 #include "pascal.h"
 #include "debug.h"
 
-extern char *PUBLIC_DATA PLAYER_VERSION;
+extern char *PLAYER_VERSION;
 
 void     PUBLIC_CODE player_clear_error(void);
 bool     PUBLIC_CODE player_is_error(void);
@@ -48,12 +48,47 @@ uint8_t  PUBLIC_CODE player_get_pattern_delay(void);
 void     PUBLIC_CODE player_free_module(void);
 void     PUBLIC_CODE player_free(void);
 
-#ifdef __WATCOMC__
-#pragma aux player_set_pos "*";
-#endif
-
 /*** Initialization ***/
 
-DECLARE_REGISTRATION(s3mplay)
+DECLARE_REGISTRATION (s3mplay)
+
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux PLAYER_VERSION "*";
+
+#pragma aux player_clear_error "*";
+#pragma aux player_is_error "*";
+#pragma aux player_get_error "*";
+#pragma aux player_init "*";
+#pragma aux player_init_device "*";
+#pragma aux player_device_dump_conf "*";
+#pragma aux player_device_get_name "*";
+#pragma aux player_set_mode "*";
+#pragma aux player_get_output_rate "*";
+#pragma aux player_get_output_channels "*";
+#pragma aux player_get_output_bits "*";
+#pragma aux player_get_output_lq "*";
+#pragma aux player_set_master_volume "*";
+#pragma aux player_get_master_volume "*";
+#pragma aux player_set_order "*";
+#pragma aux player_load_s3m "*";
+#pragma aux player_set_pos "*";
+#pragma aux player_play_start "*";
+#pragma aux player_play_pause "*";
+#pragma aux player_play_continue "*";
+#pragma aux player_play_stop "*";
+#pragma aux player_get_buffer_pos "*";
+#pragma aux player_get_speed "*";
+#pragma aux player_get_tempo "*";
+#pragma aux player_get_pattern_delay "*";
+#pragma aux player_free_module "*";
+#pragma aux player_free "*";
+
+#pragma aux register_s3mplay "*";
+#pragma aux unregister_s3mplay "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* S3MPLAY_H */

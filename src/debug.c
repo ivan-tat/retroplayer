@@ -21,11 +21,7 @@
 
 FILE *debuglogfile;
 
-#else
-
-extern FILE *PUBLIC_DATA debuglogfile;
-
-#endif
+#endif  /* DEFINE_LOCAL_DATA */
 
 static const struct
 {
@@ -72,7 +68,7 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
         default:
             textcol = 7;
             break;
-    };
+    }
 
     if (len < MAX_TAG_LENGTH - 1)
         if (file)
@@ -84,7 +80,7 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
                 cc_snprintf(_tag + len, MAX_TAG_LENGTH - len - 1,
                     (len > 0) ? " [%s]" : "[%s]", file);
             len = strlen(_tag);
-        };
+        }
 
     if (len < MAX_TAG_LENGTH - 1)
         if (method)
@@ -92,7 +88,7 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
             cc_snprintf(_tag + len, MAX_TAG_LENGTH - len - 1,
                 (len > 0) ? " %s()" : "%s()", method);
             len = strlen(_tag);
-        };
+        }
 
     if (len)
     {
@@ -104,7 +100,7 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
             textcolor(7);
             cc_printf(s, _tag);
         }
-    };
+    }
 
     if (format)
     {
@@ -115,7 +111,7 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
             textcolor(textcol);
             cc_vprintf(format, ap);
         }
-    };
+    }
 
     va_end(ap);
 
@@ -201,18 +197,18 @@ void PUBLIC_CODE Debug_Success(const char *file, const char *method)
 
 /*** Initialization ***/
 
-void debugInit(void)
+void debug_init (void)
 {
-    //debuglogfile = fopen("debug.log", "wb");
+    //debuglogfile = fopen ("debug.log", "wb");
     debuglogfile = NULL;
-    DEBUG_INFO("debugInit", "Start logging.");
+    DEBUG_INFO ("debug_init", "Start logging.");
 }
 
-void debugDone(void)
+void debug_done (void)
 {
-    DEBUG_INFO("debugDone", "End logging.");
+    DEBUG_INFO ("debug_done", "End logging.");
     if (debuglogfile)
-        fclose(debuglogfile);
+        fclose (debuglogfile);
 }
 
-DEFINE_REGISTRATION(debug, debugInit, debugDone)
+DEFINE_REGISTRATION (debug, debug_init, debug_done)

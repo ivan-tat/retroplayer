@@ -2,7 +2,7 @@
 {$I-,X+,V-,G+,D+}
 unit s3mplay;
 
-INTERFACE
+interface
 
 uses
     types,
@@ -16,38 +16,38 @@ uses
 
 (*$I defines.pas*)
 
-CONST
+const
     PLAYER_VERSION: PChar = '1.70.1';
 
 procedure player_clear_error;
-function  player_is_error: Boolean;
-function  player_get_error: PChar;
-function  player_init: Boolean;
-function  player_init_device(input: Byte): Boolean;
+procedure player_is_error;
+procedure player_get_error;
+procedure player_init;
+procedure player_init_device;
 procedure player_device_dump_conf;
-function  player_device_get_name: PChar;
-function  player_set_mode(f_16bits, f_stereo: Boolean; rate: Word; LQ: Boolean): Boolean;
-function  player_get_output_rate: Word;
-function  player_get_output_channels: Byte;
-function  player_get_output_bits: Byte;
-function  player_get_output_lq: Boolean;
-procedure player_set_master_volume(value: Byte);
-function  player_get_master_volume: Byte;
-procedure player_set_order(extended: Boolean);
-function  player_load_s3m(name: PChar): Boolean;
+procedure player_device_get_name;
+procedure player_set_mode;
+procedure player_get_output_rate;
+procedure player_get_output_channels;
+procedure player_get_output_bits;
+procedure player_get_output_lq;
+procedure player_set_master_volume;
+procedure player_get_master_volume;
+procedure player_set_order;
+procedure player_load_s3m;
 procedure player_set_pos;
-function  player_play_start: Boolean;
+procedure player_play_start;
 procedure player_play_pause;
 procedure player_play_continue;
 procedure player_play_stop;
-function  player_get_buffer_pos: Word;
-function  player_get_speed: Byte;
-function  player_get_tempo: Byte;
-function  player_get_pattern_delay: Byte;
+procedure player_get_buffer_pos;
+procedure player_get_speed;
+procedure player_get_tempo;
+procedure player_get_pattern_delay;
 procedure player_free_module;
 procedure player_free;
 
-IMPLEMENTATION
+implementation
 
 uses
     watcom,
@@ -77,30 +77,30 @@ uses
 (*$l s3mplay.obj*)
 
 procedure player_clear_error; external;
-function  player_is_error: Boolean; external;
-function  player_get_error: PChar; external;
-function  player_init: Boolean; external;
-function  player_init_device(input: Byte): Boolean; external;
+procedure player_is_error; external;
+procedure player_get_error; external;
+procedure player_init; external;
+procedure player_init_device; external;
 procedure player_device_dump_conf; external;
-function  player_device_get_name: PChar; external;
-function  player_set_mode(f_16bits, f_stereo: Boolean; rate: Word; LQ: Boolean): Boolean; external;
-function  player_get_output_rate: Word; external;
-function  player_get_output_channels: Byte; external;
-function  player_get_output_bits: Byte; external;
-function  player_get_output_lq: Boolean; external;
-procedure player_set_master_volume(value: Byte); external;
-function  player_get_master_volume: Byte; external;
-procedure player_set_order(extended: Boolean); external;
-function  player_load_s3m(name: PChar): Boolean; external;
+procedure player_device_get_name; external;
+procedure player_set_mode; external;
+procedure player_get_output_rate; external;
+procedure player_get_output_channels; external;
+procedure player_get_output_bits; external;
+procedure player_get_output_lq; external;
+procedure player_set_master_volume; external;
+procedure player_get_master_volume; external;
+procedure player_set_order; external;
+procedure player_load_s3m; external;
 procedure player_set_pos; external;
-function  player_play_start: Boolean; external;
+procedure player_play_start; external;
 procedure player_play_pause; external;
 procedure player_play_continue; external;
 procedure player_play_stop; external;
-function  player_get_buffer_pos: Word; external;
-function  player_get_speed: Byte; external;
-function  player_get_tempo: Byte; external;
-function  player_get_pattern_delay: Byte; external;
+procedure player_get_buffer_pos; external;
+procedure player_get_speed; external;
+procedure player_get_tempo; external;
+procedure player_get_pattern_delay; external;
 procedure player_free_module; external;
 procedure player_free; external;
 

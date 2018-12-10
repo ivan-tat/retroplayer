@@ -32,28 +32,32 @@ const
     SBIO_MIXER_VOICE_LEFT    = $32;
     SBIO_MIXER_VOICE_RIGHT   = $33;
 
-procedure sbioMixerReset(base: Word);
-function  sbioMixerRead(base: Word; reg: Byte): Byte;
-procedure sbioMixerWrite(base: Word; reg, data: Byte);
-function  sbioDSPReset(base: Word): Boolean;
-function  sbioDSPRead(base: Word): Byte;
-function  sbioDSPReadQueue(base: Word; data: Pointer; length: Word): Boolean;
-function  sbioDSPWrite(base: Word; data: Byte): Boolean;
-function  sbioDSPWriteQueue(base: Word; data: Pointer; length: Word): Boolean;
-procedure sbioDSPAcknowledgeIRQ(base: Word; mode16bit: Boolean);
+procedure sbioMixerReset;
+procedure sbioMixerRead;
+procedure sbioMixerWrite;
+
+procedure sbioDSPReset;
+procedure sbioDSPRead;
+procedure sbioDSPReadQueue;
+procedure sbioDSPWrite;
+procedure sbioDSPWriteQueue;
+
+procedure sbioDSPAcknowledgeIRQ;
 
 implementation
 
 (*$l sbio.obj*)
 
-procedure sbioMixerReset(base: Word); external;
-function  sbioMixerRead(base: Word; reg: Byte): Byte; external;
-procedure sbioMixerWrite(base: Word; reg, data: Byte); external;
-function  sbioDSPReset(base: Word): Boolean; external;
-function  sbioDSPRead(base: Word): Byte; external;
-function  sbioDSPReadQueue(base: Word; data: Pointer; length: Word): Boolean; external;
-function  sbioDSPWrite(base: Word; data: Byte): Boolean; external;
-function  sbioDSPWriteQueue(base: Word; data: Pointer; length: Word): Boolean; external;
-procedure sbioDSPAcknowledgeIRQ(base: Word; mode16bit: Boolean); external;
+procedure sbioMixerReset; external;
+procedure sbioMixerRead; external;
+procedure sbioMixerWrite; external;
+
+procedure sbioDSPReset; external;
+procedure sbioDSPRead; external;
+procedure sbioDSPReadQueue; external;
+procedure sbioDSPWrite; external;
+procedure sbioDSPWriteQueue; external;
+
+procedure sbioDSPAcknowledgeIRQ; external;
 
 end.

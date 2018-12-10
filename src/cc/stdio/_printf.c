@@ -19,7 +19,7 @@
 extern void PUBLIC_CODE pascal_write(const char *str);
 
 #ifdef __WATCOMC__
-#pragma aux pascal_write modify [ax bx cx dx si di es];
+#pragma aux pascal_write "*" modify [ ax bx cx dx si di es ];
 #endif
 
 /*** Data stream ***/
@@ -68,14 +68,14 @@ void dataStreamFlush(DATASTREAM *self)
                     _dataStreamTerminate(self);
                     if (fwrite(self->buf, size, 1, (FILE *)self->output))
                         self->written += size;
-                };
+                }
                 break;
 
             default:
                 break;
-        };
+        }
         self->pos = 0;
-    };
+    }
 }
 
 void dataStreamWrite(DATASTREAM *self, const void *ptr, size_t len)
@@ -95,14 +95,14 @@ void dataStreamWrite(DATASTREAM *self, const void *ptr, size_t len)
                     left = self->limit - self->written;
                     if (len > left)
                         len = left;
-                };
+                }
                 memcpy(MK_FP(FP_SEG(self->output), FP_OFF(self->output) + self->pos),
                     ptr, len);
                 self->pos += len;
                 self->written += len;
                 if (self->limit)
                     self->stop = (self->written == self->limit);
-            };
+            }
             break;
 
         case DATASTREAM_TYPE_STDOUT:
@@ -121,7 +121,7 @@ void dataStreamWrite(DATASTREAM *self, const void *ptr, size_t len)
                     input += __n;
                     self->pos += __n;
                     len -= __n;
-                };
+                }
                 if (self->pos == maxsize)
                     dataStreamFlush(self);
             } while (len && !self->stop);
@@ -129,7 +129,7 @@ void dataStreamWrite(DATASTREAM *self, const void *ptr, size_t len)
 
         default:
             break;
-    };
+    }
 }
 
 void dataStreamInitMemory(DATASTREAM *self, void *ptr, size_t limit)
@@ -211,7 +211,7 @@ void __near write_udecimal
     {
         *--p = '-';
         len++;
-    };
+    }
 
     dataStreamWrite(stream, p, len);
 }
@@ -447,7 +447,7 @@ void _dsprintf(DATASTREAM *stream, const char *format, va_list ap)
 
             default:
                 i++;
-        };
-    };
+        }
+    }
     dataStreamFlush(stream);
 }

@@ -27,13 +27,17 @@ const char *s3mloader_get_error(S3MLOADER *self);
 void     s3mloader_free(S3MLOADER *self);
 void     s3mloader_delete(S3MLOADER **self);
 
+/*** Linking ***/
+
 #ifdef __WATCOMC__
+
 #pragma aux s3mloader_new "*";
 #pragma aux s3mloader_init "*";
 #pragma aux s3mloader_load "*";
 #pragma aux s3mloader_get_error "*";
 #pragma aux s3mloader_free "*";
 #pragma aux s3mloader_delete "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* LOADS3M_H */

@@ -12,16 +12,16 @@ interface
 
 (*$I defines.pas*)
 
-procedure cc_memcmp_;
-procedure cc_memcpy_;
-procedure cc_memset_;
-procedure cc_strchr_;
-procedure cc_strcmp_;
-procedure cc_stricmp_;
-procedure cc_strlen_;
-procedure cc_strncmp_;
-procedure cc_strncpy_;
-procedure cc_strnicmp_;
+procedure cc_memcmp;
+procedure cc_memcpy;
+procedure cc_memset;
+procedure cc_strchr;
+procedure cc_strcmp;
+procedure cc_stricmp;
+procedure cc_strlen;
+procedure cc_strncmp;
+procedure cc_strncpy;
+procedure cc_strnicmp;
 
 function  memcmp(var buf1, buf2; size: Word): Integer;
 procedure memcpy(var dest, src; size: Word);
@@ -33,34 +33,34 @@ function  strncpy(dest, src: PChar; maxlen: Word): PChar;
 implementation
 
 (*$L string/memcmp.obj*)
-procedure cc_memcmp_; external;
+procedure cc_memcmp; external;
 
 (*$L string/memcpy.obj*)
-procedure cc_memcpy_; external;
+procedure cc_memcpy; external;
 
 (*$L string/memset.obj*)
-procedure cc_memset_; external;
+procedure cc_memset; external;
 
 (*$L string/strchr.obj*)
-procedure cc_strchr_; external;
+procedure cc_strchr; external;
 
 (*$L string/strcmp.obj*)
-procedure cc_strcmp_; external;
+procedure cc_strcmp; external;
 
 (*$L string/stricmp.obj*)
-procedure cc_stricmp_; external;
+procedure cc_stricmp; external;
 
 (*$L string/strlen.obj*)
-procedure cc_strlen_; external;
+procedure cc_strlen; external;
 
 (*$L string/strncmp.obj*)
-procedure cc_strncmp_; external;
+procedure cc_strncmp; external;
 
 (*$L string/strncpy.obj*)
-procedure cc_strncpy_; external;
+procedure cc_strncpy; external;
 
 (*$L string/strnicmp.obj*)
-procedure cc_strnicmp_; external;
+procedure cc_strnicmp; external;
 
 function memcmp(var buf1, buf2; size: Word): Integer;
 var

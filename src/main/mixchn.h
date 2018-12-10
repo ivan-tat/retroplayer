@@ -1,4 +1,4 @@
-/* mixchn.h -- declarations for mixing channel handling library.
+/* mixchn.h -- declarations for mixchn.c.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -122,9 +122,55 @@ void     PUBLIC_CODE chn_setupNote(MIXCHN *chn, uint8_t note, bool keep);
 
 typedef MIXCHN channelsList_t[MAX_CHANNELS];
 
-/* Variables */
+/*** Variables ***/
 
-extern channelsList_t PUBLIC_DATA Channel;  /* all public/private data for every channel */
-extern uint8_t PUBLIC_DATA UsedChannels;    /* possible values : 1..32 (kill all Adlib) */
+extern channelsList_t Channel;  /* all public/private data for every channel */
+extern uint8_t UsedChannels;    /* possible values : 1..32 (kill all Adlib) */
 
-#endif 	/* MIXCHN_H */
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux mixchn_set_flags "*";
+#pragma aux mixchn_get_flags "*";
+#pragma aux mixchn_set_enabled "*";
+#pragma aux mixchn_is_enabled "*";
+#pragma aux mixchn_set_playing "*";
+#pragma aux mixchn_is_playing "*";
+#pragma aux mixchn_set_mixing "*";
+#pragma aux mixchn_is_mixing "*";
+#pragma aux mixchn_set_type "*";
+#pragma aux mixchn_get_type "*";
+#pragma aux mixchn_set_instrument_num "*";
+#pragma aux mixchn_get_instrument_num "*";
+#pragma aux mixchn_set_instrument "*";
+#pragma aux mixchn_get_instrument "*";
+#pragma aux mixchn_set_sample_volume "*";
+#pragma aux mixchn_get_sample_volume "*";
+#pragma aux mixchn_set_sample_period_limits "*";
+#pragma aux mixchn_check_sample_period "*";
+#pragma aux mixchn_set_sample_period "*";
+#pragma aux mixchn_get_sample_period "*";
+#pragma aux mixchn_set_sample_step "*";
+#pragma aux mixchn_get_sample_step "*";
+#pragma aux mixchn_setup_sample_period "*";
+#pragma aux mixchn_set_sample_data "*";
+#pragma aux mixchn_get_sample_data "*";
+#pragma aux mixchn_set_command "*";
+#pragma aux mixchn_get_command "*";
+#pragma aux mixchn_set_sub_command "*";
+#pragma aux mixchn_get_sub_command "*";
+#pragma aux mixchn_set_command_parameter "*";
+#pragma aux mixchn_get_command_parameter "*";
+#pragma aux mixchn_reset_wave_tables "*";
+#pragma aux chn_setupInstrument "*";
+#pragma aux chn_calcNotePeriod "*";
+#pragma aux chn_calcNoteStep "*";
+#pragma aux chn_setupNote "*";
+
+#pragma aux Channel "*";
+#pragma aux UsedChannels "*";
+
+#endif  /* __WATCOMC__ */
+
+#endif  /* MIXCHN_H */

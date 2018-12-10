@@ -23,7 +23,7 @@ uint32_t getFreeEMMMemory(void);
 
 /* Information windows */
 
-extern uint8_t PUBLIC_DATA chnlastinst[MAX_CHANNELS];
+extern uint8_t chnlastinst[MAX_CHANNELS];
 
 void get_note_name(char *__dest, uint8_t note);
 void write_Note(uint8_t note);
@@ -34,6 +34,27 @@ void PUBLIC_CODE plays3m_main(void);
 
 /*** Initialization ***/
 
-DECLARE_REGISTRATION(plays3m)
+DECLARE_REGISTRATION (plays3m)
+
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux getFreeDOSMemory "*";
+#pragma aux getFreeEMMMemory "*";
+
+#pragma aux chnlastinst "*";
+
+#pragma aux get_note_name "*";
+#pragma aux write_Note "*";
+#pragma aux nextord "*";
+#pragma aux prevorder "*";
+
+#pragma aux plays3m_main "*";
+
+#pragma aux register_plays3m "*";
+#pragma aux unregister_plays3m "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* PLAYS3M_H */

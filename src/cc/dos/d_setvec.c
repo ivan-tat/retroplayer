@@ -1,4 +1,4 @@
-/* d_getvec.c -- part of custom "dos" library.
+/* d_setvec.c -- part of custom "dos" library.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */

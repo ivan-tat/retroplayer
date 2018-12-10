@@ -45,7 +45,7 @@ int cc_vfprintf(FILE *stream, const char *format, va_list ap);
 int cc_vsprintf(char *str, const char *format, va_list ap);
 int cc_vsnprintf(char *str, size_t size, const char *format, va_list ap);
 
-/* Aliases */
+/*** Aliases ***/
 
 #define fopen   cc_fopen
 #define fclose  cc_fclose
@@ -62,9 +62,10 @@ int cc_vsnprintf(char *str, size_t size, const char *format, va_list ap);
 #define vsprintf  cc_vsprintf
 #define vsnprintf cc_vsnprintf
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux cc_fopen "*";
 #pragma aux cc_fclose "*";
 #pragma aux cc_fsetpos "*";
@@ -79,6 +80,7 @@ int cc_vsnprintf(char *str, size_t size, const char *format, va_list ap);
 #pragma aux cc_vfprintf "*";
 #pragma aux cc_vsprintf "*";
 #pragma aux cc_vsnprintf "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* CC_STDIO_H */

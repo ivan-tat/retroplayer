@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "cc/errno.h"
 
 #ifdef DEFINE_LOCAL_DATA
 

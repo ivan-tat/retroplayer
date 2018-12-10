@@ -1,4 +1,4 @@
-/* voltab.h -- declarations for voltab.pas.
+/* voltab.h -- declarations for voltab.c.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -17,22 +17,26 @@
 
 #include "pascal.h"
 
-// TODO: remove PUBLIC_DATA/PUBLIC_CODE macros when done.
-
 typedef int16_t voltab_t[64][256];
 
-extern voltab_t *PUBLIC_DATA volumetableptr;
+extern voltab_t *volumetableptr;
 
 void voltab_init(void);
 bool voltab_alloc(void);
 void voltab_calc(void);
 void voltab_free(void);
 
+/*** Linking ***/
+
 #ifdef __WATCOMC__
+
+#pragma aux volumetableptr "*";
+
 #pragma aux voltab_init "*";
 #pragma aux voltab_alloc "*";
 #pragma aux voltab_calc "*";
 #pragma aux voltab_free "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* VOLTAB_H */

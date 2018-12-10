@@ -1,4 +1,4 @@
-/* muspat.h -- declarations for musical pattern handling library.
+/* muspat.h -- declarations for muspat.c.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -95,8 +95,53 @@ void        PUBLIC_CODE muspatl_set_EM_handle_name(MUSPATLIST *self);
 uint32_t    PUBLIC_CODE muspatl_get_used_EM(MUSPATLIST *self);
 void        PUBLIC_CODE muspatl_free(MUSPATLIST *self);
 
-/* Variables */
+/*** Variables ***/
 
-extern MUSPATLIST *PUBLIC_DATA mod_Patterns;
+extern MUSPATLIST *mod_Patterns;
+
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux muspat_init "*";
+#pragma aux muspat_set_EM_data "*";
+#pragma aux muspat_is_EM_data "*";
+#pragma aux muspat_set_own_EM_handle "*";
+#pragma aux muspat_is_own_EM_handle "*";
+#pragma aux muspat_set_channels "*";
+#pragma aux muspat_get_channels "*";
+#pragma aux muspat_set_rows "*";
+#pragma aux muspat_get_rows "*";
+#pragma aux muspat_set_size "*";
+#pragma aux muspat_get_size "*";
+#pragma aux muspat_set_data "*";
+#pragma aux muspat_set_EM_data_handle "*";
+#pragma aux muspat_get_EM_data_handle "*";
+#pragma aux muspat_set_EM_data_page "*";
+#pragma aux muspat_get_EM_data_page "*";
+#pragma aux muspat_set_EM_data_offset "*";
+#pragma aux muspat_get_EM_data_offset "*";
+#pragma aux muspat_get_data "*";
+#pragma aux muspat_map_EM_data "*";
+#pragma aux muspat_free "*";
+
+#pragma aux muspatl_init "*";
+#pragma aux muspatl_set "*";
+#pragma aux muspatl_get "*";
+#pragma aux muspatl_set_count "*";
+#pragma aux muspatl_get_count "*";
+#pragma aux muspatl_set_EM_data "*";
+#pragma aux muspatl_is_EM_data "*";
+#pragma aux muspatl_set_own_EM_handle "*";
+#pragma aux muspatl_is_own_EM_handle "*";
+#pragma aux muspatl_set_EM_handle "*";
+#pragma aux muspatl_get_EM_handle "*";
+#pragma aux muspatl_set_EM_handle_name "*";
+#pragma aux muspatl_get_used_EM "*";
+#pragma aux muspatl_free "*";
+
+#pragma aux mod_Patterns "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* MUSPAT_H */

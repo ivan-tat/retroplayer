@@ -20,6 +20,7 @@ procedure _DEBUG_FAIL;
 procedure _DEBUG_SUCCESS;
 procedure _DEBUG_REG;
 procedure _DEBUG_UNREG;
+
 procedure Debug_Msg(filename: PChar; method: PChar; msg: PChar);
 procedure Debug_Info(filename: PChar; method: PChar; msg: PChar);
 procedure Debug_Warn(filename: PChar; method: PChar; msg: PChar);
@@ -49,6 +50,7 @@ procedure _DEBUG_FAIL; external;
 procedure _DEBUG_SUCCESS; external;
 procedure _DEBUG_REG; external;
 procedure _DEBUG_UNREG; external;
+
 procedure Debug_Msg(filename: PChar; method: PChar; msg: PChar); external;
 procedure Debug_Info(filename: PChar; method: PChar; msg: PChar); external;
 procedure Debug_Warn(filename: PChar; method: PChar; msg: PChar); external;

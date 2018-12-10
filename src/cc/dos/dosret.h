@@ -14,12 +14,12 @@
 
 unsigned __cc_set_errno_dos(unsigned code);
 
-/* Linkning */
+/*** Linkning ***/
 
 #ifdef __WATCOMC__
 
 #pragma aux __cc_set_errno_dos "^";
 
-#endif
+#endif  /* __WATCOMC__ */
 
 #endif  /* CC_DOS_DOSRET_H */

@@ -283,7 +283,7 @@ MUSINS *PUBLIC_CODE musinsl_get(MUSINSLIST *self, uint16_t index)
         return NULL;
 }
 
-void PUBLIC_DATA musinsl_set_EM_data_handle(MUSINSLIST *self, EMSHDL value)
+void PUBLIC_CODE musinsl_set_EM_data_handle(MUSINSLIST *self, EMSHDL value)
 {
     if (self)
         SmpEMSHandle = value;
@@ -332,9 +332,9 @@ void PUBLIC_CODE musinsl_delete(MUSINSLIST **self)
 
 /* instruments */
 
-instrumentsList_t *PUBLIC_DATA mod_Instruments;
-uint16_t PUBLIC_DATA InsNum;
-bool     PUBLIC_DATA EMSSmp;
-uint16_t PUBLIC_DATA SmpEMSHandle;
+instrumentsList_t *mod_Instruments;
+uint16_t InsNum;
+bool     EMSSmp;
+uint16_t SmpEMSHandle;
 
 #endif  /* DEFINE_LOCAL_DATA */

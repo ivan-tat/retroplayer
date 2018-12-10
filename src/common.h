@@ -23,4 +23,16 @@ void  PUBLIC_CODE _delete_(void **p);
 #define _new(t)     (t *)__new(sizeof(t))
 #define _delete(p)  __delete((void **)&(p))
 
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux __new "*";
+#pragma aux __delete "*";
+
+#pragma aux _new_ "*";
+#pragma aux _delete_ "*";
+
+#endif  /* __WATCOMC__ */
+
 #endif  /* COMMON_H */

@@ -41,17 +41,17 @@ int __near _get_actual_base(const char **str, int base)
         {
             *str += 2;
             return 16;
-        };
-    };
+        }
+    }
     if (base == 0)
     {
         if ((c[0] == '0') && (c[1] == '0'))
         {
             *str += 2;
             return 8;
-        };
+        }
         return 10;
-    };
+    }
 
     return base;
 }
@@ -88,16 +88,16 @@ long cc_strtol(const char *nptr, char **endptr, int base)
 
     if ((nptr == NULL) || (base < 0) || (base == 1) || (base > 36))
     {
-        errno = CC_EINVAL;
+        cc_errno = CC_EINVAL;
         return 0;
-    };
+    }
 
     if (!*nptr)
     {
         if (endptr)
             *endptr = (char *)nptr;
         return 0;
-    };
+    }
 
     p = nptr;
 
@@ -109,7 +109,7 @@ long cc_strtol(const char *nptr, char **endptr, int base)
         if (!isspace(c))
             break;
         p++;
-    };
+    }
 
     /* get sign */
 
@@ -133,7 +133,7 @@ long cc_strtol(const char *nptr, char **endptr, int base)
 
         default:
             break;
-    };
+    }
 
     /* check radix */
 
@@ -168,9 +168,9 @@ long cc_strtol(const char *nptr, char **endptr, int base)
                 {
                     value *= base;
                     value += digit;
-                };
-            };
-        };
+                }
+            }
+        }
     }
     while (c && (digit >= 0) && !overflow);
 
@@ -215,7 +215,7 @@ long cc_strtol(const char *nptr, char **endptr, int base)
     if (overflow)
     {
         /* 1 */
-        errno = CC_ERANGE;
+        cc_errno = CC_ERANGE;
 
         if (endptr)
             *endptr = (char *)p;
@@ -238,21 +238,21 @@ long cc_strtol(const char *nptr, char **endptr, int base)
         {
             if (c)
                 /* 4 */
-                errno = CC_EINVAL;
+                cc_errno = CC_EINVAL;
             else
                 /* 5,6 */
                 if (sign)
                 {
-                    errno = CC_EINVAL;
+                    cc_errno = CC_EINVAL;
                     p = signptr;
-                };
+                }
 
             if (endptr)
                 *endptr = (char *)p;
 
             value = 0;
             negate = false;
-        };
+        }
 
     if (negate)
         value = -value;

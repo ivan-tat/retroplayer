@@ -22,13 +22,13 @@
 
 #ifdef DEFINE_LOCAL_DATA
 
-bool     PUBLIC_DATA emsInstalled;
-EMSERR   PUBLIC_DATA emsEC;
-EMSVER   PUBLIC_DATA emsVersion;
-uint16_t PUBLIC_DATA emsFrameSeg;    /* real memory segment for first page */
-void    *PUBLIC_DATA emsFramePtr;    /* real memory pointer for first page */
+bool     emsInstalled;
+EMSERR   emsEC;
+EMSVER   emsVersion;
+uint16_t emsFrameSeg;    /* real memory segment for first page */
+void    *emsFramePtr;    /* real memory pointer for first page */
 
-#endif
+#endif  /* DEFINE_LOCAL_DATA */
 
 #define DOS_DRIVER_NAME_OFF 10
 
@@ -121,7 +121,6 @@ typedef struct handles_list_t
 #pragma pack(pop);
 
 static HANDLESLIST _handleslist;
-
 
 /* Entry */
 
@@ -518,7 +517,7 @@ bool PUBLIC_CODE emsSetHandleName(EMSHDL handle, EMSNAME *name)
 
 /*** Initialization ***/
 
-void emsInit(void)
+void __near ems_init (void)
 {
     emsEC = 0;
     emsFrameSeg = 0;
@@ -531,23 +530,23 @@ void emsInit(void)
         {
             emsFrameSeg = emsGetFrameSeg();
             emsFramePtr = MK_FP(emsFrameSeg, 0);
-            DEBUG_MSG_("emsInit", "Found EMS version %hu.%03hu.", emsVersion.Hi, emsVersion.Lo);
-            DEBUG_MSG_("emsInit", "%lu KiB of expanded memory available.", (uint32_t)emsGetFreePagesCount()<<4);
+            DEBUG_MSG_("ems_init", "Found EMS version %hu.%03hu.", emsVersion.Hi, emsVersion.Lo);
+            DEBUG_MSG_("ems_init", "%lu KiB of expanded memory available.", (uint32_t)emsGetFreePagesCount()<<4);
         }
         else
         {
             emsInstalled = false;
-            DEBUG_ERR("emsInit", "Failed to get EMS version.");
+            DEBUG_ERR("ems_init", "Failed to get EMS version.");
         }
     }
     if (DEBUG)
         if (!emsInstalled)
-            DEBUG_MSG ("emsInit", "No EMS is available.");
+            DEBUG_MSG("ems_init", "No EMS is available.");
 }
 
-void emsDone(void)
+void __near ems_done (void)
 {
     _list_free(&_handleslist);
 }
 
-DEFINE_REGISTRATION(ems, emsInit, emsDone)
+DEFINE_REGISTRATION (ems, ems_init, ems_done)

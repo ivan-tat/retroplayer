@@ -49,4 +49,19 @@ bool     __far dynarr_set_size(DYNARR *self, uint16_t size);
 uint16_t __far dynarr_get_size(DYNARR *self);
 void     __far dynarr_free(DYNARR *self);
 
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux dynarr_init "*";
+#pragma aux dynarr_init_items "*";
+#pragma aux dynarr_free_items "*";
+#pragma aux dynarr_set_item "*";
+#pragma aux dynarr_get_item "*";
+#pragma aux dynarr_set_size "*";
+#pragma aux dynarr_get_size "*";
+#pragma aux dynarr_free "*";
+
+#endif  /* __WATCOMC__ */
+
 #endif  /* DYNARRAY_H */

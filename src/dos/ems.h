@@ -40,11 +40,11 @@ typedef emsHandleName_t EMSNAME;
 
 /* external variables */
 
-extern bool     PUBLIC_DATA emsInstalled;
-extern EMSERR   PUBLIC_DATA emsEC;
-extern EMSVER   PUBLIC_DATA emsVersion;
-extern uint16_t PUBLIC_DATA emsFrameSeg;    /* real memory segment for first page */
-extern void    *PUBLIC_DATA emsFramePtr;    /* real memory pointer for first page */
+extern bool     emsInstalled;
+extern EMSERR   emsEC;
+extern EMSVER   emsVersion;
+extern uint16_t emsFrameSeg;    /* real memory segment for first page */
+extern void    *emsFramePtr;    /* real memory pointer for first page */
 
 /* public functions */
 
@@ -76,6 +76,39 @@ bool        PUBLIC_CODE emsSetHandleName(EMSHDL handle, EMSNAME *name);
 
 /*** Initialization ***/
 
-DECLARE_REGISTRATION(ems)
+DECLARE_REGISTRATION (ems)
+
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux emsInstalled "*";
+#pragma aux emsEC "*";
+#pragma aux emsVersion "*";
+#pragma aux emsFrameSeg "*";
+#pragma aux emsFramePtr "*";
+
+#ifndef USE_INTRINSICS
+#pragma aux emsCalcPagesCount "*";
+#endif
+
+#pragma aux emsIsInstalled "*";
+#pragma aux emsGetErrorMsg "*";
+#pragma aux emsGetVersion "*";
+#pragma aux emsGetFrameSeg "*";
+#pragma aux emsGetFreePagesCount "*";
+#pragma aux emsAlloc "*";
+#pragma aux emsResize "*";
+#pragma aux emsFree "*";
+#pragma aux emsMap "*";
+#pragma aux emsSaveMap "*";
+#pragma aux emsRestoreMap "*";
+#pragma aux emsGetHandleSize "*";
+#pragma aux emsSetHandleName "*";
+
+#pragma aux register_ems "*";
+#pragma aux unregister_ems "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* EMS_H */

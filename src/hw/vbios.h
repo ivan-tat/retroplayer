@@ -99,9 +99,10 @@ void vbios_load_rom_font_8x8(char block);
 void vbios_query_font_info(struct vbios_font_info_t *info, vbios_font_type_t type);
 void vbios_use_alternate_print_screen(void);
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux vbiosda_get_text_width "*";
 #pragma aux vbiosda_get_text_height "*";
 #pragma aux vbiosda_get_ega_misc_info "*";
@@ -120,6 +121,7 @@ void vbios_use_alternate_print_screen(void);
 #pragma aux vbios_load_rom_font_8x8 "*";
 #pragma aux vbios_query_font_info "*";
 #pragma aux vbios_use_alternate_print_screen "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* VBIOS_H */

@@ -304,7 +304,7 @@ void hwowner_unregister(HWOWNER *owner)
     }
 }
 
-/* Initialization */
+/*** Initialization ***/
 
 void __near _hwowner_init(void)
 {

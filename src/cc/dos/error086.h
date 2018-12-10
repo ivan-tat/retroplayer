@@ -16,10 +16,12 @@
 
 unsigned __cc_doserror(union CC_REGPACK *regs);
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux __cc_doserror "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* CC_DOS_ERROR086_H */

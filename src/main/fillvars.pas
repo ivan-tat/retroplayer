@@ -43,13 +43,13 @@ var
     sndDMABuf: TSNDDMABUF;
     playOption_FPS: byte;
 
-procedure snddmabuf_init(self: PSNDDMABUF);
-function  snddmabuf_alloc(self: PSNDDMABUF; size: longint): boolean;
-function  snddmabuf_get_frame_offset(self: PSNDDMABUF; index: byte): word;
-function  snddmabuf_get_frame(self: PSNDDMABUF; index: byte): pointer;
-function  snddmabuf_get_offset_from_count(self: PSNDDMABUF; value: word): word;
-function  snddmabuf_get_count_from_offset(self: PSNDDMABUF; value: word): word;
-procedure snddmabuf_free(self: PSNDDMABUF);
+procedure snddmabuf_init;
+procedure snddmabuf_alloc;
+procedure snddmabuf_get_frame_offset;
+procedure snddmabuf_get_frame;
+procedure snddmabuf_get_offset_from_count;
+procedure snddmabuf_get_count_from_offset;
+procedure snddmabuf_free;
 
 implementation
 
@@ -65,12 +65,12 @@ uses
 
 (*$l fillvars.obj*)
 
-procedure snddmabuf_init(self: PSNDDMABUF); external;
-function  snddmabuf_alloc(self: PSNDDMABUF; size: longint): boolean; external;
-function  snddmabuf_get_frame_offset(self: PSNDDMABUF; index: byte): word; external;
-function  snddmabuf_get_frame(self: PSNDDMABUF; index: byte): pointer; external;
-function  snddmabuf_get_offset_from_count(self: PSNDDMABUF; value: word): word; external;
-function  snddmabuf_get_count_from_offset(self: PSNDDMABUF; value: word): word; external;
-procedure snddmabuf_free(self: PSNDDMABUF); external;
+procedure snddmabuf_init; external;
+procedure snddmabuf_alloc; external;
+procedure snddmabuf_get_frame_offset; external;
+procedure snddmabuf_get_frame; external;
+procedure snddmabuf_get_offset_from_count; external;
+procedure snddmabuf_get_count_from_offset; external;
+procedure snddmabuf_free; external;
 
 end.

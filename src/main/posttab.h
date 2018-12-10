@@ -35,8 +35,12 @@ void clip_s32_s8_lq_stereo(void *outbuf, int32_t *mb, uint16_t count);
 void clip_s32_u16_lq_stereo(void *outbuf, int32_t *mb, uint16_t count);
 void clip_s32_s16_lq_stereo(void *outbuf, int32_t *mb, uint16_t count);
 
+/*** Linking ***/
+
 #ifdef __WATCOMC__
+
 #pragma aux amptab_set_volume "*";
+
 #pragma aux amplify_s32 "*";
 #pragma aux clip_s32_u8 "*";
 #pragma aux clip_s32_s8 "*";
@@ -50,6 +54,7 @@ void clip_s32_s16_lq_stereo(void *outbuf, int32_t *mb, uint16_t count);
 #pragma aux clip_s32_s8_lq_stereo "*";
 #pragma aux clip_s32_u16_lq_stereo "*";
 #pragma aux clip_s32_s16_lq_stereo "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* POSTTAB_H */

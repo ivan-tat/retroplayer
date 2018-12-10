@@ -117,7 +117,7 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
         chnState_cur_bNote = patData[patOffset];
         chnState_cur_bIns  = patData[patOffset + 1];
         chnState_cur_bVol  = patData[patOffset + 2];
-    };
+    }
 
     /* read effects - it may change the read instr/note ! */
 
@@ -137,13 +137,13 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
         {
             if (chn_effCanContinue(chn))
                 chn->bEffFlags |= EFFFLAG_CONTINUE;
-        };
+        }
     }
     else
     {
         if (mixchn_get_command(chn) != EFFIDX_NONE)
             chn_effStop(chn);
-    };
+    }
 
     mixchn_set_command(chn, cmd);
     mixchn_set_sub_command(chn, 0);
@@ -159,7 +159,7 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
                 chn_setupInstrument(chn, chnState_cur_bIns);
             else
                 chnState_cur_bIns = 0;
-        };
+        }
         /* read note */
         if (_isNote(chnState_cur_bNote))
             chn_setupNote(chn, chnState_cur_bNote, chnState_porta_flag);
@@ -172,12 +172,12 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
             chnState_cur_bVol = chnState_cur_bVol > CHNINSVOL_MAX ?
                 CHNINSVOL_MAX : chnState_cur_bVol;
             mixchn_set_sample_volume(chn, (chnState_cur_bVol * playState_gVolume) >> 6);
-        };
+        }
         chn_effHandle(chn);
-    };
+    }
 
     return desc->channel < UsedChannels;
-};
+}
 
 bool __near pat_skipNextChannel(PATDESC *desc)
 {
@@ -188,7 +188,7 @@ bool __near pat_skipNextChannel(PATDESC *desc)
     desc->offset += 5;
 
     return desc->channel < UsedChannels;
-};
+}
 
 /**********************************************************************/
 
@@ -218,8 +218,8 @@ PATFLOWSTATE __near pat_playRow(MUSPAT *pat)
         {
             if (!pat_skipNextChannel(&patDesc))
                 break;
-        };
-    };
+        }
+    }
 
     if (playState_gVolume_bFlag)
         playState_gVolume = playState_gVolume_bValue;
@@ -232,7 +232,7 @@ PATFLOWSTATE __near pat_playRow(MUSPAT *pat)
         playState_row = playState_patBreak_bPos;
         pattern_close(&patDesc);
         return FLOWSTATE_PATTERNEND;
-    };
+    }
 
     // Pattern loop ?
     if (playState_patLoop_bNow)
@@ -248,8 +248,8 @@ PATFLOWSTATE __near pat_playRow(MUSPAT *pat)
         {
             playState_patLoopStartRow = playState_row + 1;
             playState_patLoopActive = false;
-        };
-    };
+        }
+    }
 
     pattern_close(&patDesc);
     return FLOWSTATE_ROWEND;
@@ -257,7 +257,7 @@ PATFLOWSTATE __near pat_playRow(MUSPAT *pat)
 
 /**********************************************************************/
 
-void readnewnotes(void)
+void PUBLIC_CODE readnewnotes(void)
 {
     char firstPlay;
     PATFLOWSTATE status;
@@ -279,7 +279,7 @@ void readnewnotes(void)
                 {
                     playState_row = 0;
                     status = FLOWSTATE_PATTERNEND;
-                };
+                }
                 break;
 
             case FLOWSTATE_PATTERNEND:
@@ -315,7 +315,7 @@ void readnewnotes(void)
                     }
                     else
                         status = FLOWSTATE_WAIT;
-                };
+                }
                 break;
 
             case FLOWSTATE_SONGSTOP:
@@ -328,12 +328,12 @@ void readnewnotes(void)
                 {
                     playState_songEnded = true;
                     status = FLOWSTATE_WAIT;
-                };
+                }
                 break;
 
             default:
                 status = FLOWSTATE_WAIT;
                 break;
-        };
-    };
+        }
+    }
 }

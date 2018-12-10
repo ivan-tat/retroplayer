@@ -342,6 +342,6 @@ void PUBLIC_CODE muspatl_free(MUSPATLIST *self)
 
 #ifdef DEFINE_LOCAL_DATA
 
-MUSPATLIST *PUBLIC_DATA mod_Patterns;
+MUSPATLIST *mod_Patterns;
 
 #endif  /* DEFINE_LOCAL_DATA */

@@ -11,7 +11,7 @@
 
 #include "pascal.h"
 
-void PUBLIC_CODE strpastoc(char *dest, char const *src, uint16_t maxlen)
+void PUBLIC_CODE strpastoc (char *dest, char const *src, uint16_t maxlen)
 {
     uint16_t len;
 
@@ -29,7 +29,7 @@ void PUBLIC_CODE strpastoc(char *dest, char const *src, uint16_t maxlen)
     }
 }
 
-void PUBLIC_CODE strctopas(char *dest, char const *src, uint16_t maxlen)
+void PUBLIC_CODE strctopas (char *dest, char const *src, uint16_t maxlen)
 {
     char const *endptr;
     uint16_t len;

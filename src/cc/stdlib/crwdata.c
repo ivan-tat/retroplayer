@@ -11,4 +11,8 @@
 
 #include "cc/stdlib.h"
 
-//const static uint16_t cc_psp = 0;
+#ifdef DEFINE_LOCAL_DATA
+
+const static uint16_t cc_psp = 0;
+
+#endif  /* DEFINE_LOCAL_DATA */

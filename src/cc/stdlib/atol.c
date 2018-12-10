@@ -32,7 +32,7 @@ long cc_atol(const char *src)
             break;
         default:
             break;
-    };
+    }
 
     value = 0;
     while (isdigit(c = *p++))

@@ -32,13 +32,15 @@ void __far __stdcall _cc_local_int0(void __far *addr, uint16_t flags);
 // No return.
 void __far __stdcall _cc_local_int23(void __far *addr, uint16_t flags);
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux _cc_local_int0_asm "*";
 #pragma aux _cc_local_int23_asm "*";
 #pragma aux _cc_local_int0 "*";
 #pragma aux _cc_local_int23 "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* STARTUP_INTS_H */

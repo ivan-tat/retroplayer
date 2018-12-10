@@ -22,7 +22,7 @@ const
     _CC_UPPER  = $40;
     _CC_LOWER  = $80;
 
-const __cc_IsTable: array [0..256] of byte =
+const _cc_IsTable: array [0..256] of byte =
 (
     0,
 
@@ -194,7 +194,7 @@ const
     _LOWER  = _CC_LOWER;
 
 var
-    __IsTable: array [0..256] of byte absolute __cc_IsTable;
+    __IsTable: array [0..256] of byte absolute _cc_IsTable;
 
 implementation
 

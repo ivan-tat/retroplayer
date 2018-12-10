@@ -16,7 +16,7 @@ void cc_outp(unsigned int port, char value)
         "mov dx,port";
         "mov al,value";
         "out dx,al";
-    };
+    }
 }
 
 #endif  /* __WATCOMC__ */

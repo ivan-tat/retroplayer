@@ -663,8 +663,8 @@ METHOD_INIT(volSlide)
             else
                 // x0
                 cmd = EFFIDX_VOLSLIDE_UP;
-        };
-    };
+        }
+    }
     mixchn_set_sub_command(chn, cmd);
     return true;
 }
@@ -817,7 +817,7 @@ void __near eff_porta_start(MIXCHN *chn)
         /* now save some values (we want to slide from) */
         chnState_porta_dSmpStepOld   = mixchn_get_sample_step(chn);
         chnState_porta_wSmpPeriodOld = mixchn_get_sample_period(chn);
-    };
+    }
 }
 
 void __near eff_porta_stop(MIXCHN *chn)
@@ -848,7 +848,7 @@ METHOD_HANDLE(porta)
         chn->wSmpPeriodDest = mixchn_get_sample_period(chn);
         mixchn_set_sample_period(chn, chnState_porta_wSmpPeriodOld);
         mixchn_set_sample_step(chn, chnState_porta_dSmpStepOld);
-    };
+    }
 }
 
 METHOD_TICK(porta)
@@ -866,7 +866,7 @@ METHOD_TICK(porta)
         period += slide;
         if (period > chn->wSmpPeriodDest)
             period = chn->wSmpPeriodDest;
-    };
+    }
     mixchn_setup_sample_period(chn, period);
 }
 
@@ -928,7 +928,7 @@ METHOD_TICK(vibNorm)
         chn->bTabPos = pos;
         mixchn_setup_sample_period(chn, chn->wSmpPeriodOld +
             ((get_i8_value(chn->wVibTab, pos) * (chn->bVibParam & 0x0f)) >> 4));
-    };
+    }
 }
 
 METHOD_CONT(vibNorm)
@@ -957,7 +957,7 @@ METHOD_TICK(vibFine)
         chn->bTabPos = pos;
         mixchn_setup_sample_period(chn, chn->wSmpPeriodOld +
             ((get_i8_value(chn->wVibTab, pos) * (chn->bVibParam & 0x0f)) >> 8));
-    };
+    }
 }
 
 /*** Vibrato (normal) + Volume slide ***/
@@ -1023,7 +1023,7 @@ METHOD_HANDLE(arpeggio)
             return;
         /* start arpeggio: */
         chn->bArpPos = 0;
-    };
+    }
 
     param = mixchn_get_command_parameter(chn);
 
@@ -1088,8 +1088,8 @@ METHOD_INIT(retrig)
         {
             mixchn_set_command(chn, EFFIDX_NONE);
             return true;
-        };
-    };
+        }
+    }
     return SUB_EFFECTS_LIST(retrig)[eff_retrig_route[param >> 4]]->init(chn, param);
 }
 
@@ -1101,7 +1101,7 @@ METHOD_TICK(retrig)
     {
         if (! --chn->bRetrigTicks)
             return;
-    };
+    }
     chn->dSmpPos = 0;
     ticks = mixchn_get_command_parameter(chn) & 0x0f;
     if (ticks)
@@ -1110,7 +1110,7 @@ METHOD_TICK(retrig)
         cmd = mixchn_get_sub_command(chn);
         if (cmd <= 6)
             SUB_EFFECTS_LIST(retrig)[cmd]->tick(chn);
-    };
+    }
 }
 
 METHOD_INIT(retrig_none)
@@ -1196,7 +1196,7 @@ METHOD_INIT(tremolo)
         if (!(param & 0xf0))
             param |= mixchn_get_command_parameter(chn) & 0xf0;
         mixchn_set_command_parameter(chn, param);
-    };
+    }
     return true;
 }
 
@@ -1260,9 +1260,9 @@ METHOD_INIT(special_patLoop)
             playState_patLoopActive = true;
             param++;
             playState_patLoopCount = param;
-        };
+        }
         playState_patLoop_bNow = true;
-    };
+    }
 
     return true;
 }
@@ -1303,12 +1303,12 @@ METHOD_TICK(special_noteDelay)
             {
                 chn_setupNote(chn, note, 0);
                 mixchn_set_playing(chn, true);
-            };
-        };
+            }
+        }
         if (chn->bSavVol != CHNINSVOL_EMPTY)
             mixchn_set_sample_volume(chn, (chn->bSavVol * playState_gVolume) >> 6);
         mixchn_set_command(chn, EFFIDX_NONE);
-    };
+    }
 }
 
 METHOD_INIT(special_patDelay)
@@ -1317,7 +1317,7 @@ METHOD_INIT(special_patDelay)
     {
         playState_patDelayCount = param + 1;
         chnState_patDelay_bParameterSaved = mixchn_get_command_parameter(chn);
-    };
+    }
     return true;
 }
 

@@ -1,4 +1,4 @@
-/* _printf.c -- part of custom "stdio" library.
+/* _printf.h -- part of custom "stdio" library.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -58,15 +58,17 @@ void dataStreamInitFile(DATASTREAM *self, FILE *stream, char *buf, size_t size);
 
 void _dsprintf(DATASTREAM *stream, const char *format, va_list ap);
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux dataStreamFlush "*";
 #pragma aux dataStreamWrite "*";
 #pragma aux dataStreamInitMemory "*";
 #pragma aux dataStreamInitStdOut "*";
 #pragma aux dataStreamInitFile "*";
 #pragma aux _dsprintf "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* CC_STDIO_PRINTF_H */

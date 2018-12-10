@@ -32,7 +32,7 @@ void PUBLIC_CODE vga_clear_page_320x200x8(char c)
     memset(MK_FP(drawseg, 0), c, 320*200);
 }
 
-/* Initialization */
+/*** Initialization ***/
 
 void __near vga_init(void)
 {

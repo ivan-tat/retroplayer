@@ -27,7 +27,7 @@ bool PUBLIC_CODE set_sample_format(HWSMPFMT *p, uint8_t b, bool s, uint8_t c)
             break;
     default:
         return false;
-    };
+    }
 
     switch (c)
     {
@@ -37,7 +37,7 @@ bool PUBLIC_CODE set_sample_format(HWSMPFMT *p, uint8_t b, bool s, uint8_t c)
             break;
     default:
         return false;
-    };
+    }
 
     *p = fmt;
     return true;

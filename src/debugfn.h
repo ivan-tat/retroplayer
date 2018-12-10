@@ -14,10 +14,6 @@
 
 extern void PUBLIC_CODE _DEBUG_print(const char *str);
 
-#ifdef __WATCOMC__
-#pragma aux _DEBUG_print modify [ax bx cx dx si di es];
-#endif
-
 void __far _DEBUG_get_xnum(uint32_t value, char len, char *dest);
 void __far _DEBUG_get_xline(void *buf, uint8_t size, uint8_t max, char *dest);
 void __far _DEBUG_dump_mem(void *buf, unsigned size, const char *padstr);
@@ -34,12 +30,16 @@ void __far _DEBUG_dump_mem(void *buf, unsigned size, const char *padstr);
  #define DEBUG_dump_mem(buf, size, padstr)
 #endif
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
+#pragma aux _DEBUG_print "*" modify [ ax bx cx dx si di es ];
+
 #pragma aux _DEBUG_get_xnum "*";
 #pragma aux _DEBUG_get_xline "*";
 #pragma aux _DEBUG_dump_mem "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* DEBUGFN_H */

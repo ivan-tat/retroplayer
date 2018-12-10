@@ -921,8 +921,6 @@ void PUBLIC_CODE plays3m_main(void)
 
 /*** Initialization ***/
 
-DECLARE_REGISTRATION(plays3m)
-
 void __near plays3m_init(void)
 {
     DEBUG_BEGIN("plays3m_init");

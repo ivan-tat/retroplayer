@@ -44,7 +44,7 @@ int16_t cc_setenv(const char *name, const char *value, int16_t overwrite)
     envsize = oenv->size;
     if (_dos_allocmem(_dos_para(envsize), &seg))
     {
-        errno = ENOMEM;
+        cc_errno = CC_ENOMEM;
         return -1;
     }
     nenv.arr = MK_FP(seg, 0);
@@ -64,7 +64,7 @@ int16_t cc_setenv(const char *name, const char *value, int16_t overwrite)
         if (ssize < nlen + 1 + 1)
         {
             _dos_freemem(FP_SEG(nenv.arr));
-            errno = ENOMEM;
+            cc_errno = CC_ENOMEM;
             return -1;
         }
     }
@@ -96,7 +96,7 @@ int16_t cc_setenv(const char *name, const char *value, int16_t overwrite)
         return 0;
     else
     {
-        errno = ENOMEM;
+        cc_errno = CC_ENOMEM;
         return -1;
     }
 }

@@ -60,7 +60,14 @@ bool     sb_transfer_stop(SBDEV *self);
 void     sb_free(SBDEV *self);
 void     sb_delete(SBDEV **self);
 
+/*** Initialization ***/
+
+DECLARE_REGISTRATION (sbctl)
+
+/*** Linking ***/
+
 #ifdef __WATCOMC__
+
 #pragma aux sb_new "*";
 #pragma aux sb_init "*";
 #pragma aux sb_conf_manual "*";
@@ -84,10 +91,10 @@ void     sb_delete(SBDEV **self);
 #pragma aux sb_transfer_stop "*";
 #pragma aux sb_free "*";
 #pragma aux sb_delete "*";
-#endif
 
-/* Initialization */
+#pragma aux register_sbctl "*";
+#pragma aux unregister_sbctl "*";
 
-DECLARE_REGISTRATION(sbctl)
+#endif  /* __WATCOMC__ */
 
 #endif  /* SBCTL_H */

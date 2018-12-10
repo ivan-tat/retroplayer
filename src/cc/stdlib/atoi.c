@@ -32,7 +32,7 @@ int cc_atoi(const char *src)
             break;
         default:
             break;
-    };
+    }
 
     value = 0;
     while (isdigit(c = *p++))

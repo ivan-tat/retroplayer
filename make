@@ -111,15 +111,19 @@ W_AS="wasm -zq"
 # Description of options:
 # -zq             operate quietly
 W_CC='wcc'
-export WCC="-3 -fp3 -ml -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu"
+export WCC="-3 -fp3 -ml -oi -oc -os -q -r -s -zdp -zff -zgf -zl -zld -zls -zp=1 -zu"
 # Description of options for "wcc":
 # -3              386 instructions
 # -fp3            generate floating-point code (80387 FPU code)
 # -ml             memory model (large - large code/large data)
+# -ecc            set default calling convention to __cdecl
+# -ecp            set default calling convention to __pascal
+# -ecw            set default calling convention to __watcall (default)
 # -oc             disable <call followed by return> to <jump> optimization
 #                 reason: "wdis" incorrectly writes "je near ptr <near_extern_label>"
 #                 (without "near ptr")
 # -oi             expand intrinsic functions inline
+# -os             favor code size over execution time in optimizations
 # -q              operate quietly (display only error messages)
 # -r              save/restore segment registers across calls
 # -s              remove stack overflow checks
@@ -127,6 +131,7 @@ export WCC="-3 -fp3 -ml -oi -oc -q -r -s -zdp -zff -zgf -zl -zls -zp=1 -zu"
 # -zff            FS floats (i.e. not fixed to a segment)
 # -zgf            GS floats (i.e. not fixed to a segment)
 # -zl             remove default library information
+# -zld            remove file dependency information
 # -zls            remove automatically inserted symbols
 # -zp=1           pack structure members with alignment (1)
 # -zu             SS != DGROUP (i.e., do not assume stack is in data segment)

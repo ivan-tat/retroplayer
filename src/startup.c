@@ -19,9 +19,6 @@
 
 #include "startup.h"
 
-//extern void __declspec(noreturn) PUBLIC_CODE pascal_Halt(uint16_t status);
-extern void PUBLIC_CODE pascal_Halt(uint16_t status);
-
 #ifdef DEFINE_LOCAL_DATA
 
 static uint16_t     cc_PrefixSeg = 0;

@@ -14,12 +14,12 @@ interface
 (*$I defines.pas*)
 
 var
-    _cc_errno: Integer;
+    cc_errno: Integer;
 
 (* Alias *)
 
 var
-    _errno: Integer absolute _cc_errno;
+    errno: Integer absolute cc_errno;
 
 implementation
 

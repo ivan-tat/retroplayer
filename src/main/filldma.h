@@ -23,4 +23,12 @@
 
 void PUBLIC_CODE fill_DMAbuffer(MIXBUF *mb, SNDDMABUF *outbuf);
 
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux fill_DMAbuffer "*";
+
+#endif  /* __WATCOMC__ */
+
 #endif  /* FILLDMA_H */

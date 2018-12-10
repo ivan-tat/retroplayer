@@ -45,20 +45,20 @@ type
     end;
     PSCRWIN = ^TSCRWIN;
 
-procedure scrwin_init(self: PSCRWIN; x0, y0, x1, y1: Byte; draw, keypress: Pointer);
-function  scrwin_is_created(self: PSCRWIN): Boolean;
-procedure scrwin_set_flags(self: PSCRWIN; value: TWINFLAGS);
-function  scrwin_get_flags(self: PSCRWIN): TWINFLAGS;
-procedure scrwin_set_width(self: PSCRWIN; value: Byte);
-function  scrwin_get_width(self: PSCRWIN): Byte;
-procedure scrwin_set_height(self: PSCRWIN; value: Byte);
-function  scrwin_get_height(self: PSCRWIN): Byte;
-procedure scrwin_draw(self: PSCRWIN);
-function  scrwin_keypress(self: PSCRWIN; c: Char): Boolean;
-procedure scrwin_show(self: PSCRWIN);
-procedure scrwin_focus(self: PSCRWIN);
-procedure scrwin_leave(self: PSCRWIN);
-procedure scrwin_close(self: PSCRWIN);
+procedure scrwin_init;
+procedure scrwin_is_created;
+procedure scrwin_set_flags;
+procedure scrwin_get_flags;
+procedure scrwin_set_width;
+procedure scrwin_get_width;
+procedure scrwin_set_height;
+procedure scrwin_get_height;
+procedure scrwin_draw;
+procedure scrwin_keypress;
+procedure scrwin_show;
+procedure scrwin_focus;
+procedure scrwin_leave;
+procedure scrwin_close;
 
 implementation
 
@@ -67,19 +67,19 @@ uses
 
 (*$l screen.obj*)
 
-procedure scrwin_init(self: PSCRWIN; x0, y0, x1, y1: Byte; draw, keypress: Pointer); external;
-function  scrwin_is_created(self: PSCRWIN): Boolean; external;
-procedure scrwin_set_flags(self: PSCRWIN; value: TWINFLAGS); external;
-function  scrwin_get_flags(self: PSCRWIN): TWINFLAGS; external;
-procedure scrwin_set_width(self: PSCRWIN; value: Byte); external;
-function  scrwin_get_width(self: PSCRWIN): Byte; external;
-procedure scrwin_set_height(self: PSCRWIN; value: Byte); external;
-function  scrwin_get_height(self: PSCRWIN): Byte; external;
-procedure scrwin_draw(self: PSCRWIN); external;
-function  scrwin_keypress(self: PSCRWIN; c: Char): Boolean; external;
-procedure scrwin_show(self: PSCRWIN); external;
-procedure scrwin_focus(self: PSCRWIN); external;
-procedure scrwin_leave(self: PSCRWIN); external;
-procedure scrwin_close(self: PSCRWIN); external;
+procedure scrwin_init; external;
+procedure scrwin_is_created; external;
+procedure scrwin_set_flags; external;
+procedure scrwin_get_flags; external;
+procedure scrwin_set_width; external;
+procedure scrwin_get_width; external;
+procedure scrwin_set_height; external;
+procedure scrwin_get_height; external;
+procedure scrwin_draw; external;
+procedure scrwin_keypress; external;
+procedure scrwin_show; external;
+procedure scrwin_focus; external;
+procedure scrwin_leave; external;
+procedure scrwin_close; external;
 
 end.

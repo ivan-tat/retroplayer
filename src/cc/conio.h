@@ -114,7 +114,7 @@ void cc_textmode(uint16_t mode);
 extern bool cc_kbhit(void);
 extern char cc_getch(void);
 
-/*** Initialization ***/
+/*** Console initialization ***/
 
 /* Private */
 
@@ -126,14 +126,14 @@ void _cc_console_on_start(void);
 
 void cc_console_init(void);
 
-/* Aliases */
+/*** Aliases ***/
 
-/*** General I/O ***/
+/* General I/O */
 
 #define inp cc_inp
 #define outp cc_outp
 
-/*** Text-mode variables ***/
+/* Text-mode variables */
 
 #define checkbreak      cc_checkbreak;
 #define checkeof        cc_checkeof;
@@ -144,7 +144,7 @@ void cc_console_init(void);
 #define windmin         cc_windmin;
 #define windmax         cc_windmax;
 
-/*** Text-mode functions ***/
+/* Text-mode functions */
 
 #define textmode       cc_textmode
 #define window         cc_window
@@ -157,7 +157,7 @@ void cc_console_init(void);
 #define highvideo(c)   cc_highvideo(c)
 #define normvideo(c)   cc_normvideo(c)
 
-/*** Keyboard functions ***/
+/* Keyboard functions */
 
 #define kbhit cc_kbhit
 #define getch cc_getch
@@ -166,9 +166,10 @@ void cc_console_init(void);
 
 #define console_init cc_console_init
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 //#pragma aux cc_inp "*";
 //#pragma aux cc_outp "*";
 
@@ -206,6 +207,6 @@ void cc_console_init(void);
 #pragma aux _cc_console_on_start "*";
 #pragma aux cc_console_init "*";
 
-#endif
+#endif  /* __WATCOMC__ */
 
 #endif  /* CC_CONIO_H */

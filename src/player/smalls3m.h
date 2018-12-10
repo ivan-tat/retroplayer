@@ -19,4 +19,12 @@
 
 void PUBLIC_CODE smalls3m_main(void);
 
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux smalls3m_main "*";
+
+#endif  /* __WATCOMC__ */
+
 #endif  /* SMALLS3M_H */

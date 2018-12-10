@@ -16,6 +16,14 @@
 
 #include "pascal.h"
 
-uint32_t PUBLIC_CODE _memmax(void);
+uint32_t _memmax(void);
+
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux _memmax "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* CC_MALLOC_H */

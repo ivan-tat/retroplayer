@@ -33,15 +33,15 @@ char *cc_strncpy(char *dest, const char *src, size_t n)
                 ptr2++;
                 count--;
             } while (next && count);
-        };
+        }
 
         while (count)
         {
             ptr1 = 0;
             ptr1++;
             count--;
-        };
-    };
+        }
+    }
 
     return dest;
 }

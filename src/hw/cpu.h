@@ -20,11 +20,13 @@
 extern bool isCPU_8086(void);
 extern bool isCPU_i386(void);
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux isCPU_8086 "*";
 #pragma aux isCPU_i386 "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif /* CPU_H */

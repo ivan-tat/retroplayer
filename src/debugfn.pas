@@ -14,6 +14,7 @@ interface
 (*$I defines.pas*)
 
 procedure _DEBUG_print(s: PChar);
+
 procedure _DEBUG_get_xnum;
 procedure _DEBUG_get_xline;
 procedure _DEBUG_dump_mem;

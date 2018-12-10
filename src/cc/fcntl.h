@@ -24,7 +24,7 @@
 #define CC_O_TRUNC      0x40    // truncate existing file
 #define CC_O_NOINHERIT  0x80    // file is not inherited by child process (DOS only)
 
-/* Aliases */
+/*** Aliases ***/
 
 #define O_RDONLY    CC_O_RDONLY
 #define O_WRONLY    CC_O_WRONLY

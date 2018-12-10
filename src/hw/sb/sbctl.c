@@ -2013,7 +2013,7 @@ void sb_delete(SBDEV **self)
 
 /*** Initialization ***/
 
-void sbctl_init(void)
+void __near sbctl_init (void)
 {
     DEBUG_BEGIN("sbctl_init");
 
@@ -2022,7 +2022,7 @@ void sbctl_init(void)
     DEBUG_END("sbctl_init");
 }
 
-void sbctl_done(void)
+void __near sbctl_done (void)
 {
     DEBUG_BEGIN("sbctl_done");
 
@@ -2031,4 +2031,4 @@ void sbctl_done(void)
     DEBUG_END("sbctl_done");
 }
 
-DEFINE_REGISTRATION(sbctl, sbctl_init, sbctl_done)
+DEFINE_REGISTRATION (sbctl, sbctl_init, sbctl_done)

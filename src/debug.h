@@ -14,6 +14,8 @@
 
 #include <stdarg.h>
 
+#include "cc/stdio.h"
+
 #define DBGLOG_MSG  0
 #define DBGLOG_INFO 1
 #define DBGLOG_WARN 2
@@ -72,9 +74,18 @@ void PUBLIC_CODE Debug_End(const char *file, const char *method);
 void PUBLIC_CODE Debug_Fail(const char *file, const char *method, const char *msg);
 void PUBLIC_CODE Debug_Success(const char *file, const char *method);
 
-/* Linking */
+/*** Variables ***/
+
+extern FILE *debuglogfile;
+
+/*** Initialization ***/
+
+DECLARE_REGISTRATION (debug)
+
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux _DEBUG_LOG "*";
 #pragma aux _DEBUG_BEGIN "*";
 #pragma aux _DEBUG_END "*";
@@ -82,10 +93,12 @@ void PUBLIC_CODE Debug_Success(const char *file, const char *method);
 #pragma aux _DEBUG_SUCCESS "*";
 #pragma aux _DEBUG_REG "*";
 #pragma aux _DEBUG_UNREG "*";
-#endif
 
-/*** Initialization ***/
+#pragma aux debuglogfile "*";
 
-DECLARE_REGISTRATION(debug)
+#pragma aux register_debug "*";
+#pragma aux unregister_debug "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* DEBUG_H */

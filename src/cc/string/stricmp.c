@@ -35,7 +35,7 @@ int cc_stricmp(const char *s1, const char *s2)
             ptr2++;
             count--;
         } while ((!res) && next && count);
-    };
+    }
 
     return res;
 }

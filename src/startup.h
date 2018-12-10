@@ -85,11 +85,8 @@ void _cc_Exit(int16_t status);
 
 extern uint16_t PUBLIC_CODE pascal_paramcount(void);
 extern void     PUBLIC_CODE pascal_paramstr(char *dest, uint8_t i);
-
-#ifdef __WATCOMC__
-#pragma aux pascal_paramcount modify [    bx cx dx si di es ];
-#pragma aux pascal_paramstr   modify [ ax bx cx dx si di es ];
-#endif
+//extern void __declspec(noreturn) PUBLIC_CODE pascal_Halt(uint16_t status);
+extern void     PUBLIC_CODE pascal_Halt(uint16_t status);
 
 uint16_t custom_argc(void);
 void     custom_argv(char *dest, uint16_t n, uint8_t i);
@@ -98,9 +95,10 @@ void     custom_argv(char *dest, uint16_t n, uint8_t i);
 
 void _cc_startup(void);
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux cc_PrefixSeg "*";
 #pragma aux cc_ErrorAddr "*";
 #pragma aux cc_ExitProc "*";
@@ -109,14 +107,22 @@ void _cc_startup(void);
 #pragma aux cc_Test8086 "*";
 #pragma aux cc_Input "*";
 #pragma aux cc_Output "*";
+
 #pragma aux _cc_ExitList "*";
 #pragma aux _cc_ExitCount "*";
 //#pragma aux _cc_on_exit "*";
-#pragma aux custom_argc "*";
-#pragma aux custom_argv "*";
-#pragma aux _cc_startup "*";
 #pragma aux _cc_ExitWithError "*";
 #pragma aux _cc_Exit "*";
-#endif
+
+#pragma aux pascal_paramcount "*" modify [    bx cx dx si di es ];
+#pragma aux pascal_paramstr   "*" modify [ ax bx cx dx si di es ];
+#pragma aux pascal_Halt       "*";
+
+#pragma aux custom_argc "*";
+#pragma aux custom_argv "*";
+
+#pragma aux _cc_startup "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* STARTUP_H */

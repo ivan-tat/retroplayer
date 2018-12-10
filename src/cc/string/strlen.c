@@ -22,10 +22,10 @@ size_t cc_strlen(const char *s)
         {
             ptr++;
             count--;
-        };
+        }
 
         return ~count;
-    };
+    }
 
     return 0;
 }

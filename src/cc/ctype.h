@@ -40,7 +40,7 @@ extern const unsigned char _cc_IsTable[257];
 #define cc_isupper(__c)  ((unsigned char)(_cc_IsTable[((unsigned char)(__c))+1]) & _CC_UPPER)
 #define cc_isxdigit(__c) ((unsigned char)(_cc_IsTable[((unsigned char)(__c))+1]) & _CC_XDIGT)
 
-/* Aliases */
+/*** Aliases ***/
 
 #define _CNTRL _CC_CNTRL
 #define _SPACE _CC_SPACE
@@ -64,5 +64,13 @@ extern const unsigned char _cc_IsTable[257];
 #define isspace cc_isspace
 #define isupper cc_isupper
 #define isxdigit cc_isxdigit
+
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux _cc_IsTable "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* CC_CTYPE_H */

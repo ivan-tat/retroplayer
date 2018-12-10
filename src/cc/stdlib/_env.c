@@ -90,18 +90,18 @@ bool _env_name_check(const char *name, uint16_t *nlen)
 {
     if (!name)
     {
-        errno = EINVAL;
+        cc_errno = CC_EINVAL;
         return  true;
     }
     *nlen = strlen(name);
     if (!*nlen)
     {
-        errno = EINVAL;
+        cc_errno = CC_EINVAL;
         return true;
     }
     if (strchr(name, '='))
     {
-        errno = EINVAL;
+        cc_errno = CC_EINVAL;
         return true;
     }
     return false;
@@ -134,19 +134,19 @@ bool _environ_alloc(struct envstrlist_t *self, uint16_t count)
             }
             else
             {
-                errno = ENOMEM;
+                cc_errno = CC_ENOMEM;
                 return false;
             }
         }
         else
         {
-            errno = EINVAL;
+            cc_errno = CC_EINVAL;
             return false;
         }
     }
     else
     {
-        errno = EINVAL;
+        cc_errno = CC_EINVAL;
         return false;
     }
 }
@@ -230,7 +230,7 @@ void cc_environ_free(void)
     cc_environ_sync();
 }
 
-/* Initialization */
+/*** Initialization ***/
 
 /*static void *_oldexit_environ = NULL;*/
 

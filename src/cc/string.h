@@ -31,7 +31,7 @@ int    cc_strncmp(const char *s1, const char *s2, size_t n);
 char  *cc_strncpy(char *dest, const char *src, size_t n);
 int    cc_strnicmp(const char *s1, const char *s2, size_t n);
 
-/* Aliases */
+/*** Aliases ***/
 
 #define memcmp   cc_memcmp
 #define memcpy   cc_memcpy
@@ -43,5 +43,22 @@ int    cc_strnicmp(const char *s1, const char *s2, size_t n);
 #define strncmp  cc_strncmp
 #define strncpy  cc_strncpy
 #define strnicmp cc_strnicmp
+
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux cc_memcmp "*";
+#pragma aux cc_memcpy "*";
+#pragma aux cc_memset "*";
+#pragma aux cc_strchr "*";
+#pragma aux cc_strcmp "*";
+#pragma aux cc_stricmp "*";
+#pragma aux cc_strlen "*";
+#pragma aux cc_strncmp "*";
+#pragma aux cc_strncpy "*";
+#pragma aux cc_strnicmp "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* CC_STRING_H */

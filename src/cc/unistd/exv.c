@@ -14,6 +14,9 @@
 #include "cc/unistd.h"
 
 extern int16_t PUBLIC_DATA pascal_doserror;
+#ifdef __WATCOMC__
+#pragma aux pascal_doserror "*";
+#endif  /* __WATCOMC__ */
 
 int cc_execv(const char *filename, char *const argv[])
 {
@@ -68,34 +71,34 @@ int cc_execv(const char *filename, char *const argv[])
     switch (pascal_doserror)
     {
     case 0:
-        errno = EZERO;
+        cc_errno = CC_EZERO;
         break;
     case 2:
-        errno = ENOENT;
+        cc_errno = CC_ENOENT;
         break;
     case 3:
-        errno = ENOENT;
+        cc_errno = CC_ENOENT;
         break;
     case 5:
-        errno = EACCES;
+        cc_errno = CC_EACCES;
         break;
     case 6:
-        errno = EFAULT;
+        cc_errno = CC_EFAULT;
         break;
     case 8:
-        errno = ENOMEM;
+        cc_errno = CC_ENOMEM;
         break;
     case 10:
-        errno = EINVAL;
+        cc_errno = CC_EINVAL;
         break;
     case 11:
-        errno = EINVAL;
+        cc_errno = CC_EINVAL;
         break;
     case 18:
-        errno = EMFILE;
+        cc_errno = CC_EMFILE;
         break;
     default:
-        errno = EZERO;
+        cc_errno = CC_EZERO;
         break;
     }
     return 0;

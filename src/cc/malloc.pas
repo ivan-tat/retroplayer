@@ -12,7 +12,7 @@ interface
 
 (*$I defines.pas*)
 
-function _memmax: longint;
+procedure _memmax;
 
 implementation
 
@@ -21,6 +21,6 @@ uses
     dos_;
 
 (*$l malloc/memmax.obj*)
-function _memmax: longint; external;
+procedure _memmax; external;
 
 end.

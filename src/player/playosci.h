@@ -19,10 +19,12 @@
 
 void __far playosci_main (void);
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux playosci_main "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* PLAYOSCI_H */

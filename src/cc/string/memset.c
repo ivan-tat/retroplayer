@@ -24,7 +24,7 @@ void *cc_memset(void *s, int c, size_t n)
             ptr++;
             count--;
         } while (count);
-    };
+    }
 
     return s;
 }

@@ -15,8 +15,6 @@
 
 #include "main/voltab.h"
 
-// TODO: remove PUBLIC_CODE macros when done.
-
 void voltab_init(void)
 {
     volumetableptr = NULL;

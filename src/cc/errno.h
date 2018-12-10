@@ -65,7 +65,7 @@ extern int16_t cc_errno;
 /* additional Standard C error */
 #define CC_EILSEQ       40  /* Illegal multibyte sequence */
 
-/* Aliases */
+/*** Aliases ***/
 
 #define errno cc_errno
 
@@ -115,5 +115,13 @@ extern int16_t cc_errno;
 #define ENOTEMPTY    CC_ENOTEMPTY
 /* additional Standard C error */
 #define EILSEQ       CC_EILSEQ
+
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux cc_errno "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* CC_ERRNO_H */

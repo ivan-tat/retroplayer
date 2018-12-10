@@ -27,7 +27,7 @@ void *cc_memcpy(void *dest, const void *src, size_t n)
             ptr2++;
             count--;
         } while (count);
-    };
+    }
 
     return dest;
 }

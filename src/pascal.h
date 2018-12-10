@@ -16,9 +16,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include <startup.h>
+#include "startup.h"
 
-/* Initialization */
+/*** Initialization ***/
 
 /*extern void *PUBLIC_DATA exitproc;*/
 
@@ -74,15 +74,22 @@ _UNREGMETHOD(name)\
 
 #define pascal_String_size 256
 
-void PUBLIC_CODE pascal_fillchar(void *dest, uint16_t size, uint8_t value);
-void PUBLIC_CODE pascal_move(void *src, void *dest, uint16_t size);
+extern void PUBLIC_CODE pascal_fillchar (void *dest, uint16_t size, uint8_t value);
+extern void PUBLIC_CODE pascal_move (void *src, void *dest, uint16_t size);
+
+void PUBLIC_CODE strpastoc (char *dest, char const *src, uint16_t maxlen);
+void PUBLIC_CODE strctopas (char *dest, char const *src, uint16_t maxlen);
+
+/*** Linking ***/
 
 #ifdef __WATCOMC__
-#pragma aux pascal_fillchar modify [ ax bx cx dx si di es ];
-#pragma aux pascal_move     modify [ ax bx cx dx si di es ];
-#endif
 
-void PUBLIC_CODE strpastoc(char *dest, char const *src, uint16_t maxlen);
-void PUBLIC_CODE strctopas(char *dest, char const *src, uint16_t maxlen);
+#pragma aux pascal_fillchar "*" modify [ ax bx cx dx si di es ];
+#pragma aux pascal_move     "*" modify [ ax bx cx dx si di es ];
+
+#pragma aux strpastoc "*";
+#pragma aux strctopas "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* PASCAL_H */

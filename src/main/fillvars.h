@@ -48,7 +48,7 @@ typedef struct sound_DMA_buffer_t SNDDMABUF;
 
 /* player */
 
-extern uint8_t PUBLIC_DATA playOption_FPS;
+extern uint8_t playOption_FPS;
     /* frames per second ... default is about 70Hz */
 
 void     PUBLIC_CODE snddmabuf_init(SNDDMABUF *self);
@@ -59,6 +59,24 @@ uint16_t PUBLIC_CODE snddmabuf_get_offset_from_count(SNDDMABUF *self, uint16_t c
 uint16_t PUBLIC_CODE snddmabuf_get_count_from_offset(SNDDMABUF *self, uint16_t bufOff);
 void     PUBLIC_CODE snddmabuf_free(SNDDMABUF *self);
 
-extern SNDDMABUF PUBLIC_DATA sndDMABuf;
+extern SNDDMABUF sndDMABuf;
+
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux playOption_FPS "*";
+
+#pragma aux snddmabuf_init "*";
+#pragma aux snddmabuf_alloc "*";
+#pragma aux snddmabuf_get_frame_offset "*";
+#pragma aux snddmabuf_get_frame "*";
+#pragma aux snddmabuf_get_offset_from_count "*";
+#pragma aux snddmabuf_get_count_from_offset "*";
+#pragma aux snddmabuf_free "*";
+
+#pragma aux sndDMABuf "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* FILLVARS_H */

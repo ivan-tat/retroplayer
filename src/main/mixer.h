@@ -112,27 +112,30 @@ uint16_t mixbuf_get_offset_from_count(MIXBUF *self, uint16_t value);
 uint16_t mixbuf_get_count_from_offset(MIXBUF *self, uint16_t value);
 void     mixbuf_free(MIXBUF *self);
 
-/* Variables */
+/*** Variables ***/
 
 extern SMPBUF smpbuf;
 extern MIXBUF mixBuf;
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux _MixSampleMono8 "*";
 #pragma aux _MixSampleMono16 "*";
+
 #pragma aux fill_8 "*";
 #pragma aux fill_16 "*";
 #pragma aux fill_32 "*";
+
 #pragma aux _calc_sample_step "*";
-#pragma aux smpbuf "*";
+
 #pragma aux smpbuf_init "*";
 #pragma aux smpbuf_alloc "*";
 #pragma aux smpbuf_get "*";
 #pragma aux smpbuf_get_length "*";
 #pragma aux smpbuf_free "*";
-#pragma aux mixBuf "*";
+
 #pragma aux mixbuf_init "*";
 #pragma aux mixbuf_alloc "*";
 #pragma aux mixbuf_get "*";
@@ -145,6 +148,10 @@ extern MIXBUF mixBuf;
 #pragma aux mixbuf_get_offset_from_count "*";
 #pragma aux mixbuf_get_count_from_offset "*";
 #pragma aux mixbuf_free "*";
-#endif
+
+#pragma aux smpbuf "*";
+#pragma aux mixBuf "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif /* MIXER_H */

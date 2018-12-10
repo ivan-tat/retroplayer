@@ -15,7 +15,7 @@
 extern void PUBLIC_CODE pascal_delay(uint16_t count);
 
 #ifdef __WATCOMC__
-#pragma aux pascal_delay modify [ax bx cx dx si di es];
+#pragma aux pascal_delay "*" modify [ ax bx cx dx si di es ];
 #endif
 
 void cc_delay(unsigned int __milliseconds)

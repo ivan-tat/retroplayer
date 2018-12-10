@@ -16,8 +16,8 @@ var
     drawseg: Word;
 
 procedure vga_wait_vsync;
-procedure vga_clear_page_320x200x8(c: Byte);
-procedure vga_line(x1, y1, x2, y2: Word; f: Byte);
+procedure vga_clear_page_320x200x8;
+procedure vga_line;
 procedure vga_bar(o, b, l: Word);
 
 implementation
@@ -33,10 +33,10 @@ uses
 (*$l vga.obj*)
 
 procedure vga_wait_vsync; external;
-procedure vga_clear_page_320x200x8(c: Byte); external;
+procedure vga_clear_page_320x200x8; external;
 
 (*$L line.obj*)
-procedure vga_line(x1, y1, x2, y2: Word; f: Byte); external;
+procedure vga_line; external;
 
 procedure vga_bar(o, b, l: Word); assembler;
 asm

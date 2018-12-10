@@ -12,7 +12,7 @@
 
 #include "cc/malloc.h"
 
-uint32_t PUBLIC_CODE _memmax(void)
+uint32_t _memmax(void)
 {
     uint16_t max;
     _dos_allocmem(0xffff, &max);

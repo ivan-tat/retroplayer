@@ -31,31 +31,31 @@ type
     TMUSINS = array [0..16*5-1] of Byte;
     PMUSINS = ^TMUSINS;
 
-procedure musins_init(self: PMUSINS);
-procedure musins_set_type(self: PMUSINS; value: TMUSINSTYPE);
-function  musins_get_type(self: PMUSINS): TMUSINSTYPE;
-procedure musins_set_looped(self: PMUSINS; value: Boolean);
-function  musins_is_looped(self: PMUSINS): Boolean;
-procedure musins_set_EM_data(self: PMUSINS; value: Boolean);
-function  musins_is_EM_data(self: PMUSINS): Boolean;
-procedure musins_set_EM_data_page(self: PMUSINS; value: Word);
-function  musins_get_EM_data_page(self: PMUSINS): Word;
-procedure musins_set_data(self: PMUSINS; value: Pointer);
-function  musins_get_data(self: PMUSINS): Pointer;
-function  musins_map_EM_data(self: PMUSINS): Pointer;
-procedure musins_set_length(self: PMUSINS; value: LongInt);
-function  musins_get_length(self: PMUSINS): LongInt;
-procedure musins_set_loop_start(self: PMUSINS; value: LongInt);
-function  musins_get_loop_start(self: PMUSINS): LongInt;
-procedure musins_set_loop_end(self: PMUSINS; value: LongInt);
-function  musins_get_loop_end(self: PMUSINS): LongInt;
-procedure musins_set_volume(self: PMUSINS; value: Byte);
-function  musins_get_volume(self: PMUSINS): Byte;
-procedure musins_set_rate(self: PMUSINS; value: LongInt);
-function  musins_get_rate(self: PMUSINS): LongInt;
-procedure musins_set_title(self: PMUSINS; value: PChar);
-function  musins_get_title(self: PMUSINS): PChar;
-procedure musins_free(self: PMUSINS);
+procedure musins_init;
+procedure musins_set_type;
+procedure musins_get_type;
+procedure musins_set_looped;
+procedure musins_is_looped;
+procedure musins_set_EM_data;
+procedure musins_is_EM_data;
+procedure musins_set_EM_data_page;
+procedure musins_get_EM_data_page;
+procedure musins_set_data;
+procedure musins_get_data;
+procedure musins_map_EM_data;
+procedure musins_set_length;
+procedure musins_get_length;
+procedure musins_set_loop_start;
+procedure musins_get_loop_start;
+procedure musins_set_loop_end;
+procedure musins_get_loop_end;
+procedure musins_set_volume;
+procedure musins_get_volume;
+procedure musins_set_rate;
+procedure musins_get_rate;
+procedure musins_set_title;
+procedure musins_get_title;
+procedure musins_free;
 
 (* Musical instruments list *)
 
@@ -66,16 +66,16 @@ type
     TMUSINSLIST = array [0..MAX_INSTRUMENTS-1] of TMUSINS;
     PMUSINSLIST = ^TMUSINSLIST;
 
-function  musinsl_new: PMUSINSLIST;
-procedure musinsl_init(self: PMUSINSLIST);
-procedure musinsl_set_EM_data(self: PMUSINSLIST; value: Boolean);
-function  musinsl_is_EM_data(self: PMUSINSLIST): Boolean;
-function  musinsl_get(self: PMUSINSLIST; index: Word): PMUSINS;
-procedure musinsl_set_EM_data_handle(self: PMUSINSLIST; value: TEMSHDL);
-procedure musinsl_set_EM_handle_name(self: PMUSINSLIST);
-function  musinsl_get_used_EM(self: PMUSINSLIST): LongInt;
-procedure musinsl_free(self: PMUSINSLIST);
-procedure musinsl_delete(var self: PMUSINSLIST);
+procedure musinsl_new;
+procedure musinsl_init;
+procedure musinsl_set_EM_data;
+procedure musinsl_is_EM_data;
+procedure musinsl_get;
+procedure musinsl_set_EM_data_handle;
+procedure musinsl_set_EM_handle_name;
+procedure musinsl_get_used_EM;
+procedure musinsl_free;
+procedure musinsl_delete;
 
 var
     mod_Instruments: PMUSINSLIST;
@@ -93,41 +93,41 @@ uses
 
 (*$L musins.obj*)
 
-procedure musins_init(self: PMUSINS); external;
-procedure musins_set_type(self: PMUSINS; value: TMUSINSTYPE); external;
-function  musins_get_type(self: PMUSINS): TMUSINSTYPE; external;
-procedure musins_set_looped(self: PMUSINS; value: Boolean); external;
-function  musins_is_looped(self: PMUSINS): Boolean; external;
-procedure musins_set_EM_data(self: PMUSINS; value: Boolean); external;
-function  musins_is_EM_data(self: PMUSINS): Boolean; external;
-procedure musins_set_EM_data_page(self: PMUSINS; value: Word); external;
-function  musins_get_EM_data_page(self: PMUSINS): Word; external;
-procedure musins_set_data(self: PMUSINS; value: Pointer); external;
-function  musins_get_data(self: PMUSINS): Pointer; external;
-function  musins_map_EM_data(self: PMUSINS): Pointer; external;
-procedure musins_set_length(self: PMUSINS; value: LongInt); external;
-function  musins_get_length(self: PMUSINS): LongInt; external;
-procedure musins_set_loop_start(self: PMUSINS; value: LongInt); external;
-function  musins_get_loop_start(self: PMUSINS): LongInt; external;
-procedure musins_set_loop_end(self: PMUSINS; value: LongInt); external;
-function  musins_get_loop_end(self: PMUSINS): LongInt; external;
-procedure musins_set_volume(self: PMUSINS; value: Byte); external;
-function  musins_get_volume(self: PMUSINS): Byte; external;
-procedure musins_set_rate(self: PMUSINS; value: LongInt); external;
-function  musins_get_rate(self: PMUSINS): LongInt; external;
-procedure musins_set_title(self: PMUSINS; value: PChar); external;
-function  musins_get_title(self: PMUSINS): PChar; external;
-procedure musins_free(self: PMUSINS); external;
+procedure musins_init; external;
+procedure musins_set_type; external;
+procedure musins_get_type; external;
+procedure musins_set_looped; external;
+procedure musins_is_looped; external;
+procedure musins_set_EM_data; external;
+procedure musins_is_EM_data; external;
+procedure musins_set_EM_data_page; external;
+procedure musins_get_EM_data_page; external;
+procedure musins_set_data; external;
+procedure musins_get_data; external;
+procedure musins_map_EM_data; external;
+procedure musins_set_length; external;
+procedure musins_get_length; external;
+procedure musins_set_loop_start; external;
+procedure musins_get_loop_start; external;
+procedure musins_set_loop_end; external;
+procedure musins_get_loop_end; external;
+procedure musins_set_volume; external;
+procedure musins_get_volume; external;
+procedure musins_set_rate; external;
+procedure musins_get_rate; external;
+procedure musins_set_title; external;
+procedure musins_get_title; external;
+procedure musins_free; external;
 
-function  musinsl_new: PMUSINSLIST; external;
-procedure musinsl_init(self: PMUSINSLIST); external;
-procedure musinsl_set_EM_data(self: PMUSINSLIST; value: Boolean); external;
-function  musinsl_is_EM_data(self: PMUSINSLIST): Boolean; external;
-function  musinsl_get(self: PMUSINSLIST; index: Word): PMUSINS; external;
-procedure musinsl_set_EM_data_handle(self: PMUSINSLIST; value: TEMSHDL); external;
-procedure musinsl_set_EM_handle_name(self: PMUSINSLIST); external;
-function  musinsl_get_used_EM(self: PMUSINSLIST): LongInt; external;
-procedure musinsl_free(self: PMUSINSLIST); external;
-procedure musinsl_delete(var self: PMUSINSLIST); external;
+procedure musinsl_new; external;
+procedure musinsl_init; external;
+procedure musinsl_set_EM_data; external;
+procedure musinsl_is_EM_data; external;
+procedure musinsl_get; external;
+procedure musinsl_set_EM_data_handle; external;
+procedure musinsl_set_EM_handle_name; external;
+procedure musinsl_get_used_EM; external;
+procedure musinsl_free; external;
+procedure musinsl_delete; external;
 
 end.

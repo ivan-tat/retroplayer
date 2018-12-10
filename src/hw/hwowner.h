@@ -28,15 +28,22 @@ HWOWNERID   hwowner_get_id(HWOWNER *owner);
 const char *hwowner_get_name(HWOWNERID id);
 void        hwowner_unregister(HWOWNER *owner);
 
+/*** Initialization ***/
+
+DECLARE_REGISTRATION (hwowner)
+
+/*** Linking ***/
+
 #ifdef __WATCOMC__
+
 #pragma aux hwowner_register "*";
 #pragma aux hwowner_get_id "*";
 #pragma aux hwowner_get_name "*";
 #pragma aux hwowner_unregister "*";
-#endif
 
-/* Initialization */
+#pragma aux register_hwowner "*";
+#pragma aux unregister_hwowner "*";
 
-DECLARE_REGISTRATION(hwowner)
+#endif  /* __WATCOMC__ */
 
 #endif  /* HWOWNER_H */

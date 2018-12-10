@@ -170,7 +170,7 @@ void _cc_dos_terminate(uint8_t code);
 extern void PUBLIC_CODE pascal_swapvectors(void);
 extern void PUBLIC_CODE pascal_exec(char *name, char *cmdline);
 
-/* Aliases */
+/*** Aliases ***/
 
 #define DOSERROR CC_DOSERROR
 
@@ -229,13 +229,13 @@ extern void PUBLIC_CODE pascal_exec(char *name, char *cmdline);
 
 #define _dos_terminate _cc_dos_terminate
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
 
 /* Pascal >>> */
-#pragma aux pascal_swapvectors modify [ ax bx cx dx si di es ];
-#pragma aux pascal_exec        modify [ ax bx cx dx si di es ];
+#pragma aux pascal_swapvectors "*" modify [ ax bx cx dx si di es ];
+#pragma aux pascal_exec        "*" modify [ ax bx cx dx si di es ];
 /* <<< Pascal */
 
 #pragma aux _cc_doserrno "*";

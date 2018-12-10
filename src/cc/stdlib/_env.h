@@ -72,11 +72,13 @@ bool environ_init(void);
 void environ_free(void);
 */
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux _dos_env "*";
 #pragma aux _env_list "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif

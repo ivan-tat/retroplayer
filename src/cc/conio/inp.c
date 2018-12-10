@@ -15,7 +15,7 @@ char cc_inp(unsigned int port)
     {
         "mov dx,port";
         "in al,dx";
-    };
+    }
 }
 
 #endif  /* __WATCOMC__ */

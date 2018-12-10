@@ -15,79 +15,77 @@
 
 #include "main/s3mvars.h"
 
-// TODO: remove EXTERN_LINK, PUBLIC_DATA and PUBLIC_CODE macros when done.
-
 #ifdef DEFINE_LOCAL_DATA
 
 /* EMS */
 
-bool PUBLIC_DATA UseEMS;
-EMSHDL PUBLIC_DATA SavHandle;
+bool UseEMS;
+EMSHDL SavHandle;
 
 /* general module information */
 
-bool             PUBLIC_DATA mod_isLoaded;
-modTitle_t       PUBLIC_DATA mod_Title;
-modTrackerName_t PUBLIC_DATA mod_TrackerName;
+bool             mod_isLoaded;
+modTitle_t       mod_Title;
+modTrackerName_t mod_TrackerName;
 
 /* module options */
 
-bool PUBLIC_DATA modOption_ST2Vibrato;
-bool PUBLIC_DATA modOption_ST2Tempo;
-bool PUBLIC_DATA modOption_AmigaSlides;
-bool PUBLIC_DATA modOption_SBfilter;
-bool PUBLIC_DATA modOption_CostumeFlag;
-bool PUBLIC_DATA modOption_VolZeroOptim;
-bool PUBLIC_DATA modOption_AmigaLimits;
-bool PUBLIC_DATA modOption_Stereo;
+bool modOption_ST2Vibrato;
+bool modOption_ST2Tempo;
+bool modOption_AmigaSlides;
+bool modOption_SBfilter;
+bool modOption_CostumeFlag;
+bool modOption_VolZeroOptim;
+bool modOption_AmigaLimits;
+bool modOption_Stereo;
 
 /* play options */
 
-bool PUBLIC_DATA playOption_ST3Order;
-bool PUBLIC_DATA playOption_LoopSong;
+bool playOption_ST3Order;
+bool playOption_LoopSong;
 
 /* song arrangement */
 
-ordersList_t PUBLIC_DATA Order;
-uint16_t PUBLIC_DATA OrdNum;
-uint8_t  PUBLIC_DATA LastOrder;
+ordersList_t Order;
+uint16_t OrdNum;
+uint8_t  LastOrder;
 
-channelsList_t PUBLIC_DATA Channel;
-uint8_t PUBLIC_DATA UsedChannels;
+channelsList_t Channel;
+uint8_t UsedChannels;
 
 /* initial state */
 
-uint8_t  PUBLIC_DATA initState_tempo;
-uint8_t  PUBLIC_DATA initState_speed;
-uint16_t PUBLIC_DATA initState_startOrder;
+uint8_t  initState_tempo;
+uint8_t  initState_speed;
+uint16_t initState_startOrder;
 
 /* play state */
 
-bool     PUBLIC_DATA playState_songEnded;
-uint16_t PUBLIC_DATA playState_rate;
-uint8_t  PUBLIC_DATA playState_tempo;
-uint8_t  PUBLIC_DATA playState_speed;
-uint8_t  PUBLIC_DATA playState_gVolume;
-uint8_t  PUBLIC_DATA playState_mVolume;
-uint16_t PUBLIC_DATA playState_tick_samples_per_channel;    /* depends on rate and tempo */
+bool     playState_songEnded;
+uint16_t playState_rate;
+uint8_t  playState_tempo;
+uint8_t  playState_speed;
+uint8_t  playState_gVolume;
+uint8_t  playState_mVolume;
+uint16_t playState_tick_samples_per_channel;    /* depends on rate and tempo */
 
 /* position in song - you can change it while playing to jump arround */
 
-uint8_t  PUBLIC_DATA playState_order;
-uint8_t  PUBLIC_DATA playState_pattern;
-uint8_t  PUBLIC_DATA playState_row;
-uint8_t  PUBLIC_DATA playState_tick;
-uint16_t PUBLIC_DATA playState_tick_samples_per_channel_left;   /* samples per channel left to next tick */
+uint8_t  playState_order;
+uint8_t  playState_pattern;
+uint8_t  playState_row;
+uint8_t  playState_tick;
+uint16_t playState_tick_samples_per_channel_left;   /* samples per channel left to next tick */
 
 /* pattern loop */
 
-bool    PUBLIC_DATA playState_patLoopActive;
-uint8_t PUBLIC_DATA playState_patLoopCount;
-uint8_t PUBLIC_DATA playState_patLoopStartRow;
+bool    playState_patLoopActive;
+uint8_t playState_patLoopCount;
+uint8_t playState_patLoopStartRow;
 
 /* pattern delay */
 
-uint8_t PUBLIC_DATA playState_patDelayCount;
+uint8_t playState_patDelayCount;
 
 #endif  /* DEFINE_LOCAL_DATA */
 

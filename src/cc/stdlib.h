@@ -39,12 +39,13 @@ char   *cc_getenv(const char *name);
 int16_t cc_unsetenv(const char *name);
 int16_t cc_setenv(const char *name, const char *value, int16_t overwrite);
 
-/* Initialization */
+/*** Initialization ***/
 
 bool environ_init(void);
 
-/* Aliases */
+/*** Aliases ***/
 
+/* cc_PrefixSeg is defined in startup.h */
 #define _psp cc_PrefixSeg
 
 #define ATEXIT_MAX CC_ATEXIT_MAX
@@ -67,9 +68,10 @@ bool environ_init(void);
 #define unsetenv cc_unsetenv
 #define setenv cc_setenv
 
-/* Linking */
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux cc_environ "*";
 #pragma aux cc_atexit "*";
 #pragma aux cc_atoi "*";
@@ -82,6 +84,7 @@ bool environ_init(void);
 #pragma aux cc_unsetenv "*";
 #pragma aux cc_setenv "*";
 #pragma aux environ_init "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* CC_STDLIB_H */

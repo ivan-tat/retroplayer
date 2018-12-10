@@ -1,4 +1,4 @@
-/* musins.h -- declarations for musical instrument handling library.
+/* musins.h -- declarations for musins.c.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -99,7 +99,7 @@ void        PUBLIC_CODE musinsl_init(MUSINSLIST *self);
 void        PUBLIC_CODE musinsl_set_EM_data(MUSINSLIST *self, bool value);
 bool        PUBLIC_CODE musinsl_is_EM_data(MUSINSLIST *self);
 MUSINS     *PUBLIC_CODE musinsl_get(MUSINSLIST *self, uint16_t index);
-void        PUBLIC_DATA musinsl_set_EM_data_handle(MUSINSLIST *self, EMSHDL value);
+void        PUBLIC_CODE musinsl_set_EM_data_handle(MUSINSLIST *self, EMSHDL value);
 void        PUBLIC_CODE musinsl_set_EM_handle_name(MUSINSLIST *self);
 uint32_t    PUBLIC_CODE musinsl_get_used_EM(MUSINSLIST *self);
 void        PUBLIC_CODE musinsl_free(MUSINSLIST *self);
@@ -107,9 +107,57 @@ void        PUBLIC_CODE musinsl_delete(MUSINSLIST **self);
 
 /*** Variables ***/
 
-extern instrumentsList_t *PUBLIC_DATA mod_Instruments;  /* pointer to data for all instruments */
-extern uint16_t PUBLIC_DATA InsNum;
-extern bool     PUBLIC_DATA EMSSmp;         /* samples in EMS ? */
-extern uint16_t PUBLIC_DATA SmpEMSHandle;   /* hanlde to access EMS for samples */
+extern instrumentsList_t *mod_Instruments;  /* pointer to data for all instruments */
+extern uint16_t InsNum;
+extern bool     EMSSmp;         /* samples in EMS ? */
+extern uint16_t SmpEMSHandle;   /* hanlde to access EMS for samples */
+
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux musins_init "*";
+#pragma aux musins_set_type "*";
+#pragma aux musins_get_type "*";
+#pragma aux musins_set_looped "*";
+#pragma aux musins_is_looped "*";
+#pragma aux musins_set_EM_data "*";
+#pragma aux musins_is_EM_data "*";
+#pragma aux musins_set_EM_data_page "*";
+#pragma aux musins_get_EM_data_page "*";
+#pragma aux musins_set_data "*";
+#pragma aux musins_get_data "*";
+#pragma aux musins_map_EM_data "*";
+#pragma aux musins_set_length "*";
+#pragma aux musins_get_length "*";
+#pragma aux musins_set_loop_start "*";
+#pragma aux musins_get_loop_start "*";
+#pragma aux musins_set_loop_end "*";
+#pragma aux musins_get_loop_end "*";
+#pragma aux musins_set_volume "*";
+#pragma aux musins_get_volume "*";
+#pragma aux musins_set_rate "*";
+#pragma aux musins_get_rate "*";
+#pragma aux musins_set_title "*";
+#pragma aux musins_get_title "*";
+#pragma aux musins_free "*";
+
+#pragma aux musinsl_new "*";
+#pragma aux musinsl_init "*";
+#pragma aux musinsl_set_EM_data "*";
+#pragma aux musinsl_is_EM_data "*";
+#pragma aux musinsl_get "*";
+#pragma aux musinsl_set_EM_data_handle "*";
+#pragma aux musinsl_set_EM_handle_name "*";
+#pragma aux musinsl_get_used_EM "*";
+#pragma aux musinsl_free "*";
+#pragma aux musinsl_delete "*";
+
+#pragma aux mod_Instruments "*";
+#pragma aux InsNum "*";
+#pragma aux EMSSmp "*";
+#pragma aux SmpEMSHandle "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* MUSINS_H */

@@ -460,7 +460,7 @@ bool hwowner_release_irq_channels(HWOWNER *self, IRQMASK mask)
     return false;
 }
 
-/* Initialization */
+/*** Initialization ***/
 
 void __near pic_init(void)
 {

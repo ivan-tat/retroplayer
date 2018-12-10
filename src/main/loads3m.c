@@ -345,7 +345,7 @@ void __near _unpack_pattern(uint8_t *src, uint8_t *dst, uint8_t maxrow, uint8_t 
         outbuf[3] = EFFIDX_NONE;      /* command */
         outbuf[4] = 0;                /* parameters */
         outbuf += 5;
-    };
+    }
 
     row = 0;
     inbuf = src;
@@ -367,26 +367,26 @@ void __near _unpack_pattern(uint8_t *src, uint8_t *dst, uint8_t maxrow, uint8_t 
                 {
                     outbuf[0] = inbuf[0];
                     outbuf[1] = inbuf[1];
-                };
+                }
                 inbuf += 2;
-            };
+            }
             if (a & S3MPATFL_VOL)
             {
                 if (read)
                     outbuf[2] = inbuf[0];
                 inbuf++;
-            };
+            }
             if (a & S3MPATFL_CMD_PARM)
             {
                 if (read)
                 {
                     outbuf[3] = inbuf[0];
                     outbuf[4] = inbuf[1];
-                };
+                }
                 inbuf += 2;
-            };
-        };
-    };
+            }
+        }
+    }
 }
 
 bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
@@ -776,7 +776,7 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
     {
         DEBUG_ERR("s3mloader_load", "Failed to initialize instruments.");
         return false;
-    };
+    }
     musinsl_init(mod_Instruments);
 
     mod_Patterns = _new(MUSPATLIST);

@@ -26,12 +26,12 @@ type
     end;
     PHWSMPFMT = ^THWSMPFMT;
 
-function  set_sample_format(p: PHWSMPFMT; b: byte; s: boolean; c: byte): boolean;
-function  get_sample_format_bits(p: PHWSMPFMT): byte;
-function  is_sample_format_signed(p: PHWSMPFMT): boolean;
-function  get_sample_format_channels(p: PHWSMPFMT): byte;
-function  get_sample_format_width(p: PHWSMPFMT): word;
-procedure clear_sample_format(p: PHWSMPFMT);
+procedure set_sample_format;
+procedure get_sample_format_bits;
+procedure is_sample_format_signed;
+procedure get_sample_format_channels;
+procedure get_sample_format_width;
+procedure clear_sample_format;
 
 type
     TSoundHWISRCallback = procedure;
@@ -41,11 +41,11 @@ implementation
 
 (*$l sndctl_t.obj*)
 
-function  set_sample_format(p: PHWSMPFMT; b: byte; s: boolean; c: byte): boolean; external;
-function  get_sample_format_bits(p: PHWSMPFMT): byte; external;
-function  is_sample_format_signed(p: PHWSMPFMT): boolean; external;
-function  get_sample_format_channels(p: PHWSMPFMT): byte; external;
-function  get_sample_format_width(p: PHWSMPFMT): word; external;
-procedure clear_sample_format(p: PHWSMPFMT); external;
+procedure set_sample_format; external;
+procedure get_sample_format_bits; external;
+procedure is_sample_format_signed; external;
+procedure get_sample_format_channels; external;
+procedure get_sample_format_width; external;
+procedure clear_sample_format; external;
 
 end.

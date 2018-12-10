@@ -22,7 +22,7 @@
 #define CC_SH_DENYWR 0x20   // deny write
 #define CC_SH_DENYRW 0x10   // deny read and write (exclusive)
 
-/* Aliases */
+/*** Aliases ***/
 
 #define SH_COMPAT CC_SH_COMPAT
 #define SH_DENYNO CC_SH_DENYNO

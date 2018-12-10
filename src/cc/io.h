@@ -33,22 +33,30 @@ int32_t cc_lseek(int fd, int32_t offset, int whence);
 int32_t cc_read(int fd, void *buf, size_t count);
 int32_t cc_write(int fd, void *buf, size_t count);
 
-/* Aliases */
+/*** Aliases ***/
 
 #define SEEK_SET CC_SEEK_SET
 #define SEEK_CUR CC_SEEK_CUR
 #define SEEK_END CC_SEEK_END
 
 #define open cc_open
+#define close cc_close
 
-/* Linking */
+#define lseek cc_lseek
+#define read cc_read
+#define write cc_write
+
+/*** Linking ***/
 
 #ifdef __WATCOMC__
+
 #pragma aux cc_open "*";
 #pragma aux cc_close "*";
+
 #pragma aux cc_lseek "*";
 #pragma aux cc_read "*";
 #pragma aux cc_write "*";
-#endif
+
+#endif  /* __WATCOMC__ */
 
 #endif  /* CC_IO_H */

@@ -40,19 +40,19 @@ var
     emsFrameSeg: Word;
     emsFramePtr: Pointer;
 
-function emsIsInstalled: Boolean;
-function emsGetErrorMsg: PChar;
-function emsGetVersion: Boolean;
-function emsGetFrameSeg: Word;
-function emsGetFreePagesCount: Integer;
-function emsAlloc(pages: Word): TEMSHDL;
-function emsResize(handle: TEMSHDL; pages: Word): Boolean;
-function emsFree(handle: TEMSHDL): Boolean;
-function emsMap(handle: TEMSHDL; logPage: Word; physPage: Byte): Boolean;
-function emsSaveMap(handle: TEMSHDL ): Boolean;
-function emsRestoreMap(handle: TEMSHDL ): Boolean;
-function emsGetHandleSize(handle: TEMSHDL): Word;
-function emsSetHandleName(handle: TEMSHDL; name: PEMSNAME): Boolean;
+procedure emsIsInstalled;
+procedure emsGetErrorMsg;
+procedure emsGetVersion;
+procedure emsGetFrameSeg;
+procedure emsGetFreePagesCount;
+procedure emsAlloc;
+procedure emsResize;
+procedure emsFree;
+procedure emsMap;
+procedure emsSaveMap;
+procedure emsRestoreMap;
+procedure emsGetHandleSize;
+procedure emsSetHandleName;
 
 implementation
 
@@ -67,19 +67,19 @@ uses
     debug;
 
 (*$l ems.obj*)
-function emsIsInstalled: Boolean; external;
-function emsGetErrorMsg: PChar; external;
-function emsGetVersion: Boolean; external;
-function emsGetFrameSeg: Word; external;
-function emsGetFreePagesCount: Integer; external;
-function emsAlloc(pages: Word): TEMSHDL; external;
-function emsResize(handle: TEMSHDL; pages: Word): Boolean; external;
-function emsFree(handle: TEMSHDL): Boolean; external;
-function emsMap(handle: TEMSHDL; logPage: Word; physPage: Byte): Boolean; external;
-function emsSaveMap(handle: TEMSHDL): Boolean; external;
-function emsRestoreMap(handle: TEMSHDL): Boolean; external;
-function emsGetHandleSize(handle: TEMSHDL): Word; external;
-function emsSetHandleName(handle: TEMSHDL; name: PEMSNAME): Boolean; external;
+procedure emsIsInstalled; external;
+procedure emsGetErrorMsg; external;
+procedure emsGetVersion; external;
+procedure emsGetFrameSeg; external;
+procedure emsGetFreePagesCount; external;
+procedure emsAlloc; external;
+procedure emsResize; external;
+procedure emsFree; external;
+procedure emsMap; external;
+procedure emsSaveMap; external;
+procedure emsRestoreMap; external;
+procedure emsGetHandleSize; external;
+procedure emsSetHandleName; external;
 
 procedure register_ems; far; external;
 

@@ -41,4 +41,17 @@ void     PUBLIC_CODE clear_sample_format(HWSMPFMT *p);
 
 typedef void __far SoundHWISRCallback_t(void);
 
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux set_sample_format "*";
+#pragma aux get_sample_format_bits "*";
+#pragma aux is_sample_format_signed "*";
+#pragma aux get_sample_format_channels "*";
+#pragma aux get_sample_format_width "*";
+#pragma aux clear_sample_format "*";
+
+#endif  /* __WATCOMC__ */
+
 #endif  /* SNDCTL_T_H */

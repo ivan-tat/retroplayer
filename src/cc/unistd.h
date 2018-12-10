@@ -16,11 +16,11 @@
 
 int cc_execv(const char *filename, char *const argv[]);
 
-/* Aliases */
+/*** Aliases ***/
 
 #define execv cc_execv
 
-/* Linkning */
+/*** Linkning ***/
 
 #ifdef __WATCOMC__
 

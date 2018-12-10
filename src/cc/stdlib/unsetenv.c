@@ -42,7 +42,7 @@ int16_t cc_unsetenv(const char *name)
 
     if (_dos_allocmem(_dos_para(envsize), &seg))
     {
-        errno = ENOMEM;
+        cc_errno = CC_ENOMEM;
         return -1;
     }
     nenv.arr = MK_FP(seg, 0);
@@ -65,7 +65,7 @@ int16_t cc_unsetenv(const char *name)
         return 0;
     else
     {
-        errno = ENOMEM;
+        cc_errno = CC_ENOMEM;
         return -1;
     }
 }

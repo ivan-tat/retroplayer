@@ -80,7 +80,6 @@ extern void cc_delay(unsigned int __milliseconds);
 #ifdef __WATCOMC__
 
 extern void __far __watcall cc_intr(int, union CC_REGPACK *);
-#pragma aux cc_intr parm [ax] [bx cx];
 
 void _cc_disable(void);
 #pragma aux _cc_disable = \
@@ -105,7 +104,7 @@ extern void _cc_enable(void);
 
 #endif  /* __WATCOMC__ */
 
-/* Aliases */
+/*** Aliases ***/
 
 #define delay cc_delay
 #define intr cc_intr
@@ -134,9 +133,7 @@ extern void _cc_enable(void);
 #ifdef __WATCOMC__
 
 #pragma aux cc_delay "*";
-#pragma aux cc_intr "*";
-//#pragma aux _cc_disable "*";
-//#pragma aux _cc_enable "*";
+#pragma aux cc_intr "*" parm [ ax ] [ bx cx ] modify [ ax bx cx dx es ];
 
 #endif  /* __WATCOMC__ */
 

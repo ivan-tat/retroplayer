@@ -51,7 +51,14 @@ bool hwowner_clear_irq_channels_handler(HWOWNER *self, IRQMASK mask);
 bool hwowner_release_irq(HWOWNER *self, uint8_t ch);
 bool hwowner_release_irq_channels(HWOWNER *self, IRQMASK mask);
 
+/*** Initialization ***/
+
+DECLARE_REGISTRATION (pic)
+
+/*** Linking ***/
+
 #ifdef __WATCOMC__
+
 #pragma aux pic_get_hooked_irq_channels "*";
 #pragma aux pic_get_irq_owner "*";
 #pragma aux pic_get_irq_handler "*";
@@ -70,10 +77,10 @@ bool hwowner_release_irq_channels(HWOWNER *self, IRQMASK mask);
 #pragma aux hwowner_clear_irq_channels_handler "*";
 #pragma aux hwowner_release_irq "*";
 #pragma aux hwowner_release_irq_channels "*";
-#endif
 
-/* Initialization */
+#pragma aux register_pic "*";
+#pragma aux unregister_pic "*";
 
-DECLARE_REGISTRATION(pic)
+#endif  /* __WATCOMC__ */
 
 #endif  /* PIC_H */

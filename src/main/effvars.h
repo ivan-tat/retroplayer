@@ -1,4 +1,4 @@
-/* effects.h -- declarations for effects.pas.
+/* effvars.h -- declarations for effvars.c.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -17,11 +17,20 @@
 
 #include "pascal.h"
 
-// TODO: remove reserved words "extern" and PUBLIC_DATA macros when done.
+extern int8_t   sinuswave[64];
+extern int8_t   rampwave[64];
+extern uint8_t  squarewave[64];
+extern uint16_t wavetab[3];
 
-extern int8_t   PUBLIC_DATA sinuswave[64];
-extern int8_t   PUBLIC_DATA rampwave[64];
-extern uint8_t  PUBLIC_DATA squarewave[64];
-extern uint16_t PUBLIC_DATA wavetab[3];
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux sinuswave "*";
+#pragma aux rampwave "*";
+#pragma aux squarewave "*";
+#pragma aux wavetab "*";
+
+#endif  /* __WATCOMC__ */
 
 #endif /* EFFVARS_H */

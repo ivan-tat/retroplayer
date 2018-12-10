@@ -1,19 +1,26 @@
-#ifndef _SBIO_H
-#define _SBIO_H 1
+/* sbio.h -- declarations for sbio.c.
+
+   This is free and unencumbered software released into the public domain.
+   For more information, please refer to <http://unlicense.org>. */
+
+#ifndef SBIO_H
+#define SBIO_H 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
+#pragma once
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-#endif
 
 /* Sound Blaster hardware i/o errors */
 
 typedef uint16_t sbio_error_t;
 typedef sbio_error_t SBIOERR;
 
-extern SBIOERR __pascal sbioError;
+extern SBIOERR sbioError;
 
 #define E_SBIO_SUCCESS 0
 #define E_SBIO_DSP_RESET_FAILED 1
@@ -45,4 +52,24 @@ bool    PUBLIC_CODE sbioDSPWriteQueue(uint16_t base, uint8_t *data, uint16_t len
 
 void PUBLIC_CODE sbioDSPAcknowledgeIRQ(uint16_t base, bool mode16bit);
 
-#endif /* _SBIO_H */
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux sbioError "*";
+
+#pragma aux sbioMixerReset "*";
+#pragma aux sbioMixerRead "*";
+#pragma aux sbioMixerWrite "*";
+
+#pragma aux sbioDSPReset "*";
+#pragma aux sbioDSPRead "*";
+#pragma aux sbioDSPReadQueue "*";
+#pragma aux sbioDSPWrite "*";
+#pragma aux sbioDSPWriteQueue "*";
+
+#pragma aux sbioDSPAcknowledgeIRQ "*";
+
+#endif  /* __WATCOMC__ */
+
+#endif  /* SBIO_H */

@@ -35,7 +35,7 @@ int cc_strnicmp(const char *s1, const char *s2, size_t n)
             ptr2++;
             count--;
         } while ((!res) && next && count);
-    };
+    }
 
     return res;
 }
