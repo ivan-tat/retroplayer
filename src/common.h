@@ -17,8 +17,8 @@
 void *__new(size_t size);
 void  __delete(void **p);
 
-void *PUBLIC_CODE _new_(uint16_t size);
-void  PUBLIC_CODE _delete_(void **p);
+void *__far __pascal _new_ (uint16_t size);
+void  __far __pascal _delete_ (void **p);
 
 #define _new(t)     (t *)__new(sizeof(t))
 #define _delete(p)  __delete((void **)&(p))

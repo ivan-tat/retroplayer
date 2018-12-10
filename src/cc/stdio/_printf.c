@@ -16,7 +16,7 @@
 #include "cc/stdio.h"
 #include "cc/stdio/_printf.h"
 
-extern void PUBLIC_CODE pascal_write(const char *str);
+extern void __far __pascal pascal_write(const char *str);
 
 #ifdef __WATCOMC__
 #pragma aux pascal_write "*" modify [ ax bx cx dx si di es ];

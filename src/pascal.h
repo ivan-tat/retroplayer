@@ -20,7 +20,7 @@
 
 /*** Initialization ***/
 
-/*extern void *PUBLIC_DATA exitproc;*/
+/*extern void *__pascal exitproc;*/
 
 /* Use init()/done() methods in C only */
 /* Use register_*()/unregister_*() methods in Pascal only */
@@ -28,8 +28,8 @@
 #define _REGNAME(name)   register_##name
 #define _UNREGNAME(name) unregister_##name
 
-#define _REGMETHOD(name)   void PUBLIC_CODE _REGNAME(name)(void)
-#define _UNREGMETHOD(name) void PUBLIC_CODE _UNREGNAME(name)(void)
+#define _REGMETHOD(name)   void __far _REGNAME(name)(void)
+#define _UNREGMETHOD(name) void __far _UNREGNAME(name)(void)
 
 /* Use DECLARE_INITIALIZATION() in header files */
 /* Use DECLARE_REGISTRATION() in header files */
@@ -74,11 +74,11 @@ _UNREGMETHOD(name)\
 
 #define pascal_String_size 256
 
-extern void PUBLIC_CODE pascal_fillchar (void *dest, uint16_t size, uint8_t value);
-extern void PUBLIC_CODE pascal_move (void *src, void *dest, uint16_t size);
+extern void __far __pascal pascal_fillchar (void *dest, uint16_t size, uint8_t value);
+extern void __far __pascal pascal_move (void *src, void *dest, uint16_t size);
 
-void PUBLIC_CODE strpastoc (char *dest, char const *src, uint16_t maxlen);
-void PUBLIC_CODE strctopas (char *dest, char const *src, uint16_t maxlen);
+void __far __pascal strpastoc (char *dest, char const *src, uint16_t maxlen);
+void __far __pascal strctopas (char *dest, char const *src, uint16_t maxlen);
 
 /*** Linking ***/
 

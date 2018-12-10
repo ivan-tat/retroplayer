@@ -24,7 +24,7 @@
 /*
 unsigned _cc_dos_read(int fd, void __far *buf, unsigned count, unsigned *numbytes)
 */
-uint16_t PUBLIC_CODE _cc_dos_read(int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes)
+uint16_t __far _cc_dos_read (int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes)
 {
     union CC_REGPACK regs;
     uint16_t error;
@@ -55,7 +55,7 @@ uint16_t PUBLIC_CODE _cc_dos_read(int16_t fd, void __far *buf, uint16_t count, u
 /*
 unsigned _cc_dos_write(int fd, void __far *buf, unsigned count, unsigned *numbytes)
 */
-uint16_t PUBLIC_CODE _cc_dos_write(int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes)
+uint16_t __far _cc_dos_write (int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes)
 {
     union CC_REGPACK regs;
     uint16_t error;

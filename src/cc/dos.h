@@ -54,7 +54,7 @@ void _cc_dos_getdate(struct cc_dosdate_t *d);
 void _cc_dos_gettime(struct cc_dostime_t *t);
 
 void __far *_cc_dos_getvect(unsigned num);
-void _cc_dos_setvect(unsigned num, void __far *p);
+void __far _cc_dos_setvect(unsigned num, void __far *p);
 
 #define __cc_dos_para(size) (((size) + 15) >> 4)
 
@@ -67,7 +67,7 @@ void _cc_dos_setvect(unsigned num, void __far *p);
 /*
 unsigned _cc_dos_para(unsigned size);
 */
-uint16_t PUBLIC_CODE _cc_dos_para(uint32_t size);
+uint16_t __far _cc_dos_para (uint32_t size);
 
 #endif  /* !USE_INTRINSICS */
 
@@ -78,9 +78,9 @@ unsigned _cc_dos_setblock(unsigned size, unsigned seg, unsigned *max);
 */
 
 // Pascal
-uint16_t PUBLIC_CODE _cc_dos_allocmem(uint16_t size, uint16_t *seg);
-uint16_t PUBLIC_CODE _cc_dos_freemem(uint16_t seg);
-uint16_t PUBLIC_CODE _cc_dos_setblock(uint16_t size, uint16_t seg, uint16_t *max);
+uint16_t __far _cc_dos_allocmem (uint16_t size, uint16_t *seg);
+uint16_t __far _cc_dos_freemem (uint16_t seg);
+uint16_t __far _cc_dos_setblock (uint16_t size, uint16_t seg, uint16_t *max);
 
 /* DOS Program Segment Prefix */
 
@@ -156,19 +156,19 @@ unsigned _cc_dos_read(int fd, void __far *buf, unsigned count, unsigned *numbyte
 unsigned _cc_dos_write(int fd, void __far *buf, unsigned count, unsigned *numbytes);
 unsigned _cc_dos_seek(int fd, long offset, int kind, long *newoffset);
 */
-uint16_t PUBLIC_CODE _cc_dos_creat(const char *fname, uint16_t attr, int16_t *fd);
-uint16_t PUBLIC_CODE _cc_dos_creatnew(const char *fname, uint16_t attr, int16_t *fd);
-uint16_t PUBLIC_CODE _cc_dos_open(const char *fname, uint16_t mode, int16_t *fd);
-uint16_t PUBLIC_CODE _cc_dos_close(int16_t fd);
-uint16_t PUBLIC_CODE _cc_dos_commit(int16_t fd);
-uint16_t PUBLIC_CODE _cc_dos_read(int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes);
-uint16_t PUBLIC_CODE _cc_dos_write(int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes);
-uint16_t PUBLIC_CODE _cc_dos_seek(int16_t fd, int32_t offset, int16_t kind, int32_t *newoffset);
+uint16_t __far _cc_dos_creat (const char *fname, uint16_t attr, int16_t *fd);
+uint16_t __far _cc_dos_creatnew (const char *fname, uint16_t attr, int16_t *fd);
+uint16_t __far _cc_dos_open (const char *fname, uint16_t mode, int16_t *fd);
+uint16_t __far _cc_dos_close (int16_t fd);
+uint16_t __far _cc_dos_commit (int16_t fd);
+uint16_t __far _cc_dos_read (int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes);
+uint16_t __far _cc_dos_write (int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes);
+uint16_t __far _cc_dos_seek (int16_t fd, int32_t offset, int16_t kind, int32_t *newoffset);
 
 void _cc_dos_terminate(uint8_t code);
 
-extern void PUBLIC_CODE pascal_swapvectors(void);
-extern void PUBLIC_CODE pascal_exec(char *name, char *cmdline);
+extern void __far __pascal pascal_swapvectors(void);
+extern void __far __pascal pascal_exec(char *name, char *cmdline);
 
 /*** Aliases ***/
 

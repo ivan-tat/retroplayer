@@ -51,25 +51,25 @@ typedef struct screen_window_t
 };
 #pragma pack(pop);
 
-void     PUBLIC_CODE scrwin_init(
+void     __far scrwin_init (
     SCRWIN *self,
     uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
     void *draw,
     void *keypress
 );
-bool     PUBLIC_CODE scrwin_is_created(SCRWIN *self);
-void     PUBLIC_CODE scrwin_set_flags(SCRWIN *self, WINFLAGS value);
-WINFLAGS PUBLIC_CODE scrwin_get_flags(SCRWIN *self);
-void     PUBLIC_CODE scrwin_set_width(SCRWIN *self, uint8_t value);
-uint8_t  PUBLIC_CODE scrwin_get_width(SCRWIN *self);
-void     PUBLIC_CODE scrwin_set_height(SCRWIN *self, uint8_t value);
-uint8_t  PUBLIC_CODE scrwin_get_height(SCRWIN *self);
-void     PUBLIC_CODE scrwin_draw(SCRWIN *self);
-bool     PUBLIC_CODE scrwin_keypress(SCRWIN *self, char key);
-void     PUBLIC_CODE scrwin_show(SCRWIN *self);
-void     PUBLIC_CODE scrwin_focus(SCRWIN *self);
-void     PUBLIC_CODE scrwin_leave(SCRWIN *self);
-void     PUBLIC_CODE scrwin_close(SCRWIN *self);
+bool     __far scrwin_is_created (SCRWIN *self);
+void     __far scrwin_set_flags (SCRWIN *self, WINFLAGS value);
+WINFLAGS __far scrwin_get_flags (SCRWIN *self);
+void     __far scrwin_set_width (SCRWIN *self, uint8_t value);
+uint8_t  __far scrwin_get_width (SCRWIN *self);
+void     __far scrwin_set_height (SCRWIN *self, uint8_t value);
+uint8_t  __far scrwin_get_height (SCRWIN *self);
+void     __far scrwin_draw (SCRWIN *self);
+bool     __far scrwin_keypress (SCRWIN *self, char key);
+void     __far scrwin_show (SCRWIN *self);
+void     __far scrwin_focus (SCRWIN *self);
+void     __far scrwin_leave (SCRWIN *self);
+void     __far scrwin_close (SCRWIN *self);
 
 /*** Linking ***/
 

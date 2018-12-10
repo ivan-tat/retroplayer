@@ -19,9 +19,7 @@
 #include "main/mixer.h"
 #include "main/fillvars.h"
 
-// TODO: remove PUBLIC_CODE macros when done.
-
-void PUBLIC_CODE fill_DMAbuffer(MIXBUF *mb, SNDDMABUF *outbuf);
+void __far fill_DMAbuffer (MIXBUF *mb, SNDDMABUF *outbuf);
 
 /*** Linking ***/
 

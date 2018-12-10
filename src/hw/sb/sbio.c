@@ -26,7 +26,7 @@
 #define DSP_WRITE_BUFFER_STATUS 0x0c // Read
 #define DSP_WRITE_DATA          0x0c // Write
 
-void PUBLIC_CODE sbioMixerReset(uint16_t base)
+void __far sbioMixerReset (uint16_t base)
 {
     unsigned int wait;
 
@@ -40,14 +40,14 @@ void PUBLIC_CODE sbioMixerReset(uint16_t base)
     sbioError = E_SBIO_SUCCESS;
 }
 
-uint8_t PUBLIC_CODE sbioMixerRead(uint16_t base, uint8_t reg)
+uint8_t __far sbioMixerRead (uint16_t base, uint8_t reg)
 {
     outp(base + MIXER_REG, reg);
     sbioError = E_SBIO_SUCCESS;
     return inp(base + MIXER_DATA);
 }
 
-void PUBLIC_CODE sbioMixerWrite(uint16_t base, uint8_t reg, uint8_t data)
+void __far sbioMixerWrite (uint16_t base, uint8_t reg, uint8_t data)
 {
     uint8_t tmp;
 
@@ -57,7 +57,7 @@ void PUBLIC_CODE sbioMixerWrite(uint16_t base, uint8_t reg, uint8_t data)
     sbioError = E_SBIO_SUCCESS;
 }
 
-bool PUBLIC_CODE sbioDSPReset(uint16_t base)
+bool __far sbioDSPReset (uint16_t base)
 {
     unsigned int count;
     uint8_t tmp;
@@ -86,7 +86,7 @@ bool PUBLIC_CODE sbioDSPReset(uint16_t base)
     return false;
 }
 
-uint8_t PUBLIC_CODE sbioDSPRead(uint16_t base)
+uint8_t __far sbioDSPRead (uint16_t base)
 {
     unsigned int wait;
 
@@ -101,7 +101,7 @@ uint8_t PUBLIC_CODE sbioDSPRead(uint16_t base)
     return 0;
 }
 
-bool PUBLIC_CODE sbioDSPReadQueue(uint16_t base, uint8_t *data, uint16_t length)
+bool __far sbioDSPReadQueue (uint16_t base, uint8_t *data, uint16_t length)
 {
     uint8_t v;
 
@@ -120,7 +120,7 @@ bool PUBLIC_CODE sbioDSPReadQueue(uint16_t base, uint8_t *data, uint16_t length)
     return true;
 }
 
-bool PUBLIC_CODE sbioDSPWrite(uint16_t base, uint8_t data)
+bool __far sbioDSPWrite (uint16_t base, uint8_t data)
 {
     unsigned int wait;
 
@@ -136,7 +136,7 @@ bool PUBLIC_CODE sbioDSPWrite(uint16_t base, uint8_t data)
     return false;
 }
 
-bool PUBLIC_CODE sbioDSPWriteQueue(uint16_t base, uint8_t *data, uint16_t length)
+bool __far sbioDSPWriteQueue (uint16_t base, uint8_t *data, uint16_t length)
 {
     while (length)
     {
@@ -150,7 +150,7 @@ bool PUBLIC_CODE sbioDSPWriteQueue(uint16_t base, uint8_t *data, uint16_t length
     return true;
 }
 
-void PUBLIC_CODE sbioDSPAcknowledgeIRQ(uint16_t base, bool mode16bit)
+void __far sbioDSPAcknowledgeIRQ (uint16_t base, bool mode16bit)
 {
     unsigned char tmp;
 

@@ -83,10 +83,10 @@ void _cc_Exit(int16_t status);
 
 /* Arguments handling */
 
-extern uint16_t PUBLIC_CODE pascal_paramcount(void);
-extern void     PUBLIC_CODE pascal_paramstr(char *dest, uint8_t i);
-//extern void __declspec(noreturn) PUBLIC_CODE pascal_Halt(uint16_t status);
-extern void     PUBLIC_CODE pascal_Halt(uint16_t status);
+extern uint16_t __far __pascal pascal_paramcount(void);
+extern void     __far __pascal pascal_paramstr(char *dest, uint8_t i);
+//extern void __declspec(noreturn) __far __pascal pascal_Halt(uint16_t status);
+extern void     __far __pascal pascal_Halt(uint16_t status);
 
 uint16_t custom_argc(void);
 void     custom_argv(char *dest, uint16_t n, uint8_t i);

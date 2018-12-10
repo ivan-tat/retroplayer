@@ -42,27 +42,27 @@ typedef struct music_pattern_t
 #pragma pack(pop);
 typedef struct music_pattern_t MUSPAT;
 
-void     PUBLIC_CODE muspat_init(MUSPAT *self);
-void     PUBLIC_CODE muspat_set_EM_data(MUSPAT *self, bool value);
-bool     PUBLIC_CODE muspat_is_EM_data(MUSPAT *self);
-void     PUBLIC_CODE muspat_set_own_EM_handle(MUSPAT *self, bool value);
-bool     PUBLIC_CODE muspat_is_own_EM_handle(MUSPAT *self);
-void     PUBLIC_CODE muspat_set_channels(MUSPAT *self, uint8_t value);
-uint8_t  PUBLIC_CODE muspat_get_channels(MUSPAT *self);
-void     PUBLIC_CODE muspat_set_rows(MUSPAT *self, uint8_t value);
-uint8_t  PUBLIC_CODE muspat_get_rows(MUSPAT *self);
-void     PUBLIC_CODE muspat_set_size(MUSPAT *self, uint16_t value);
-uint16_t PUBLIC_CODE muspat_get_size(MUSPAT *self);
-void     PUBLIC_CODE muspat_set_data(MUSPAT *self, void *value);
-void     PUBLIC_CODE muspat_set_EM_data_handle(MUSPAT *self, EMSHDL value);
-EMSHDL   PUBLIC_CODE muspat_get_EM_data_handle(MUSPAT *self);
-void     PUBLIC_CODE muspat_set_EM_data_page(MUSPAT *self, uint16_t value);
-uint16_t PUBLIC_CODE muspat_get_EM_data_page(MUSPAT *self);
-void     PUBLIC_CODE muspat_set_EM_data_offset(MUSPAT *self, uint16_t value);
-uint16_t PUBLIC_CODE muspat_get_EM_data_offset(MUSPAT *self);
-void    *PUBLIC_CODE muspat_get_data(MUSPAT *self);
-void    *PUBLIC_CODE muspat_map_EM_data(MUSPAT *self);
-void     PUBLIC_CODE muspat_free(MUSPAT *self);
+void     __far muspat_init (MUSPAT *self);
+void     __far muspat_set_EM_data (MUSPAT *self, bool value);
+bool     __far muspat_is_EM_data (MUSPAT *self);
+void     __far muspat_set_own_EM_handle (MUSPAT *self, bool value);
+bool     __far muspat_is_own_EM_handle (MUSPAT *self);
+void     __far muspat_set_channels (MUSPAT *self, uint8_t value);
+uint8_t  __far muspat_get_channels (MUSPAT *self);
+void     __far muspat_set_rows (MUSPAT *self, uint8_t value);
+uint8_t  __far muspat_get_rows (MUSPAT *self);
+void     __far muspat_set_size (MUSPAT *self, uint16_t value);
+uint16_t __far muspat_get_size (MUSPAT *self);
+void     __far muspat_set_data (MUSPAT *self, void *value);
+void     __far muspat_set_EM_data_handle (MUSPAT *self, EMSHDL value);
+EMSHDL   __far muspat_get_EM_data_handle (MUSPAT *self);
+void     __far muspat_set_EM_data_page (MUSPAT *self, uint16_t value);
+uint16_t __far muspat_get_EM_data_page (MUSPAT *self);
+void     __far muspat_set_EM_data_offset (MUSPAT *self, uint16_t value);
+uint16_t __far muspat_get_EM_data_offset (MUSPAT *self);
+void    *__far muspat_get_data (MUSPAT *self);
+void    *__far muspat_map_EM_data (MUSPAT *self);
+void     __far muspat_free (MUSPAT *self);
 
 /*** Patterns list ***/
 
@@ -80,20 +80,20 @@ typedef struct music_patterns_list_t
 };
 typedef struct music_patterns_list_t MUSPATLIST;
 
-void        PUBLIC_CODE muspatl_init(MUSPATLIST *self);
-void        PUBLIC_CODE muspatl_set(MUSPATLIST *self, uint16_t index, MUSPAT *item);
-MUSPAT     *PUBLIC_CODE muspatl_get(MUSPATLIST *self, uint16_t index);
-bool        PUBLIC_CODE muspatl_set_count(MUSPATLIST *self, uint16_t value);
-uint16_t    PUBLIC_CODE muspatl_get_count(MUSPATLIST *self);
-void        PUBLIC_CODE muspatl_set_EM_data(MUSPATLIST *self, bool value);
-bool        PUBLIC_CODE muspatl_is_EM_data(MUSPATLIST *self);
-void        PUBLIC_CODE muspatl_set_own_EM_handle(MUSPATLIST *self, bool value);
-bool        PUBLIC_CODE muspatl_is_own_EM_handle(MUSPATLIST *self);
-void        PUBLIC_CODE muspatl_set_EM_handle(MUSPATLIST *self, EMSHDL value);
-EMSHDL      PUBLIC_CODE muspatl_get_EM_handle(MUSPATLIST *self);
-void        PUBLIC_CODE muspatl_set_EM_handle_name(MUSPATLIST *self);
-uint32_t    PUBLIC_CODE muspatl_get_used_EM(MUSPATLIST *self);
-void        PUBLIC_CODE muspatl_free(MUSPATLIST *self);
+void        __far muspatl_init (MUSPATLIST *self);
+void        __far muspatl_set (MUSPATLIST *self, uint16_t index, MUSPAT *item);
+MUSPAT     *__far muspatl_get (MUSPATLIST *self, uint16_t index);
+bool        __far muspatl_set_count (MUSPATLIST *self, uint16_t value);
+uint16_t    __far muspatl_get_count (MUSPATLIST *self);
+void        __far muspatl_set_EM_data (MUSPATLIST *self, bool value);
+bool        __far muspatl_is_EM_data (MUSPATLIST *self);
+void        __far muspatl_set_own_EM_handle (MUSPATLIST *self, bool value);
+bool        __far muspatl_is_own_EM_handle (MUSPATLIST *self);
+void        __far muspatl_set_EM_handle (MUSPATLIST *self, EMSHDL value);
+EMSHDL      __far muspatl_get_EM_handle (MUSPATLIST *self);
+void        __far muspatl_set_EM_handle_name (MUSPATLIST *self);
+uint32_t    __far muspatl_get_used_EM (MUSPATLIST *self);
+void        __far muspatl_free (MUSPATLIST *self);
 
 /*** Variables ***/
 

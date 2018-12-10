@@ -280,10 +280,6 @@ static SCRWIN *win_debug = NULL;
 
 /* Pattern window */
 
-// FIXME: make these private:
-extern uint8_t PUBLIC_DATA lastrow;
-extern uint8_t PUBLIC_DATA startchn;
-
 /* Window's event router */
 
 #define WINLIST_SIZE 7
@@ -685,7 +681,7 @@ void run_os_shell(void)
 
 /*** Main **/
 
-void PUBLIC_CODE plays3m_main(void)
+void __far plays3m_main (void)
 {
     int count, i;
     char s[pascal_String_size];

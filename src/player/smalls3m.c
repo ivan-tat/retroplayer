@@ -57,7 +57,7 @@ show_usage (void)
     );
 }
 
-void PUBLIC_CODE
+void __far
 smalls3m_main (void)
 {
     char *comspec;

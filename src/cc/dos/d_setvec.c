@@ -8,7 +8,7 @@
 #include "cc/i86.h"
 #include "cc/dos.h"
 
-void _cc_dos_setvect(unsigned num, void __far *p)
+void __far _cc_dos_setvect(unsigned num, void __far *p)
 {
     union CC_REGPACK regs;
     regs.h.al = num;

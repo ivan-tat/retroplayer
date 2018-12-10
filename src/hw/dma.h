@@ -18,8 +18,6 @@
 #include "pascal.h"
 #include "hw/hwowner.h"
 
-// TODO: remove PUBLIC_CODE macros when done.
-
 #define DMA_CHANNELS 8
 
 /*** Hardware I/O ***/
@@ -83,9 +81,9 @@ typedef struct dma_buffer_t
 };
 typedef struct dma_buffer_t DMABUF;
 
-void    PUBLIC_CODE dmaBuf_init(DMABUF *self);
-bool    PUBLIC_CODE dmaBuf_alloc(DMABUF *self, uint32_t size);
-void    PUBLIC_CODE dmaBuf_free(DMABUF *self);
+void    __far dmaBuf_init (DMABUF *self);
+bool    __far dmaBuf_alloc (DMABUF *self, uint32_t size);
+void    __far dmaBuf_free (DMABUF *self);
 
 /*** Initialization ***/
 

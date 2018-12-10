@@ -36,21 +36,21 @@ extern SBIOERR sbioError;
 #define SBIO_MIXER_VOICE_LEFT    0x32
 #define SBIO_MIXER_VOICE_RIGHT   0x33
 
-void    PUBLIC_CODE sbioMixerReset(uint16_t base);
-uint8_t PUBLIC_CODE sbioMixerRead(uint16_t base, uint8_t reg);
-void    PUBLIC_CODE sbioMixerWrite(uint16_t base, uint8_t reg, uint8_t data);
+void    __far sbioMixerReset (uint16_t base);
+uint8_t __far sbioMixerRead (uint16_t base, uint8_t reg);
+void    __far sbioMixerWrite (uint16_t base, uint8_t reg, uint8_t data);
 
 /* DSP */
 
-bool    PUBLIC_CODE sbioDSPReset(uint16_t base);
-uint8_t PUBLIC_CODE sbioDSPRead(uint16_t base);
-bool    PUBLIC_CODE sbioDSPReadQueue(uint16_t base, uint8_t *data, uint16_t length);
-bool    PUBLIC_CODE sbioDSPWrite(uint16_t base, uint8_t data);
-bool    PUBLIC_CODE sbioDSPWriteQueue(uint16_t base, uint8_t *data, uint16_t length);
+bool    __far sbioDSPReset (uint16_t base);
+uint8_t __far sbioDSPRead (uint16_t base);
+bool    __far sbioDSPReadQueue (uint16_t base, uint8_t *data, uint16_t length);
+bool    __far sbioDSPWrite (uint16_t base, uint8_t data);
+bool    __far sbioDSPWriteQueue (uint16_t base, uint8_t *data, uint16_t length);
 
 /* IRQ */
 
-void PUBLIC_CODE sbioDSPAcknowledgeIRQ(uint16_t base, bool mode16bit);
+void __far sbioDSPAcknowledgeIRQ (uint16_t base, bool mode16bit);
 
 /*** Linking ***/
 

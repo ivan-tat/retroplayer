@@ -14,17 +14,17 @@
 
 #include "main/mixchn.h"
 
-void PUBLIC_CODE mixchn_set_flags(MIXCHN *self, MIXCHNFLAGS value)
+void __far mixchn_set_flags (MIXCHN *self, MIXCHNFLAGS value)
 {
     self->bChannelFlags = value;
 }
 
-MIXCHNFLAGS PUBLIC_CODE mixchn_get_flags(MIXCHN *self)
+MIXCHNFLAGS __far mixchn_get_flags (MIXCHN *self)
 {
     return self->bChannelFlags;
 }
 
-void PUBLIC_CODE mixchn_set_enabled(MIXCHN *self, bool value)
+void __far mixchn_set_enabled (MIXCHN *self, bool value)
 {
     if (value)
         self->bChannelFlags |= MIXCHNFL_ENABLED;
@@ -32,12 +32,12 @@ void PUBLIC_CODE mixchn_set_enabled(MIXCHN *self, bool value)
         self->bChannelFlags &= ~MIXCHNFL_ENABLED;
 }
 
-bool PUBLIC_CODE mixchn_is_enabled(MIXCHN *self)
+bool __far mixchn_is_enabled (MIXCHN *self)
 {
     return (self->bChannelFlags & MIXCHNFL_ENABLED) != 0;
 }
 
-void PUBLIC_CODE mixchn_set_playing(MIXCHN *self, bool value)
+void __far mixchn_set_playing (MIXCHN *self, bool value)
 {
     if (value)
         self->bChannelFlags |= MIXCHNFL_PLAYING;
@@ -45,12 +45,12 @@ void PUBLIC_CODE mixchn_set_playing(MIXCHN *self, bool value)
         self->bChannelFlags &= ~MIXCHNFL_PLAYING;
 }
 
-bool PUBLIC_CODE mixchn_is_playing(MIXCHN *self)
+bool __far mixchn_is_playing (MIXCHN *self)
 {
     return (self->bChannelFlags & MIXCHNFL_PLAYING) != 0;
 }
 
-void PUBLIC_CODE mixchn_set_mixing(MIXCHN *self, bool value)
+void __far mixchn_set_mixing (MIXCHN *self, bool value)
 {
     if (value)
         self->bChannelFlags |= MIXCHNFL_MIXING;
@@ -58,42 +58,42 @@ void PUBLIC_CODE mixchn_set_mixing(MIXCHN *self, bool value)
         self->bChannelFlags &= ~MIXCHNFL_MIXING;
 }
 
-bool PUBLIC_CODE mixchn_is_mixing(MIXCHN *self)
+bool __far mixchn_is_mixing (MIXCHN *self)
 {
     return (self->bChannelFlags & MIXCHNFL_MIXING) != 0;
 }
 
-void PUBLIC_CODE mixchn_set_type(MIXCHN *self, uint8_t value)
+void __far mixchn_set_type (MIXCHN *self, uint8_t value)
 {
     self->bChannelType = value;
 }
 
-uint8_t PUBLIC_CODE mixchn_get_type(MIXCHN *self)
+uint8_t __far mixchn_get_type (MIXCHN *self)
 {
     return self->bChannelType;
 }
 
-void PUBLIC_CODE mixchn_set_instrument_num(MIXCHN *self, uint8_t value)
+void __far mixchn_set_instrument_num (MIXCHN *self, uint8_t value)
 {
     self->bIns = value;
 }
 
-uint8_t PUBLIC_CODE mixchn_get_instrument_num(MIXCHN *self)
+uint8_t __far mixchn_get_instrument_num (MIXCHN *self)
 {
     return self->bIns;
 }
 
-void PUBLIC_CODE mixchn_set_instrument(MIXCHN *self, MUSINS *value)
+void __far mixchn_set_instrument (MIXCHN *self, MUSINS *value)
 {
     self->pMusIns = value;
 }
 
-MUSINS *PUBLIC_CODE mixchn_get_instrument(MIXCHN *self)
+MUSINS *__far mixchn_get_instrument (MIXCHN *self)
 {
     return self->pMusIns;
 }
 
-void PUBLIC_CODE mixchn_set_sample_volume(MIXCHN *self, int16_t vol)
+void __far mixchn_set_sample_volume (MIXCHN *self, int16_t vol)
 {
     if (vol < 0)
         self->bSmpVol = 0;
@@ -101,12 +101,12 @@ void PUBLIC_CODE mixchn_set_sample_volume(MIXCHN *self, int16_t vol)
         self->bSmpVol = vol > CHNINSVOL_MAX ? CHNINSVOL_MAX : vol;
 }
 
-uint8_t PUBLIC_CODE mixchn_get_sample_volume(MIXCHN *self)
+uint8_t __far mixchn_get_sample_volume (MIXCHN *self)
 {
     return self->bSmpVol;
 }
 
-void PUBLIC_CODE mixchn_set_sample_period_limits(MIXCHN *self, uint16_t rate, bool amiga)
+void __far mixchn_set_sample_period_limits (MIXCHN *self, uint16_t rate, bool amiga)
 {
     unsigned int lo, hi;
 
@@ -124,7 +124,7 @@ void PUBLIC_CODE mixchn_set_sample_period_limits(MIXCHN *self, uint16_t rate, bo
      self->wSmpPeriodHigh = (unsigned long)(MID_C_RATE * (unsigned long)(hi)) / rate;
 }
 
-uint16_t PUBLIC_CODE mixchn_check_sample_period(MIXCHN *self, uint32_t value)
+uint16_t __far mixchn_check_sample_period (MIXCHN *self, uint32_t value)
 {
     if (value < self->wSmpPeriodLow)
         value = self->wSmpPeriodLow;
@@ -135,27 +135,27 @@ uint16_t PUBLIC_CODE mixchn_check_sample_period(MIXCHN *self, uint32_t value)
     return value;
 }
 
-void PUBLIC_CODE mixchn_set_sample_period(MIXCHN *self, uint16_t value)
+void __far mixchn_set_sample_period (MIXCHN *self, uint16_t value)
 {
     self->wSmpPeriod = value;
 }
 
-uint16_t PUBLIC_CODE mixchn_get_sample_period(MIXCHN *self)
+uint16_t __far mixchn_get_sample_period (MIXCHN *self)
 {
     return self->wSmpPeriod;
 }
 
-void PUBLIC_CODE mixchn_set_sample_step(MIXCHN *self, uint32_t value)
+void __far mixchn_set_sample_step (MIXCHN *self, uint32_t value)
 {
     self->dSmpStep = value;
 }
 
-uint32_t PUBLIC_CODE mixchn_get_sample_step(MIXCHN *self)
+uint32_t __far mixchn_get_sample_step (MIXCHN *self)
 {
     return self->dSmpStep;
 }
 
-void PUBLIC_CODE mixchn_setup_sample_period(MIXCHN *self, uint32_t value)
+void __far mixchn_setup_sample_period (MIXCHN *self, uint32_t value)
 {
     if (value)
     {
@@ -170,47 +170,47 @@ void PUBLIC_CODE mixchn_setup_sample_period(MIXCHN *self, uint32_t value)
     }
 }
 
-void PUBLIC_CODE mixchn_set_sample_data(MIXCHN *self, void *value)
+void __far mixchn_set_sample_data (MIXCHN *self, void *value)
 {
     self->wSmpSeg = FP_SEG(value);
 }
 
-void *PUBLIC_CODE mixchn_get_sample_data(MIXCHN *self)
+void *__far mixchn_get_sample_data (MIXCHN *self)
 {
     return MK_FP(self->wSmpSeg, 0);
 }
 
-void PUBLIC_CODE mixchn_set_command(MIXCHN *self, uint8_t value)
+void __far mixchn_set_command (MIXCHN *self, uint8_t value)
 {
     self->bCommand = value;
 }
 
-uint8_t PUBLIC_CODE mixchn_get_command(MIXCHN *self)
+uint8_t __far mixchn_get_command (MIXCHN *self)
 {
     return self->bCommand;
 }
 
-void PUBLIC_CODE mixchn_set_sub_command(MIXCHN *self, uint8_t value)
+void __far mixchn_set_sub_command (MIXCHN *self, uint8_t value)
 {
     self->bCommand2 = value;
 }
 
-uint8_t PUBLIC_CODE mixchn_get_sub_command(MIXCHN *self)
+uint8_t __far mixchn_get_sub_command (MIXCHN *self)
 {
     return self->bCommand2;
 }
 
-void PUBLIC_CODE mixchn_set_command_parameter(MIXCHN *self, uint8_t value)
+void __far mixchn_set_command_parameter (MIXCHN *self, uint8_t value)
 {
     self->bParameter = value;
 }
 
-uint8_t PUBLIC_CODE mixchn_get_command_parameter(MIXCHN *self)
+uint8_t __far mixchn_get_command_parameter (MIXCHN *self)
 {
     return self->bParameter;
 }
 
-void PUBLIC_CODE mixchn_reset_wave_tables(MIXCHN *self)
+void __far mixchn_reset_wave_tables (MIXCHN *self)
 {
     if (self)
     {
@@ -219,7 +219,7 @@ void PUBLIC_CODE mixchn_reset_wave_tables(MIXCHN *self)
     }
 }
 
-void PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum)
+void __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum)
 {
     MUSINS *ins;
     unsigned int rate;
@@ -255,14 +255,14 @@ void PUBLIC_CODE chn_setupInstrument(MIXCHN *chn, uint8_t insNum)
         mixchn_set_instrument_num(chn, 0);
 }
 
-uint16_t PUBLIC_CODE chn_calcNotePeriod(MIXCHN *chn, uint32_t rate, uint8_t note)
+uint16_t __far chn_calcNotePeriod (MIXCHN *chn, uint32_t rate, uint8_t note)
 {
     unsigned int period;
     period = (unsigned long)(MID_C_RATE * (unsigned long)getNotePeriod(note)) / rate;
     return mixchn_check_sample_period(chn, period);
 }
 
-uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, uint32_t rate, uint8_t note)
+uint32_t __far chn_calcNoteStep (MIXCHN *chn, uint32_t rate, uint8_t note)
 {
     unsigned int period;
     period = chn_calcNotePeriod(chn, rate, note);
@@ -272,7 +272,7 @@ uint32_t PUBLIC_CODE chn_calcNoteStep(MIXCHN *chn, uint32_t rate, uint8_t note)
         return 0;
 }
 
-void PUBLIC_CODE chn_setupNote(MIXCHN *chn, uint8_t note, bool keep)
+void __far chn_setupNote (MIXCHN *chn, uint8_t note, bool keep)
 {
     MUSINS *ins;
     uint32_t rate;

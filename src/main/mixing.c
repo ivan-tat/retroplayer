@@ -23,8 +23,6 @@
 
 #include "main/mixing.h"
 
-// TODO: remove PUBLIC_CODE macros when done.
-
 void __near song_new_tick(MIXBUF *mb)
 {
     playState_tick_samples_per_channel_left = playState_tick_samples_per_channel;

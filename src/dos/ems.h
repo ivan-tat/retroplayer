@@ -60,19 +60,19 @@ uint16_t emsCalcPagesCount(uint32_t size);
 
 #endif
 
-bool        PUBLIC_CODE emsIsInstalled(void);
-const char *PUBLIC_CODE emsGetErrorMsg(void);
-bool        PUBLIC_CODE emsGetVersion(void);
-uint16_t    PUBLIC_CODE emsGetFrameSeg(void);
-uint16_t    PUBLIC_CODE emsGetFreePagesCount(void);
-EMSHDL      PUBLIC_CODE emsAlloc(uint16_t pages);
-bool        PUBLIC_CODE emsResize(EMSHDL handle, uint16_t pages);
-bool        PUBLIC_CODE emsFree(EMSHDL handle);
-bool        PUBLIC_CODE emsMap(EMSHDL handle, uint16_t logPage, uint8_t physPage);
-bool        PUBLIC_CODE emsSaveMap(EMSHDL handle);
-bool        PUBLIC_CODE emsRestoreMap(EMSHDL handle);
-uint16_t    PUBLIC_CODE emsGetHandleSize(EMSHDL handle);
-bool        PUBLIC_CODE emsSetHandleName(EMSHDL handle, EMSNAME *name);
+bool        __far emsIsInstalled (void);
+const char *__far emsGetErrorMsg (void);
+bool        __far emsGetVersion (void);
+uint16_t    __far emsGetFrameSeg (void);
+uint16_t    __far emsGetFreePagesCount (void);
+EMSHDL      __far emsAlloc (uint16_t pages);
+bool        __far emsResize (EMSHDL handle, uint16_t pages);
+bool        __far emsFree (EMSHDL handle);
+bool        __far emsMap (EMSHDL handle, uint16_t logPage, uint8_t physPage);
+bool        __far emsSaveMap (EMSHDL handle);
+bool        __far emsRestoreMap (EMSHDL handle);
+uint16_t    __far emsGetHandleSize (EMSHDL handle);
+bool        __far emsSetHandleName (EMSHDL handle, EMSNAME *name);
 
 /*** Initialization ***/
 

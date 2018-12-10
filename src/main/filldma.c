@@ -19,8 +19,6 @@
 
 #include "main/filldma.h"
 
-// TODO: remove PUBLIC_CODE macros when done.
-
 typedef void clip_proc_t(void *, int32_t *, uint16_t);
 
 static clip_proc_t *clip_procs[] =  // NOTE: mixbuf is 32 bits
@@ -196,7 +194,7 @@ void __near fill_frame(MIXBUF *mb, SNDDMABUF *outbuf)
     outbuf->flags &= ~SNDDMABUFFL_LOCKED;
 }
 
-void PUBLIC_CODE fill_DMAbuffer(MIXBUF *mb, SNDDMABUF *outbuf)
+void __far fill_DMAbuffer (MIXBUF *mb, SNDDMABUF *outbuf)
 {
     while (outbuf->frameLast != outbuf->frameActive)
     {

@@ -86,7 +86,7 @@ static const struct emsErrorDesc_t
 
 static const char EMS_ERROR_UNKNOWN[] = "Unknown error";
 
-const char *PUBLIC_CODE emsGetErrorMsg(void)
+const char *__far emsGetErrorMsg (void)
 {
     int i;
 
@@ -288,7 +288,7 @@ uint16_t emsCalcPagesCount(uint32_t size)
 
 #endif  /* !USE_INTRINSICS */
 
-bool PUBLIC_CODE emsIsInstalled(void)
+bool __far emsIsInstalled (void)
 {
     union REGPACK regs;
     DOSDRVNAME *p;
@@ -299,7 +299,7 @@ bool PUBLIC_CODE emsIsInstalled(void)
     return (memcmp(p, EMS_DRIVER_NAME, sizeof(DOSDRVNAME)) == 0);
 }
 
-bool PUBLIC_CODE emsGetVersion(void)
+bool __far emsGetVersion (void)
 {
     union REGPACK regs;
 
@@ -320,7 +320,7 @@ bool PUBLIC_CODE emsGetVersion(void)
     }
 }
 
-uint16_t PUBLIC_CODE emsGetFrameSeg(void)
+uint16_t __far emsGetFrameSeg (void)
 {
     union REGPACK regs;
 
@@ -335,7 +335,7 @@ uint16_t PUBLIC_CODE emsGetFrameSeg(void)
         return regs.w.bx;
 }
 
-uint16_t PUBLIC_CODE emsGetFreePagesCount(void)
+uint16_t __far emsGetFreePagesCount (void)
 {
     union REGPACK regs;
 
@@ -366,7 +366,7 @@ EMSHDL __near _ems_alloc(uint16_t pages)
         return regs.w.dx;
 }
 
-EMSHDL PUBLIC_CODE emsAlloc(uint16_t pages)
+EMSHDL __far emsAlloc (uint16_t pages)
 {
     EMSHDL h;
 
@@ -377,7 +377,7 @@ EMSHDL PUBLIC_CODE emsAlloc(uint16_t pages)
     return h;
 }
 
-bool PUBLIC_CODE emsResize(EMSHDL handle, uint16_t pages)
+bool __far emsResize (EMSHDL handle, uint16_t pages)
 {
     union REGPACK regs;
 
@@ -415,7 +415,7 @@ bool __near _ems_free(EMSHDL handle)
         return true;
 }
 
-bool PUBLIC_CODE emsFree(EMSHDL handle)
+bool __far emsFree (EMSHDL handle)
 {
     if (_ems_free(handle))
     {
@@ -426,7 +426,7 @@ bool PUBLIC_CODE emsFree(EMSHDL handle)
     return false;
 }
 
-bool PUBLIC_CODE emsMap(EMSHDL handle, uint16_t logPage, uint8_t physPage)
+bool __far emsMap (EMSHDL handle, uint16_t logPage, uint8_t physPage)
 {
     union REGPACK regs;
 
@@ -444,7 +444,7 @@ bool PUBLIC_CODE emsMap(EMSHDL handle, uint16_t logPage, uint8_t physPage)
         return true;
 }
 
-bool PUBLIC_CODE emsSaveMap(EMSHDL handle)
+bool __far emsSaveMap (EMSHDL handle)
 {
     union REGPACK regs;
 
@@ -460,7 +460,7 @@ bool PUBLIC_CODE emsSaveMap(EMSHDL handle)
         return true;
 }
 
-bool PUBLIC_CODE emsRestoreMap(EMSHDL handle)
+bool __far emsRestoreMap (EMSHDL handle)
 {
     union REGPACK regs;
 
@@ -476,7 +476,7 @@ bool PUBLIC_CODE emsRestoreMap(EMSHDL handle)
         return true;
 }
 
-uint16_t PUBLIC_CODE emsGetHandleSize(EMSHDL handle)
+uint16_t __far emsGetHandleSize (EMSHDL handle)
 {
     union REGPACK regs;
 
@@ -492,7 +492,7 @@ uint16_t PUBLIC_CODE emsGetHandleSize(EMSHDL handle)
         return regs.w.bx;
 }
 
-bool PUBLIC_CODE emsSetHandleName(EMSHDL handle, EMSNAME *name)
+bool __far emsSetHandleName (EMSHDL handle, EMSNAME *name)
 {
     union REGPACK regs;
 

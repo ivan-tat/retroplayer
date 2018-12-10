@@ -20,10 +20,6 @@
 
 #include "player/w_pat.h"
 
-// FIXME: make these private:
-extern uint8_t PUBLIC_DATA lastrow;
-extern uint8_t PUBLIC_DATA startchn;
-
 void __far win_pattern_init(SCRWIN *self)
 {
     scrwin_init(

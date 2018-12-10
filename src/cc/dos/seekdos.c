@@ -23,7 +23,7 @@
 /*
 unsigned _cc_dos_seek(int fd, long offset, int kind, long *newoffset)
 */
-uint16_t PUBLIC_CODE _cc_dos_seek(int16_t fd, int32_t offset, int16_t kind, int32_t *newoffset)
+uint16_t __far _cc_dos_seek (int16_t fd, int32_t offset, int16_t kind, int32_t *newoffset)
 {
     union CC_REGPACK regs;
     uint16_t error;

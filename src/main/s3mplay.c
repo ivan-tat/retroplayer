@@ -143,18 +143,18 @@ void __far ISR_play(void)
 
 /* Player */
 
-void PUBLIC_CODE player_clear_error(void)
+void __far player_clear_error (void)
 {
     player_error = E_PLAYER_SUCCESS;
     player_error_msg = NULL;
 }
 
-bool PUBLIC_CODE player_is_error(void)
+bool __far player_is_error (void)
 {
     return player_error != E_PLAYER_SUCCESS;
 }
 
-const char *PUBLIC_CODE player_get_error(void)
+const char *__far player_get_error (void)
 {
     int i;
 
@@ -172,7 +172,7 @@ const char *PUBLIC_CODE player_get_error(void)
     return PLAYER_ERROR_UNKNOWN;
 }
 
-bool PUBLIC_CODE player_init(void)
+bool __far player_init (void)
 {
     uint16_t len;
 
@@ -239,7 +239,7 @@ bool PUBLIC_CODE player_init(void)
     return true;
 }
 
-bool PUBLIC_CODE player_init_device(uint8_t type)
+bool __far player_init_device (uint8_t type)
 {
     DEBUG_BEGIN("player_init_device");
 
@@ -289,13 +289,13 @@ bool PUBLIC_CODE player_init_device(uint8_t type)
     }
 }
 
-void PUBLIC_CODE player_device_dump_conf(void)
+void __far player_device_dump_conf (void)
 {
     if (player_flags_snddev)
         sb_conf_dump(player_device);
 }
 
-char *PUBLIC_CODE player_device_get_name(void)
+char *__far player_device_get_name (void)
 {
     if (player_flags_snddev)
         return sb_get_name(player_device);
@@ -303,7 +303,7 @@ char *PUBLIC_CODE player_device_get_name(void)
         return NULL;
 }
 
-bool PUBLIC_CODE player_set_mode(bool f_16bits, bool f_stereo, uint16_t rate, bool LQ)
+bool __far player_set_mode (bool f_16bits, bool f_stereo, uint16_t rate, bool LQ)
 {
     DEBUG_BEGIN("player_set_mode");
 
@@ -331,22 +331,22 @@ bool PUBLIC_CODE player_set_mode(bool f_16bits, bool f_stereo, uint16_t rate, bo
     return true;
 }
 
-uint16_t PUBLIC_CODE player_get_output_rate(void)
+uint16_t __far player_get_output_rate (void)
 {
     return player_mode_rate;
 }
 
-uint8_t PUBLIC_CODE player_get_output_channels(void)
+uint8_t __far player_get_output_channels (void)
 {
     return player_mode_channels;
 }
 
-uint8_t PUBLIC_CODE player_get_output_bits(void)
+uint8_t __far player_get_output_bits (void)
 {
     return player_mode_bits;
 }
 
-bool PUBLIC_CODE player_get_output_lq(void)
+bool __far player_get_output_lq (void)
 {
     return player_mode_lq;
 }
@@ -397,7 +397,7 @@ bool __near _player_setup_outbuf(SNDDMABUF *outbuf, uint16_t spc)
     }
 }
 
-void PUBLIC_CODE player_set_master_volume(uint8_t value)
+void __far player_set_master_volume (uint8_t value)
 {
     if (value > 127)
         value = 127;
@@ -405,7 +405,7 @@ void PUBLIC_CODE player_set_master_volume(uint8_t value)
     amptab_set_volume(value);
 }
 
-uint8_t PUBLIC_CODE player_get_master_volume(void)
+uint8_t __far player_get_master_volume (void)
 {
     return playState_mVolume;
 }
@@ -438,7 +438,7 @@ void __near _player_setup_patterns_order(void)
     LastOrder = i;
 }
 
-void PUBLIC_CODE player_set_order(bool extended)
+void __far player_set_order (bool extended)
 {
     if (playOption_ST3Order != extended)
     {
@@ -447,7 +447,7 @@ void PUBLIC_CODE player_set_order(bool extended)
         _player_setup_patterns_order();
 }
 
-bool PUBLIC_CODE player_load_s3m(char *name)
+bool __far player_load_s3m (char *name)
 {
     S3MLOADER *p;
 
@@ -498,7 +498,7 @@ void __near _player_set_initial_state(void)
     _player_reset_channels();
 }
 
-void player_set_pos(uint8_t start_order, uint8_t start_row, bool keep)
+void __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep)
 {
     // Module
     playState_tick = 1;         // last tick (go to next row)
@@ -516,7 +516,7 @@ void player_set_pos(uint8_t start_order, uint8_t start_row, bool keep)
     }
 }
 
-bool PUBLIC_CODE player_play_start(void)
+bool __far player_play_start (void)
 {
     SNDDMABUF *outbuf;
     uint16_t frame_size;
@@ -618,45 +618,45 @@ bool PUBLIC_CODE player_play_start(void)
     return true;
 }
 
-void PUBLIC_CODE player_play_pause(void)
+void __far player_play_pause (void)
 {
     if (player_device)
         sb_transfer_pause(player_device);
 }
 
-void PUBLIC_CODE player_play_continue(void)
+void __far player_play_continue (void)
 {
     if (player_device)
         sb_transfer_continue(player_device);
 }
 
-void PUBLIC_CODE player_play_stop(void)
+void __far player_play_stop (void)
 {
     if (player_device)
         sb_transfer_stop(player_device);
 }
 
-uint16_t PUBLIC_CODE player_get_buffer_pos(void)
+uint16_t __far player_get_buffer_pos (void)
 {
     return sb_get_buffer_pos(player_device);
 }
 
-uint8_t PUBLIC_CODE player_get_speed(void)
+uint8_t __far player_get_speed (void)
 {
     return playState_speed;
 }
 
-uint8_t PUBLIC_CODE player_get_tempo(void)
+uint8_t __far player_get_tempo (void)
 {
     return playState_tempo;
 }
 
-uint8_t PUBLIC_CODE player_get_pattern_delay(void)
+uint8_t __far player_get_pattern_delay (void)
 {
     return playState_patDelayCount;
 }
 
-void PUBLIC_CODE player_free_module(void)
+void __far player_free_module (void)
 {
     DEBUG_BEGIN("player_free_module");
 
@@ -677,7 +677,7 @@ void PUBLIC_CODE player_free_module(void)
     DEBUG_END("player_free_module");
 }
 
-void PUBLIC_CODE player_free_device(void)
+void __far player_free_device (void)
 {
     DEBUG_BEGIN("player_free_device");
 
@@ -690,7 +690,7 @@ void PUBLIC_CODE player_free_device(void)
     DEBUG_END("player_free_device");
 }
 
-void PUBLIC_CODE player_free(void)
+void __far player_free (void)
 {
     DEBUG_BEGIN("player_free");
 

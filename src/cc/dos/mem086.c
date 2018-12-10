@@ -14,7 +14,7 @@
 /*
 unsigned _cc_dos_para(unsigned size)
 */
-uint16_t PUBLIC_CODE _cc_dos_para(uint32_t size)
+uint16_t __far _cc_dos_para (uint32_t size)
 {
     return __cc_dos_para(size);
 }
@@ -24,7 +24,7 @@ uint16_t PUBLIC_CODE _cc_dos_para(uint32_t size)
 /*
 unsigned _cc_dos_allocmem(unsigned size, unsigned *seg)
 */
-uint16_t PUBLIC_CODE _cc_dos_allocmem(uint16_t size, uint16_t *seg)
+uint16_t __far _cc_dos_allocmem (uint16_t size, uint16_t *seg)
 {
     union CC_REGPACK regs;
     uint16_t error;
@@ -43,7 +43,7 @@ uint16_t PUBLIC_CODE _cc_dos_allocmem(uint16_t size, uint16_t *seg)
 /*
 unsigned _cc_dos_freemem(unsigned seg)
 */
-uint16_t PUBLIC_CODE _cc_dos_freemem(uint16_t seg)
+uint16_t __far _cc_dos_freemem (uint16_t seg)
 {
     union CC_REGPACK regs;
 
@@ -56,7 +56,7 @@ uint16_t PUBLIC_CODE _cc_dos_freemem(uint16_t seg)
 /*
 unsigned _cc_dos_setblock(unsigned size, unsigned seg, unsigned *max)
 */
-uint16_t PUBLIC_CODE _cc_dos_setblock(uint16_t size, uint16_t seg, uint16_t *max)
+uint16_t __far _cc_dos_setblock (uint16_t size, uint16_t seg, uint16_t *max)
 {
     union CC_REGPACK regs;
     uint16_t error;

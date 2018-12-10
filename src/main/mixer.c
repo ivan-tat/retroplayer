@@ -25,8 +25,6 @@ uint32_t _calc_sample_step(uint16_t period, uint16_t rate)
     return b;
 }
 
-/* TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done */
-
 #ifdef DEFINE_LOCAL_DATA
 
 static uint16_t ST3Periods[12] =

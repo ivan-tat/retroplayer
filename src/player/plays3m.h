@@ -30,7 +30,7 @@ void write_Note(uint8_t note);
 uint8_t nextord(uint8_t nr);
 uint8_t prevorder(uint8_t nr);
 
-void PUBLIC_CODE plays3m_main(void);
+void __far plays3m_main (void);
 
 /*** Initialization ***/
 
@@ -44,6 +44,9 @@ DECLARE_REGISTRATION (plays3m)
 #pragma aux getFreeEMMMemory "*";
 
 #pragma aux chnlastinst "*";
+
+#pragma aux lastrow "*";
+#pragma aux startchn "*";
 
 #pragma aux get_note_name "*";
 #pragma aux write_Note "*";

@@ -13,7 +13,7 @@
 
 #include "cc/unistd.h"
 
-extern int16_t PUBLIC_DATA pascal_doserror;
+extern int16_t pascal_doserror;
 #ifdef __WATCOMC__
 #pragma aux pascal_doserror "*";
 #endif  /* __WATCOMC__ */

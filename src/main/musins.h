@@ -60,31 +60,31 @@ typedef struct instrument_t MUSINS;
 
 typedef struct instrument_t PCMSMP;
 
-void       PUBLIC_CODE musins_init(MUSINS *self);
-void       PUBLIC_CODE musins_set_type(MUSINS *self, MUSINSTYPE value);
-MUSINSTYPE PUBLIC_CODE musins_get_type(MUSINS *self);
-void       PUBLIC_CODE musins_set_looped(MUSINS *self, bool value);
-bool       PUBLIC_CODE musins_is_looped(MUSINS *self);
-void       PUBLIC_CODE musins_set_EM_data(MUSINS *self, bool value);
-bool       PUBLIC_CODE musins_is_EM_data(MUSINS *self);
-void       PUBLIC_CODE musins_set_EM_data_page(MUSINS *self, uint16_t value);
-uint16_t   PUBLIC_CODE musins_get_EM_data_page(MUSINS *self);
-void       PUBLIC_CODE musins_set_data(MUSINS *self, void *value);
-void      *PUBLIC_CODE musins_get_data(MUSINS *self);
-void      *PUBLIC_CODE musins_map_EM_data(MUSINS *self);
-void       PUBLIC_CODE musins_set_length(MUSINS *self, uint32_t value);
-uint32_t   PUBLIC_CODE musins_get_length(MUSINS *self);
-void       PUBLIC_CODE musins_set_loop_start(MUSINS *self, uint32_t value);
-uint32_t   PUBLIC_CODE musins_get_loop_start(MUSINS *self);
-void       PUBLIC_CODE musins_set_loop_end(MUSINS *self, uint32_t value);
-uint32_t   PUBLIC_CODE musins_get_loop_end(MUSINS *self);
-void       PUBLIC_CODE musins_set_volume(MUSINS *self, uint8_t value);
-uint8_t    PUBLIC_CODE musins_get_volume(MUSINS *self);
-void       PUBLIC_CODE musins_set_rate(MUSINS *self, uint32_t value);
-uint32_t   PUBLIC_CODE musins_get_rate(MUSINS *self);
-void       PUBLIC_CODE musins_set_title(MUSINS *self, char *value);
-char      *PUBLIC_CODE musins_get_title(MUSINS *self);
-void       PUBLIC_CODE musins_free(MUSINS *self);
+void       __far musins_init (MUSINS *self);
+void       __far musins_set_type (MUSINS *self, MUSINSTYPE value);
+MUSINSTYPE __far musins_get_type (MUSINS *self);
+void       __far musins_set_looped (MUSINS *self, bool value);
+bool       __far musins_is_looped (MUSINS *self);
+void       __far musins_set_EM_data (MUSINS *self, bool value);
+bool       __far musins_is_EM_data (MUSINS *self);
+void       __far musins_set_EM_data_page (MUSINS *self, uint16_t value);
+uint16_t   __far musins_get_EM_data_page (MUSINS *self);
+void       __far musins_set_data (MUSINS *self, void *value);
+void      *__far musins_get_data (MUSINS *self);
+void      *__far musins_map_EM_data (MUSINS *self);
+void       __far musins_set_length (MUSINS *self, uint32_t value);
+uint32_t   __far musins_get_length (MUSINS *self);
+void       __far musins_set_loop_start (MUSINS *self, uint32_t value);
+uint32_t   __far musins_get_loop_start (MUSINS *self);
+void       __far musins_set_loop_end (MUSINS *self, uint32_t value);
+uint32_t   __far musins_get_loop_end (MUSINS *self);
+void       __far musins_set_volume (MUSINS *self, uint8_t value);
+uint8_t    __far musins_get_volume (MUSINS *self);
+void       __far musins_set_rate (MUSINS *self, uint32_t value);
+uint32_t   __far musins_get_rate (MUSINS *self);
+void       __far musins_set_title (MUSINS *self, char *value);
+char      *__far musins_get_title (MUSINS *self);
+void       __far musins_free (MUSINS *self);
 
 /*** Musical instruments list ***/
 
@@ -94,16 +94,16 @@ void       PUBLIC_CODE musins_free(MUSINS *self);
 typedef MUSINS instrumentsList_t[MAX_INSTRUMENTS];
 typedef instrumentsList_t MUSINSLIST;
 
-MUSINSLIST *PUBLIC_CODE musinsl_new(void);
-void        PUBLIC_CODE musinsl_init(MUSINSLIST *self);
-void        PUBLIC_CODE musinsl_set_EM_data(MUSINSLIST *self, bool value);
-bool        PUBLIC_CODE musinsl_is_EM_data(MUSINSLIST *self);
-MUSINS     *PUBLIC_CODE musinsl_get(MUSINSLIST *self, uint16_t index);
-void        PUBLIC_CODE musinsl_set_EM_data_handle(MUSINSLIST *self, EMSHDL value);
-void        PUBLIC_CODE musinsl_set_EM_handle_name(MUSINSLIST *self);
-uint32_t    PUBLIC_CODE musinsl_get_used_EM(MUSINSLIST *self);
-void        PUBLIC_CODE musinsl_free(MUSINSLIST *self);
-void        PUBLIC_CODE musinsl_delete(MUSINSLIST **self);
+MUSINSLIST *__far musinsl_new (void);
+void        __far musinsl_init (MUSINSLIST *self);
+void        __far musinsl_set_EM_data (MUSINSLIST *self, bool value);
+bool        __far musinsl_is_EM_data (MUSINSLIST *self);
+MUSINS     *__far musinsl_get (MUSINSLIST *self, uint16_t index);
+void        __far musinsl_set_EM_data_handle (MUSINSLIST *self, EMSHDL value);
+void        __far musinsl_set_EM_handle_name (MUSINSLIST *self);
+uint32_t    __far musinsl_get_used_EM (MUSINSLIST *self);
+void        __far musinsl_free (MUSINSLIST *self);
+void        __far musinsl_delete (MUSINSLIST **self);
 
 /*** Variables ***/
 

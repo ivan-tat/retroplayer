@@ -21,7 +21,7 @@
 /*
 unsigned _cc_dos_close(int fd)
 */
-uint16_t PUBLIC_CODE _cc_dos_close(int16_t fd)
+uint16_t __far _cc_dos_close (int16_t fd)
 {
     union CC_REGPACK regs;
 
@@ -40,7 +40,7 @@ uint16_t PUBLIC_CODE _cc_dos_close(int16_t fd)
 /*
 unsigned _cc_dos_commit(int fd)
 */
-uint16_t PUBLIC_CODE _cc_dos_commit(int16_t fd)
+uint16_t __far _cc_dos_commit (int16_t fd)
 {
     union CC_REGPACK regs;
 

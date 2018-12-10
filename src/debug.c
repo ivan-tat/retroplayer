@@ -155,42 +155,42 @@ void __far _DEBUG_UNREG(const char *file, const char *method, const char *name)
     _DEBUG_LOG(DBGLOG_INFO, file, 0, method, "Unregistering module <%s>...", name);
 }
 
-void PUBLIC_CODE Debug_Msg(const char *file, const char *method, const char *msg)
+void __far __pascal Debug_Msg (const char *file, const char *method, const char *msg)
 {
     _DEBUG_LOG(DBGLOG_MSG, file, 0, method, msg);
 }
 
-void PUBLIC_CODE Debug_Info(const char *file, const char *method, const char *msg)
+void __far __pascal Debug_Info (const char *file, const char *method, const char *msg)
 {
     _DEBUG_LOG(DBGLOG_INFO, file, 0, method, msg);
 }
 
-void PUBLIC_CODE Debug_Warn(const char *file, const char *method, const char *msg)
+void __far __pascal Debug_Warn (const char *file, const char *method, const char *msg)
 {
     _DEBUG_LOG(DBGLOG_WARN, file, 0, method, msg);
 }
 
-void PUBLIC_CODE Debug_Err(const char *file, const char *method, const char *msg)
+void __far __pascal Debug_Err (const char *file, const char *method, const char *msg)
 {
     _DEBUG_LOG(DBGLOG_ERR, file, 0, method, msg);
 }
 
-void PUBLIC_CODE Debug_Begin(const char *file, const char *method)
+void __far __pascal Debug_Begin (const char *file, const char *method)
 {
     _DEBUG_BEGIN(file, 0, method);
 }
 
-void PUBLIC_CODE Debug_End(const char *file, const char *method)
+void __far __pascal Debug_End (const char *file, const char *method)
 {
     _DEBUG_END(file, 0, method);
 }
 
-void PUBLIC_CODE Debug_Fail(const char *file, const char *method, const char *msg)
+void __far __pascal Debug_Fail (const char *file, const char *method, const char *msg)
 {
     _DEBUG_FAIL(file, 0, method, msg);
 }
 
-void PUBLIC_CODE Debug_Success(const char *file, const char *method)
+void __far __pascal Debug_Success (const char *file, const char *method)
 {
     _DEBUG_SUCCESS(file, 0, method);
 }

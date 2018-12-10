@@ -19,19 +19,19 @@
 
 /*** Musical instrument ***/
 
-void PUBLIC_CODE musins_init(MUSINS *self)
+void __far musins_init (MUSINS *self)
 {
     if (self)
         memset(self, 0, sizeof(MUSINS));
 }
 
-void PUBLIC_CODE musins_set_type(MUSINS *self, MUSINSTYPE value)
+void __far musins_set_type (MUSINS *self, MUSINSTYPE value)
 {
     if (self)
         self->bType = value;
 }
 
-MUSINSTYPE PUBLIC_CODE musins_get_type(MUSINS *self)
+MUSINSTYPE __far musins_get_type (MUSINS *self)
 {
     if (self)
         return self->bType;
@@ -39,7 +39,7 @@ MUSINSTYPE PUBLIC_CODE musins_get_type(MUSINS *self)
         return MUSINST_EMPTY;
 }
 
-void PUBLIC_CODE musins_set_looped(MUSINS *self, bool value)
+void __far musins_set_looped (MUSINS *self, bool value)
 {
     if (self)
     {
@@ -50,7 +50,7 @@ void PUBLIC_CODE musins_set_looped(MUSINS *self, bool value)
     }
 }
 
-bool PUBLIC_CODE musins_is_looped(MUSINS *self)
+bool __far musins_is_looped (MUSINS *self)
 {
     if (self)
         return (self->flags & SMPFLAG_LOOP) != 0;
@@ -58,7 +58,7 @@ bool PUBLIC_CODE musins_is_looped(MUSINS *self)
         return false;
 }
 
-void PUBLIC_CODE musins_set_EM_data(MUSINS *self, bool value)
+void __far musins_set_EM_data (MUSINS *self, bool value)
 {
     if (self)
     {
@@ -69,7 +69,7 @@ void PUBLIC_CODE musins_set_EM_data(MUSINS *self, bool value)
     }
 }
 
-bool PUBLIC_CODE musins_is_EM_data(MUSINS *self)
+bool __far musins_is_EM_data (MUSINS *self)
 {
     if (self)
         return self->memseg >= 0xf000;
@@ -77,13 +77,13 @@ bool PUBLIC_CODE musins_is_EM_data(MUSINS *self)
         return false;
 }
 
-void PUBLIC_CODE musins_set_EM_data_page(MUSINS *self, uint16_t value)
+void __far musins_set_EM_data_page (MUSINS *self, uint16_t value)
 {
     if (self)
         self->memseg = (self->memseg & 0xf000) + (value & 0x0fff);
 }
 
-uint16_t PUBLIC_CODE musins_get_EM_data_page(MUSINS *self)
+uint16_t __far musins_get_EM_data_page (MUSINS *self)
 {
     if (self)
         return self->memseg & 0x0fff;
@@ -91,13 +91,13 @@ uint16_t PUBLIC_CODE musins_get_EM_data_page(MUSINS *self)
         return 0;
 }
 
-void PUBLIC_CODE musins_set_data(MUSINS *self, void *value)
+void __far musins_set_data (MUSINS *self, void *value)
 {
     if (self)
         self->memseg = FP_SEG(value);
 }
 
-void *PUBLIC_CODE musins_get_data(MUSINS *self)
+void *__far musins_get_data (MUSINS *self)
 {
     if (self)
     {
@@ -110,7 +110,7 @@ void *PUBLIC_CODE musins_get_data(MUSINS *self)
         return NULL;
 }
 
-void *PUBLIC_CODE musins_map_EM_data(MUSINS *self)
+void *__far musins_map_EM_data (MUSINS *self)
 {
     uint16_t page;
     uint8_t physPage, count;
@@ -132,13 +132,13 @@ void *PUBLIC_CODE musins_map_EM_data(MUSINS *self)
         return NULL;
 }
 
-void PUBLIC_CODE musins_set_length(MUSINS *self, uint32_t value)
+void __far musins_set_length (MUSINS *self, uint32_t value)
 {
     if (self)
         self->slength = value;
 }
 
-uint32_t PUBLIC_CODE musins_get_length(MUSINS *self)
+uint32_t __far musins_get_length (MUSINS *self)
 {
     if (self)
         return self->slength;
@@ -146,13 +146,13 @@ uint32_t PUBLIC_CODE musins_get_length(MUSINS *self)
         return 0;
 }
 
-void PUBLIC_CODE musins_set_loop_start(MUSINS *self, uint32_t value)
+void __far musins_set_loop_start (MUSINS *self, uint32_t value)
 {
     if (self)
         self->loopbeg = value;
 }
 
-uint32_t PUBLIC_CODE musins_get_loop_start(MUSINS *self)
+uint32_t __far musins_get_loop_start (MUSINS *self)
 {
     if (self)
         return self->loopbeg;
@@ -160,13 +160,13 @@ uint32_t PUBLIC_CODE musins_get_loop_start(MUSINS *self)
         return 0;
 }
 
-void PUBLIC_CODE musins_set_loop_end(MUSINS *self, uint32_t value)
+void __far musins_set_loop_end (MUSINS *self, uint32_t value)
 {
     if (self)
         self->loopend = value;
 }
 
-uint32_t PUBLIC_CODE musins_get_loop_end(MUSINS *self)
+uint32_t __far musins_get_loop_end (MUSINS *self)
 {
     if (self)
         return self->loopend;
@@ -174,13 +174,13 @@ uint32_t PUBLIC_CODE musins_get_loop_end(MUSINS *self)
         return 0;
 }
 
-void PUBLIC_CODE musins_set_volume(MUSINS *self, uint8_t value)
+void __far musins_set_volume (MUSINS *self, uint8_t value)
 {
     if (self)
         self->vol = value;
 }
 
-uint8_t PUBLIC_CODE musins_get_volume(MUSINS *self)
+uint8_t __far musins_get_volume (MUSINS *self)
 {
     if (self)
         return self->vol;
@@ -188,13 +188,13 @@ uint8_t PUBLIC_CODE musins_get_volume(MUSINS *self)
         return 0;
 }
 
-void PUBLIC_CODE musins_set_rate(MUSINS *self, uint32_t value)
+void __far musins_set_rate (MUSINS *self, uint32_t value)
 {
     if (self)
         self->c2speed = value;
 }
 
-uint32_t PUBLIC_CODE musins_get_rate(MUSINS *self)
+uint32_t __far musins_get_rate (MUSINS *self)
 {
     if (self)
         return self->c2speed;
@@ -202,13 +202,13 @@ uint32_t PUBLIC_CODE musins_get_rate(MUSINS *self)
         return 0;
 }
 
-void PUBLIC_CODE musins_set_title(MUSINS *self, char *value)
+void __far musins_set_title (MUSINS *self, char *value)
 {
     if (self)
         strncpy(self->IName, value, MUSINS_TITLE_LENGTH_MAX);
 }
 
-char *PUBLIC_CODE musins_get_title(MUSINS *self)
+char *__far musins_get_title (MUSINS *self)
 {
     if (self)
         return self->IName;
@@ -216,7 +216,7 @@ char *PUBLIC_CODE musins_get_title(MUSINS *self)
         return NULL;
 }
 
-void PUBLIC_CODE musins_free(MUSINS *self)
+void __far musins_free (MUSINS *self)
 {
     void *data;
 
@@ -242,7 +242,7 @@ void PUBLIC_CODE musins_free(MUSINS *self)
 
 static EMSNAME EMS_INSLIST_HANDLE_NAME = "inslist";
 
-MUSINSLIST *PUBLIC_CODE musinsl_new(void)
+MUSINSLIST *__far musinsl_new (void)
 {
     uint16_t seg;
 
@@ -252,7 +252,7 @@ MUSINSLIST *PUBLIC_CODE musinsl_new(void)
         return NULL;
 }
 
-void PUBLIC_CODE musinsl_init(MUSINSLIST *self)
+void __far musinsl_init (MUSINSLIST *self)
 {
     uint16_t i;
 
@@ -261,13 +261,13 @@ void PUBLIC_CODE musinsl_init(MUSINSLIST *self)
             musins_set_type(musinsl_get(self, i), MUSINST_EMPTY);
 }
 
-void PUBLIC_CODE musinsl_set_EM_data(MUSINSLIST *self, bool value)
+void __far musinsl_set_EM_data (MUSINSLIST *self, bool value)
 {
     if (self)
         mod_Samples_EMData = value;
 }
 
-bool PUBLIC_CODE musinsl_is_EM_data(MUSINSLIST *self)
+bool __far musinsl_is_EM_data (MUSINSLIST *self)
 {
     if (self)
         return mod_Samples_EMData;
@@ -275,7 +275,7 @@ bool PUBLIC_CODE musinsl_is_EM_data(MUSINSLIST *self)
         return false;
 }
 
-MUSINS *PUBLIC_CODE musinsl_get(MUSINSLIST *self, uint16_t index)
+MUSINS *__far musinsl_get (MUSINSLIST *self, uint16_t index)
 {
     if (self)
         return (MUSINS *)MK_FP(FP_SEG(self), FP_OFF(self) + index * sizeof(MUSINS));
@@ -283,19 +283,19 @@ MUSINS *PUBLIC_CODE musinsl_get(MUSINSLIST *self, uint16_t index)
         return NULL;
 }
 
-void PUBLIC_CODE musinsl_set_EM_data_handle(MUSINSLIST *self, EMSHDL value)
+void __far musinsl_set_EM_data_handle (MUSINSLIST *self, EMSHDL value)
 {
     if (self)
         mod_Samples_EMHandle = value;
 }
 
-void PUBLIC_CODE musinsl_set_EM_handle_name(MUSINSLIST *self)
+void __far musinsl_set_EM_handle_name (MUSINSLIST *self)
 {
     if (self)
         emsSetHandleName(mod_Samples_EMHandle, &EMS_INSLIST_HANDLE_NAME);
 }
 
-uint32_t PUBLIC_CODE musinsl_get_used_EM(MUSINSLIST *self)
+uint32_t __far musinsl_get_used_EM (MUSINSLIST *self)
 {
     if (mod_Samples_EMData)
         return (uint32_t) emsGetHandleSize(mod_Samples_EMHandle) << 4;
@@ -303,7 +303,7 @@ uint32_t PUBLIC_CODE musinsl_get_used_EM(MUSINSLIST *self)
         return 0;
 }
 
-void PUBLIC_CODE musinsl_free(MUSINSLIST *self)
+void __far musinsl_free (MUSINSLIST *self)
 {
     uint16_t i;
 
@@ -318,7 +318,7 @@ void PUBLIC_CODE musinsl_free(MUSINSLIST *self)
     }
 }
 
-void PUBLIC_CODE musinsl_delete(MUSINSLIST **self)
+void __far musinsl_delete (MUSINSLIST **self)
 {
     if (self)
         if (*self)

@@ -17,7 +17,7 @@
 
 #include "hw/vga.h"
 
-void PUBLIC_CODE vga_wait_vsync(void)
+void __far vga_wait_vsync (void)
 {
     _disable();
 
@@ -27,7 +27,7 @@ void PUBLIC_CODE vga_wait_vsync(void)
     _enable();
 }
 
-void PUBLIC_CODE vga_clear_page_320x200x8(char c)
+void __far vga_clear_page_320x200x8 (char c)
 {
     memset(MK_FP(drawseg, 0), c, 320*200);
 }

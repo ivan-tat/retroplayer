@@ -20,33 +20,33 @@
 
 extern char *PLAYER_VERSION;
 
-void     PUBLIC_CODE player_clear_error(void);
-bool     PUBLIC_CODE player_is_error(void);
-const char *PUBLIC_CODE player_get_error(void);
-bool     PUBLIC_CODE player_init(void);
-bool     PUBLIC_CODE player_init_device(uint8_t type);
-void     PUBLIC_CODE player_device_dump_conf(void);
-char    *PUBLIC_CODE player_device_get_name(void);
-bool     PUBLIC_CODE player_set_mode(bool f_16bits, bool f_stereo, uint16_t rate, bool LQ);
-uint16_t PUBLIC_CODE player_get_output_rate(void);
-uint8_t  PUBLIC_CODE player_get_output_channels(void);
-uint8_t  PUBLIC_CODE player_get_output_bits(void);
-bool     PUBLIC_CODE player_get_output_lq(void);
-void     PUBLIC_CODE player_set_master_volume(uint8_t value);
-uint8_t  PUBLIC_CODE player_get_master_volume(void);
-void     PUBLIC_CODE player_set_order(bool extended);
-bool     PUBLIC_CODE player_load_s3m(char *name);
-void     player_set_pos(uint8_t start_order, uint8_t start_row, bool keep);
-bool     PUBLIC_CODE player_play_start(void);
-void     PUBLIC_CODE player_play_pause(void);
-void     PUBLIC_CODE player_play_continue(void);
-void     PUBLIC_CODE player_play_stop(void);
-uint16_t PUBLIC_CODE player_get_buffer_pos(void);
-uint8_t  PUBLIC_CODE player_get_speed(void);
-uint8_t  PUBLIC_CODE player_get_tempo(void);
-uint8_t  PUBLIC_CODE player_get_pattern_delay(void);
-void     PUBLIC_CODE player_free_module(void);
-void     PUBLIC_CODE player_free(void);
+void     __far player_clear_error (void);
+bool     __far player_is_error (void);
+const char *__far player_get_error (void);
+bool     __far player_init (void);
+bool     __far player_init_device (uint8_t type);
+void     __far player_device_dump_conf (void);
+char    *__far player_device_get_name (void);
+bool     __far player_set_mode (bool f_16bits, bool f_stereo, uint16_t rate, bool LQ);
+uint16_t __far player_get_output_rate (void);
+uint8_t  __far player_get_output_channels (void);
+uint8_t  __far player_get_output_bits (void);
+bool     __far player_get_output_lq (void);
+void     __far player_set_master_volume (uint8_t value);
+uint8_t  __far player_get_master_volume (void);
+void     __far player_set_order (bool extended);
+bool     __far player_load_s3m (char *name);
+void     __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep);
+bool     __far player_play_start (void);
+void     __far player_play_pause (void);
+void     __far player_play_continue (void);
+void     __far player_play_stop (void);
+uint16_t __far player_get_buffer_pos (void);
+uint8_t  __far player_get_speed (void);
+uint8_t  __far player_get_tempo (void);
+uint8_t  __far player_get_pattern_delay (void);
+void     __far player_free_module (void);
+void     __far player_free (void);
 
 /*** Initialization ***/
 

@@ -20,9 +20,7 @@
 #include "main/s3mvars.h"
 #include "main/fillvars.h"
 
-/* TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done */
-
-void PUBLIC_CODE snddmabuf_init(SNDDMABUF *self)
+void __far snddmabuf_init (SNDDMABUF *self)
 {
     if (self)
     {
@@ -36,7 +34,7 @@ void PUBLIC_CODE snddmabuf_init(SNDDMABUF *self)
     }
 }
 
-bool PUBLIC_CODE snddmabuf_alloc(SNDDMABUF *self, uint32_t dmaSize)
+bool __far snddmabuf_alloc (SNDDMABUF *self, uint32_t dmaSize)
 {
     DEBUG_BEGIN("snddmabuf_alloc");
 
@@ -76,7 +74,7 @@ uint16_t __near _snddmabuf_get_frame_offset(SNDDMABUF *self, uint8_t index)
     return index < self->framesCount ? index * self->frameSize : 0;
 }
 
-uint16_t PUBLIC_CODE snddmabuf_get_frame_offset(SNDDMABUF *self, uint8_t index)
+uint16_t __far snddmabuf_get_frame_offset (SNDDMABUF *self, uint8_t index)
 {
     if (self)
         return _snddmabuf_get_frame_offset(self, index);
@@ -84,7 +82,7 @@ uint16_t PUBLIC_CODE snddmabuf_get_frame_offset(SNDDMABUF *self, uint8_t index)
         return 0;
 }
 
-void *PUBLIC_CODE snddmabuf_get_frame(SNDDMABUF *self, uint8_t index)
+void *__far snddmabuf_get_frame (SNDDMABUF *self, uint8_t index)
 {
     void *data;
 
@@ -98,7 +96,7 @@ void *PUBLIC_CODE snddmabuf_get_frame(SNDDMABUF *self, uint8_t index)
     return NULL;
 }
 
-uint16_t PUBLIC_CODE snddmabuf_get_offset_from_count(SNDDMABUF *self, uint16_t count)
+uint16_t __far snddmabuf_get_offset_from_count (SNDDMABUF *self, uint16_t count)
 {
     uint16_t bufOff;
 
@@ -121,7 +119,7 @@ uint16_t PUBLIC_CODE snddmabuf_get_offset_from_count(SNDDMABUF *self, uint16_t c
     return bufOff;
 }
 
-uint16_t PUBLIC_CODE snddmabuf_get_count_from_offset(SNDDMABUF *self, uint16_t bufOff)
+uint16_t __far snddmabuf_get_count_from_offset (SNDDMABUF *self, uint16_t bufOff)
 {
     uint16_t count;
 
@@ -144,7 +142,7 @@ uint16_t PUBLIC_CODE snddmabuf_get_count_from_offset(SNDDMABUF *self, uint16_t b
     return count;
 }
 
-void PUBLIC_CODE snddmabuf_free(SNDDMABUF *self)
+void __far snddmabuf_free (SNDDMABUF *self)
 {
     if (self)
         if (self->buf)

@@ -21,7 +21,7 @@ unsigned _cc_dos_open(const char *fname, unsigned mode, int *fd)
  *      - file mode flags as defined in "cc/dos.h" file (CC_O_*_DOS constants) and
  *      - access/open mode flags as defined in "cc/share.h" (CC_SH_* constants)
  */
-uint16_t PUBLIC_CODE _cc_dos_open(const char *fname, uint16_t mode, int16_t *fd)
+uint16_t __far _cc_dos_open (const char *fname, uint16_t mode, int16_t *fd)
 {
     union CC_REGPACK regs;
     uint16_t error;

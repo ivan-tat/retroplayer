@@ -20,8 +20,6 @@
 
 #include "main/readnote.h"
 
-// TODO: remove PUBLIC_CODE macros when done.
-
 /**********************************************************************/
 
 /* Pattern's descriptor for sequentional reading */
@@ -257,7 +255,7 @@ PATFLOWSTATE __near pat_playRow(MUSPAT *pat)
 
 /**********************************************************************/
 
-void PUBLIC_CODE readnewnotes(void)
+void __far readnewnotes (void)
 {
     char firstPlay;
     PATFLOWSTATE status;

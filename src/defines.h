@@ -18,8 +18,4 @@
 #define CRLF "\r\n"
 //#define CRLF "\n"
 
-#define PUBLIC_DATA __pascal
-#define PUBLIC_CODE __far __pascal
-#define EXTERN_LINK extern
-
 #endif  /* DEFINES_H */

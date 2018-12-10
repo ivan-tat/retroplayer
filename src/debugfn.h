@@ -12,7 +12,7 @@
 #pragma once
 #endif
 
-extern void PUBLIC_CODE _DEBUG_print(const char *str);
+extern void __far __pascal _DEBUG_print(const char *str);
 
 void __far _DEBUG_get_xnum(uint32_t value, char len, char *dest);
 void __far _DEBUG_get_xline(void *buf, uint8_t size, uint8_t max, char *dest);

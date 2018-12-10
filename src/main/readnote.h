@@ -17,7 +17,7 @@
 
 #include "pascal.h"
 
-void PUBLIC_CODE readnewnotes(void);
+void __far readnewnotes (void);
 
 /*** Linking ***/
 

@@ -13,7 +13,7 @@
 
 #include "cc/stdlib.h"
 
-extern void PUBLIC_CODE pascal_getmem(void **p, uint16_t size);
+extern void __far __pascal pascal_getmem(void **p, uint16_t size);
 
 #ifdef __WATCOMC__
 #pragma aux pascal_getmem "*" modify [ ax bx cx dx si di es ];

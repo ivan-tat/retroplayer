@@ -13,7 +13,7 @@
 
 #include "player/screen.h"
 
-void PUBLIC_CODE scrwin_init(
+void __far scrwin_init (
     SCRWIN *self,
     uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
     void *draw,
@@ -32,18 +32,18 @@ void PUBLIC_CODE scrwin_init(
     }
 }
 
-bool PUBLIC_CODE scrwin_is_created(SCRWIN *self)
+bool __far scrwin_is_created (SCRWIN *self)
 {
     return self != NULL;
 }
 
-void PUBLIC_CODE scrwin_set_flags(SCRWIN *self, WINFLAGS value)
+void __far scrwin_set_flags (SCRWIN *self, WINFLAGS value)
 {
     if (self)
         self->flags = value;
 }
 
-WINFLAGS PUBLIC_CODE scrwin_get_flags(SCRWIN *self)
+WINFLAGS __far scrwin_get_flags (SCRWIN *self)
 {
     if (self)
         return self->flags;
@@ -51,13 +51,13 @@ WINFLAGS PUBLIC_CODE scrwin_get_flags(SCRWIN *self)
         return 0;
 }
 
-void PUBLIC_CODE scrwin_set_width(SCRWIN *self, uint8_t value)
+void __far scrwin_set_width (SCRWIN *self, uint8_t value)
 {
     if (self)
         self->rect.x1 = self->rect.x0 + value;
 }
 
-uint8_t PUBLIC_CODE scrwin_get_width(SCRWIN *self)
+uint8_t __far scrwin_get_width (SCRWIN *self)
 {
     if (self)
         return self->rect.x1 - self->rect.x0;
@@ -65,13 +65,13 @@ uint8_t PUBLIC_CODE scrwin_get_width(SCRWIN *self)
         return 0;
 }
 
-void PUBLIC_CODE scrwin_set_height(SCRWIN *self, uint8_t value)
+void __far scrwin_set_height (SCRWIN *self, uint8_t value)
 {
     if (self)
         self->rect.y1 = self->rect.y0 + value;
 }
 
-uint8_t PUBLIC_CODE scrwin_get_height(SCRWIN *self)
+uint8_t __far scrwin_get_height (SCRWIN *self)
 {
     if (self)
         return self->rect.y1 - self->rect.y0;
@@ -95,7 +95,7 @@ void __near _scrwin_draw_end(SCRWIN *self)
         window(1, 1, scrWidth, scrHeight);
 }
 
-void PUBLIC_CODE scrwin_draw(SCRWIN *self)
+void __far scrwin_draw (SCRWIN *self)
 {
     if (self)
         if (self->flags & WINFL_VISIBLE)
@@ -113,7 +113,7 @@ void PUBLIC_CODE scrwin_draw(SCRWIN *self)
         }
 }
 
-bool PUBLIC_CODE scrwin_keypress(SCRWIN *self, char key)
+bool __far scrwin_keypress (SCRWIN *self, char key)
 {
     if (self)
         if (self->flags & WINFL_VISIBLE)
@@ -126,7 +126,7 @@ bool PUBLIC_CODE scrwin_keypress(SCRWIN *self, char key)
     return false;
 }
 
-void PUBLIC_CODE scrwin_show(SCRWIN *self)
+void __far scrwin_show (SCRWIN *self)
 {
     if (self)
     {
@@ -143,7 +143,7 @@ void PUBLIC_CODE scrwin_show(SCRWIN *self)
     }
 }
 
-void PUBLIC_CODE scrwin_focus(SCRWIN *self)
+void __far scrwin_focus (SCRWIN *self)
 {
     if (self)
         if ((self->flags & WINFL_VISIBLE)
@@ -159,7 +159,7 @@ void PUBLIC_CODE scrwin_focus(SCRWIN *self)
         }
 }
 
-void PUBLIC_CODE scrwin_leave(SCRWIN *self)
+void __far scrwin_leave (SCRWIN *self)
 {
     if (self)
         if ((self->flags & WINFL_VISIBLE)
@@ -175,7 +175,7 @@ void PUBLIC_CODE scrwin_leave(SCRWIN *self)
         }
 }
 
-void PUBLIC_CODE scrwin_close(SCRWIN *self)
+void __far scrwin_close (SCRWIN *self)
 {
     if (self)
     {

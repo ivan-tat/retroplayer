@@ -32,12 +32,12 @@ void __delete(void **p)
         }
 }
 
-void *PUBLIC_CODE _new_(uint16_t size)
+void *__far __pascal _new_ (uint16_t size)
 {
     return __new(size);
 }
 
-void PUBLIC_CODE _delete_(void **p)
+void __far __pascal _delete_ (void **p)
 {
     __delete(p);
 }

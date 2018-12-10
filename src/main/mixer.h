@@ -18,8 +18,6 @@
 
 #include "pascal.h"
 
-// TODO: remove PUBLIC_CODE macros when done.
-
 /* Sample playing */
 
 #define MIXSMPFL_16BITS 0x01
@@ -38,7 +36,7 @@ typedef struct playSampleInfo_t
 };
 #pragma pack(pop);
 
-extern void PUBLIC_CODE _MixSampleMono8(
+extern void __far __pascal _MixSampleMono8(
     void *outBuf,
     struct playSampleInfo_t *smpInfo,
     uint16_t volTab,
@@ -46,7 +44,7 @@ extern void PUBLIC_CODE _MixSampleMono8(
     uint16_t count
 );
 
-extern void PUBLIC_CODE _MixSampleStereo8(
+extern void __far __pascal _MixSampleStereo8(
     void *outBuf,
     struct playSampleInfo_t *smpInfo,
     uint16_t volTab,
@@ -62,7 +60,7 @@ void fill_32(void *dest, uint32_t value, uint16_t count);
 
 /* Playing */
 
-extern uint16_t PUBLIC_DATA ST3Periods[12];
+extern uint16_t ST3Periods[12];
 
 #define getNotePeriod(note) ((ST3Periods[(note) & 0x0f] << 4) >> ((note) >> 4))
 
@@ -120,6 +118,8 @@ extern MIXBUF mixBuf;
 /*** Linking ***/
 
 #ifdef __WATCOMC__
+
+#pragma aux ST3Periods "*";
 
 #pragma aux _MixSampleMono8 "*";
 #pragma aux _MixSampleMono16 "*";

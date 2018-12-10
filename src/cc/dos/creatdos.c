@@ -22,7 +22,7 @@
 /*
 unsigned _cc_dos_creat(const char *fname, unsigned mode, int *fd)
 */
-uint16_t PUBLIC_CODE _cc_dos_creat(const char *fname, uint16_t attr, int16_t *fd)
+uint16_t __far _cc_dos_creat (const char *fname, uint16_t attr, int16_t *fd)
 {
     union CC_REGPACK regs;
     uint16_t error;
@@ -48,7 +48,7 @@ uint16_t PUBLIC_CODE _cc_dos_creat(const char *fname, uint16_t attr, int16_t *fd
 /*
 unsigned _cc_dos_creatnew(const char *fname, unsigned attr, int *fd)
 */
-uint16_t PUBLIC_CODE _cc_dos_creatnew(const char *fname, uint16_t attr, int16_t *fd)
+uint16_t __far _cc_dos_creatnew (const char *fname, uint16_t attr, int16_t *fd)
 {
     union CC_REGPACK regs;
     uint16_t error;

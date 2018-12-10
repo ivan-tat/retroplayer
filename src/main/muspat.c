@@ -39,7 +39,7 @@
 #define _muspat_get_EM_data_offset(o)    o->data_off
 #define _muspat_get_EM_data(o)           MK_FP(emsFrameSeg, o->data_off)
 
-void PUBLIC_CODE muspat_init(MUSPAT *self)
+void __far muspat_init (MUSPAT *self)
 {
     if (self)
     {
@@ -48,13 +48,13 @@ void PUBLIC_CODE muspat_init(MUSPAT *self)
     }
 }
 
-void PUBLIC_CODE muspat_set_EM_data(MUSPAT *self, bool value)
+void __far muspat_set_EM_data (MUSPAT *self, bool value)
 {
     if (self)
         _muspat_set_EM_data(self, value);
 }
 
-bool PUBLIC_CODE muspat_is_EM_data(MUSPAT *self)
+bool __far muspat_is_EM_data (MUSPAT *self)
 {
     if (self)
         return _muspat_is_EM_data(self);
@@ -62,13 +62,13 @@ bool PUBLIC_CODE muspat_is_EM_data(MUSPAT *self)
         return false;
 }
 
-void PUBLIC_CODE muspat_set_own_EM_handle(MUSPAT *self, bool value)
+void __far muspat_set_own_EM_handle (MUSPAT *self, bool value)
 {
     if (self)
         _muspat_set_own_EM_handle(self, value);
 }
 
-bool PUBLIC_CODE muspat_is_own_EM_handle(MUSPAT *self)
+bool __far muspat_is_own_EM_handle (MUSPAT *self)
 {
     if (self)
         return _muspat_is_own_EM_handle(self);
@@ -76,13 +76,13 @@ bool PUBLIC_CODE muspat_is_own_EM_handle(MUSPAT *self)
         return false;
 }
 
-void PUBLIC_CODE muspat_set_channels(MUSPAT *self, uint8_t value)
+void __far muspat_set_channels (MUSPAT *self, uint8_t value)
 {
     if (self)
         _muspat_set_channels(self, value);
 }
 
-uint8_t PUBLIC_CODE muspat_get_channels(MUSPAT *self)
+uint8_t __far muspat_get_channels (MUSPAT *self)
 {
     if (self)
         return _muspat_get_channels(self);
@@ -90,13 +90,13 @@ uint8_t PUBLIC_CODE muspat_get_channels(MUSPAT *self)
         return 0;
 }
 
-void PUBLIC_CODE muspat_set_rows(MUSPAT *self, uint8_t value)
+void __far muspat_set_rows (MUSPAT *self, uint8_t value)
 {
     if (self)
         _muspat_set_rows(self, value);
 }
 
-uint8_t PUBLIC_CODE muspat_get_rows(MUSPAT *self)
+uint8_t __far muspat_get_rows (MUSPAT *self)
 {
     if (self)
         return _muspat_get_rows(self);
@@ -104,13 +104,13 @@ uint8_t PUBLIC_CODE muspat_get_rows(MUSPAT *self)
         return 0;
 }
 
-void PUBLIC_CODE muspat_set_size(MUSPAT *self, uint16_t value)
+void __far muspat_set_size (MUSPAT *self, uint16_t value)
 {
     if (self)
         _muspat_set_size(self, value);
 }
 
-uint16_t PUBLIC_CODE muspat_get_size(MUSPAT *self)
+uint16_t __far muspat_get_size (MUSPAT *self)
 {
     if (self)
         return _muspat_get_size(self);
@@ -118,19 +118,19 @@ uint16_t PUBLIC_CODE muspat_get_size(MUSPAT *self)
         return 0;
 }
 
-void PUBLIC_CODE muspat_set_data(MUSPAT *self, void *value)
+void __far muspat_set_data (MUSPAT *self, void *value)
 {
     if (self)
         _muspat_set_data(self, value);
 }
 
-void PUBLIC_CODE muspat_set_EM_data_handle(MUSPAT *self, EMSHDL value)
+void __far muspat_set_EM_data_handle (MUSPAT *self, EMSHDL value)
 {
     if (self)
         _muspat_set_EM_data_handle(self, value);
 }
 
-EMSHDL PUBLIC_CODE muspat_get_EM_data_handle(MUSPAT *self)
+EMSHDL __far muspat_get_EM_data_handle (MUSPAT *self)
 {
     if (self)
         return _muspat_get_EM_data_handle(self);
@@ -138,13 +138,13 @@ EMSHDL PUBLIC_CODE muspat_get_EM_data_handle(MUSPAT *self)
         return EMSBADHDL;
 }
 
-void PUBLIC_CODE muspat_set_EM_data_page(MUSPAT *self, uint16_t value)
+void __far muspat_set_EM_data_page (MUSPAT *self, uint16_t value)
 {
     if (self)
         _muspat_set_EM_data_page(self, value);
 }
 
-uint16_t PUBLIC_CODE muspat_get_EM_data_page(MUSPAT *self)
+uint16_t __far muspat_get_EM_data_page (MUSPAT *self)
 {
     if (self)
         return _muspat_get_EM_data_page(self);
@@ -152,13 +152,13 @@ uint16_t PUBLIC_CODE muspat_get_EM_data_page(MUSPAT *self)
         return 0;
 }
 
-void PUBLIC_CODE muspat_set_EM_data_offset(MUSPAT *self, uint16_t value)
+void __far muspat_set_EM_data_offset (MUSPAT *self, uint16_t value)
 {
     if (self)
         _muspat_set_EM_data_offset(self, value);
 }
 
-uint16_t PUBLIC_CODE muspat_get_EM_data_offset(MUSPAT *self)
+uint16_t __far muspat_get_EM_data_offset (MUSPAT *self)
 {
     if (self)
         return _muspat_get_EM_data_offset(self);
@@ -166,7 +166,7 @@ uint16_t PUBLIC_CODE muspat_get_EM_data_offset(MUSPAT *self)
         return 0;
 }
 
-void *PUBLIC_CODE muspat_get_data(MUSPAT *self)
+void *__far muspat_get_data (MUSPAT *self)
 {
     if (self)
     {
@@ -179,7 +179,7 @@ void *PUBLIC_CODE muspat_get_data(MUSPAT *self)
         return NULL;
 }
 
-void *PUBLIC_CODE muspat_map_EM_data(MUSPAT *self)
+void *__far muspat_map_EM_data (MUSPAT *self)
 {
     if (self)
     {
@@ -191,7 +191,7 @@ void *PUBLIC_CODE muspat_map_EM_data(MUSPAT *self)
     return NULL;
 }
 
-void PUBLIC_CODE muspat_free(MUSPAT *self)
+void __far muspat_free (MUSPAT *self)
 {
     void *p;
 
@@ -222,17 +222,17 @@ void PUBLIC_CODE muspat_free(MUSPAT *self)
 
 static EMSNAME EMS_PATLIST_HANDLE_NAME = "patlist";
 
-void __far _muspatl_init_item(void *self, void *item)
+void __far _muspatl_init_item (void *self, void *item)
 {
     muspat_init((MUSPAT *)item);
 }
 
-void __far _muspatl_free_item(void *self, void *item)
+void __far _muspatl_free_item (void *self, void *item)
 {
     muspat_free((MUSPAT *)item);
 }
 
-void PUBLIC_CODE muspatl_init(MUSPATLIST *self)
+void __far muspatl_init (MUSPATLIST *self)
 {
     if (self)
     {
@@ -241,13 +241,13 @@ void PUBLIC_CODE muspatl_init(MUSPATLIST *self)
     }
 }
 
-void PUBLIC_CODE muspatl_set(MUSPATLIST *self, uint16_t index, MUSPAT *item)
+void __far muspatl_set (MUSPATLIST *self, uint16_t index, MUSPAT *item)
 {
     if (self)
         dynarr_set_item(&(self->list), index, item);
 }
 
-MUSPAT *PUBLIC_CODE muspatl_get(MUSPATLIST *self, uint16_t index)
+MUSPAT *__far muspatl_get (MUSPATLIST *self, uint16_t index)
 {
     if (self)
         return dynarr_get_item(&(self->list), index);
@@ -255,7 +255,7 @@ MUSPAT *PUBLIC_CODE muspatl_get(MUSPATLIST *self, uint16_t index)
         return NULL;
 }
 
-bool PUBLIC_CODE muspatl_set_count(MUSPATLIST *self, uint16_t count)
+bool __far muspatl_set_count (MUSPATLIST *self, uint16_t count)
 {
     if (self)
         return dynarr_set_size(&(self->list), count);
@@ -263,7 +263,7 @@ bool PUBLIC_CODE muspatl_set_count(MUSPATLIST *self, uint16_t count)
         return false;
 }
 
-uint16_t PUBLIC_CODE muspatl_get_count(MUSPATLIST *self)
+uint16_t __far muspatl_get_count (MUSPATLIST *self)
 {
     if (self)
         return dynarr_get_size(&(self->list));
@@ -271,13 +271,13 @@ uint16_t PUBLIC_CODE muspatl_get_count(MUSPATLIST *self)
         return 0;
 }
 
-void PUBLIC_CODE muspatl_set_EM_data(MUSPATLIST *self, bool value)
+void __far muspatl_set_EM_data (MUSPATLIST *self, bool value)
 {
     if (self)
         _muspatl_set_EM_data(self, value);
 }
 
-bool PUBLIC_CODE muspatl_is_EM_data(MUSPATLIST *self)
+bool __far muspatl_is_EM_data (MUSPATLIST *self)
 {
     if (self)
         return _muspatl_is_EM_data(self);
@@ -285,13 +285,13 @@ bool PUBLIC_CODE muspatl_is_EM_data(MUSPATLIST *self)
         return false;
 }
 
-void PUBLIC_CODE muspatl_set_own_EM_handle(MUSPATLIST *self, bool value)
+void __far muspatl_set_own_EM_handle (MUSPATLIST *self, bool value)
 {
     if (self)
         _muspatl_set_own_EM_handle(self, value);
 }
 
-bool PUBLIC_CODE muspatl_is_own_EM_handle(MUSPATLIST *self)
+bool __far muspatl_is_own_EM_handle (MUSPATLIST *self)
 {
     if (self)
         return _muspatl_is_own_EM_handle(self);
@@ -299,13 +299,13 @@ bool PUBLIC_CODE muspatl_is_own_EM_handle(MUSPATLIST *self)
         return false;
 }
 
-void PUBLIC_CODE muspatl_set_EM_handle(MUSPATLIST *self, EMSHDL value)
+void __far muspatl_set_EM_handle (MUSPATLIST *self, EMSHDL value)
 {
     if (self)
         _muspatl_set_EM_handle(self, value);
 }
 
-EMSHDL PUBLIC_CODE muspatl_get_EM_handle(MUSPATLIST *self)
+EMSHDL __far muspatl_get_EM_handle (MUSPATLIST *self)
 {
     if (self)
         return _muspatl_get_EM_handle(self);
@@ -313,14 +313,14 @@ EMSHDL PUBLIC_CODE muspatl_get_EM_handle(MUSPATLIST *self)
         return EMSBADHDL;
 }
 
-void PUBLIC_CODE muspatl_set_EM_handle_name(MUSPATLIST *self)
+void __far muspatl_set_EM_handle_name (MUSPATLIST *self)
 {
     if (self)
         if (_muspatl_is_own_EM_handle(self))
             emsSetHandleName(self->handle, EMS_PATLIST_HANDLE_NAME);
 }
 
-uint32_t PUBLIC_CODE muspatl_get_used_EM(MUSPATLIST *self)
+uint32_t __far muspatl_get_used_EM (MUSPATLIST *self)
 {
     if (self)
         if (_muspatl_is_EM_data(self))
@@ -329,7 +329,7 @@ uint32_t PUBLIC_CODE muspatl_get_used_EM(MUSPATLIST *self)
     return 0;
 }
 
-void PUBLIC_CODE muspatl_free(MUSPATLIST *self)
+void __far muspatl_free (MUSPATLIST *self)
 {
     if (self)
     {

@@ -19,8 +19,6 @@
 
 #include "hw/dma.h"
 
-// TODO: remove PUBLIC_CODE macros when done.
-
 /* I/O ports */
 
 #pragma pack(push, 1);
@@ -373,7 +371,7 @@ bool hwowner_release_dma_channels(HWOWNER *self, DMAMASK mask)
 
 /* Buffer */
 
-void PUBLIC_CODE dmaBuf_init(DMABUF *self)
+void __far dmaBuf_init (DMABUF *self)
 {
     if (self)
     {
@@ -383,7 +381,7 @@ void PUBLIC_CODE dmaBuf_init(DMABUF *self)
     }
 }
 
-bool PUBLIC_CODE dmaBuf_alloc(DMABUF *self, uint32_t size)
+bool __far dmaBuf_alloc (DMABUF *self, uint32_t size)
 {
     uint16_t seg, max;
     uint32_t bufStart, bufEnd, bufSize, dmaStart, dmaEnd, dmaSize;
@@ -455,7 +453,7 @@ bool PUBLIC_CODE dmaBuf_alloc(DMABUF *self, uint32_t size)
     }
 }
 
-void PUBLIC_CODE dmaBuf_free(DMABUF *self)
+void __far dmaBuf_free (DMABUF *self)
 {
     if (self)
     {

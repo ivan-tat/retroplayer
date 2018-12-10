@@ -17,7 +17,7 @@
 
 #include "pascal.h"
 
-void PUBLIC_CODE smalls3m_main(void);
+void __far smalls3m_main (void);
 
 /*** Linking ***/
 

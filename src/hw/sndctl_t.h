@@ -17,8 +17,6 @@
 
 #include "pascal.h"
 
-// TODO: remove PUBLIC_CODE macros when done.
-
 /* Hardware sample format */
 
 typedef uint8_t HWSMPFMTFLAGS;
@@ -32,12 +30,12 @@ typedef struct hwSampleFormat_t {
 };
 typedef struct hwSampleFormat_t HWSMPFMT;
 
-bool     PUBLIC_CODE set_sample_format(HWSMPFMT *p, uint8_t bits, bool sign, uint8_t channels);
-uint8_t  PUBLIC_CODE get_sample_format_bits(HWSMPFMT *p);
-bool     PUBLIC_CODE is_sample_format_signed(HWSMPFMT *p);
-uint8_t  PUBLIC_CODE get_sample_format_channels(HWSMPFMT *p);
-uint16_t PUBLIC_CODE get_sample_format_width(HWSMPFMT *p);
-void     PUBLIC_CODE clear_sample_format(HWSMPFMT *p);
+bool     __far set_sample_format (HWSMPFMT *p, uint8_t bits, bool sign, uint8_t channels);
+uint8_t  __far get_sample_format_bits (HWSMPFMT *p);
+bool     __far is_sample_format_signed (HWSMPFMT *p);
+uint8_t  __far get_sample_format_channels (HWSMPFMT *p);
+uint16_t __far get_sample_format_width (HWSMPFMT *p);
+void     __far clear_sample_format (HWSMPFMT *p);
 
 typedef void __far SoundHWISRCallback_t(void);
 

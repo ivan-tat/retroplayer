@@ -19,8 +19,6 @@
 #include "hw/dma.h"
 #include "hw/sndctl_t.h"
 
-// TODO: remove PUBLIC_DATA and PUBLIC_CODE macros when done.
-
 /* DMA buffer for sound */
 
 typedef uint16_t sound_DMA_buffer_flags_t;
@@ -51,13 +49,13 @@ typedef struct sound_DMA_buffer_t SNDDMABUF;
 extern uint8_t playOption_FPS;
     /* frames per second ... default is about 70Hz */
 
-void     PUBLIC_CODE snddmabuf_init(SNDDMABUF *self);
-bool     PUBLIC_CODE snddmabuf_alloc(SNDDMABUF *self, uint32_t dmaSize);
-uint16_t PUBLIC_CODE snddmabuf_get_frame_offset(SNDDMABUF *self, uint8_t index);
-void    *PUBLIC_CODE snddmabuf_get_frame(SNDDMABUF *self, uint8_t index);
-uint16_t PUBLIC_CODE snddmabuf_get_offset_from_count(SNDDMABUF *self, uint16_t count);
-uint16_t PUBLIC_CODE snddmabuf_get_count_from_offset(SNDDMABUF *self, uint16_t bufOff);
-void     PUBLIC_CODE snddmabuf_free(SNDDMABUF *self);
+void     __far snddmabuf_init (SNDDMABUF *self);
+bool     __far snddmabuf_alloc (SNDDMABUF *self, uint32_t dmaSize);
+uint16_t __far snddmabuf_get_frame_offset (SNDDMABUF *self, uint8_t index);
+void    *__far snddmabuf_get_frame (SNDDMABUF *self, uint8_t index);
+uint16_t __far snddmabuf_get_offset_from_count (SNDDMABUF *self, uint16_t count);
+uint16_t __far snddmabuf_get_count_from_offset (SNDDMABUF *self, uint16_t bufOff);
+void     __far snddmabuf_free (SNDDMABUF *self);
 
 extern SNDDMABUF sndDMABuf;
 
