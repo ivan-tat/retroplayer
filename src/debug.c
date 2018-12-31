@@ -199,8 +199,10 @@ void __far __pascal Debug_Success (const char *file, const char *method)
 
 void debug_init (void)
 {
-    //debuglogfile = fopen ("debug.log", "wb");
-    debuglogfile = NULL;
+    if (DEBUG_WRITE_LOG)
+        debuglogfile = fopen ("debug.log", "wb");
+    else
+        debuglogfile = NULL;
     DEBUG_INFO ("debug_init", "Start logging.");
 }
 

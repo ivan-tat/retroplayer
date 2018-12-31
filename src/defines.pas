@@ -4,6 +4,7 @@
 (*$define _DEFINES_PAS_INCLUDED*)
 
 (*$define DEBUG*)
+(*-$define DEBUG_WRITE_LOG*)
 (*$define DEBUG_FILE_S3M_LOAD*)
 (*-$define DEBUG_WRITE_OUTPUT_STREAM*)
 (*$define DEFINE_LOCAL_DATA*)
@@ -18,6 +19,11 @@ const
     DEBUG = true;
 (*$else*)
     DEBUG = false;
+(*$endif*)
+(*$ifdef DEBUG_WRITE_LOG*)
+    DEBUG_WRITE_LOG = true;
+(*$else*)
+    DEBUG_WRITE_LOG = false;
 (*$endif*)
 (*$ifdef DEBUG_FILE_S3M_LOAD*)
     DEBUG_FILE_S3M_LOAD = true;
