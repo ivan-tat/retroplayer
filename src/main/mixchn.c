@@ -221,11 +221,13 @@ void __far mixchn_reset_wave_tables (MIXCHN *self)
 
 void __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum)
 {
+    MUSINSLIST *instruments;
     MUSINS *ins;
     unsigned int rate;
     unsigned int flags;
 
-    ins = musinsl_get(mod_Instruments, insNum - 1);
+    instruments = mod_Instruments;
+    ins = musinsl_get (instruments, insNum - 1);
     if (musins_get_type(ins) == MUSINST_PCM)
     {
         rate = musins_get_rate(ins);

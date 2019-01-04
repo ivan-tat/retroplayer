@@ -819,6 +819,7 @@ bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
 bool __near s3mloader_load_instrument(S3MLOADER *self, uint8_t index)
 {
     struct S3M_loader_t *_Self = self;
+    MUSINSLIST *instruments;
     uint16_t length;
     uint8_t typ;
     MUSINS *ins;
@@ -831,7 +832,8 @@ bool __near s3mloader_load_instrument(S3MLOADER *self, uint8_t index)
         return false;
     }
 
-    ins = musinsl_get(mod_Instruments, index);
+    instruments = mod_Instruments;
+    ins = musinsl_get (instruments, index);
     musins_init(ins);
 
     if (!fread(&s3mins, sizeof(S3MINS), 1, _Self->f))
@@ -971,6 +973,7 @@ void __near convert_sign_8(void *data, uint32_t size)
 bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
 {
     struct S3M_loader_t *_Self = self;
+    MUSINSLIST *instruments;
     char *data;
     MUSINS *ins;
     uint16_t pages, h, dh;
@@ -980,6 +983,8 @@ bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
     void *loopstart;
     uint32_t loopsize;
 
+    instruments = mod_Instruments;
+
     if (fsetpos(_Self->f, _Self->smppara[index] * 16))
     {
         DEBUG_ERR("s3mloader_load_sample", "Failed to read file.");
@@ -987,7 +992,7 @@ bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
         return false;
     }
 
-    ins = musinsl_get(mod_Instruments, index);
+    ins = musinsl_get (instruments, index);
 
     if (musins_is_looped(ins))
         smpsize = musins_get_loop_end(ins);
@@ -1004,7 +1009,7 @@ bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
 
     pages = (uint32_t)(memsize + 16 * 1024 - 1) / (16 * 1024);
 
-    if (UseEMS && musinsl_is_EM_data(mod_Instruments) && (_Self->smp_EM_pages >= pages))
+    if (UseEMS && musinsl_is_EM_data (instruments) && (_Self->smp_EM_pages >= pages))
     {
         if (DEBUG_FILE_S3M_LOAD)
             DEBUG_INFO_ (NULL, "sample=%02u, data=EM:%u-%u.", index, _Self->smp_EM_page, _Self->smp_EM_page + pages - 1);
@@ -1081,6 +1086,7 @@ uint8_t __near getchtyp(uint8_t b)
 bool s3mloader_load(S3MLOADER *self, const char *name)
 {
     struct S3M_loader_t *_Self = self;
+    MUSINSLIST *instruments;
     S3MHEADER header;
     uint8_t maxused;
     uint8_t i, smpnum;

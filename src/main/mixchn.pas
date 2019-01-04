@@ -31,7 +31,7 @@ type
     TChannel = packed record
         bChannelFlags: TMIXCHNFLAGS;
         bChannelType:   byte;
-        pMusIns:        PMUSINS;
+        pMusIns:        Pointer;
         wSmpSeg:        word;
         bIns:           byte;
         bNote:          byte;

@@ -283,6 +283,16 @@ MUSINS *__far musinsl_get (MUSINSLIST *self, uint16_t index)
         return NULL;
 }
 
+bool __far musinsl_set_count (MUSINSLIST *self, uint16_t value)
+{
+    mod_InstrumentsCount = value;
+    return true;
+}
+uint16_t __far musinsl_get_count (MUSINSLIST *self)
+{
+    return mod_InstrumentsCount;
+}
+
 void __far musinsl_set_EM_data_handle (MUSINSLIST *self, EMSHDL value)
 {
     if (self)
@@ -308,7 +318,7 @@ void __far musinsl_free (MUSINSLIST *self)
     uint16_t i;
 
     for (i = 0; i < MAX_INSTRUMENTS; i++)
-        musins_free(musinsl_get(mod_Instruments, i));
+        musins_free (musinsl_get (self, i));
 
     if (mod_Samples_EMData)
     {

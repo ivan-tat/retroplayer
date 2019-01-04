@@ -35,6 +35,7 @@ void __far win_debug_init(SCRWIN *self)
 
 void __far win_debug_draw(SCRWIN *self)
 {
+    MUSINSLIST *instruments;
     uint8_t y;
     MIXBUF *mixbuf;
     SNDDMABUF *sndbuf;
@@ -44,6 +45,7 @@ void __far win_debug_draw(SCRWIN *self)
 
     if (scrwin_is_created(self))
     {
+        instruments = mod_Instruments;
         textbackground(_black);
 
         if (scrwin_get_flags(self) & WINFL_FULLREDRAW)
@@ -103,7 +105,7 @@ void __far win_debug_draw(SCRWIN *self)
                 printf("Used expanded memory:       KiB");
                 gotoxy(27, 14);
                 textcolor(_yellow);
-                printf("%5u", musinsl_get_used_EM(mod_Instruments) + muspatl_get_used_EM(mod_Patterns));
+                printf("%5u", musinsl_get_used_EM (instruments) + muspatl_get_used_EM(mod_Patterns));
             }
             else
             {

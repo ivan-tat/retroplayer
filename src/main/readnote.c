@@ -42,6 +42,7 @@ typedef patternFlowState_t PATFLOWSTATE;
 
 void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
 {
+    MUSINSLIST *instruments;
     MUSINS *ins;
     unsigned char cmd, param;
 
@@ -89,11 +90,13 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
 
     if (chn_effInit(chn, param))
     {
+        instruments = mod_Instruments;
+
         /* read instrument */
         /* reinit instrument data and keep sample position */
         if (_isInstrument (chnState_cur_bIns))
         {
-            ins = musinsl_get(mod_Instruments, _unpackInstrument (chnState_cur_bIns));
+            ins = musinsl_get (instruments, _unpackInstrument (chnState_cur_bIns));
             if (musins_get_type(ins) == MUSINST_PCM)
                 chn_setupInstrument(chn, chnState_cur_bIns);
             else

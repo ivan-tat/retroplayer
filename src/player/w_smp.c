@@ -50,6 +50,8 @@ void __near print_sample_num(uint8_t i, uint8_t first_line, uint8_t page_height)
 
 void __far win_samples_draw(SCRWIN *self)
 {
+    MUSINSLIST *instruments;
+    uint16_t ins_count;
     uint8_t i, j, k, n;
     uint8_t page_height, height, first_line;
     MUSINS *ins;
@@ -58,6 +60,8 @@ void __far win_samples_draw(SCRWIN *self)
 
     if (scrwin_is_created(self))
     {
+        instruments = mod_Instruments;
+        ins_count = musinsl_get_count (instruments);
         textbackground(_black);
         textcolor(_white);
 
@@ -74,7 +78,7 @@ void __far win_samples_draw(SCRWIN *self)
             clreol();
             gotoxy(1, 2);
 
-            if (page_height <= mod_InstrumentsCount)
+            if (page_height <= ins_count)
             {
                 samplepage = 0;
                 i = 0;
@@ -82,9 +86,9 @@ void __far win_samples_draw(SCRWIN *self)
             else
             {
                 i = samplepage * page_height;
-                if (i >= mod_InstrumentsCount)
+                if (i >= ins_count)
                 {
-                    samplepage = mod_InstrumentsCount / page_height;
+                    samplepage = ins_count / page_height;
                     if (samplepage)
                         samplepage--;
                     i = samplepage * page_height;
@@ -93,9 +97,9 @@ void __far win_samples_draw(SCRWIN *self)
 
             height = scrwin_get_height(self);
             for (j = 1; j < height; j++)
-                if (i < mod_InstrumentsCount)
+                if (i < ins_count)
                 {
-                    ins = musinsl_get(mod_Instruments, i);
+                    ins = musinsl_get(instruments, i);
 
                     strncpy(&title, musins_get_title(ins), MUSINS_TITLE_LENGTH_MAX);
 
@@ -160,10 +164,14 @@ void __far win_samples_draw(SCRWIN *self)
 
 bool __far win_samples_keypress(SCRWIN *self, char c)
 {
+    MUSINSLIST *instruments;
+    uint16_t ins_count;
     uint8_t page_height;
 
     if (scrwin_is_created(self))
     {
+        instruments = mod_Instruments;
+        ins_count = musinsl_get_count (instruments);
         if (c == '[')
         {
             if (samplepage > 0)
@@ -177,7 +185,7 @@ bool __far win_samples_keypress(SCRWIN *self, char c)
         if (c == ']')
         {
             page_height = scrwin_get_height(self);
-            if ((samplepage + 1) * page_height + 1 <= mod_InstrumentsCount)
+            if ((samplepage + 1) * page_height + 1 <= ins_count)
             {
                 samplepage++;
                 scrwin_set_flags(self, scrwin_get_flags(self) | WINFL_FULLREDRAW);

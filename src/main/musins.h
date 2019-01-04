@@ -99,6 +99,8 @@ void        __far musinsl_init (MUSINSLIST *self);
 void        __far musinsl_set_EM_data (MUSINSLIST *self, bool value);
 bool        __far musinsl_is_EM_data (MUSINSLIST *self);
 MUSINS     *__far musinsl_get (MUSINSLIST *self, uint16_t index);
+bool        __far musinsl_set_count (MUSINSLIST *self, uint16_t value);
+uint16_t    __far musinsl_get_count (MUSINSLIST *self);
 void        __far musinsl_set_EM_data_handle (MUSINSLIST *self, EMSHDL value);
 void        __far musinsl_set_EM_handle_name (MUSINSLIST *self);
 uint32_t    __far musinsl_get_used_EM (MUSINSLIST *self);
@@ -107,7 +109,7 @@ void        __far musinsl_delete (MUSINSLIST **self);
 
 /*** Variables ***/
 
-extern instrumentsList_t *mod_Instruments;  /* pointer to data for all instruments */
+extern MUSINSLIST *mod_Instruments;
 extern uint16_t mod_InstrumentsCount;
 extern bool     mod_Samples_EMData;     /* samples in EMS ? */
 extern uint16_t mod_Samples_EMHandle;   /* hanlde to access EMS for samples */
@@ -147,6 +149,8 @@ extern uint16_t mod_Samples_EMHandle;   /* hanlde to access EMS for samples */
 #pragma aux musinsl_set_EM_data "*";
 #pragma aux musinsl_is_EM_data "*";
 #pragma aux musinsl_get "*";
+#pragma aux musinsl_set_count "*";
+#pragma aux musinsl_get_count "*";
 #pragma aux musinsl_set_EM_data_handle "*";
 #pragma aux musinsl_set_EM_handle_name "*";
 #pragma aux musinsl_get_used_EM "*";

@@ -17,20 +17,6 @@ uses
 
 (* Musical instrument *)
 
-type
-    TMUSINSTYPE = Byte;
-
-const
-    MUSINST_EMPTY = 0;
-    MUSINST_PCM = 1;
-
-const
-    SMPFLAG_LOOP = $01;
-
-type
-    TMUSINS = array [0..16*5-1] of Byte;
-    PMUSINS = ^TMUSINS;
-
 procedure musins_init;
 procedure musins_set_type;
 procedure musins_get_type;
@@ -59,18 +45,13 @@ procedure musins_free;
 
 (* Musical instruments list *)
 
-const
-    MAX_INSTRUMENTS = 99;
-
-type
-    TMUSINSLIST = array [0..MAX_INSTRUMENTS-1] of TMUSINS;
-    PMUSINSLIST = ^TMUSINSLIST;
-
 procedure musinsl_new;
 procedure musinsl_init;
 procedure musinsl_set_EM_data;
 procedure musinsl_is_EM_data;
 procedure musinsl_get;
+procedure musinsl_set_count;
+procedure musinsl_get_count;
 procedure musinsl_set_EM_data_handle;
 procedure musinsl_set_EM_handle_name;
 procedure musinsl_get_used_EM;
@@ -78,7 +59,7 @@ procedure musinsl_free;
 procedure musinsl_delete;
 
 var
-    mod_Instruments: PMUSINSLIST;
+    mod_Instruments: Pointer;
     mod_InstrumentsCount: word;
     mod_Samples_EMData: boolean;
     mod_Samples_EMHandle: TEMSHDL;
@@ -124,6 +105,8 @@ procedure musinsl_init; external;
 procedure musinsl_set_EM_data; external;
 procedure musinsl_is_EM_data; external;
 procedure musinsl_get; external;
+procedure musinsl_set_count; external;
+procedure musinsl_get_count; external;
 procedure musinsl_set_EM_data_handle; external;
 procedure musinsl_set_EM_handle_name; external;
 procedure musinsl_get_used_EM; external;

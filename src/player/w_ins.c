@@ -32,10 +32,12 @@ void __far win_instruments_init(SCRWIN *self)
 
 void __near posstring(char *__dest, uint8_t i)
 {
+    MUSINSLIST *instruments;
     MUSINS *ins;
     uint16_t data;
 
-    ins = musinsl_get(mod_Instruments, i - 1);
+    instruments = mod_Instruments;
+    ins = musinsl_get (instruments, i - 1);
     if (musins_get_type(ins) == MUSINST_PCM)
     {
         if (musins_is_EM_data(ins))
@@ -62,6 +64,7 @@ void __near write_no(uint16_t num, uint8_t height, uint8_t line)
 
 void __far win_instruments_draw(SCRWIN *self)
 {
+    MUSINSLIST *instruments;
     int i;
     uint8_t n;
     MIXCHN *chn;
@@ -70,6 +73,8 @@ void __far win_instruments_draw(SCRWIN *self)
 
     if (scrwin_is_created(self))
     {
+        instruments = mod_Instruments;
+
         textbackground(_black);
         textcolor(_lightgray);
 
@@ -89,7 +94,7 @@ void __far win_instruments_draw(SCRWIN *self)
             {
                 gotoxy(24, height);
                 textcolor(_yellow);
-                printf("%5u", musinsl_get_used_EM(mod_Instruments));
+                printf("%5u", musinsl_get_used_EM (instruments));
                 textcolor(_lightgray);
                 gotoxy(30, height);
                 printf("KiB");
