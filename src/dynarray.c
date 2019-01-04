@@ -91,6 +91,26 @@ void *__far dynarr_get_item(DYNARR *self, uint16_t index)
     return NULL;
 }
 
+int32_t __far dynarr_indexof(DYNARR *self, void *item)
+{
+    uint16_t offset;
+
+    if (self)
+    {
+        if (self->list
+        && (FP_SEG (self->list) == FP_SEG (item))
+        && (FP_OFF (self->list) <= FP_OFF (item)))
+        {
+            offset = FP_OFF (item) - FP_OFF (self->list);
+            if ((offset < self->item_size * self->size)
+            && ((offset % self->item_size) == 0))
+                return offset / self->item_size;
+        }
+    }
+
+    return -1;
+}
+
 bool __far dynarr_set_size(DYNARR *self, uint16_t size)
 {
     uint16_t seg, max, memsize, i;
