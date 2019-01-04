@@ -17,20 +17,9 @@
 
 #include "cc/i86.h"
 
-#define NOTE_MAX (7 * 12 + 11)
+#define NOTE_MAX    (7 * 12 + 11)
 
-#define CHNNOTE_MAX ((7 << 4) + 11)
-#define CHNNOTE_EMPTY 0xff
-#define CHNNOTE_OFF 0xfe
-
-#define _isNote(note) (((note) != CHNNOTE_OFF) && ((note) != CHNNOTE_EMPTY))
-#define _packNote(note) (((note) % 12) + (((note) / 12) << 4))
-#define _unpackNote(note) (((note) & 0x0f) + ((note) >> 4) * 12)
-
-#define CHNINSVOL_EMPTY 0xff
-#define CHNINSVOL_MAX 63
-
-#define _isVolume(vol) ((vol) != CHNINSVOL_EMPTY)
+#define SMPVOL_MAX  64
 
 #define MID_C_RATE 8363
 

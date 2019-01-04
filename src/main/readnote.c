@@ -10,8 +10,10 @@
 
 #include "pascal.h"
 #include "cc/i86.h"
+#include "cc/string.h"
 #include "dos/ems.h"
 #include "main/s3mtypes.h"
+#include "main/mixchn.h"
 #include "main/muspat.h"
 #include "main/s3mvars.h"
 #include "main/effvars.h"
@@ -21,17 +23,6 @@
 #include "main/readnote.h"
 
 /**********************************************************************/
-
-/* Pattern's descriptor for sequentional reading */
-typedef struct patternDesc_t
-{
-    MUSPAT *pattern;
-    unsigned char *data;
-    unsigned int row;
-    unsigned int channel;
-    unsigned int offset;
-};
-typedef struct patternDesc_t PATDESC;
 
 /* Pattern flow state & Song flow state */
 // TODO: Split Pattern & Song flow state
@@ -49,83 +40,33 @@ typedef patternFlowState_t PATFLOWSTATE;
 
 /**********************************************************************/
 
-bool __near pattern_open(PATDESC *desc, MUSPAT *pat)
+void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
 {
-    if (pat)
-    {
-        desc->pattern = pat;
-        if (muspat_is_EM_data(pat))
-            desc->data = muspat_map_EM_data(pat);
-        else
-            desc->data = muspat_get_data(pat);
-        if (!desc->data)
-            return false;
-        desc->row = 0;
-        desc->channel = 0;
-        desc->offset = 0;
-        return true;
-    }
-    else
-        return false;
-}
-
-void __near pattern_seekRow(PATDESC *desc, unsigned int row)
-{
-    desc->row = row;
-    desc->channel = 0;
-    desc->offset = 5 * mod_ChannelsCount * row;
-}
-
-void __near pattern_close(PATDESC *desc)
-{
-    desc->pattern = (void *)0;
-    desc->data = (void *)0;
-    desc->row = 0;
-    desc->channel = 0;
-    desc->offset = 0;
-}
-
-/**********************************************************************/
-
-bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
-{
-    unsigned char *patData;
-    unsigned int patOffset;
     MUSINS *ins;
-    unsigned int cmd;
-    unsigned char param;
-
-    if (desc->channel >= mod_ChannelsCount)
-        return false;
-
-    patData = desc->data;
-    patOffset = desc->offset;
+    unsigned char cmd, param;
 
     chnState_porta_flag = false;
     chnState_patDelay_bCommandSaved = mixchn_get_command(chn);
 
     if (playState_patDelay_bNow)
     {
+        chnState_cur_bIns  = CHNINS_EMPTY;
         chnState_cur_bNote = CHNNOTE_EMPTY;
-        chnState_cur_bIns  = 0;
-        chnState_cur_bVol  = CHNINSVOL_EMPTY;
+        chnState_cur_bVol  = CHNVOL_EMPTY;
     }
     else
     {
-        chnState_cur_bNote = patData[patOffset];
-        chnState_cur_bIns  = patData[patOffset + 1];
-        chnState_cur_bVol  = patData[patOffset + 2];
+        chnState_cur_bIns  = event->instrument;
+        chnState_cur_bNote = event->note;
+        chnState_cur_bVol  = event->volume;
     }
 
     /* read effects - it may change the read instr/note ! */
 
-    cmd = patData[patOffset + 3];
+    cmd = event->command;
     if (cmd > MAXEFF)
         cmd = EFFIDX_NONE;
-    param = patData[patOffset + 4];
-
-    desc->channel++;
-    desc->offset += 5;
+    param = event->parameter;
 
     chn->bEffFlags = 0; /* important! */
 
@@ -150,13 +91,13 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
     {
         /* read instrument */
         /* reinit instrument data and keep sample position */
-        if (chnState_cur_bIns)
+        if (_isInstrument (chnState_cur_bIns))
         {
-            ins = musinsl_get(mod_Instruments, chnState_cur_bIns - 1);
+            ins = musinsl_get(mod_Instruments, _unpackInstrument (chnState_cur_bIns));
             if (musins_get_type(ins) == MUSINST_PCM)
                 chn_setupInstrument(chn, chnState_cur_bIns);
             else
-                chnState_cur_bIns = 0;
+                chnState_cur_bIns = CHNINS_EMPTY;
         }
         /* read note */
         if (_isNote(chnState_cur_bNote))
@@ -167,170 +108,237 @@ bool __near pat_playNextChannel(PATDESC *desc, MIXCHN *chn)
         /* read volume */
         if (_isVolume(chnState_cur_bVol))
         {
-            chnState_cur_bVol = chnState_cur_bVol > CHNINSVOL_MAX ?
-                CHNINSVOL_MAX : chnState_cur_bVol;
+            chnState_cur_bVol = chnState_cur_bVol > CHNVOL_MAX ? CHNVOL_MAX : chnState_cur_bVol;
             mixchn_set_sample_volume(chn, (chnState_cur_bVol * playState_gVolume) >> 6);
         }
         chn_effHandle(chn);
     }
-
-    return desc->channel < mod_ChannelsCount;
 }
 
-bool __near pat_skipNextChannel(PATDESC *desc)
+void __near _play_event (MUSPATROWEVENT *e)
 {
-    if (desc->channel >= mod_ChannelsCount)
-        return false;
-
-    desc->channel++;
-    desc->offset += 5;
-
-    return desc->channel < mod_ChannelsCount;
-}
-
-/**********************************************************************/
-
-PATFLOWSTATE __near pat_playRow(MUSPAT *pat)
-{
-    PATDESC patDesc;
-    unsigned char i;
     MIXCHN *chn;
 
-    if (!pat)
-        return FLOWSTATE_ROWEND;
+    chn = & (mod_Channels [e->channel]);
 
-    if (!pattern_open(&patDesc, pat))
-        return FLOWSTATE_ROWEND;
+    if (mixchn_get_type (chn) <= 2)
+        _play_channel (chn, & (e->event));
+}
 
-    pattern_seekRow(&patDesc, playState_row);
+bool __near _play_row (MUSPAT *pat, uint16_t row)
+{
+    MUSPATIO f;
+    MUSPATROWEVENT e, empty;
+    unsigned int num_channels;
+    unsigned char c, next_c;
+    bool row_read, row_ev_ok;
 
-    for (i = 0; i < mod_ChannelsCount; i++)
+    if ((!pat) || (!muspatio_open (&f, pat, MUSPATIOMD_READ)))
+        return false;
+
+    muspatio_seek (&f, row, 0);
+
+    num_channels = mod_ChannelsCount;
+
+    /* Linear reading of pattern's events while increasing channel number */
+    muspatrowevent_clear (&empty);
+    c = 0;
+    row_read = !muspatio_is_end_of_row (&f);
+    while (c < num_channels)
     {
-        chn = &mod_Channels[i];
-        if (mixchn_get_type(chn) <= 2)
+        // walk through from current channel (c) to the end
+        row_ev_ok = false;
+        next_c = num_channels;
+
+        if (row_read)
         {
-            if (!pat_playNextChannel(&patDesc, chn))
-                break;
+            muspatio_read (&f, &e);
+            if (e.channel < num_channels)
+            {
+                // walk through from current channel (c) to current event's channel
+                row_ev_ok = true;
+                next_c = e.channel;
+                row_read = !muspatio_is_end_of_row (&f);
+            }
         }
-        else
+
+        /* walk through from channel (c) to (next_c)  */
+        while (c < next_c)
         {
-            if (!pat_skipNextChannel(&patDesc))
-                break;
+            empty.channel = c;
+            _play_event (&empty);
+            c++;
+        }
+
+        if (row_ev_ok)
+        {
+            _play_event (&e);
+            c++;
         }
     }
 
-    if (playState_gVolume_bFlag)
-        playState_gVolume = playState_gVolume_bValue;
+    muspatio_close (&f);
 
-    playState_tick = playState_speed;
-
-    // Pattern break ?
-    if (playState_patBreak_bFlag)
-    {
-        playState_row = playState_patBreak_bPos;
-        pattern_close(&patDesc);
-        return FLOWSTATE_PATTERNEND;
-    }
-
-    // Pattern loop ?
-    if (playState_patLoop_bNow)
-    {
-        playState_patLoopCount--;
-        if (playState_patLoopCount)
-        {
-            playState_row = playState_patLoopStartRow;
-            pattern_close(&patDesc);
-            return FLOWSTATE_WAIT;
-        }
-        else
-        {
-            playState_patLoopStartRow = playState_row + 1;
-            playState_patLoopActive = false;
-        }
-    }
-
-    pattern_close(&patDesc);
-    return FLOWSTATE_ROWEND;
+    return true;
 }
 
 /**********************************************************************/
+
+typedef struct track_state_t
+{
+    PATFLOWSTATE status;
+    bool firstPlay;
+    MUSPAT *pat;
+};
+typedef struct track_state_t TRACKSTATE;
+
+void __near on_row_end (TRACKSTATE *state)
+{
+    playState_row++;
+
+    if (playState_row < muspat_get_rows (state->pat))
+        state->status = FLOWSTATE_WAIT;
+    else
+    {
+        playState_row = 0;
+        state->status = FLOWSTATE_PATTERNEND;
+    }
+}
+
+void __near on_pattern_end (TRACKSTATE *state)
+{
+    playState_order++;
+
+    state->status = FLOWSTATE_PATTERNJUMP;
+}
+
+void __near on_pattern_jump (TRACKSTATE *state)
+{
+    playState_patLoopStartRow = 0;
+
+    if (playState_order > LastOrder)
+        state->status = FLOWSTATE_SONGSTOP;
+    else
+        state->status = FLOWSTATE_SONGLOOP;
+}
+
+void __near on_track_loop (TRACKSTATE *state)
+{
+    MUSPATLIST *patterns;
+    unsigned int i;
+
+    i = Order[playState_order];
+
+    if (i >= 254)
+    {
+        state->status = FLOWSTATE_PATTERNEND;
+        return;
+    }
+    else
+    {
+        playState_pattern = i;
+
+        if (state->firstPlay)
+        {
+            state->firstPlay = false;
+            playState_jumpToOrder_bFlag = false;
+            playState_patBreak_bFlag = false;
+            playState_gVolume_bFlag = false;
+            playState_patLoop_bNow = false;
+            playState_patDelay_bNow = playState_patDelayCount != 0;
+            patterns = mod_Patterns;
+            state->pat = muspatl_get (patterns, i);
+
+            if (!_play_row (state->pat, playState_row))
+            {
+                state->status = FLOWSTATE_ROWEND;
+                return;
+            }
+
+            if (playState_gVolume_bFlag)
+                playState_gVolume = playState_gVolume_bValue;
+
+            playState_tick = playState_speed;
+
+            // Pattern break ?
+            if (playState_patBreak_bFlag)
+            {
+                playState_row = playState_patBreak_bPos;
+                state->status = FLOWSTATE_PATTERNEND;
+                return;
+            }
+
+            // Pattern loop ?
+            if (playState_patLoop_bNow)
+            {
+                playState_patLoopCount--;
+                if (playState_patLoopCount)
+                {
+                    playState_row = playState_patLoopStartRow;
+                    state->status = FLOWSTATE_WAIT;
+                    return;
+                }
+                else
+                {
+                    playState_patLoopStartRow = playState_row + 1;
+                    playState_patLoopActive = false;
+                }
+            }
+
+            state->status = FLOWSTATE_ROWEND;
+        }
+        else
+            state->status = FLOWSTATE_WAIT;
+    }
+}
+
+void __near on_track_stop (TRACKSTATE *state)
+{
+    if (playOption_LoopSong)
+    {
+        playState_order = 0;
+        state->status = FLOWSTATE_SONGLOOP;
+    }
+    else
+    {
+        playState_songEnded = true;
+        state->status = FLOWSTATE_WAIT;
+    }
+}
 
 void __far readnewnotes (void)
 {
-    char firstPlay;
-    PATFLOWSTATE status;
-    unsigned int patIndex;
-    MUSPAT *pat;
+    TRACKSTATE ts;
 
-    firstPlay = true;
-    status = FLOWSTATE_SONGLOOP;
+    ts.status = FLOWSTATE_SONGLOOP;
+    ts.firstPlay = true;
 
-    while (status != FLOWSTATE_WAIT)
+    while (ts.status != FLOWSTATE_WAIT)
     {
-        switch (status)
+        switch (ts.status)
         {
             case FLOWSTATE_ROWEND:
-                playState_row++;
-                if (playState_row < 64)
-                    status = FLOWSTATE_WAIT;
-                else
-                {
-                    playState_row = 0;
-                    status = FLOWSTATE_PATTERNEND;
-                }
+                on_row_end (& ts);
                 break;
 
             case FLOWSTATE_PATTERNEND:
-                playState_order++;
-                status = FLOWSTATE_PATTERNJUMP;
+                on_pattern_end (& ts);
                 break;
 
             case FLOWSTATE_PATTERNJUMP:
-                playState_patLoopStartRow = 0;
-                if (playState_order > LastOrder)
-                    status = FLOWSTATE_SONGSTOP;
-                else
-                    status = FLOWSTATE_SONGLOOP;
+                on_pattern_jump (& ts);
                 break;
 
             case FLOWSTATE_SONGLOOP:
-                patIndex = Order[playState_order];
-                if (patIndex >= 254)
-                    status = FLOWSTATE_PATTERNEND;
-                else
-                {
-                    playState_pattern = patIndex;
-                    if (firstPlay)
-                    {
-                        firstPlay = false;
-                        playState_jumpToOrder_bFlag = false;
-                        playState_patBreak_bFlag = false;
-                        playState_gVolume_bFlag = false;
-                        playState_patLoop_bNow = false;
-                        playState_patDelay_bNow = playState_patDelayCount != 0;
-                        pat = muspatl_get(mod_Patterns, patIndex);
-                        status = pat_playRow(pat);
-                    }
-                    else
-                        status = FLOWSTATE_WAIT;
-                }
+                on_track_loop (& ts);
                 break;
 
             case FLOWSTATE_SONGSTOP:
-                if (playOption_LoopSong)
-                {
-                    playState_order = 0;
-                    status = FLOWSTATE_SONGLOOP;
-                }
-                else
-                {
-                    playState_songEnded = true;
-                    status = FLOWSTATE_WAIT;
-                }
+                on_track_stop (& ts);
                 break;
 
             default:
-                status = FLOWSTATE_WAIT;
+                ts.status = FLOWSTATE_WAIT;
                 break;
         }
     }

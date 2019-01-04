@@ -11,33 +11,70 @@
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/string.h"
+#include "cc/stdio.h"
 #include "cc/dos.h"
+#include "debug.h"
 #include "dynarray.h"
 #include "dos/ems.h"
 
 #include "main/muspat.h"
 
+/*** Music pattern channel's event ***/
+
+void __far muspatchnevent_clear (MUSPATCHNEVENT *self)
+{
+    self->flags = 0;
+    self->instrument = CHNINS_EMPTY;
+    self->note = CHNNOTE_EMPTY;
+    self->volume = CHNVOL_EMPTY;
+    self->command = CHNCMD_EMPTY;
+    self->parameter = 0;
+}
+
+/*** Music pattern row's event ***/
+
+void __far muspatrowevent_clear (MUSPATROWEVENT *self)
+{
+    self->channel = 0;
+    self->event.flags = 0;
+    self->event.instrument = CHNINS_EMPTY;
+    self->event.note = CHNNOTE_EMPTY;
+    self->event.volume = CHNVOL_EMPTY;
+    self->event.command = CHNCMD_EMPTY;
+    self->event.parameter = 0;
+}
+
 /*** Music pattern ***/
 
-#define _muspat_set_EM_data(o, v)        o->flags = (o->flags & ~MUSPATFL_EM) | (v ? MUSPATFL_EM : 0)
-#define _muspat_is_EM_data(o)            ((o->flags & MUSPATFL_EM) != 0)
-#define _muspat_set_own_EM_handle(o, v)  o->flags = (o->flags & ~MUSPATFL_OWNHDL) | (v ? MUSPATFL_OWNHDL : 0)
-#define _muspat_is_own_EM_handle(o)      ((o->flags & MUSPATFL_OWNHDL) != 0)
-#define _muspat_set_channels(o, v)       o->channels = v
-#define _muspat_get_channels(o)          o->channels
-#define _muspat_set_rows(o, v)           o->rows = v
-#define _muspat_get_rows(o)              o->rows
-#define _muspat_set_size(o, v)           o->size = v
-#define _muspat_get_size(o)              o->size
-#define _muspat_set_data(o, v)           { o->data_off = FP_OFF(v); o->data_seg = FP_SEG(v); }
-#define _muspat_get_data(o)              MK_FP(o->data_seg, o->data_off)
-#define _muspat_set_EM_data_handle(o, v) o->handle = v
-#define _muspat_get_EM_data_handle(o)    o->handle
-#define _muspat_set_EM_data_page(o, v)   o->data_seg = v
-#define _muspat_get_EM_data_page(o)      o->data_seg
-#define _muspat_set_EM_data_offset(o, v) o->data_off = v
-#define _muspat_get_EM_data_offset(o)    o->data_off
-#define _muspat_get_EM_data(o)           MK_FP(emsFrameSeg, o->data_off)
+#define _muspat_get_flags(o)                (o)->flags
+#define _muspat_set_flags(o, v)             _muspat_get_flags (o) = (v)
+#define _muspat_set_EM_data(o, v)           _muspat_set_flags ((o), (_muspat_get_flags (o) & ~MUSPATFL_EM) | ((v) ? MUSPATFL_EM : 0))
+#define _muspat_is_EM_data(o)               ((_muspat_get_flags (o) & MUSPATFL_EM) != 0)
+#define _muspat_set_own_EM_handle(o, v)     _muspat_set_flags ((o), (_muspat_get_flags (o) & ~MUSPATFL_OWNHDL) | ((v) ? MUSPATFL_OWNHDL : 0))
+#define _muspat_is_own_EM_handle(o)         ((_muspat_get_flags (o) & MUSPATFL_OWNHDL) != 0)
+#define _muspat_set_data_packed(o, v)       _muspat_set_flags ((o), (_muspat_get_flags (o) & ~MUSPATFL_PACKED) | ((v) ? MUSPATFL_PACKED : 0))
+#define _muspat_is_data_packed(o)           ((_muspat_get_flags (o) & MUSPATFL_PACKED) != 0)
+#define _muspat_get_channels(o)             (o)->channels
+#define _muspat_set_channels(o, v)          _muspat_get_channels (o) = (v)
+#define _muspat_get_rows(o)                 (o)->rows
+#define _muspat_set_rows(o, v)              _muspat_get_rows (o) = (v)
+#define _muspat_get_size(o)                 (o)->size
+#define _muspat_set_size(o, v)              _muspat_get_size (o) = (v)
+#define _muspat_get_data_off(o)             (o)->data_off
+#define _muspat_set_data_off(o, v)          _muspat_get_data_off (o) = (v)
+#define _muspat_get_data_seg(o)             (o)->data_seg
+#define _muspat_set_data_seg(o, v)          _muspat_get_data_seg (o) = (v)
+#define _muspat_get_data(o)                 MK_FP (_muspat_get_data_seg (o), _muspat_get_data_off (o))
+#define _muspat_set_data(o, v)              { _muspat_set_data_off ((o), FP_OFF (v)); _muspat_set_data_seg ((o), FP_SEG (v)); }
+#define _muspat_get_EM_data_handle(o)       (o)->handle
+#define _muspat_set_EM_data_handle(o, v)    _muspat_get_EM_data_handle (o) = (v)
+#define _muspat_get_EM_data_page(o)         _muspat_get_data_seg (o)
+#define _muspat_set_EM_data_page(o, v)      _muspat_get_EM_data_page (o) = (v)
+#define _muspat_get_EM_data_offset(o)       _muspat_get_data_off (o)
+#define _muspat_set_EM_data_offset(o, v)    _muspat_get_EM_data_offset (o) = (v)
+#define _muspat_get_EM_data(o)              MK_FP (emsFrameSeg, _muspat_get_EM_data_offset (o))
+#define _muspat_get_row_start(o, r, c)      (_muspat_get_channels (o) * (r) + (c)) * 5
+#define _muspat_get_packed_data_start(o)    (_muspat_get_rows (o) * sizeof (uint16_t))
 
 void __far muspat_init (MUSPAT *self)
 {
@@ -76,6 +113,20 @@ bool __far muspat_is_own_EM_handle (MUSPAT *self)
         return false;
 }
 
+void __far muspat_set_data_packed (MUSPAT *self, bool value)
+{
+    if (self)
+        _muspat_set_data_packed (self, value);
+}
+
+bool __far muspat_is_data_packed (MUSPAT *self)
+{
+    if (self)
+        return _muspat_is_data_packed (self);
+    else
+        return false;
+}
+
 void __far muspat_set_channels (MUSPAT *self, uint8_t value)
 {
     if (self)
@@ -90,13 +141,13 @@ uint8_t __far muspat_get_channels (MUSPAT *self)
         return 0;
 }
 
-void __far muspat_set_rows (MUSPAT *self, uint8_t value)
+void __far muspat_set_rows (MUSPAT *self, uint16_t value)
 {
     if (self)
         _muspat_set_rows(self, value);
 }
 
-uint8_t __far muspat_get_rows (MUSPAT *self)
+uint16_t __far muspat_get_rows (MUSPAT *self)
 {
     if (self)
         return _muspat_get_rows(self);
@@ -121,7 +172,7 @@ uint16_t __far muspat_get_size (MUSPAT *self)
 void __far muspat_set_data (MUSPAT *self, void *value)
 {
     if (self)
-        _muspat_set_data(self, value);
+        _muspat_set_data (self, value);
 }
 
 void __far muspat_set_EM_data_handle (MUSPAT *self, EMSHDL value)
@@ -191,6 +242,62 @@ void *__far muspat_map_EM_data (MUSPAT *self)
     return NULL;
 }
 
+uint16_t __far muspat_get_row_start (MUSPAT *self, uint16_t row, uint8_t channel)
+{
+    return _muspat_get_row_start (self, row, channel);
+}
+
+uint16_t __far muspat_get_packed_data_start (MUSPAT *self)
+{
+    return _muspat_get_packed_data_start (self);
+}
+
+/* assumes EM data is mapped before call */
+void __far muspat_set_packed_row_start (MUSPAT *self, uint16_t row, uint16_t offset)
+{
+    uint16_t *offsets;
+
+    if (row)
+    {
+        offsets = muspat_get_data (self);
+        offsets [row - 1] = offset - _muspat_get_packed_data_start (self);
+    }
+}
+
+/* assumes EM data is mapped before call */
+uint16_t __far muspat_get_packed_row_start (MUSPAT *self, uint16_t row)
+{
+    uint16_t start;
+    uint16_t *offsets;
+
+    start = _muspat_get_packed_data_start (self);
+    if (row)
+    {
+        offsets = muspat_get_data (self);
+        start += offsets [row - 1];
+    }
+
+    return start;
+}
+
+/* assumes EM data is mapped before call */
+uint16_t __far muspat_get_packed_size (MUSPAT *self)
+{
+    uint16_t rows;
+    uint16_t start;
+    uint16_t *offsets;
+
+    rows = _muspat_get_rows (self);
+    start = _muspat_get_packed_data_start (self);
+    if (rows)
+    {
+        offsets = muspat_get_data (self);
+        start += offsets [rows - 1];
+    }
+
+    return start;
+}
+
 void __far muspat_free (MUSPAT *self)
 {
     void *p;
@@ -211,14 +318,647 @@ void __far muspat_free (MUSPAT *self)
     }
 }
 
+/*** Music pattern reader ***/
+
+typedef unsigned char music_pattern_row_event_flags_t;
+typedef music_pattern_row_event_flags_t MUSPATROWEVFLAGS;
+
+#define MUSPATROWEVFL_CHN               (1 << 0)
+#define MUSPATROWEVFL_CHNEVENT_SHIFT    1
+
+void __far _muspatio_seek (MUSPATIO *self, unsigned int row, unsigned char channel);
+void __far _muspatio_seek_packed (MUSPATIO *self, unsigned int row, unsigned char channel);
+void __far _muspatio_read (MUSPATIO *self, MUSPATROWEVENT *event);
+void __far _muspatio_read_packed (MUSPATIO *self, MUSPATROWEVENT *event);
+bool __far _muspatio_is_end_of_row (MUSPATIO *self);
+bool __far _muspatio_is_end_of_row_packed (MUSPATIO *self);
+void __far _muspatio_end_row (MUSPATIO *self);
+void __far _muspatio_end_row_packed_write (MUSPATIO *self);
+void __far _muspatio_write (MUSPATIO *self, MUSPATROWEVENT *event);
+void __far _muspatio_write_packed (MUSPATIO *self, MUSPATROWEVENT *event);
+void __far _muspatio_close (MUSPATIO *self);
+
+void __near muspatio_open_read (MUSPATIO *self)
+{
+    self->m_seek            = & _muspatio_seek;
+    self->m_read_write      = & _muspatio_read;
+    self->m_is_end_of_row   = & _muspatio_is_end_of_row;
+    self->m_end_row         = & _muspatio_end_row;
+    self->m_close           = & _muspatio_close;
+    //~ self->row_start         = 0;
+    //~ self->row_end           = 0;
+    //~ self->offset            = 0;
+    //~ self->channel           = 0;
+}
+
+void __near muspatio_open_write (MUSPATIO *self)
+{
+    self->m_seek            = & _muspatio_seek;
+    self->m_read_write      = & _muspatio_write;
+    self->m_is_end_of_row   = & _muspatio_is_end_of_row;
+    self->m_end_row         = & _muspatio_end_row;
+    self->m_close           = & _muspatio_close;
+    //~ self->row_start         = 0;
+    //~ self->row_end           = 0;
+    //~ self->offset            = 0;
+    //~ self->channel           = 0;
+}
+
+void __near muspatio_open_packed_read (MUSPATIO *self)
+{
+    self->m_seek            = & _muspatio_seek_packed;
+    self->m_read_write      = & _muspatio_read_packed;
+    self->m_is_end_of_row   = & _muspatio_is_end_of_row_packed;
+    self->m_end_row         = & _muspatio_end_row;
+    self->m_close           = & _muspatio_close;
+    self->row_start         = _muspat_get_packed_data_start (self->pattern);
+    self->row_end           = muspat_get_packed_row_start (self->pattern, 1);
+    self->offset            = self->row_start;
+    //~ self->channel           = 0;
+}
+
+void __near muspatio_open_packed_write (MUSPATIO *self)
+{
+    self->m_seek            = & _muspatio_seek_packed;
+    self->m_read_write      = & _muspatio_write_packed;
+    self->m_is_end_of_row   = & _muspatio_is_end_of_row_packed;
+    self->m_end_row         = & _muspatio_end_row_packed_write;
+    self->m_close           = & _muspatio_close;
+    self->row_start         = _muspat_get_packed_data_start (self->pattern);
+    //~ self->row_end           = 0;    // undefined
+    self->offset            = self->row_start;
+    //~ self->channel           = 0;
+}
+
+void __near muspatio_clear (MUSPATIO *self)
+{
+    memset (self, 0, sizeof (MUSPATIO));
+}
+
+bool __far muspatio_open (MUSPATIO *self, MUSPAT *pattern, MUSPATIOMODE mode)
+{
+    if (self && pattern)
+    {
+        muspatio_clear (self);
+
+        self->pattern = pattern;
+
+        if (muspat_is_EM_data (pattern))
+        {
+            self->data = muspat_map_EM_data (pattern);
+            if (!self->data)
+            {
+                self->error = "EM map failed";
+                return false;
+            }
+        }
+        else
+        {
+            self->data = muspat_get_data (pattern);
+            if (!self->data)
+            {
+                self->error = "No data";
+                return false;
+            }
+        }
+
+        self->mode = mode;
+
+        if (muspat_is_data_packed (pattern))
+        {
+            switch (mode)
+            {
+            case MUSPATIOMD_READ:
+                muspatio_open_packed_read (self);
+                return true;
+            case MUSPATIOMD_WRITE:
+                muspatio_open_packed_write (self);
+                return true;
+            default:
+                self->error = "Bad mode";
+                return false;
+            }
+        }
+        else
+        {
+            switch (mode)
+            {
+            case MUSPATIOMD_READ:
+                muspatio_open_read (self);
+                return true;
+            case MUSPATIOMD_WRITE:
+                muspatio_open_write (self);
+                return true;
+            default:
+                self->error = "Bad mode";
+                return false;
+            }
+        }
+    }
+
+    self->error = "Bad arguments";
+    return false;
+}
+
+void __far _muspatio_seek (MUSPATIO *self, unsigned int row, unsigned char channel)
+{
+    MUSPAT *pattern;
+
+    self->row = row;
+    pattern = self->pattern;
+
+    self->row_start = _muspat_get_row_start (pattern, row, 0);
+    self->row_end = _muspat_get_row_start (pattern, row + 1, 0);
+    self->offset = _muspat_get_row_start (pattern, row, channel);
+    self->channel = channel;
+}
+
+void __far _muspatio_seek_packed (MUSPATIO *self, unsigned int row, unsigned char channel)
+{
+    MUSPAT *pattern;
+
+    self->row = row;
+    pattern = self->pattern;
+
+    self->row_start = muspat_get_packed_row_start (pattern, row);
+    self->row_end = muspat_get_packed_row_start (pattern, row + 1);
+    self->offset = self->row_start;
+    self->channel = 0;
+}
+
+void __far _muspatio_read (MUSPATIO *self, MUSPATROWEVENT *event)
+{
+    unsigned char *data;
+    MUSCHNEVFLAGS flags;
+    unsigned char channel;
+
+    data = self->data + self->offset;
+
+    event->channel = self->channel;
+    flags = 0;
+
+    event->event.instrument = data [0];
+    if (event->event.instrument != CHNINS_EMPTY)
+        flags |= MUSPATCHNEVFL_INS;
+
+    event->event.note = data [1];
+    if (event->event.note != CHNNOTE_EMPTY)
+        flags |= MUSPATCHNEVFL_NOTE;
+
+    event->event.volume = data [2];
+    if (event->event.volume != CHNVOL_EMPTY)
+        flags |= MUSPATCHNEVFL_VOL;
+
+    event->event.command = data [3];
+    event->event.parameter = data [4];
+    if (event->event.command != CHNCMD_EMPTY)
+        flags |= MUSPATCHNEVFL_CMD;
+
+    event->event.flags = flags;
+    self->offset += 5;
+    self->channel++;
+}
+
+void __far _muspatio_read_packed (MUSPATIO *self, MUSPATROWEVENT *event)
+{
+    unsigned char *data;
+    MUSPATROWEVFLAGS row_flags;
+    unsigned char channel;
+
+    data = self->data + self->offset;
+
+    row_flags = data [0];
+    data++;
+
+    if (row_flags & MUSPATROWEVFL_CHN)
+    {
+        channel = data [0];
+        data++;
+    }
+    else
+        channel = self->channel;
+
+    event->channel = channel;
+    event->event.flags = (row_flags >> MUSPATROWEVFL_CHNEVENT_SHIFT) & MUSPATCHNEVFL_ALL;
+
+    if (row_flags & (MUSPATCHNEVFL_INS << MUSPATROWEVFL_CHNEVENT_SHIFT))
+    {
+        event->event.instrument = data [0];
+        data++;
+    }
+    else
+        event->event.instrument = CHNINS_EMPTY;
+
+    if (row_flags & (MUSPATCHNEVFL_NOTE << MUSPATROWEVFL_CHNEVENT_SHIFT))
+    {
+        event->event.note = data [0];
+        data++;
+    }
+    else
+        event->event.note = CHNNOTE_EMPTY;
+
+    if (row_flags & (MUSPATCHNEVFL_VOL << MUSPATROWEVFL_CHNEVENT_SHIFT))
+    {
+        event->event.volume = data [0];
+        data++;
+    }
+    else
+        event->event.volume = CHNVOL_EMPTY;
+
+    if (row_flags & (MUSPATCHNEVFL_CMD << MUSPATROWEVFL_CHNEVENT_SHIFT))
+    {
+        event->event.command = data [0];
+        event->event.parameter = data [1];
+        data += 2;
+    }
+    else
+    {
+        event->event.command = CHNCMD_EMPTY;
+        event->event.parameter = 0;
+    }
+
+    self->offset = FP_OFF (data) - FP_OFF (self->data);
+    self->channel = channel + 1;
+}
+
+void __far _muspatio_write (MUSPATIO *self, MUSPATROWEVENT *event)
+{
+    unsigned char *data;
+
+    if (event->channel < muspat_get_channels (self->pattern))
+    {
+        if (!(event->event.flags & MUSPATCHNEVFL_INS))
+            event->event.instrument = CHNINS_EMPTY;
+
+        if (!(event->event.flags & MUSPATCHNEVFL_NOTE))
+            event->event.note = CHNNOTE_EMPTY;
+
+        if (!(event->event.flags & MUSPATCHNEVFL_VOL))
+            event->event.volume = CHNVOL_EMPTY;
+
+        if (!(event->event.flags & MUSPATCHNEVFL_CMD))
+        {
+            event->event.command = CHNCMD_EMPTY;
+            event->event.parameter = 0;
+        }
+
+        muspatio_seek (self, self->row, event->channel);
+
+        data = self->data + self->offset;
+        data [0] = event->event.instrument;
+        data [1] = event->event.note;
+        data [2] = event->event.volume;
+        data [3] = event->event.command;
+        data [4] = event->event.parameter;
+        self->offset += 5;
+        self->channel++;
+    }
+}
+
+void __far _muspatio_write_packed (MUSPATIO *self, MUSPATROWEVENT *event)
+{
+    unsigned char *data;
+    unsigned int offset;
+    MUSPATROWEVFLAGS row_flags;
+    unsigned char channel;
+
+    data = self->data + self->offset;
+
+    row_flags = (event->event.flags & MUSPATCHNEVFL_ALL) << MUSPATROWEVFL_CHNEVENT_SHIFT;
+
+    channel = event->channel;
+    if (channel != self->channel)
+        row_flags |= MUSPATROWEVFL_CHN;
+
+    data [0] = row_flags;
+    data++;
+
+    if (row_flags & MUSPATROWEVFL_CHN)
+    {
+        data [0] = channel;
+        data++;
+    }
+
+    if (row_flags & (MUSPATCHNEVFL_INS << MUSPATROWEVFL_CHNEVENT_SHIFT))
+    {
+        data [0] = event->event.instrument;
+        data++;
+    }
+
+    if (row_flags & (MUSPATCHNEVFL_NOTE << MUSPATROWEVFL_CHNEVENT_SHIFT))
+    {
+        data [0] = event->event.note;
+        data++;
+    }
+
+    if (row_flags & (MUSPATCHNEVFL_VOL << MUSPATROWEVFL_CHNEVENT_SHIFT))
+    {
+        data [0] = event->event.volume;
+        data++;
+    }
+
+    if (row_flags & (MUSPATCHNEVFL_CMD << MUSPATROWEVFL_CHNEVENT_SHIFT))
+    {
+        data [0] = event->event.command;
+        data [1] = event->event.parameter;
+        data += 2;
+    }
+
+    self->offset = FP_OFF (data) - FP_OFF (self->data);
+    self->channel = channel + 1;
+}
+
+bool __far _muspatio_is_end_of_row (MUSPATIO *self)
+{
+    return (self->channel == 32) || (self->offset >= self->row_end);
+}
+
+bool __far _muspatio_is_end_of_row_packed (MUSPATIO *self)
+{
+    return self->offset >= self->row_end;
+}
+
+void __far _muspatio_end_row (MUSPATIO *self)
+{
+    muspatio_seek (self, self->row + 1, 0);
+}
+
+void __far _muspatio_end_row_packed_write (MUSPATIO *self)
+{
+    if (self->row < _muspat_get_rows (self->pattern))
+    {
+        self->row++;
+
+        muspat_set_packed_row_start (self->pattern, self->row, self->offset);
+
+        self->row_start = self->offset;
+        self->row_end = 0;
+        self->channel = 0;
+    }
+}
+
+void __far _muspatio_close (MUSPATIO *self)
+{
+    muspatio_clear (self);
+}
+
+#if DEBUG == 1
+
+static const char __halftones[16] = "cCdDefFgGaAb????";
+static const char __octaves[16] = "0123456789??????";
+
+void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event)
+{
+    if (event->flags & MUSPATCHNEVFL_NOTE)
+    {
+        switch (event->note)
+        {
+        case CHNNOTE_EMPTY:
+            s[0] = '.';
+            s[1] = '.';
+            break;
+        case CHNNOTE_OFF:
+            s[0] = '=';
+            s[1] = '=';
+            break;
+        default:
+            if (event->note <= CHNNOTE_MAX)
+            {
+                s[0] = __halftones[event->note & 0x0f];
+                s[1] = __octaves[event->note >> 4];
+            }
+            else
+            {
+                s[0] = '?';
+                s[1] = '?';
+            }
+            break;
+        }
+    }
+    else
+    {
+        s[0] = '.';
+        s[1] = '.';
+    }
+
+    s[2] = ' ';
+
+    if (event->flags & MUSPATCHNEVFL_INS)
+    {
+        switch (event->instrument)
+        {
+        case CHNINS_EMPTY:
+            s[3] = '.';
+            s[4] = '.';
+            break;
+        default:
+            if (_unpackInstrument (event->instrument) < 99)
+            {
+                s[3] = '0' + ((_unpackInstrument (event->instrument) + 1) / 10);
+                s[4] = '0' + ((_unpackInstrument (event->instrument) + 1) % 10);
+            }
+            else
+            {
+                s[3] = '?';
+                s[4] = '?';
+            }
+            break;
+        }
+    }
+    else
+    {
+        s[3] = '.';
+        s[4] = '.';
+    }
+
+    s[5] = ' ';
+
+    if (event->flags & MUSPATCHNEVFL_VOL)
+    {
+        switch (event->volume)
+        {
+        case CHNVOL_EMPTY:
+            s[6] = '.';
+            s[7] = '.';
+            break;
+        default:
+            if (_isVolume (event->volume))
+            {
+                s[6] = '0' + (event->volume / 10);
+                s[7] = '0' + (event->volume % 10);
+            }
+            else
+            {
+                s[6] = '?';
+                s[7] = '?';
+            }
+            break;
+        }
+    }
+    else
+    {
+        s[6] = '.';
+        s[7] = '.';
+    }
+
+    s[8] = ' ';
+
+    if (event->flags & MUSPATCHNEVFL_CMD)
+    {
+        if (event->command == CHNCMD_EMPTY)
+        {
+            s[9] = '.';
+            s[10] = '.';
+            s[11] = '.';
+        }
+        else
+        {
+            if (event->command <= CHNCMD_MAX)
+                s[9] = 'A' + event->command - 1;
+            else
+                s[9] = '?';
+
+            snprintf (s + 10, 2, "%02X", event->parameter);
+        }
+    }
+    else
+    {
+        s[9] = '.';
+        s[10] = '.';
+        s[11] = '.';
+    }
+
+    s[12] = 0;
+}
+
+void __near DEBUG_dump_pattern_info (MUSPAT *self)
+{
+    void *data;
+    uint16_t size;
+    char s[64];
+
+    data = muspat_get_data (self);
+
+    if (muspat_is_EM_data (self))
+    {
+        snprintf (s, 64,
+            "EM, page=0x%04X, offset=0x%04X",
+            muspat_get_EM_data_page (self),
+            muspat_get_EM_data_offset (self)
+        );
+    }
+    else
+    {
+        snprintf (s, 64,
+            "DOS, address=0x%04X:0x%04X",
+            FP_SEG (data),
+            FP_OFF (data)
+        );
+    }
+    size = muspat_get_size (self);
+    DEBUG_MSG_ ("DEBUG_dump_pattern_info",
+        "Pattern: rows=%u, size=0x%04X, place=%s",
+        muspat_get_rows (self),
+        size,
+        s
+    );
+
+    if (muspat_is_data_packed (self))
+    {
+        size = muspat_get_packed_size (self);
+        snprintf (s, 64, "packed, packed_size=0x%04X, data_start=0x%04X", size, muspat_get_packed_data_start (self));
+    }
+    else
+        snprintf (s, 64, "raw, channels=%u", muspat_get_channels (self));
+
+    DEBUG_MSG_ ("DEBUG_dump_pattern_info",
+        "Pattern: format=%s",
+        s
+    );
+
+    DEBUG_dump_mem (data, size, "data: ");
+}
+
+// "s" must hold atleast 64 bytes or (num_channels * 13) bytes
+bool __far DEBUG_dump_pattern (MUSPAT *self, char *s, uint8_t num_channels)
+{
+    MUSPATIO f;
+    MUSPATROWEVENT e, empty;
+    unsigned int rows, row;
+    unsigned char c, next_c;
+    bool row_read, row_ev_ok;
+
+    if ((!self) || (!muspatio_open (&f, self, MUSPATIOMD_READ)))
+    {
+        DEBUG_ERR_ ("DEBUG_dump_pattern", "Failed to read pattern (%s)", f.error);
+        return false;
+    }
+
+    DEBUG_dump_pattern_info (self);
+
+    rows = muspat_get_rows (self);
+    for (row = 0; row < rows; row++)
+    {
+        muspatio_seek (&f, row, 0);
+
+        /* Linear reading of pattern's events while increasing channel number */
+        muspatrowevent_clear (&empty);
+        c = 0;
+        row_read = !muspatio_is_end_of_row (&f);
+        while (c < num_channels)
+        {
+            // walk through from current channel (c) to the end
+            row_ev_ok = false;
+            next_c = num_channels;
+
+            if (row_read)
+            {
+                muspatio_read (&f, &e);
+                if (e.channel < num_channels)
+                {
+                    // walk through from current channel (c) to current event's channel
+                    row_ev_ok = true;
+                    next_c = e.channel;
+                    row_read = !muspatio_is_end_of_row (&f);
+                }
+            }
+
+            /* walk through from channel (c) to (next_c)  */
+            while (c < next_c)
+            {
+                empty.channel = c;
+                DEBUG_get_pattern_channel_event_str (s + empty.channel * 13, & (empty.event));
+                s[empty.channel * 13 + 12] = '|';
+                c++;
+            }
+
+            if (row_ev_ok)
+            {
+                DEBUG_get_pattern_channel_event_str (s + e.channel * 13, & (e.event));
+                s[e.channel * 13 + 12] = '|';
+                c++;
+            }
+        }
+
+        s[(num_channels - 1) * 13 + 12] = 0;
+        _DEBUG_LOG (DBGLOG_MSG, NULL, 0, NULL, "%03hhu: |%s|", row, s);
+    }
+
+    muspatio_close (&f);
+    return true;
+}
+
+#endif  /* DEBUG */
+
 /*** Music patterns list ***/
 
-#define _muspatl_set_EM_data(o, v)          o->flags = (o->flags & ~MUSPATLFL_EM) | (v ? MUSPATLFL_EM : 0)
-#define _muspatl_is_EM_data(o)              ((o->flags & MUSPATLFL_EM) != 0)
-#define _muspatl_set_own_EM_handle(o, v)    o->flags = (o->flags & ~MUSPATLFL_OWNHDL) | (v ? MUSPATLFL_OWNHDL : 0)
-#define _muspatl_is_own_EM_handle(o)        ((o->flags & MUSPATLFL_OWNHDL) != 0)
-#define _muspatl_set_EM_handle(o, v)        o->handle = v
-#define _muspatl_get_EM_handle(o)           o->handle
+#define _muspatl_set_EM_data(o, v)          (o)->flags = ((o)->flags & ~MUSPATLFL_EM) | ((v) ? MUSPATLFL_EM : 0)
+#define _muspatl_is_EM_data(o)              (((o)->flags & MUSPATLFL_EM) != 0)
+#define _muspatl_set_own_EM_handle(o, v)    (o)->flags = ((o)->flags & ~MUSPATLFL_OWNHDL) | ((v) ? MUSPATLFL_OWNHDL : 0)
+#define _muspatl_is_own_EM_handle(o)        (((o)->flags & MUSPATLFL_OWNHDL) != 0)
+#define _muspatl_get_list(o)                &((o)->list)
+#define _muspatl_get_EM_handle(o)           (o)->handle
+#define _muspatl_set_EM_handle(o, v)        _muspatl_get_EM_handle (o) = (v)
 
 static EMSNAME EMS_PATLIST_HANDLE_NAME = "patlist";
 
@@ -236,7 +976,7 @@ void __far muspatl_init (MUSPATLIST *self)
 {
     if (self)
     {
-        dynarr_init(&(self->list), self, sizeof(MUSPAT), _muspatl_init_item, _muspatl_free_item);
+        dynarr_init (_muspatl_get_list (self), self, sizeof(MUSPAT), _muspatl_init_item, _muspatl_free_item);
         _muspatl_set_EM_handle(self, EMSBADHDL);
     }
 }
@@ -244,13 +984,13 @@ void __far muspatl_init (MUSPATLIST *self)
 void __far muspatl_set (MUSPATLIST *self, uint16_t index, MUSPAT *item)
 {
     if (self)
-        dynarr_set_item(&(self->list), index, item);
+        dynarr_set_item (_muspatl_get_list (self), index, item);
 }
 
 MUSPAT *__far muspatl_get (MUSPATLIST *self, uint16_t index)
 {
     if (self)
-        return dynarr_get_item(&(self->list), index);
+        return dynarr_get_item (_muspatl_get_list (self), index);
     else
         return NULL;
 }
@@ -258,7 +998,7 @@ MUSPAT *__far muspatl_get (MUSPATLIST *self, uint16_t index)
 bool __far muspatl_set_count (MUSPATLIST *self, uint16_t count)
 {
     if (self)
-        return dynarr_set_size(&(self->list), count);
+        return dynarr_set_size (_muspatl_get_list (self), count);
     else
         return false;
 }
@@ -266,7 +1006,7 @@ bool __far muspatl_set_count (MUSPATLIST *self, uint16_t count)
 uint16_t __far muspatl_get_count (MUSPATLIST *self)
 {
     if (self)
-        return dynarr_get_size(&(self->list));
+        return dynarr_get_size (_muspatl_get_list (self));
     else
         return 0;
 }
@@ -317,14 +1057,14 @@ void __far muspatl_set_EM_handle_name (MUSPATLIST *self)
 {
     if (self)
         if (_muspatl_is_own_EM_handle(self))
-            emsSetHandleName(self->handle, EMS_PATLIST_HANDLE_NAME);
+            emsSetHandleName (_muspatl_get_EM_handle (self), EMS_PATLIST_HANDLE_NAME);
 }
 
 uint32_t __far muspatl_get_used_EM (MUSPATLIST *self)
 {
     if (self)
         if (_muspatl_is_EM_data(self))
-            return 16 * emsGetHandleSize(self->handle);
+            return 16 * emsGetHandleSize (_muspatl_get_EM_handle (self));
 
     return 0;
 }
@@ -333,10 +1073,10 @@ void __far muspatl_free (MUSPATLIST *self)
 {
     if (self)
     {
-        dynarr_free(&(self->list));
+        dynarr_free (_muspatl_get_list (self));
 
         if (_muspatl_is_own_EM_handle(self))
-            emsFree(self->handle);
+            emsFree (_muspatl_get_EM_handle (self));
     }
 }
 

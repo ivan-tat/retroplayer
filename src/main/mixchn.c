@@ -98,7 +98,7 @@ void __far mixchn_set_sample_volume (MIXCHN *self, int16_t vol)
     if (vol < 0)
         self->bSmpVol = 0;
     else
-        self->bSmpVol = vol > CHNINSVOL_MAX ? CHNINSVOL_MAX : vol;
+        self->bSmpVol = vol > SMPVOL_MAX ? SMPVOL_MAX : vol;
 }
 
 uint8_t __far mixchn_get_sample_volume (MIXCHN *self)

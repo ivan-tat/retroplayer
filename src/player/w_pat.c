@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "cc/string.h"
 #include "cc/conio.h"
 #include "cc/stdio.h"
 #include "main/effects.h"
@@ -31,22 +32,117 @@ void __far win_pattern_init(SCRWIN *self)
     startchn = 1;
 }
 
+void __near draw_channel_event (MUSPATCHNEVENT *event)
+{
+    uint8_t _ins, _vol, _cmd, _parm;
+    char output[12];
+
+    write_Note (event->note);
+
+    _ins  = event->instrument;
+    _vol  = event->volume;
+    _cmd  = event->command;
+    _parm = event->parameter;
+
+    output[0] = ' ';
+    if (_ins == CHNINS_EMPTY)
+    {
+        output[1] = '.';
+        output[2] = '.';
+    }
+    else
+    if (_unpackInstrument (_ins) < 99)
+    {
+        output[1] = '0' + ((_unpackInstrument (_ins) + 1) / 10);
+        output[2] = '0' + ((_unpackInstrument (_ins) + 1) % 10);
+    }
+    else
+    {
+        output[1] = '?';
+        output[2] = '?';
+    }
+
+    output[3] = ' ';
+    if (_isVolume (_vol))
+    {
+        output[4] = '0' + (_vol / 10);
+        output[5] = '0' + (_vol % 10);
+    }
+    else
+    if (_vol == CHNVOL_EMPTY)
+    {
+        output[4] = '.';
+        output[5] = '.';
+    }
+    else
+    {
+        output[4] = '?';
+        output[5] = '?';
+    }
+
+    output[6] = ' ';
+    if (_cmd == CHNCMD_EMPTY)
+    {
+        output[7] = '.';
+        output[8] = '.';
+        output[9] = '.';
+    }
+    else
+    {
+        if (_cmd <= MAXEFF)
+            output[7] = 'A' + _cmd - 1;
+        else
+            output[7] = '?';
+
+        snprintf (& (output[8]), 2, "%02X", _parm);
+    }
+    output[10] = 0;
+    printf ("%s", output);
+}
+
 void __near __pascal display_row(uint8_t ordr, uint8_t row)
 {
+    #define DISPLAY_COLUMNS 5
     MUSPAT *pat;
-    uint8_t *p;
-    uint8_t i;
-    uint8_t _note, _ins, _vol, _cmd, _parm;
-    char output[12];
+    MUSPATIO f;
+    MUSPATROWEVENT e;
+    MUSPATCHNEVENT line[DISPLAY_COLUMNS];
+    uint8_t i, c_start, c_end;
 
     pat = muspatl_get(mod_Patterns, Order[ordr]);
 
-    if (muspat_is_EM_data(pat))
-        p = muspat_map_EM_data(pat);
-    else
-        p = muspat_get_data(pat);
+    c_start = startchn - 1;
+    c_end = c_start + DISPLAY_COLUMNS;
+    if (c_end >= mod_ChannelsCount)
+        c_end = mod_ChannelsCount;
 
-    p = &(p[(row * mod_ChannelsCount + startchn - 1) * 5]);
+    for (i = 0; i < c_end - c_start; i++)
+        muspatchnevent_clear (& (line [i]));
+
+    muspatio_open (&f, pat, MUSPATIOMD_READ);
+
+    if (muspat_is_data_packed (pat))
+    {
+        muspatio_seek (&f, row, 0);
+
+        i = 0;
+        while (!muspatio_is_end_of_row (&f))
+        {
+            muspatio_read (&f, &e);
+            if ((e.channel >= c_start) && (e.channel < c_end))
+                memcpy (& (line [e.channel - c_start]), & (e.event), sizeof (MUSPATCHNEVENT));
+        }
+    }
+    else
+    {
+        muspatio_seek (&f, row, c_start);
+
+        for (i = c_start; i < c_end ; i++)
+        {
+            muspatio_read (&f, &e);
+            memcpy (& (line [i - c_start]), & (e.event), sizeof (MUSPATCHNEVENT));
+        }
+    }
 
     textbackground(_black);
     textcolor(_lightgray);
@@ -54,83 +150,21 @@ void __near __pascal display_row(uint8_t ordr, uint8_t row)
     textcolor(_darkgray);
     printf("\xb3");
 
-    for (i = 0; i < 5 ; i++)
+    for (i = 0; i < DISPLAY_COLUMNS ; i++)
     {
         textcolor(_lightgray);
 
-        if (i < mod_ChannelsCount)
-        {
-            _note = p[0];
-            _ins  = p[1];
-            _vol  = p[2];
-            _cmd  = p[3];
-            _parm = p[4];
-
-            write_Note(_note);
-
-            output[0] = ' ';
-            if (_ins == 0)
-            {
-                output[1] = '.';
-                output[2] = '.';
-            }
-            else
-            if (_ins <= 99)
-            {
-                output[1] = '0' + (_ins / 10);
-                output[2] = '0' + (_ins % 10);
-            }
-            else
-            {
-                output[1] = '?';
-                output[2] = '?';
-            }
-
-            output[3] = ' ';
-            if (_vol <= 64)
-            {
-                output[4] = '0' + (_vol / 10);
-                output[5] = '0' + (_vol % 10);
-            }
-            else
-            if (_vol < 255)
-            {
-                output[4] = '?';
-                output[5] = '?';
-            }
-            else
-            {
-                output[4] = '.';
-                output[5] = '.';
-            }
-
-            output[6] = ' ';
-            if (_cmd == EFFIDX_NONE)
-            {
-                output[7] = '.';
-                output[8] = '.';
-                output[9] = '.';
-            }
-            else
-            {
-                if (_cmd <= MAXEFF)
-                    output[7] = 'A' + _cmd - 1;
-                else
-                    output[7] = '?';
-
-                sprintf(&(output[8]), "%02X", _parm);
-            }
-            output[10] = 0;
-            printf("%s", output);
-        }
+        if (startchn - 1 + i < mod_ChannelsCount)
+            draw_channel_event (&(line[i]));
         else
             printf("             ");
 
         textcolor(_darkgray);
         printf("\xb3");
-
-        p += 5;
     }
+
+    muspatio_close (&f);
+    #undef DISPLAY_COLUMNS
 }
 
 void __near __pascal display_currow(void)

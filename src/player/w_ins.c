@@ -48,7 +48,7 @@ void __near posstring(char *__dest, uint8_t i)
             __dest[0] = 'D';
             data = FP_SEG(musins_get_data(ins));
         }
-        sprintf(&(__dest[1]), "%04X", data);
+        snprintf (& (__dest[1]), 4, "%04X", data);
     }
     else
         memcpy(__dest, "     ", 6);

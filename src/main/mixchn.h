@@ -114,7 +114,6 @@ uint16_t __far chn_calcNotePeriod (MIXCHN *chn, uint32_t rate, uint8_t note);
 uint32_t __far chn_calcNoteStep (MIXCHN *chn, uint32_t rate, uint8_t note);
 void     __far chn_setupNote (MIXCHN *chn, uint8_t note, bool keep);
 
-
 /* Mixing channels list */
 
 #define MAX_CHANNELS 32

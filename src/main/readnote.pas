@@ -17,6 +17,7 @@ procedure readnewnotes;
 implementation
 
 uses
+    string_,
     ems,
     s3mtypes,
     musins,
