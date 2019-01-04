@@ -33,7 +33,6 @@ uses
     watcom,
     pascal,
     startup,
-    debugfn,
     errno_,
     ctype,
     dos_,

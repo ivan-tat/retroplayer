@@ -23,7 +23,6 @@ implementation
 uses
     watcom,
     pascal,
-    debugfn,
     string_,
     ctype,
     errno_,

@@ -10,7 +10,6 @@
 
 #include "pascal.h"
 #include "startup.h"
-#include "debugfn.h"
 #include "cc/i86.h"
 #include "cc/errno.h"
 #include "cc/dos.h"

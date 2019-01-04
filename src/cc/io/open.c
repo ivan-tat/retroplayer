@@ -8,7 +8,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "pascal.h"
-#include "debugfn.h"
 #include "cc/i86.h"
 #include "cc/string.h"
 #include "cc/errno.h"

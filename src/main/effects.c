@@ -17,6 +17,7 @@
 #include "main/s3mvars.h"
 #include "main/effvars.h"
 #include "main/mixer.h"
+#include "main/muspat.h"
 #include "main/effects.h"
 
 #define get_i8_value(off, pos) *(int8_t *)MK_FP(FP_SEG(&wavetab), off + pos)
@@ -1202,8 +1203,8 @@ METHOD_INIT(tremolo)
 
 METHOD_HANDLE(tremolo)
 {
-    if ((chnState_cur_bIns != 0)
-    ||  (chnState_cur_bVol != CHNINSVOL_EMPTY)
+    if ((chnState_cur_bIns != CHNINS_EMPTY)
+    ||  (chnState_cur_bVol != CHNVOL_EMPTY)
     ||  (!(chn->bEffFlags & EFFFLAG_CONTINUE)))
         chn->bSmpVolOld = mixchn_get_sample_volume(chn);
 }
@@ -1305,7 +1306,7 @@ METHOD_TICK(special_noteDelay)
                 mixchn_set_playing(chn, true);
             }
         }
-        if (chn->bSavVol != CHNINSVOL_EMPTY)
+        if (chn->bSavVol != CHNVOL_EMPTY)
             mixchn_set_sample_volume(chn, (chn->bSavVol * playState_gVolume) >> 6);
         mixchn_set_command(chn, EFFIDX_NONE);
     }

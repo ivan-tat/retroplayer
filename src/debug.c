@@ -37,6 +37,8 @@ static const struct
 
 #define MAX_TAG_LENGTH 64
 
+static const char _hexdigits[16] = "0123456789ABCDEF";
+
 void __far _DEBUG_LOG(const int type, const char *file, int line, const char *method, const char *format, ...)
 {
     va_list ap;
@@ -154,6 +156,105 @@ void __far _DEBUG_UNREG(const char *file, const char *method, const char *name)
 {
     _DEBUG_LOG(DBGLOG_INFO, file, 0, method, "Unregistering module <%s>...", name);
 }
+
+/*
+ * Example:
+ *      #define LEN 8
+ *      char s [LEN + 1];
+ *      _DEBUG_get_xnum (0xBAAD5EED, LEN, s);
+ *      // s = "BAAD5EED";
+ *
+ *  Description:
+ *      Destination must be of the size (len + 1) bytes to hold the result.
+ */
+void __far _DEBUG_get_xnum (uint32_t value, char len, char *dest)
+{
+    char *c, count;
+
+    c = & (dest [len - 1]);
+    count = len;
+    while (count)
+    {
+        *c = _hexdigits [value & 15];
+        value >>= 4;
+        c--;
+        count--;
+    }
+    dest[len] = 0;
+}
+
+/*
+ * Example:
+ *      #define MAX 16
+ *      char s [MAX * 4 + 1];
+ *      _DEBUG_get_xline (_hexdigits, 12, MAX, s);
+ *      // s = "30 31 32 33 34 35 36 37 38 39 41 42             0123456789AB";
+ *
+ *  Description:
+ *      Destination must be of the size (max * 4 + 1) bytes to hold the result.
+ */
+void __far _DEBUG_get_xline (void *buf, uint8_t size, uint8_t max, char *dest)
+{
+    char *p;
+    int i;
+
+    p = (char *) buf;
+    i = size;
+    while (i)
+    {
+        _DEBUG_get_xnum (*p, 2, dest);
+        dest [2] = ' ';
+        p++;
+        dest += 3;
+        i--;
+    }
+
+    if (max - size)
+    {
+        memset (dest, ' ', (max - size) * 3);
+        dest += (max - size) * 3;
+    }
+
+    p = (char *) buf;
+    i = size;
+    while (i)
+    {
+        *dest = (*p < 32) ? '.' : *p;
+        p++;
+        dest++;
+        i--;
+    }
+
+    *dest = 0;
+}
+
+#define LINE_SIZE 16
+void __far _DEBUG_dump_mem (void *buf, unsigned size, const char *padstr)
+{
+    const char *p;
+    unsigned o, left;
+    char len;
+    char s[4 + 1 + LINE_SIZE * 4 + 1];
+
+    p = (char *) buf;
+    o = 0;
+    left = size;
+    while (left)
+    {
+        len = (left > LINE_SIZE) ? LINE_SIZE : left;
+        _DEBUG_get_xnum (o, 4, s);
+        s[4] = ' ';
+        _DEBUG_get_xline ((void *) p, len, LINE_SIZE, & (s [5]));
+        if (padstr)
+            _DEBUG_LOG (DBGLOG_MSG, NULL, 0, NULL, "%s%s", padstr, s);
+        else
+            _DEBUG_LOG (DBGLOG_MSG, NULL, 0, NULL, "%s", s);
+        p += len;
+        o += len;
+        left -= len;
+    }
+}
+#undef LINE_SIZE
 
 void __far __pascal Debug_Msg (const char *file, const char *method, const char *msg)
 {
