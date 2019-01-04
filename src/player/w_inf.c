@@ -31,10 +31,12 @@ void __far win_information_init(SCRWIN *self)
 
 void __far win_information_draw(SCRWIN *self)
 {
+    MUSPATLIST *patterns;
     MUSPAT *pat;
 
     if (scrwin_is_created(self))
     {
+        patterns = mod_Patterns;
         textbackground(_blue);
 
         if (scrwin_get_flags(self) & WINFL_FULLREDRAW)
@@ -83,7 +85,7 @@ void __far win_information_draw(SCRWIN *self)
             printf(player_get_output_lq() ? "Low" : "High");
         }
 
-        pat = muspatl_get(mod_Patterns, playState_pattern);
+        pat = muspatl_get (patterns, playState_pattern);
 
         textcolor(_lightcyan);
         gotoxy(8, 2);

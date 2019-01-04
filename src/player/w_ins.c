@@ -88,24 +88,6 @@ void __far win_instruments_draw(SCRWIN *self)
             gotoxy(2, 1);
             printf("Sample positions in memory: (D: DOS memory, E: Expanded memory)");
 
-            gotoxy(2, height);
-            printf("Expanded memory used:");
-            if (UseEMS)
-            {
-                gotoxy(24, height);
-                textcolor(_yellow);
-                printf("%5u", musinsl_get_used_EM (instruments));
-                textcolor(_lightgray);
-                gotoxy(30, height);
-                printf("KiB");
-            }
-            else
-            {
-                gotoxy(24, height);
-                textcolor(_yellow);
-                printf("NONE");
-            }
-
             textcolor(_white);
             for (i = 1; i <= 99; i++)
             {

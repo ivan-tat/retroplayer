@@ -103,13 +103,15 @@ void __near draw_channel_event (MUSPATCHNEVENT *event)
 void __near __pascal display_row(uint8_t ordr, uint8_t row)
 {
     #define DISPLAY_COLUMNS 5
+    MUSPATLIST *patterns;
     MUSPAT *pat;
     MUSPATIO f;
     MUSPATROWEVENT e;
     MUSPATCHNEVENT line[DISPLAY_COLUMNS];
     uint8_t i, c_start, c_end;
 
-    pat = muspatl_get(mod_Patterns, Order[ordr]);
+    patterns = mod_Patterns;
+    pat = muspatl_get (patterns, Order[ordr]);
 
     c_start = startchn - 1;
     c_end = c_start + DISPLAY_COLUMNS;
@@ -177,11 +179,13 @@ void __far win_pattern_draw(SCRWIN *self)
 {
     //_win_pattern_draw(self);
 
+    MUSPATLIST *patterns;
     int i, j, currow_y;
     MUSPAT *pat;
 
     if (scrwin_is_created(self))
     {
+        patterns = mod_Patterns;
         currow_y = scrwin_get_height(self);
 
         if (scrwin_get_flags(self) & WINFL_FULLREDRAW)
@@ -204,7 +208,7 @@ void __far win_pattern_draw(SCRWIN *self)
                     printf("\xc3\xc4\xc4\xc4\xbf");
             }
             lastrow = playState_row;
-            pat = muspatl_get(mod_Patterns, playState_pattern);
+            pat = muspatl_get (patterns, playState_pattern);
             if (muspat_is_EM_data(pat))
                 muspat_map_EM_data(pat);
         }
@@ -225,7 +229,7 @@ void __far win_pattern_draw(SCRWIN *self)
             }
             // new pattern
             lastrow = 0;
-            pat = muspatl_get(mod_Patterns, playState_pattern);
+            pat = muspatl_get (patterns, playState_pattern);
             if (muspat_is_EM_data(pat))
                 muspat_map_EM_data(pat);
         }
