@@ -19,9 +19,9 @@
 
 #include "player/w_chn.h"
 
-static const char *CHANTYPES[5] =
+static const char *CHANTYPES[3] =
 {
-    "--", "LT", "RT", "AM", "AD"
+    "--", "PC", "AD"
 };
 
 void __far win_channels_init(SCRWIN *self)
@@ -39,10 +39,11 @@ void __far win_channels_init(SCRWIN *self)
 void __far win_channels_draw(SCRWIN *self)
 {
     uint8_t i, count;
+    MIXCHNLIST *channels;
     MIXCHN *chn;
-    uint8_t type;
-    uint8_t cmd;
+    MIXCHNTYPE type;
     MIXCHNFLAGS flags;
+    uint8_t cmd;
     char flagsstr[6];
     char notestr[4];
     char effectstr[_EFFECT_DESC_MAX];
@@ -50,6 +51,8 @@ void __far win_channels_draw(SCRWIN *self)
 
     if (scrwin_is_created(self))
     {
+        channels = mod_Channels;
+
         textbackground(_black);
 
         if (scrwin_get_flags(self) & WINFL_FULLREDRAW)
@@ -62,14 +65,12 @@ void __far win_channels_draw(SCRWIN *self)
         textcolor(_lightgray);
         i = 0;
         count = 0;
-        while (i < mod_ChannelsCount)
+        while (i < mixchnl_get_count (channels))
         {
-            chn = &mod_Channels[i];
+            chn = mixchnl_get (channels, i);
             type = mixchn_get_type(chn);
             flags = mixchn_get_flags(chn);
-            if  ((type < 3)
-            &&  ((mod_ChannelsCount < 17)
-            ||   (type > 0)))
+            if  ((type == MIXCHNTYPE_PCM) &&  (mixchnl_get_count (channels) <= 16))
             {
                 count++;
 

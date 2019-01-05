@@ -79,6 +79,17 @@
 /* Tracker version */
 #define _S3M_TRACKER_VER_MAJOR_ST3  3
 
+/* Channel bits */
+#define _S3M_CHN_TYPE_MASK      0x1f
+#define _S3M_CHN_DISABLED       0x80
+
+/* Channel type */
+#define _S3M_CHN_OFF            0
+#define _S3M_CHN_LEFT           1
+#define _S3M_CHN_RIGHT          2
+#define _S3M_CHN_ADLIB_MELODY   3
+#define _S3M_CHN_ADLIB_DRUMS    4
+
 #pragma pack(push, 1);
 typedef struct S3M_header
 {
@@ -327,14 +338,17 @@ bool __near s3mloader_allocbuf(S3MLOADER *self)
 void __near s3mloader_alloc_patterns(S3MLOADER *self)
 {
     _S3M_LOADER *_Self = self;
+    MUSMOD *track;
     MUSPATLIST *patterns;
     uint16_t patsize;
     uint16_t patperpage;
     uint16_t freepages;
     EMSHDL handle;
 
+    track = _Self->track;
     patterns = mod_Patterns;
-    patsize = mod_ChannelsCount * 64 * 5;
+    patsize = musmod_get_channels_count (track) * 64 * 5;
+
     if (DEBUG_FILE_S3M_LOAD)
         DEBUG_INFO_ (NULL, "Pattern memory size: %u.", patsize);
 
@@ -712,23 +726,27 @@ bool __near s3mloader_convert_pattern (S3MLOADER *self, uint8_t *src, uint16_t s
 void __near s3mloader_dump_patterns (S3MLOADER *self)
 {
     _S3M_LOADER *_Self = self;
+    MUSMOD *track;
     MUSPATLIST *patterns;
     MUSPAT *pattern;
-    unsigned int count, i;
+    unsigned int count, i, num_channels;
     char s[_S3M_MAX_CHANNELS][13];
 
+    track = _Self->track;
+    num_channels = musmod_get_channels_count (track);
     patterns = mod_Patterns;
     count = muspatl_get_count (patterns);
     for (i = 0; i < count; i++)
     {
         pattern = muspatl_get (patterns, i);
-        DEBUG_dump_pattern (pattern, s, mod_ChannelsCount);
+        DEBUG_dump_pattern (pattern, s, num_channels);
     }
 }
 
 bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
 {
     _S3M_LOADER *_Self = self;
+    MUSMOD *track;
     MUSPATLIST *patterns;
     uint32_t pos;
     uint16_t length;
@@ -739,6 +757,7 @@ bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
     bool em;
     char s[64];
 
+    track = _Self->track;
     patterns = mod_Patterns;
     pos = _Self->patpara[index] * 16;
 
@@ -780,7 +799,7 @@ bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
 
     pat = &pat_static;
     muspat_init(pat);
-    muspat_set_channels(pat, mod_ChannelsCount);
+    muspat_set_channels (pat, musmod_get_channels_count (track));
     muspat_set_rows(pat, 64);
     muspat_set_size(pat, muspat_get_channels(pat) * muspat_get_rows(pat) * 5);
 
@@ -1115,15 +1134,18 @@ bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
 uint8_t __near getchtyp(uint8_t b)
 {
     if (b <= 7)
-        return 1;   // left
-    if (b <= 15)
-        return 2;   // right
-    if (b <= 23)
-        return 3;   // adlib melody
-    if (b <= 31)
-        return 4;   // adlib drums
+        return _S3M_CHN_LEFT;
 
-    return 0;
+    if (b <= 15)
+        return _S3M_CHN_RIGHT;
+
+    if (b <= 23)
+        return _S3M_CHN_ADLIB_MELODY;
+
+    if (b <= 31)
+        return _S3M_CHN_ADLIB_DRUMS;
+
+    return _S3M_CHN_OFF;
 }
 
 MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
@@ -1131,14 +1153,12 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
     _S3M_LOADER *_Self = self;
     S3MHEADER header;
     MUSMOD *track;
+    MUSMODCHNPAN pan;
     MUSINSLIST *instruments;
     MUSPATLIST *patterns;
-    uint8_t maxused;
-    uint8_t i, smpnum;
-    uint8_t chtype;
+    uint8_t maxused, i;
     void *p;
     char *par;
-    MIXCHN *chn;
     uint16_t count;
 
     if ((!_Self) || (!name))
@@ -1205,46 +1225,70 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
         return NULL;
     }
 
+    maxused = 0;
+    for (i = 0; i < _S3M_MAX_CHANNELS; i++)
+        if ((header.channelset[i] & _S3M_CHN_DISABLED) == 0)
+        {
+            switch (getchtyp (header.channelset[i] & _S3M_CHN_TYPE_MASK))
+            {
+            case _S3M_CHN_OFF:
+                pan = MUSMODCHNPAN_CENTER;
+                break;
+            case _S3M_CHN_LEFT:
+                pan = MUSMODCHNPAN_LEFT | MUSMODCHNPANFL_ENABLED;
+                maxused = i + 1;
+                break;
+            case _S3M_CHN_RIGHT:
+                pan = MUSMODCHNPAN_RIGHT | MUSMODCHNPANFL_ENABLED;
+                maxused = i + 1;
+                break;
+            case _S3M_CHN_ADLIB_MELODY:
+                pan = MUSMODCHNPAN_CENTER;
+                break;
+            case _S3M_CHN_ADLIB_DRUMS:
+                pan = MUSMODCHNPAN_CENTER;
+                break;
+            default:
+                pan = MUSMODCHNPAN_CENTER;
+                break;
+            }
+            musmod_get_channels (track)[i].pan = pan;
+        }
+
+    if (!maxused)
+    {
+        DEBUG_ERR("s3mloader_load", "All channels are disabled.");
+        _Self->err = E_S3M_UNKNOWN;
+        return NULL;
+    }
+
+    musmod_set_channels_count (track, maxused);
+
+    if (DEBUG_FILE_S3M_LOAD)
+        DEBUG_INFO_ ("s3mloader_load", "Channels: %hu", musmod_get_channels_count (track));
+
     snprintf (
-        musmod_get_format (_Self->track),
-        MOD_FORMAT_LEN,
+        musmod_get_format (track),
+        MUSMOD_FORMAT_LEN,
         "Scream Tracker %hhx.%02hhx module",
         (header.tracker & _S3M_TRACKER_VER_MAJOR_MASK) >> _S3M_TRACKER_VER_MAJOR_SHIFT,
         (header.tracker & _S3M_TRACKER_VER_MINOR_MASK) >> _S3M_TRACKER_VER_MINOR_SHIFT
     );
 
     header.name[_S3M_TITLE_LEN - 1] = 0;
-    musmod_set_title (_Self->track, header.name);
+    musmod_set_title (track, header.name);
 
     musinsl_set_count (instruments, header.insnum);
     muspatl_set_count (patterns, header.patnum);
+
     musmod_set_order_length (track, header.ordnum);
-    musmod_set_stereo (_Self->track, (header.mvolume & _S3M_MVOL_STEREO) != 0);
-    musmod_set_amiga_limits (_Self->track, (header.flags & _S3M_FLAG_AMIGA_LIMITS) != 0);
+    musmod_set_stereo (track, (header.mvolume & _S3M_MVOL_STEREO) != 0);
+    musmod_set_amiga_limits (track, (header.flags & _S3M_FLAG_AMIGA_LIMITS) != 0);
     playState_gVolume   = header.gvolume;
     playState_mVolume   = (header.mvolume & _S3M_MVOL_MASK) >> _S3M_MVOL_SHIFT;
     musmod_set_tempo (track, header.initialtempo);
     musmod_set_speed (track, header.initialspeed);
     _Self->signed_data = (header.format == _S3M_FILE_FORMAT_1);
-
-    maxused = 0;
-    for (i = 0; i < 32; i++)
-    {
-        chn = &(mod_Channels[i]);
-        chtype = getchtyp(header.channelset[i] & 31);
-        if ((header.channelset[i] & 128) == 0)
-        {
-            if ((chtype > 0) && (chtype < 3))
-                maxused = i + 1;
-            mixchn_set_flags(chn, MIXCHNFL_ENABLED + MIXCHNFL_MIXING);
-        }
-        else
-            mixchn_set_flags(chn, 0);
-        mixchn_set_type(chn, chtype);
-    }
-    mod_ChannelsCount = maxused;
-    if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_INFO_ (NULL, "Channels: %hu", mod_ChannelsCount);
 
     if (!fread(&Order, musmod_get_order_length (track), 1, _Self->f))
     {
@@ -1311,9 +1355,8 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
 
     s3mloader_dump_patterns (self);
 
-    musmod_set_loaded (_Self->track, true);
+    musmod_set_loaded (track, true);
 
-    track = _Self->track;
     _Self->track = NULL;
     return track;
 }

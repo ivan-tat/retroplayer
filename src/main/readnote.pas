@@ -22,6 +22,7 @@ uses
     s3mtypes,
     musins,
     muspat,
+    musmod,
     s3mvars,
     effvars,
     mixchn,

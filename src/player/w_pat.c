@@ -108,15 +108,17 @@ void __near __pascal display_row(uint8_t ordr, uint8_t row)
     MUSPATIO f;
     MUSPATROWEVENT e;
     MUSPATCHNEVENT line[DISPLAY_COLUMNS];
+    MIXCHNLIST *channels;
     uint8_t i, c_start, c_end;
 
     patterns = mod_Patterns;
+    channels = mod_Channels;
     pat = muspatl_get (patterns, Order[ordr]);
 
     c_start = startchn - 1;
     c_end = c_start + DISPLAY_COLUMNS;
-    if (c_end >= mod_ChannelsCount)
-        c_end = mod_ChannelsCount;
+    if (c_end >= mixchnl_get_count (channels))
+        c_end = mixchnl_get_count (channels);
 
     for (i = 0; i < c_end - c_start; i++)
         muspatchnevent_clear (& (line [i]));
@@ -156,7 +158,7 @@ void __near __pascal display_row(uint8_t ordr, uint8_t row)
     {
         textcolor(_lightgray);
 
-        if (startchn - 1 + i < mod_ChannelsCount)
+        if (startchn - 1 + i < mixchnl_get_count (channels))
             draw_channel_event (&(line[i]));
         else
             printf("             ");
@@ -246,6 +248,10 @@ void __far win_pattern_draw(SCRWIN *self)
 
 bool __far win_pattern_keypress(SCRWIN *self, char c)
 {
+    MIXCHNLIST *channels;
+
+    channels = mod_Channels;
+
     if (scrwin_is_created(self))
     {
         if (c == 75)
@@ -261,7 +267,7 @@ bool __far win_pattern_keypress(SCRWIN *self, char c)
         else
         if (c == 77)
         {
-            if (startchn < mod_ChannelsCount)
+            if (startchn < mixchnl_get_count (channels))
             {
                 startchn++;
                 scrwin_set_flags(self, scrwin_get_flags(self) | WINFL_FULLREDRAW);

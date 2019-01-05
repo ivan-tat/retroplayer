@@ -123,11 +123,13 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
 
 void __near _play_event (MUSPATROWEVENT *e)
 {
+    MIXCHNLIST *channels;
     MIXCHN *chn;
 
-    chn = & (mod_Channels [e->channel]);
+    channels = mod_Channels;
+    chn = mixchnl_get (channels, e->channel);
 
-    if (mixchn_get_type (chn) <= 2)
+    if (mixchn_get_type (chn) == MIXCHNTYPE_PCM)
         _play_channel (chn, & (e->event));
 }
 
@@ -135,6 +137,7 @@ bool __near _play_row (MUSPAT *pat, uint16_t row)
 {
     MUSPATIO f;
     MUSPATROWEVENT e, empty;
+    MIXCHNLIST *channels;
     unsigned int num_channels;
     unsigned char c, next_c;
     bool row_read, row_ev_ok;
@@ -144,7 +147,8 @@ bool __near _play_row (MUSPAT *pat, uint16_t row)
 
     muspatio_seek (&f, row, 0);
 
-    num_channels = mod_ChannelsCount;
+    channels = mod_Channels;
+    num_channels = mixchnl_get_count (channels);
 
     /* Linear reading of pattern's events while increasing channel number */
     muspatrowevent_clear (&empty);

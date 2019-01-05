@@ -49,7 +49,7 @@ uses
 {$L plays3m.obj}
 
 var
-    chnlastinst: array[0..MAX_CHANNELS-1] of Byte;
+    chnlastinst: array[0..MUSMOD_CHANNELS_MAX-1] of Byte;
     lastrow: Byte;
     startchn: Byte;
 

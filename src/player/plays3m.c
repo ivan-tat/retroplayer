@@ -406,49 +406,47 @@ void __near __pascal winlist_free(void)
 
 /* channels */
 
-static uint8_t savchn[MAX_CHANNELS];
+static bool savchn[MUSMOD_CHANNELS_MAX];
 
 void __near channels_save_all(void)
 {
-    int i;
+    MIXCHNLIST *channels;
     MIXCHN *chn;
+    uint8_t num_channels, i;
 
-    for (i = 0; i < MAX_CHANNELS; i++)
+    channels = mod_Channels;
+    num_channels = mixchnl_get_count (channels);
+
+    for (i = 0; i < num_channels; i++)
     {
-        chn = &(mod_Channels[i]);
-        savchn[i] = mixchn_get_type(chn);
+        chn = mixchnl_get (channels, i);
+        savchn[i] = mixchn_is_mixing (chn);
     }
-}
-
-void __near channels_swap(uint8_t index)
-{
-    MIXCHN *chn;
-
-    chn = &(mod_Channels[index]);
-
-    if (mixchn_get_type(chn) == 0)
-        mixchn_set_type(chn, savchn[index]);
-    else
-        mixchn_set_type(chn, 0);
 }
 
 void __near channels_toggle_mixing(uint8_t index)
 {
+    MIXCHNLIST *channels;
     MIXCHN *chn;
 
-    chn = &(mod_Channels[index]);
-    mixchn_set_mixing(chn, !mixchn_is_mixing(chn));
+    channels = mod_Channels;
+    chn = mixchnl_get (channels, index);
+    mixchn_set_mixing (chn, !mixchn_is_mixing(chn));
 }
 
 void __near channels_stop_all(void)
 {
-    int i;
+    MIXCHNLIST *channels;
     MIXCHN *chn;
+    uint8_t num_channels, i;
 
-    for (i = 0; i < mod_ChannelsCount; i++)
+    channels = mod_Channels;
+    num_channels = mixchnl_get_count (channels);
+
+    for (i = 0; i < num_channels; i++)
     {
-        chn = &(mod_Channels[i]);
-        mixchn_set_flags(chn, mixchn_get_flags(chn) & ~MIXCHNFL_PLAYING);
+        chn = mixchnl_get (channels, i);
+        mixchn_set_flags (chn, mixchn_get_flags(chn) & ~MIXCHNFL_PLAYING);
     }
 }
 

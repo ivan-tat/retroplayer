@@ -15,6 +15,20 @@
 
 #include "main/mixchn.h"
 
+MIXCHNFLAGS __far __mixchn_set_flags (MIXCHNFLAGS _flags, MIXCHNFLAGS _mask, MIXCHNFLAGS _set, bool raise)
+{
+    if (raise)
+        return (_flags & _mask) | _set;
+    else
+        return _flags & _mask;
+}
+
+void __far mixchn_init (MIXCHN *self)
+{
+    if (self)
+        memset (self, 0, sizeof (MIXCHN));
+}
+
 void __far mixchn_set_flags (MIXCHN *self, MIXCHNFLAGS value)
 {
     self->bChannelFlags = value;
@@ -64,14 +78,24 @@ bool __far mixchn_is_mixing (MIXCHN *self)
     return (self->bChannelFlags & MIXCHNFL_MIXING) != 0;
 }
 
-void __far mixchn_set_type (MIXCHN *self, uint8_t value)
+void __far mixchn_set_type (MIXCHN *self, MIXCHNTYPE value)
 {
     self->bChannelType = value;
 }
 
-uint8_t __far mixchn_get_type (MIXCHN *self)
+MIXCHNTYPE __far mixchn_get_type (MIXCHN *self)
 {
     return self->bChannelType;
+}
+
+void __far mixchn_set_pan (MIXCHN *self, MIXCHNPAN value)
+{
+    self->pan = value;
+}
+
+MIXCHNPAN __far mixchn_get_pan (MIXCHN *self)
+{
+    return self->pan;
 }
 
 void __far mixchn_set_instrument_num (MIXCHN *self, uint8_t value)
@@ -220,6 +244,11 @@ void __far mixchn_reset_wave_tables (MIXCHN *self)
     }
 }
 
+void __far mixchn_free (MIXCHN *self)
+{
+    return;
+}
+
 void __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum)
 {
     MUSMOD *track;
@@ -304,9 +333,75 @@ void __far chn_setupNote (MIXCHN *chn, uint8_t note, bool keep)
     }
 }
 
+/*** Mixing channels list ***/
+
+#define _mixchnl_get_list(o)    & ((o)->list)
+
+MIXCHNLFLAGS __far __mixchnl_set_flags (MIXCHNLFLAGS _flags, MIXCHNLFLAGS _mask, MIXCHNLFLAGS _set, bool raise)
+{
+    MIXCHNLFLAGS result;
+
+    result = _flags & _mask;
+    if (raise)
+        result |= _set;
+
+    return result;
+}
+
+void __far _mixchnl_init_item (void *self, void *item)
+{
+    mixchn_init ((MIXCHN *) item);
+}
+
+void __far _mixchnl_free_item (void *self, void *item)
+{
+    mixchn_free ((MIXCHN *) item);
+}
+
+void __far mixchnl_init (MIXCHNLIST *self)
+{
+    if (self)
+    {
+        memset (self, 0, sizeof (MIXCHNLIST));
+        dynarr_init (_mixchnl_get_list (self), self, sizeof (MIXCHN), _mixchnl_init_item, _mixchnl_free_item);
+    }
+}
+
+MIXCHN *__far mixchnl_get (MIXCHNLIST *self, uint16_t index)
+{
+    if (self)
+        return dynarr_get_item (_mixchnl_get_list (self), index);
+    else
+        return NULL;
+}
+
+bool __far mixchnl_set_count (MIXCHNLIST *self, uint16_t value)
+{
+    if (self)
+        return dynarr_set_size (_mixchnl_get_list (self), value);
+    else
+        return false;
+}
+
+uint16_t __far mixchnl_get_count (MIXCHNLIST *self)
+{
+    if (self)
+        return dynarr_get_size (_mixchnl_get_list (self));
+    else
+        return 0;
+}
+
+void __far mixchnl_free (MIXCHNLIST *self)
+{
+    if (self)
+    {
+        dynarr_free (_mixchnl_get_list (self));
+        mixchnl_init (self);    // clear
+    }
+}
+
 #ifdef DEFINE_LOCAL_DATA
 
-channelsList_t mod_Channels;
-uint8_t mod_ChannelsCount;
+MIXCHNLIST *mod_Channels;
 
 #endif  /* DEFINE_LOCAL_DATA */

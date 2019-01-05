@@ -16,6 +16,7 @@
 #include <stdint.h>
 
 #include "cc/i86.h"
+#include "dynarray.h"
 #include "main/musins.h"
 #include "main/s3mtypes.h"
 
@@ -29,10 +30,25 @@ typedef uint8_t MIXCHNFLAGS;
 
 #define EFFFLAG_CONTINUE 0x01
 
+typedef uint8_t mix_channel_type_t;
+typedef mix_channel_type_t MIXCHNTYPE;
+
+#define MIXCHNTYPE_NONE     0
+#define MIXCHNTYPE_PCM      1
+#define MIXCHNTYPE_ADLIB    2
+
+typedef uint8_t mix_channel_pan_t;
+typedef mix_channel_pan_t MIXCHNPAN;
+
+#define MIXCHNPAN_LEFT      0
+#define MIXCHNPAN_CENTER    32
+#define MIXCHNPAN_RIGHT     64
+
 typedef struct mix_channel_t
 {
     MIXCHNFLAGS bChannelFlags;
-    uint8_t  bChannelType;  // 0=off, 1=left, 2=right, 3,4=adlib (if 0,3,4 -> everything ignored !)
+    MIXCHNTYPE bChannelType;
+    MIXCHNPAN pan;
     // current Instrument :
     MUSINS  *pMusIns;
     uint16_t wSmpSeg;       // DOS segment of current sample data
@@ -77,6 +93,7 @@ typedef struct mix_channel_t
 
 typedef struct mix_channel_t MIXCHN;
 
+void     __far mixchn_init (MIXCHN *self);
 void     __far mixchn_set_flags (MIXCHN *self, MIXCHNFLAGS value);
 MIXCHNFLAGS __far mixchn_get_flags (MIXCHN *self);
 void     __far mixchn_set_enabled (MIXCHN *self, bool value);
@@ -85,8 +102,10 @@ void     __far mixchn_set_playing (MIXCHN *self, bool value);
 bool     __far mixchn_is_playing (MIXCHN *self);
 void     __far mixchn_set_mixing (MIXCHN *self, bool value);
 bool     __far mixchn_is_mixing (MIXCHN *self);
-void     __far mixchn_set_type (MIXCHN *self, uint8_t value);
-uint8_t  __far mixchn_get_type (MIXCHN *self);
+void     __far mixchn_set_type (MIXCHN *self, MIXCHNTYPE value);
+MIXCHNTYPE __far mixchn_get_type (MIXCHN *self);
+void     __far mixchn_set_pan (MIXCHN *self, MIXCHNPAN value);
+MIXCHNPAN __far mixchn_get_pan (MIXCHN *self);
 void     __far mixchn_set_instrument_num (MIXCHN *self, uint8_t value);
 uint8_t  __far mixchn_get_instrument_num (MIXCHN *self);
 void     __far mixchn_set_instrument (MIXCHN *self, MUSINS *value);
@@ -109,27 +128,51 @@ uint8_t  __far mixchn_get_sub_command (MIXCHN *self);
 void     __far mixchn_set_command_parameter (MIXCHN *self, uint8_t value);
 uint8_t  __far mixchn_get_command_parameter (MIXCHN *self);
 void     __far mixchn_reset_wave_tables (MIXCHN *self);
+void     __far mixchn_free (MIXCHN *self);
+
 void     __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum);
 uint16_t __far chn_calcNotePeriod (MIXCHN *chn, uint32_t rate, uint8_t note);
 uint32_t __far chn_calcNoteStep (MIXCHN *chn, uint32_t rate, uint8_t note);
 void     __far chn_setupNote (MIXCHN *chn, uint8_t note, bool keep);
 
-/* Mixing channels list */
+/*** Mixing channels list ***/
 
-#define MAX_CHANNELS 32
-    /* 0..31 channels */
+/* Flags */
 
-typedef MIXCHN channelsList_t[MAX_CHANNELS];
+typedef uint16_t mixing_channels_list_flags_t;
+typedef mixing_channels_list_flags_t MIXCHNLFLAGS;
+
+/* Structure */
+
+#pragma pack(push, 1);
+typedef struct mixing_channels_list_t
+{
+    MIXCHNLFLAGS flags;
+    DYNARR list;
+};
+#pragma pack(pop);
+
+typedef struct mixing_channels_list_t MIXCHNLIST;
+
+/* Methods */
+
+MIXCHNLFLAGS __far __mixchnl_set_flags (MIXCHNLFLAGS _flags, MIXCHNLFLAGS _mask, MIXCHNLFLAGS _set, bool raise);
+
+void        __far mixchnl_init (MIXCHNLIST *self);
+MIXCHN     *__far mixchnl_get (MIXCHNLIST *self, uint16_t index);
+bool        __far mixchnl_set_count (MIXCHNLIST *self, uint16_t value);
+uint16_t    __far mixchnl_get_count (MIXCHNLIST *self);
+void        __far mixchnl_free (MIXCHNLIST *self);
 
 /*** Variables ***/
 
-extern channelsList_t mod_Channels;  /* all public/private data for every channel */
-extern uint8_t mod_ChannelsCount;    /* possible values : 1..32 (kill all Adlib) */
+extern MIXCHNLIST *mod_Channels;
 
 /*** Linking ***/
 
 #ifdef __WATCOMC__
 
+#pragma aux mixchn_init "*";
 #pragma aux mixchn_set_flags "*";
 #pragma aux mixchn_get_flags "*";
 #pragma aux mixchn_set_enabled "*";
@@ -140,6 +183,8 @@ extern uint8_t mod_ChannelsCount;    /* possible values : 1..32 (kill all Adlib)
 #pragma aux mixchn_is_mixing "*";
 #pragma aux mixchn_set_type "*";
 #pragma aux mixchn_get_type "*";
+#pragma aux mixchn_set_pan "*";
+#pragma aux mixchn_get_pan "*";
 #pragma aux mixchn_set_instrument_num "*";
 #pragma aux mixchn_get_instrument_num "*";
 #pragma aux mixchn_set_instrument "*";
@@ -162,13 +207,22 @@ extern uint8_t mod_ChannelsCount;    /* possible values : 1..32 (kill all Adlib)
 #pragma aux mixchn_set_command_parameter "*";
 #pragma aux mixchn_get_command_parameter "*";
 #pragma aux mixchn_reset_wave_tables "*";
+#pragma aux mixchn_free "*";
+
 #pragma aux chn_setupInstrument "*";
 #pragma aux chn_calcNotePeriod "*";
 #pragma aux chn_calcNoteStep "*";
 #pragma aux chn_setupNote "*";
 
+#pragma aux __mixchnl_set_flags "*";
+
+#pragma aux mixchnl_init "*";
+#pragma aux mixchnl_get "*";
+#pragma aux mixchnl_set_count "*";
+#pragma aux mixchnl_get_count "*";
+#pragma aux mixchnl_free "*";
+
 #pragma aux mod_Channels "*";
-#pragma aux mod_ChannelsCount "*";
 
 #endif  /* __WATCOMC__ */
 

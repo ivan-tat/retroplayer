@@ -71,6 +71,7 @@ void __far win_instruments_draw(SCRWIN *self)
     MUSINSLIST *instruments;
     int i;
     uint8_t n;
+    MIXCHNLIST *channels;
     MIXCHN *chn;
     uint8_t height, page_height, line_len;
     char data[6];
@@ -79,6 +80,7 @@ void __far win_instruments_draw(SCRWIN *self)
     {
         track = mod_Track;
         instruments = mod_Instruments;
+        channels = mod_Channels;
 
         textbackground(_black);
         textcolor(_lightgray);
@@ -102,11 +104,11 @@ void __far win_instruments_draw(SCRWIN *self)
             }
         }
 
-        for (i = 0; i < mod_ChannelsCount; i++)
+        for (i = 0; i < mixchnl_get_count (channels); i++)
         {
-            chn = &mod_Channels[i];
+            chn = mixchnl_get (channels, i);
 
-            if (mixchn_is_playing(chn) && (mixchn_get_type(chn) > 0))
+            if (mixchn_is_playing (chn) && (mixchn_get_type (chn) == MIXCHNTYPE_PCM))
                 n = mixchn_get_instrument_num(chn);
             else
                 n = 0;

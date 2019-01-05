@@ -488,15 +488,60 @@ bool __far player_load_s3m (char *name)
     return true;
 }
 
-void __near _player_reset_channels(void)
+bool __near _player_alloc_channels (MIXCHNLIST *channels, MUSMOD *track)
 {
-    int i;
+    uint8_t num_channels;
+    uint8_t i;
+    MIXCHN *chn;
+    MIXCHNTYPE type;
+    MIXCHNPAN pan;
+    MIXCHNFLAGS flags;
+
+    num_channels = musmod_get_channels_count (track);
+
+    if (mixchnl_get_count (channels) != num_channels)
+        if (!mixchnl_set_count (channels, musmod_get_channels_count (track)))
+        {
+            DEBUG_ERR ("_player_alloc_channels", "Failed to allocate memory for mixing channels.");
+            return false;
+        }
+
+    for (i = 0; i < num_channels; i++)
+    {
+        chn = mixchnl_get (channels, i);
+        pan = musmod_get_channels (track)[i].pan & MUSMODCHNPANFL_PAN_MASK;
+
+        if (musmod_get_channels (track)[i].pan & MUSMODCHNPANFL_ENABLED)
+        {
+            type = MIXCHNTYPE_PCM;
+            flags = MIXCHNFL_ENABLED | MIXCHNFL_MIXING;
+        }
+        else
+        {
+            type = MIXCHNTYPE_NONE;
+            flags = 0;
+        }
+
+        mixchn_set_type (chn, type);
+        mixchn_set_pan (chn, pan);
+        mixchn_set_flags (chn, flags);
+    }
+
+    return true;
+}
+
+void __near _player_reset_channels (MIXCHNLIST *channels)
+{
+    uint8_t num_channels, i;
     MIXCHN *chn;
 
-    for (i = 0; i < mod_ChannelsCount; i++)
+    num_channels = mixchnl_get_count (channels);
+
+    for (i = 0; i < num_channels; i++)
     {
-        chn = &mod_Channels[i];
-        mixchn_reset_wave_tables(chn);
+        chn = mixchnl_get (channels, i);
+        if (mixchn_get_type (chn) != MIXCHNTYPE_NONE)
+            mixchn_reset_wave_tables (chn);
     }
 }
 
@@ -504,7 +549,6 @@ void __near _player_set_initial_state (MUSMOD *track)
 {
     playState_set_speed (musmod_get_speed (track));
     playState_set_tempo (musmod_get_tempo (track));
-    _player_reset_channels();
 }
 
 void __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep)
@@ -528,6 +572,7 @@ void __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep)
 bool __far player_play_start (void)
 {
     MUSMOD *track;
+    MIXCHNLIST *channels;
     SNDDMABUF *outbuf;
     uint16_t frame_size;
 
@@ -561,6 +606,21 @@ bool __far player_play_start (void)
         player_error = E_PLAYER_NO_MODULE;
         return false;
     }
+
+    // Allocate mixing channels
+
+    channels = _new (MIXCHNLIST);
+    if (!channels)
+    {
+        DEBUG_FAIL ("player_play_start", "Failed to allocate memory for mixing channels.");
+        player_error = E_PLAYER_LOW_MEMORY;
+        return false;
+    }
+    mixchnl_init (channels);
+    mod_Channels = channels;
+
+    if (!_player_alloc_channels (channels, track))
+        return false;
 
     // 1. Setup output mode
 
@@ -605,6 +665,7 @@ bool __far player_play_start (void)
 
     _player_setup_patterns_order (track);
     _player_set_initial_state (track);
+    _player_reset_channels (channels);
     player_set_pos (initState_startOrder, 0, false);
 
     playState_tick_samples_per_channel_left = 0;    // emmidiately next tick
@@ -670,6 +731,7 @@ uint8_t __far player_get_pattern_delay (void)
 void __far player_free_module (void)
 {
     MUSMOD *track;
+    MIXCHNLIST *channels;
 
     DEBUG_BEGIN("player_free_module");
 
@@ -692,6 +754,14 @@ void __far player_free_module (void)
         muspatl_free(mod_Patterns);
         _delete(mod_Patterns);
     }
+
+    channels = mod_Channels;
+    if (channels)
+    {
+        mixchnl_free (channels);
+        _delete (channels);
+    }
+    channels = NULL;
 
     DEBUG_END("player_free_module");
 }
@@ -759,6 +829,7 @@ void __near s3mplay_init(void)
     snddmabuf_init(&sndDMABuf);
     SavHandle = EMSBADHDL;
     mod_Track = NULL;
+    mod_Channels = NULL;
     mod_Instruments = NULL;
     mod_Patterns = NULL;
 }

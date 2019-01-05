@@ -32,8 +32,7 @@ bool playOption_LoopSong;
 ordersList_t Order;
 uint8_t  LastOrder;
 
-channelsList_t mod_Channels;
-uint8_t mod_ChannelsCount;
+MIXCHNLIST *mod_Channels;
 
 /* initial state */
 

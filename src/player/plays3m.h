@@ -16,6 +16,7 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "main/musmod.h"
 #include "main/mixchn.h"
 
 uint32_t getFreeDOSMemory(void);
@@ -23,7 +24,7 @@ uint32_t getFreeEMMMemory(void);
 
 /* Information windows */
 
-extern uint8_t chnlastinst[MAX_CHANNELS];
+extern uint8_t chnlastinst[MUSMOD_CHANNELS_MAX];
 
 void get_note_name(char *__dest, uint8_t note);
 void write_Note(uint8_t note);

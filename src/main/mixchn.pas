@@ -10,75 +10,9 @@ unit mixchn;
 
 interface
 
-uses
-    types,
-    musins;
-
 (*$I defines.pas*)
 
-type
-    TMIXCHNFLAGS = Byte;
-
-const
-    MIXCHNFL_ENABLED = $01;
-    MIXCHNFL_PLAYING = $02;
-    MIXCHNFL_MIXING  = $04;
-
-const
-    EFFFLAG_CONTINUE = $01;
-
-type
-    TChannel = packed record
-        bChannelFlags: TMIXCHNFLAGS;
-        bChannelType:   byte;
-        pMusIns:        Pointer;
-        wSmpSeg:        word;
-        bIns:           byte;
-        bNote:          byte;
-        bSmpVol:        byte;
-        bSmpFlags:      byte;
-        wSmpStart:      word;
-        wSmpLoopStart:  word;
-        wSmpLoopEnd:    word;
-        dSmpPos:        dword;
-        dSmpStep:       dword;
-        wSmpPeriod:     word;
-        wSmpPeriodLow:  word;
-        wSmpPeriodHigh: word;
-        bCommand:       byte;
-        bCommand2:      byte;
-        bParameter:     byte;
-        bEffFlags:      byte;
-        wVibTab:        word;
-        wTrmTab:        word;
-        bTabPos:        byte;
-        bVibParam:      byte;
-        bPortParam:     byte;
-        wSmpPeriodOld:  word;
-        bSmpVolOld:     byte;
-        wSmpPeriodDest: word;
-        bArpPos:        byte;
-        bArpNotes:      array [0..1] of byte;
-        dArpSmpSteps:   array [0..2] of dword;
-        bRetrigTicks:   byte;
-        bSavNote:       byte;
-        bSavIns:        byte;
-        bSavVol:        byte;
-        bDelayTicks:    byte;
-    end;
-    PMIXCHN = ^TChannel;
-
-const
-    MAX_CHANNELS = 32; (* 0..31 channels *)
-
-type
-    TChannelArray = array [0..MAX_CHANNELS-1] of TChannel;
-        (* all public/private data for every channel *)
-
-var
-    mod_Channels: TChannelArray;
-    mod_ChannelsCount: byte;
-
+procedure mixchn_init;
 procedure mixchn_set_flags;
 procedure mixchn_get_flags;
 procedure mixchn_set_enabled;
@@ -89,6 +23,8 @@ procedure mixchn_set_mixing;
 procedure mixchn_is_mixing;
 procedure mixchn_set_type;
 procedure mixchn_get_type;
+procedure mixchn_set_pan;
+procedure mixchn_get_pan;
 procedure mixchn_set_instrument_num;
 procedure mixchn_get_instrument_num;
 procedure mixchn_set_instrument;
@@ -111,22 +47,40 @@ procedure mixchn_get_sub_command;
 procedure mixchn_set_command_parameter;
 procedure mixchn_get_command_parameter;
 procedure mixchn_reset_wave_tables;
+procedure mixchn_free;
+
 procedure chn_setupInstrument;
 procedure chn_calcNotePeriod;
 procedure chn_calcNoteStep;
 procedure chn_setupNote;
 
+procedure __mixchnl_set_flags;
+
+procedure mixchnl_init;
+procedure mixchnl_get;
+procedure mixchnl_set_count;
+procedure mixchnl_get_count;
+procedure mixchnl_free;
+
+var
+    mod_Channels: Pointer;
+
 implementation
 
 uses
     watcom,
+    types,
+    string_,
+    dynarray,
     effvars,
     s3mvars,
+    musins,
     musmod,
     mixer;
 
 (*$l mixchn.obj*)
 
+procedure mixchn_init; external;
 procedure mixchn_set_flags; external;
 procedure mixchn_get_flags; external;
 procedure mixchn_set_enabled; external;
@@ -137,6 +91,8 @@ procedure mixchn_set_mixing; external;
 procedure mixchn_is_mixing; external;
 procedure mixchn_set_type; external;
 procedure mixchn_get_type; external;
+procedure mixchn_set_pan; external;
+procedure mixchn_get_pan; external;
 procedure mixchn_set_instrument_num; external;
 procedure mixchn_get_instrument_num; external;
 procedure mixchn_set_instrument; external;
@@ -159,9 +115,19 @@ procedure mixchn_get_sub_command; external;
 procedure mixchn_set_command_parameter; external;
 procedure mixchn_get_command_parameter; external;
 procedure mixchn_reset_wave_tables; external;
+procedure mixchn_free; external;
+
 procedure chn_setupInstrument; external;
 procedure chn_calcNotePeriod; external;
 procedure chn_calcNoteStep; external;
 procedure chn_setupNote; external;
+
+procedure __mixchnl_set_flags; external;
+
+procedure mixchnl_init; external;
+procedure mixchnl_get; external;
+procedure mixchnl_set_count; external;
+procedure mixchnl_get_count; external;
+procedure mixchnl_free; external;
 
 end.

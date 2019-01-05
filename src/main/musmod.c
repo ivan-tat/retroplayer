@@ -32,6 +32,7 @@ void __far musmod_init (MUSMOD *self)
     if (self)
     {
         memset (self, 0, sizeof (MUSMOD));
+        memset (self->channels, MUSMODCHNPAN_CENTER, sizeof (MUSMODCHN) * MUSMOD_CHANNELS_MAX);
         /*
         musinsl_init (_musmod_get_instruments (self));  // clear
         pcmsmpl_init (_musmod_get_samples (self));      // clear

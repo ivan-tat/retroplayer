@@ -46,7 +46,7 @@ void __near song_new_tick(MIXBUF *mb)
 void __near song_play_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_t count, uint16_t bufOff)
 {
     void *outBuf;
-    uint8_t chtype;
+    MIXCHNTYPE chtype;
     struct playSampleInfo_t smpInfo;
     unsigned int smpPos;
     MUSINS *ins;
@@ -55,7 +55,7 @@ void __near song_play_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_
     outBuf = MK_FP(FP_SEG(mb->buf), FP_OFF(mb->buf) + bufOff);
     chtype = mixchn_get_type(chn);
 
-    if (chtype == 0 || chtype > 2)
+    if (chtype != MIXCHNTYPE_PCM)
         return;
 
     if (callEffects)
@@ -125,10 +125,12 @@ void __near song_play(MIXBUF *mb, uint16_t len)
     uint16_t count;   /* samples per channel to calculate */
     uint8_t i;
     bool callEffects;
+    MIXCHNLIST *channels;
     MIXCHN *chn;
 
     outBuf = mb->buf;
     bufSize = mixbuf_get_offset_from_count(mb, len);
+    channels = mod_Channels;
 
     if (!playState_songEnded)
     {
@@ -154,12 +156,12 @@ void __near song_play(MIXBUF *mb, uint16_t len)
             if (!count)
                 break;
 
-            for (i = 0; i < mod_ChannelsCount; i++)
+            for (i = 0; i < mixchnl_get_count (channels); i++)
             {
-                chn = &(mod_Channels[i]);
+                chn = mixchnl_get (channels, i);
                 if (mixchn_is_enabled(chn))
                     song_play_channel(chn, callEffects, mb, count,
-                        bufOff + (mixbuf_get_channels(mb) == 2 && mixchn_get_type(chn) == 2 ? sizeof(int32_t) : 0));   // NOTE: mixbuf is 32 bits
+                        bufOff + ((mixbuf_get_channels (mb) == 2) && (mixchn_get_pan (chn) == MIXCHNPAN_RIGHT) ? sizeof(int32_t) : 0));   // NOTE: mixbuf is 32 bits
             }
 
             playState_tick_samples_per_channel_left -= count;

@@ -12,7 +12,8 @@ interface
 
 (*$I defines.pas*)
 
-(* song arrangement *)
+const
+    MUSMOD_CHANNELS_MAX = 32;
 
 procedure __musmod_set_flags;
 
