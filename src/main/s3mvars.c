@@ -30,7 +30,6 @@ bool playOption_LoopSong;
 /* song arrangement */
 
 ordersList_t Order;
-uint16_t OrdNum;
 uint8_t  LastOrder;
 
 channelsList_t mod_Channels;

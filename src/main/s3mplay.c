@@ -410,26 +410,25 @@ uint8_t __far player_get_master_volume (void)
     return playState_mVolume;
 }
 
-void __near _player_setup_patterns_order(void)
+void __near _player_setup_patterns_order (MUSMOD *track)
 {
-    MUSMOD *track;
-    int i;
+    int i, last;
 
-    track = mod_Track;
     if (track && musmod_is_loaded (track))
     {
+        last = musmod_get_order_length (track) - 1;
         if (playOption_ST3Order)
         {
             /* search for first '--' */
             i = 0;
-            while ((i < OrdNum - 1) && (Order[i] < 255))
+            while ((i < last) && (Order[i] < 255))
                 i++;
             i--;
         }
         else
         {
-            /* it is not important, we can also do simply LastOrder = OrdNum - 1 */
-            i = OrdNum - 1;
+            /* it is not important, we can also do simply LastOrder = order_length - 1 */
+            i = last;
             while ((i > 0) && (Order[i] >= 254))
                 i--;
         }
@@ -442,16 +441,22 @@ void __near _player_setup_patterns_order(void)
 
 void __far player_set_order (bool extended)
 {
+    MUSMOD *track;
+
+    track = mod_Track;
+
     if (playOption_ST3Order != extended)
     {
         playOption_ST3Order = extended;
     }
-        _player_setup_patterns_order();
+
+    _player_setup_patterns_order (track);
 }
 
 bool __far player_load_s3m (char *name)
 {
     S3MLOADER *p;
+    MUSMOD *track;
 
     p = s3mloader_new();
     if (!p)
@@ -463,8 +468,9 @@ bool __far player_load_s3m (char *name)
     }
     s3mloader_init(p);
 
-    mod_Track = s3mloader_load (p, name);
-    if ((!mod_Track) || (!musmod_is_loaded (mod_Track)))
+    track = s3mloader_load (p, name);
+    mod_Track = track;
+    if ((!track) || (!musmod_is_loaded (track)))
     {
         DEBUG_FAIL("player_load_s3m", "Failed to load S3M file.");
         player_error = E_PLAYER_LOADER;
@@ -597,7 +603,7 @@ bool __far player_play_start (void)
 
     // 5. Setup playing state
 
-    _player_setup_patterns_order();
+    _player_setup_patterns_order (track);
     _player_set_initial_state();
     player_set_pos(initState_startOrder, 0, false);
 

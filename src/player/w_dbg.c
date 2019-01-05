@@ -16,6 +16,7 @@
 #include "main/mixer.h"
 #include "main/musins.h"
 #include "main/muspat.h"
+#include "main/musmod.h"
 #include "main/s3mvars.h"
 #include "main/s3mplay.h"
 #include "player/screen.h"
@@ -50,6 +51,7 @@ void __far win_debug_init(SCRWIN *self)
 
 void __far win_debug_draw(SCRWIN *self)
 {
+    MUSMOD *track;
     MUSINSLIST *instruments;
     MUSPATLIST *patterns;
     uint8_t y;
@@ -71,6 +73,7 @@ void __far win_debug_draw(SCRWIN *self)
 
     if (scrwin_is_created(self))
     {
+        track = mod_Track;
         instruments = mod_Instruments;
         patterns = mod_Patterns;
 

@@ -37,7 +37,6 @@ var
 
 var
     Order: TOrderArray;
-    OrdNum: word;
     LastOrder: byte;
 
 (* initial state *)

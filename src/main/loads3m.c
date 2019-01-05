@@ -856,6 +856,7 @@ bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
 bool __near s3mloader_load_instrument(S3MLOADER *self, uint8_t index)
 {
     _S3M_LOADER *_Self = self;
+    MUSMOD *track;
     MUSINSLIST *instruments;
     uint16_t length;
     uint8_t typ;
@@ -869,6 +870,7 @@ bool __near s3mloader_load_instrument(S3MLOADER *self, uint8_t index)
         return false;
     }
 
+    track = _Self->track;
     instruments = mod_Instruments;
     ins = musinsl_get (instruments, index);
     musins_init(ins);
@@ -931,6 +933,7 @@ uint32_t __near _calc_sample_mem_size(uint32_t size)
 void __near s3mloader_alloc_samples(S3MLOADER *self)
 {
     _S3M_LOADER *_Self = self;
+    MUSMOD *track;
     MUSINSLIST *instruments;
     uint16_t pages;
     uint32_t memsize;
@@ -938,6 +941,7 @@ void __near s3mloader_alloc_samples(S3MLOADER *self)
     MUSINS *ins;
     EMSHDL handle;
 
+    track = _Self->track;
     instruments = mod_Instruments;
 
     if (!emsGetFreePagesCount())
@@ -965,7 +969,7 @@ void __near s3mloader_alloc_samples(S3MLOADER *self)
     if (DEBUG_FILE_S3M_LOAD)
         DEBUG_INFO_ ("s3mloader_alloc_samples",
             "Instruments: %u, EM pages requested for samples: %u.",
-            mod_InstrumentsCount,
+            musinsl_get_count (instruments),
             pages
         );
 
@@ -1010,6 +1014,7 @@ void __near convert_sign_8(void *data, uint32_t size)
 bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
 {
     _S3M_LOADER *_Self = self;
+    MUSMOD *track;
     MUSINSLIST *instruments;
     char *data;
     MUSINS *ins;
@@ -1020,6 +1025,7 @@ bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
     void *loopstart;
     uint32_t loopsize;
 
+    track = _Self->track;
     instruments = mod_Instruments;
 
     if (fsetpos(_Self->f, _Self->smppara[index] * 16))
@@ -1126,6 +1132,7 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
     S3MHEADER header;
     MUSMOD *track;
     MUSINSLIST *instruments;
+    MUSPATLIST *patterns;
     uint8_t maxused;
     uint8_t i, smpnum;
     uint8_t chtype;
@@ -1140,13 +1147,15 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
         return NULL;
     }
 
-    _Self->track = _new (MUSMOD);
-    if (!_Self->track)
+    track = _new (MUSMOD);
+    if (!track)
     {
         DEBUG_ERR ("s3mloader_load", "Failed to allocate memory for music module.");
         return NULL;
     }
-    musmod_init (_Self->track);
+    musmod_init (track);
+
+    _Self->track = track;
 
     mod_Instruments = musinsl_new();
     if (!mod_Instruments)
@@ -1163,6 +1172,9 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
         return NULL;
     }
     muspatl_init(mod_Patterns);
+
+    instruments = mod_Instruments;
+    patterns = mod_Patterns;
 
     UseEMS = UseEMS && emsInstalled && emsGetFreePagesCount();
 
@@ -1204,9 +1216,9 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
     header.name[_S3M_TITLE_LEN - 1] = 0;
     musmod_set_title (_Self->track, header.name);
 
-    OrdNum = header.ordnum;
-    mod_InstrumentsCount = header.insnum;
-    muspatl_set_count(mod_Patterns, header.patnum);
+    musinsl_set_count (instruments, header.insnum);
+    muspatl_set_count (patterns, header.patnum);
+    musmod_set_order_length (track, header.ordnum);
     musmod_set_stereo (_Self->track, (header.mvolume & _S3M_MVOL_STEREO) != 0);
     musmod_set_amiga_limits (_Self->track, (header.flags & _S3M_FLAG_AMIGA_LIMITS) != 0);
     playState_gVolume   = header.gvolume;
@@ -1234,7 +1246,7 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
     if (DEBUG_FILE_S3M_LOAD)
         DEBUG_INFO_ (NULL, "Channels: %hu", mod_ChannelsCount);
 
-    if (!fread(&Order, OrdNum, 1, _Self->f))
+    if (!fread(&Order, musmod_get_order_length (track), 1, _Self->f))
     {
         DEBUG_ERR("s3mloader_load", "Failed to read patterns order.");
         _Self->err = E_S3M_FILE_READ;
@@ -1242,23 +1254,23 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
     }
     // check order if there's one 'real' (playable) entry ...
     i = 0;
-    while ((i < OrdNum) && (Order[i] >= 254))
+    while ((i < musmod_get_order_length (track)) && (Order[i] >= 254))
         i++;
 
-    if (i == OrdNum)
+    if (i == musmod_get_order_length (track))
     {
         DEBUG_ERR("s3mloader_load", "Playable entry not found.");
         _Self->err = E_S3M_PATTERNS_ORDER;
         return NULL;
     }
-    if (!fread(&(_Self->inspara), mod_InstrumentsCount * 2, 1, _Self->f))
+    if (!fread(&(_Self->inspara), musinsl_get_count (instruments) * 2, 1, _Self->f))
     {
         DEBUG_ERR("s3mloader_load", "Failed to read instruments headers.");
         _Self->err = E_S3M_FILE_READ;
         return NULL;
     }
 
-    if (!fread(&(_Self->patpara), muspatl_get_count(mod_Patterns) * 2, 1, _Self->f))
+    if (!fread (&(_Self->patpara), muspatl_get_count (patterns) * 2, 1, _Self->f))
     {
         DEBUG_ERR("s3mloader_load", "Failed to read patterns offsets.");
         _Self->err = E_S3M_FILE_READ;
@@ -1274,12 +1286,12 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
 
     s3mloader_alloc_patterns(_Self);
 
-    count = muspatl_get_count(mod_Patterns);
+    count = muspatl_get_count (patterns);
     for (i = 0; i < count; i++)
         if (!s3mloader_load_pattern(_Self, i))
             return NULL;
 
-    count = mod_InstrumentsCount;
+    count = musinsl_get_count (instruments);
     for (i = 0; i < count; i++)
         if (!s3mloader_load_instrument(_Self, i))
             return NULL;
@@ -1292,10 +1304,10 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
             if (!s3mloader_load_sample(_Self, i))
                 return NULL;
 
-    if (musinsl_is_EM_data(mod_Instruments))
-        musinsl_set_EM_handle_name(mod_Instruments);
-    if (muspatl_is_EM_data(mod_Patterns))
-        muspatl_set_EM_handle_name(mod_Patterns);
+    if (musinsl_is_EM_data (instruments))
+        musinsl_set_EM_handle_name (instruments);
+    if (muspatl_is_EM_data (patterns))
+        muspatl_set_EM_handle_name (patterns);
 
     s3mloader_dump_patterns (self);
 

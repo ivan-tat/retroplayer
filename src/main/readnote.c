@@ -15,6 +15,7 @@
 #include "main/s3mtypes.h"
 #include "main/mixchn.h"
 #include "main/muspat.h"
+#include "main/musmod.h"
 #include "main/s3mvars.h"
 #include "main/effvars.h"
 #include "main/mixer.h"
@@ -42,6 +43,7 @@ typedef patternFlowState_t PATFLOWSTATE;
 
 void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
 {
+    MUSMOD *track;
     MUSINSLIST *instruments;
     MUSINS *ins;
     unsigned char cmd, param;
@@ -90,6 +92,7 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
 
     if (chn_effInit(chn, param))
     {
+        track = mod_Track;
         instruments = mod_Instruments;
 
         /* read instrument */

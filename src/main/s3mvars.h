@@ -37,14 +37,13 @@ extern bool playOption_ST3Order;
     /* if true then handle order like ST3 - if a "--"=255 is found -
         stop or loop to the song start (look playOption_LoopSong) */
     /* if false - play the whole order and simply skip the "--"
-        if (CurOrder==OrdNum) then stop or loop to the beginning */
+        if (CurOrder==order_length) then stop or loop to the beginning */
 extern bool playOption_LoopSong;
     /* flag if restart if we reach the end of the S3M module */
 
 /* song arrangement */
 
 extern ordersList_t Order;
-extern uint16_t OrdNum;
 extern uint8_t  LastOrder;  /* last order to play */
 
 /* initial state */
@@ -99,7 +98,6 @@ void playState_set_tempo(uint8_t value);
 #pragma aux playOption_LoopSong "*";
 
 #pragma aux Order "*";
-#pragma aux OrdNum "*";
 #pragma aux LastOrder "*";
 
 #pragma aux initState_tempo "*";

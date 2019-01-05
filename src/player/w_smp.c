@@ -13,6 +13,7 @@
 #include "cc/stdio.h"
 #include "cc/string.h"
 #include "main/musins.h"
+#include "main/musmod.h"
 #include "main/mixchn.h"
 #include "player/screen.h"
 #include "player/plays3m.h"
@@ -50,6 +51,7 @@ void __near print_sample_num(uint8_t i, uint8_t first_line, uint8_t page_height)
 
 void __far win_samples_draw(SCRWIN *self)
 {
+    MUSMOD *track;
     MUSINSLIST *instruments;
     uint16_t ins_count;
     uint8_t i, j, k, n;
@@ -60,6 +62,7 @@ void __far win_samples_draw(SCRWIN *self)
 
     if (scrwin_is_created(self))
     {
+        track = mod_Track;
         instruments = mod_Instruments;
         ins_count = musinsl_get_count (instruments);
         textbackground(_black);
@@ -164,12 +167,14 @@ void __far win_samples_draw(SCRWIN *self)
 
 bool __far win_samples_keypress(SCRWIN *self, char c)
 {
+    MUSMOD *track;
     MUSINSLIST *instruments;
     uint16_t ins_count;
     uint8_t page_height;
 
     if (scrwin_is_created(self))
     {
+        track = mod_Track;
         instruments = mod_Instruments;
         ins_count = musinsl_get_count (instruments);
         if (c == '[')

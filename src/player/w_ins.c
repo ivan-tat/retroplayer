@@ -13,6 +13,7 @@
 #include "cc/stdio.h"
 #include "cc/string.h"
 #include "main/musins.h"
+#include "main/musmod.h"
 #include "main/mixchn.h"
 #include "main/s3mvars.h"
 #include "player/screen.h"
@@ -32,10 +33,12 @@ void __far win_instruments_init(SCRWIN *self)
 
 void __near posstring(char *__dest, uint8_t i)
 {
+    MUSMOD *track;
     MUSINSLIST *instruments;
     MUSINS *ins;
     uint16_t data;
 
+    track = mod_Track;
     instruments = mod_Instruments;
     ins = musinsl_get (instruments, i - 1);
     if (musins_get_type(ins) == MUSINST_PCM)
@@ -64,6 +67,7 @@ void __near write_no(uint16_t num, uint8_t height, uint8_t line)
 
 void __far win_instruments_draw(SCRWIN *self)
 {
+    MUSMOD *track;
     MUSINSLIST *instruments;
     int i;
     uint8_t n;
@@ -73,6 +77,7 @@ void __far win_instruments_draw(SCRWIN *self)
 
     if (scrwin_is_created(self))
     {
+        track = mod_Track;
         instruments = mod_Instruments;
 
         textbackground(_black);
