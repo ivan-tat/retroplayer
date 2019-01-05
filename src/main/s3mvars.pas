@@ -42,8 +42,6 @@ var
 (* initial state *)
 
 var
-    initState_tempo: byte;
-    initState_speed: byte;
     initState_startOrder: word;
 
 (* play state *)

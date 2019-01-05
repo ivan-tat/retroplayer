@@ -48,8 +48,6 @@ extern uint8_t  LastOrder;  /* last order to play */
 
 /* initial state */
 
-extern uint8_t  initState_tempo;
-extern uint8_t  initState_speed;
 extern uint16_t initState_startOrder;
 
 /* play state */
@@ -100,8 +98,6 @@ void playState_set_tempo(uint8_t value);
 #pragma aux Order "*";
 #pragma aux LastOrder "*";
 
-#pragma aux initState_tempo "*";
-#pragma aux initState_speed "*";
 #pragma aux initState_startOrder "*";
 
 #pragma aux playState_songEnded "*";

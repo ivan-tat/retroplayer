@@ -1223,8 +1223,8 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
     musmod_set_amiga_limits (_Self->track, (header.flags & _S3M_FLAG_AMIGA_LIMITS) != 0);
     playState_gVolume   = header.gvolume;
     playState_mVolume   = (header.mvolume & _S3M_MVOL_MASK) >> _S3M_MVOL_SHIFT;
-    initState_speed     = header.initialspeed;
-    initState_tempo     = header.initialtempo;
+    musmod_set_tempo (track, header.initialtempo);
+    musmod_set_speed (track, header.initialspeed);
     _Self->signed_data = (header.format == _S3M_FILE_FORMAT_1);
 
     maxused = 0;

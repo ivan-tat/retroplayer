@@ -37,8 +37,6 @@ uint8_t mod_ChannelsCount;
 
 /* initial state */
 
-uint8_t  initState_tempo;
-uint8_t  initState_speed;
 uint16_t initState_startOrder;
 
 /* play state */

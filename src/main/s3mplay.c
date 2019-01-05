@@ -500,10 +500,10 @@ void __near _player_reset_channels(void)
     }
 }
 
-void __near _player_set_initial_state(void)
+void __near _player_set_initial_state (MUSMOD *track)
 {
-    playState_set_speed(initState_speed);
-    playState_set_tempo(initState_tempo);
+    playState_set_speed (musmod_get_speed (track));
+    playState_set_tempo (musmod_get_tempo (track));
     _player_reset_channels();
 }
 
@@ -604,8 +604,8 @@ bool __far player_play_start (void)
     // 5. Setup playing state
 
     _player_setup_patterns_order (track);
-    _player_set_initial_state();
-    player_set_pos(initState_startOrder, 0, false);
+    _player_set_initial_state (track);
+    player_set_pos (initState_startOrder, 0, false);
 
     playState_tick_samples_per_channel_left = 0;    // emmidiately next tick
     playState_songEnded = false;    // resume playing

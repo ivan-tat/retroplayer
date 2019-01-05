@@ -63,9 +63,9 @@ typedef struct music_module_t
     uint16_t    order_start;
     uint8_t     global_volume;
     uint8_t     master_volume;
+    */
     uint8_t     tempo;
     uint8_t     speed;
-    */
 };
 typedef struct music_module_t MUSMOD;
 
@@ -102,11 +102,12 @@ MUSMODFLAGS __far __musmod_set_flags (MUSMODFLAGS _flags, MUSMODFLAGS _mask, MUS
 #define _musmod_set_global_volume(o, v) _musmod_get_global_volume(o) = (v)
 #define _musmod_get_master_volume(o)    (o)->master_volume
 #define _musmod_set_master_volume(o, v) _musmod_get_master_volume(o) = (v)
+*/
 #define _musmod_get_tempo(o)            (o)->tempo
 #define _musmod_set_tempo(o, v)         _musmod_get_tempo(o) = (v)
 #define _musmod_get_speed(o)            (o)->speed
 #define _musmod_set_speed(o, v)         _musmod_get_speed(o) = (v)
-*/
+
 void __far musmod_init (MUSMOD *self);
 #define    musmod_set_flags(o, v)           _musmod_set_flags (o, v)
 #define    musmod_get_flags(o)              _musmod_get_flags (o)
@@ -135,11 +136,11 @@ void __far musmod_set_format (MUSMOD *self, char *value);
 #define    musmod_set_global_volume(o, v)   _musmod_set_global_volume (o, v)
 #define    musmod_get_master_volume(o)      _musmod_get_master_volume (o)
 #define    musmod_set_master_volume(o, v)   _musmod_set_master_volume (o, v)
-#define    musmod_get_tempo(o)              _musmod_get_tempo(o)
+*/
+#define    musmod_get_tempo(o)              _musmod_get_tempo (o)
 #define    musmod_set_tempo(o, v)           _musmod_set_tempo (o, v)
 #define    musmod_get_speed(o)              _musmod_get_speed (o)
 #define    musmod_set_speed(o, v)           _musmod_set_speed (o, v)
-*/
 void __far musmod_free (MUSMOD *self);
 
 /*** Variables ***/
