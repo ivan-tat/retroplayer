@@ -25,21 +25,45 @@
 #include "main/s3mplay.h"
 #include "main/loads3m.h"
 
-#define S3M_MAX_CHANNELS    32
-#define S3M_MAX_INSTRUMENTS 99
-#define S3M_MAX_PATTERNS    100
+/* Limits */
+#define _S3M_MAX_INSTRUMENTS 99
+#define _S3M_MAX_PATTERNS 100
+#define _S3M_MAX_CHANNELS 32
 
 #define S3M_PAT_MIN    0
 #define S3M_PAT_MAX    99
 #define S3M_PAT_SKIP   0xfe
 #define S3M_PAT_EMPTY  0xff
 
-
 #define LOADER_BUF_SIZE (10 * 1024)
+
+/* Macros */
+#define mk_u16(a, b)        ((((a) & 0xffU) << 0) | (((b) & 0xffU) << 8))
+#define mk_u32(a, b, c, d)  ((((a) & 0xffUL) << 0) | (((b) & 0xffUL) << 8) | (((c) & 0xffUL) << 16) | (((d) & 0xffUL) << 24))
 
 /*** File header ***/
 
 #define _S3M_TITLE_LEN 28
+
+/* Format */
+#define _S3M_FILE_TYPE      mk_u16 (0x1a, 16)
+#define _S3M_FILE_FORMAT_1  1
+#define _S3M_FILE_FORMAT_2  2
+#define _S3M_FILE_MAGIC     mk_u32 ('S', 'C', 'R', 'M')
+
+/* Header flags */
+#define _S3M_FLAG_ST2_VIBRATO   0x01    // not supported
+#define _S3M_FLAG_ST2_TEMPO     0x02    // not supported
+#define _S3M_FLAG_AMIGA_SLIDES  0x04    // not supported
+#define _S3M_FLAG_VOL_0_OPTI    0x08    // not supported
+#define _S3M_FLAG_AMIGA_LIMITS  0x10
+#define _S3M_FLAG_SB_FILTER     0x20    // not supported
+#define _S3M_FLAG_CUSTOM        0x80    // not supported
+
+/* Master volume bits */
+#define _S3M_MVOL_MASK      0x7f
+#define _S3M_MVOL_SHIFT     0
+#define _S3M_MVOL_STEREO    0x80
 
 /* Tracker version bits */
 #define _S3M_TRACKER_VER_MINOR_MASK     0x00ff
@@ -49,26 +73,31 @@
 #define _S3M_TRACKER_TYPE_MASK          0xf000
 #define _S3M_TRACKER_TYPE_SHIFT         12
 
+/* Tracker type */
+#define _S3M_TRACKER_ST3    1
+
+/* Tracker version */
+#define _S3M_TRACKER_VER_MAJOR_ST3  3
+
 #pragma pack(push, 1);
 typedef struct S3M_header
 {
     char name[_S3M_TITLE_LEN];
-    char charEOF;       // = 0x1A
-    uint8_t type;       // = 0x10
+    uint16_t type;
     uint8_t unused1[2];
     uint16_t ordnum;
     uint16_t insnum;
     uint16_t patnum;
     uint16_t flags;
     uint16_t tracker;
-    uint16_t ffv;       // file format version
-    uint32_t magic;     // = "SCRM"
+    uint16_t format;
+    uint32_t magic;
     uint8_t gvolume;    // global volume
     uint8_t initialspeed;
     uint8_t initialtempo;
     uint8_t mvolume;    // master volume
     uint8_t unused2[12];
-    uint8_t channelset[S3M_MAX_CHANNELS];
+    uint8_t channelset[_S3M_MAX_CHANNELS];
 };
 #pragma pack(pop);
 typedef struct S3M_header S3MHEADER;
@@ -251,9 +280,9 @@ typedef struct _s3m_loader_t
     FILE *f;
     char *buffer;
     bool signed_data;
-    uint16_t inspara[S3M_MAX_INSTRUMENTS];
-    uint16_t patpara[S3M_MAX_PATTERNS];
-    uint32_t smppara[S3M_MAX_INSTRUMENTS];
+    uint16_t inspara[_S3M_MAX_INSTRUMENTS];
+    uint16_t patpara[_S3M_MAX_PATTERNS];
+    uint32_t smppara[_S3M_MAX_INSTRUMENTS];
     uint16_t pat_EM_pages;
     uint16_t pat_EM_page;
     uint16_t pat_EM_page_offset;
@@ -510,7 +539,7 @@ void __near _clear_events (MUSPATCHNEVENT *events)
 {
     unsigned char i;
 
-    for (i = 0; i < S3M_MAX_CHANNELS; i++)
+    for (i = 0; i < _S3M_MAX_CHANNELS; i++)
     {
         muspatchnevent_clear (events);
         events++;
@@ -524,7 +553,7 @@ bool __near s3mloader_convert_pattern (S3MLOADER *self, uint8_t *src, uint16_t s
     _S3M_PATEVENT ei;
     MUSPATIO f;
     MUSPATROWEVENT e;
-    MUSPATCHNEVENT events[S3M_MAX_CHANNELS];
+    MUSPATCHNEVENT events[_S3M_MAX_CHANNELS];
     uint16_t maxrow, r;
     uint8_t maxchn, c;
     uint16_t offset;
@@ -686,7 +715,7 @@ void __near s3mloader_dump_patterns (S3MLOADER *self)
     MUSPATLIST *patterns;
     MUSPAT *pattern;
     unsigned int count, i;
-    char s[S3M_MAX_CHANNELS][13];
+    char s[_S3M_MAX_CHANNELS][13];
 
     patterns = mod_Patterns;
     count = muspatl_get_count (patterns);
@@ -919,7 +948,7 @@ void __near s3mloader_alloc_samples(S3MLOADER *self)
     }
 
     pages = 0;
-    for (i = 0; i < S3M_MAX_INSTRUMENTS; i++)
+    for (i = 0; i < _S3M_MAX_INSTRUMENTS; i++)
     {
         ins = musinsl_get (instruments, i);
         if (musins_get_type(ins) == MUSINST_PCM)
@@ -1153,10 +1182,11 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
         return NULL;
     }
 
-    if ((header.type != 16)
-    || (header.magic != 0x4d524353)
-    || (((header.tracker >> 8) & 0xff) != 0x13)
-    || ((header.ffv != 1) && (header.ffv != 2)))
+    if ((header.type != _S3M_FILE_TYPE)
+    || (header.magic != _S3M_FILE_MAGIC)
+    || ((header.tracker & (_S3M_TRACKER_TYPE_MASK | _S3M_TRACKER_VER_MAJOR_MASK)) !=
+        ((_S3M_TRACKER_ST3 << _S3M_TRACKER_TYPE_SHIFT) | (_S3M_TRACKER_VER_MAJOR_ST3 << _S3M_TRACKER_VER_MAJOR_SHIFT)))
+    || ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2)))
     {
         DEBUG_ERR("s3mloader_load", "Unsupported file format.");
         _Self->err = E_S3M_FILE_TYPE;
@@ -1177,19 +1207,13 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
     OrdNum = header.ordnum;
     mod_InstrumentsCount = header.insnum;
     muspatl_set_count(mod_Patterns, header.patnum);
-    modOption_ST2Vibrato   = (header.flags & 0x01) != 0;
-    modOption_ST2Tempo     = (header.flags & 0x02) != 0;
-    modOption_AmigaSlides  = (header.flags & 0x04) != 0;
-    modOption_VolZeroOptim = (header.flags & 0x08) != 0;
-    modOption_AmigaLimits  = (header.flags & 0x10) != 0;
-    modOption_SBfilter     = (header.flags & 0x20) != 0;
-    modOption_CostumeFlag  = (header.flags & 0x80) != 0;
-    modOption_Stereo       = ((header.mvolume & 0x80) != 0);
+    musmod_set_stereo (_Self->track, (header.mvolume & _S3M_MVOL_STEREO) != 0);
+    musmod_set_amiga_limits (_Self->track, (header.flags & _S3M_FLAG_AMIGA_LIMITS) != 0);
     playState_gVolume   = header.gvolume;
-    playState_mVolume   = header.mvolume & 0x7f;
+    playState_mVolume   = (header.mvolume & _S3M_MVOL_MASK) >> _S3M_MVOL_SHIFT;
     initState_speed     = header.initialspeed;
     initState_tempo     = header.initialtempo;
-    _Self->signed_data   = (header.ffv == 1);
+    _Self->signed_data = (header.format == _S3M_FILE_FORMAT_1);
 
     maxused = 0;
     for (i = 0; i < 32; i++)

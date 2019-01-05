@@ -122,6 +122,7 @@ uses
     watcom,
     effvars,
     s3mvars,
+    musmod,
     mixer;
 
 (*$l mixchn.obj*)

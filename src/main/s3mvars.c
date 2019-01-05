@@ -22,17 +22,6 @@
 bool UseEMS;
 EMSHDL SavHandle;
 
-/* module options */
-
-bool modOption_ST2Vibrato;
-bool modOption_ST2Tempo;
-bool modOption_AmigaSlides;
-bool modOption_SBfilter;
-bool modOption_CostumeFlag;
-bool modOption_VolZeroOptim;
-bool modOption_AmigaLimits;
-bool modOption_Stereo;
-
 /* play options */
 
 bool playOption_ST3Order;

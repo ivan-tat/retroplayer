@@ -27,18 +27,6 @@ var
     UseEMS: boolean;
     SavHandle: TEMSHDL;
 
-(* module options *)
-
-var
-    modOption_ST2Vibrato: boolean;
-    modOption_ST2Tempo: boolean;
-    modOption_AmigaSlides: boolean;
-    modOption_SBfilter: boolean;
-    modOption_CostumeFlag: boolean;
-    modOption_VolZeroOptim: boolean;
-    modOption_AmigaLimits: boolean;
-    modOption_Stereo: boolean;
-
 (* play options *)
 
 var

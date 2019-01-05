@@ -10,6 +10,7 @@
 #include "main/effvars.h"
 #include "main/effects.h"
 #include "main/s3mvars.h"
+#include "main/musmod.h"
 #include "main/mixer.h"
 
 #include "main/mixchn.h"
@@ -221,11 +222,13 @@ void __far mixchn_reset_wave_tables (MIXCHN *self)
 
 void __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum)
 {
+    MUSMOD *track;
     MUSINSLIST *instruments;
     MUSINS *ins;
     unsigned int rate;
     unsigned int flags;
 
+    track = mod_Track;
     instruments = mod_Instruments;
     ins = musinsl_get (instruments, insNum - 1);
     if (musins_get_type(ins) == MUSINST_PCM)
@@ -246,7 +249,7 @@ void __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum)
             else
                 chn->wSmpLoopEnd = musins_get_length(ins);
             chn->wSmpStart = 0; // reset start position
-            mixchn_set_sample_period_limits(chn, rate, modOption_AmigaLimits);
+            mixchn_set_sample_period_limits (chn, rate, musmod_is_amiga_limits (track));
         }
         else
             // don't play it - it's wrong !

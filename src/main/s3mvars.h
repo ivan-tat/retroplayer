@@ -31,17 +31,6 @@ extern bool UseEMS;
 extern EMSHDL SavHandle;
     /* EM handle to save mapping while playing */
 
-/* module options */
-
-extern bool modOption_ST2Vibrato;   /* not supported */
-extern bool modOption_ST2Tempo;     /* not supported */
-extern bool modOption_AmigaSlides;  /* not supported */
-extern bool modOption_SBfilter;     /* not supported */
-extern bool modOption_CostumeFlag;  /* not supported */
-extern bool modOption_VolZeroOptim; /* PSIs volume-zero optimization */
-extern bool modOption_AmigaLimits;  /* check for amiga limits */
-extern bool modOption_Stereo;
-
 /* play options */
 
 extern bool playOption_ST3Order;
@@ -105,15 +94,6 @@ void playState_set_tempo(uint8_t value);
 
 #pragma aux UseEMS "*";
 #pragma aux SavHandle "*";
-
-#pragma aux modOption_ST2Vibrato "*";
-#pragma aux modOption_ST2Tempo "*";
-#pragma aux modOption_AmigaSlides "*";
-#pragma aux modOption_SBfilter "*";
-#pragma aux modOption_CostumeFlag "*";
-#pragma aux modOption_VolZeroOptim "*";
-#pragma aux modOption_AmigaLimits "*";
-#pragma aux modOption_Stereo "*";
 
 #pragma aux playOption_ST3Order "*";
 #pragma aux playOption_LoopSong "*";
