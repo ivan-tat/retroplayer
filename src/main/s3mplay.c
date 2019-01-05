@@ -412,9 +412,11 @@ uint8_t __far player_get_master_volume (void)
 
 void __near _player_setup_patterns_order(void)
 {
+    MUSMOD *track;
     int i;
 
-    if (mod_isLoaded)
+    track = mod_Track;
+    if (track && musmod_is_loaded (track))
     {
         if (playOption_ST3Order)
         {
@@ -461,7 +463,8 @@ bool __far player_load_s3m (char *name)
     }
     s3mloader_init(p);
 
-    if (!s3mloader_load(p, name))
+    mod_Track = s3mloader_load (p, name);
+    if ((!mod_Track) || (!musmod_is_loaded (mod_Track)))
     {
         DEBUG_FAIL("player_load_s3m", "Failed to load S3M file.");
         player_error = E_PLAYER_LOADER;
@@ -518,6 +521,7 @@ void __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep)
 
 bool __far player_play_start (void)
 {
+    MUSMOD *track;
     SNDDMABUF *outbuf;
     uint16_t frame_size;
 
@@ -544,7 +548,8 @@ bool __far player_play_start (void)
         return false;
     }
 
-    if (!mod_isLoaded)
+    track = mod_Track;
+    if ((!track) || (!musmod_is_loaded (track)))
     {
         DEBUG_FAIL("player_play_start", "No music module was loaded.");
         player_error = E_PLAYER_NO_MODULE;
@@ -658,7 +663,17 @@ uint8_t __far player_get_pattern_delay (void)
 
 void __far player_free_module (void)
 {
+    MUSMOD *track;
+
     DEBUG_BEGIN("player_free_module");
+
+    track = mod_Track;
+    if (track)
+    {
+        musmod_free (track);
+        _delete (track);
+    }
+    mod_Track = NULL;
 
     if (mod_Instruments)
     {
@@ -671,8 +686,6 @@ void __far player_free_module (void)
         muspatl_free(mod_Patterns);
         _delete(mod_Patterns);
     }
-
-    mod_isLoaded = false;
 
     DEBUG_END("player_free_module");
 }
@@ -739,6 +752,7 @@ void __near s3mplay_init(void)
     mixbuf_init(&mixBuf);
     snddmabuf_init(&sndDMABuf);
     SavHandle = EMSBADHDL;
+    mod_Track = NULL;
     mod_Instruments = NULL;
     mod_Patterns = NULL;
 }

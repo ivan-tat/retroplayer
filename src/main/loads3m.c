@@ -18,6 +18,7 @@
 #include "common.h"
 #include "main/musins.h"
 #include "main/muspat.h"
+#include "main/musmod.h"
 #include "main/effects.h"
 #include "main/s3mtypes.h"
 #include "main/s3mvars.h"
@@ -38,12 +39,20 @@
 
 /*** File header ***/
 
-#define S3M_TITLE_LENGTH 28
+#define _S3M_TITLE_LEN 28
+
+/* Tracker version bits */
+#define _S3M_TRACKER_VER_MINOR_MASK     0x00ff
+#define _S3M_TRACKER_VER_MINOR_SHIFT    0
+#define _S3M_TRACKER_VER_MAJOR_MASK     0x0f00
+#define _S3M_TRACKER_VER_MAJOR_SHIFT    8
+#define _S3M_TRACKER_TYPE_MASK          0xf000
+#define _S3M_TRACKER_TYPE_SHIFT         12
 
 #pragma pack(push, 1);
 typedef struct S3M_header
 {
-    char name[S3M_TITLE_LENGTH];
+    char name[_S3M_TITLE_LEN];
     char charEOF;       // = 0x1A
     uint8_t type;       // = 0x10
     uint8_t unused1[2];
@@ -51,10 +60,7 @@ typedef struct S3M_header
     uint16_t insnum;
     uint16_t patnum;
     uint16_t flags;
-    uint16_t cwtv;      // Created With Tracker Version
-        // bit  12    = always 1 -> created with Scream Tracker;
-        // bits 11..8 = major tracker version;
-        //       7..0 = minor tracker version.
+    uint16_t tracker;
     uint16_t ffv;       // file format version
     uint32_t magic;     // = "SCRM"
     uint8_t gvolume;    // global volume
@@ -238,9 +244,10 @@ S3M_ERRORS[] =
 
 /*** Loader ***/
 
-typedef struct S3M_loader_t
+typedef struct _s3m_loader_t
 {
     S3MERR err;
+    MUSMOD *track;
     FILE *f;
     char *buffer;
     bool signed_data;
@@ -253,23 +260,24 @@ typedef struct S3M_loader_t
     uint16_t smp_EM_pages;
     uint16_t smp_EM_page;
 };
+typedef struct _s3m_loader_t _S3M_LOADER;
 
-void *s3mloader_new(void)
+S3MLOADER *s3mloader_new(void)
 {
-    return _new (struct S3M_loader_t);
+    return _new (_S3M_LOADER);
 }
 
 void s3mloader_init(S3MLOADER *self)
 {
-    struct S3M_loader_t *_Self = self;
+    _S3M_LOADER *_Self = self;
 
     if (_Self)
-        memset(_Self, 0, sizeof(struct S3M_loader_t));
+        memset(_Self, 0, sizeof(_S3M_LOADER));
 }
 
 bool __near s3mloader_allocbuf(S3MLOADER *self)
 {
-    struct S3M_loader_t *_Self = self;
+    _S3M_LOADER *_Self = self;
     uint16_t seg;
 
     if (_Self)
@@ -289,7 +297,7 @@ bool __near s3mloader_allocbuf(S3MLOADER *self)
 
 void __near s3mloader_alloc_patterns(S3MLOADER *self)
 {
-    struct S3M_loader_t *_Self = self;
+    _S3M_LOADER *_Self = self;
     MUSPATLIST *patterns;
     uint16_t patsize;
     uint16_t patperpage;
@@ -511,7 +519,7 @@ void __near _clear_events (MUSPATCHNEVENT *events)
 
 bool __near s3mloader_convert_pattern (S3MLOADER *self, uint8_t *src, uint16_t src_len, MUSPAT *pattern, bool pack)
 {
-    struct S3M_loader_t *_Self = self;
+    _S3M_LOADER *_Self = self;
     _S3M_PATIO fi;
     _S3M_PATEVENT ei;
     MUSPATIO f;
@@ -674,7 +682,7 @@ bool __near s3mloader_convert_pattern (S3MLOADER *self, uint8_t *src, uint16_t s
 
 void __near s3mloader_dump_patterns (S3MLOADER *self)
 {
-    struct S3M_loader_t *_Self = self;
+    _S3M_LOADER *_Self = self;
     MUSPATLIST *patterns;
     MUSPAT *pattern;
     unsigned int count, i;
@@ -691,7 +699,7 @@ void __near s3mloader_dump_patterns (S3MLOADER *self)
 
 bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
 {
-    struct S3M_loader_t *_Self = self;
+    _S3M_LOADER *_Self = self;
     MUSPATLIST *patterns;
     uint32_t pos;
     uint16_t length;
@@ -818,7 +826,7 @@ bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
 
 bool __near s3mloader_load_instrument(S3MLOADER *self, uint8_t index)
 {
-    struct S3M_loader_t *_Self = self;
+    _S3M_LOADER *_Self = self;
     MUSINSLIST *instruments;
     uint16_t length;
     uint8_t typ;
@@ -893,7 +901,7 @@ uint32_t __near _calc_sample_mem_size(uint32_t size)
 
 void __near s3mloader_alloc_samples(S3MLOADER *self)
 {
-    struct S3M_loader_t *_Self = self;
+    _S3M_LOADER *_Self = self;
     MUSINSLIST *instruments;
     uint16_t pages;
     uint32_t memsize;
@@ -972,7 +980,7 @@ void __near convert_sign_8(void *data, uint32_t size)
 
 bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
 {
-    struct S3M_loader_t *_Self = self;
+    _S3M_LOADER *_Self = self;
     MUSINSLIST *instruments;
     char *data;
     MUSINS *ins;
@@ -1083,11 +1091,12 @@ uint8_t __near getchtyp(uint8_t b)
     return 0;
 }
 
-bool s3mloader_load(S3MLOADER *self, const char *name)
+MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
 {
-    struct S3M_loader_t *_Self = self;
-    MUSINSLIST *instruments;
+    _S3M_LOADER *_Self = self;
     S3MHEADER header;
+    MUSMOD *track;
+    MUSINSLIST *instruments;
     uint8_t maxused;
     uint8_t i, smpnum;
     uint8_t chtype;
@@ -1096,11 +1105,25 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
     MIXCHN *chn;
     uint16_t count;
 
+    if ((!_Self) || (!name))
+    {
+        DEBUG_ERR ("s3mloader_load", "Bad arguments.");
+        return NULL;
+    }
+
+    _Self->track = _new (MUSMOD);
+    if (!_Self->track)
+    {
+        DEBUG_ERR ("s3mloader_load", "Failed to allocate memory for music module.");
+        return NULL;
+    }
+    musmod_init (_Self->track);
+
     mod_Instruments = musinsl_new();
     if (!mod_Instruments)
     {
         DEBUG_ERR("s3mloader_load", "Failed to initialize instruments.");
-        return false;
+        return NULL;
     }
     musinsl_init(mod_Instruments);
 
@@ -1108,7 +1131,7 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
     if (!mod_Patterns)
     {
         DEBUG_ERR("s3mloader_load", "Failed to initialize patterns.");
-        return false;
+        return NULL;
     }
     muspatl_init(mod_Patterns);
 
@@ -1120,40 +1143,36 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
     {
         DEBUG_ERR("s3mloader_load", "Failed to open file.");
         _Self->err = E_S3M_FILE_OPEN;
-        return false;
+        return NULL;
     }
 
     if (!fread(&header, sizeof(S3MHEADER), 1, _Self->f))
     {
         DEBUG_ERR("s3mloader_load", "Failed to read file''s header.");
         _Self->err = E_S3M_FILE_READ;
-        return false;
+        return NULL;
     }
 
     if ((header.type != 16)
     || (header.magic != 0x4d524353)
-    || (((header.cwtv >> 8) & 0xff) != 0x13)
+    || (((header.tracker >> 8) & 0xff) != 0x13)
     || ((header.ffv != 1) && (header.ffv != 2)))
     {
         DEBUG_ERR("s3mloader_load", "Unsupported file format.");
         _Self->err = E_S3M_FILE_TYPE;
-        return false;
+        return NULL;
     }
 
-    memset(mod_TrackerName, 0, MOD_MAX_TRACKER_NAME_LENGTH);
-    snprintf(
-        mod_TrackerName,
-        MOD_MAX_TRACKER_NAME_LENGTH,
-        "Scream Tracker %c.%c%c module",
-        '0' + ((header.cwtv >> 8) & 0x0f),
-        '0' + ((header.cwtv >> 4) & 0x0f),
-        '0' + (header.cwtv & 0x0f)
+    snprintf (
+        musmod_get_format (_Self->track),
+        MOD_FORMAT_LEN,
+        "Scream Tracker %hhx.%02hhx module",
+        (header.tracker & _S3M_TRACKER_VER_MAJOR_MASK) >> _S3M_TRACKER_VER_MAJOR_SHIFT,
+        (header.tracker & _S3M_TRACKER_VER_MINOR_MASK) >> _S3M_TRACKER_VER_MINOR_SHIFT
     );
 
-    memset(mod_Title, 0, MOD_MAX_TITLE_LENGTH);
-    strncpy(mod_Title, header.name,
-        S3M_TITLE_LENGTH > MOD_MAX_TITLE_LENGTH ? MOD_MAX_TITLE_LENGTH : S3M_TITLE_LENGTH);
-    mod_Title[MOD_MAX_TITLE_LENGTH - 1] = 0;
+    header.name[_S3M_TITLE_LEN - 1] = 0;
+    musmod_set_title (_Self->track, header.name);
 
     OrdNum = header.ordnum;
     mod_InstrumentsCount = header.insnum;
@@ -1195,7 +1214,7 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
     {
         DEBUG_ERR("s3mloader_load", "Failed to read patterns order.");
         _Self->err = E_S3M_FILE_READ;
-        return false;
+        return NULL;
     }
     // check order if there's one 'real' (playable) entry ...
     i = 0;
@@ -1206,27 +1225,27 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
     {
         DEBUG_ERR("s3mloader_load", "Playable entry not found.");
         _Self->err = E_S3M_PATTERNS_ORDER;
-        return false;
+        return NULL;
     }
     if (!fread(&(_Self->inspara), mod_InstrumentsCount * 2, 1, _Self->f))
     {
         DEBUG_ERR("s3mloader_load", "Failed to read instruments headers.");
         _Self->err = E_S3M_FILE_READ;
-        return false;
+        return NULL;
     }
 
     if (!fread(&(_Self->patpara), muspatl_get_count(mod_Patterns) * 2, 1, _Self->f))
     {
         DEBUG_ERR("s3mloader_load", "Failed to read patterns offsets.");
         _Self->err = E_S3M_FILE_READ;
-        return false;
+        return NULL;
     }
 
     if (!s3mloader_allocbuf(_Self))
     {
         DEBUG_ERR("s3mloader_load", "Failed to allocate DOS memory for buffer.");
         _Self->err = E_S3M_DOS_MEM_ALLOC;
-        return false;
+        return NULL;
     }
 
     s3mloader_alloc_patterns(_Self);
@@ -1234,12 +1253,12 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
     count = muspatl_get_count(mod_Patterns);
     for (i = 0; i < count; i++)
         if (!s3mloader_load_pattern(_Self, i))
-            return false;
+            return NULL;
 
     count = mod_InstrumentsCount;
     for (i = 0; i < count; i++)
         if (!s3mloader_load_instrument(_Self, i))
-            return false;
+            return NULL;
 
     if (UseEMS)
         s3mloader_alloc_samples(_Self);
@@ -1247,7 +1266,7 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
     for (i = 0; i < count; i++)
         if (_Self->smppara[i])
             if (!s3mloader_load_sample(_Self, i))
-                return false;
+                return NULL;
 
     if (musinsl_is_EM_data(mod_Instruments))
         musinsl_set_EM_handle_name(mod_Instruments);
@@ -1255,14 +1274,17 @@ bool s3mloader_load(S3MLOADER *self, const char *name)
         muspatl_set_EM_handle_name(mod_Patterns);
 
     s3mloader_dump_patterns (self);
-    mod_isLoaded = true;
 
-    return true;
+    musmod_set_loaded (_Self->track, true);
+
+    track = _Self->track;
+    _Self->track = NULL;
+    return track;
 }
 
 const char *s3mloader_get_error(S3MLOADER *self)
 {
-    struct S3M_loader_t *_Self = self;
+    _S3M_LOADER *_Self = self;
     uint16_t i;
 
     if (_Self)
@@ -1286,7 +1308,7 @@ const char *s3mloader_get_error(S3MLOADER *self)
 
 void s3mloader_free(S3MLOADER *self)
 {
-    struct S3M_loader_t *_Self = self;
+    _S3M_LOADER *_Self = self;
 
     if (_Self)
     {
@@ -1305,7 +1327,7 @@ void s3mloader_free(S3MLOADER *self)
 
 void s3mloader_delete(S3MLOADER **self)
 {
-    struct S3M_loader_t **_Self = (struct S3M_loader_t **)self;
+    _S3M_LOADER **_Self = (_S3M_LOADER **) self;
 
     if (_Self)
         if (*_Self)

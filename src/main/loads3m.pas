@@ -33,6 +33,7 @@ uses
     common,
     musins,
     muspat,
+    musmod,
     s3mtypes,
     s3mvars,
     mixchn;

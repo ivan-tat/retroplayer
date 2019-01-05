@@ -19,6 +19,7 @@
 #include "hw/vga.h"
 #include "main/s3mvars.h"
 #include "main/fillvars.h"
+#include "main/musmod.h"
 #include "main/mixchn.h"
 #include "main/s3mplay.h"
 
@@ -222,7 +223,10 @@ void __far playosci_main (void)
         exit (1);
     }
 
-    printf ("Loaded '%s' (%s)" CRLF, mod_Title, mod_TrackerName);
+    printf ("Loaded '%s' (%s)" CRLF,
+        musmod_get_title (mod_Track),
+        musmod_get_format (mod_Track)
+    );
 
     if (!player_init ())
     {

@@ -4,16 +4,6 @@ unit s3mplay;
 
 interface
 
-uses
-    types,
-    s3mtypes,
-    musins,
-    muspat,
-    s3mvars,
-    voltab,
-    posttab,
-    fillvars;
-
 (*$I defines.pas*)
 
 const
@@ -53,6 +43,7 @@ implementation
 
 uses
     watcom,
+    types,
     cpu,
     dos_,
     stdio,
@@ -68,7 +59,15 @@ uses
     pic,
     sndctl_t,
     sbctl,
+    fillvars,
+    s3mtypes,
+    musins,
+    muspat,
+    musmod,
+    s3mvars,
     effvars,
+    voltab,
+    posttab,
     mixer,
     mixchn,
     filldma,

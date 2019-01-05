@@ -29,6 +29,7 @@
 #include "main/fillvars.h"
 #include "main/musins.h"
 #include "main/muspat.h"
+#include "main/musmod.h"
 #include "main/mixchn.h"
 #include "main/effects.h"
 #include "main/s3mvars.h"
@@ -131,8 +132,8 @@ smalls3m_main (void)
         "Music module loaded." CRLF
         "Format: %s" CRLF
         "Title: \"%s\"" CRLF,
-        mod_TrackerName,
-        mod_Title
+        musmod_get_format (mod_Track),
+        musmod_get_title (mod_Track)
     );
 
     if (!player_init ())

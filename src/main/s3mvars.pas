@@ -27,13 +27,6 @@ var
     UseEMS: boolean;
     SavHandle: TEMSHDL;
 
-(* general module information *)
-
-var
-    mod_isLoaded: boolean;
-    mod_Title: TModTitle;
-    mod_TrackerName: TModTrackerName;
-
 (* module options *)
 
 var

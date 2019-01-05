@@ -13,6 +13,7 @@
 #include "cc/stdio.h"
 #include "hw/sb/sbctl.h"
 #include "main/muspat.h"
+#include "main/musmod.h"
 #include "main/s3mvars.h"
 #include "main/s3mplay.h"
 #include "player/screen.h"
@@ -31,12 +32,16 @@ void __far win_information_init(SCRWIN *self)
 
 void __far win_information_draw(SCRWIN *self)
 {
+    MUSMOD *track;
     MUSPATLIST *patterns;
     MUSPAT *pat;
 
     if (scrwin_is_created(self))
     {
+        track = mod_Track;
         patterns = mod_Patterns;
+        pat = muspatl_get (patterns, playState_pattern);
+
         textbackground(_blue);
 
         if (scrwin_get_flags(self) & WINFL_FULLREDRAW)
@@ -69,9 +74,9 @@ void __far win_information_draw(SCRWIN *self)
             textcolor(_lightgreen);
             gotoxy(8, 1);
             textbackground(_blue);
-            printf("%s", mod_Title);
+            printf("%s", musmod_get_title (track));
             gotoxy(41, 1);
-            printf("%s", mod_TrackerName);
+            printf("%s", musmod_get_format (track));
             textcolor(_yellow);
             gotoxy(9, 4);
             printf("%s", player_device_get_name());
@@ -84,8 +89,6 @@ void __far win_information_draw(SCRWIN *self)
             gotoxy(76, 4);
             printf(player_get_output_lq() ? "Low" : "High");
         }
-
-        pat = muspatl_get (patterns, playState_pattern);
 
         textcolor(_lightcyan);
         gotoxy(8, 2);

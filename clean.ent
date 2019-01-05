@@ -109,6 +109,7 @@
 ./src/main/mixer.asm
 ./src/main/mixing.asm
 ./src/main/musins.asm
+./src/main/musmod.asm
 ./src/main/muspat.asm
 ./src/main/posttab.asm
 ./src/main/readnote.asm

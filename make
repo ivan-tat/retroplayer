@@ -462,6 +462,7 @@ build_target $T_MAIN   inc-linux src/main/_wramp.c
 build_target $T_MAIN   inc-linux src/main/_wsinus.c
 build_target $T_MAIN   inc-linux src/main/_wsquare.c
 build_target $T_MAIN   obj src/main/musins.c
+build_target $T_MAIN   obj src/main/musmod.c
 build_target $T_MAIN   obj src/main/muspat.c
 build_target $T_MAIN   obj src/main/s3mvars.c
 build_target $T_MAIN   obj src/main/fillvars.c
@@ -529,6 +530,7 @@ build_target $T_MAIN_TP   obj src/main/types.pas
 build_target $T_MAIN_TP   obj src/main/s3mtypes.pas
 build_target $T_MAIN_TP   obj src/main/musins.pas
 build_target $T_MAIN_TP   obj src/main/muspat.pas
+build_target $T_MAIN_TP   obj src/main/musmod.pas
 build_target $T_MAIN_TP   obj src/main/effvars.pas
 build_target $T_MAIN_TP   obj src/main/s3mvars.pas
 build_target $T_MAIN_TP   obj src/main/fillvars.pas

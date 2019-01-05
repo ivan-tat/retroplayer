@@ -31,12 +31,6 @@ extern bool UseEMS;
 extern EMSHDL SavHandle;
     /* EM handle to save mapping while playing */
 
-/* general module information */
-
-extern bool             mod_isLoaded;
-extern modTitle_t       mod_Title;          /* name given by the musician */
-extern modTrackerName_t mod_TrackerName;    /* tracker version file was created with */
-
 /* module options */
 
 extern bool modOption_ST2Vibrato;   /* not supported */
@@ -111,10 +105,6 @@ void playState_set_tempo(uint8_t value);
 
 #pragma aux UseEMS "*";
 #pragma aux SavHandle "*";
-
-#pragma aux mod_isLoaded "*";
-#pragma aux mod_Title "*";
-#pragma aux mod_TrackerName "*";
 
 #pragma aux modOption_ST2Vibrato "*";
 #pragma aux modOption_ST2Tempo "*";

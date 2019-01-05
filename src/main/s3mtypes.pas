@@ -14,22 +14,6 @@ uses types;
 
 (*$I defines.pas*)
 
-(* generic module information *)
-
-const
-    MOD_MAX_TITLE_LENGTH = 28;
-
-type
-    TModTitle = array [0..MOD_MAX_TITLE_LENGTH - 1] of Char;
-    PModTitle = ^TModTitle;
-
-const
-    MOD_MAX_TRACKER_NAME_LENGTH = 32;
-
-type
-    TModTrackerName = array [0..MOD_MAX_TRACKER_NAME_LENGTH - 1] of Char;
-    PModTrackerName = ^TModTrackerName;
-
 const
     MAX_ORDERS = 255; (* 0..254 orders *)
 

@@ -21,6 +21,7 @@ uses
     s3mvars,
     fillvars,
     mixchn,
+    musmod,
     s3mplay;
 
 (*$I defines.pas*)

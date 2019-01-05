@@ -26,6 +26,7 @@
 #include "main/fillvars.h"
 #include "main/musins.h"
 #include "main/muspat.h"
+#include "main/musmod.h"
 #include "main/mixchn.h"
 #include "main/effects.h"
 #include "main/s3mvars.h"
@@ -767,7 +768,9 @@ void __far plays3m_main (void)
         memstats ();
     }
 
-    printf("Song \"%s\" loaded (%s)." CRLF, mod_Title, mod_TrackerName);
+    printf ("Song \"%s\" loaded (%s)." CRLF,
+        musmod_get_title (mod_Track),
+        musmod_get_format (mod_Track));
 
     if (!player_init())
     {

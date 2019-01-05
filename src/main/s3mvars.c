@@ -22,12 +22,6 @@
 bool UseEMS;
 EMSHDL SavHandle;
 
-/* general module information */
-
-bool             mod_isLoaded;
-modTitle_t       mod_Title;
-modTrackerName_t mod_TrackerName;
-
 /* module options */
 
 bool modOption_ST2Vibrato;
