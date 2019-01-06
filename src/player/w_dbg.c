@@ -52,6 +52,7 @@ void __far win_debug_init(SCRWIN *self)
 void __far win_debug_draw(SCRWIN *self)
 {
     MUSMOD *track;
+    PCMSMPLIST *samples;
     MUSINSLIST *instruments;
     MUSPATLIST *patterns;
     uint8_t y;
@@ -74,8 +75,9 @@ void __far win_debug_draw(SCRWIN *self)
     if (scrwin_is_created(self))
     {
         track = mod_Track;
-        instruments = mod_Instruments;
-        patterns = mod_Patterns;
+        samples = musmod_get_samples (track);
+        instruments = musmod_get_instruments (track);
+        patterns = musmod_get_patterns (track);
 
         textbackground (_black);
 
@@ -119,7 +121,7 @@ void __far win_debug_draw(SCRWIN *self)
 
             if (UseEMS)
             {
-                gotoxy (MEMORY_V - 5, MEMORY_Y + 2); printf ("%5u", musinsl_get_used_EM (instruments));
+                gotoxy (MEMORY_V - 5, MEMORY_Y + 2); printf ("%5u", pcmsmpl_get_used_EM (samples));
                 gotoxy (MEMORY_V - 5, MEMORY_Y + 3); printf ("%5u", muspatl_get_used_EM (patterns));
                 gotoxy (MEMORY_V - 5, MEMORY_Y + 4); printf ("%5u", getFreeEMMMemory ());
             }

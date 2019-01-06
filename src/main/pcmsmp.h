@@ -64,8 +64,7 @@ typedef struct pcm_sample_t
     {
         struct
         {
-            uint16_t offset;
-            uint16_t segment;
+            void *ptr;
         } dos;
         struct
         {
@@ -105,14 +104,10 @@ PCMSMPFLAGS __far __pcmsmp_set_flags (PCMSMPFLAGS _flags, PCMSMPFLAGS _mask, PCM
 #define _pcmsmp_set_size(o, v)              _pcmsmp_get_size (o) = (v)
 #define _pcmsmp_get_length(o)               (_pcmsmp_get_16bits (o) ? _pcmsmp_get_size (o) >> 1 : _pcmsmp_get_size (o))
 #define _pcmsmp_get_mem_size(o)             (_pcmsmp_get_size (o) + 1024)
-#define _pcmsmp_get_data_off(o)             (o)->data.dos.offset
-#define _pcmsmp_set_data_off(o, v)          _pcmsmp_get_data_off (o) = (v)
-#define _pcmsmp_get_data_seg(o)             (o)->data.dos.segment
-#define _pcmsmp_set_data_seg(o, v)          _pcmsmp_get_data_seg (o) = (v)
-#define _pcmsmp_get_data(o)                 MK_FP (_pcmsmp_get_data_seg (o), _pcmsmp_get_data_off (o))
-#define _pcmsmp_set_data(o, v)              { _pcmsmp_set_data_off (o, v); _pcmsmp_set_data_seg (o, v); }
+#define _pcmsmp_get_data(o)                 (o)->data.dos.ptr
+#define _pcmsmp_set_data(o, v)              _pcmsmp_get_data (o) = (v)
 #define _pcmsmp_get_EM_data_offset(o)       (o)->data.em.offset
-#define _pcmsmp_set_EM_data_offset(o, v)    _pcmsmp_set_data_off (o, v)
+#define _pcmsmp_set_EM_data_offset(o, v)    _pcmsmp_get_EM_data_offset (o) = (v)
 #define _pcmsmp_get_EM_data_page(o)         (o)->data.em.page
 #define _pcmsmp_set_EM_data_page(o, v)      _pcmsmp_get_EM_data_page (o) = (v)
 #define _pcmsmp_get_EM_data_handle(o)       (o)->data.em.handle
@@ -165,7 +160,7 @@ void *__far pcmsmp_map_EM_data (PCMSMP *self);
 #define     pcmsmp_set_volume(o, v)             _pcmsmp_set_volume (o, v)
 #define     pcmsmp_get_volume(o)                _pcmsmp_get_volume (o)
 void  __far pcmsmp_set_title (PCMSMP *self, char *value);
-char *__far pcmsmp_get_title (PCMSMP *self);
+#define     pcmsmp_get_title(o)                 _pcmsmp_get_title (o)
 void  __far pcmsmp_free (PCMSMP *self);
 
 /*** PCM samples list ***/
@@ -251,7 +246,6 @@ void __far DEBUG_dump_sample_info (PCMSMP *smp, uint8_t index);
 #pragma aux pcmsmp_init "*";
 #pragma aux pcmsmp_map_EM_data "*";
 #pragma aux pcmsmp_set_title "*";
-#pragma aux pcmsmp_get_title "*";
 #pragma aux pcmsmp_free "*";
 
 #pragma aux __pcmsmpl_set_flags "*";

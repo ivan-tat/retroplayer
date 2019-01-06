@@ -10,107 +10,46 @@ unit musins;
 
 interface
 
-uses
-    ems;
-
 (*$I defines.pas*)
 
-(* Musical instrument *)
-
 procedure musins_init;
-procedure musins_set_type;
-procedure musins_get_type;
-procedure musins_set_looped;
-procedure musins_is_looped;
-procedure musins_set_EM_data;
-procedure musins_is_EM_data;
-procedure musins_set_EM_data_page;
-procedure musins_get_EM_data_page;
-procedure musins_set_data;
-procedure musins_get_data;
-procedure musins_map_EM_data;
-procedure musins_set_length;
-procedure musins_get_length;
-procedure musins_set_loop_start;
-procedure musins_get_loop_start;
-procedure musins_set_loop_end;
-procedure musins_get_loop_end;
-procedure musins_set_volume;
-procedure musins_get_volume;
-procedure musins_set_rate;
-procedure musins_get_rate;
 procedure musins_set_title;
-procedure musins_get_title;
 procedure musins_free;
 
-(* Musical instruments list *)
-
-procedure musinsl_new;
 procedure musinsl_init;
-procedure musinsl_set_EM_data;
-procedure musinsl_is_EM_data;
-procedure musinsl_get;
-procedure musinsl_set_count;
-procedure musinsl_get_count;
-procedure musinsl_set_EM_data_handle;
-procedure musinsl_set_EM_handle_name;
-procedure musinsl_get_used_EM;
 procedure musinsl_free;
-procedure musinsl_delete;
 
-var
-    mod_Instruments: Pointer;
-    mod_InstrumentsCount: word;
-    mod_Samples_EMData: boolean;
-    mod_Samples_EMHandle: TEMSHDL;
+(*$ifdef DEBUG*)
+
+procedure DEBUG_dump_instrument_info;
+
+(*$endif*)
 
 implementation
 
 uses
     i86,
     string_,
+    stdio,
+    debug,
     dos_,
-    dynarray;
+    ems,
+    dynarray,
+    pcmsmp;
 
 (*$L musins.obj*)
 
 procedure musins_init; external;
-procedure musins_set_type; external;
-procedure musins_get_type; external;
-procedure musins_set_looped; external;
-procedure musins_is_looped; external;
-procedure musins_set_EM_data; external;
-procedure musins_is_EM_data; external;
-procedure musins_set_EM_data_page; external;
-procedure musins_get_EM_data_page; external;
-procedure musins_set_data; external;
-procedure musins_get_data; external;
-procedure musins_map_EM_data; external;
-procedure musins_set_length; external;
-procedure musins_get_length; external;
-procedure musins_set_loop_start; external;
-procedure musins_get_loop_start; external;
-procedure musins_set_loop_end; external;
-procedure musins_get_loop_end; external;
-procedure musins_set_volume; external;
-procedure musins_get_volume; external;
-procedure musins_set_rate; external;
-procedure musins_get_rate; external;
 procedure musins_set_title; external;
-procedure musins_get_title; external;
 procedure musins_free; external;
 
-procedure musinsl_new; external;
 procedure musinsl_init; external;
-procedure musinsl_set_EM_data; external;
-procedure musinsl_is_EM_data; external;
-procedure musinsl_get; external;
-procedure musinsl_set_count; external;
-procedure musinsl_get_count; external;
-procedure musinsl_set_EM_data_handle; external;
-procedure musinsl_set_EM_handle_name; external;
-procedure musinsl_get_used_EM; external;
 procedure musinsl_free; external;
-procedure musinsl_delete; external;
+
+(*$ifdef DEBUG*)
+
+procedure DEBUG_dump_instrument_info; external;
+
+(*$endif*)
 
 end.

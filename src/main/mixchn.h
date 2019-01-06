@@ -51,6 +51,7 @@ typedef struct mix_channel_t
     MIXCHNPAN pan;
     // current Instrument :
     MUSINS  *pMusIns;
+    PCMSMP  *sample;
     uint16_t wSmpSeg;       // DOS segment of current sample data
     uint8_t  bIns;          // number of instrument is currently playing
     uint8_t  bNote;
@@ -93,6 +94,9 @@ typedef struct mix_channel_t
 
 typedef struct mix_channel_t MIXCHN;
 
+#define _mixchn_get_sample(o)       (o)->sample
+#define _mixchn_set_sample(o, v)    _mixchn_get_sample (o) = (v)
+
 void     __far mixchn_init (MIXCHN *self);
 void     __far mixchn_set_flags (MIXCHN *self, MIXCHNFLAGS value);
 MIXCHNFLAGS __far mixchn_get_flags (MIXCHN *self);
@@ -110,6 +114,8 @@ void     __far mixchn_set_instrument_num (MIXCHN *self, uint8_t value);
 uint8_t  __far mixchn_get_instrument_num (MIXCHN *self);
 void     __far mixchn_set_instrument (MIXCHN *self, MUSINS *value);
 MUSINS  *__far mixchn_get_instrument (MIXCHN *self);
+#define        mixchn_set_sample(o, v)  _mixchn_set_sample (o, v)
+#define        mixchn_get_sample(o)     _mixchn_get_sample (o)
 void     __far mixchn_set_sample_volume (MIXCHN *self, int16_t vol);
 uint8_t  __far mixchn_get_sample_volume (MIXCHN *self);
 void     __far mixchn_set_sample_period_limits (MIXCHN *self, uint16_t rate, bool amiga);

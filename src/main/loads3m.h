@@ -16,28 +16,27 @@
 #include <stdint.h>
 
 #include "pascal.h"
-#include "main/s3mtypes.h"
 #include "main/musmod.h"
 
-typedef void S3MLOADER;
+typedef void LOADER_S3M;
 
-S3MLOADER *s3mloader_new(void);
-void     s3mloader_init(S3MLOADER *self);
-MUSMOD  *s3mloader_load (S3MLOADER *self, const char *name);
-const char *s3mloader_get_error(S3MLOADER *self);
-void     s3mloader_free(S3MLOADER *self);
-void     s3mloader_delete(S3MLOADER **self);
+LOADER_S3M *load_s3m_new (void);
+void        load_s3m_init (LOADER_S3M *self);
+MUSMOD     *load_s3m_load (LOADER_S3M *self, const char *name);
+const char *load_s3m_get_error (LOADER_S3M *self);
+void        load_s3m_free (LOADER_S3M *self);
+void        load_s3m_delete (LOADER_S3M **self);
 
 /*** Linking ***/
 
 #ifdef __WATCOMC__
 
-#pragma aux s3mloader_new "*";
-#pragma aux s3mloader_init "*";
-#pragma aux s3mloader_load "*";
-#pragma aux s3mloader_get_error "*";
-#pragma aux s3mloader_free "*";
-#pragma aux s3mloader_delete "*";
+#pragma aux load_s3m_new "*";
+#pragma aux load_s3m_init "*";
+#pragma aux load_s3m_load "*";
+#pragma aux load_s3m_get_error "*";
+#pragma aux load_s3m_free "*";
+#pragma aux load_s3m_delete "*";
 
 #endif  /* __WATCOMC__ */
 

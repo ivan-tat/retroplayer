@@ -35,23 +35,27 @@ void __near posstring(char *__dest, uint8_t i)
 {
     MUSMOD *track;
     MUSINSLIST *instruments;
+    PCMSMPLIST *samples;
     MUSINS *ins;
+    PCMSMP *smp;
     uint16_t data;
 
     track = mod_Track;
-    instruments = mod_Instruments;
+    instruments = musmod_get_instruments (track);
+    samples = musmod_get_samples (track);
     ins = musinsl_get (instruments, i - 1);
-    if (musins_get_type(ins) == MUSINST_PCM)
+    if (musins_get_type (ins) == MUSINST_PCM)
     {
-        if (musins_is_EM_data(ins))
+        smp = musins_get_sample (ins);
+        if (pcmsmp_is_EM_data (smp))
         {
             __dest[0] = 'E';
-            data = musins_get_EM_data_page(ins);
+            data = pcmsmp_get_EM_data_page (smp);
         }
         else
         {
             __dest[0] = 'D';
-            data = FP_SEG(musins_get_data(ins));
+            data = FP_SEG (pcmsmp_get_data (smp));
         }
         snprintf (& (__dest[1]), 4, "%04X", data);
     }
@@ -69,6 +73,7 @@ void __far win_instruments_draw(SCRWIN *self)
 {
     MUSMOD *track;
     MUSINSLIST *instruments;
+    PCMSMPLIST *samples;
     int i;
     uint8_t n;
     MIXCHNLIST *channels;
@@ -79,7 +84,7 @@ void __far win_instruments_draw(SCRWIN *self)
     if (scrwin_is_created(self))
     {
         track = mod_Track;
-        instruments = mod_Instruments;
+        instruments = musmod_get_instruments (track);
         channels = mod_Channels;
 
         textbackground(_black);

@@ -1079,9 +1079,3 @@ void __far muspatl_free (MUSPATLIST *self)
             emsFree (_muspatl_get_EM_handle (self));
     }
 }
-
-#ifdef DEFINE_LOCAL_DATA
-
-MUSPATLIST *mod_Patterns;
-
-#endif  /* DEFINE_LOCAL_DATA */

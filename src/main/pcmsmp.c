@@ -76,14 +76,6 @@ void __far pcmsmp_set_title (PCMSMP *self, char *value)
             _pcmsmp_clear_title (self);
 }
 
-char *__far pcmsmp_get_title (PCMSMP *self)
-{
-    if (self)
-        return _pcmsmp_get_title (self);
-    else
-        return NULL;
-}
-
 void __far pcmsmp_free (PCMSMP *self)
 {
     void *data;

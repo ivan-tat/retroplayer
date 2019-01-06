@@ -39,7 +39,7 @@ void __far win_information_draw(SCRWIN *self)
     if (scrwin_is_created(self))
     {
         track = mod_Track;
-        patterns = mod_Patterns;
+        patterns = musmod_get_patterns (track);
         pat = muspatl_get (patterns, playState_pattern);
 
         textbackground(_blue);

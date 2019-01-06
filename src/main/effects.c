@@ -1015,7 +1015,7 @@ METHOD_INIT(arpeggio)
 METHOD_HANDLE(arpeggio)
 {
     uint8_t param, note;
-    MUSINS *ins;
+    PCMSMP *smp;
     uint32_t rate;
 
     if (!chnState_arp_bFlag)
@@ -1034,10 +1034,10 @@ METHOD_HANDLE(arpeggio)
     note = _unpackNote(chn->bNote) + (param & 0x0f);
     chn->bArpNotes[1] = _packNote(note > NOTE_MAX ? NOTE_MAX : note);
 
-    ins = mixchn_get_instrument(chn);
-    if (ins)
+    smp = mixchn_get_sample (chn);
+    if (smp && pcmsmp_is_available (smp))
     {
-        rate = musins_get_rate(ins);
+        rate = pcmsmp_get_rate (smp);
         if (rate)
         {
             chn->dArpSmpSteps[0] = chn_calcNoteStep(chn, rate, chn->bNote);

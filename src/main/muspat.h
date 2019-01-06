@@ -230,10 +230,6 @@ void        __far muspatl_set_EM_handle_name (MUSPATLIST *self);
 uint32_t    __far muspatl_get_used_EM (MUSPATLIST *self);
 void        __far muspatl_free (MUSPATLIST *self);
 
-/*** Variables ***/
-
-extern MUSPATLIST *mod_Patterns;
-
 /*** Linking ***/
 
 #ifdef __WATCOMC__
@@ -294,8 +290,6 @@ extern MUSPATLIST *mod_Patterns;
 #pragma aux muspatl_set_EM_handle_name "*";
 #pragma aux muspatl_get_used_EM "*";
 #pragma aux muspatl_free "*";
-
-#pragma aux mod_Patterns "*";
 
 #endif  /* __WATCOMC__ */
 

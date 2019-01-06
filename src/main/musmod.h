@@ -53,6 +53,8 @@ typedef struct musmod_channel_t MUSMODCHN;
 /* Song arrangement */
 
 typedef uint8_t musmod_order_entry_t;
+typedef musmod_order_entry_t MUSMODORDENTRY;
+
 typedef musmod_order_entry_t musmod_order_t[MUSMOD_ORDER_LEN];
 typedef musmod_order_t MUSMODORDER;
 
@@ -74,9 +76,9 @@ typedef struct music_module_t
     char        format[MUSMOD_FORMAT_LEN];
     MUSMODCHN   channels[MUSMOD_CHANNELS_MAX];
     PCMSMPLIST  samples;
-    /*
     MUSINSLIST  instruments;
     MUSPATLIST  patterns;
+    /*
     MUSMODORDER order;
     */
     uint8_t     channels_count;
@@ -107,9 +109,9 @@ MUSMODFLAGS __far __musmod_set_flags (MUSMODFLAGS _flags, MUSMODFLAGS _mask, MUS
 #define _musmod_get_format(o)           (o)->format
 #define _musmod_get_channels(o)         (o)->channels
 #define _musmod_get_samples(o)          & ((o)->samples)
-/*
 #define _musmod_get_instruments(o)      & ((o)->instruments)
 #define _musmod_get_patterns(o)         & ((o)->patterns)
+/*
 #define _musmod_get_order(o)            (o)->order
 */
 #define _musmod_get_channels_count(o)   (o)->channels_count
@@ -145,10 +147,10 @@ void __far musmod_set_format (MUSMOD *self, char *value);
 #define    musmod_get_channels(o)           _musmod_get_channels (o)
 #define    musmod_get_channels_count(o)     _musmod_get_channels_count (o)
 #define    musmod_set_channels_count(o, v)  _musmod_set_channels_count (o, v)
-/*
 #define    musmod_get_samples(o)            (o) ? _musmod_get_samples (o) : NULL
 #define    musmod_get_instruments(o)        (o) ? _musmod_get_instruments (o) : NULL
 #define    musmod_get_patterns(o)           (o) ? _musmod_get_patterns (o) : NULL
+/*
 #define    musmod_get_order(o)              (o) ? _musmod_get_order (o) : NULL
 */
 #define    musmod_get_order_length(o)       _musmod_get_order_length (o)

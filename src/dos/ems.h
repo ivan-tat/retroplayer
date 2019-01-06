@@ -19,6 +19,8 @@
 
 /* types */
 
+#define EM_PAGE_SIZE (16 * 1024)
+
 typedef struct emsVersion_t
 {
     uint8_t Lo, Hi;

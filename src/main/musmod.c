@@ -11,9 +11,7 @@
 #include "pascal.h"
 #include "common.h"
 #include "cc/string.h"
-/*
 #include "main/pcmsmp.h"
-*/
 #include "main/musins.h"
 #include "main/muspat.h"
 
@@ -39,10 +37,8 @@ void __far musmod_init (MUSMOD *self)
         memset (self, 0, sizeof (MUSMOD));
         memset (_musmod_get_channels (self), MUSMODCHNPAN_CENTER, sizeof (MUSMODCHN) * MUSMOD_CHANNELS_MAX);
         pcmsmpl_init (_musmod_get_samples (self));      // clear
-        /*
         musinsl_init (_musmod_get_instruments (self));  // clear
         muspatl_init (_musmod_get_patterns (self));     // clear
-        */
     }
 }
 
@@ -68,13 +64,9 @@ void __far musmod_free (MUSMOD *self)
 {
     if (self)
     {
-        /*
         musinsl_free (_musmod_get_instruments (self));
-        */
         pcmsmpl_free (_musmod_get_samples (self));
-        /*
         muspatl_free (_musmod_get_patterns (self));
-        */
 
         musmod_init (self); // clear
     }

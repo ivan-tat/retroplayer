@@ -49,7 +49,7 @@ void __near song_play_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_
     MIXCHNTYPE chtype;
     struct playSampleInfo_t smpInfo;
     unsigned int smpPos;
-    MUSINS *ins;
+    PCMSMP *smp;
     uint8_t vol;
 
     outBuf = MK_FP(FP_SEG(mb->buf), FP_OFF(mb->buf) + bufOff);
@@ -79,11 +79,11 @@ void __near song_play_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_
         if (mixchn_is_mixing(chn) && vol)
         {
             vol--;
-            ins = mixchn_get_instrument(chn);
-            if (musins_is_EM_data(ins))
-                smpInfo.dData = musins_map_EM_data(ins);
+            smp = mixchn_get_sample (chn);
+            if (pcmsmp_is_EM_data (smp))
+                smpInfo.dData = pcmsmp_map_EM_data (smp);
             else
-                smpInfo.dData = musins_get_data(ins);
+                smpInfo.dData = pcmsmp_get_data (smp);
 
             if (!smpInfo.dData)
                 return;
@@ -101,17 +101,17 @@ void __near song_play_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_
     }
     if (smpPos >= chn->wSmpLoopEnd)
     {
-        if (chn->bSmpFlags & SMPFLAG_LOOP == 0)
-        {
-            mixchn_set_playing(chn, false);
-        }
-        else
+        if (chn->bSmpFlags & MIXSMPFL_LOOP)
         {
             while (smpPos >= chn->wSmpLoopEnd)
             {
                 smpPos -= chn->wSmpLoopEnd;
                 smpPos += chn->wSmpLoopStart;
             }
+        }
+        else
+        {
+            mixchn_set_playing(chn, false);
         }
     }
     chn->dSmpPos = (chn->dSmpPos & 0xffff) + ((unsigned long)smpPos << 16);

@@ -53,10 +53,12 @@ void __far win_samples_draw(SCRWIN *self)
 {
     MUSMOD *track;
     MUSINSLIST *instruments;
+    PCMSMPLIST *samples;
+    MUSINS *ins;
+    PCMSMP *smp;
     uint16_t ins_count;
     uint8_t i, j, k, n;
     uint8_t page_height, height, first_line;
-    MUSINS *ins;
     MIXCHNLIST *channels;
     MIXCHN *chn;
     char title[30];
@@ -64,7 +66,8 @@ void __far win_samples_draw(SCRWIN *self)
     if (scrwin_is_created(self))
     {
         track = mod_Track;
-        instruments = mod_Instruments;
+        instruments = musmod_get_instruments (track);
+        samples = musmod_get_samples (track);
         channels = mod_Channels;
         ins_count = musinsl_get_count (instruments);
         textbackground(_black);
@@ -104,14 +107,14 @@ void __far win_samples_draw(SCRWIN *self)
             for (j = 1; j < height; j++)
                 if (i < ins_count)
                 {
-                    ins = musinsl_get(instruments, i);
+                    ins = musinsl_get (instruments, i);
 
-                    strncpy(&title, musins_get_title(ins), MUSINS_TITLE_LENGTH_MAX);
+                    strncpy(&title, musins_get_title (ins), MUSINS_TITLE_LEN);
 
-                    for (k = strlen(&title); k < MUSINS_TITLE_LENGTH_MAX - 1; k++)
+                    for (k = strlen(&title); k < MUSINS_TITLE_LEN - 1; k++)
                         title[k] = ' ';
 
-                    title[MUSINS_TITLE_LENGTH_MAX - 1] = 0;
+                    title[MUSINS_TITLE_LEN - 1] = 0;
 
                     if (musins_get_type(ins) == MUSINST_PCM)
                         textcolor(_lightgray);
@@ -121,17 +124,29 @@ void __far win_samples_draw(SCRWIN *self)
                     if (j > 1)
                         printf(CRLF);
 
-                    printf(
-                        " %2hu. %s %2hu %5u %s %5u %5u %5u",
-                        i + 1,
-                        title,
-                        (uint8_t)8,
-                        (uint16_t)musins_get_rate(ins),
-                        musins_is_looped(ins) ? "On " : "Off",
-                        (uint16_t)musins_get_loop_start(ins),
-                        (uint16_t)musins_get_loop_end(ins),
-                        (uint16_t)musins_get_length(ins)
-                    );
+                    smp = musins_get_sample (ins);
+                    if (smp && pcmsmp_is_available (smp))
+                    {
+                        printf(
+                            " %2hu. %s %2hu %5u %s %5u %5u %5u",
+                            i + 1,
+                            title,
+                            (uint8_t) pcmsmp_get_bits (smp),
+                            (uint16_t) pcmsmp_get_rate (smp),
+                            pcmsmp_get_loop (smp) != PCMSMPLOOP_NONE ? "On " : "Off",
+                            (uint16_t) pcmsmp_get_loop_start (smp),
+                            (uint16_t) pcmsmp_get_loop_end (smp),
+                            (uint16_t) pcmsmp_get_length (smp)
+                        );
+                    }
+                    else
+                    {
+                        printf(
+                            " %2hu. %s  -     -   -     -     -     -",
+                            i + 1,
+                            title
+                        );
+                    }
 
                     i++;
                 }
@@ -177,7 +192,7 @@ bool __far win_samples_keypress(SCRWIN *self, char c)
     if (scrwin_is_created(self))
     {
         track = mod_Track;
-        instruments = mod_Instruments;
+        instruments = musmod_get_instruments (track);
         ins_count = musinsl_get_count (instruments);
         if (c == '[')
         {

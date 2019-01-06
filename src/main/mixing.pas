@@ -21,6 +21,7 @@ uses
     ems,
     sbctl,
     voltab,
+    pcmsmp,
     musins,
     s3mvars,
     effvars,

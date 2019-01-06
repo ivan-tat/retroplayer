@@ -71,9 +71,6 @@ procedure muspatl_set_EM_handle_name;
 procedure muspatl_get_used_EM;
 procedure muspatl_free;
 
-var
-    mod_Patterns: Pointer;
-
 implementation
 
 uses

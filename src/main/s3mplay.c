@@ -455,10 +455,10 @@ void __far player_set_order (bool extended)
 
 bool __far player_load_s3m (char *name)
 {
-    S3MLOADER *p;
+    LOADER_S3M *p;
     MUSMOD *track;
 
-    p = s3mloader_new();
+    p = load_s3m_new();
     if (!p)
     {
         DEBUG_FAIL("player_load_s3m", "Failed to initialize S3M loader.");
@@ -466,23 +466,23 @@ bool __far player_load_s3m (char *name)
         player_error_msg = "Failed to initialize S3M loader.";
         return false;
     }
-    s3mloader_init(p);
+    load_s3m_init(p);
 
-    track = s3mloader_load (p, name);
+    track = load_s3m_load (p, name);
     mod_Track = track;
     if ((!track) || (!musmod_is_loaded (track)))
     {
         DEBUG_FAIL("player_load_s3m", "Failed to load S3M file.");
         player_error = E_PLAYER_LOADER;
-        player_error_msg = s3mloader_get_error(p);
-        s3mloader_free(p);
-        s3mloader_delete(&p);
+        player_error_msg = load_s3m_get_error(p);
+        load_s3m_free(p);
+        load_s3m_delete(&p);
         player_free_module();
         return false;
     }
 
-    s3mloader_free(p);
-    s3mloader_delete(&p);
+    load_s3m_free(p);
+    load_s3m_delete(&p);
 
     DEBUG_SUCCESS("player_load_s3m");
     return true;
@@ -743,18 +743,6 @@ void __far player_free_module (void)
     }
     mod_Track = NULL;
 
-    if (mod_Instruments)
-    {
-        musinsl_free(mod_Instruments);
-        musinsl_delete(&mod_Instruments);
-    }
-
-    if (mod_Patterns)
-    {
-        muspatl_free(mod_Patterns);
-        _delete(mod_Patterns);
-    }
-
     channels = mod_Channels;
     if (channels)
     {
@@ -830,8 +818,6 @@ void __near s3mplay_init(void)
     SavHandle = EMSBADHDL;
     mod_Track = NULL;
     mod_Channels = NULL;
-    mod_Instruments = NULL;
-    mod_Patterns = NULL;
 }
 
 void __near s3mplay_done(void)

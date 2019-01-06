@@ -93,7 +93,7 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
     if (chn_effInit(chn, param))
     {
         track = mod_Track;
-        instruments = mod_Instruments;
+        instruments = musmod_get_instruments (track);
 
         /* read instrument */
         /* reinit instrument data and keep sample position */
@@ -234,8 +234,11 @@ void __near on_pattern_jump (TRACKSTATE *state)
 
 void __near on_track_loop (TRACKSTATE *state)
 {
+    MUSMOD *track;
     MUSPATLIST *patterns;
     unsigned int i;
+
+    track = mod_Track;
 
     i = Order[playState_order];
 
@@ -256,7 +259,7 @@ void __near on_track_loop (TRACKSTATE *state)
             playState_gVolume_bFlag = false;
             playState_patLoop_bNow = false;
             playState_patDelay_bNow = playState_patDelayCount != 0;
-            patterns = mod_Patterns;
+            patterns = musmod_get_patterns (track);
             state->pat = muspatl_get (patterns, i);
 
             if (!_play_row (state->pat, playState_row))

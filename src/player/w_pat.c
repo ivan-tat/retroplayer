@@ -103,6 +103,7 @@ void __near draw_channel_event (MUSPATCHNEVENT *event)
 void __near __pascal display_row(uint8_t ordr, uint8_t row)
 {
     #define DISPLAY_COLUMNS 5
+    MUSMOD *track;
     MUSPATLIST *patterns;
     MUSPAT *pat;
     MUSPATIO f;
@@ -111,7 +112,8 @@ void __near __pascal display_row(uint8_t ordr, uint8_t row)
     MIXCHNLIST *channels;
     uint8_t i, c_start, c_end;
 
-    patterns = mod_Patterns;
+    track = mod_Track;
+    patterns = musmod_get_patterns (track);
     channels = mod_Channels;
     pat = muspatl_get (patterns, Order[ordr]);
 
@@ -181,13 +183,15 @@ void __far win_pattern_draw(SCRWIN *self)
 {
     //_win_pattern_draw(self);
 
+    MUSMOD *track;
     MUSPATLIST *patterns;
     int i, j, currow_y;
     MUSPAT *pat;
 
     if (scrwin_is_created(self))
     {
-        patterns = mod_Patterns;
+        track = mod_Track;
+        patterns = musmod_get_patterns (track);
         currow_y = scrwin_get_height(self);
 
         if (scrwin_get_flags(self) & WINFL_FULLREDRAW)

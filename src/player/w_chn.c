@@ -12,6 +12,7 @@
 #include "cc/conio.h"
 #include "cc/stdio.h"
 #include "cc/string.h"
+#include "main/mixer.h"
 #include "main/mixchn.h"
 #include "main/effects.h"
 #include "player/screen.h"
@@ -86,7 +87,7 @@ void __far win_channels_draw(SCRWIN *self)
                     flagsstr[1] = 'p';
                 if (flags & MIXCHNFL_MIXING)
                     flagsstr[2] = 'm';
-                if (chn->bSmpFlags & SMPFLAG_LOOP)
+                if (chn->bSmpFlags & MIXSMPFL_LOOP)
                     flagsstr[3] = 'l';
                 if (chn->bEffFlags & EFFFLAG_CONTINUE)
                     flagsstr[4] = 'c';

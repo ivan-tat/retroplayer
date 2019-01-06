@@ -253,36 +253,50 @@ void __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum)
 {
     MUSMOD *track;
     MUSINSLIST *instruments;
+    PCMSMPLIST *samples;
     MUSINS *ins;
+    PCMSMP *smp;
     unsigned int rate;
     unsigned int flags;
 
     track = mod_Track;
-    instruments = mod_Instruments;
+    instruments = musmod_get_instruments (track);
+    samples = musmod_get_samples (track);
     ins = musinsl_get (instruments, insNum - 1);
     if (musins_get_type(ins) == MUSINST_PCM)
     {
-        rate = musins_get_rate(ins);
-        if (rate)
+        smp = musins_get_sample (ins);
+        if (smp && pcmsmp_is_available (smp))
         {
-            mixchn_set_instrument_num(chn, insNum);
-            mixchn_set_instrument(chn, ins);
-            mixchn_set_sample_volume(chn, (musins_get_volume(ins) * playState_gVolume) >> 6);
-            flags = 0;
-            if (musins_is_looped(ins))
-                flags |= SMPFLAG_LOOP;
-            chn->bSmpFlags = flags;
-            chn->wSmpLoopStart = musins_get_loop_start(ins);
-            if (musins_is_looped(ins))
-                chn->wSmpLoopEnd = musins_get_loop_end(ins);
+            rate = pcmsmp_get_rate (smp);
+            if (rate)
+            {
+                mixchn_set_instrument_num (chn, insNum);
+                mixchn_set_instrument (chn, ins);
+                mixchn_set_sample (chn, smp);
+                mixchn_set_sample_volume (chn, (musins_get_volume (ins) * playState_gVolume) >> 6);
+                flags = 0;
+                if (pcmsmp_get_bits (smp) == 16)
+                    flags |= MIXSMPFL_16BITS;
+                if (pcmsmp_get_loop (smp) != PCMSMPLOOP_NONE)
+                    flags |= MIXSMPFL_LOOP;
+                chn->bSmpFlags = flags;
+                chn->wSmpLoopStart = pcmsmp_get_loop_start (smp);
+                if (flags & MIXSMPFL_LOOP)
+                    chn->wSmpLoopEnd = pcmsmp_get_loop_end (smp);
+                else
+                    chn->wSmpLoopEnd = pcmsmp_get_length (smp);
+                chn->wSmpStart = 0; // reset start position
+                mixchn_set_sample_period_limits (chn, rate, musmod_is_amiga_limits (track));
+            }
             else
-                chn->wSmpLoopEnd = musins_get_length(ins);
-            chn->wSmpStart = 0; // reset start position
-            mixchn_set_sample_period_limits (chn, rate, musmod_is_amiga_limits (track));
+                // don't play it - it's wrong !
+                mixchn_set_instrument_num(chn, 0);
         }
         else
             // don't play it - it's wrong !
             mixchn_set_instrument_num(chn, 0);
+
     }
     else
         // don't play it - it's wrong !
@@ -309,6 +323,7 @@ uint32_t __far chn_calcNoteStep (MIXCHN *chn, uint32_t rate, uint8_t note)
 void __far chn_setupNote (MIXCHN *chn, uint8_t note, bool keep)
 {
     MUSINS *ins;
+    PCMSMP *smp;
     uint32_t rate;
 
     chn->bNote = note;
@@ -316,17 +331,21 @@ void __far chn_setupNote (MIXCHN *chn, uint8_t note, bool keep)
     if (mixchn_get_instrument_num(chn))
     {
         ins = mixchn_get_instrument(chn);
-        if (musins_get_type(ins) == MUSINST_PCM)
+        if (musins_get_type (ins) == MUSINST_PCM)
         {
-            rate = musins_get_rate(ins);
-            if (rate)
+            smp = musins_get_sample (ins);
+            if (smp && pcmsmp_is_available (smp))
             {
-                mixchn_setup_sample_period(chn, chn_calcNotePeriod(chn, rate, note));
-                if (! keep)
+                rate = pcmsmp_get_rate (smp);
+                if (rate)
                 {
-                    // restart instrument
-                    chn->dSmpPos = (unsigned long)chn->wSmpStart << 16;
-                    mixchn_set_playing(chn, true);
+                    mixchn_setup_sample_period(chn, chn_calcNotePeriod(chn, rate, note));
+                    if (! keep)
+                    {
+                        // restart instrument
+                        chn->dSmpPos = (unsigned long)chn->wSmpStart << 16;
+                        mixchn_set_playing(chn, true);
+                    }
                 }
             }
         }

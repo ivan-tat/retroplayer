@@ -12,18 +12,19 @@ interface
 
 (*$I defines.pas*)
 
-procedure s3mloader_new;
-procedure s3mloader_init;
-procedure s3mloader_load;
-procedure s3mloader_get_error;
-procedure s3mloader_free;
-procedure s3mloader_delete;
+procedure load_s3m_new;
+procedure load_s3m_init;
+procedure load_s3m_load;
+procedure load_s3m_get_error;
+procedure load_s3m_free;
+procedure load_s3m_delete;
 
 implementation
 
 uses
     stdio,
     string_,
+    dynarray,
     debug,
     strutils,
     crt,
@@ -31,6 +32,7 @@ uses
     dos_,
     ems,
     common,
+    pcmsmp,
     musins,
     muspat,
     musmod,
@@ -40,11 +42,11 @@ uses
 
 (*$l loads3m.obj*)
 
-procedure s3mloader_new; external;
-procedure s3mloader_init; external;
-procedure s3mloader_load; external;
-procedure s3mloader_get_error; external;
-procedure s3mloader_free; external;
-procedure s3mloader_delete; external;
+procedure load_s3m_new; external;
+procedure load_s3m_init; external;
+procedure load_s3m_load; external;
+procedure load_s3m_get_error; external;
+procedure load_s3m_free; external;
+procedure load_s3m_delete; external;
 
 end.

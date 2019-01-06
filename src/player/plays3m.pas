@@ -11,6 +11,7 @@ uses
     stdio,
     stdlib,
     string_,
+    dynarray,
     unistd,
     crt,
     dos,

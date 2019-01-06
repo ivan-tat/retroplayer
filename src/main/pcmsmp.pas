@@ -17,7 +17,6 @@ procedure __pcmsmp_set_flags;
 procedure pcmsmp_init;
 procedure pcmsmp_map_EM_data;
 procedure pcmsmp_set_title;
-procedure pcmsmp_get_title;
 procedure pcmsmp_free;
 
 procedure __pcmsmpl_set_flags;
@@ -49,7 +48,6 @@ procedure __pcmsmp_set_flags; external;
 procedure pcmsmp_init; external;
 procedure pcmsmp_map_EM_data; external;
 procedure pcmsmp_set_title; external;
-procedure pcmsmp_get_title; external;
 procedure pcmsmp_free; external;
 
 procedure __pcmsmpl_set_flags; external;

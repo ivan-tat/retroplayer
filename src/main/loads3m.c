@@ -16,6 +16,7 @@
 #include "cc/dos.h"
 #include "dos/ems.h"
 #include "common.h"
+#include "main/pcmsmp.h"
 #include "main/musins.h"
 #include "main/muspat.h"
 #include "main/musmod.h"
@@ -30,12 +31,7 @@
 #define _S3M_MAX_PATTERNS 100
 #define _S3M_MAX_CHANNELS 32
 
-#define S3M_PAT_MIN    0
-#define S3M_PAT_MAX    99
-#define S3M_PAT_SKIP   0xfe
-#define S3M_PAT_EMPTY  0xff
-
-#define LOADER_BUF_SIZE (10 * 1024)
+#define _S3M_LOADER_BUF_SIZE (10 * 1024)
 
 /* Macros */
 #define mk_u16(a, b)        ((((a) & 0xffU) << 0) | (((b) & 0xffU) << 8))
@@ -91,7 +87,7 @@
 #define _S3M_CHN_ADLIB_DRUMS    4
 
 #pragma pack(push, 1);
-typedef struct S3M_header
+typedef struct _s3m_header_t
 {
     char name[_S3M_TITLE_LEN];
     uint16_t type;
@@ -111,24 +107,29 @@ typedef struct S3M_header
     uint8_t channelset[_S3M_MAX_CHANNELS];
 };
 #pragma pack(pop);
-typedef struct S3M_header S3MHEADER;
+typedef struct _s3m_header_t _S3M_HEADER;
 
 /*** Packed pattern lead byte flags ***/
 
-#define S3MPATFL_CHNMASK  0x1f
-#define S3MPATFL_NOTE_INS 0x20
-#define S3MPATFL_VOL      0x40
-#define S3MPATFL_CMD_PARM 0x80
+typedef uint8_t _s3m_event_flags_t;
+typedef _s3m_event_flags_t _S3M_EVENTFLAGS;
+
+#define _S3M_EVENTFL_CHNMASK  0x1f
+#define _S3M_EVENTFL_NOTE_INS 0x20
+#define _S3M_EVENTFL_VOL      0x40
+#define _S3M_EVENTFL_CMD_PARM 0x80
 
 /*** PCM sample ***/
 
-typedef uint8_t S3MSMPFLAGS;
-#define S3MSMPFL_LOOP   0x01
-#define S3MSMPFL_STEREO 0x02
-#define S3MSMPFL_16BITS 0x04
+typedef uint8_t _s3m_sample_flags_t;
+typedef _s3m_sample_flags_t _S3M_SMPFLAGS;
+
+#define _S3M_SMPFL_LOOP   0x01
+#define _S3M_SMPFL_STEREO 0x02
+#define _S3M_SMPFL_16BITS 0x04
 
 #pragma pack(push, 1);
-typedef struct S3M_PCM_sample
+typedef struct _s3m_sample_t
 {
     uint8_t filepos_hi;
     uint16_t filepos;
@@ -138,17 +139,17 @@ typedef struct S3M_PCM_sample
     uint8_t volume;
     uint8_t unused1;
     uint8_t packinfo;
-    S3MSMPFLAGS flags;
+    _S3M_SMPFLAGS flags;
     uint32_t rate;
     uint8_t unused2[12];
 };
 #pragma pack(pop);
-typedef struct S3M_PCM_sample S3MPCMSMP;
+typedef struct _s3m_sample_t _S3M_SMP;
 
 /*** AdLib instrument ***/
 
 #pragma pack(push, 1);
-typedef struct S3M_adlib_instrument
+typedef struct _s3m_adlib_instrument_t
 {
     uint8_t unused1[3];
     uint8_t data[12];
@@ -158,42 +159,56 @@ typedef struct S3M_adlib_instrument
     uint8_t unused3[12];
 };
 #pragma pack(pop);
-typedef struct S3M_adlib_instrument S3MADLIBINS;
+typedef struct _s3m_adlib_instrument_t _S3M_ADL;
 
 /*** Instrument ***/
 
-typedef uint8_t S3MINSTYPE;
-#define S3MINST_EMPTY  0x00
-#define S3MINST_PCM    0x01
-#define S3MINST_AMEL   0x02
-#define S3MINST_ABD    0x03
-#define S3MINST_ASNARE 0x04
-#define S3MINST_ATOM   0x05
-#define S3MINST_ACYM   0x06
-#define S3MINST_AHIHAT 0x07
+typedef uint8_t _s3m_instrument_type_t;
+typedef _s3m_instrument_type_t _S3M_INSTYPE;
 
-#define S3MINS_TITLE_LENGTH_MAX 28
+#define _S3M_INST_EMPTY  0x00
+#define _S3M_INST_PCM    0x01
+#define _S3M_INST_AMEL   0x02
+#define _S3M_INST_ABD    0x03
+#define _S3M_INST_ASNARE 0x04
+#define _S3M_INST_ATOM   0x05
+#define _S3M_INST_ACYM   0x06
+#define _S3M_INST_AHIHAT 0x07
+
+#define _S3M_INS_FILENAME_LEN 12
+#define _S3M_INS_TITLE_LEN 28
 
 #pragma pack(push, 1);
-typedef struct S3M_instrument
+typedef struct _s3m_instrument_t
 {
-    S3MINSTYPE type;
-    char dosname[12];
+    _S3M_INSTYPE type;
+    char dosname[_S3M_INS_FILENAME_LEN];
     union
     {
-        S3MPCMSMP sample;
-        S3MADLIBINS adlib;
+        _S3M_SMP sample;
+        _S3M_ADL adlib;
     } data;
-    char title[S3MINS_TITLE_LENGTH_MAX];
+    char title[_S3M_INS_TITLE_LEN];
     uint32_t magic;
 };
 #pragma pack(pop);
-typedef struct S3M_instrument S3MINS;
+typedef struct _s3m_instrument_t _S3M_INS;
+
+#define _ins_get_type(o)                (o)->type
+#define _ins_get_sample_offset(o)       (((o)->data.sample.filepos + ((uint32_t)(o)->data.sample.filepos_hi << 16)) << 4)
+#define _ins_get_sample_length(o)       (o)->data.sample.length
+#define _ins_is_sample_looped(o)        (((o)->data.sample.flags & _S3M_SMPFL_LOOP) != 0)
+#define _ins_get_sample_loop_start(o)   (o)->data.sample.loopbeg
+#define _ins_get_sample_loop_end(o)     (o)->data.sample.loopend
+#define _ins_get_sample_rate(o)         (o)->data.sample.rate
+#define _ins_get_sample_volume(o)       (o)->data.sample.volume
+#define _ins_get_file_name(o)           (o)->dosname
+#define _ins_get_title(o)               (o)->title
 
 /*** Errors ***/
 
-typedef int16_t S3M_error_t;
-typedef S3M_error_t S3MERR;
+typedef int16_t _s3m_error_t;
+typedef _s3m_error_t _S3M_ERR;
 
 #define E_S3M_SUCCESS           0
 #define E_S3M_DOS_MEM_ALLOC     1
@@ -214,11 +229,11 @@ typedef S3M_error_t S3MERR;
 
 static const struct
 {
-    S3MERR code;
+    _S3M_ERR code;
     char *msg;
 }
 
-S3M_ERRORS[] =
+_S3M_ERRORS[] =
 {
     {
         E_S3M_DOS_MEM_ALLOC,
@@ -284,16 +299,28 @@ S3M_ERRORS[] =
 
 /*** Loader ***/
 
+#pragma pack(push, 1);
+typedef struct _s3m_instrument_info_t
+{
+    _S3M_INS header;
+    int8_t smp_num;
+};
+#pragma pack(pop);
+typedef struct _s3m_instrument_info_t _S3M_INSINFO;
+
 typedef struct _s3m_loader_t
 {
-    S3MERR err;
+    _S3M_ERR err;
     MUSMOD *track;
     FILE *f;
     char *buffer;
     bool signed_data;
-    uint16_t inspara[_S3M_MAX_INSTRUMENTS];
-    uint16_t patpara[_S3M_MAX_PATTERNS];
-    uint32_t smppara[_S3M_MAX_INSTRUMENTS];
+    uint8_t   ins_count;
+    uint16_t *ins_offsets;
+    _S3M_INSINFO *ins_info;
+    uint8_t   smp_count;
+    uint8_t   pat_count;
+    uint16_t *pat_offsets;
     uint16_t pat_EM_pages;
     uint16_t pat_EM_page;
     uint16_t pat_EM_page_offset;
@@ -302,40 +329,35 @@ typedef struct _s3m_loader_t
 };
 typedef struct _s3m_loader_t _S3M_LOADER;
 
-S3MLOADER *s3mloader_new(void)
+LOADER_S3M *load_s3m_new (void)
 {
     return _new (_S3M_LOADER);
 }
 
-void s3mloader_init(S3MLOADER *self)
+void load_s3m_init (LOADER_S3M *self)
 {
     _S3M_LOADER *_Self = self;
 
     if (_Self)
-        memset(_Self, 0, sizeof(_S3M_LOADER));
+        memset (_Self, 0, sizeof (_S3M_LOADER));
 }
 
-bool __near s3mloader_allocbuf(S3MLOADER *self)
+bool __near load_s3m_allocbuf (LOADER_S3M *self)
 {
     _S3M_LOADER *_Self = self;
-    uint16_t seg;
 
     if (_Self)
+    {
         if (!_Self->buffer)
-        {
-            if (!_dos_allocmem(_dos_para(LOADER_BUF_SIZE), &seg))
-            {
-                _Self->buffer = MK_FP(seg, 0);
-                return true;
-            }
-        }
-        else
+            _Self->buffer = __new (_S3M_LOADER_BUF_SIZE);
+        if (_Self->buffer)
             return true;
+    }
 
     return false;
 }
 
-void __near s3mloader_alloc_patterns(S3MLOADER *self)
+void __near load_s3m_alloc_patterns (LOADER_S3M *self)
 {
     _S3M_LOADER *_Self = self;
     MUSMOD *track;
@@ -346,27 +368,27 @@ void __near s3mloader_alloc_patterns(S3MLOADER *self)
     EMSHDL handle;
 
     track = _Self->track;
-    patterns = mod_Patterns;
     patsize = musmod_get_channels_count (track) * 64 * 5;
 
     if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_INFO_ (NULL, "Pattern memory size: %u.", patsize);
+        DEBUG_INFO_ ("load_s3m_alloc_patterns", "Pattern memory size: %u.", patsize);
 
     if (UseEMS)
     {
-        patperpage = 16 * 1024 / patsize;
+        patterns = musmod_get_patterns (track);
+        patperpage = EM_PAGE_SIZE / patsize;
         if (DEBUG_FILE_S3M_LOAD)
-            DEBUG_INFO_ (NULL, "Patterns per EM page: %u.", patperpage);
+            DEBUG_INFO_ ("load_s3m_alloc_patterns", "Patterns per EM page: %u.", patperpage);
         _Self->pat_EM_pages = (muspatl_get_count (patterns) + patperpage - 1) / patperpage;
 
-        freepages = emsGetFreePagesCount();
+        freepages = emsGetFreePagesCount ();
         if (_Self->pat_EM_pages > freepages)
             _Self->pat_EM_pages = freepages;
 
-        handle = emsAlloc(_Self->pat_EM_pages);
+        handle = emsAlloc (_Self->pat_EM_pages);
         if (emsEC != E_EMS_SUCCESS)
         {
-            DEBUG_ERR("s3mloader_load", "Failed to allocate EM for patterns.");
+            DEBUG_ERR_ ("load_s3m_alloc_patterns", "Failed to allocate EM for %s.", "patterns");
             muspatl_set_EM_data (patterns, false);
             return;
         }
@@ -560,7 +582,7 @@ void __near _clear_events (MUSPATCHNEVENT *events)
     }
 }
 
-bool __near s3mloader_convert_pattern (S3MLOADER *self, uint8_t *src, uint16_t src_len, MUSPAT *pattern, bool pack)
+bool __near load_s3m_convert_pattern (LOADER_S3M *self, uint8_t *src, uint16_t src_len, MUSPAT *pattern, bool pack)
 {
     _S3M_LOADER *_Self = self;
     _S3M_PATIO fi;
@@ -579,7 +601,7 @@ bool __near s3mloader_convert_pattern (S3MLOADER *self, uint8_t *src, uint16_t s
 
     if (!muspatio_open (&f, pattern, MUSPATIOMD_WRITE))
     {
-        DEBUG_ERR_ ("s3mloader_convert_pattern", "Failed to open pattern for writing (%s).", f.error);
+        DEBUG_ERR_ ("load_s3m_convert_pattern", "Failed to open pattern for writing (%s).", f.error);
         return false;
     }
 
@@ -706,11 +728,7 @@ bool __near s3mloader_convert_pattern (S3MLOADER *self, uint8_t *src, uint16_t s
         }
         else
         {
-            DEBUG_ERR_ (
-                "s3mloader_convert_pattern",
-                "Failed to read pattern (%s).",
-                fi.error
-            );
+            DEBUG_ERR_ ("load_s3m_convert_pattern", "Failed to read pattern (%s).", fi.error);
             muspatio_close (&f);
             _s3m_patio_close (&fi);
             return false;
@@ -723,123 +741,110 @@ bool __near s3mloader_convert_pattern (S3MLOADER *self, uint8_t *src, uint16_t s
     return true;
 }
 
-void __near s3mloader_dump_patterns (S3MLOADER *self)
+bool __near load_s3m_load_pattern (LOADER_S3M *self, uint8_t index)
 {
-    _S3M_LOADER *_Self = self;
-    MUSMOD *track;
-    MUSPATLIST *patterns;
-    MUSPAT *pattern;
-    unsigned int count, i, num_channels;
-    char s[_S3M_MAX_CHANNELS][13];
-
-    track = _Self->track;
-    num_channels = musmod_get_channels_count (track);
-    patterns = mod_Patterns;
-    count = muspatl_get_count (patterns);
-    for (i = 0; i < count; i++)
-    {
-        pattern = muspatl_get (patterns, i);
-        DEBUG_dump_pattern (pattern, s, num_channels);
-    }
-}
-
-bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
-{
+    #define _BUF_SIZE (_S3M_MAX_CHANNELS * 13)
     _S3M_LOADER *_Self = self;
     MUSMOD *track;
     MUSPATLIST *patterns;
     uint32_t pos;
     uint16_t length;
-    MUSPAT pat_static;
-    MUSPAT *pat;
+    MUSPAT pat_static, *pat;
     void *data;
-    uint16_t seg;
     bool em;
-    char s[64];
+    char s[_BUF_SIZE];
 
     track = _Self->track;
-    patterns = mod_Patterns;
-    pos = _Self->patpara[index] * 16;
+    patterns = musmod_get_patterns (track);
+    pos = _Self->pat_offsets[index] * 16;
 
     if (!pos)
     {
         /*
         pat = muspatl_get (patterns, index);
-        muspat_init(pat);   // is not necessary because it was already initialized by DYNARR's set_size().
+        muspat_init (pat);  // is not necessary because it was already initialized by DYNARR's set_size().
         */
         return true;
     }
 
-    if (fsetpos(_Self->f, pos))
+    if (fsetpos (_Self->f, pos))
     {
-        DEBUG_ERR("s3mloader_load_pattern", "Failed to read file.");
+        DEBUG_ERR_ ("load_s3m_load_pattern", "Failed to read %s.", "file");
         _Self->err = E_S3M_FILE_SEEK;
         return false;
     }
-    if (!fread(&length, 2, 1, _Self->f))
+    if (!fread (&length, 2, 1, _Self->f))
     {
-        DEBUG_ERR("s3mloader_load_pattern", "Failed to read pattern.");
+        DEBUG_ERR_ ("load_s3m_load_pattern", "Failed to read %s.", "pattern");
         _Self->err = E_S3M_FILE_READ;
         return false;
     }
 
-    if ((length <= 2) || (length > LOADER_BUF_SIZE))
+    if ((length <= 2) || (length > _S3M_LOADER_BUF_SIZE))
     {
-        DEBUG_ERR("s3mloader_load_pattern", "Bad pattern size.");
+        DEBUG_ERR ("load_s3m_load_pattern", "Bad pattern size.");
         _Self->err = E_S3M_PATTERN_SIZE;
         return false;
     }
+
     length -= 2;
-    if (!fread(_Self->buffer, length, 1, _Self->f))
+    if (!fread (_Self->buffer, length, 1, _Self->f))
     {
-        DEBUG_ERR("s3mloader_load_pattern", "Failed to read pattern.");
+        DEBUG_ERR_ ("load_s3m_load_pattern", "Failed to read %s.", "pattern");
         _Self->err = E_S3M_FILE_READ;
         return false;
     }
 
     pat = &pat_static;
-    muspat_init(pat);
+    muspat_init (pat);
     muspat_set_channels (pat, musmod_get_channels_count (track));
-    muspat_set_rows(pat, 64);
-    muspat_set_size(pat, muspat_get_channels(pat) * muspat_get_rows(pat) * 5);
+    muspat_set_rows (pat, 64);
+    muspat_set_size (pat, muspat_get_channels (pat) * muspat_get_rows (pat) * 5);
 
     // try to put in EM
     em = false;
     if (muspatl_is_EM_data (patterns) && _Self->pat_EM_pages)
     {
         em = true;
-        if (_Self->pat_EM_page_offset + muspat_get_size(pat) > 16 * 1024)
+        if (muspat_is_data_packed (pat))
+            length = muspat_get_packed_size (pat);
+        else
+            length = muspat_get_size (pat);
+        length = (length + 15) & ~15;   // round size to 16 bytes
+        if (_Self->pat_EM_page_offset + length > EM_PAGE_SIZE)
         {
+            // EM page overflow, try next page
             _Self->pat_EM_page++;
             _Self->pat_EM_page_offset = 0;
             _Self->pat_EM_pages--;
-            if (!_Self->pat_EM_pages || (_Self->pat_EM_page_offset + muspat_get_size(pat) > 16 * 1024))
-                em = false;
+            em = _Self->pat_EM_pages && (_Self->pat_EM_page_offset + length <= EM_PAGE_SIZE);
         }
     }
 
     if (em)
     {
-        muspat_set_EM_data(pat, true);
-        muspat_set_own_EM_handle(pat, false);
+        muspat_set_EM_data (pat, true);
+        muspat_set_own_EM_handle (pat, false);
         muspat_set_EM_data_handle (pat, muspatl_get_EM_handle (patterns));
-        muspat_set_EM_data_page(pat, _Self->pat_EM_page);
-        muspat_set_EM_data_offset(pat, _Self->pat_EM_page_offset);
+        muspat_set_EM_data_page (pat, _Self->pat_EM_page);
+        muspat_set_EM_data_offset (pat, _Self->pat_EM_page_offset);
+        _Self->pat_EM_page_offset += length;    // next available offset
     }
     else
     {
-        if (_dos_allocmem(_dos_para(muspat_get_size(pat)), &seg))
+        data = __new (muspat_get_size (pat));
+        if (!data)
         {
-            DEBUG_ERR("s3mloader_load_pattern", "Failed to allocate DOS memory for pattern.");
+            DEBUG_ERR_ ("load_s3m_load_pattern", "Failed to allocate memory for %s.", "pattern");
             _Self->err = E_S3M_DOS_MEM_ALLOC;
             return false;
         }
-        muspat_set_EM_data(pat, false);
-        muspat_set_data (pat, MK_FP (seg, 0));
+        muspat_set_EM_data (pat, false);
+        muspat_set_data (pat, data);
     }
 
     muspatl_set (patterns, index, pat);
-    pat = muspatl_get (patterns, index);
+    pat = muspatl_get (patterns, index);    // update pointer
 
     if (DEBUG_FILE_S3M_LOAD)
     {
@@ -860,7 +865,7 @@ bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
         }
 
         DEBUG_MSG_ (
-            "s3mloader_load_pattern",
+            "load_s3m_load_pattern",
             "index=%hu, file_size=%u, mem_size=%u, data=%s",
             index,
             length,
@@ -869,153 +874,302 @@ bool __near s3mloader_load_pattern(S3MLOADER *self, uint8_t index)
         );
     }
 
-    return s3mloader_convert_pattern (self, _Self->buffer, length, pat, true);
+    // TODO: use extra buffer for unpacked pattern to determine real data size of final packed data
+    if (load_s3m_convert_pattern (self, _Self->buffer, length, pat, true))
+    {
+        if (muspat_is_EM_data (pat) && muspat_is_data_packed (pat))
+            muspat_set_size (pat, muspat_get_packed_size (pat));    // reduce memory usage
+
+        if (DEBUG_FILE_S3M_LOAD)
+            DEBUG_dump_pattern (pat, s, musmod_get_channels_count (track));
+        return true;
+    }
+    else
+        return false;
+    #undef _BUF_SIZE
 }
 
-bool __near s3mloader_load_instrument(S3MLOADER *self, uint8_t index)
+bool __near load_s3m_load_ins_offsets (LOADER_S3M *self)
 {
     _S3M_LOADER *_Self = self;
-    MUSMOD *track;
-    MUSINSLIST *instruments;
-    uint16_t length;
-    uint8_t typ;
-    MUSINS *ins;
-    S3MINS s3mins;
+    uint16_t size;
 
-    if (fsetpos(_Self->f, _Self->inspara[index] * 16))
+    size = _Self->ins_count * sizeof (uint16_t);
+
+    _Self->ins_offsets = __new (size);
+    if (! _Self->ins_offsets)
     {
-        DEBUG_ERR("s3mloader_load_instrument", "Failed to read file.");
-        _Self->err = E_S3M_FILE_SEEK;
+        DEBUG_ERR_ ("load_s3m_load_ins_offsets", "Failed to allocate memory for %s.", "instruments offsets");
+        _Self->err = E_S3M_DOS_MEM_ALLOC;
         return false;
     }
 
-    track = _Self->track;
-    instruments = mod_Instruments;
-    ins = musinsl_get (instruments, index);
-    musins_init(ins);
-
-    if (!fread(&s3mins, sizeof(S3MINS), 1, _Self->f))
+    if (!fread (_Self->ins_offsets, size, 1, _Self->f))
     {
-        DEBUG_ERR("s3mloader_load_instrument", "Failed to read instrument header.");
+        DEBUG_ERR_ ("load_s3m_load_ins_offsets", "Failed to read %s.", "instruments offsets");
         _Self->err = E_S3M_FILE_READ;
         return false;
     }
 
-    if (s3mins.type == S3MINST_PCM)
+    return true;
+}
+
+bool __near load_s3m_load_pat_offsets (LOADER_S3M *self)
+{
+    _S3M_LOADER *_Self = self;
+    uint16_t size;
+
+    size = sizeof (uint16_t) * _Self->pat_count;
+
+    _Self->pat_offsets = __new (size);
+    if (!_Self->pat_offsets)
     {
-        if (s3mins.data.sample.packinfo)
-        {
-            DEBUG_ERR("s3mloader_load_instrument", "Packed sample is not supported.");
-            _Self->err = E_S3M_PACKED_SAMPLE;
-            return false;
-        }
-        if (s3mins.data.sample.flags & S3MSMPFL_STEREO)
-        {
-            DEBUG_ERR("s3mloader_load_instrument", "Stereo sample is not supported.");
-            _Self->err = E_S3M_STEREO_SAMPLE;
-            return false;
-        }
-        if (s3mins.data.sample.flags & S3MSMPFL_16BITS)
-        {
-            DEBUG_ERR("s3mloader_load_instrument", "16-bits sample is not supported.");
-            _Self->err = E_S3M_16BITS_SAMPLE;
-            return false;
-        }
-        musins_set_type(ins, MUSINST_PCM);
-        musins_set_length(ins, s3mins.data.sample.length);
-        if (s3mins.data.sample.flags & S3MSMPFL_LOOP)
-        {
-            musins_set_looped(ins, true);
-            musins_set_loop_start(ins, s3mins.data.sample.loopbeg);
-            musins_set_loop_end(ins, s3mins.data.sample.loopend);
-        }
-        musins_set_volume(ins, s3mins.data.sample.volume);
-        musins_set_rate(ins, s3mins.data.sample.rate);
-        _Self->smppara[index] = s3mins.data.sample.filepos + ((uint32_t)s3mins.data.sample.filepos_hi << 16);
+        DEBUG_ERR_ ("load_s3m_load_pat_offsets", "Failed to allocate memory for %s.", "pattern offsets");
+        _Self->err = E_S3M_DOS_MEM_ALLOC;
+        return false;
     }
-    else
+
+    if (!fread (_Self->pat_offsets, size, 1, _Self->f))
     {
-        musins_set_type(ins, MUSINST_EMPTY);
-        _Self->smppara[index] = 0;
+        DEBUG_ERR_ ("load_s3m_load_pat_offsets", "Failed to read %s.", "patterns offsets");
+        _Self->err = E_S3M_FILE_READ;
+        return false;
     }
-    s3mins.title[S3MINS_TITLE_LENGTH_MAX - 1] = 0;  // for weird case
-    musins_set_title(ins, s3mins.title);
 
     return true;
 }
 
-uint32_t __near _calc_sample_mem_size(uint32_t size)
+bool __near load_s3m_load_ins_headers (LOADER_S3M *self)
+{
+    _S3M_LOADER *_Self = self;
+    _S3M_INSINFO *info;
+    uint8_t i;
+
+    _Self->ins_info = __new (sizeof (_S3M_INSINFO) * _Self->ins_count);
+    if (!_Self->ins_info)
+    {
+        DEBUG_ERR_ ("load_s3m_load_ins_headers", "Failed to allocate memory for %s.", "instruments headers");
+        _Self->err = E_S3M_DOS_MEM_ALLOC;
+        return false;
+    }
+
+    _Self->smp_count = 0;
+    for (i = 0; i < _Self->ins_count; i++)
+    {
+        if (fsetpos (_Self->f, _Self->ins_offsets[i] * 16))
+        {
+            DEBUG_ERR_ ("load_s3m_load_ins_headers", "Failed to read %s.", "file");
+            _Self->err = E_S3M_FILE_SEEK;
+            return false;
+        }
+
+        info = & (_Self->ins_info[i]);
+        if (!fread (& (info->header), sizeof (_S3M_INS), 1, _Self->f))
+        {
+            DEBUG_ERR_ ("load_s3m_load_ins_headers", "Failed to read %s.", "instrument header");
+            _Self->err = E_S3M_FILE_READ;
+            return false;
+        }
+
+        switch (_ins_get_type (& (info->header)))
+        {
+        case _S3M_INST_EMPTY:
+            info->smp_num = -1;
+            break;
+        case _S3M_INST_PCM:
+            if (info->header.data.sample.packinfo)
+            {
+                DEBUG_ERR_ ("load_s3m_load_ins_headers", "%s is not supported.", "Packed sample");
+                _Self->err = E_S3M_PACKED_SAMPLE;
+                return false;
+            }
+            if (info->header.data.sample.flags & _S3M_SMPFL_STEREO)
+            {
+                DEBUG_ERR_ ("load_s3m_load_ins_headers", "%s is not supported.", "Stereo sample");
+                _Self->err = E_S3M_STEREO_SAMPLE;
+                return false;
+            }
+            if (info->header.data.sample.flags & _S3M_SMPFL_16BITS)
+            {
+                DEBUG_ERR_ ("load_s3m_load_ins_headers", "%s is not supported.", "16-bits sample");
+                _Self->err = E_S3M_16BITS_SAMPLE;
+                return false;
+            }
+            info->smp_num = _Self->smp_count;
+            _Self->smp_count++;
+            break;
+        case _S3M_INST_AMEL:
+        case _S3M_INST_ABD:
+        case _S3M_INST_ASNARE:
+        case _S3M_INST_ATOM:
+        case _S3M_INST_ACYM:
+        case _S3M_INST_AHIHAT:
+            DEBUG_ERR_ ("load_s3m_load_ins_headers", "%s is not supported.", "Adlib instrument");
+            _Self->err = E_S3M_INSTRUMENT_TYPE;
+            return false;
+        default:
+            DEBUG_ERR ("load_s3m_load_ins_headers", "Unknown instrument type.");
+            _Self->err = E_S3M_INSTRUMENT_TYPE;
+            return false;
+        }
+        DEBUG_INFO_ ("load_s3m_load_ins_headers", "i=%d, s=%d", i, info->smp_num);
+    }
+
+    return true;
+}
+
+bool __near load_s3m_load_instrument (LOADER_S3M *self, uint8_t index)
+{
+    _S3M_LOADER *_Self = self;
+    _S3M_INSINFO *info;
+    _S3M_INS *_ins;
+    MUSMOD *track;
+    PCMSMPLIST *samples;
+    MUSINSLIST *instruments;
+    MUSINS *ins;
+    PCMSMP *smp;
+    char smp_title[_S3M_INS_FILENAME_LEN + 1];  /* including terminating zero */
+    char ins_title[MUSINS_TITLE_LEN + 1];       /* including terminating zero */
+
+    info = & (_Self->ins_info[index]);
+    _ins = & (info->header);
+
+    track = _Self->track;
+    samples = musmod_get_samples (track);
+    instruments = musmod_get_instruments (track);
+    ins = musinsl_get (instruments, index);
+    musins_init (ins);
+
+    if (_ins_get_type (_ins) == _S3M_INST_PCM)
+    {
+        smp = pcmsmpl_get (samples, info->smp_num);
+        pcmsmp_set_available (smp, true);
+        pcmsmp_set_size (smp, _ins_get_sample_length (_ins));
+
+        if (_ins_is_sample_looped (_ins))
+        {
+            pcmsmp_set_loop (smp, PCMSMPLOOP_FORWARD);
+            pcmsmp_set_loop_start (smp, _ins_get_sample_loop_start (_ins));
+            pcmsmp_set_loop_end (smp, _ins_get_sample_loop_end (_ins));
+        }
+        else
+            pcmsmp_set_loop (smp, PCMSMPLOOP_NONE);
+
+        pcmsmp_set_rate (smp, _ins_get_sample_rate (_ins));
+        pcmsmp_set_volume (smp, _ins_get_sample_volume (_ins));
+
+        memcpy (smp_title, _ins_get_file_name (_ins), _S3M_INS_FILENAME_LEN);
+        smp_title[_S3M_INS_FILENAME_LEN] = 0;
+        pcmsmp_set_title (smp, smp_title);
+
+        musins_set_type (ins, MUSINST_PCM);
+        musins_set_volume (ins, _ins_get_sample_volume (_ins));    /* FIXME: split sample and instrument volumes */
+        musins_set_sample (ins, smp);
+    }
+    else
+    {
+        musins_set_type (ins, MUSINST_EMPTY);
+    }
+
+    memcpy (ins_title, _ins_get_title (_ins), _S3M_INS_TITLE_LEN);
+    ins_title[_S3M_INS_TITLE_LEN] = 0;
+    musins_set_title (ins, ins_title);
+    musins_get_title (ins)[MUSINS_TITLE_LEN - 1] = 0;
+
+    if (DEBUG_FILE_S3M_LOAD)
+        DEBUG_dump_instrument_info (ins, index, samples);
+
+    return true;
+}
+
+uint32_t __near _calc_sample_load_size (PCMSMP *smp)
+{
+    uint32_t value;
+
+    if (pcmsmp_get_loop (smp) != PCMSMPLOOP_NONE)
+        value = pcmsmp_get_loop_end (smp);
+    else
+        value = pcmsmp_get_length (smp);
+
+    if (pcmsmp_get_bits (smp) == 16)
+        value <<= 1;
+
+    return value;
+}
+
+uint32_t __near _calc_sample_mem_size (uint32_t size)
 {
     return size + 1024;
 }
 
-void __near s3mloader_alloc_samples(S3MLOADER *self)
+void __near load_s3m_alloc_samples (LOADER_S3M *self)
 {
     _S3M_LOADER *_Self = self;
     MUSMOD *track;
+    PCMSMPLIST *samples;
     MUSINSLIST *instruments;
-    uint16_t pages;
-    uint32_t memsize;
+    uint16_t pages, free_pages;
+    uint32_t data_size;
     int16_t i;
     MUSINS *ins;
+    PCMSMP *smp;
     EMSHDL handle;
 
     track = _Self->track;
-    instruments = mod_Instruments;
-
-    if (!emsGetFreePagesCount())
-    {
-        DEBUG_WARN("s3mloader_alloc_samples", "Not enough EM for samples.");
-        musinsl_set_EM_data (instruments, false);
-        return;
-    }
+    samples = musmod_get_samples (track);
+    instruments = musmod_get_instruments (track);
 
     pages = 0;
-    for (i = 0; i < _S3M_MAX_INSTRUMENTS; i++)
+    for (i = 0; i < _Self->ins_count; i++)
     {
         ins = musinsl_get (instruments, i);
-        if (musins_get_type(ins) == MUSINST_PCM)
+        if (musins_get_type (ins) == MUSINST_PCM)
         {
-            if (musins_is_looped(ins))
-                memsize = musins_get_loop_end(ins);
-            else
-                memsize = musins_get_length(ins);
-            memsize = _calc_sample_mem_size(memsize);
-            pages += (memsize + 16 * 1024 - 1) / (16 * 1024);
+            smp = musins_get_sample (ins);
+            data_size = _calc_sample_mem_size (_calc_sample_load_size (smp));
+            pages += (uint32_t) (data_size + EM_PAGE_SIZE - 1) / EM_PAGE_SIZE;
         }
     }
 
     if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_INFO_ ("s3mloader_alloc_samples",
-            "Instruments: %u, EM pages requested for samples: %u.",
-            musinsl_get_count (instruments),
+        DEBUG_INFO_ ("load_s3m_alloc_samples",
+            "Samples to load: %u (EM pages: %u)",
+            _Self->smp_count,
             pages
         );
 
-    if (pages)
+    free_pages = emsGetFreePagesCount ();
+    if (!free_pages)
     {
-        if (pages > emsGetFreePagesCount())
-            pages = emsGetFreePagesCount();
-
-        handle = emsAlloc (pages);
-        if (emsEC != E_EMS_SUCCESS)
-        {
-            DEBUG_ERR ("s3mloader_alloc_samples", "Failed to allocate EM for samples.");
-            musinsl_set_EM_data (instruments, false);
-            return;
-        }
-        musinsl_set_EM_data (instruments, true);
-        musinsl_set_EM_data_handle (instruments, handle);
+        DEBUG_WARN_ ("load_s3m_alloc_samples", "Not enough EM for %s.", "samples");
+        pcmsmpl_set_EM_data (samples, false);
+        return;
     }
+
+    if (pages > free_pages)
+        pages = free_pages;
+
+    handle = emsAlloc (pages);
+    if (emsEC != E_EMS_SUCCESS)
+    {
+        DEBUG_ERR_ ("load_s3m_alloc_samples", "Failed to allocate EM for %s.", "samples");
+        pcmsmpl_set_EM_data (samples, false);
+        return;
+    }
+    pcmsmpl_set_EM_data (samples, true);
+    pcmsmpl_set_EM_handle (samples, handle);
 
     _Self->smp_EM_pages = pages;
     _Self->smp_EM_page = 0;
 
     if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_INFO_ ("s3mloader_alloc_samples", "EM pages allocated for samples: %u.", pages);
+        DEBUG_INFO_ ("load_s3m_alloc_samples",
+            "EM pages allocated: %u.",
+            pages
+        );
 }
 
-void __near convert_sign_8(void *data, uint32_t size)
+void __near convert_sign_8 (void *data, uint32_t size)
 {
     char *p;
     uint32_t count;
@@ -1030,57 +1184,64 @@ void __near convert_sign_8(void *data, uint32_t size)
     }
 }
 
-bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
+bool __near load_s3m_load_sample (LOADER_S3M *self, uint8_t index)
 {
     _S3M_LOADER *_Self = self;
+    _S3M_INSINFO *info;
     MUSMOD *track;
+    PCMSMPLIST *samples;
     MUSINSLIST *instruments;
-    char *data;
     MUSINS *ins;
+    PCMSMP *smp;
+    char *data;
     uint16_t pages, h, dh;
     uint8_t i;
-    uint32_t smpsize, memsize;
-    uint16_t seg;
+    uint32_t load_size, data_size;
     void *loopstart;
     uint32_t loopsize;
 
-    track = _Self->track;
-    instruments = mod_Instruments;
-
-    if (fsetpos(_Self->f, _Self->smppara[index] * 16))
+    info = & (_Self->ins_info[index]);
+    if (fsetpos (_Self->f, _ins_get_sample_offset (& (info->header))))
     {
-        DEBUG_ERR("s3mloader_load_sample", "Failed to read file.");
+        DEBUG_ERR_ ("load_s3m_load_sample", "Failed to read %s.", "file");
         _Self->err = E_S3M_FILE_SEEK;
         return false;
     }
 
+    track = _Self->track;
+    samples = musmod_get_samples (track);
+    instruments = musmod_get_instruments (track);
     ins = musinsl_get (instruments, index);
-
-    if (musins_is_looped(ins))
-        smpsize = musins_get_loop_end(ins);
-    else
-        smpsize = musins_get_length(ins);
-
-    memsize = _calc_sample_mem_size(smpsize);
-    if (memsize > 0xffff)
+    smp = pcmsmpl_get (samples, info->smp_num);
+    load_size = _calc_sample_load_size (smp);
+    data_size = _calc_sample_mem_size (load_size);
+    if (data_size > 0xffff)
     {
-        DEBUG_ERR("s3mloader_load_sample", "Sample too large.");
+        DEBUG_ERR ("load_s3m_load_sample", "Sample is too large.");
         _Self->err = E_S3M_SAMPLE_SIZE;
         return false;
     }
 
-    pages = (uint32_t)(memsize + 16 * 1024 - 1) / (16 * 1024);
+    pages = (uint32_t) (data_size + EM_PAGE_SIZE - 1) / EM_PAGE_SIZE;
 
-    if (UseEMS && musinsl_is_EM_data (instruments) && (_Self->smp_EM_pages >= pages))
+    if (UseEMS && pcmsmpl_is_EM_data (samples) && (_Self->smp_EM_pages >= pages))
     {
         if (DEBUG_FILE_S3M_LOAD)
-            DEBUG_INFO_ (NULL, "sample=%02u, data=EM:%u-%u.", index, _Self->smp_EM_page, _Self->smp_EM_page + pages - 1);
-        musins_set_EM_data(ins, true);
-        musins_set_EM_data_page(ins, _Self->smp_EM_page);
-        data = musins_map_EM_data(ins);
+            DEBUG_INFO_ ("load_s3m_load_sample",
+                "sample=%02u, place=EM, pages=%u-%u.",
+                index,
+                _Self->smp_EM_page,
+                _Self->smp_EM_page + pages - 1
+            );
+        pcmsmp_set_EM_data (smp, true);
+        pcmsmp_set_own_EM_handle (smp, false);
+        pcmsmp_set_EM_data_handle (smp, pcmsmpl_get_EM_handle (samples));
+        pcmsmp_set_EM_data_page (smp, _Self->smp_EM_page);
+        pcmsmp_set_EM_data_offset (smp, 0);
+        data = pcmsmp_map_EM_data (smp);
         if (!data)
         {
-            DEBUG_ERR("s3mloader_load_sample", "Failed to map EM for sample.");
+            DEBUG_ERR_ ("load_s3m_load_sample", "Failed to map EM for %s.", "sample");
             _Self->err = E_S3M_EM_MAP;
             return false;
         }
@@ -1088,45 +1249,61 @@ bool __near s3mloader_load_sample(S3MLOADER *self, uint8_t index)
     }
     else
     {
-        if (_dos_allocmem(_dos_para(memsize), &seg))
+        data = __new (data_size);
+        if (!data)
         {
-            DEBUG_ERR("s3mloader_load_sample", "Failed to allocate DOS memory for sample data.");
+            DEBUG_ERR_ ("load_s3m_load_sample", "Failed to allocate memory for %s.", "sample data");
             _Self->err = E_S3M_DOS_MEM_ALLOC;
             return false;
         }
-        data = MK_FP(seg, 0);
-        musins_set_EM_data(ins, false);
-        musins_set_data(ins, data);
         if (DEBUG_FILE_S3M_LOAD)
-            DEBUG_INFO_ ("s3mloader_load_sample", "sample=%02u, data=DOS:0x%04X:0x%04X.", index, FP_SEG (data), FP_OFF (data));
+            DEBUG_INFO_ ("load_s3m_load_sample",
+                "sample=%02u, data=DOS, address=0x%04X:0x%04X.",
+                index,
+                FP_SEG (data),
+                FP_OFF (data)
+            );
+        pcmsmp_set_EM_data (smp, false);
+        pcmsmp_set_data (smp, data);
     }
-    if (!fread(data, smpsize, 1, _Self->f))
+
+    if (!fread (data, load_size, 1, _Self->f))
     {
-        DEBUG_ERR("s3mloader_load_sample", "Failed to read sample data.");
+        DEBUG_ERR_ ("load_s3m_load_sample", "Failed to read %s.", "sample data");
         _Self->err = E_S3M_FILE_READ;
         return false;
     }
 
     if (!_Self->signed_data)
-        convert_sign_8(data, smpsize);
+        convert_sign_8 (data, load_size);
 
-    if (musins_is_looped(ins))
+    switch (pcmsmp_get_loop (smp))
     {
-        h = memsize - smpsize;
-        loopstart = &(data[musins_get_loop_start(ins)]);
-        loopsize = musins_get_loop_end(ins) - musins_get_loop_start(ins);
+    case PCMSMPLOOP_NONE:
+        memset (& (data [load_size]), 0, data_size - load_size);
+        break;
+    case PCMSMPLOOP_FORWARD:
+        h = data_size - load_size;
+        loopstart = & (data [pcmsmp_get_loop_start (smp)]);
+        loopsize = pcmsmp_get_loop_end (smp) - pcmsmp_get_loop_start (smp);
         while (h)
         {
             if (h > loopsize)
                 dh = loopsize;
             else
                 dh = h;
-            memcpy(&(data[memsize - h]), loopstart, dh);
+            memcpy (& (data [data_size - h]), loopstart, dh);
             h -= dh;
         }
+        break;
+    /* TODO: implement all loop types */
+    case PCMSMPLOOP_BACKWARD:
+    case PCMSMPLOOP_PINGPONG:
+    default:
+        break;
     }
-    else
-        memset(&(data[smpsize]), 128, memsize - smpsize);
+
+    pcmsmp_set_available (smp, true);
 
     return true;
 }
@@ -1148,68 +1325,52 @@ uint8_t __near getchtyp(uint8_t b)
     return _S3M_CHN_OFF;
 }
 
-MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
+MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
 {
     _S3M_LOADER *_Self = self;
-    S3MHEADER header;
+    _S3M_HEADER header;
     MUSMOD *track;
     MUSMODCHNPAN pan;
+    PCMSMPLIST *samples;
     MUSINSLIST *instruments;
     MUSPATLIST *patterns;
-    uint8_t maxused, i;
-    void *p;
-    char *par;
+    //PATORD *order;
+    uint8_t maxused, i, smpnum;
     uint16_t count;
 
     if ((!_Self) || (!name))
     {
-        DEBUG_ERR ("s3mloader_load", "Bad arguments.");
+        DEBUG_ERR ("load_s3m_load", "Bad arguments.");
         return NULL;
     }
 
     track = _new (MUSMOD);
     if (!track)
     {
-        DEBUG_ERR ("s3mloader_load", "Failed to allocate memory for music module.");
+        DEBUG_ERR_ ("load_s3m_load", "Failed to allocate memory for %s.", "music module");
         return NULL;
     }
     musmod_init (track);
-
     _Self->track = track;
+    samples = musmod_get_samples (track);
+    instruments = musmod_get_instruments (track);
+    patterns = musmod_get_patterns (track);
+    //order = musmod_get_order (track);
 
-    mod_Instruments = musinsl_new();
-    if (!mod_Instruments)
-    {
-        DEBUG_ERR("s3mloader_load", "Failed to initialize instruments.");
-        return NULL;
-    }
-    musinsl_init(mod_Instruments);
-
-    mod_Patterns = _new(MUSPATLIST);
-    if (!mod_Patterns)
-    {
-        DEBUG_ERR("s3mloader_load", "Failed to initialize patterns.");
-        return NULL;
-    }
-    muspatl_init(mod_Patterns);
-
-    instruments = mod_Instruments;
-    patterns = mod_Patterns;
-
-    UseEMS = UseEMS && emsInstalled && emsGetFreePagesCount();
+    UseEMS = UseEMS && emsInstalled && emsGetFreePagesCount ();
 
     _Self->err = E_S3M_SUCCESS;
-    _Self->f = fopen(name, "rb");
+    _Self->f = fopen (name, "rb");
     if (!_Self->f)
     {
-        DEBUG_ERR("s3mloader_load", "Failed to open file.");
+        DEBUG_ERR_ ("load_s3m_load", "Failed to open file '%s'.", name);
         _Self->err = E_S3M_FILE_OPEN;
         return NULL;
     }
 
-    if (!fread(&header, sizeof(S3MHEADER), 1, _Self->f))
+    if (!fread (&header, sizeof (_S3M_HEADER), 1, _Self->f))
     {
-        DEBUG_ERR("s3mloader_load", "Failed to read file''s header.");
+        DEBUG_ERR_ ("load_s3m_load", "Failed to read %s.", "file''s header");
         _Self->err = E_S3M_FILE_READ;
         return NULL;
     }
@@ -1220,7 +1381,7 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
         ((_S3M_TRACKER_ST3 << _S3M_TRACKER_TYPE_SHIFT) | (_S3M_TRACKER_VER_MAJOR_ST3 << _S3M_TRACKER_VER_MAJOR_SHIFT)))
     || ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2)))
     {
-        DEBUG_ERR("s3mloader_load", "Unsupported file format.");
+        DEBUG_ERR_ ("load_s3m_load", "%s is not supported.", "file format");
         _Self->err = E_S3M_FILE_TYPE;
         return NULL;
     }
@@ -1257,7 +1418,7 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
 
     if (!maxused)
     {
-        DEBUG_ERR("s3mloader_load", "All channels are disabled.");
+        DEBUG_ERR ("load_s3m_load", "All channels are disabled.");
         _Self->err = E_S3M_UNKNOWN;
         return NULL;
     }
@@ -1265,7 +1426,7 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
     musmod_set_channels_count (track, maxused);
 
     if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_INFO_ ("s3mloader_load", "Channels: %hu", musmod_get_channels_count (track));
+        DEBUG_INFO_ ("load_s3m_load", "Channels: %hu", musmod_get_channels_count (track));
 
     snprintf (
         musmod_get_format (track),
@@ -1278,82 +1439,104 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
     header.name[_S3M_TITLE_LEN - 1] = 0;
     musmod_set_title (track, header.name);
 
-    musinsl_set_count (instruments, header.insnum);
-    muspatl_set_count (patterns, header.patnum);
-
+    _Self->ins_count = header.insnum;
+    _Self->pat_count = header.patnum;
     musmod_set_order_length (track, header.ordnum);
     musmod_set_stereo (track, (header.mvolume & _S3M_MVOL_STEREO) != 0);
     musmod_set_amiga_limits (track, (header.flags & _S3M_FLAG_AMIGA_LIMITS) != 0);
+    //musmod_set_global_volume (track, header.gvolume);
+    //musmod_set_master_volume (track, (header.mvolume & _S3M_MVOL_MASK) >> _S3M_MVOL_SHIFT);
     playState_gVolume   = header.gvolume;
     playState_mVolume   = (header.mvolume & _S3M_MVOL_MASK) >> _S3M_MVOL_SHIFT;
     musmod_set_tempo (track, header.initialtempo);
     musmod_set_speed (track, header.initialspeed);
     _Self->signed_data = (header.format == _S3M_FILE_FORMAT_1);
 
-    if (!fread(&Order, musmod_get_order_length (track), 1, _Self->f))
+    // TODO: allocate patterns order array (order)
+
+    if (!musinsl_set_count (instruments, _Self->ins_count))
     {
-        DEBUG_ERR("s3mloader_load", "Failed to read patterns order.");
+        DEBUG_ERR_ ("load_s3m_load", "Failed to allocate memory for %s.", "instruments list");
+        _Self->err = E_S3M_DOS_MEM_ALLOC;
+        return NULL;
+    }
+
+    if (!muspatl_set_count (patterns, _Self->pat_count))
+    {
+        DEBUG_ERR_ ("load_s3m_load", "Failed to allocate memory for %s.", "patterns list");
+        _Self->err = E_S3M_DOS_MEM_ALLOC;
+        return NULL;
+    }
+
+    //if (!fread (order, musmod_get_order_length (track), 1, _Self->f))
+    if (!fread (&Order, musmod_get_order_length (track), 1, _Self->f))
+    {
+        DEBUG_ERR_ ("load_s3m_load", "Failed to read %s.", "patterns order");
         _Self->err = E_S3M_FILE_READ;
         return NULL;
     }
+
     // check order if there's one 'real' (playable) entry ...
     i = 0;
+    //while ((i < musmod_get_order_length (track)) && (*order[i] >= 254))
     while ((i < musmod_get_order_length (track)) && (Order[i] >= 254))
         i++;
 
     if (i == musmod_get_order_length (track))
     {
-        DEBUG_ERR("s3mloader_load", "Playable entry not found.");
+        DEBUG_ERR ("load_s3m_load", "Playable entry not found.");
         _Self->err = E_S3M_PATTERNS_ORDER;
         return NULL;
     }
-    if (!fread(&(_Self->inspara), musinsl_get_count (instruments) * 2, 1, _Self->f))
-    {
-        DEBUG_ERR("s3mloader_load", "Failed to read instruments headers.");
-        _Self->err = E_S3M_FILE_READ;
-        return NULL;
-    }
 
-    if (!fread (&(_Self->patpara), muspatl_get_count (patterns) * 2, 1, _Self->f))
-    {
-        DEBUG_ERR("s3mloader_load", "Failed to read patterns offsets.");
-        _Self->err = E_S3M_FILE_READ;
+    if (!load_s3m_load_ins_offsets (_Self))
         return NULL;
-    }
 
-    if (!s3mloader_allocbuf(_Self))
+    if (!load_s3m_load_pat_offsets (_Self))
+        return NULL;
+
+    if (!load_s3m_allocbuf (_Self))
     {
-        DEBUG_ERR("s3mloader_load", "Failed to allocate DOS memory for buffer.");
+        DEBUG_ERR_ ("load_s3m_load", "Failed to allocate memory for %s.", "file buffer");
         _Self->err = E_S3M_DOS_MEM_ALLOC;
         return NULL;
     }
 
-    s3mloader_alloc_patterns(_Self);
+    load_s3m_alloc_patterns (_Self);
 
     count = muspatl_get_count (patterns);
     for (i = 0; i < count; i++)
-        if (!s3mloader_load_pattern(_Self, i))
+        if (!load_s3m_load_pattern (_Self, i))
             return NULL;
 
-    count = musinsl_get_count (instruments);
+    if (!load_s3m_load_ins_headers (_Self))
+        return NULL;
+
+    if (!pcmsmpl_set_count (samples, _Self->smp_count))
+    {
+        DEBUG_ERR_ ("load_s3m_load", "Failed to allocate memory for %s.", "samples list");
+        _Self->err = E_S3M_DOS_MEM_ALLOC;
+        return NULL;
+    }
+
+    count = _Self->ins_count;
     for (i = 0; i < count; i++)
-        if (!s3mloader_load_instrument(_Self, i))
+        if (!load_s3m_load_instrument (_Self, i))
             return NULL;
 
     if (UseEMS)
-        s3mloader_alloc_samples(_Self);
+        load_s3m_alloc_samples (_Self);
 
     for (i = 0; i < count; i++)
-        if (_Self->smppara[i])
-            if (!s3mloader_load_sample(_Self, i))
+        if (_Self->ins_info[i].smp_num >= 0)
+            if (!load_s3m_load_sample (_Self, i))
                 return NULL;
 
-    if (musinsl_is_EM_data (instruments))
-        musinsl_set_EM_handle_name (instruments);
+    if (pcmsmpl_is_EM_data (samples))
+        pcmsmpl_set_EM_handle_name (samples, "smplist");
+
     if (muspatl_is_EM_data (patterns))
         muspatl_set_EM_handle_name (patterns);
-
-    s3mloader_dump_patterns (self);
 
     musmod_set_loaded (track, true);
 
@@ -1361,7 +1544,7 @@ MUSMOD *s3mloader_load (S3MLOADER *self, const char *name)
     return track;
 }
 
-const char *s3mloader_get_error(S3MLOADER *self)
+const char *load_s3m_get_error (LOADER_S3M *self)
 {
     _S3M_LOADER *_Self = self;
     uint16_t i;
@@ -1372,43 +1555,43 @@ const char *s3mloader_get_error(S3MLOADER *self)
             return NULL;
 
         i = 0;
-        while (S3M_ERRORS[i].code != E_S3M_UNKNOWN)
+        while (_S3M_ERRORS[i].code != E_S3M_UNKNOWN)
         {
-            if (S3M_ERRORS[i].code == _Self->err)
-                return S3M_ERRORS[i].msg;
+            if (_S3M_ERRORS[i].code == _Self->err)
+                return _S3M_ERRORS[i].msg;
             i++;
         }
 
-        return S3M_ERRORS[i].msg;
+        return _S3M_ERRORS[i].msg;
     }
     else
         return NULL;
 }
 
-void s3mloader_free(S3MLOADER *self)
+void load_s3m_free (LOADER_S3M *self)
 {
     _S3M_LOADER *_Self = self;
 
     if (_Self)
     {
-        if (_Self->buffer)
-        {
-            _dos_freemem(FP_SEG(_Self->buffer));
-            _Self->buffer = NULL;
-        }
+        _delete (_Self->buffer);
+        _delete (_Self->ins_offsets);
+        _delete (_Self->pat_offsets);
+        _delete (_Self->ins_info);
         if (_Self->f)
         {
-            fclose(_Self->f);
+            fclose (_Self->f);
             _Self->f = NULL;
+        }
+        if (_Self->track)
+        {
+            musmod_free (_Self->track);
+            _delete (_Self->track);
         }
     }
 }
 
-void s3mloader_delete(S3MLOADER **self)
+void load_s3m_delete (LOADER_S3M **self)
 {
-    _S3M_LOADER **_Self = (_S3M_LOADER **) self;
-
-    if (_Self)
-        if (*_Self)
-            __delete (self);
+    _delete (self);
 }
