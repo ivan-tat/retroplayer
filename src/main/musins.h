@@ -58,8 +58,6 @@ typedef struct instrument_t
 #pragma pack(pop);
 typedef struct instrument_t MUSINS;
 
-typedef struct instrument_t PCMSMP;
-
 void       __far musins_init (MUSINS *self);
 void       __far musins_set_type (MUSINS *self, MUSINSTYPE value);
 MUSINSTYPE __far musins_get_type (MUSINS *self);

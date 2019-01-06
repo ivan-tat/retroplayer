@@ -27,15 +27,20 @@ MUSMODFLAGS __far __musmod_set_flags (MUSMODFLAGS _flags, MUSMODFLAGS _mask, MUS
         return _flags & _mask;
 }
 
+#define _musmod_set_title(o, v)     strncpy (_musmod_get_title (o), v, MUSMOD_TITLE_LEN)
+#define _musmod_clear_title(o)      memset (_musmod_get_title (o), 0, MUSMOD_TITLE_LEN)
+#define _musmod_set_format(o, v)    strncpy (_musmod_get_format (o), v, MUSMOD_FORMAT_LEN)
+#define _musmod_clear_format(o)     memset (_musmod_get_format (o), 0, MUSMOD_FORMAT_LEN)
+
 void __far musmod_init (MUSMOD *self)
 {
     if (self)
     {
         memset (self, 0, sizeof (MUSMOD));
-        memset (self->channels, MUSMODCHNPAN_CENTER, sizeof (MUSMODCHN) * MUSMOD_CHANNELS_MAX);
+        memset (_musmod_get_channels (self), MUSMODCHNPAN_CENTER, sizeof (MUSMODCHN) * MUSMOD_CHANNELS_MAX);
+        pcmsmpl_init (_musmod_get_samples (self));      // clear
         /*
         musinsl_init (_musmod_get_instruments (self));  // clear
-        pcmsmpl_init (_musmod_get_samples (self));      // clear
         muspatl_init (_musmod_get_patterns (self));     // clear
         */
     }
@@ -65,7 +70,9 @@ void __far musmod_free (MUSMOD *self)
     {
         /*
         musinsl_free (_musmod_get_instruments (self));
+        */
         pcmsmpl_free (_musmod_get_samples (self));
+        /*
         muspatl_free (_musmod_get_patterns (self));
         */
 

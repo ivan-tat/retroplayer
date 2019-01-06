@@ -17,9 +17,7 @@
 
 #include "pascal.h"
 #include "cc/string.h"
-/*
 #include "main/pcmsmp.h"
-*/
 #include "main/musins.h"
 #include "main/muspat.h"
 
@@ -75,8 +73,8 @@ typedef struct music_module_t
     char        title[MUSMOD_TITLE_LEN];
     char        format[MUSMOD_FORMAT_LEN];
     MUSMODCHN   channels[MUSMOD_CHANNELS_MAX];
-    /*
     PCMSMPLIST  samples;
+    /*
     MUSINSLIST  instruments;
     MUSPATLIST  patterns;
     MUSMODORDER order;
@@ -106,14 +104,10 @@ MUSMODFLAGS __far __musmod_set_flags (MUSMODFLAGS _flags, MUSMODFLAGS _mask, MUS
 #define _musmod_set_amiga_limits(o, v)  _musmod_set_flags (o, __musmod_set_flags (_musmod_get_flags (o), ~MUSMODFL_AMIGA_LIMITS, MUSMODFL_AMIGA_LIMITS, v))
 #define _musmod_is_amiga_limits(o)      ((_musmod_get_flags (o) & MUSMODFL_AMIGA_LIMITS) != 0)
 #define _musmod_get_title(o)            (o)->title
-#define _musmod_set_title(o, v)         strncpy (_musmod_get_title (o), v, MUSMOD_TITLE_LEN)
-#define _musmod_clear_title(o)          memset (_musmod_get_title (o), 0, MUSMOD_TITLE_LEN)
 #define _musmod_get_format(o)           (o)->format
-#define _musmod_set_format(o, v)        strncpy (_musmod_get_format (o), v, MUSMOD_FORMAT_LEN)
-#define _musmod_clear_format(o)         memset (_musmod_get_format (o), 0, MUSMOD_FORMAT_LEN)
 #define _musmod_get_channels(o)         (o)->channels
-/*
 #define _musmod_get_samples(o)          & ((o)->samples)
+/*
 #define _musmod_get_instruments(o)      & ((o)->instruments)
 #define _musmod_get_patterns(o)         & ((o)->patterns)
 #define _musmod_get_order(o)            (o)->order
