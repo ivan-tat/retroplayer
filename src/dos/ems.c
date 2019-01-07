@@ -396,7 +396,10 @@ bool __far emsResize (EMSHDL handle, uint16_t pages)
             return true;
     }
     else
+    {
+        emsEC = 0x84;
         return false;
+    }
 }
 
 bool __near _ems_free(EMSHDL handle)
@@ -512,7 +515,10 @@ bool __far emsSetHandleName (EMSHDL handle, EMSNAME *name)
             return true;
     }
     else
+    {
+        emsEC = 0x84;
         return false;
+    }
 }
 
 /*** Initialization ***/

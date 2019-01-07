@@ -22,6 +22,7 @@ procedure load_s3m_delete;
 implementation
 
 uses
+    watcom,
     stdio,
     string_,
     dynarray,

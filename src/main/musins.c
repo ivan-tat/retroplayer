@@ -111,10 +111,10 @@ void __far DEBUG_dump_instrument_info (MUSINS *self, uint8_t index, PCMSMPLIST *
             link = -1;
             break;
         };
-        snprintf (s, _BUF_SIZE, "%3hd", link);
+        snprintf (s, _BUF_SIZE, "%hd", link);
         DEBUG_INFO_ (
             "DEBUG_dump_instrument_info",
-            "index=%hhu, type=%s (index=%s), volume=%2hu, title='%s'",
+            "index=%hu, type=%s (index=%s), volume=%hu, title='%s'",
             (uint8_t) index,
             (char *) type,
             (char *) s,

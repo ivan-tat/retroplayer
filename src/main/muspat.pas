@@ -49,13 +49,6 @@ procedure muspat_free;
 
 procedure muspatio_open;
 
-(*$ifdef DEBUG*)
-
-procedure DEBUG_get_pattern_channel_event_str;
-procedure DEBUG_dump_pattern;
-
-(*$endif*)
-
 procedure muspatl_init;
 procedure muspatl_set;
 procedure muspatl_get;
@@ -70,6 +63,14 @@ procedure muspatl_get_EM_handle;
 procedure muspatl_set_EM_handle_name;
 procedure muspatl_get_used_EM;
 procedure muspatl_free;
+
+(*$ifdef DEBUG*)
+
+procedure DEBUG_get_pattern_channel_event_str;
+procedure DEBUG_dump_pattern_info;
+procedure DEBUG_dump_pattern;
+
+(*$endif*)
 
 implementation
 
@@ -117,13 +118,6 @@ procedure muspat_free; external;
 
 procedure muspatio_open; external;
 
-(*$ifdef DEBUG*)
-
-procedure DEBUG_get_pattern_channel_event_str; external;
-procedure DEBUG_dump_pattern; external;
-
-(*$endif*)
-
 procedure muspatl_init; external;
 procedure muspatl_set; external;
 procedure muspatl_get; external;
@@ -138,5 +132,13 @@ procedure muspatl_get_EM_handle; external;
 procedure muspatl_set_EM_handle_name; external;
 procedure muspatl_get_used_EM; external;
 procedure muspatl_free; external;
+
+(*$ifdef DEBUG*)
+
+procedure DEBUG_get_pattern_channel_event_str; external;
+procedure DEBUG_dump_pattern_info; external;
+procedure DEBUG_dump_pattern; external;
+
+(*$endif*)
 
 end.

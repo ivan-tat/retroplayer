@@ -37,12 +37,12 @@ void __near draw_channel_event (MUSPATCHNEVENT *event)
     uint8_t _ins, _vol, _cmd, _parm;
     char output[12];
 
-    write_Note (event->note);
+    write_Note (event->data.note);
 
-    _ins  = event->instrument;
-    _vol  = event->volume;
-    _cmd  = event->command;
-    _parm = event->parameter;
+    _ins  = event->data.instrument;
+    _vol  = event->data.volume;
+    _cmd  = event->data.command;
+    _parm = event->data.parameter;
 
     output[0] = ' ';
     if (_ins == CHNINS_EMPTY)

@@ -63,6 +63,18 @@
 
 /*** Music pattern channel's event ***/
 
+#pragma pack(push, 1);
+typedef struct music_pattern_channel_event_data_t
+{
+    unsigned char instrument;
+    unsigned char note;
+    unsigned char volume;
+    unsigned char command;
+    unsigned char parameter;
+};
+#pragma pack(pop);
+typedef struct music_pattern_channel_event_data_t MUSPATCHNEVDATA;
+
 typedef uint8_t music_pattern_channel_event_flags_t;
 typedef music_pattern_channel_event_flags_t MUSCHNEVFLAGS;
 
@@ -72,15 +84,13 @@ typedef music_pattern_channel_event_flags_t MUSCHNEVFLAGS;
 #define MUSPATCHNEVFL_CMD  (1 << 3)
 #define MUSPATCHNEVFL_ALL  (MUSPATCHNEVFL_INS | MUSPATCHNEVFL_NOTE | MUSPATCHNEVFL_VOL | MUSPATCHNEVFL_CMD)
 
+#pragma pack(push, 1);
 typedef struct music_pattern_channel_event_t
 {
     MUSCHNEVFLAGS flags;
-    unsigned char instrument;
-    unsigned char note;
-    unsigned char volume;
-    unsigned char command;
-    unsigned char parameter;
+    MUSPATCHNEVDATA data;
 };
+#pragma pack(pop);
 typedef struct music_pattern_channel_event_t MUSPATCHNEVENT;
 
 void __far muspatchnevent_clear (MUSPATCHNEVENT *self);
@@ -192,13 +202,6 @@ bool __far muspatio_open (MUSPATIO *self, MUSPAT *pattern, MUSPATIOMODE mode);  
 #define    muspatio_end_row(self)               (self)->m_end_row (self)
 #define    muspatio_close(self)                 (self)->m_close (self)
 
-#if DEBUG == 1
-
-void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event);    // Format is "no in vl eff" (12 characters + zero)
-bool __far DEBUG_dump_pattern (MUSPAT *self, char *s, uint8_t num_channels);    // "s" must hold atleast 64 bytes or (num_channels * 13) bytes
-
-#endif  /* DEBUG */
-
 /*** Patterns list ***/
 
 typedef uint16_t music_patterns_list_flags_t;
@@ -229,6 +232,16 @@ EMSHDL      __far muspatl_get_EM_handle (MUSPATLIST *self);
 void        __far muspatl_set_EM_handle_name (MUSPATLIST *self);
 uint32_t    __far muspatl_get_used_EM (MUSPATLIST *self);
 void        __far muspatl_free (MUSPATLIST *self);
+
+/*** Debug ***/
+
+#if DEBUG == 1
+
+void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event);    // Format is "no in vl eff" (12 characters + zero)
+void __far DEBUG_dump_pattern_info (MUSPAT *pattern, uint8_t index);
+bool __far DEBUG_dump_pattern (MUSPAT *self, char *s, uint8_t num_channels);    // "s" must hold atleast 64 bytes or (num_channels * 13) bytes
+
+#endif  /* DEBUG */
 
 /*** Linking ***/
 
@@ -269,13 +282,6 @@ void        __far muspatl_free (MUSPATLIST *self);
 
 #pragma aux muspatio_open "*";
 
-#if DEBUG == 1
-
-#pragma aux DEBUG_get_pattern_channel_event_str "*";
-#pragma aux DEBUG_dump_pattern "*";
-
-#endif  /* DEBUG */
-
 #pragma aux muspatl_init "*";
 #pragma aux muspatl_set "*";
 #pragma aux muspatl_get "*";
@@ -290,6 +296,14 @@ void        __far muspatl_free (MUSPATLIST *self);
 #pragma aux muspatl_set_EM_handle_name "*";
 #pragma aux muspatl_get_used_EM "*";
 #pragma aux muspatl_free "*";
+
+#if DEBUG == 1
+
+#pragma aux DEBUG_get_pattern_channel_event_str "*";
+#pragma aux DEBUG_dump_pattern_info "*";
+#pragma aux DEBUG_dump_pattern "*";
+
+#endif  /* DEBUG */
 
 #endif  /* __WATCOMC__ */
 

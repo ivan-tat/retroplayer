@@ -59,17 +59,17 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
     }
     else
     {
-        chnState_cur_bIns  = event->instrument;
-        chnState_cur_bNote = event->note;
-        chnState_cur_bVol  = event->volume;
+        chnState_cur_bIns  = event->data.instrument;
+        chnState_cur_bNote = event->data.note;
+        chnState_cur_bVol  = event->data.volume;
     }
 
     /* read effects - it may change the read instr/note ! */
 
-    cmd = event->command;
+    cmd = event->data.command;
     if (cmd > MAXEFF)
         cmd = EFFIDX_NONE;
-    param = event->parameter;
+    param = event->data.parameter;
 
     chn->bEffFlags = 0; /* important! */
 
