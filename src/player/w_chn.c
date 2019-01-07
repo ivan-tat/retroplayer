@@ -104,7 +104,7 @@ void __far win_channels_draw(SCRWIN *self)
 
                 cmd = mixchn_get_command(chn);
                 if (cmd && (cmd <= MAXEFF))
-                    chn_get_effect_desc(chn, effectstr, _EFFECT_DESC_MAX);
+                    chn_effGetName (chn, effectstr, _EFFECT_DESC_MAX);
                 else
                     effectstr[0] = 0;
 

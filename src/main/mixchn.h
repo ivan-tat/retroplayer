@@ -46,8 +46,8 @@ typedef mix_channel_pan_t MIXCHNPAN;
 
 typedef struct mix_channel_t
 {
+    MIXCHNTYPE type;
     MIXCHNFLAGS bChannelFlags;
-    MIXCHNTYPE bChannelType;
     MIXCHNPAN pan;
     // current Instrument :
     MUSINS  *pMusIns;
@@ -94,6 +94,8 @@ typedef struct mix_channel_t
 
 typedef struct mix_channel_t MIXCHN;
 
+#define _mixchn_get_type(o)         (o)->type
+#define _mixchn_set_type(o, v)      _mixchn_get_type (o) = (v)
 #define _mixchn_get_sample(o)       (o)->sample
 #define _mixchn_set_sample(o, v)    _mixchn_get_sample (o) = (v)
 
@@ -106,8 +108,8 @@ void     __far mixchn_set_playing (MIXCHN *self, bool value);
 bool     __far mixchn_is_playing (MIXCHN *self);
 void     __far mixchn_set_mixing (MIXCHN *self, bool value);
 bool     __far mixchn_is_mixing (MIXCHN *self);
-void     __far mixchn_set_type (MIXCHN *self, MIXCHNTYPE value);
-MIXCHNTYPE __far mixchn_get_type (MIXCHN *self);
+#define     mixchn_set_type(o, v)   _mixchn_set_type (o, v)
+#define     mixchn_get_type(o)      _mixchn_get_type (o)
 void     __far mixchn_set_pan (MIXCHN *self, MIXCHNPAN value);
 MIXCHNPAN __far mixchn_get_pan (MIXCHN *self);
 void     __far mixchn_set_instrument_num (MIXCHN *self, uint8_t value);
@@ -187,8 +189,6 @@ extern MIXCHNLIST *mod_Channels;
 #pragma aux mixchn_is_playing "*";
 #pragma aux mixchn_set_mixing "*";
 #pragma aux mixchn_is_mixing "*";
-#pragma aux mixchn_set_type "*";
-#pragma aux mixchn_get_type "*";
 #pragma aux mixchn_set_pan "*";
 #pragma aux mixchn_get_pan "*";
 #pragma aux mixchn_set_instrument_num "*";

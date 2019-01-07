@@ -84,7 +84,7 @@ procedure chn_effHandle;
 procedure chn_effTick;
 procedure chn_effCanContinue;
 procedure chn_effStop;
-procedure chn_get_effect_desc;
+procedure chn_effGetName;
 
 implementation
 
@@ -105,6 +105,6 @@ procedure chn_effHandle; external;
 procedure chn_effTick; external;
 procedure chn_effCanContinue; external;
 procedure chn_effStop; external;
-procedure chn_get_effect_desc; external;
+procedure chn_effGetName; external;
 
 end.

@@ -102,7 +102,7 @@ void chn_effHandle(MIXCHN *chn);
 void chn_effTick(MIXCHN *chn);
 bool chn_effCanContinue(MIXCHN *chn);
 void chn_effStop(MIXCHN *chn);
-void chn_get_effect_desc(MIXCHN *chn, char *__dest, uint16_t __n);
+void chn_effGetName(MIXCHN *chn, char *__s, size_t __maxlen);
 
 /*** Linking ***/
 
@@ -135,7 +135,7 @@ void chn_get_effect_desc(MIXCHN *chn, char *__dest, uint16_t __n);
 #pragma aux chn_effTick "*";
 #pragma aux chn_effCanContinue "*";
 #pragma aux chn_effStop "*";
-#pragma aux chn_get_effect_desc "*";
+#pragma aux chn_effGetName "*";
 
 #endif  /* __WATCOMC__ */
 

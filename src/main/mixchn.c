@@ -78,16 +78,6 @@ bool __far mixchn_is_mixing (MIXCHN *self)
     return (self->bChannelFlags & MIXCHNFL_MIXING) != 0;
 }
 
-void __far mixchn_set_type (MIXCHN *self, MIXCHNTYPE value)
-{
-    self->bChannelType = value;
-}
-
-MIXCHNTYPE __far mixchn_get_type (MIXCHN *self)
-{
-    return self->bChannelType;
-}
-
 void __far mixchn_set_pan (MIXCHN *self, MIXCHNPAN value)
 {
     self->pan = value;
