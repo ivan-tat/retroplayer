@@ -22,6 +22,13 @@
 
 /* Mixing channel */
 
+typedef uint8_t mix_channel_type_t;
+typedef mix_channel_type_t MIXCHNTYPE;
+
+#define MIXCHNTYPE_NONE     0
+#define MIXCHNTYPE_PCM      1
+#define MIXCHNTYPE_ADLIB    2
+
 typedef uint8_t MIXCHNFLAGS;
 
 #define MIXCHNFL_ENABLED (1<<0) // channel is enabled (can play voice, do effects), otherwise ignored
@@ -29,13 +36,6 @@ typedef uint8_t MIXCHNFLAGS;
 #define MIXCHNFL_MIXING  (1<<2) // mix output, otherwise muted
 
 #define EFFFLAG_CONTINUE 0x01
-
-typedef uint8_t mix_channel_type_t;
-typedef mix_channel_type_t MIXCHNTYPE;
-
-#define MIXCHNTYPE_NONE     0
-#define MIXCHNTYPE_PCM      1
-#define MIXCHNTYPE_ADLIB    2
 
 typedef uint8_t mix_channel_pan_t;
 typedef mix_channel_pan_t MIXCHNPAN;
@@ -47,7 +47,7 @@ typedef mix_channel_pan_t MIXCHNPAN;
 typedef struct mix_channel_t
 {
     MIXCHNTYPE type;
-    MIXCHNFLAGS bChannelFlags;
+    MIXCHNFLAGS flags;
     MIXCHNPAN pan;
     // current Instrument :
     MUSINS  *pMusIns;
@@ -96,12 +96,14 @@ typedef struct mix_channel_t MIXCHN;
 
 #define _mixchn_get_type(o)         (o)->type
 #define _mixchn_set_type(o, v)      _mixchn_get_type (o) = (v)
+#define _mixchn_get_flags(o)        (o)->flags
+#define _mixchn_set_flags(o, v)     _mixchn_get_flags (o) = (v)
 #define _mixchn_get_sample(o)       (o)->sample
 #define _mixchn_set_sample(o, v)    _mixchn_get_sample (o) = (v)
 
 void     __far mixchn_init (MIXCHN *self);
-void     __far mixchn_set_flags (MIXCHN *self, MIXCHNFLAGS value);
-MIXCHNFLAGS __far mixchn_get_flags (MIXCHN *self);
+#define        mixchn_set_flags(o, v)   _mixchn_set_flags (o, v)
+#define        mixchn_get_flags(o)      _mixchn_get_flags (o)
 void     __far mixchn_set_enabled (MIXCHN *self, bool value);
 bool     __far mixchn_is_enabled (MIXCHN *self);
 void     __far mixchn_set_playing (MIXCHN *self, bool value);
@@ -181,8 +183,6 @@ extern MIXCHNLIST *mod_Channels;
 #ifdef __WATCOMC__
 
 #pragma aux mixchn_init "*";
-#pragma aux mixchn_set_flags "*";
-#pragma aux mixchn_get_flags "*";
 #pragma aux mixchn_set_enabled "*";
 #pragma aux mixchn_is_enabled "*";
 #pragma aux mixchn_set_playing "*";

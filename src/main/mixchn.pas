@@ -13,8 +13,6 @@ interface
 (*$I defines.pas*)
 
 procedure mixchn_init;
-procedure mixchn_set_flags;
-procedure mixchn_get_flags;
 procedure mixchn_set_enabled;
 procedure mixchn_is_enabled;
 procedure mixchn_set_playing;
@@ -79,8 +77,6 @@ uses
 (*$l mixchn.obj*)
 
 procedure mixchn_init; external;
-procedure mixchn_set_flags; external;
-procedure mixchn_get_flags; external;
 procedure mixchn_set_enabled; external;
 procedure mixchn_is_enabled; external;
 procedure mixchn_set_playing; external;
