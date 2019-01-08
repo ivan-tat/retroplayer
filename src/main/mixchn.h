@@ -50,8 +50,8 @@ typedef struct mix_channel_t
     MIXCHNFLAGS flags;
     MIXCHNPAN pan;
     uint8_t instrument_num;
-    MUSINS  *pMusIns;
-    PCMSMP  *sample;
+    MUSINS *instrument;
+    PCMSMP *sample;
     uint16_t wSmpSeg;       // DOS segment of current sample data
     uint8_t  bNote;
     // copy of sampledata (maybe it differs a bit):
@@ -104,7 +104,8 @@ typedef struct mix_channel_t MIXCHN;
 #define _mixchn_set_pan(o, v)       _mixchn_get_pan (o) = (v)
 #define _mixchn_get_instrument_num(o)       (o)->instrument_num
 #define _mixchn_set_instrument_num(o, v)    _mixchn_get_instrument_num (o) = (v)
-
+#define _mixchn_get_instrument(o)           (o)->instrument
+#define _mixchn_set_instrument(o, v)        _mixchn_get_instrument (o) = (v)
 #define _mixchn_get_sample(o)       (o)->sample
 #define _mixchn_set_sample(o, v)    _mixchn_get_sample (o) = (v)
 
@@ -123,8 +124,8 @@ void     __far mixchn_set_mixing (MIXCHN *self, bool value);
 #define        mixchn_get_pan(o)        _mixchn_get_pan (o)
 #define        mixchn_set_instrument_num(o, v)  _mixchn_set_instrument_num (o, v)
 #define        mixchn_get_instrument_num(o)     _mixchn_get_instrument_num (o)
-void     __far mixchn_set_instrument (MIXCHN *self, MUSINS *value);
-MUSINS  *__far mixchn_get_instrument (MIXCHN *self);
+#define        mixchn_set_instrument(o, v)      _mixchn_set_instrument (o, v)
+#define        mixchn_get_instrument(o)         _mixchn_get_instrument (o)
 #define        mixchn_set_sample(o, v)  _mixchn_set_sample (o, v)
 #define        mixchn_get_sample(o)     _mixchn_get_sample (o)
 void     __far mixchn_set_sample_volume (MIXCHN *self, int16_t vol);
