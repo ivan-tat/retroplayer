@@ -197,7 +197,7 @@ void __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum)
                 mixchn_set_instrument_num (chn, insNum);
                 mixchn_set_instrument (chn, ins);
                 mixchn_set_sample (chn, smp);
-                mixchn_set_note_volume (chn, (musins_get_volume (ins) * playState_gVolume) >> 6);
+                mixchn_set_note_volume (chn, musins_get_volume (ins));
                 flags = 0;
                 if (pcmsmp_get_bits (smp) == 16)
                     flags |= MIXSMPFL_16BITS;

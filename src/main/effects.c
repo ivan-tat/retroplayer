@@ -852,7 +852,7 @@ METHOD_TICK(volSlide_down)
 
 METHOD_TICK(volSlide_up)
 {
-    mixchn_set_note_volume (chn, ((mixchn_get_note_volume (chn) + (mixchn_get_command_parameter (chn) >> 4)) * playState_gVolume) >> 6);
+    mixchn_set_note_volume (chn, mixchn_get_note_volume (chn) + (mixchn_get_command_parameter (chn) >> 4));
 }
 
 METHOD_HANDLE(volSlide_fineDown)
@@ -1632,7 +1632,7 @@ METHOD_TICK(special_noteDelay)
             }
         }
         if (chn->bSavVol != CHNVOL_EMPTY)
-            mixchn_set_note_volume (chn, (chn->bSavVol * playState_gVolume) >> 6);
+            mixchn_set_note_volume (chn, chn->bSavVol);
         mixchn_set_command(chn, EFFIDX_NONE);
     }
 }
