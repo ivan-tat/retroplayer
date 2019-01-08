@@ -478,17 +478,17 @@ build_target $T_MAIN   obj src/main/mixing.c
 build_target $T_MAIN   obj src/main/filldma.c
 build_target $T_MAIN   obj src/main/loads3m.c
 build_target $T_MAIN   obj src/main/s3mplay.c
-build_target $T_MAIN   obj src/player/screen.c
-build_target $T_MAIN   obj src/player/w_inf.c
-build_target $T_MAIN   obj src/player/w_hlp.c
-build_target $T_MAIN   obj src/player/w_chn.c
-build_target $T_MAIN   obj src/player/w_pat.c
-build_target $T_MAIN   obj src/player/w_ins.c
-build_target $T_MAIN   obj src/player/w_smp.c
-build_target $T_MAIN   obj src/player/w_dbg.c
-build_target $T_MAIN   obj src/player/plays3m.c
-build_target $T_MAIN   obj src/player/playosci.c
-build_target $T_MAIN   obj src/player/smalls3m.c
+build_target $T_PLAYER obj src/player/screen.c
+build_target $T_PLAYER obj src/player/w_inf.c
+build_target $T_PLAYER obj src/player/w_hlp.c
+build_target $T_PLAYER obj src/player/w_chn.c
+build_target $T_PLAYER obj src/player/w_pat.c
+build_target $T_PLAYER obj src/player/w_ins.c
+build_target $T_PLAYER obj src/player/w_smp.c
+build_target $T_PLAYER obj src/player/w_dbg.c
+build_target $T_PLAYER obj src/player/plays3m.c
+build_target $T_PLAYER obj src/player/playosci.c
+build_target $T_PLAYER obj src/player/smalls3m.c
 fi
 
 if [ -n "$DJGPP" ]; then
