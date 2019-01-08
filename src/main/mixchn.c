@@ -61,7 +61,7 @@ void __far mixchn_set_sample_volume (MIXCHN *self, int16_t value)
         if (value > SMPVOL_MAX)
             value = SMPVOL_MAX;
 
-    self->bSmpVol = value;
+    self->note_volume = value;
 }
 
 void __far mixchn_set_sample_period_limits (MIXCHN *self, uint16_t rate, bool amiga)

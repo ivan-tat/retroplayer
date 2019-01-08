@@ -51,10 +51,10 @@ typedef struct mix_channel_t
     MIXCHNPAN pan;
     uint8_t instrument_num;
     uint8_t note;
+    uint8_t note_volume;
     MUSINS *instrument;
     PCMSMP *sample;
     // copy of sampledata (maybe it differs a bit):
-    uint8_t  bSmpVol;       // current sample volume
     uint8_t  bSmpFlags;     // flags (looped sample)
     uint16_t wSmpStart;     // start offset of sample
     uint16_t wSmpLoopStart; // loop start of current sample (0xffff if no loop)
@@ -109,7 +109,7 @@ typedef struct mix_channel_t MIXCHN;
 #define _mixchn_set_instrument(o, v)        _mixchn_get_instrument (o) = (v)
 #define _mixchn_get_sample(o)       (o)->sample
 #define _mixchn_set_sample(o, v)    _mixchn_get_sample (o) = (v)
-#define _mixchn_get_sample_volume(o)        (o)->bSmpVol
+#define _mixchn_get_sample_volume(o)        (o)->note_volume
 
 void     __far mixchn_init (MIXCHN *self);
 #define        mixchn_set_type(o, v)   _mixchn_set_type (o, v)
