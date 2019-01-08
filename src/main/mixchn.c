@@ -53,16 +53,6 @@ void __far mixchn_set_mixing (MIXCHN *self, bool value)
         _mixchn_set_flags (self, _mixchn_get_flags (self) & ~MIXCHNFL_MIXING);
 }
 
-void __far mixchn_set_instrument_num (MIXCHN *self, uint8_t value)
-{
-    self->bIns = value;
-}
-
-uint8_t __far mixchn_get_instrument_num (MIXCHN *self)
-{
-    return self->bIns;
-}
-
 void __far mixchn_set_instrument (MIXCHN *self, MUSINS *value)
 {
     self->pMusIns = value;
