@@ -23,6 +23,8 @@
 
 /*** PCM sample ***/
 
+#define PCMSMP_VOLUME_MAX 64
+
 /* Loop type (2 bits) */
 
 typedef uint8_t pcm_sample_loop_t;

@@ -24,11 +24,11 @@
 void __far muspatchnevent_clear (MUSPATCHNEVENT *self)
 {
     self->flags = 0;
-    self->data.instrument = CHNINS_EMPTY;
-    self->data.note = CHNNOTE_EMPTY;
-    self->data.volume = CHNVOL_EMPTY;
-    self->data.command = CHNCMD_EMPTY;
-    self->data.parameter = 0;
+    self->data.instrument  = CHN_INS_NONE;
+    self->data.note        = CHN_NOTE_NONE;
+    self->data.note_volume = CHN_NOTEVOL_NONE;
+    self->data.command     = CHN_CMD_NONE;
+    self->data.parameter   = 0;
 }
 
 /*** Music pattern row's event ***/
@@ -37,11 +37,11 @@ void __far muspatrowevent_clear (MUSPATROWEVENT *self)
 {
     self->channel = 0;
     self->event.flags = 0;
-    self->event.data.instrument = CHNINS_EMPTY;
-    self->event.data.note = CHNNOTE_EMPTY;
-    self->event.data.volume = CHNVOL_EMPTY;
-    self->event.data.command = CHNCMD_EMPTY;
-    self->event.data.parameter = 0;
+    self->event.data.instrument  = CHN_INS_NONE;
+    self->event.data.note        = CHN_NOTE_NONE;
+    self->event.data.note_volume = CHN_NOTEVOL_NONE;
+    self->event.data.command     = CHN_CMD_NONE;
+    self->event.data.parameter   = 0;
 }
 
 /*** Music pattern ***/
@@ -498,20 +498,20 @@ void __far _muspatio_read (MUSPATIO *self, MUSPATROWEVENT *event)
     flags = 0;
 
     event->event.data.instrument = data [0];
-    if (event->event.data.instrument != CHNINS_EMPTY)
+    if (event->event.data.instrument != CHN_INS_NONE)
         flags |= MUSPATCHNEVFL_INS;
 
     event->event.data.note = data [1];
-    if (event->event.data.note != CHNNOTE_EMPTY)
+    if (event->event.data.note != CHN_NOTE_NONE)
         flags |= MUSPATCHNEVFL_NOTE;
 
-    event->event.data.volume = data [2];
-    if (event->event.data.volume != CHNVOL_EMPTY)
+    event->event.data.note_volume = data [2];
+    if (event->event.data.note_volume != CHN_NOTEVOL_NONE)
         flags |= MUSPATCHNEVFL_VOL;
 
     event->event.data.command = data [3];
     event->event.data.parameter = data [4];
-    if (event->event.data.command != CHNCMD_EMPTY)
+    if (event->event.data.command != CHN_CMD_NONE)
         flags |= MUSPATCHNEVFL_CMD;
 
     event->event.flags = flags;
@@ -547,7 +547,7 @@ void __far _muspatio_read_packed (MUSPATIO *self, MUSPATROWEVENT *event)
         data++;
     }
     else
-        event->event.data.instrument = CHNINS_EMPTY;
+        event->event.data.instrument = CHN_INS_NONE;
 
     if (row_flags & (MUSPATCHNEVFL_NOTE << MUSPATROWEVFL_CHNEVENT_SHIFT))
     {
@@ -555,15 +555,15 @@ void __far _muspatio_read_packed (MUSPATIO *self, MUSPATROWEVENT *event)
         data++;
     }
     else
-        event->event.data.note = CHNNOTE_EMPTY;
+        event->event.data.note = CHN_NOTE_NONE;
 
     if (row_flags & (MUSPATCHNEVFL_VOL << MUSPATROWEVFL_CHNEVENT_SHIFT))
     {
-        event->event.data.volume = data [0];
+        event->event.data.note_volume = data [0];
         data++;
     }
     else
-        event->event.data.volume = CHNVOL_EMPTY;
+        event->event.data.note_volume = CHN_NOTEVOL_NONE;
 
     if (row_flags & (MUSPATCHNEVFL_CMD << MUSPATROWEVFL_CHNEVENT_SHIFT))
     {
@@ -573,7 +573,7 @@ void __far _muspatio_read_packed (MUSPATIO *self, MUSPATROWEVENT *event)
     }
     else
     {
-        event->event.data.command = CHNCMD_EMPTY;
+        event->event.data.command = CHN_CMD_NONE;
         event->event.data.parameter = 0;
     }
 
@@ -588,17 +588,17 @@ void __far _muspatio_write (MUSPATIO *self, MUSPATROWEVENT *event)
     if (event->channel < muspat_get_channels (self->pattern))
     {
         if (!(event->event.flags & MUSPATCHNEVFL_INS))
-            event->event.data.instrument = CHNINS_EMPTY;
+            event->event.data.instrument = CHN_INS_NONE;
 
         if (!(event->event.flags & MUSPATCHNEVFL_NOTE))
-            event->event.data.note = CHNNOTE_EMPTY;
+            event->event.data.note = CHN_NOTE_NONE;
 
         if (!(event->event.flags & MUSPATCHNEVFL_VOL))
-            event->event.data.volume = CHNVOL_EMPTY;
+            event->event.data.note_volume = CHN_NOTEVOL_NONE;
 
         if (!(event->event.flags & MUSPATCHNEVFL_CMD))
         {
-            event->event.data.command = CHNCMD_EMPTY;
+            event->event.data.command = CHN_CMD_NONE;
             event->event.data.parameter = 0;
         }
 
@@ -607,7 +607,7 @@ void __far _muspatio_write (MUSPATIO *self, MUSPATROWEVENT *event)
         data = self->data + self->offset;
         data [0] = event->event.data.instrument;
         data [1] = event->event.data.note;
-        data [2] = event->event.data.volume;
+        data [2] = event->event.data.note_volume;
         data [3] = event->event.data.command;
         data [4] = event->event.data.parameter;
         self->offset += 5;
@@ -653,7 +653,7 @@ void __far _muspatio_write_packed (MUSPATIO *self, MUSPATROWEVENT *event)
 
     if (row_flags & (MUSPATCHNEVFL_VOL << MUSPATROWEVFL_CHNEVENT_SHIFT))
     {
-        data [0] = event->event.data.volume;
+        data [0] = event->event.data.note_volume;
         data++;
     }
 
@@ -709,23 +709,26 @@ static const char __octaves[16] = "0123456789??????";
 
 void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event)
 {
+    uint8_t v;
+
     if (event->flags & MUSPATCHNEVFL_NOTE)
     {
-        switch (event->data.note)
+        v = event->data.note;
+        switch (v)
         {
-        case CHNNOTE_EMPTY:
+        case CHN_NOTE_NONE:
             s[0] = '.';
             s[1] = '.';
             break;
-        case CHNNOTE_OFF:
+        case CHN_NOTE_OFF:
             s[0] = '=';
             s[1] = '=';
             break;
         default:
-            if (event->data.note <= CHNNOTE_MAX)
+            if (v <= CHN_NOTE_MAX)
             {
-                s[0] = __halftones[event->data.note & 0x0f];
-                s[1] = __octaves[event->data.note >> 4];
+                s[0] = __halftones[v & 0x0f];
+                s[1] = __octaves[v >> 4];
             }
             else
             {
@@ -745,17 +748,20 @@ void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event)
 
     if (event->flags & MUSPATCHNEVFL_INS)
     {
-        switch (event->data.instrument)
+        v = event->data.instrument;
+        switch (v)
         {
-        case CHNINS_EMPTY:
+        case CHN_INS_NONE:
             s[3] = '.';
             s[4] = '.';
             break;
         default:
-            if (_unpackInstrument (event->data.instrument) < 99)
+            v = _get_instrument (v);
+            if (v < 99)
             {
-                s[3] = '0' + ((_unpackInstrument (event->data.instrument) + 1) / 10);
-                s[4] = '0' + ((_unpackInstrument (event->data.instrument) + 1) % 10);
+                v++;
+                s[3] = '0' + (v / 10);
+                s[4] = '0' + (v % 10);
             }
             else
             {
@@ -775,17 +781,18 @@ void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event)
 
     if (event->flags & MUSPATCHNEVFL_VOL)
     {
-        switch (event->data.volume)
+        v = event->data.note_volume;
+        switch (v)
         {
-        case CHNVOL_EMPTY:
+        case CHN_NOTEVOL_NONE:
             s[6] = '.';
             s[7] = '.';
             break;
         default:
-            if (_isVolume (event->data.volume))
+            if (v <= CHN_NOTEVOL_MAX)
             {
-                s[6] = '0' + (event->data.volume / 10);
-                s[7] = '0' + (event->data.volume % 10);
+                s[6] = '0' + (v / 10);
+                s[7] = '0' + (v % 10);
             }
             else
             {
@@ -805,7 +812,8 @@ void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event)
 
     if (event->flags & MUSPATCHNEVFL_CMD)
     {
-        if (event->data.command == CHNCMD_EMPTY)
+        v = event->data.command;
+        if (v == CHN_CMD_NONE)
         {
             s[9] = '.';
             s[10] = '.';
@@ -813,8 +821,8 @@ void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event)
         }
         else
         {
-            if (event->data.command <= CHNCMD_MAX)
-                s[9] = 'A' + event->data.command - 1;
+            if (v <= CHN_CMD_MAX)
+                s[9] = 'A' + v - 1;
             else
                 s[9] = '?';
 

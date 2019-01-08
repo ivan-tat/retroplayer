@@ -21,46 +21,6 @@
 #include "dos/ems.h"
 #include "dynarray.h"
 
-/* Instrument */
-
-#define CHNINS_EMPTY    0
-
-#define _packInstrument(v)      ((v) + 1)
-#define _unpackInstrument(v)    ((v) - 1)
-
-#define _isInstrument(v)        ((v) != CHNINS_EMPTY)
-
-/* Note */
-
-#define CHNNOTE_EMPTY   0xff
-#define CHNNOTE_OFF     0xfe
-
-#define _packNote(v)    (((v) % 12) + (((v) / 12) << 4))
-#define _unpackNote(v)  (((v) & 0x0f) + ((v) >> 4) * 12)
-
-#define CHNNOTE_MAX     _packNote (NOTE_MAX)
-
-#define _isNote(v)      (((v) != CHNNOTE_EMPTY) && ((v) != CHNNOTE_OFF))
-
-/* Volume */
-
-#define CHNVOL_EMPTY    0xff
-
-#define CHNVOL_MAX      63
-
-#define _isVolume(v)    ((v) != CHNVOL_EMPTY)
-
-/* Command */
-
-#define CHNCMD_EMPTY    0xff
-#define CHNCMD_MIN      1
-#define CHNCMD_MAX      26
-
-#define _packCommand(v)     ((v) + 1)
-#define _unpackCommand(v)   ((v) - 1)
-
-#define _isCommand(v)   ((v) != CHNCMD_EMPTY)
-
 /*** Music pattern channel's event ***/
 
 #pragma pack(push, 1);
@@ -68,7 +28,7 @@ typedef struct music_pattern_channel_event_data_t
 {
     unsigned char instrument;
     unsigned char note;
-    unsigned char volume;
+    unsigned char note_volume;
     unsigned char command;
     unsigned char parameter;
 };

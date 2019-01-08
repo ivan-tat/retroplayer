@@ -211,7 +211,7 @@ void get_note_name(char *__dest, uint8_t note)
     bool valid;
 
     valid = true;
-    if (note == CHNNOTE_EMPTY)
+    if (note == CHN_NOTE_NONE)
     {
         __dest[0] = '.';
         __dest[1] = '.';
@@ -219,7 +219,7 @@ void get_note_name(char *__dest, uint8_t note)
         __dest[3] = 0;
     }
     else
-    if (note == CHNNOTE_OFF)
+    if (note == CHN_NOTE_OFF)
     {
         __dest[0] = '^';
         __dest[1] = '^';
@@ -227,7 +227,7 @@ void get_note_name(char *__dest, uint8_t note)
         __dest[3] = 0;
     }
     else
-    if (note <= CHNNOTE_MAX)
+    if (note <= CHN_NOTE_MAX)
     {
         halftone = note & 0x0f;
         octave = note >> 4;

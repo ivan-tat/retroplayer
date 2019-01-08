@@ -142,7 +142,7 @@ typedef struct _s3m_sample_t
     uint32_t length;
     uint32_t loopbeg;
     uint32_t loopend;
-    uint8_t volume;
+    uint8_t note_volume;
     uint8_t unused1;
     uint8_t packinfo;
     _S3M_SMPFLAGS flags;
@@ -159,7 +159,7 @@ typedef struct _s3m_adlib_instrument_t
 {
     uint8_t unused1[3];
     uint8_t data[12];
-    uint8_t volume;
+    uint8_t note_volume;
     uint8_t unused2[3];
     uint32_t rate;
     uint8_t unused3[12];
@@ -207,7 +207,7 @@ typedef struct _s3m_instrument_t _S3M_INS;
 #define _ins_get_sample_loop_start(o)   (o)->data.sample.loopbeg
 #define _ins_get_sample_loop_end(o)     (o)->data.sample.loopend
 #define _ins_get_sample_rate(o)         (o)->data.sample.rate
-#define _ins_get_sample_volume(o)       (o)->data.sample.volume
+#define _ins_get_sample_note_volume(o)  (o)->data.sample.note_volume
 #define _ins_get_file_name(o)           (o)->dosname
 #define _ins_get_title(o)               (o)->title
 
@@ -463,7 +463,7 @@ typedef struct _s3m_pattern_event_t
     unsigned char channel;
     unsigned char instrument;
     unsigned char note;
-    unsigned char volume;
+    unsigned char note_volume;
     unsigned char command;
     unsigned char parameter;
 };
@@ -513,11 +513,11 @@ bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATEVENT *event)
     if (!_s3m_patio_read (self, &flags, 1))
         return false;
 
-    event->instrument = CHNINS_EMPTY;
-    event->note = CHNNOTE_EMPTY;
-    event->volume = CHNVOL_EMPTY;
-    event->command = CHNCMD_EMPTY;
-    event->parameter = 0;
+    event->instrument  = CHN_INS_NONE;
+    event->note        = CHN_NOTE_NONE;
+    event->note_volume = CHN_NOTEVOL_NONE;
+    event->command     = CHN_CMD_NONE;
+    event->parameter   = 0;
 
     if (flags)
     {
@@ -535,7 +535,7 @@ bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATEVENT *event)
             case 0xff:
                 break;
             case 0xfe:
-                event->note = CHNNOTE_OFF;
+                event->note = CHN_NOTE_OFF;
                 event->flags |= _S3M_PATEVFL_NOTE;
                 break;
             default:
@@ -563,7 +563,7 @@ bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATEVENT *event)
 
         if (flags & 0x40)
         {
-            // volume
+            // note volume
             if (!_s3m_patio_read (self, v, 1))
                 return false;
 
@@ -574,7 +574,7 @@ bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATEVENT *event)
             default:
                 if (v[0] <= 64)
                 {
-                    event->volume = v[0];
+                    event->note_volume = v[0];
                     event->flags |= _S3M_PATEVFL_VOL;
                 }
                 break;
@@ -726,7 +726,7 @@ bool __near load_s3m_convert_pattern (LOADER_S3M *self, uint8_t *src, uint16_t s
 
                     if (ei.flags & _S3M_PATEVFL_VOL)
                     {
-                        e.event.data.volume = ei.volume;
+                        e.event.data.note_volume = ei.note_volume;
                         e.event.flags |= MUSPATCHNEVFL_VOL;
                     }
 
@@ -1140,14 +1140,14 @@ bool __near load_s3m_load_instrument (LOADER_S3M *self, uint8_t index)
             pcmsmp_set_loop (smp, PCMSMPLOOP_NONE);
 
         pcmsmp_set_rate (smp, _ins_get_sample_rate (_ins));
-        pcmsmp_set_volume (smp, _ins_get_sample_volume (_ins));
+        pcmsmp_set_volume (smp, PCMSMP_VOLUME_MAX);
 
         memcpy (smp_title, _ins_get_file_name (_ins), _S3M_INS_FILENAME_LEN);
         smp_title[_S3M_INS_FILENAME_LEN] = 0;
         pcmsmp_set_title (smp, smp_title);
 
         musins_set_type (ins, MUSINST_PCM);
-        musins_set_volume (ins, _ins_get_sample_volume (_ins));    /* FIXME: split sample and instrument volumes */
+        musins_set_note_volume (ins, _ins_get_sample_note_volume (_ins));
         musins_set_sample (ins, smp);
     }
     else

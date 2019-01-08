@@ -45,7 +45,7 @@
 #define EFFIDX_L_PORTA_VOLSLIDE  12
 #define EFFIDX_M                 13
 #define EFFIDX_N                 14
-#define EFFIDX_O                 15
+#define EFFIDX_O_SAMPLE_OFFSET   15
 #define EFFIDX_P                 16
 #define EFFIDX_Q_RETRIG_VOLSLIDE 17
 #define EFFIDX_R_TREMOLO         18

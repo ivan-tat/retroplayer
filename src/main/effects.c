@@ -1029,7 +1029,8 @@ METHOD_GET_NAME (pitchUp)
 void __near eff_porta_start(MIXCHN *chn)
 {
     chnState_porta_flag = true;
-    if (_isNote(chnState_cur_bNote))
+    if (((chnState_cur_bNote) != CHN_NOTE_OFF)
+    &&  ((chnState_cur_bNote) != CHN_NOTE_NONE))
     {
         /* now save some values (we want to slide from) */
         chnState_porta_dSmpStepOld   = mixchn_get_sample_step(chn);
@@ -1060,7 +1061,8 @@ METHOD_INIT(porta)
 
 METHOD_HANDLE(porta)
 {
-    if (_isNote(chnState_cur_bNote))
+    if (((chnState_cur_bNote) != CHN_NOTE_OFF)
+    &&  ((chnState_cur_bNote) != CHN_NOTE_NONE))
     {
         chn->wSmpPeriodDest = mixchn_get_sample_period(chn);
         mixchn_set_sample_period(chn, chnState_porta_wSmpPeriodOld);
@@ -1177,7 +1179,8 @@ METHOD_TICK(vibNorm)
 
 METHOD_CONT(vibNorm)
 {
-    return !_isNote(chnState_cur_bNote);
+    return (((chnState_cur_bNote) == CHN_NOTE_OFF)
+    ||      ((chnState_cur_bNote) == CHN_NOTE_NONE));
 }
 
 METHOD_STOP(vibNorm)
@@ -1313,11 +1316,11 @@ METHOD_HANDLE(arpeggio)
 
     param = mixchn_get_command_parameter(chn);
 
-    note = _unpackNote (mixchn_get_note (chn)) + (param >> 4);
-    chn->bArpNotes[0] = _packNote(note > NOTE_MAX ? NOTE_MAX : note);
+    note = _unpack_note (mixchn_get_note (chn)) + (param >> 4);
+    chn->bArpNotes[0] = _pack_note (note > NOTE_MAX ? NOTE_MAX : note);
 
-    note = _unpackNote (mixchn_get_note (chn)) + (param & 0x0f);
-    chn->bArpNotes[1] = _packNote(note > NOTE_MAX ? NOTE_MAX : note);
+    note = _unpack_note (mixchn_get_note (chn)) + (param & 0x0f);
+    chn->bArpNotes[1] = _pack_note (note > NOTE_MAX ? NOTE_MAX : note);
 
     smp = mixchn_get_sample (chn);
     if (smp && pcmsmp_is_available (smp))
@@ -1361,7 +1364,8 @@ METHOD_HANDLE(sampleOffset)
     uint8_t param;
     param = mixchn_get_command_parameter(chn);
     chn->wSmpStart = param << 8;
-    if (_isNote(chnState_cur_bNote))
+    if (((chnState_cur_bNote) != CHN_NOTE_OFF)
+    &&  ((chnState_cur_bNote) != CHN_NOTE_NONE))
         chn->dSmpPos = (unsigned long)chn->wSmpStart << 16;
 }
 
@@ -1523,8 +1527,8 @@ METHOD_INIT(tremolo)
 
 METHOD_HANDLE(tremolo)
 {
-    if ((chnState_cur_bIns != CHNINS_EMPTY)
-    ||  (chnState_cur_bVol != CHNVOL_EMPTY)
+    if ((chnState_cur_bIns != CHN_INS_NONE)
+    ||  (chnState_cur_bVol != CHN_NOTEVOL_NONE)
     ||  (!(chn->bEffFlags & EFFFLAG_CONTINUE)))
         chn->bSmpVolOld = mixchn_get_note_volume (chn);
 }
@@ -1621,9 +1625,9 @@ METHOD_TICK(special_noteDelay)
         if (insNum)
             chn_setupInstrument(chn, insNum);
         note = chn->bSavNote;
-        if (note != CHNNOTE_EMPTY)
+        if (note != CHN_NOTE_NONE)
         {
-            if (note == CHNNOTE_OFF)
+            if (note == CHN_NOTE_OFF)
                 mixchn_set_playing(chn, false);
             else
             {
@@ -1631,7 +1635,7 @@ METHOD_TICK(special_noteDelay)
                 mixchn_set_playing(chn, true);
             }
         }
-        if (chn->bSavVol != CHNVOL_EMPTY)
+        if (chn->bSavVol != CHN_NOTEVOL_NONE)
             mixchn_set_note_volume (chn, chn->bSavVol);
         mixchn_set_command(chn, EFFIDX_NONE);
     }
@@ -1754,7 +1758,7 @@ void chn_effGetName (MIXCHN *chn, char *__s, size_t __maxlen)
     cmd = mixchn_get_command (chn);
     param = mixchn_get_command_parameter (chn);
 
-    if ((cmd != CHNCMD_EMPTY) && (cmd <= MAXEFF))
+    if ((cmd != CHN_CMD_NONE) && (cmd <= MAXEFF))
     {
         snprintf (s, 5, "%c%02hhX: ",  'A' + cmd - 1, param);
         EFFECTS_LIST (main)[cmd]->get_name (chn, s + 5, _BUF_SIZE - 5);

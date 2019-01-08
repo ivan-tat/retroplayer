@@ -40,21 +40,22 @@ void __near draw_channel_event (MUSPATCHNEVENT *event)
     write_Note (event->data.note);
 
     _ins  = event->data.instrument;
-    _vol  = event->data.volume;
+    _vol  = event->data.note_volume;
     _cmd  = event->data.command;
     _parm = event->data.parameter;
 
     output[0] = ' ';
-    if (_ins == CHNINS_EMPTY)
+    if (_ins == CHN_INS_NONE)
     {
         output[1] = '.';
         output[2] = '.';
     }
     else
-    if (_unpackInstrument (_ins) < 99)
+    if ((_ins >= CHN_INS_MIN) && (_ins <= CHN_INS_MAX))
     {
-        output[1] = '0' + ((_unpackInstrument (_ins) + 1) / 10);
-        output[2] = '0' + ((_unpackInstrument (_ins) + 1) % 10);
+        _ins = _get_instrument (_ins) + 1;
+        output[1] = '0' + (_ins / 10);
+        output[2] = '0' + (_ins % 10);
     }
     else
     {
@@ -63,13 +64,13 @@ void __near draw_channel_event (MUSPATCHNEVENT *event)
     }
 
     output[3] = ' ';
-    if (_isVolume (_vol))
+    if (_vol <= CHN_NOTEVOL_MAX)
     {
         output[4] = '0' + (_vol / 10);
         output[5] = '0' + (_vol % 10);
     }
     else
-    if (_vol == CHNVOL_EMPTY)
+    if (_vol == CHN_NOTEVOL_NONE)
     {
         output[4] = '.';
         output[5] = '.';
@@ -81,7 +82,7 @@ void __near draw_channel_event (MUSPATCHNEVENT *event)
     }
 
     output[6] = ' ';
-    if (_cmd == CHNCMD_EMPTY)
+    if (_cmd == CHN_CMD_NONE)
     {
         output[7] = '.';
         output[8] = '.';

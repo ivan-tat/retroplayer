@@ -53,15 +53,15 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
 
     if (playState_patDelay_bNow)
     {
-        chnState_cur_bIns  = CHNINS_EMPTY;
-        chnState_cur_bNote = CHNNOTE_EMPTY;
-        chnState_cur_bVol  = CHNVOL_EMPTY;
+        chnState_cur_bIns  = CHN_INS_NONE;
+        chnState_cur_bNote = CHN_NOTE_NONE;
+        chnState_cur_bVol  = CHN_NOTEVOL_NONE;
     }
     else
     {
         chnState_cur_bIns  = event->data.instrument;
         chnState_cur_bNote = event->data.note;
-        chnState_cur_bVol  = event->data.volume;
+        chnState_cur_bVol  = event->data.note_volume;
     }
 
     /* read effects - it may change the read instr/note ! */
@@ -97,24 +97,27 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
 
         /* read instrument */
         /* reinit instrument data and keep sample position */
-        if (_isInstrument (chnState_cur_bIns))
+        if (((chnState_cur_bIns) != CHN_INS_NONE)
+        &&  ((chnState_cur_bIns) <= CHN_INS_MAX))
         {
-            ins = musinsl_get (instruments, _unpackInstrument (chnState_cur_bIns));
+            ins = musinsl_get (instruments, _get_instrument (chnState_cur_bIns));
             if (musins_get_type(ins) == MUSINST_PCM)
                 chn_setupInstrument(chn, chnState_cur_bIns);
             else
-                chnState_cur_bIns = CHNINS_EMPTY;
+                chnState_cur_bIns = CHN_INS_NONE;
         }
         /* read note */
-        if (_isNote(chnState_cur_bNote))
+        if (((chnState_cur_bNote) != CHN_NOTE_OFF)
+        &&  ((chnState_cur_bNote) != CHN_NOTE_NONE))
             chn_setupNote(chn, chnState_cur_bNote, chnState_porta_flag);
         else
-            if (chnState_cur_bNote == CHNNOTE_OFF)
+            if (chnState_cur_bNote == CHN_NOTE_OFF)
                 mixchn_set_playing(chn, false);
         /* read volume */
-        if (_isVolume(chnState_cur_bVol))
+        if (chnState_cur_bVol != CHN_NOTEVOL_NONE)
         {
-            chnState_cur_bVol = chnState_cur_bVol > CHNVOL_MAX ? CHNVOL_MAX : chnState_cur_bVol;
+            if (chnState_cur_bVol > CHN_NOTEVOL_MAX)
+                chnState_cur_bVol = CHN_NOTEVOL_MAX;
             mixchn_set_note_volume (chn, chnState_cur_bVol);
         }
         chn_effHandle(chn);

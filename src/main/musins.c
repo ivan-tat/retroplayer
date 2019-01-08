@@ -118,7 +118,7 @@ void __far DEBUG_dump_instrument_info (MUSINS *self, uint8_t index, PCMSMPLIST *
             (uint8_t) index,
             (char *) type,
             (char *) s,
-            (uint8_t) _musins_get_volume (self),
+            (uint8_t) _musins_get_note_volume (self),
             (char *) _musins_get_title (self)
         );
     }

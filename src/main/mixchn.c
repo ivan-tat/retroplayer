@@ -58,8 +58,8 @@ void __far mixchn_set_note_volume (MIXCHN *self, int16_t value)
     if (value < 0)
         value = 0;
     else
-        if (value > SMPVOL_MAX)
-            value = SMPVOL_MAX;
+        if (value > CHN_NOTEVOL_MAX)
+            value = CHN_NOTEVOL_MAX;
 
     self->note_volume = value;
 }
@@ -195,9 +195,9 @@ void __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum)
             if (rate)
             {
                 mixchn_set_instrument_num (chn, insNum);
+                mixchn_set_note_volume (chn, musins_get_note_volume (ins));
                 mixchn_set_instrument (chn, ins);
                 mixchn_set_sample (chn, smp);
-                mixchn_set_note_volume (chn, musins_get_volume (ins));
                 flags = 0;
                 if (pcmsmp_get_bits (smp) == 16)
                     flags |= MIXSMPFL_16BITS;
