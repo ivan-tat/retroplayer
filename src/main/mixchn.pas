@@ -14,11 +14,8 @@ interface
 
 procedure mixchn_init;
 procedure mixchn_set_enabled;
-procedure mixchn_is_enabled;
 procedure mixchn_set_playing;
-procedure mixchn_is_playing;
 procedure mixchn_set_mixing;
-procedure mixchn_is_mixing;
 procedure mixchn_set_pan;
 procedure mixchn_get_pan;
 procedure mixchn_set_instrument_num;
@@ -78,11 +75,8 @@ uses
 
 procedure mixchn_init; external;
 procedure mixchn_set_enabled; external;
-procedure mixchn_is_enabled; external;
 procedure mixchn_set_playing; external;
-procedure mixchn_is_playing; external;
 procedure mixchn_set_mixing; external;
-procedure mixchn_is_mixing; external;
 procedure mixchn_set_pan; external;
 procedure mixchn_get_pan; external;
 procedure mixchn_set_instrument_num; external;

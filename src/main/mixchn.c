@@ -37,11 +37,6 @@ void __far mixchn_set_enabled (MIXCHN *self, bool value)
         _mixchn_set_flags (self, _mixchn_get_flags (self) & ~MIXCHNFL_ENABLED);
 }
 
-bool __far mixchn_is_enabled (MIXCHN *self)
-{
-    return (mixchn_get_flags (self) & MIXCHNFL_ENABLED) != 0;
-}
-
 void __far mixchn_set_playing (MIXCHN *self, bool value)
 {
     if (value)
@@ -50,22 +45,12 @@ void __far mixchn_set_playing (MIXCHN *self, bool value)
         _mixchn_set_flags (self, _mixchn_get_flags (self) & ~MIXCHNFL_PLAYING);
 }
 
-bool __far mixchn_is_playing (MIXCHN *self)
-{
-    return (mixchn_get_flags (self) & MIXCHNFL_PLAYING) != 0;
-}
-
 void __far mixchn_set_mixing (MIXCHN *self, bool value)
 {
     if (value)
         _mixchn_set_flags (self, _mixchn_get_flags (self) | MIXCHNFL_MIXING);
     else
         _mixchn_set_flags (self, _mixchn_get_flags (self) & ~MIXCHNFL_MIXING);
-}
-
-bool __far mixchn_is_mixing (MIXCHN *self)
-{
-    return (mixchn_get_flags (self) & MIXCHNFL_MIXING) != 0;
 }
 
 void __far mixchn_set_pan (MIXCHN *self, MIXCHNPAN value)

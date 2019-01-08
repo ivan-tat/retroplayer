@@ -98,6 +98,10 @@ typedef struct mix_channel_t MIXCHN;
 #define _mixchn_set_type(o, v)      _mixchn_get_type (o) = (v)
 #define _mixchn_get_flags(o)        (o)->flags
 #define _mixchn_set_flags(o, v)     _mixchn_get_flags (o) = (v)
+#define _mixchn_is_enabled(o)       ((mixchn_get_flags (o) & MIXCHNFL_ENABLED) != 0)
+#define _mixchn_is_playing(o)       ((mixchn_get_flags (o) & MIXCHNFL_PLAYING) != 0)
+#define _mixchn_is_mixing(o)        ((mixchn_get_flags (o) & MIXCHNFL_MIXING) != 0)
+
 #define _mixchn_get_sample(o)       (o)->sample
 #define _mixchn_set_sample(o, v)    _mixchn_get_sample (o) = (v)
 
@@ -105,13 +109,13 @@ void     __far mixchn_init (MIXCHN *self);
 #define        mixchn_set_flags(o, v)   _mixchn_set_flags (o, v)
 #define        mixchn_get_flags(o)      _mixchn_get_flags (o)
 void     __far mixchn_set_enabled (MIXCHN *self, bool value);
-bool     __far mixchn_is_enabled (MIXCHN *self);
+#define        mixchn_is_enabled(o)     _mixchn_is_enabled (o)
 void     __far mixchn_set_playing (MIXCHN *self, bool value);
-bool     __far mixchn_is_playing (MIXCHN *self);
+#define        mixchn_is_playing(o)     _mixchn_is_playing (o)
 void     __far mixchn_set_mixing (MIXCHN *self, bool value);
-bool     __far mixchn_is_mixing (MIXCHN *self);
-#define     mixchn_set_type(o, v)   _mixchn_set_type (o, v)
-#define     mixchn_get_type(o)      _mixchn_get_type (o)
+#define        mixchn_is_mixing(o)      _mixchn_is_mixing (o)
+#define        mixchn_set_type(o, v)   _mixchn_set_type (o, v)
+#define        mixchn_get_type(o)      _mixchn_get_type (o)
 void     __far mixchn_set_pan (MIXCHN *self, MIXCHNPAN value);
 MIXCHNPAN __far mixchn_get_pan (MIXCHN *self);
 void     __far mixchn_set_instrument_num (MIXCHN *self, uint8_t value);
@@ -184,11 +188,8 @@ extern MIXCHNLIST *mod_Channels;
 
 #pragma aux mixchn_init "*";
 #pragma aux mixchn_set_enabled "*";
-#pragma aux mixchn_is_enabled "*";
 #pragma aux mixchn_set_playing "*";
-#pragma aux mixchn_is_playing "*";
 #pragma aux mixchn_set_mixing "*";
-#pragma aux mixchn_is_mixing "*";
 #pragma aux mixchn_set_pan "*";
 #pragma aux mixchn_get_pan "*";
 #pragma aux mixchn_set_instrument_num "*";
