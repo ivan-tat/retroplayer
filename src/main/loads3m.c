@@ -1147,6 +1147,7 @@ bool __near load_s3m_load_instrument (LOADER_S3M *self, uint8_t index)
         pcmsmp_set_title (smp, smp_title);
 
         musins_set_type (ins, MUSINST_PCM);
+        musins_set_volume (ins, MUSINS_VOLUME_MAX);
         musins_set_note_volume (ins, _ins_get_sample_note_volume (_ins));
         musins_set_sample (ins, smp);
     }

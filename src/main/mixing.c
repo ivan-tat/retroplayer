@@ -49,8 +49,9 @@ void __near song_play_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_
     MIXCHNTYPE chtype;
     struct playSampleInfo_t smpInfo;
     unsigned int smpPos;
+    MUSINS *ins;
     PCMSMP *smp;
-    uint8_t final_volume;
+    uint8_t Vol, IV, SV, GV, final_volume;
 
     outBuf = MK_FP(FP_SEG(mb->buf), FP_OFF(mb->buf) + bufOff);
     chtype = mixchn_get_type(chn);
@@ -75,9 +76,16 @@ void __near song_play_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_
     /* first check for correct position inside sample */
     if (smpPos < chn->wSmpLoopEnd)
     {
-        if (playState_gVolume)
+        ins = mixchn_get_instrument (chn);
+        smp = mixchn_get_sample (chn);
+        Vol = mixchn_get_note_volume (chn); // = 0..64  (6 bits)
+        IV = musins_get_volume (ins);       // = 0..128 (7 bits)
+        SV = pcmsmp_get_volume (smp);       // = 0..64  (6 bits)
+        GV = playState_gVolume;             // = 0..64  (6 bits)
+        if (Vol | IV | SV | GV)
         {
-            final_volume = (mixchn_get_note_volume (chn) * playState_gVolume) >> 6;
+            // final_volume = 0..64 (6 bits)
+            final_volume = ((uint32_t) Vol * IV * SV * GV) >> (6 + 7 + 6 + 6 - 6);
             if (final_volume > 64)
                 final_volume = 64;
         }
@@ -87,7 +95,6 @@ void __near song_play_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_
         if (mixchn_is_mixing(chn) && final_volume)
         {
             final_volume--; // fit it in 6 bits, 1..64 -> 0..63
-            smp = mixchn_get_sample (chn);
             if (pcmsmp_is_EM_data (smp))
                 smpInfo.dData = pcmsmp_map_EM_data (smp);
             else

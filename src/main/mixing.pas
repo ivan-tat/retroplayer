@@ -17,6 +17,7 @@ procedure sound_fill_buffer;
 implementation
 
 uses
+    watcom,
     string_,
     ems,
     sbctl,

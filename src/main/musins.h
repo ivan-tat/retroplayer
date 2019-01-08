@@ -30,12 +30,15 @@ typedef music_instrument_type_t MUSINSTYPE;
 #define MUSINST_PCM   1
 #define MUSINST_ADLIB 2
 
+#define MUSINS_VOLUME_MAX 128
+
 #define MUSINS_TITLE_LEN 28
 
 #pragma pack(push, 1);
 typedef struct instrument_t
 {
     MUSINSTYPE  type;
+    uint8_t     volume;
     uint8_t     note_volume;
     void       *link;
     uint8_t     title[MUSINS_TITLE_LEN];
@@ -45,6 +48,8 @@ typedef struct instrument_t MUSINS;
 
 #define _musins_get_type(o)         (o)->type
 #define _musins_set_type(o, v)      _musins_get_type (o) = (v)
+#define _musins_get_volume(o)       (o)->volume
+#define _musins_set_volume(o, v)    _musins_get_volume (o) = (v)
 #define _musins_get_note_volume(o)      (o)->note_volume
 #define _musins_set_note_volume(o, v)   _musins_get_note_volume (o) = (v)
 #define _musins_get_link(o)         (o)->link
@@ -55,6 +60,8 @@ typedef struct instrument_t MUSINS;
 void __far musins_init (MUSINS *self);
 #define    musins_set_type(o, v)    _musins_set_type (o, v)
 #define    musins_get_type(o)       _musins_get_type (o)
+#define    musins_set_volume(o, v)  _musins_set_volume (o, v)
+#define    musins_get_volume(o)     _musins_get_volume (o)
 #define    musins_set_note_volume(o, v) _musins_set_note_volume (o, v)
 #define    musins_get_note_volume(o)    _musins_get_note_volume (o)
 #define    musins_set_sample(o, v)  _musins_set_sample (o, v)
