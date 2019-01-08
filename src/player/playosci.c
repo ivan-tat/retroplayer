@@ -51,7 +51,7 @@ void __near draw_channels_volume(void)
     for (i = 0; i < mixchnl_get_count (channels); i++)
     {
         chn = mixchnl_get (channels, i);
-        vga_bar (320 * 170 + i * 15 + 10, 10, mixchn_is_playing (chn) ? mixchn_get_sample_volume (chn) : 0);
+        vga_bar (320 * 170 + i * 15 + 10, 10, mixchn_is_playing (chn) ? mixchn_get_note_volume (chn) : 0);
     }
 }
 

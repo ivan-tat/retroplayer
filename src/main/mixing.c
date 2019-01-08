@@ -75,7 +75,7 @@ void __near song_play_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_
     /* first check for correct position inside sample */
     if (smpPos < chn->wSmpLoopEnd)
     {
-        vol = mixchn_get_sample_volume(chn);
+        vol = mixchn_get_note_volume (chn);
         if (mixchn_is_mixing(chn) && vol)
         {
             vol--;

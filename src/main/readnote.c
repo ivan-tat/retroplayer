@@ -115,7 +115,7 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
         if (_isVolume(chnState_cur_bVol))
         {
             chnState_cur_bVol = chnState_cur_bVol > CHNVOL_MAX ? CHNVOL_MAX : chnState_cur_bVol;
-            mixchn_set_sample_volume(chn, (chnState_cur_bVol * playState_gVolume) >> 6);
+            mixchn_set_note_volume (chn, (chnState_cur_bVol * playState_gVolume) >> 6);
         }
         chn_effHandle(chn);
     }

@@ -119,7 +119,7 @@ void __far win_channels_draw(SCRWIN *self)
                     mixchn_get_sample_period(chn),
                     (uint16_t)(step >> 16),
                     (uint16_t)(step & 0xffff),
-                    mixchn_get_sample_volume(chn),
+                    mixchn_get_note_volume (chn),
                     &effectstr
                 );
                 clreol();
