@@ -1313,10 +1313,10 @@ METHOD_HANDLE(arpeggio)
 
     param = mixchn_get_command_parameter(chn);
 
-    note = _unpackNote(chn->bNote) + (param >> 4);
+    note = _unpackNote (mixchn_get_note (chn)) + (param >> 4);
     chn->bArpNotes[0] = _packNote(note > NOTE_MAX ? NOTE_MAX : note);
 
-    note = _unpackNote(chn->bNote) + (param & 0x0f);
+    note = _unpackNote (mixchn_get_note (chn)) + (param & 0x0f);
     chn->bArpNotes[1] = _packNote(note > NOTE_MAX ? NOTE_MAX : note);
 
     smp = mixchn_get_sample (chn);
@@ -1325,7 +1325,7 @@ METHOD_HANDLE(arpeggio)
         rate = pcmsmp_get_rate (smp);
         if (rate)
         {
-            chn->dArpSmpSteps[0] = chn_calcNoteStep(chn, rate, chn->bNote);
+            chn->dArpSmpSteps[0] = chn_calcNoteStep(chn, rate, mixchn_get_note (chn));
             chn->dArpSmpSteps[1] = chn_calcNoteStep(chn, rate, chn->bArpNotes[0]);
             chn->dArpSmpSteps[2] = chn_calcNoteStep(chn, rate, chn->bArpNotes[1]);
         }

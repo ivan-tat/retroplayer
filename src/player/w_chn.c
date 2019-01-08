@@ -93,7 +93,7 @@ void __far win_channels_draw(SCRWIN *self)
                     flagsstr[4] = 'c';
 
                 if (mixchn_is_enabled(chn))
-                    get_note_name(notestr, chn->bNote);
+                    get_note_name (notestr, mixchn_get_note (chn));
                 else
                 {
                     notestr[0] = '.';

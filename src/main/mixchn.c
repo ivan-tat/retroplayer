@@ -251,7 +251,7 @@ void __far chn_setupNote (MIXCHN *chn, uint8_t note, bool keep)
     PCMSMP *smp;
     uint32_t rate;
 
-    chn->bNote = note;
+    _mixchn_set_note (chn, note);
     mixchn_set_sample_period(chn, 0);   // clear it first - just to make sure we really set it
     if (mixchn_get_instrument_num(chn))
     {
