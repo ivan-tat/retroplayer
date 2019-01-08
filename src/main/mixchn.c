@@ -130,16 +130,6 @@ void __far mixchn_setup_sample_period (MIXCHN *self, uint32_t value)
     }
 }
 
-void __far mixchn_set_sample_data (MIXCHN *self, void *value)
-{
-    self->wSmpSeg = FP_SEG(value);
-}
-
-void *__far mixchn_get_sample_data (MIXCHN *self)
-{
-    return MK_FP(self->wSmpSeg, 0);
-}
-
 void __far mixchn_set_command (MIXCHN *self, uint8_t value)
 {
     self->bCommand = value;

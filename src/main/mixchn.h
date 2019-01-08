@@ -52,7 +52,6 @@ typedef struct mix_channel_t
     uint8_t instrument_num;
     MUSINS *instrument;
     PCMSMP *sample;
-    uint16_t wSmpSeg;       // DOS segment of current sample data
     uint8_t  bNote;
     // copy of sampledata (maybe it differs a bit):
     uint8_t  bSmpVol;       // current sample volume
@@ -137,8 +136,6 @@ uint16_t __far mixchn_get_sample_period (MIXCHN *self);
 void     __far mixchn_set_sample_step (MIXCHN *self, uint32_t value);
 uint32_t __far mixchn_get_sample_step (MIXCHN *self);
 void     __far mixchn_setup_sample_period (MIXCHN *self, uint32_t value);
-void     __far mixchn_set_sample_data (MIXCHN *self, void *value);
-void    *__far mixchn_get_sample_data (MIXCHN *self);
 void     __far mixchn_set_command (MIXCHN *self, uint8_t value);
 uint8_t  __far mixchn_get_command (MIXCHN *self);
 void     __far mixchn_set_sub_command (MIXCHN *self, uint8_t value);
@@ -205,8 +202,6 @@ extern MIXCHNLIST *mod_Channels;
 #pragma aux mixchn_set_sample_step "*";
 #pragma aux mixchn_get_sample_step "*";
 #pragma aux mixchn_setup_sample_period "*";
-#pragma aux mixchn_set_sample_data "*";
-#pragma aux mixchn_get_sample_data "*";
 #pragma aux mixchn_set_command "*";
 #pragma aux mixchn_get_command "*";
 #pragma aux mixchn_set_sub_command "*";
