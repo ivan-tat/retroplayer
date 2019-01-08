@@ -53,17 +53,15 @@ void __far mixchn_set_mixing (MIXCHN *self, bool value)
         _mixchn_set_flags (self, _mixchn_get_flags (self) & ~MIXCHNFL_MIXING);
 }
 
-void __far mixchn_set_sample_volume (MIXCHN *self, int16_t vol)
+void __far mixchn_set_sample_volume (MIXCHN *self, int16_t value)
 {
-    if (vol < 0)
-        self->bSmpVol = 0;
+    if (value < 0)
+        value = 0;
     else
-        self->bSmpVol = vol > SMPVOL_MAX ? SMPVOL_MAX : vol;
-}
+        if (value > SMPVOL_MAX)
+            value = SMPVOL_MAX;
 
-uint8_t __far mixchn_get_sample_volume (MIXCHN *self)
-{
-    return self->bSmpVol;
+    self->bSmpVol = value;
 }
 
 void __far mixchn_set_sample_period_limits (MIXCHN *self, uint16_t rate, bool amiga)

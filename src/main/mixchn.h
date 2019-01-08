@@ -109,6 +109,7 @@ typedef struct mix_channel_t MIXCHN;
 #define _mixchn_set_instrument(o, v)        _mixchn_get_instrument (o) = (v)
 #define _mixchn_get_sample(o)       (o)->sample
 #define _mixchn_set_sample(o, v)    _mixchn_get_sample (o) = (v)
+#define _mixchn_get_sample_volume(o)        (o)->bSmpVol
 
 void     __far mixchn_init (MIXCHN *self);
 #define        mixchn_set_type(o, v)   _mixchn_set_type (o, v)
@@ -131,8 +132,8 @@ void     __far mixchn_set_mixing (MIXCHN *self, bool value);
 #define        mixchn_get_instrument(o)         _mixchn_get_instrument (o)
 #define        mixchn_set_sample(o, v)  _mixchn_set_sample (o, v)
 #define        mixchn_get_sample(o)     _mixchn_get_sample (o)
-void     __far mixchn_set_sample_volume (MIXCHN *self, int16_t vol);
-uint8_t  __far mixchn_get_sample_volume (MIXCHN *self);
+void     __far mixchn_set_sample_volume (MIXCHN *self, int16_t value);
+#define        mixchn_get_sample_volume(o)      _mixchn_get_sample_volume (o)
 void     __far mixchn_set_sample_period_limits (MIXCHN *self, uint16_t rate, bool amiga);
 uint16_t __far mixchn_check_sample_period (MIXCHN *self, uint32_t value);
 void     __far mixchn_set_sample_period (MIXCHN *self, uint16_t value);
@@ -195,10 +196,7 @@ extern MIXCHNLIST *mod_Channels;
 #pragma aux mixchn_set_enabled "*";
 #pragma aux mixchn_set_playing "*";
 #pragma aux mixchn_set_mixing "*";
-#pragma aux mixchn_set_instrument "*";
-#pragma aux mixchn_get_instrument "*";
 #pragma aux mixchn_set_sample_volume "*";
-#pragma aux mixchn_get_sample_volume "*";
 #pragma aux mixchn_set_sample_period_limits "*";
 #pragma aux mixchn_check_sample_period "*";
 #pragma aux mixchn_set_sample_period "*";
