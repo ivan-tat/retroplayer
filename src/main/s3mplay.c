@@ -547,8 +547,10 @@ void __near _player_reset_channels (MIXCHNLIST *channels)
 
 void __near _player_set_initial_state (MUSMOD *track)
 {
-    playState_set_speed (musmod_get_speed (track));
-    playState_set_tempo (musmod_get_tempo (track));
+    playState_set_tempo (musmod_get_tempo (track)); // first priority (is output mixer-dependant)
+    playState_set_speed (musmod_get_speed (track)); // second priority (is song's internal value)
+    playState_gVolume = musmod_get_global_volume (track);   // is song's internal value
+    playState_mVolume = musmod_get_master_volume (track);   // is song's output
 }
 
 void __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep)
@@ -659,15 +661,17 @@ bool __far player_play_start (void)
     // 4. Setup mixer tables
 
     voltab_calc();
-    amptab_set_volume(playState_mVolume);
 
     // 5. Setup playing state
 
     _player_setup_patterns_order (track);
-    _player_set_initial_state (track);
+    _player_set_initial_state (track);  // master volume affects mixer tables
+
+    // mixer
+    amptab_set_volume (playState_mVolume);
+
     _player_reset_channels (channels);
     player_set_pos (initState_startOrder, 0, false);
-
     playState_tick_samples_per_channel_left = 0;    // emmidiately next tick
     playState_songEnded = false;    // resume playing
 

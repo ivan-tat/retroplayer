@@ -1529,10 +1529,8 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
     musmod_set_order_length (track, header.ordnum);
     musmod_set_stereo (track, (header.mvolume & _S3M_MVOL_STEREO) != 0);
     musmod_set_amiga_limits (track, (header.flags & _S3M_FLAG_AMIGA_LIMITS) != 0);
-    //musmod_set_global_volume (track, header.gvolume);
-    //musmod_set_master_volume (track, (header.mvolume & _S3M_MVOL_MASK) >> _S3M_MVOL_SHIFT);
-    playState_gVolume   = header.gvolume;
-    playState_mVolume   = (header.mvolume & _S3M_MVOL_MASK) >> _S3M_MVOL_SHIFT;
+    musmod_set_global_volume (track, header.gvolume);
+    musmod_set_master_volume (track, (header.mvolume & _S3M_MVOL_MASK) >> _S3M_MVOL_SHIFT);
     musmod_set_tempo (track, header.initialtempo);
     musmod_set_speed (track, header.initialspeed);
     _Self->signed_data = (header.format == _S3M_FILE_FORMAT_1);

@@ -28,6 +28,9 @@
 #define MUSMOD_CHANNELS_MAX 32
 #define MUSMOD_ORDER_LEN    100 // 0..99 entries
 
+#define MUSMOD_GLOBAL_VOLUME_MAX 64
+#define MUSMOD_MASTER_VOLUME_MAX 128
+
 /* Channel panning */
 
 typedef uint8_t musmod_channel_pan_t;
@@ -85,9 +88,9 @@ typedef struct music_module_t
     uint8_t     order_length;
     /*
     uint16_t    order_start;
+    */
     uint8_t     global_volume;
     uint8_t     master_volume;
-    */
     uint8_t     tempo;
     uint8_t     speed;
 };
@@ -121,11 +124,11 @@ MUSMODFLAGS __far __musmod_set_flags (MUSMODFLAGS _flags, MUSMODFLAGS _mask, MUS
 /*
 #define _musmod_get_order_start(o)      (o)->order_start
 #define _musmod_set_order_start(o, v)   _musmod_get_order_start (o) = (v)
+*/
 #define _musmod_get_global_volume(o)    (o)->global_volume
 #define _musmod_set_global_volume(o, v) _musmod_get_global_volume (o) = (v)
 #define _musmod_get_master_volume(o)    (o)->master_volume
 #define _musmod_set_master_volume(o, v) _musmod_get_master_volume (o) = (v)
-*/
 #define _musmod_get_tempo(o)            (o)->tempo
 #define _musmod_set_tempo(o, v)         _musmod_get_tempo(o) = (v)
 #define _musmod_get_speed(o)            (o)->speed
@@ -158,11 +161,11 @@ void __far musmod_set_format (MUSMOD *self, char *value);
 /*
 #define    musmod_get_order_start(o)        _musmod_get_order_start (o)
 #define    musmod_set_order_start(o, v)     _musmod_set_order_start (o, v)
+*/
 #define    musmod_get_global_volume(o)      _musmod_get_global_volume (o)
 #define    musmod_set_global_volume(o, v)   _musmod_set_global_volume (o, v)
 #define    musmod_get_master_volume(o)      _musmod_get_master_volume (o)
 #define    musmod_set_master_volume(o, v)   _musmod_set_master_volume (o, v)
-*/
 #define    musmod_get_tempo(o)              _musmod_get_tempo (o)
 #define    musmod_set_tempo(o, v)           _musmod_set_tempo (o, v)
 #define    musmod_get_speed(o)              _musmod_get_speed (o)
