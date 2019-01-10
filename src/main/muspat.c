@@ -509,7 +509,7 @@ void __far _muspatio_write_packed (MUSPATIO *self, MUSPATROWEVENT *event)
 
 bool __far _muspatio_is_end_of_row (MUSPATIO *self)
 {
-    return (self->channel == 32) || (self->offset >= self->row_end);
+    return (self->channel >= muspat_get_channels (self->pattern)) || (self->offset >= self->row_end);
 }
 
 bool __far _muspatio_is_end_of_row_packed (MUSPATIO *self)
@@ -590,6 +590,7 @@ void __far muspatl_free (MUSPATLIST *self)
 
 static const char __halftones[16] = "cCdDefFgGaAb????";
 static const char __octaves[16] = "0123456789??????";
+static const char __hexdigits[16] = "0123456789ABCDEF";
 
 void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event)
 {
@@ -641,17 +642,9 @@ void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event)
             break;
         default:
             v = _get_instrument (v);
-            if (v < 99)
-            {
-                v++;
-                s[3] = '0' + (v / 10);
-                s[4] = '0' + (v % 10);
-            }
-            else
-            {
-                s[3] = '?';
-                s[4] = '?';
-            }
+            v++;
+            s[3] = __hexdigits[v >> 4];
+            s[4] = __hexdigits[v & 0x0f];
             break;
         }
     }
