@@ -82,37 +82,75 @@ typedef struct music_pattern_t
     uint8_t channels;
     uint16_t rows;
     uint16_t size;
-    uint16_t data_off;
-    uint16_t data_seg;  /* DOS segment or EM page */
-    EMSHDL handle;
+    union
+    {
+        struct
+        {
+            void *ptr;
+        } dos;
+        struct
+        {
+            uint16_t offset;
+            uint16_t page;
+            EMSHDL   handle;
+        } em;
+    } data;
 };
 #pragma pack(pop);
 typedef struct music_pattern_t MUSPAT;
 
+MUSPATFLAGS __far __muspat_set_flags (MUSPATFLAGS _flags, MUSPATFLAGS _mask, MUSPATFLAGS _set, bool raise);
+
+#define _muspat_get_flags(o)                (o)->flags
+#define _muspat_set_flags(o, v)             _muspat_get_flags (o) = (v)
+#define _muspat_set_EM_data(o, v)           _muspat_set_flags (o, __muspat_set_flags (_muspat_get_flags (o), ~MUSPATFL_EM, MUSPATFL_EM, v))
+#define _muspat_is_EM_data(o)               ((_muspat_get_flags (o) & MUSPATFL_EM) != 0)
+#define _muspat_set_own_EM_handle(o, v)     _muspat_set_flags (o, __muspat_set_flags (_muspat_get_flags (o), ~MUSPATFL_OWNHDL, MUSPATFL_OWNHDL, v))
+#define _muspat_is_own_EM_handle(o)         ((_muspat_get_flags (o) & MUSPATFL_OWNHDL) != 0)
+#define _muspat_set_data_packed(o, v)       _muspat_set_flags (o, __muspat_set_flags (_muspat_get_flags (o), ~MUSPATFL_PACKED, MUSPATFL_PACKED, v))
+#define _muspat_is_data_packed(o)           ((_muspat_get_flags (o) & MUSPATFL_PACKED) != 0)
+#define _muspat_get_channels(o)             (o)->channels
+#define _muspat_set_channels(o, v)          _muspat_get_channels (o) = (v)
+#define _muspat_get_rows(o)                 (o)->rows
+#define _muspat_set_rows(o, v)              _muspat_get_rows (o) = (v)
+#define _muspat_get_size(o)                 (o)->size
+#define _muspat_set_size(o, v)              _muspat_get_size (o) = (v)
+#define _muspat_get_data(o)                 (o)->data.dos.ptr
+#define _muspat_set_data(o, v)              _muspat_get_data (o) = (v)
+#define _muspat_get_EM_data_handle(o)       (o)->data.em.handle
+#define _muspat_set_EM_data_handle(o, v)    _muspat_get_EM_data_handle (o) = (v)
+#define _muspat_get_EM_data_page(o)         (o)->data.em.page
+#define _muspat_set_EM_data_page(o, v)      _muspat_get_EM_data_page (o) = (v)
+#define _muspat_get_EM_data_offset(o)       (o)->data.em.offset
+#define _muspat_set_EM_data_offset(o, v)    _muspat_get_EM_data_offset (o) = (v)
+#define _muspat_get_EM_data(o)              MK_FP (emsFrameSeg, _muspat_get_EM_data_offset (o))
+#define _muspat_get_row_start(o, r, c)      (_muspat_get_channels (o) * (r) + (c)) * sizeof (MUSPATCHNEVDATA)
+#define _muspat_get_packed_data_start(o)    (_muspat_get_rows (o) * sizeof (uint16_t))
+
 void     __far muspat_init (MUSPAT *self);
-void     __far muspat_set_EM_data (MUSPAT *self, bool value);
-bool     __far muspat_is_EM_data (MUSPAT *self);
-void     __far muspat_set_own_EM_handle (MUSPAT *self, bool value);
-bool     __far muspat_is_own_EM_handle (MUSPAT *self);
-void     __far muspat_set_data_packed (MUSPAT *self, bool value);
-bool     __far muspat_is_data_packed (MUSPAT *self);
-void     __far muspat_set_channels (MUSPAT *self, uint8_t value);
-uint8_t  __far muspat_get_channels (MUSPAT *self);
-void     __far muspat_set_rows (MUSPAT *self, uint16_t value);
-uint16_t __far muspat_get_rows (MUSPAT *self);
-void     __far muspat_set_size (MUSPAT *self, uint16_t value);
-uint16_t __far muspat_get_size (MUSPAT *self);
-void     __far muspat_set_data (MUSPAT *self, void *value);
-void     __far muspat_set_EM_data_handle (MUSPAT *self, EMSHDL value);
-EMSHDL   __far muspat_get_EM_data_handle (MUSPAT *self);
-void     __far muspat_set_EM_data_page (MUSPAT *self, uint16_t value);
-uint16_t __far muspat_get_EM_data_page (MUSPAT *self);
-void     __far muspat_set_EM_data_offset (MUSPAT *self, uint16_t value);
-uint16_t __far muspat_get_EM_data_offset (MUSPAT *self);
+#define        muspat_set_EM_data(o, v)         _muspat_set_EM_data (o, v)
+#define        muspat_is_EM_data(o)             _muspat_is_EM_data (o)
+#define        muspat_set_own_EM_handle(o, v)   _muspat_set_own_EM_handle (o, v)
+#define        muspat_is_own_EM_handle          _muspat_is_own_EM_handle (o)
+#define        muspat_set_data_packed(o, v)     _muspat_set_data_packed (o, v)
+#define        muspat_is_data_packed(o)         _muspat_is_data_packed (o)
+#define        muspat_set_channels(o, v)        _muspat_set_channels (o, v)
+#define        muspat_get_channels(o)           _muspat_get_channels (o)
+#define        muspat_set_rows(o, v)            _muspat_set_rows (o, v)
+#define        muspat_get_rows(o)               _muspat_get_rows (o)
+#define        muspat_set_size(o, v)            _muspat_set_size (o, v)
+#define        muspat_get_size(o)               _muspat_get_size (o)
+#define        muspat_set_data(o, v)            _muspat_set_data (o, v)
+#define        muspat_set_EM_data_handle(o, v)  _muspat_set_EM_data_handle (o, v)
+#define        muspat_get_EM_data_handle(o)     _muspat_get_EM_data_handle (o)
+#define        muspat_set_EM_data_page(o, v)    _muspat_set_EM_data_page (o, v)
+#define        muspat_get_EM_data_page(o)       _muspat_get_EM_data_page (o)
+#define        muspat_set_EM_data_offset(o, v)  _muspat_set_EM_data_offset (o, v)
+#define        muspat_get_EM_data_offset(o)     _muspat_get_EM_data_offset (o)
 void    *__far muspat_get_data (MUSPAT *self);
 void    *__far muspat_map_EM_data (MUSPAT *self);
-uint16_t __far muspat_get_row_start (MUSPAT *self, uint16_t row, uint8_t channel);
-uint16_t __far muspat_get_packed_data_start (MUSPAT *self);
+#define        muspat_get_row_start(o, r, c)    _muspat_get_row_start (o, r, c)
+#define        muspat_get_packed_data_start(o)  _muspat_get_packed_data_start (o)
 void     __far muspat_set_packed_row_start (MUSPAT *self, uint16_t row, uint16_t offset);  /* assumes EM data is mapped before call */
 uint16_t __far muspat_get_packed_row_start (MUSPAT *self, uint16_t row);                   /* assumes EM data is mapped before call */
 uint16_t __far muspat_get_packed_size (MUSPAT *self);                                      /* assumes EM data is mapped before call */
@@ -178,20 +216,40 @@ typedef struct music_patterns_list_t
 };
 typedef struct music_patterns_list_t MUSPATLIST;
 
-void        __far muspatl_init (MUSPATLIST *self);
-void        __far muspatl_set (MUSPATLIST *self, uint16_t index, MUSPAT *item);
-MUSPAT     *__far muspatl_get (MUSPATLIST *self, uint16_t index);
-bool        __far muspatl_set_count (MUSPATLIST *self, uint16_t value);
-uint16_t    __far muspatl_get_count (MUSPATLIST *self);
-void        __far muspatl_set_EM_data (MUSPATLIST *self, bool value);
-bool        __far muspatl_is_EM_data (MUSPATLIST *self);
-void        __far muspatl_set_own_EM_handle (MUSPATLIST *self, bool value);
-bool        __far muspatl_is_own_EM_handle (MUSPATLIST *self);
-void        __far muspatl_set_EM_handle (MUSPATLIST *self, EMSHDL value);
-EMSHDL      __far muspatl_get_EM_handle (MUSPATLIST *self);
-void        __far muspatl_set_EM_handle_name (MUSPATLIST *self);
-uint32_t    __far muspatl_get_used_EM (MUSPATLIST *self);
-void        __far muspatl_free (MUSPATLIST *self);
+/* Methods */
+
+MUSPATLFLAGS __far __muspatl_set_flags (MUSPATLFLAGS _flags, MUSPATLFLAGS _mask, MUSPATLFLAGS _set, bool raise);
+
+#define _muspatl_get_flags(o)               (o)->flags
+#define _muspatl_set_flags(o, v)            _muspatl_get_flags (o) = (v)
+#define _muspatl_set_EM_data(o, v)          _muspatl_set_flags (o, __muspatl_set_flags (_muspatl_get_flags (o), ~MUSPATLFL_EM, MUSPATLFL_EM, v))
+#define _muspatl_is_EM_data(o)              ((_muspatl_get_flags (o) & MUSPATLFL_EM) != 0)
+#define _muspatl_set_own_EM_handle(o, v)    _muspatl_set_flags (o, __muspatl_set_flags (_muspatl_get_flags (o), ~MUSPATLFL_OWNHDL, MUSPATLFL_OWNHDL, v))
+#define _muspatl_is_own_EM_handle(o)        ((_muspatl_get_flags (o) & MUSPATLFL_OWNHDL) != 0)
+#define _muspatl_get_list(o)                & ((o)->list)
+#define _muspatl_get_EM_handle(o)           (o)->handle
+#define _muspatl_set_EM_handle(o, v)        _muspatl_get_EM_handle (o) = (v)
+#define _muspatl_set_EM_handle_name(o, v)   emsSetHandleName (_muspatl_get_EM_handle (o), v)
+#define _muspatl_set_count(o, v)            dynarr_set_size (_muspatl_get_list (o), v)
+#define _muspatl_get_count(o)               dynarr_get_size (_muspatl_get_list (o))
+#define _muspatl_set(o, i, v)               dynarr_set_item (_muspatl_get_list (o), i, v)
+#define _muspatl_get(o, i)                  dynarr_get_item (_muspatl_get_list (o), i)
+#define _muspatl_get_used_EM(o)             ((uint32_t) emsGetHandleSize (_muspatl_get_EM_handle (o)) << 4)
+
+void __far muspatl_init (MUSPATLIST *self);
+#define    muspatl_set_EM_data(o, v)        _muspatl_set_EM_data (o, v)
+#define    muspatl_is_EM_data(o)            _muspatl_is_EM_data (o)
+#define    muspatl_set_own_EM_handle(o, v)  _muspatl_set_own_EM_handle (o, v)
+#define    muspatl_is_own_EM_handle(o)      _muspatl_is_own_EM_handle (o)
+#define    muspatl_set_EM_handle(o, v)      _muspatl_set_EM_handle (o, v)
+#define    muspatl_get_EM_handle(o)         _muspatl_get_EM_handle (o)
+#define    muspatl_set_EM_handle_name(o, v) _muspatl_set_EM_handle_name (o, v)
+#define    muspatl_set_count(o, v)          _muspatl_set_count (o, v)
+#define    muspatl_get_count(o)             _muspatl_get_count (o)
+#define    muspatl_set(o, i, v)             _muspatl_set (o, i, v)
+#define    muspatl_get(o, i)                _muspatl_get (o, i)
+#define    muspatl_get_used_EM(o)           _muspatl_get_used_EM (o)
+void __far muspatl_free (MUSPATLIST *self);
 
 /*** Debug ***/
 
@@ -211,30 +269,11 @@ bool __far DEBUG_dump_pattern (MUSPAT *self, char *s, uint8_t num_channels);    
 
 #pragma aux muspatrowevent_clear "*";
 
+#pragma aux __muspat_set_flags "*";
+
 #pragma aux muspat_init "*";
-#pragma aux muspat_set_EM_data "*";
-#pragma aux muspat_is_EM_data "*";
-#pragma aux muspat_set_own_EM_handle "*";
-#pragma aux muspat_is_own_EM_handle "*";
-#pragma aux muspat_set_data_packed "*";
-#pragma aux muspat_is_data_packed "*";
-#pragma aux muspat_set_channels "*";
-#pragma aux muspat_get_channels "*";
-#pragma aux muspat_set_rows "*";
-#pragma aux muspat_get_rows "*";
-#pragma aux muspat_set_size "*";
-#pragma aux muspat_get_size "*";
-#pragma aux muspat_set_data "*";
-#pragma aux muspat_set_EM_data_handle "*";
-#pragma aux muspat_get_EM_data_handle "*";
-#pragma aux muspat_set_EM_data_page "*";
-#pragma aux muspat_get_EM_data_page "*";
-#pragma aux muspat_set_EM_data_offset "*";
-#pragma aux muspat_get_EM_data_offset "*";
 #pragma aux muspat_get_data "*";
 #pragma aux muspat_map_EM_data "*";
-#pragma aux muspat_get_row_start "*";
-#pragma aux muspat_get_packed_data_start "*";
 #pragma aux muspat_set_packed_row_start "*";
 #pragma aux muspat_get_packed_row_start "*";
 #pragma aux muspat_get_packed_size "*";
@@ -242,19 +281,9 @@ bool __far DEBUG_dump_pattern (MUSPAT *self, char *s, uint8_t num_channels);    
 
 #pragma aux muspatio_open "*";
 
+#pragma aux __muspatl_set_flags "*";
+
 #pragma aux muspatl_init "*";
-#pragma aux muspatl_set "*";
-#pragma aux muspatl_get "*";
-#pragma aux muspatl_set_count "*";
-#pragma aux muspatl_get_count "*";
-#pragma aux muspatl_set_EM_data "*";
-#pragma aux muspatl_is_EM_data "*";
-#pragma aux muspatl_set_own_EM_handle "*";
-#pragma aux muspatl_is_own_EM_handle "*";
-#pragma aux muspatl_set_EM_handle "*";
-#pragma aux muspatl_get_EM_handle "*";
-#pragma aux muspatl_set_EM_handle_name "*";
-#pragma aux muspatl_get_used_EM "*";
 #pragma aux muspatl_free "*";
 
 #if DEBUG == 1

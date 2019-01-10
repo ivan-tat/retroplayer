@@ -46,35 +46,16 @@ void __far muspatrowevent_clear (MUSPATROWEVENT *self)
 
 /*** Music pattern ***/
 
-#define _muspat_get_flags(o)                (o)->flags
-#define _muspat_set_flags(o, v)             _muspat_get_flags (o) = (v)
-#define _muspat_set_EM_data(o, v)           _muspat_set_flags ((o), (_muspat_get_flags (o) & ~MUSPATFL_EM) | ((v) ? MUSPATFL_EM : 0))
-#define _muspat_is_EM_data(o)               ((_muspat_get_flags (o) & MUSPATFL_EM) != 0)
-#define _muspat_set_own_EM_handle(o, v)     _muspat_set_flags ((o), (_muspat_get_flags (o) & ~MUSPATFL_OWNHDL) | ((v) ? MUSPATFL_OWNHDL : 0))
-#define _muspat_is_own_EM_handle(o)         ((_muspat_get_flags (o) & MUSPATFL_OWNHDL) != 0)
-#define _muspat_set_data_packed(o, v)       _muspat_set_flags ((o), (_muspat_get_flags (o) & ~MUSPATFL_PACKED) | ((v) ? MUSPATFL_PACKED : 0))
-#define _muspat_is_data_packed(o)           ((_muspat_get_flags (o) & MUSPATFL_PACKED) != 0)
-#define _muspat_get_channels(o)             (o)->channels
-#define _muspat_set_channels(o, v)          _muspat_get_channels (o) = (v)
-#define _muspat_get_rows(o)                 (o)->rows
-#define _muspat_set_rows(o, v)              _muspat_get_rows (o) = (v)
-#define _muspat_get_size(o)                 (o)->size
-#define _muspat_set_size(o, v)              _muspat_get_size (o) = (v)
-#define _muspat_get_data_off(o)             (o)->data_off
-#define _muspat_set_data_off(o, v)          _muspat_get_data_off (o) = (v)
-#define _muspat_get_data_seg(o)             (o)->data_seg
-#define _muspat_set_data_seg(o, v)          _muspat_get_data_seg (o) = (v)
-#define _muspat_get_data(o)                 MK_FP (_muspat_get_data_seg (o), _muspat_get_data_off (o))
-#define _muspat_set_data(o, v)              { _muspat_set_data_off ((o), FP_OFF (v)); _muspat_set_data_seg ((o), FP_SEG (v)); }
-#define _muspat_get_EM_data_handle(o)       (o)->handle
-#define _muspat_set_EM_data_handle(o, v)    _muspat_get_EM_data_handle (o) = (v)
-#define _muspat_get_EM_data_page(o)         _muspat_get_data_seg (o)
-#define _muspat_set_EM_data_page(o, v)      _muspat_get_EM_data_page (o) = (v)
-#define _muspat_get_EM_data_offset(o)       _muspat_get_data_off (o)
-#define _muspat_set_EM_data_offset(o, v)    _muspat_get_EM_data_offset (o) = (v)
-#define _muspat_get_EM_data(o)              MK_FP (emsFrameSeg, _muspat_get_EM_data_offset (o))
-#define _muspat_get_row_start(o, r, c)      (_muspat_get_channels (o) * (r) + (c)) * 5
-#define _muspat_get_packed_data_start(o)    (_muspat_get_rows (o) * sizeof (uint16_t))
+MUSPATFLAGS __far __muspat_set_flags (MUSPATFLAGS _flags, MUSPATFLAGS _mask, MUSPATFLAGS _set, bool raise)
+{
+    MUSPATFLAGS result;
+
+    result = _flags & _mask;
+    if (raise)
+        result |= _set;
+
+    return result;
+}
 
 void __far muspat_init (MUSPAT *self)
 {
@@ -83,138 +64,6 @@ void __far muspat_init (MUSPAT *self)
         memset(self, 0, sizeof(MUSPAT));
         _muspat_set_EM_data_handle(self, EMSBADHDL);
     }
-}
-
-void __far muspat_set_EM_data (MUSPAT *self, bool value)
-{
-    if (self)
-        _muspat_set_EM_data(self, value);
-}
-
-bool __far muspat_is_EM_data (MUSPAT *self)
-{
-    if (self)
-        return _muspat_is_EM_data(self);
-    else
-        return false;
-}
-
-void __far muspat_set_own_EM_handle (MUSPAT *self, bool value)
-{
-    if (self)
-        _muspat_set_own_EM_handle(self, value);
-}
-
-bool __far muspat_is_own_EM_handle (MUSPAT *self)
-{
-    if (self)
-        return _muspat_is_own_EM_handle(self);
-    else
-        return false;
-}
-
-void __far muspat_set_data_packed (MUSPAT *self, bool value)
-{
-    if (self)
-        _muspat_set_data_packed (self, value);
-}
-
-bool __far muspat_is_data_packed (MUSPAT *self)
-{
-    if (self)
-        return _muspat_is_data_packed (self);
-    else
-        return false;
-}
-
-void __far muspat_set_channels (MUSPAT *self, uint8_t value)
-{
-    if (self)
-        _muspat_set_channels(self, value);
-}
-
-uint8_t __far muspat_get_channels (MUSPAT *self)
-{
-    if (self)
-        return _muspat_get_channels(self);
-    else
-        return 0;
-}
-
-void __far muspat_set_rows (MUSPAT *self, uint16_t value)
-{
-    if (self)
-        _muspat_set_rows(self, value);
-}
-
-uint16_t __far muspat_get_rows (MUSPAT *self)
-{
-    if (self)
-        return _muspat_get_rows(self);
-    else
-        return 0;
-}
-
-void __far muspat_set_size (MUSPAT *self, uint16_t value)
-{
-    if (self)
-        _muspat_set_size(self, value);
-}
-
-uint16_t __far muspat_get_size (MUSPAT *self)
-{
-    if (self)
-        return _muspat_get_size(self);
-    else
-        return 0;
-}
-
-void __far muspat_set_data (MUSPAT *self, void *value)
-{
-    if (self)
-        _muspat_set_data (self, value);
-}
-
-void __far muspat_set_EM_data_handle (MUSPAT *self, EMSHDL value)
-{
-    if (self)
-        _muspat_set_EM_data_handle(self, value);
-}
-
-EMSHDL __far muspat_get_EM_data_handle (MUSPAT *self)
-{
-    if (self)
-        return _muspat_get_EM_data_handle(self);
-    else
-        return EMSBADHDL;
-}
-
-void __far muspat_set_EM_data_page (MUSPAT *self, uint16_t value)
-{
-    if (self)
-        _muspat_set_EM_data_page(self, value);
-}
-
-uint16_t __far muspat_get_EM_data_page (MUSPAT *self)
-{
-    if (self)
-        return _muspat_get_EM_data_page(self);
-    else
-        return 0;
-}
-
-void __far muspat_set_EM_data_offset (MUSPAT *self, uint16_t value)
-{
-    if (self)
-        _muspat_set_EM_data_offset(self, value);
-}
-
-uint16_t __far muspat_get_EM_data_offset (MUSPAT *self)
-{
-    if (self)
-        return _muspat_get_EM_data_offset(self);
-    else
-        return 0;
 }
 
 void *__far muspat_get_data (MUSPAT *self)
@@ -240,16 +89,6 @@ void *__far muspat_map_EM_data (MUSPAT *self)
     }
 
     return NULL;
-}
-
-uint16_t __far muspat_get_row_start (MUSPAT *self, uint16_t row, uint8_t channel)
-{
-    return _muspat_get_row_start (self, row, channel);
-}
-
-uint16_t __far muspat_get_packed_data_start (MUSPAT *self)
-{
-    return _muspat_get_packed_data_start (self);
 }
 
 /* assumes EM data is mapped before call */
@@ -702,6 +541,51 @@ void __far _muspatio_close (MUSPATIO *self)
     muspatio_clear (self);
 }
 
+/*** Music patterns list ***/
+
+MUSPATLFLAGS __far __muspatl_set_flags (MUSPATLFLAGS _flags, MUSPATLFLAGS _mask, MUSPATLFLAGS _set, bool raise)
+{
+    MUSPATLFLAGS result;
+
+    result = _flags & _mask;
+    if (raise)
+        result |= _set;
+
+    return result;
+}
+
+void __far _muspatl_init_item (void *self, void *item)
+{
+    muspat_init((MUSPAT *)item);
+}
+
+void __far _muspatl_free_item (void *self, void *item)
+{
+    muspat_free((MUSPAT *)item);
+}
+
+void __far muspatl_init (MUSPATLIST *self)
+{
+    if (self)
+    {
+        dynarr_init (_muspatl_get_list (self), self, sizeof(MUSPAT), _muspatl_init_item, _muspatl_free_item);
+        _muspatl_set_EM_handle(self, EMSBADHDL);
+    }
+}
+
+void __far muspatl_free (MUSPATLIST *self)
+{
+    if (self)
+    {
+        dynarr_free (_muspatl_get_list (self));
+
+        if (_muspatl_is_own_EM_handle(self))
+            emsFree (_muspatl_get_EM_handle (self));
+    }
+}
+
+/*** Debug ***/
+
 #if DEBUG == 1
 
 static const char __halftones[16] = "cCdDefFgGaAb????";
@@ -968,133 +852,3 @@ bool __far DEBUG_dump_pattern (MUSPAT *pattern, char *s, uint8_t num_channels)
 }
 
 #endif  /* DEBUG */
-
-/*** Music patterns list ***/
-
-#define _muspatl_set_EM_data(o, v)          (o)->flags = ((o)->flags & ~MUSPATLFL_EM) | ((v) ? MUSPATLFL_EM : 0)
-#define _muspatl_is_EM_data(o)              (((o)->flags & MUSPATLFL_EM) != 0)
-#define _muspatl_set_own_EM_handle(o, v)    (o)->flags = ((o)->flags & ~MUSPATLFL_OWNHDL) | ((v) ? MUSPATLFL_OWNHDL : 0)
-#define _muspatl_is_own_EM_handle(o)        (((o)->flags & MUSPATLFL_OWNHDL) != 0)
-#define _muspatl_get_list(o)                &((o)->list)
-#define _muspatl_get_EM_handle(o)           (o)->handle
-#define _muspatl_set_EM_handle(o, v)        _muspatl_get_EM_handle (o) = (v)
-
-static EMSNAME EMS_PATLIST_HANDLE_NAME = "patlist";
-
-void __far _muspatl_init_item (void *self, void *item)
-{
-    muspat_init((MUSPAT *)item);
-}
-
-void __far _muspatl_free_item (void *self, void *item)
-{
-    muspat_free((MUSPAT *)item);
-}
-
-void __far muspatl_init (MUSPATLIST *self)
-{
-    if (self)
-    {
-        dynarr_init (_muspatl_get_list (self), self, sizeof(MUSPAT), _muspatl_init_item, _muspatl_free_item);
-        _muspatl_set_EM_handle(self, EMSBADHDL);
-    }
-}
-
-void __far muspatl_set (MUSPATLIST *self, uint16_t index, MUSPAT *item)
-{
-    if (self)
-        dynarr_set_item (_muspatl_get_list (self), index, item);
-}
-
-MUSPAT *__far muspatl_get (MUSPATLIST *self, uint16_t index)
-{
-    if (self)
-        return dynarr_get_item (_muspatl_get_list (self), index);
-    else
-        return NULL;
-}
-
-bool __far muspatl_set_count (MUSPATLIST *self, uint16_t count)
-{
-    if (self)
-        return dynarr_set_size (_muspatl_get_list (self), count);
-    else
-        return false;
-}
-
-uint16_t __far muspatl_get_count (MUSPATLIST *self)
-{
-    if (self)
-        return dynarr_get_size (_muspatl_get_list (self));
-    else
-        return 0;
-}
-
-void __far muspatl_set_EM_data (MUSPATLIST *self, bool value)
-{
-    if (self)
-        _muspatl_set_EM_data(self, value);
-}
-
-bool __far muspatl_is_EM_data (MUSPATLIST *self)
-{
-    if (self)
-        return _muspatl_is_EM_data(self);
-    else
-        return false;
-}
-
-void __far muspatl_set_own_EM_handle (MUSPATLIST *self, bool value)
-{
-    if (self)
-        _muspatl_set_own_EM_handle(self, value);
-}
-
-bool __far muspatl_is_own_EM_handle (MUSPATLIST *self)
-{
-    if (self)
-        return _muspatl_is_own_EM_handle(self);
-    else
-        return false;
-}
-
-void __far muspatl_set_EM_handle (MUSPATLIST *self, EMSHDL value)
-{
-    if (self)
-        _muspatl_set_EM_handle(self, value);
-}
-
-EMSHDL __far muspatl_get_EM_handle (MUSPATLIST *self)
-{
-    if (self)
-        return _muspatl_get_EM_handle(self);
-    else
-        return EMSBADHDL;
-}
-
-void __far muspatl_set_EM_handle_name (MUSPATLIST *self)
-{
-    if (self)
-        if (_muspatl_is_own_EM_handle(self))
-            emsSetHandleName (_muspatl_get_EM_handle (self), EMS_PATLIST_HANDLE_NAME);
-}
-
-uint32_t __far muspatl_get_used_EM (MUSPATLIST *self)
-{
-    if (self)
-        if (_muspatl_is_EM_data(self))
-            return 16 * emsGetHandleSize (_muspatl_get_EM_handle (self));
-
-    return 0;
-}
-
-void __far muspatl_free (MUSPATLIST *self)
-{
-    if (self)
-    {
-        dynarr_free (_muspatl_get_list (self));
-
-        if (_muspatl_is_own_EM_handle(self))
-            emsFree (_muspatl_get_EM_handle (self));
-    }
-}

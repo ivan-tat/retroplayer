@@ -323,10 +323,10 @@ typedef struct _s3m_loader_t
     char *pat_buf;
     bool signed_data;
     uint8_t   ins_count;
-    uint16_t *ins_offsets;
-    _S3M_INSINFO *ins_info;
     uint8_t   smp_count;
     uint8_t   pat_count;
+    uint16_t *ins_offsets;
+    _S3M_INSINFO *ins_info;
     uint16_t *pat_offsets;
     uint16_t pat_EM_pages;
     uint16_t pat_EM_page;
@@ -365,30 +365,6 @@ void load_s3m_init (LOADER_S3M *self)
         memset (_Self, 0, sizeof (_S3M_LOADER));
 }
 
-bool __near load_s3m_allocbuf (LOADER_S3M *self)
-{
-    _S3M_LOADER *_Self = self;
-
-    if (_Self)
-    {
-        if (!_Self->in_buf)
-        {
-            _Self->in_buf = __new (_S3M_IN_PATTERN_SIZE_MAX);
-            if (!_Self->in_buf)
-                return false;
-        }
-        if (!_Self->pat_buf)
-        {
-            _Self->pat_buf = __new (_S3M_OUT_PATTERN_SIZE_MAX);
-            if (!_Self->pat_buf)
-                return false;
-        }
-        return true;
-    }
-
-    return false;
-}
-
 void __near load_s3m_alloc_patterns (LOADER_S3M *self)
 {
     _S3M_LOADER *_Self = self;
@@ -401,55 +377,63 @@ void __near load_s3m_alloc_patterns (LOADER_S3M *self)
     uint16_t freepages;
     EMSHDL handle;
 
-    if (UseEMS)
+    track = _Self->track;
+    patterns = musmod_get_patterns (track);
+    num_patterns = muspatl_get_count (patterns);
+    patsize = _calc_max_raw_pattern_size (_S3M_PATTERN_ROWS, musmod_get_channels_count (track));
+    patperpage = EM_PAGE_SIZE / patsize;
+    patpages = (num_patterns + patperpage - 1) / patperpage;
+    freepages = emsGetFreePagesCount ();
+
+    if (patpages <= freepages)
+        _Self->pat_EM_pages = patpages;
+    else
+        _Self->pat_EM_pages = freepages;
+
+    if (DEBUG_FILE_S3M_LOAD)
+        DEBUG_INFO_ ("load_s3m_alloc_patterns",
+            "Memory info:" CRLF
+            "All patterns size:       %5lu KiB (%u patterns, each %u bytes size)" CRLF
+            "All patterns size in EM: %5lu KiB (%u patterns, %u pages, %u per page)" CRLF
+            "Free EM:                 %5lu KiB (%u patterns, %u pages)" CRLF
+            "Requested EM:            %5lu KiB (%u patterns, %u pages)",
+            ((uint32_t) patsize * num_patterns + 1024) / 1024, num_patterns, patsize,
+            (uint32_t) patpages * EM_PAGE_SIZE / 1024, patpages * patperpage, patpages, patperpage,
+            (uint32_t) freepages * EM_PAGE_SIZE / 1024, freepages * patperpage, freepages,
+            (uint32_t) _Self->pat_EM_pages * EM_PAGE_SIZE / 1024, _Self->pat_EM_pages * patperpage, _Self->pat_EM_pages
+        );
+
+    handle = emsAlloc (_Self->pat_EM_pages);
+    if (emsEC != E_EMS_SUCCESS)
     {
-        track = _Self->track;
-        patterns = musmod_get_patterns (track);
-        num_patterns = muspatl_get_count (patterns);
-        patsize = _calc_max_raw_pattern_size (_S3M_PATTERN_ROWS, musmod_get_channels_count (track));
-        patperpage = EM_PAGE_SIZE / patsize;
-        patpages = (num_patterns + patperpage - 1) / patperpage;
-        freepages = emsGetFreePagesCount ();
-
-        if (patpages <= freepages)
-            _Self->pat_EM_pages = patpages;
-        else
-            _Self->pat_EM_pages = freepages;
-
-        if (DEBUG_FILE_S3M_LOAD)
-            DEBUG_INFO_ ("load_s3m_alloc_patterns",
-                "Memory info:" CRLF
-                "All patterns size:       %5lu KiB (%u patterns, each %u bytes size)" CRLF
-                "All patterns size in EM: %5lu KiB (%u patterns, %u pages, %u per page)" CRLF
-                "Free EM:                 %5lu KiB (%u patterns, %u pages)" CRLF
-                "Requested EM:            %5lu KiB (%u patterns, %u pages)",
-                ((uint32_t) patsize * num_patterns + 1024) / 1024, num_patterns, patsize,
-                (uint32_t) patpages * EM_PAGE_SIZE / 1024, patpages * patperpage, patpages, patperpage,
-                (uint32_t) freepages * EM_PAGE_SIZE / 1024, freepages * patperpage, freepages,
-                (uint32_t) _Self->pat_EM_pages * EM_PAGE_SIZE / 1024, _Self->pat_EM_pages * patperpage, _Self->pat_EM_pages
-            );
-
-        handle = emsAlloc (_Self->pat_EM_pages);
-        if (emsEC != E_EMS_SUCCESS)
-        {
-            DEBUG_ERR_ ("load_s3m_alloc_patterns", "Failed to allocate EM for %s.", "patterns");
-            muspatl_set_EM_data (patterns, false);
-            return;
-        }
-
-        muspatl_set_EM_data (patterns, true);
-        muspatl_set_own_EM_handle (patterns, true);
-        muspatl_set_EM_handle (patterns, handle);
-
-        _Self->pat_EM_page_offset = 0;
-        _Self->pat_EM_page = 0;
+        DEBUG_ERR_ ("load_s3m_alloc_patterns", "Failed to allocate EM for %s.", "patterns");
+        muspatl_set_EM_data (patterns, false);
+        return;
     }
+
+    muspatl_set_EM_data (patterns, true);
+    muspatl_set_own_EM_handle (patterns, true);
+    muspatl_set_EM_handle (patterns, handle);
+    muspatl_set_EM_handle_name (patterns, "patlist");
+
+    _Self->pat_EM_page_offset = 0;
+    _Self->pat_EM_page = 0;
 }
 
 /**********************************************************************/
 
-typedef unsigned char _s3m_pattern_event_flags_t;
-typedef _s3m_pattern_event_flags_t _S3M_PATEVENTFLAGS;
+typedef struct _s3m_pattern_channel_event_data_t
+{
+    unsigned char instrument;
+    unsigned char note;
+    unsigned char note_volume;
+    unsigned char command;
+    unsigned char parameter;
+};
+typedef struct _s3m_pattern_channel_event_data_t _S3M_PATCHNEVDATA;
+
+typedef unsigned char _s3m_pattern_channel_event_flags_t;
+typedef _s3m_pattern_channel_event_flags_t _S3M_PATCHNEVFLAGS;
 
 #define _S3M_PATEVFL_INS    (1 << 0)
 #define _S3M_PATEVFL_NOTE   (1 << 1)
@@ -457,17 +441,19 @@ typedef _s3m_pattern_event_flags_t _S3M_PATEVENTFLAGS;
 #define _S3M_PATEVFL_CMD    (1 << 3)
 #define _S3M_PATEVFL_ROWEND (1 << 4)
 
-typedef struct _s3m_pattern_event_t
+typedef struct _s3m_pattern_channel_event_t
 {
-    _S3M_PATEVENTFLAGS flags;
-    unsigned char channel;
-    unsigned char instrument;
-    unsigned char note;
-    unsigned char note_volume;
-    unsigned char command;
-    unsigned char parameter;
+    _S3M_PATCHNEVFLAGS flags;
+    _S3M_PATCHNEVDATA data;
 };
-typedef struct _s3m_pattern_event_t _S3M_PATEVENT;
+typedef struct _s3m_pattern_channel_event_t _S3M_PATCHNEVENT;
+
+typedef struct _s3m_pattern_row_event_t
+{
+    unsigned char channel;
+    _S3M_PATCHNEVENT event;
+};
+typedef struct _s3m_pattern_row_event_t _S3M_PATROWEVENT;
 
 typedef struct _s3m_pattern_io_t
 {
@@ -506,23 +492,23 @@ bool __near _s3m_patio_eof (_S3M_PATIO *self)
     return self->size <= self->offset;
 }
 
-bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATEVENT *event)
+bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATROWEVENT *event)
 {
     unsigned char flags, v[2];
 
     if (!_s3m_patio_read (self, &flags, 1))
         return false;
 
-    event->instrument  = CHN_INS_NONE;
-    event->note        = CHN_NOTE_NONE;
-    event->note_volume = CHN_NOTEVOL_NONE;
-    event->command     = CHN_CMD_NONE;
-    event->parameter   = 0;
+    event->event.data.instrument  = CHN_INS_NONE;
+    event->event.data.note        = CHN_NOTE_NONE;
+    event->event.data.note_volume = CHN_NOTEVOL_NONE;
+    event->event.data.command     = CHN_CMD_NONE;
+    event->event.data.parameter   = 0;
 
     if (flags)
     {
-        event->flags = 0;
         event->channel = flags & 0x1f;
+        event->event.flags = 0;
 
         if (flags & 0x20)
         {
@@ -535,14 +521,14 @@ bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATEVENT *event)
             case 0xff:
                 break;
             case 0xfe:
-                event->note = CHN_NOTE_OFF;
-                event->flags |= _S3M_PATEVFL_NOTE;
+                event->event.data.note = CHN_NOTE_OFF;
+                event->event.flags |= _S3M_PATEVFL_NOTE;
                 break;
             default:
                 if (((v[0] & 0x0f) <= 11) && ((v[0] >> 4) <= 7))
                 {
-                    event->note = v[0];
-                    event->flags |= _S3M_PATEVFL_NOTE;
+                    event->event.data.note = v[0];
+                    event->event.flags |= _S3M_PATEVFL_NOTE;
                 }
                 break;
             }
@@ -554,8 +540,8 @@ bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATEVENT *event)
             default:
                 if (v[1] <= 99)
                 {
-                    event->instrument = v[1];
-                    event->flags |= _S3M_PATEVFL_INS;
+                    event->event.data.instrument = v[1];
+                    event->event.flags |= _S3M_PATEVFL_INS;
                 }
                 break;
             }
@@ -574,8 +560,8 @@ bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATEVENT *event)
             default:
                 if (v[0] <= 64)
                 {
-                    event->note_volume = v[0];
-                    event->flags |= _S3M_PATEVFL_VOL;
+                    event->event.data.note_volume = v[0];
+                    event->event.flags |= _S3M_PATEVFL_VOL;
                 }
                 break;
             }
@@ -594,9 +580,9 @@ bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATEVENT *event)
             default:
                 if (v[0] <= 26)
                 {
-                    event->command = v[0];
-                    event->parameter = v[1];
-                    event->flags |= _S3M_PATEVFL_CMD;
+                    event->event.data.command = v[0];
+                    event->event.data.parameter = v[1];
+                    event->event.flags |= _S3M_PATEVFL_CMD;
                 }
                 break;
             }
@@ -605,8 +591,8 @@ bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATEVENT *event)
     }
     else
     {
-        event->flags = _S3M_PATEVFL_ROWEND;
         event->channel = 0;
+        event->event.flags = _S3M_PATEVFL_ROWEND;
         return true;
     }
 }
@@ -630,7 +616,7 @@ bool __near load_s3m_convert_pattern (LOADER_S3M *self, uint8_t *src, uint16_t s
 {
     _S3M_LOADER *_Self = self;
     _S3M_PATIO fi;
-    _S3M_PATEVENT ei;
+    _S3M_PATROWEVENT ei;
     MUSPATIO f;
     MUSPATROWEVENT e;
     MUSPATCHNEVENT events[_S3M_MAX_CHANNELS];
@@ -683,7 +669,7 @@ bool __near load_s3m_convert_pattern (LOADER_S3M *self, uint8_t *src, uint16_t s
         offset = fi.offset;
         if (_s3m_patio_read_event (&fi, &ei))
         {
-            if (ei.flags & _S3M_PATEVFL_ROWEND)
+            if (ei.event.flags & _S3M_PATEVFL_ROWEND)
             {
                 if (DEBUG_FILE_S3M_LOAD)
                     _DEBUG_LOG (DBGLOG_MSG, NULL, 0, NULL,
@@ -710,30 +696,30 @@ bool __near load_s3m_convert_pattern (LOADER_S3M *self, uint8_t *src, uint16_t s
                 muspatrowevent_clear (&e);
                 e.channel = ei.channel;
 
-                if (ei.flags)
+                if (ei.event.flags)
                 {
-                    if (ei.flags & _S3M_PATEVFL_INS)
+                    if (ei.event.flags & _S3M_PATEVFL_INS)
                     {
-                        e.event.data.instrument = ei.instrument;
+                        e.event.data.instrument = ei.event.data.instrument;
                         e.event.flags |= MUSPATCHNEVFL_INS;
                     }
 
-                    if (ei.flags & _S3M_PATEVFL_NOTE)
+                    if (ei.event.flags & _S3M_PATEVFL_NOTE)
                     {
-                        e.event.data.note = ei.note;
+                        e.event.data.note = ei.event.data.note;
                         e.event.flags |= MUSPATCHNEVFL_NOTE;
                     }
 
-                    if (ei.flags & _S3M_PATEVFL_VOL)
+                    if (ei.event.flags & _S3M_PATEVFL_VOL)
                     {
-                        e.event.data.note_volume = ei.note_volume;
+                        e.event.data.note_volume = ei.event.data.note_volume;
                         e.event.flags |= MUSPATCHNEVFL_VOL;
                     }
 
-                    if (ei.flags & _S3M_PATEVFL_CMD)
+                    if (ei.event.flags & _S3M_PATEVFL_CMD)
                     {
-                        e.event.data.command = ei.command;
-                        e.event.data.parameter = ei.parameter;
+                        e.event.data.command = ei.event.data.command;
+                        e.event.data.parameter = ei.event.data.parameter;
                         e.event.flags |= MUSPATCHNEVFL_CMD;
                     }
 
@@ -1243,6 +1229,7 @@ void __near load_s3m_alloc_samples (LOADER_S3M *self)
     }
     pcmsmpl_set_EM_data (samples, true);
     pcmsmpl_set_EM_handle (samples, handle);
+    pcmsmpl_set_EM_handle_name (samples, "smplist");
 
     _Self->smp_EM_pages = pages;
     _Self->smp_EM_page = 0;
@@ -1578,14 +1565,24 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
     if (!load_s3m_load_pat_offsets (_Self))
         return NULL;
 
-    if (!load_s3m_allocbuf (_Self))
+    _Self->in_buf = __new (_S3M_IN_PATTERN_SIZE_MAX);
+    if (!_Self->in_buf)
     {
-        DEBUG_ERR_ ("load_s3m_load", "Failed to allocate memory for %s.", "file buffer");
+        DEBUG_ERR_ ("load_s3m_load", "Failed to allocate memory for %s.", "input pattern buffer");
         _Self->err = E_S3M_DOS_MEM_ALLOC;
         return NULL;
     }
 
-    load_s3m_alloc_patterns (_Self);
+    _Self->pat_buf = __new (_S3M_OUT_PATTERN_SIZE_MAX);
+    if (!_Self->pat_buf)
+    {
+        DEBUG_ERR_ ("load_s3m_load", "Failed to allocate memory for %s.", "output pattern buffer");
+        _Self->err = E_S3M_DOS_MEM_ALLOC;
+        return NULL;
+    }
+
+    if (UseEMS)
+        load_s3m_alloc_patterns (_Self);
 
     count = muspatl_get_count (patterns);
     for (i = 0; i < count; i++)
@@ -1616,12 +1613,6 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
         if (_get_instrument_info (_Self, i).smp_num >= 0)
             if (!load_s3m_load_sample (_Self, i))
                 return NULL;
-
-    if (pcmsmpl_is_EM_data (samples))
-        pcmsmpl_set_EM_handle_name (samples, "smplist");
-
-    if (muspatl_is_EM_data (patterns))
-        muspatl_set_EM_handle_name (patterns);
 
     musmod_set_loaded (track, true);
 
