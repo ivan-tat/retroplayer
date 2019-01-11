@@ -21,6 +21,8 @@
 
 #include "player/w_pat.h"
 
+static const char _hexdigits[16] = "0123456789ABCDEF";
+
 void __far win_pattern_init(SCRWIN *self)
 {
     scrwin_init(
@@ -54,8 +56,8 @@ void __near draw_channel_event (MUSPATCHNEVENT *event)
     if ((_ins >= CHN_INS_MIN) && (_ins <= CHN_INS_MAX))
     {
         _ins = _get_instrument (_ins) + 1;
-        output[1] = '0' + (_ins / 10);
-        output[2] = '0' + (_ins % 10);
+        output[1] = _hexdigits[_ins >> 4];
+        output[2] = _hexdigits[_ins & 0x0f];
     }
     else
     {
@@ -66,8 +68,8 @@ void __near draw_channel_event (MUSPATCHNEVENT *event)
     output[3] = ' ';
     if (_vol <= CHN_NOTEVOL_MAX)
     {
-        output[4] = '0' + (_vol / 10);
-        output[5] = '0' + (_vol % 10);
+        output[4] = _hexdigits[_vol >> 4];
+        output[5] = _hexdigits[_vol & 0x0f];
     }
     else
     if (_vol == CHN_NOTEVOL_NONE)
@@ -95,7 +97,8 @@ void __near draw_channel_event (MUSPATCHNEVENT *event)
         else
             output[7] = '?';
 
-        snprintf (& (output[8]), 2, "%02X", _parm);
+        output[8] = _hexdigits[_parm >> 4];
+        output[9] = _hexdigits[_parm & 0x0f];
     }
     output[10] = 0;
     printf ("%s", output);
@@ -153,7 +156,7 @@ void __near __pascal display_row(uint8_t ordr, uint8_t row)
 
     textbackground(_black);
     textcolor(_lightgray);
-    printf(" %2hu ", row);
+    printf(" %02hX ", row);
     textcolor(_darkgray);
     printf("\xb3");
 

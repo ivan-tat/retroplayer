@@ -33,23 +33,35 @@ void __far win_help_draw(SCRWIN *self)
 
         if (scrwin_get_flags(self) & WINFL_FULLREDRAW)
         {
-            clrscr();
-            printf(
-                "  Keys while playing:" CRLF
-                CRLF
+            clrscr ();
+            textcolor (_white);
+            printf (
+                "Global keys:" CRLF
+            );
+            textcolor (_lightgray);
+            printf (
                 "  F1 .... this help screen" CRLF
                 "  F2 .... display channels information" CRLF
                 "  F3 .... display current pattern" CRLF
-                "  F4 .... display instruments information" CRLF
-                "  F5 .... display samples memory positions" CRLF
+                "  F4 .... display instruments list" CRLF
+                "  F5 .... display samples list" CRLF
                 "  F6 .... display debug information" CRLF
                 "  P ..... pause playback (only on SB16)" CRLF
                 "  L ..... enable/disable song loop." CRLF
                 "  <Alt>+(<1>-<0>,<Q>-<R>) ... toggle channel 1-16 on/off." CRLF
-                "  + ..... jump to next pattern." CRLF
+                "  + ..... jump to next pattern" CRLF
                 "  - ..... jump to previous pattern" CRLF
                 "  D ..... DOS shell." CRLF
-                "  ESC ... stop playback and exit."
+                "  ESC ... stop playback and exit" CRLF
+            );
+            textcolor (_white);
+            printf (
+                "Samples list:" CRLF
+            );
+            textcolor (_lightgray);
+            printf (
+                "  < ..... previous page." CRLF
+                "  > ..... next page" CRLF
             );
         }
     }
