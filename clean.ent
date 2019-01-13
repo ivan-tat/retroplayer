@@ -89,6 +89,7 @@
 ./src/debug.asm
 ./src/dos/
 ./src/dos/ems.asm
+./src/dstream.asm
 ./src/dynarray.asm
 ./src/hw/
 ./src/hw/dma.asm

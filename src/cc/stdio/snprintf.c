@@ -8,19 +8,20 @@
 #include <stdarg.h>
 
 #include "pascal.h"
+#include "dstream.h"
 
 #include "cc/stdio.h"
 #include "cc/stdio/_printf.h"
-
-#define BUFSIZE 128
 
 int cc_snprintf(char *str, size_t size, const char *format, ...)
 {
     va_list ap;
     DATASTREAM ds;
     va_start(ap, format);
-    dataStreamInitMemory(&ds, str, size);
-    _dsprintf(&ds, format, ap);
+    datastream_init (&ds, DSFLAG_DIRECT, NULL);
+    datastream_set_limit (&ds, size);
+    datastream_set_output (&ds, str);
+    _printf (&ds, format, ap);
     str[ds.written] = 0;
     va_end(ap);
     return ds.written;

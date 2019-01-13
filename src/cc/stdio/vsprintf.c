@@ -8,6 +8,7 @@
 #include <stdarg.h>
 
 #include "pascal.h"
+#include "dstream.h"
 
 #include "cc/stdio.h"
 #include "cc/stdio/_printf.h"
@@ -15,8 +16,10 @@
 int cc_vsprintf(char *str, const char *format, va_list ap)
 {
     DATASTREAM ds;
-    dataStreamInitMemory(&ds, str, 0);
-    _dsprintf(&ds, format, ap);
+    datastream_init (&ds, DSFLAG_DIRECT, NULL);
+    datastream_set_limit (&ds, 0);
+    datastream_set_output (&ds, str);
+    _printf (&ds, format, ap);
     str[ds.written] = 0;
     return ds.written;
 }

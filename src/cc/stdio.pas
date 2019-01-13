@@ -37,6 +37,7 @@ uses
     ctype,
     dos_,
     string_,
+    dstream,
     io;
 
 procedure pascal_write(s: pchar); far;
@@ -56,12 +57,7 @@ procedure cc_fsetpos; external;
 procedure cc_fwrite; external;
 
 (*$L stdio/_printf.obj*)
-procedure dataStreamFlush; external;
-procedure dataStreamWrite; external;
-procedure dataStreamInitMemory; external;
-procedure dataStreamInitStdOut; external;
-procedure dataStreamInitFile; external;
-procedure _dsprintf; external;
+procedure _printf; external;
 
 (*$L stdio/printf.obj*)
 procedure cc_printf; external;

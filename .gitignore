@@ -44,6 +44,7 @@
 scripts/ow/tmp/
 src/common.asm
 src/debug.asm
+src/dstream.asm
 src/dynarray.asm
 src/pascal.asm
 src/startup.asm

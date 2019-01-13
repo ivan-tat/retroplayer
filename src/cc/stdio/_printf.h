@@ -19,55 +19,29 @@
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/string.h"
+#include "dstream.h"
 
 #include "cc/stdio.h"
 
-/* Data stream */
+bool __far _system_flush_file (DATASTREAM *self);
+bool __far _system_flush_stdout (DATASTREAM *self);
 
-typedef enum
-{
-    DATASTREAM_TYPE_UNDEFINED = 0,
-    DATASTREAM_TYPE_MEMORY    = 1,
-    DATASTREAM_TYPE_STDOUT    = 2,
-    DATASTREAM_TYPE_FILE      = 3
-} DATASTREAMTYPE;
+void __far _printf (DATASTREAM *stream, const char *format, va_list ap);
 
-typedef void __far dataStreamFlushProc_t(const char *buf);
+/*** Externals ***/
 
-typedef struct dataStream_t
-{
-    DATASTREAMTYPE type;
-    size_t limit;   /* only for memory stream */
-    bool stop;      /* only for memory stream */
-    uint8_t termSize;
-    uint32_t term;  /* 1-4 bytes or far pointer to terminator if longer */
-    char *buf;      /* buffer */
-    size_t bufSize; /* buffer */
-    size_t pos;     /* buffer */
-    size_t written;
-    void *output;   /* "FILE *stream" or "char *ptr" */
-    dataStreamFlushProc_t *flush;   /* only for printf() */
-};
-typedef struct dataStream_t DATASTREAM;
-
-void dataStreamFlush(DATASTREAM *self);
-void dataStreamWrite(DATASTREAM *self, const void *ptr, size_t len);
-void dataStreamInitMemory(DATASTREAM *self, void *ptr, size_t limit);
-void dataStreamInitStdOut(DATASTREAM *self, char *buf, size_t size);
-void dataStreamInitFile(DATASTREAM *self, FILE *stream, char *buf, size_t size);
-
-void _dsprintf(DATASTREAM *stream, const char *format, va_list ap);
+extern void __far __pascal pascal_write (const char *str);
 
 /*** Linking ***/
 
 #ifdef __WATCOMC__
 
-#pragma aux dataStreamFlush "*";
-#pragma aux dataStreamWrite "*";
-#pragma aux dataStreamInitMemory "*";
-#pragma aux dataStreamInitStdOut "*";
-#pragma aux dataStreamInitFile "*";
-#pragma aux _dsprintf "*";
+#pragma aux _system_flush_file "*";
+#pragma aux _system_flush_stdout "*";
+
+#pragma aux _printf "*";
+
+#pragma aux pascal_write "*" modify [ ax bx cx dx si di es ];
 
 #endif  /* __WATCOMC__ */
 

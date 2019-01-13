@@ -12,155 +12,27 @@
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/string.h"
+#include "dstream.h"
 
 #include "cc/stdio.h"
 #include "cc/stdio/_printf.h"
 
-extern void __far __pascal pascal_write(const char *str);
-
-#ifdef __WATCOMC__
-#pragma aux pascal_write "*" modify [ ax bx cx dx si di es ];
-#endif
-
-/*** Data stream ***/
-
-void __far _writestdout(const char *str)
+bool __far _system_flush_file (DATASTREAM *self)
 {
-    pascal_write(str);
+    if (self->output)
+        return (fwrite (self->buf, self->pos, 1, (FILE *) self->output)) == 1;
+    else
+        return false;
 }
 
-void __near _dataStream_init(DATASTREAM *self)
+bool __far _system_flush_stdout (DATASTREAM *self)
 {
-    memset(self, 0, sizeof(DATASTREAM));
+    self->buf[self->pos] = 0;
+    pascal_write (self->buf);
+    return true;
 }
 
-void __near _dataStreamTerminate(DATASTREAM *self)
-{
-    if (self->buf)
-        if (self->termSize)
-            memcpy(self->buf + self->pos,
-                (self->termSize <= 4) ? &self->term : (void *)self->term,
-                self->termSize);
-}
-
-void dataStreamFlush(DATASTREAM *self)
-{
-    size_t size;
-
-    if (self->pos)
-    {
-        size = self->pos;
-        switch (self->type)
-        {
-            case DATASTREAM_TYPE_MEMORY:
-                /* we do not use buffer here */
-                break;
-
-            case DATASTREAM_TYPE_STDOUT:
-                _dataStreamTerminate(self);
-                self->flush(self->buf);
-                self->written += size;
-                break;
-
-            case DATASTREAM_TYPE_FILE:
-                if (self->output)
-                {
-                    _dataStreamTerminate(self);
-                    if (fwrite(self->buf, size, 1, (FILE *)self->output))
-                        self->written += size;
-                }
-                break;
-
-            default:
-                break;
-        }
-        self->pos = 0;
-    }
-}
-
-void dataStreamWrite(DATASTREAM *self, const void *ptr, size_t len)
-{
-    const char *input;
-    size_t maxsize, left, __n;
-
-    switch (self->type)
-    {
-        case DATASTREAM_TYPE_MEMORY:
-            if (self->output)
-            {
-                if (self->stop)
-                    break;
-                if (self->limit)
-                {
-                    left = self->limit - self->written;
-                    if (len > left)
-                        len = left;
-                }
-                memcpy(MK_FP(FP_SEG(self->output), FP_OFF(self->output) + self->pos),
-                    ptr, len);
-                self->pos += len;
-                self->written += len;
-                if (self->limit)
-                    self->stop = (self->written == self->limit);
-            }
-            break;
-
-        case DATASTREAM_TYPE_STDOUT:
-        case DATASTREAM_TYPE_FILE:
-            input = ptr;
-            maxsize = self->bufSize - self->termSize;
-            do
-            {
-                left = maxsize - self->pos;
-                if (left > 0)
-                {
-                    __n = len;
-                    if (__n > left)
-                        __n = left;
-                    memcpy(&self->buf[self->pos], input, __n);
-                    input += __n;
-                    self->pos += __n;
-                    len -= __n;
-                }
-                if (self->pos == maxsize)
-                    dataStreamFlush(self);
-            } while (len && !self->stop);
-            break;
-
-        default:
-            break;
-    }
-}
-
-void dataStreamInitMemory(DATASTREAM *self, void *ptr, size_t limit)
-{
-    _dataStream_init(self);
-    self->type = DATASTREAM_TYPE_MEMORY;
-    self->output = ptr;
-    self->limit = limit;
-}
-
-void dataStreamInitStdOut(DATASTREAM *self, char *buf, size_t size)
-{
-    _dataStream_init(self);
-    self->type = DATASTREAM_TYPE_STDOUT;
-    self->termSize = 1;
-    //self->term = 0;    /* already set */
-    self->buf = buf;
-    self->bufSize = size;
-    self->flush = &_writestdout;
-}
-
-void dataStreamInitFile(DATASTREAM *self, FILE *stream, char *buf, size_t size)
-{
-    _dataStream_init(self);
-    self->type = DATASTREAM_TYPE_FILE;
-    self->buf = buf;
-    self->bufSize = size;
-    self->output = (void *)stream;
-}
-
-/*** _dsprintf() ***/
+/*** _printf () ***/
 
 #define HEXDIGIT_LC(x) ((x) < 10 ? '0' + (x) : 'a' + (x) - 10)
 #define HEXDIGIT_UC(x) ((x) < 10 ? '0' + (x) : 'A' + (x) - 10)
@@ -171,7 +43,7 @@ void __near write_uchar
     const unsigned char __v
 )
 {
-    dataStreamWrite(stream, &__v, 1);
+    datastream_write (stream, &__v, 1);
 }
 
 void __near write_udecimal
@@ -213,7 +85,7 @@ void __near write_udecimal
         len++;
     }
 
-    dataStreamWrite(stream, p, len);
+    datastream_write (stream, p, len);
 }
 
 /* ------------------------------------------------------------------ */
@@ -274,12 +146,12 @@ void __near write_hexadecimal
         len++;
     } while (_value || _count);
 
-    dataStreamWrite(stream, p, len);
+    datastream_write (stream, p, len);
 }
 
 /* ------------------------------------------------------------------ */
 
-void _dsprintf(DATASTREAM *stream, const char *format, va_list ap)
+void __far _printf (DATASTREAM *stream, const char *format, va_list ap)
 {
     int i, j;
     bool end;
@@ -311,7 +183,7 @@ void _dsprintf(DATASTREAM *stream, const char *format, va_list ap)
         {
             case '%':
                 if (i - j > 0)
-                    dataStreamWrite(stream, format + j, i - j);
+                    datastream_write (stream, format + j, i - j);
                 i++;
                 f_leadingzeroes = false;
                 f_count = 0;
@@ -325,7 +197,7 @@ void _dsprintf(DATASTREAM *stream, const char *format, va_list ap)
                     switch (c = format[i])
                     {
                         case '%':
-                            dataStreamWrite(stream, "%", 1);
+                            datastream_write (stream, "%", 1);
                             break;
 
                         case '0':
@@ -424,7 +296,7 @@ void _dsprintf(DATASTREAM *stream, const char *format, va_list ap)
 
                         case 's':
                             pvalue = va_arg(ap, char *);
-                            dataStreamWrite(stream, pvalue, strlen(pvalue));
+                            datastream_write (stream, pvalue, strlen(pvalue));
                             break;
 
                         case '\0':
@@ -441,7 +313,7 @@ void _dsprintf(DATASTREAM *stream, const char *format, va_list ap)
 
             case '\0':
                 if (i - j)
-                    dataStreamWrite(stream, format + j, i - j);
+                    datastream_write (stream, format + j, i - j);
                 end = true;
                 break;
 
@@ -449,5 +321,5 @@ void _dsprintf(DATASTREAM *stream, const char *format, va_list ap)
                 i++;
         }
     }
-    dataStreamFlush(stream);
+    datastream_flush (stream);
 }
