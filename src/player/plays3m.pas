@@ -20,6 +20,7 @@ uses
     malloc,
     errno_,
     debug,
+    common,
     hwowner,
     pic,
     dma,
@@ -48,11 +49,6 @@ uses
 {$L w_smp.obj}
 {$L w_dbg.obj}
 {$L plays3m.obj}
-
-var
-    chnlastinst: array[0..MUSMOD_CHANNELS_MAX-1] of Byte;
-    lastrow: Byte;
-    startchn: Byte;
 
 procedure plays3m_main; far; external;
 

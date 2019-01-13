@@ -11,6 +11,7 @@
 #include "pascal.h"
 #include "cc/conio.h"
 #include "cc/stdio.h"
+#include "common.h"
 #include "hw/sb/sbctl.h"
 #include "main/muspat.h"
 #include "main/musmod.h"
@@ -20,14 +21,40 @@
 
 #include "player/w_inf.h"
 
-void __far win_information_init(SCRWIN *self)
+void __far win_information_on_resize (SCRWIN *self);
+void __far win_information_draw (SCRWIN *self);
+/*
+void __far win_information_keypress (SCRWIN *self, char key);
+void __far win_information_free (SCRWIN *self);
+*/
+
+static const SCRWINVMT __win_information_vmt =
 {
-    scrwin_init(
-        self,
-        1, 1, scrWidth, 5,
-        &win_information_draw,
-        NULL
-    );
+    &win_information_on_resize,
+    &win_information_draw,
+    /*
+    &win_information_keypress,
+    &win_information_free
+    */
+    NULL,
+    NULL
+};
+
+/* private data */
+
+/* private methods */
+
+/* public methods */
+
+bool __far win_information_init (SCRWIN *self)
+{
+    scrwin_init (self, "information window");
+    _copy_vmt (self, __win_information_vmt, SCRWINVMT);
+    return true;
+}
+
+void __far win_information_on_resize (SCRWIN *self)
+{
 }
 
 void __far win_information_draw(SCRWIN *self)
@@ -131,3 +158,13 @@ void __far win_information_draw(SCRWIN *self)
             printf("---");
     }
 }
+
+/*
+void __far win_information_keypress (SCRWIN *self, char key)
+{
+}
+
+void __far win_information_free (SCRWIN *self)
+{
+}
+*/

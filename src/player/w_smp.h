@@ -18,8 +18,9 @@
 #include "pascal.h"
 #include "player/screen.h"
 
-void __far win_samples_init(SCRWIN *self);
-void __far win_samples_draw(SCRWIN *self);
-bool __far win_samples_keypress(SCRWIN *self, char c);
+bool __far win_samples_init (SCRWIN *self);
+void __far win_samples_set_track (SCRWIN *self, MUSMOD *value);
+void __far win_samples_set_channels (SCRWIN *self, MIXCHNLIST *value);
+void __far win_samples_set_page_start (SCRWIN *self, int value);
 
 #endif  /* W_SMP_H */

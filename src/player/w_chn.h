@@ -18,7 +18,6 @@
 #include "pascal.h"
 #include "player/screen.h"
 
-void __far win_channels_init(SCRWIN *self);
-void __far win_channels_draw(SCRWIN *self);
+bool __far win_channels_init (SCRWIN *self);
 
 #endif  /* W_CHN_H */

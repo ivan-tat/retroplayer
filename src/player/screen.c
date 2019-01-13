@@ -10,45 +10,49 @@
 
 #include "pascal.h"
 #include "cc/conio.h"
+#include "cc/string.h"
+#include "common.h"
 
 #include "player/screen.h"
 
-void __far scrwin_init (
-    SCRWIN *self,
-    uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1,
-    void *draw,
-    void *keypress
-)
+void __far __scrwin_on_resize (SCRWIN *self);
+void __far __scrwin_draw (SCRWIN *self);
+bool __far __scrwin_keypress (SCRWIN *self, char key);
+void __far __scrwin_free (SCRWIN *self);
+
+static const SCRWINVMT __scrwin_vmt =
 {
-    if (self)
-    {
-        self->flags = 0;
-        self->rect.x0 = x0;
-        self->rect.y0 = y0;
-        self->rect.x1 = x1;
-        self->rect.y1 = y1;
-        self->draw = draw;
-        self->keypress = keypress;
-    }
+    &__scrwin_on_resize,
+    &__scrwin_draw,
+    &__scrwin_keypress,
+    &__scrwin_free
+};
+
+// public methods
+
+void __far scrwin_init (SCRWIN *self, char *class_name)
+{
+    memset (self, 0, sizeof (SCRWIN));
+    self->__class_name = class_name;
+    _copy_vmt (self, __scrwin_vmt, SCRWINVMT);
 }
 
-bool __far scrwin_is_created (SCRWIN *self)
+void __far scrwin_set_rect (SCRWIN *self, SCRRECT *rect)
 {
-    return self != NULL;
+    self->rect.x0 = rect->x0;
+    self->rect.y0 = rect->y0;
+    self->rect.x1 = rect->x1;
+    self->rect.y1 = rect->y1;
 }
 
-void __far scrwin_set_flags (SCRWIN *self, WINFLAGS value)
+void __far scrwin_set_coords (SCRWIN *self, uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1)
 {
-    if (self)
-        self->flags = value;
-}
-
-WINFLAGS __far scrwin_get_flags (SCRWIN *self)
-{
-    if (self)
-        return self->flags;
-    else
-        return 0;
+    SCRRECT rect;
+    rect.x0 = x0;
+    rect.y0 = y0;
+    rect.x1 = x1;
+    rect.y1 = y1;
+    scrwin_set_rect (self, &rect);
 }
 
 void __far scrwin_set_width (SCRWIN *self, uint8_t value)
@@ -60,7 +64,7 @@ void __far scrwin_set_width (SCRWIN *self, uint8_t value)
 uint8_t __far scrwin_get_width (SCRWIN *self)
 {
     if (self)
-        return self->rect.x1 - self->rect.x0;
+        return self->rect.x1 - self->rect.x0 + 1;
     else
         return 0;
 }
@@ -74,9 +78,13 @@ void __far scrwin_set_height (SCRWIN *self, uint8_t value)
 uint8_t __far scrwin_get_height (SCRWIN *self)
 {
     if (self)
-        return self->rect.y1 - self->rect.y0;
+        return self->rect.y1 - self->rect.y0 + 1;
     else
         return 0;
+}
+
+void __far __scrwin_on_resize (SCRWIN *self)
+{
 }
 
 void __near _scrwin_draw_begin(SCRWIN *self)
@@ -95,6 +103,10 @@ void __near _scrwin_draw_end(SCRWIN *self)
         window(1, 1, scrWidth, scrHeight);
 }
 
+void __far __scrwin_draw (SCRWIN *self)
+{
+}
+
 void __far scrwin_draw (SCRWIN *self)
 {
     if (self)
@@ -103,8 +115,7 @@ void __far scrwin_draw (SCRWIN *self)
             _scrwin_draw_begin(self);
 
             // send events
-            if (self->draw)
-                self->draw(self);
+            _scrwin_draw (self);
 
             // clear events
             self->flags &= ~WINFL_REDRAW;
@@ -113,14 +124,18 @@ void __far scrwin_draw (SCRWIN *self)
         }
 }
 
+bool __far __scrwin_keypress (SCRWIN *self, char key)
+{
+    return false;
+}
+
 bool __far scrwin_keypress (SCRWIN *self, char key)
 {
     if (self)
         if (self->flags & WINFL_VISIBLE)
         {
             // send events
-            if (self->keypress)
-                return self->keypress(self, key);
+            return _scrwin_keypress (self, key);
         }
 
     return false;
@@ -189,3 +204,6 @@ void __far scrwin_close (SCRWIN *self)
     }
 }
 
+void __far __scrwin_free (SCRWIN *self)
+{
+}

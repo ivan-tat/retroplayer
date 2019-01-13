@@ -24,10 +24,7 @@ uint32_t getFreeEMMMemory(void);
 
 /* Information windows */
 
-extern uint8_t chnlastinst[MUSMOD_CHANNELS_MAX];
-
 void get_note_name(char *__dest, uint8_t note);
-void write_Note(uint8_t note);
 uint8_t nextord(uint8_t nr);
 uint8_t prevorder(uint8_t nr);
 
@@ -44,13 +41,7 @@ DECLARE_REGISTRATION (plays3m)
 #pragma aux getFreeDOSMemory "*";
 #pragma aux getFreeEMMMemory "*";
 
-#pragma aux chnlastinst "*";
-
-#pragma aux lastrow "*";
-#pragma aux startchn "*";
-
 #pragma aux get_note_name "*";
-#pragma aux write_Note "*";
 #pragma aux nextord "*";
 #pragma aux prevorder "*";
 

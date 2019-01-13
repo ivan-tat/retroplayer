@@ -16,10 +16,8 @@
 #include <stdint.h>
 
 #include "pascal.h"
-#include "cc/stdio.h"
 #include "player/screen.h"
 
-void __far win_help_init(SCRWIN *self);
-void __far win_help_draw(SCRWIN *self);
+bool __far win_help_init (SCRWIN *self);
 
 #endif  /* W_HLP_H */

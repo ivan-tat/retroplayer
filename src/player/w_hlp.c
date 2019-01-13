@@ -10,19 +10,54 @@
 
 #include "pascal.h"
 #include "cc/conio.h"
+#include "cc/stdio.h"
+#include "common.h"
 #include "player/screen.h"
 
 #include "player/w_hlp.h"
 
-void __far win_help_init(SCRWIN *self)
+/*
+void __far win_help_on_resize (SCRWIN *self);
+*/
+void __far win_help_draw (SCRWIN *self);
+/*
+void __far win_help_keypress (SCRWIN *self, char key);
+void __far win_help_free (SCRWIN *self);
+*/
+
+static const SCRWINVMT __win_help_vmt =
 {
-    scrwin_init(
-        self,
-        1, 6, scrWidth, scrHeight,
-        &win_help_draw,
-        NULL
-    );
+    /*
+    &win_help_on_resize,
+    */
+    NULL,
+    &win_help_draw,
+    /*
+    &win_help_keypress,
+    &win_help_free
+    */
+    NULL,
+    NULL
+};
+
+/* private data */
+
+/* private methods */
+
+/* public methods */
+
+bool __far win_help_init (SCRWIN *self)
+{
+    scrwin_init (self, "help window");
+    _copy_vmt (self, __win_help_vmt, SCRWINVMT);
+    return true;
 }
+
+/*
+void __far win_help_on_resize (SCRWIN *self)
+{
+}
+*/
 
 void __far win_help_draw(SCRWIN *self)
 {
@@ -66,3 +101,13 @@ void __far win_help_draw(SCRWIN *self)
         }
     }
 }
+
+/*
+void __far win_help_keypress (SCRWIN *self, char key)
+{
+}
+
+void __far win_help_free (SCRWIN *self)
+{
+}
+*/

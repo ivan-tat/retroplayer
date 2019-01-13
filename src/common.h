@@ -17,11 +17,15 @@
 void *__new(size_t size);
 void  __delete(void **p);
 
+void __far __copy_vmt (void **dst, void **src, unsigned n);
+
 void *__far __pascal _new_ (uint16_t size);
 void  __far __pascal _delete_ (void **p);
 
 #define _new(t)     (t *)__new(sizeof(t))
 #define _delete(p)  __delete((void **)&(p))
+
+#define _copy_vmt(dst, src, type) __copy_vmt ((void **) & (dst->__vmt), (void **) & src, sizeof (type) / sizeof (void *))
 
 /*** Linking ***/
 
@@ -29,6 +33,8 @@ void  __far __pascal _delete_ (void **p);
 
 #pragma aux __new "*";
 #pragma aux __delete "*";
+
+#pragma aux __copy_vmt "*";
 
 #pragma aux _new_ "*";
 #pragma aux _delete_ "*";

@@ -16,70 +16,49 @@ uses
     s3mtypes,
     mixchn;
 
-const
-    scrWidth = 80;
-    scrHeight = 25;
-
-type
-    TSCRRECT = packed record
-        x0, y0, x1, y1: Byte;
-    end;
-    PSCRRECT = ^TSCRRECT;
-
-type
-    TWINFLAGS = Word;
-
-const
-    WINFL_VISIBLE     = (1 shl 0);
-    WINFL_FOCUSED     = (1 shl 1);
-    WINFL_FULLREDRAW  = (1 shl 2);
-    WINFL_FOCUSREDRAW = (1 shl 3);
-    WINFL_REDRAW      = (WINFL_FULLREDRAW or WINFL_FOCUSREDRAW);
-
-type
-    TSCRWIN = packed record
-        flags: TWINFLAGS;
-        rect: TSCRRECT;
-        draw: Pointer;
-        keypress: Pointer;
-    end;
-    PSCRWIN = ^TSCRWIN;
-
 procedure scrwin_init;
-procedure scrwin_is_created;
-procedure scrwin_set_flags;
-procedure scrwin_get_flags;
+procedure scrwin_set_rect;
+procedure scrwin_set_coords;
 procedure scrwin_set_width;
 procedure scrwin_get_width;
 procedure scrwin_set_height;
 procedure scrwin_get_height;
+procedure __scrwin_on_resize;
+procedure __scrwin_draw;
 procedure scrwin_draw;
+procedure __scrwin_keypress;
 procedure scrwin_keypress;
 procedure scrwin_show;
 procedure scrwin_focus;
 procedure scrwin_leave;
 procedure scrwin_close;
+procedure __scrwin_free;
 
 implementation
 
 uses
-    conio;
+    conio,
+    string_,
+    common;
 
 (*$l screen.obj*)
 
 procedure scrwin_init; external;
-procedure scrwin_is_created; external;
-procedure scrwin_set_flags; external;
-procedure scrwin_get_flags; external;
+procedure scrwin_set_rect; external;
+procedure scrwin_set_coords; external;
 procedure scrwin_set_width; external;
 procedure scrwin_get_width; external;
 procedure scrwin_set_height; external;
 procedure scrwin_get_height; external;
+procedure __scrwin_on_resize; external;
+procedure __scrwin_draw; external;
 procedure scrwin_draw; external;
+procedure __scrwin_keypress; external;
 procedure scrwin_keypress; external;
 procedure scrwin_show; external;
 procedure scrwin_focus; external;
 procedure scrwin_leave; external;
 procedure scrwin_close; external;
+procedure __scrwin_free; external;
 
 end.

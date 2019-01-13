@@ -12,6 +12,7 @@
 #include "cc/conio.h"
 #include "cc/stdio.h"
 #include "cc/string.h"
+#include "common.h"
 #include "main/mixer.h"
 #include "main/mixchn.h"
 #include "main/effects.h"
@@ -20,25 +21,50 @@
 
 #include "player/w_chn.h"
 
+void __far win_channels_on_resize (SCRWIN *self);
+void __far win_channels_draw (SCRWIN *self);
+/*
+void __far win_channels_keypress (SCRWIN *self, char key);
+void __far win_channels_free (SCRWIN *self);
+*/
+
+static const SCRWINVMT __win_channels_vmt =
+{
+    &win_channels_on_resize,
+    &win_channels_draw,
+    /*
+    &win_channels_keypress,
+    &win_channels_free
+    */
+    NULL,
+    NULL
+};
+
+/* private data */
+
 static const char *CHANTYPES[3] =
 {
     "--", "PC", "AD"
 };
 
-void __far win_channels_init(SCRWIN *self)
+/* private methods */
+
+/* public methods */
+
+bool __far win_channels_init (SCRWIN *self)
 {
-    scrwin_init(
-        self,
-        1, 6, scrWidth, scrHeight,
-        &win_channels_draw,
-        NULL
-    );
+    scrwin_init (self, "channels list window");
+    _copy_vmt (self, __win_channels_vmt, SCRWINVMT);
+    return true;
 }
 
-#define _EFFECT_DESC_MAX 40
+void __far win_channels_on_resize (SCRWIN *self)
+{
+}
 
 void __far win_channels_draw(SCRWIN *self)
 {
+    #define _BUF_SIZE 40
     uint8_t i, count;
     MIXCHNLIST *channels;
     MIXCHN *chn;
@@ -47,7 +73,7 @@ void __far win_channels_draw(SCRWIN *self)
     uint8_t cmd;
     char flagsstr[6];
     char notestr[4];
-    char effectstr[_EFFECT_DESC_MAX];
+    char buf[_BUF_SIZE];
     uint32_t step;
 
     if (scrwin_is_created(self))
@@ -104,9 +130,9 @@ void __far win_channels_draw(SCRWIN *self)
 
                 cmd = mixchn_get_command(chn);
                 if (cmd && (cmd <= MAXEFF))
-                    chn_effGetName (chn, effectstr, _EFFECT_DESC_MAX);
+                    chn_effGetName (chn, buf, _BUF_SIZE);
                 else
-                    effectstr[0] = 0;
+                    buf[0] = 0;
 
                 gotoxy(1, 2 + i);
                 step = mixchn_get_sample_step(chn);
@@ -120,7 +146,7 @@ void __far win_channels_draw(SCRWIN *self)
                     (uint16_t)(step >> 16),
                     (uint16_t)(step & 0xffff),
                     mixchn_get_note_volume (chn),
-                    &effectstr
+                    &buf
                 );
                 clreol();
             }
@@ -130,6 +156,15 @@ void __far win_channels_draw(SCRWIN *self)
         if (!count)
             printf("No channels to mix.");
     }
+    #undef _BUF_SIZE
 }
 
-#undef _EFFECT_DESC_MAX
+/*
+void __far win_channels_keypress (SCRWIN *self, char key)
+{
+}
+
+void __far win_channels_free (SCRWIN *self)
+{
+}
+*/

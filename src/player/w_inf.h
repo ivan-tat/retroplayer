@@ -18,7 +18,6 @@
 #include "pascal.h"
 #include "player/screen.h"
 
-void __far win_information_init(SCRWIN *self);
-void __far win_information_draw(SCRWIN *self);
+bool __far win_information_init (SCRWIN *self);
 
 #endif  /* W_INF_H */

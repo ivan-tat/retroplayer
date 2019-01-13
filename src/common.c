@@ -32,6 +32,18 @@ void __delete(void **p)
         }
 }
 
+void __far __copy_vmt (void **dst, void **src, unsigned n)
+{
+    while (n)
+    {
+        if (*src)
+            *dst = *src;
+        dst++;
+        src++;
+        n--;
+    }
+}
+
 void *__far __pascal _new_ (uint16_t size)
 {
     return __new(size);

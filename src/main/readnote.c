@@ -313,6 +313,7 @@ void __near on_track_stop (TRACKSTATE *state)
     if (playOption_LoopSong)
     {
         playState_order = 0;
+        //playState_pattern = 0;  // FIXME: stop
         state->status = FLOWSTATE_SONGLOOP;
     }
     else

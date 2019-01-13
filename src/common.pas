@@ -16,6 +16,8 @@ interface
 procedure __new;
 procedure __delete;
 
+procedure __copy_vmt;
+
 function  _new_(size: Word): Pointer;
 procedure _delete_(var p: Pointer);
 
@@ -30,6 +32,8 @@ uses
 
 procedure __new; external;
 procedure __delete; external;
+
+procedure __copy_vmt; external;
 
 function  _new_(size: Word): Pointer; external;
 procedure _delete_(var p: Pointer); external;

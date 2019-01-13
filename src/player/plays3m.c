@@ -16,6 +16,7 @@
 #include "cc/errno.h"
 #include "cc/unistd.h"
 #include "dos/ems.h"
+#include "common.h"
 #include "hw/hwowner.h"
 #include "hw/pic.h"
 #include "hw/dma.h"
@@ -253,22 +254,6 @@ void get_note_name(char *__dest, uint8_t note)
     }
 }
 
-void write_Note(uint8_t note)
-{
-    char s[4];
-
-    get_note_name(s, note);
-    printf(s);
-}
-
-static SCRWIN win_information_static;
-static SCRWIN win_help_static;
-static SCRWIN win_channels_static;
-static SCRWIN win_pattern_static;
-static SCRWIN win_instruments_static;
-static SCRWIN win_samples_static;
-static SCRWIN win_debug_static;
-
 static SCRWIN *win_information = NULL;
 static SCRWIN *win_help = NULL;
 static SCRWIN *win_channels = NULL;
@@ -277,52 +262,117 @@ static SCRWIN *win_instruments = NULL;
 static SCRWIN *win_samples = NULL;
 static SCRWIN *win_debug = NULL;
 
-/* Information windows */
+SCRWIN *__near __window_create (bool (*__far init) (SCRWIN *self))
+{
+    SCRWIN *w;
 
-/* Pattern window */
+    w = _new (SCRWIN);
+    if (!w)
+    {
+        DEBUG_ERR_ ("__window_create", "Failed to allocate memory for %s.", "information window");
+        return false;
+    }
+    if (!init (w))
+    {
+        DEBUG_ERR_ ("__window_create", "Failed to initialize %s.", "information window");
+        return NULL;
+    }
+    return w;
+}
 
 /* Window's event router */
 
 #define WINLIST_SIZE 7
 
 static SCRWIN *winlist_list[WINLIST_SIZE];
+static uint8_t winlist_count;
 static uint8_t winlist_selected;    /* current info on screen */
 
-bool __near winlist_init(void)
+void __near winlist_add_item (SCRWIN *win)
 {
-    DEBUG_BEGIN("winlist_init");
+    winlist_list[winlist_count] = win;
+    winlist_count++;
+}
 
-    win_information = &win_information_static;
-    win_information_init(win_information);
+bool __near winlist_init (void)
+{
+    DEBUG_BEGIN ("winlist_init");
 
-    win_help = &win_help_static;
-    win_help_init(win_help);
+    memset (winlist_list, 0, sizeof (winlist_list));
+    winlist_count = 0;
 
-    win_channels = &win_channels_static;
-    win_channels_init(win_channels);
+    /* Help window */
+    win_help = __window_create (&win_help_init);
+    if (!win_help)
+        return false;
+    winlist_add_item (win_help);
 
-    win_pattern = &win_pattern_static;
-    win_pattern_init(win_pattern);
+    /* Channels window */
+    win_channels = __window_create (&win_channels_init);
+    if (!win_channels)
+        return false;
+    winlist_add_item (win_channels);
 
-    win_instruments = &win_instruments_static;
-    win_instruments_init(win_instruments);
+    /* Pattern window */
+    win_pattern = __window_create (&win_pattern_init);
+    if (!win_pattern)
+        return false;
+    winlist_add_item (win_pattern);
 
-    win_samples = &win_samples_static;
-    win_samples_init(win_samples);
+    /* Instruments window */
+    win_instruments = __window_create (&win_instruments_init);
+    if (!win_instruments)
+        return false;
+    winlist_add_item (win_instruments);
 
-    win_debug = &win_debug_static;
-    win_debug_init(win_debug);
+    /* Samples window */
+    win_samples = __window_create (&win_samples_init);
+    if (!win_samples)
+        return false;
+    winlist_add_item (win_samples);
 
-    winlist_list[0] = win_help;
-    winlist_list[1] = win_channels;
-    winlist_list[2] = win_pattern;
-    winlist_list[3] = win_instruments;
-    winlist_list[4] = win_samples;
-    winlist_list[5] = win_debug;
-    winlist_list[6] = win_information;
+    /* Debug window */
+    win_debug = __window_create (&win_debug_init);
+    if (!win_debug)
+        return false;
+    winlist_add_item (win_debug);
 
-    DEBUG_SUCCESS("winlist_init");
+    /* Information window - must be last in list */
+    win_information = __window_create (&win_information_init);
+    if (!win_information)
+        return false;
+    winlist_add_item (win_information);
+
+    DEBUG_SUCCESS ("winlist_init");
     return true;
+}
+
+void __near winlist_on_resize (void)
+{
+    SCRWIN *win;
+    SCRRECT r;
+    int count, i;
+
+    win = win_information;
+    r.x0 = 1;
+    r.y0 = 1;
+    r.x1 = scrWidth;
+    r.y1 = 5;
+    scrwin_set_rect (win, &r);
+    scrwin_on_resize (win);
+
+    r.x0 = 1;
+    r.y0 = 6;
+    r.x1 = scrWidth;
+    r.y1 = scrHeight;
+
+    count = winlist_count - 1;
+    for (i = 0; i < count; i++)
+    {
+        win = winlist_list[i];
+        scrwin_set_rect (win, &r);
+        scrwin_on_resize (win);
+    }
 }
 
 void __near winlist_select(uint16_t value)
@@ -352,7 +402,7 @@ void __near winlist_hide_selected(void)
 
 void __near winlist_show_all(void)
 {
-    scrwin_show(win_information);
+    scrwin_show (win_information);
     winlist_show_selected();
 }
 
@@ -361,7 +411,7 @@ void __near winlist_hide_all(void)
     int i;
     SCRWIN *win;
 
-    for (i = 0; i < WINLIST_SIZE; i++)
+    for (i = 0; i < winlist_count; i++)
     {
         win = winlist_list[i];
         if (scrwin_get_flags(win) & WINFL_VISIBLE)
@@ -374,7 +424,7 @@ void __near winlist_refresh_all(void)
     int i;
     SCRWIN *win;
 
-    for (i = 0; i < WINLIST_SIZE; i++)
+    for (i = 0; i < winlist_count; i++)
     {
         win = winlist_list[i];
         if (scrwin_get_flags(win) & WINFL_VISIBLE)
@@ -387,7 +437,7 @@ bool __near winlist_keypress(char c)
     int i;
     SCRWIN *win;
 
-    for (i = 0; i < WINLIST_SIZE; i++)
+    for (i = 0; i < winlist_count; i++)
     {
         win = winlist_list[i];
         if (scrwin_get_flags(win) & WINFL_VISIBLE)
@@ -398,9 +448,21 @@ bool __near winlist_keypress(char c)
     return false;
 }
 
-void __near __pascal winlist_free(void)
+void __near winlist_free (void)
 {
+    int i;
+    SCRWIN *win;
+
     DEBUG_BEGIN("winlist_free");
+    for (i = 0; i < winlist_count; i++)
+    {
+        win = winlist_list[i];
+        if (win)
+        {
+            scrwin_free (win);
+            _delete (winlist_list[i]);
+        }
+    }
     DEBUG_END("winlist_free");
 }
 
@@ -682,6 +744,8 @@ void run_os_shell(void)
 
 void __far plays3m_main (void)
 {
+    MUSMOD *track;
+    MIXCHNLIST *channels;
     int count, i;
     char s[pascal_String_size];
     bool quit, result;
@@ -766,9 +830,11 @@ void __far plays3m_main (void)
         memstats ();
     }
 
+    track = mod_Track;
+
     printf ("Song \"%s\" loaded (%s)." CRLF,
-        musmod_get_title (mod_Track),
-        musmod_get_format (mod_Track));
+        musmod_get_title (track),
+        musmod_get_format (track));
 
     if (!player_init())
     {
@@ -812,11 +878,27 @@ void __far plays3m_main (void)
         exit(1);
     }
 
+    winlist_on_resize ();
+
+    win_pattern_set_track (win_pattern, track);
+    win_pattern_set_start_channel (win_pattern, 1);
+    win_instruments_set_track (win_instruments, track);
+    win_instruments_set_page_start (win_instruments, 0);
+    win_samples_set_track (win_samples, track);
+    win_samples_set_page_start (win_samples, 0);
+
     if (!player_play_start())
     {
         display_errormsg();
         exit(1);
     }
+
+    channels = mod_Channels;
+
+    /* FIXME: move these here for now (MIXCHNLIST is allocated in player_play_start() ) */
+    win_pattern_set_channels (win_pattern, channels);
+    win_instruments_set_channels (win_instruments, channels);
+    win_samples_set_channels (win_samples, channels);
 
     cursor_hide();
     desktop_clear();
@@ -867,13 +949,11 @@ void __far plays3m_main (void)
                 }
                 if (c == '+')
                 {
-                    lastrow = 0;
                     player_set_pos(nextord(playState_order), 0, true);
                     c = 0;
                 }
                 if (c == '-')
                 {
-                    lastrow = 0;
                     player_set_pos(prevorder(playState_order), 0, false);
                     channels_stop_all();
                     c = 0;

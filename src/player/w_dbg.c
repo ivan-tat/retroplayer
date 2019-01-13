@@ -12,6 +12,7 @@
 #include "cc/i86.h"
 #include "cc/conio.h"
 #include "cc/stdio.h"
+#include "common.h"
 #include "main/fillvars.h"
 #include "main/mixer.h"
 #include "main/musins.h"
@@ -23,6 +24,32 @@
 #include "player/plays3m.h"
 
 #include "player/w_dbg.h"
+
+/*
+void __far win_debug_on_resize (SCRWIN *self);
+*/
+void __far win_debug_draw (SCRWIN *self);
+/*
+void __far win_debug_keypress (SCRWIN *self, char key);
+void __far win_debug_free (SCRWIN *self);
+*/
+
+static const SCRWINVMT __win_debug_vmt =
+{
+    /*
+    &win_debug_on_resize,
+    */
+    NULL,
+    &win_debug_draw,
+    /*
+    &win_debug_on_keypress,
+    &win_debug_on_free,
+    */
+    NULL,
+    NULL
+};
+
+/* private data */
 
 #define MIXBUF_Y    2
 #define MIXBUF_X    3
@@ -39,15 +66,22 @@
 #define VERSION_X   3
 #define VERSION_V   19
 
-void __far win_debug_init(SCRWIN *self)
+/* private methods */
+
+/* public methods */
+
+bool __far win_debug_init (SCRWIN *self)
 {
-    scrwin_init(
-        self,
-        1, 6, scrWidth, scrHeight,
-        &win_debug_draw,
-        NULL
-    );
+    scrwin_init (self, "debug window");
+    _copy_vmt (self, __win_debug_vmt, SCRWINVMT);
+    return true;
 }
+
+/*
+void __far win_debug_on_resize (SCRWIN *self)
+{
+}
+*/
 
 void __far win_debug_draw(SCRWIN *self)
 {
@@ -72,100 +106,107 @@ void __far win_debug_draw(SCRWIN *self)
     unsigned out_frame_active;
     unsigned out_fps;
 
-    if (scrwin_is_created(self))
+    track = mod_Track;
+    samples = musmod_get_samples (track);
+    instruments = musmod_get_instruments (track);
+    patterns = musmod_get_patterns (track);
+
+    textbackground (_black);
+
+    if (scrwin_get_flags (self) & WINFL_FULLREDRAW)
     {
-        track = mod_Track;
-        samples = musmod_get_samples (track);
-        instruments = musmod_get_instruments (track);
-        patterns = musmod_get_patterns (track);
+        y = scrwin_get_height (self) - 1;
 
-        textbackground (_black);
+        textcolor (_lightgray);
+        clrscr ();
 
-        if (scrwin_get_flags (self) & WINFL_FULLREDRAW)
-        {
-            y = scrwin_get_height (self) - 1;
+        textcolor (_white);
 
-            textcolor (_lightgray);
-            clrscr ();
+        gotoxy (MIXBUF_X, MIXBUF_Y); printf ("%s", "Mixing buffer:");
+        gotoxy (DMABUF_X, DMABUF_Y); printf ("%s", "DMA buffer:");
+        gotoxy (MEMORY_X, MEMORY_Y); printf ("%s", "Memory usage:");
+        gotoxy (VERSION_X, y); printf ("%s", "Player version:");
 
-            textcolor (_white);
+        textcolor (_lightgray);
 
-            gotoxy (MIXBUF_X, MIXBUF_Y); printf ("%s", "Mixing buffer:");
-            gotoxy (DMABUF_X, DMABUF_Y); printf ("%s", "DMA buffer:");
-            gotoxy (MEMORY_X, MEMORY_Y); printf ("%s", "Memory usage:");
-            gotoxy (VERSION_X, y); printf ("%s", "Player version:");
+        gotoxy (MIXBUF_X, MIXBUF_Y + 2); printf ("%s", "Channels:");
+        gotoxy (MIXBUF_X, MIXBUF_Y + 3); printf ("%s", "Rate:");
+        gotoxy (MIXBUF_X, MIXBUF_Y + 4); printf ("%s", "Samples per channel:");
+        gotoxy (MIXBUF_X, MIXBUF_Y + 5); printf ("%s", "Samples:");
+        gotoxy (MIXBUF_X, MIXBUF_Y + 6); printf ("%s", "Tick samples per channel:");
+        gotoxy (MIXBUF_X, MIXBUF_Y + 7); printf ("%s", "Tick samples per channel left: ");
 
-            textcolor (_lightgray);
+        gotoxy (DMABUF_X, DMABUF_Y + 2); printf ("%s", "Allocated:");
+        gotoxy (DMABUF_X, DMABUF_Y + 3); printf ("%s", "Aligned:");
+        gotoxy (DMABUF_X, DMABUF_Y + 4); printf ("%s", "Frame size:");
+        gotoxy (DMABUF_X, DMABUF_Y + 5); printf ("%s", "Frames count:");
+        gotoxy (DMABUF_X, DMABUF_Y + 6); printf ("%s", "Last frame:");
+        gotoxy (DMABUF_X, DMABUF_Y + 7); printf ("%s", "Current frame:");
+        gotoxy (DMABUF_X, DMABUF_Y + 8); printf ("%s", "Frames per second:");
 
-            gotoxy (MIXBUF_X, MIXBUF_Y + 2); printf ("%s", "Channels:");
-            gotoxy (MIXBUF_X, MIXBUF_Y + 3); printf ("%s", "Rate:");
-            gotoxy (MIXBUF_X, MIXBUF_Y + 4); printf ("%s", "Samples per channel:");
-            gotoxy (MIXBUF_X, MIXBUF_Y + 5); printf ("%s", "Samples:");
-            gotoxy (MIXBUF_X, MIXBUF_Y + 6); printf ("%s", "Tick samples per channel:");
-            gotoxy (MIXBUF_X, MIXBUF_Y + 7); printf ("%s", "Tick samples per channel left: ");
-
-            gotoxy (DMABUF_X, DMABUF_Y + 2); printf ("%s", "Allocated:");
-            gotoxy (DMABUF_X, DMABUF_Y + 3); printf ("%s", "Aligned:");
-            gotoxy (DMABUF_X, DMABUF_Y + 4); printf ("%s", "Frame size:");
-            gotoxy (DMABUF_X, DMABUF_Y + 5); printf ("%s", "Frames count:");
-            gotoxy (DMABUF_X, DMABUF_Y + 6); printf ("%s", "Last frame:");
-            gotoxy (DMABUF_X, DMABUF_Y + 7); printf ("%s", "Current frame:");
-            gotoxy (DMABUF_X, DMABUF_Y + 8); printf ("%s", "Frames per second:");
-
-            gotoxy (MEMORY_X, MEMORY_Y + 2); printf ("%s", "Samples:        KiB EM");
-            gotoxy (MEMORY_X, MEMORY_Y + 3); printf ("%s", "Patterns:       KiB EM");
-            gotoxy (MEMORY_X, MEMORY_Y + 4); printf ("%s", "Free:           KiB EM");
-            gotoxy (MEMORY_X, MEMORY_Y + 5); printf ("%s", "Free:           KiB DOS");
-
-            textcolor (_yellow);
-
-            if (UseEMS)
-            {
-                gotoxy (MEMORY_V - 5, MEMORY_Y + 2); printf ("%5u", pcmsmpl_get_used_EM (samples));
-                gotoxy (MEMORY_V - 5, MEMORY_Y + 3); printf ("%5u", muspatl_get_used_EM (patterns));
-                gotoxy (MEMORY_V - 5, MEMORY_Y + 4); printf ("%5u", getFreeEMMMemory ());
-            }
-            else
-            {
-                gotoxy (MEMORY_V - 4, MEMORY_Y + 2); printf ("%s", "none");
-                gotoxy (MEMORY_V - 4, MEMORY_Y + 3); printf ("%s", "none");
-                gotoxy (MEMORY_V - 4, MEMORY_Y + 4); printf ("%s", "none");
-            }
-
-            gotoxy (MEMORY_V - 5, MEMORY_Y + 5); printf ("%5u", getFreeDOSMemory () >> 10);
-            gotoxy (VERSION_V, y); printf ("%s", PLAYER_VERSION);
-        }
-
-        mixbuf = &mixBuf;
-        sndbuf = &sndDMABuf;
-        dmabuf = sndbuf->buf;
-        out_channels = mixbuf_get_channels (mixbuf);
-        out_rate = playState_rate;
-        out_samples_per_channel = mixbuf_get_samples_per_channel (mixbuf);
-        out_tick_samples_per_channel = playState_tick_samples_per_channel;
-        out_tick_samples_per_channel_left = playState_tick_samples_per_channel_left;
-        out_dma_buf_unaligned = dmabuf->unaligned;
-        out_dma_buf = dmabuf->data;
-        out_frame_size = sndbuf->frameSize;
-        out_frames_count = sndbuf->framesCount;
-        out_frame_last = sndbuf->frameLast;
-        out_frame_active = sndbuf->frameActive;
-        out_fps = playOption_FPS;
+        gotoxy (MEMORY_X, MEMORY_Y + 2); printf ("%s", "Samples:        KiB EM");
+        gotoxy (MEMORY_X, MEMORY_Y + 3); printf ("%s", "Patterns:       KiB EM");
+        gotoxy (MEMORY_X, MEMORY_Y + 4); printf ("%s", "Free:           KiB EM");
+        gotoxy (MEMORY_X, MEMORY_Y + 5); printf ("%s", "Free:           KiB DOS");
 
         textcolor (_yellow);
 
-        gotoxy (MIXBUF_V - 5, MIXBUF_Y + 2); printf ("%5u", out_channels);
-        gotoxy (MIXBUF_V - 5, MIXBUF_Y + 3); printf ("%5u", out_rate);
-        gotoxy (MIXBUF_V - 5, MIXBUF_Y + 4); printf ("%5u", out_samples_per_channel);
-        gotoxy (MIXBUF_V - 5, MIXBUF_Y + 5); printf ("%5u", out_channels * out_samples_per_channel);
-        gotoxy (MIXBUF_V - 5, MIXBUF_Y + 6); printf ("%5u", out_tick_samples_per_channel);
-        gotoxy (MIXBUF_V - 5, MIXBUF_Y + 7); printf ("%5u", out_tick_samples_per_channel_left);
-        gotoxy (DMABUF_V - 9, DMABUF_Y + 2); printf ("%04X:%04X", FP_SEG (out_dma_buf_unaligned), FP_OFF (out_dma_buf_unaligned));
-        gotoxy (DMABUF_V - 9, DMABUF_Y + 3); printf ("%04X:%04X", FP_SEG (out_dma_buf), FP_OFF (out_dma_buf));
-        gotoxy (DMABUF_V - 5, DMABUF_Y + 4); printf ("%5u", out_frame_size);
-        gotoxy (DMABUF_V - 5, DMABUF_Y + 5); printf ("%5u", out_frames_count);
-        gotoxy (DMABUF_V - 5, DMABUF_Y + 6); printf ("%5u", out_frame_last);
-        gotoxy (DMABUF_V - 5, DMABUF_Y + 7); printf ("%5u", out_frame_active);
-        gotoxy (DMABUF_V - 5, DMABUF_Y + 8); printf ("%5u", out_fps);
+        if (UseEMS)
+        {
+            gotoxy (MEMORY_V - 5, MEMORY_Y + 2); printf ("%5u", pcmsmpl_get_used_EM (samples));
+            gotoxy (MEMORY_V - 5, MEMORY_Y + 3); printf ("%5u", muspatl_get_used_EM (patterns));
+            gotoxy (MEMORY_V - 5, MEMORY_Y + 4); printf ("%5u", getFreeEMMMemory ());
+        }
+        else
+        {
+            gotoxy (MEMORY_V - 4, MEMORY_Y + 2); printf ("%s", "none");
+            gotoxy (MEMORY_V - 4, MEMORY_Y + 3); printf ("%s", "none");
+            gotoxy (MEMORY_V - 4, MEMORY_Y + 4); printf ("%s", "none");
+        }
+
+        gotoxy (MEMORY_V - 5, MEMORY_Y + 5); printf ("%5u", getFreeDOSMemory () >> 10);
+        gotoxy (VERSION_V, y); printf ("%s", PLAYER_VERSION);
     }
+
+    mixbuf = &mixBuf;
+    sndbuf = &sndDMABuf;
+    dmabuf = sndbuf->buf;
+    out_channels = mixbuf_get_channels (mixbuf);
+    out_rate = playState_rate;
+    out_samples_per_channel = mixbuf_get_samples_per_channel (mixbuf);
+    out_tick_samples_per_channel = playState_tick_samples_per_channel;
+    out_tick_samples_per_channel_left = playState_tick_samples_per_channel_left;
+    out_dma_buf_unaligned = dmabuf->unaligned;
+    out_dma_buf = dmabuf->data;
+    out_frame_size = sndbuf->frameSize;
+    out_frames_count = sndbuf->framesCount;
+    out_frame_last = sndbuf->frameLast;
+    out_frame_active = sndbuf->frameActive;
+    out_fps = playOption_FPS;
+
+    textcolor (_yellow);
+
+    gotoxy (MIXBUF_V - 5, MIXBUF_Y + 2); printf ("%5u", out_channels);
+    gotoxy (MIXBUF_V - 5, MIXBUF_Y + 3); printf ("%5u", out_rate);
+    gotoxy (MIXBUF_V - 5, MIXBUF_Y + 4); printf ("%5u", out_samples_per_channel);
+    gotoxy (MIXBUF_V - 5, MIXBUF_Y + 5); printf ("%5u", out_channels * out_samples_per_channel);
+    gotoxy (MIXBUF_V - 5, MIXBUF_Y + 6); printf ("%5u", out_tick_samples_per_channel);
+    gotoxy (MIXBUF_V - 5, MIXBUF_Y + 7); printf ("%5u", out_tick_samples_per_channel_left);
+    gotoxy (DMABUF_V - 9, DMABUF_Y + 2); printf ("%04X:%04X", FP_SEG (out_dma_buf_unaligned), FP_OFF (out_dma_buf_unaligned));
+    gotoxy (DMABUF_V - 9, DMABUF_Y + 3); printf ("%04X:%04X", FP_SEG (out_dma_buf), FP_OFF (out_dma_buf));
+    gotoxy (DMABUF_V - 5, DMABUF_Y + 4); printf ("%5u", out_frame_size);
+    gotoxy (DMABUF_V - 5, DMABUF_Y + 5); printf ("%5u", out_frames_count);
+    gotoxy (DMABUF_V - 5, DMABUF_Y + 6); printf ("%5u", out_frame_last);
+    gotoxy (DMABUF_V - 5, DMABUF_Y + 7); printf ("%5u", out_frame_active);
+    gotoxy (DMABUF_V - 5, DMABUF_Y + 8); printf ("%5u", out_fps);
 }
+
+/*
+void __far win_debug_keypress (SCRWIN *self, char key)
+{
+}
+
+void __far win_debug_free (SCRWIN *self)
+{
+}
+*/
