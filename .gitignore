@@ -44,10 +44,11 @@
 scripts/ow/tmp/
 src/common.asm
 src/debug.asm
-src/dstream.asm
 src/dynarray.asm
 src/pascal.asm
 src/startup.asm
+src/cc/_printf.asm
+src/cc/dstream.asm
 src/cc/conio/clreol.asm
 src/cc/conio/clrscr.asm
 src/cc/conio/getch.asm
@@ -85,6 +86,7 @@ src/cc/io/open.asm
 src/cc/io/read.asm
 src/cc/io/write.asm
 src/cc/malloc/memmax.asm
+src/cc/stdio/_fprintf.asm
 src/cc/stdio/_printf.asm
 src/cc/stdio/fclose.asm
 src/cc/stdio/fopen.asm

@@ -6,11 +6,10 @@
 #include "defines.h"
 
 #include <stdarg.h>
-
-#include "pascal.h"
-
+#include "cc/dstream.h"
+#include "cc/_printf.h"
 #include "cc/stdio.h"
-#include "cc/stdio/_printf.h"
+#include "cc/stdio/_fprintf.h"
 
 #define BUFSIZE 128
 
@@ -20,7 +19,7 @@ int cc_fprintf(FILE *stream, const char *format, ...)
     char buf[BUFSIZE];
     DATASTREAM ds;
     va_start(ap, format);
-    datastream_init (&ds, DSFLAG_BUFFER, &_system_flush_file);
+    datastream_init (&ds, DSFLAG_BUFFER, &_datastream_flush_file);
     datastream_set_buf_size (&ds, BUFSIZE);
     datastream_set_buf_ptr (&ds, &buf);
     datastream_set_output (&ds, stream);

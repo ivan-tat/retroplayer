@@ -6,10 +6,8 @@
 #include "defines.h"
 
 #include <stdarg.h>
-
-#include "pascal.h"
-#include "dstream.h"
-
+#include "cc/dstream.h"
+#include "cc/_printf.h"
 #include "cc/stdio.h"
 #include "cc/stdio/_printf.h"
 

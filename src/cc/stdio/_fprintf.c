@@ -8,16 +8,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
-#include "cc/i86.h"
-#include "cc/string.h"
 #include "cc/dstream.h"
 #include "cc/stdio.h"
 
-#include "cc/stdio/_printf.h"
+#include "cc/stdio/_fprintf.h"
 
-bool __far _datastream_flush_console (DATASTREAM *self)
+bool __far _datastream_flush_file (DATASTREAM *self)
 {
-    self->buf[self->pos] = 0;
-    pascal_write (self->buf);
-    return true;
+    if (self->output)
+        return (fwrite (self->buf, self->pos, 1, (FILE *) self->output)) == 1;
+    else
+        return false;
 }

@@ -1,5 +1,7 @@
 ./src/
 ./src/cc/
+./src/cc/_printf.asm
+./src/cc/dstream.asm
 ./src/cc/conio/
 ./src/cc/conio/clreol.asm
 ./src/cc/conio/clrscr.asm
@@ -47,6 +49,7 @@
 ./src/cc/stdio/
 ./src/cc/stdio/fclose.asm
 ./src/cc/stdio/fopen.asm
+./src/cc/stdio/_fprintf.asm
 ./src/cc/stdio/fprintf.asm
 ./src/cc/stdio/fread.asm
 ./src/cc/stdio/fsetpos.asm
@@ -89,7 +92,6 @@
 ./src/debug.asm
 ./src/dos/
 ./src/dos/ems.asm
-./src/dstream.asm
 ./src/dynarray.asm
 ./src/hw/
 ./src/hw/dma.asm

@@ -8,8 +8,8 @@
 #include <stdarg.h>
 
 #include "pascal.h"
-#include "dstream.h"
-
+#include "cc/dstream.h"
+#include "cc/_printf.h"
 #include "cc/stdio.h"
 #include "cc/stdio/_printf.h"
 
@@ -21,7 +21,7 @@ int cc_printf(const char *format, ...)
     char buf[BUFSIZE];
     DATASTREAM ds;
     va_start(ap, format);
-    datastream_init (&ds, DSFLAG_BUFFER, &_system_flush_stdout);
+    datastream_init (&ds, DSFLAG_BUFFER, &_datastream_flush_console);
     datastream_set_buf_size (&ds, BUFSIZE - 1);    /* (-1) for terminating zero */
     datastream_set_buf_ptr (&ds, &buf);
     _printf (&ds, format, ap);

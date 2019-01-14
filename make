@@ -363,6 +363,8 @@ if [ $T_WATCOM == 1 ]; then
     mv i8d086.o i8d086.obj
     cd "$PROJDIR"
 fi
+build_target $T_CC     obj src/cc/_printf.c
+build_target $T_CC     obj src/cc/dstream.c
 build_target $T_CC     obj src/cc/i86/delay.c
 build_target $T_CC     obj src/cc/i86/disable.c
 build_target $T_CC     obj src/cc/i86/dointr.asm
@@ -403,6 +405,7 @@ build_target $T_CC     obj src/cc/io/open.c
 build_target $T_CC     obj src/cc/io/read.c
 build_target $T_CC     obj src/cc/io/write.c
 build_target $T_CC     obj src/cc/malloc/memmax.c
+build_target $T_CC     obj src/cc/stdio/_fprintf.c
 build_target $T_CC     obj src/cc/stdio/_printf.c
 build_target $T_CC     obj src/cc/stdio/fclose.c
 build_target $T_CC     obj src/cc/stdio/fopen.c
@@ -443,7 +446,6 @@ build_target $T_CC     obj src/cc/unistd/exv.c
 build_target $T_DEBUG  obj src/debug.c
 build_target $T_DOS    obj src/dos/ems.c
 build_target $T_MISC   obj src/common.c
-build_target $T_MISC   obj src/dstream.c
 build_target $T_MISC   obj src/dynarray.c
 build_target $T_MISC   obj src/pascal.c
 build_target $T_MISC   obj src/startup/ints.asm
@@ -510,13 +512,14 @@ build_target $T_CC_TP     obj src/cc/string_.pas
 build_target $T_HW_TP     obj src/hw/cpu.pas
 build_target $T_MISC_TP   obj src/startup.pas
 build_target $T_MISC_TP   obj src/common.pas
-build_target $T_MISC_TP   obj src/dstream.pas
 build_target $T_HW_TP     obj src/hw/vbios.pas
 build_target $T_CC_TP     obj src/cc/conio.pas
 build_target $T_CC_TP     obj src/cc/ctype.pas
 build_target $T_CC_TP     obj src/cc/malloc.pas
 build_target $T_CC_TP     obj src/cc/io.pas
 build_target $T_CC_TP     obj src/cc/stdlib.pas
+build_target $T_CC_TP     obj src/cc/dstream.pas
+build_target $T_CC_TP     obj src/cc/printf.pas
 build_target $T_CC_TP     obj src/cc/stdio.pas
 build_target $T_CC_TP     obj src/cc/unistd.pas
 build_target $T_DEBUG_TP  obj src/debug.pas
