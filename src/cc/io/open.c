@@ -43,7 +43,7 @@ int cc_open(const char *filename, int flags, int mode)
     */
 
     // Check for unknown bits in flags
-    if (flags & !(CC_O_RDONLY | CC_O_WRONLY | CC_O_RDWR | CC_O_CREAT | CC_O_APPEND | CC_O_TRUNC | CC_O_NOINHERIT))
+    if (flags & ~(CC_O_RDONLY | CC_O_WRONLY | CC_O_RDWR | CC_O_CREAT | CC_O_APPEND | CC_O_TRUNC | CC_O_NOINHERIT))
     {
         cc_errno = CC_EINVAL;
         return BADHANDLE;
@@ -75,7 +75,7 @@ int cc_open(const char *filename, int flags, int mode)
     // Check for unknown bits in mode for `create' option
     // HINT: DOS version
     if ((flags & CC_O_CREAT)
-    &&  (mode & !(_CC_A_RDONLY | _CC_A_HIDDEN | _CC_A_SYSTEM | _CC_A_VOLID | _CC_A_SUBDIR | _CC_A_ARCH)))
+    &&  (mode & ~(_CC_A_RDONLY | _CC_A_HIDDEN | _CC_A_SYSTEM | _CC_A_VOLID | _CC_A_SUBDIR | _CC_A_ARCH)))
     {
         cc_errno = CC_EINVAL;
         return BADHANDLE;

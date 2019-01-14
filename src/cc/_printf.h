@@ -15,7 +15,7 @@
 #include <stdbool.h>
 #include <stdarg.h>
 #include "cc/string.h"
-#include "dstream.h"
+#include "cc/dstream.h"
 
 bool __far _printf (DATASTREAM *stream, const char *format, va_list ap);
 
