@@ -114,7 +114,7 @@ PCMSMPFLAGS __far __pcmsmp_set_flags (PCMSMPFLAGS _flags, PCMSMPFLAGS _mask, PCM
 #define _pcmsmp_set_EM_data_page(o, v)      _pcmsmp_get_EM_data_page (o) = (v)
 #define _pcmsmp_get_EM_data_handle(o)       (o)->data.em.handle
 #define _pcmsmp_set_EM_data_handle(o, v)    _pcmsmp_get_EM_data_handle (o) = (v)
-#define _pcmsmp_get_EM_data_pages_count(o)  (uint16_t) ((((uint32_t) _pcmsmp_get_mem_size (o) + 0x3fff) >> 1) >> 13)
+#define _pcmsmp_get_EM_data_pages_count(o)  (uint16_t) (((uint32_t) _pcmsmp_get_EM_data_offset (o) + _pcmsmp_get_mem_size (o) - 1) / EM_PAGE_SIZE + 1)
 #define _pcmsmp_get_EM_data(o)              MK_FP (emsFrameSeg, _pcmsmp_get_EM_data_offset (o))
 #define _pcmsmp_get_rate(o)                 (o)->rate
 #define _pcmsmp_set_rate(o, v)              _pcmsmp_get_rate (o) = (v)

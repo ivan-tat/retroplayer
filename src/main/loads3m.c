@@ -333,6 +333,7 @@ typedef struct _s3m_loader_t
     uint16_t pat_EM_page_offset;
     uint16_t smp_EM_pages;
     uint16_t smp_EM_page;
+    uint16_t smp_EM_page_offset;
 };
 typedef struct _s3m_loader_t _S3M_LOADER;
 
@@ -587,12 +588,66 @@ void __near load_s3m_alloc_EM_samples_pages (LOADER_S3M *self)
 
     _Self->smp_EM_pages = pages;
     _Self->smp_EM_page = 0;
+    _Self->smp_EM_page_offset = 0;
 
     if (DEBUG_FILE_S3M_LOAD)
         DEBUG_INFO_ ("load_s3m_alloc_EM_samples_pages",
             "EM pages allocated: %u.",
             pages
         );
+}
+
+bool __near load_s3m_allocate_EM_for_sample (LOADER_S3M *self, PCMSMP *smp, uint8_t index, uint32_t size, uint16_t offset, char **data)
+{
+    _S3M_LOADER *_Self = self;
+    MUSMOD *track;
+    PCMSMPLIST *samples;
+    uint16_t start_page, start_offset, end_page, end_offset;
+    uint32_t s;
+
+    track = _Self->track;
+    samples = musmod_get_samples (track);
+
+    start_page = _Self->smp_EM_page + (offset / EM_PAGE_SIZE);
+    start_offset = offset % EM_PAGE_SIZE;
+    s = size + offset - 1;  // last byte
+    end_page = start_page + (s / EM_PAGE_SIZE);
+    end_offset = s % EM_PAGE_SIZE;
+
+    if (end_page < _Self->smp_EM_pages)
+    {
+        if (DEBUG_FILE_S3M_LOAD)
+            DEBUG_INFO_ ("load_s3m_allocate_EM_for_sample",
+                "sample=%02hhu, size=0x%08lX, handle=0x%04hX, pages=0x%04hX:0x%04hX-0x%04hX:0x%04hX",
+                (uint8_t) index,
+                (uint32_t) size,
+                (uint16_t) pcmsmpl_get_EM_handle (samples),
+                (uint16_t) start_page,
+                (uint16_t) start_offset,
+                (uint16_t) end_page,
+                (uint16_t) end_offset
+            );
+        pcmsmp_set_EM_data (smp, true);
+        pcmsmp_set_own_EM_handle (smp, false);
+        pcmsmp_set_EM_data_handle (smp, pcmsmpl_get_EM_handle (samples));
+        pcmsmp_set_EM_data_page (smp, start_page);
+        pcmsmp_set_EM_data_offset (smp, start_offset);
+        *data = pcmsmp_map_EM_data (smp);
+        if (!*data)
+        {
+            DEBUG_ERR_ ("load_s3m_allocate_EM_for_sample", "Failed to map EM for %s.", "sample");
+            _Self->err = E_S3M_EM_MAP;
+            return false;
+        }
+        // next EM position
+        end_offset++;
+        end_page += end_offset / EM_PAGE_SIZE;
+        end_offset %= EM_PAGE_SIZE;
+        _Self->smp_EM_page = end_page;
+        _Self->smp_EM_page_offset = end_offset;
+    }
+
+    return true;
 }
 
 bool __near load_s3m_load_sample (LOADER_S3M *self, uint8_t index)
@@ -608,6 +663,9 @@ bool __near load_s3m_load_sample (LOADER_S3M *self, uint8_t index)
     uint16_t pages, h, dh;
     uint8_t i;
     uint32_t load_size, data_size;
+    uint16_t start_offset;
+    uint32_t end_offset;
+    uint8_t end_page;
     void *loopstart;
     uint32_t loopsize;
 
@@ -633,32 +691,23 @@ bool __near load_s3m_load_sample (LOADER_S3M *self, uint8_t index)
         return false;
     }
 
-    pages = (uint32_t) (data_size + EM_PAGE_SIZE - 1) / EM_PAGE_SIZE;
+    data = NULL;
 
-    if (UseEMS && pcmsmpl_is_EM_data (samples) && (_Self->smp_EM_pages >= pages))
+    if (UseEMS && pcmsmpl_is_EM_data (samples))
     {
-        if (DEBUG_FILE_S3M_LOAD)
-            DEBUG_INFO_ ("load_s3m_load_sample",
-                "sample=%02u, place=EM, pages=%u-%u.",
-                index,
-                _Self->smp_EM_page,
-                _Self->smp_EM_page + pages - 1
-            );
-        pcmsmp_set_EM_data (smp, true);
-        pcmsmp_set_own_EM_handle (smp, false);
-        pcmsmp_set_EM_data_handle (smp, pcmsmpl_get_EM_handle (samples));
-        pcmsmp_set_EM_data_page (smp, _Self->smp_EM_page);
-        pcmsmp_set_EM_data_offset (smp, 0);
-        data = pcmsmp_map_EM_data (smp);
-        if (!data)
+        start_offset = _Self->smp_EM_page_offset;
+        if (start_offset)
         {
-            DEBUG_ERR_ ("load_s3m_load_sample", "Failed to map EM for %s.", "sample");
-            _Self->err = E_S3M_EM_MAP;
-            return false;
+            /* try to use current offset */
+            end_offset = start_offset + data_size - 1;  // end offset points to last byte
+            if (end_offset > 0xffff)
+                start_offset = EM_PAGE_SIZE;    // use start of next page
         }
-        _Self->smp_EM_page += pages;
+        if (!load_s3m_allocate_EM_for_sample (self, smp, index, data_size, start_offset, &data))
+            return false;
     }
-    else
+
+    if (!data)
     {
         data = __new (data_size);
         if (!data)
@@ -731,6 +780,52 @@ bool __near load_s3m_load_samples (LOADER_S3M *self)
                 return false;
 
     return true;
+}
+
+void __near load_s3m_free_unused_samples_pages (LOADER_S3M *self)
+{
+    _S3M_LOADER *_Self = self;
+    MUSMOD *track;
+    PCMSMPLIST *samples;
+    uint16_t pages, pages_free;
+    EMSHDL handle;
+
+    track = _Self->track;
+    samples = musmod_get_samples (track);
+    if (pcmsmpl_is_EM_data (samples))
+    {
+        pages = _Self->smp_EM_page;
+        if (_Self->smp_EM_page_offset)
+            pages++;
+        pages_free = _Self->smp_EM_pages - pages;
+
+        DEBUG_INFO_ ("load_s3m_free_unused_samples_pages",
+            "EM pages: %u used, %u free",
+            pages,
+            pages_free
+        );
+
+        // try to free unused pages
+        if (pages_free)
+        {
+            handle = pcmsmpl_get_EM_handle (samples);
+            if (pages)
+            {
+                if (!emsResize (handle, pages))
+                    DEBUG_WARN_ ("load_s3m_free_unused_samples_pages", "Failed to free unused pages for %s.", "samples");
+            }
+            else
+            {
+                if (emsFree (handle))
+                {
+                    pcmsmpl_set_EM_data (samples, false);
+                    pcmsmpl_set_EM_handle (samples, EMSBADHDL);
+                }
+                else
+                    DEBUG_WARN_ ("load_s3m_free_unused_samples_pages", "Failed to free unused pages for %s.", "samples");
+            }
+        }
+    }
 }
 
 /*** Instruments ***/
@@ -1534,7 +1629,8 @@ void __near load_s3m_free_unused_patterns_pages (LOADER_S3M *self)
     _S3M_LOADER *_Self = self;
     MUSMOD *track;
     MUSPATLIST *patterns;
-    uint16_t pages;
+    uint16_t pages, pages_free;
+    EMSHDL handle;
 
     track = _Self->track;
     patterns = musmod_get_patterns (track);
@@ -1543,17 +1639,34 @@ void __near load_s3m_free_unused_patterns_pages (LOADER_S3M *self)
         pages = _Self->pat_EM_page;
         if (_Self->pat_EM_page_offset)
             pages++;
+        pages_free = _Self->pat_EM_pages - pages;
 
         DEBUG_INFO_ ("load_s3m_free_unused_patterns_pages",
             "EM pages: %u used, %u free",
             pages,
-            _Self->pat_EM_pages
+            pages_free
         );
 
         // try to free unused pages
-        if (pages && _Self->pat_EM_pages)
-            if (!emsResize (muspatl_get_EM_handle (patterns), pages))
-                DEBUG_WARN_ ("load_s3m_free_unused_patterns_pages", "Failed to free unused pages for %s.", "patterns");
+        if (pages_free)
+        {
+            handle = muspatl_get_EM_handle (patterns);
+            if (pages)
+            {
+                if (!emsResize (handle, pages))
+                    DEBUG_WARN_ ("load_s3m_free_unused_patterns_pages", "Failed to free unused pages for %s.", "patterns");
+            }
+            else
+            {
+                if (emsFree (handle))
+                {
+                    muspatl_set_EM_data (patterns, false);
+                    muspatl_set_EM_handle (patterns, EMSBADHDL);
+                }
+                else
+                    DEBUG_WARN_ ("load_s3m_free_unused_patterns_pages", "Failed to free unused pages for %s.", "patterns");
+            }
+        }
     }
 }
 
@@ -1706,6 +1819,9 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
 
     if (!load_s3m_load_samples (_Self))
         return NULL;
+
+    if (UseEMS)
+        load_s3m_free_unused_samples_pages (_Self);
 
     musmod_set_loaded (track, true);
 
