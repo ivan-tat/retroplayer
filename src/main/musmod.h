@@ -53,14 +53,6 @@ typedef struct musmod_channel_t
 #pragma pack(pop);
 typedef struct musmod_channel_t MUSMODCHN;
 
-/* Song arrangement */
-
-typedef uint8_t musmod_order_entry_t;
-typedef musmod_order_entry_t MUSMODORDENTRY;
-
-typedef musmod_order_entry_t musmod_order_t[MUSMOD_ORDER_LEN];
-typedef musmod_order_t MUSMODORDER;
-
 /* Flags */
 
 typedef uint16_t musmod_flags_t;
@@ -81,11 +73,8 @@ typedef struct music_module_t
     PCMSMPLIST  samples;
     MUSINSLIST  instruments;
     MUSPATLIST  patterns;
-    /*
-    MUSMODORDER order;
-    */
+    MUSPATORDER order;
     uint8_t     channels_count;
-    uint8_t     order_length;
     /*
     uint16_t    order_start;
     */
@@ -114,13 +103,9 @@ MUSMODFLAGS __far __musmod_set_flags (MUSMODFLAGS _flags, MUSMODFLAGS _mask, MUS
 #define _musmod_get_samples(o)          & ((o)->samples)
 #define _musmod_get_instruments(o)      & ((o)->instruments)
 #define _musmod_get_patterns(o)         & ((o)->patterns)
-/*
-#define _musmod_get_order(o)            (o)->order
-*/
+#define _musmod_get_order(o)            & ((o)->order)
 #define _musmod_get_channels_count(o)   (o)->channels_count
 #define _musmod_set_channels_count(o, v) _musmod_get_channels_count (o) = (v)
-#define _musmod_get_order_length(o)     (o)->order_length
-#define _musmod_set_order_length(o, v)  _musmod_get_order_length (o) = (v)
 /*
 #define _musmod_get_order_start(o)      (o)->order_start
 #define _musmod_set_order_start(o, v)   _musmod_get_order_start (o) = (v)
@@ -153,11 +138,7 @@ void __far musmod_set_format (MUSMOD *self, char *value);
 #define    musmod_get_samples(o)            (o) ? _musmod_get_samples (o) : NULL
 #define    musmod_get_instruments(o)        (o) ? _musmod_get_instruments (o) : NULL
 #define    musmod_get_patterns(o)           (o) ? _musmod_get_patterns (o) : NULL
-/*
 #define    musmod_get_order(o)              (o) ? _musmod_get_order (o) : NULL
-*/
-#define    musmod_get_order_length(o)       _musmod_get_order_length (o)
-#define    musmod_set_order_length(o, v)    _musmod_set_order_length (o, v)
 /*
 #define    musmod_get_order_start(o)        _musmod_get_order_start (o)
 #define    musmod_set_order_start(o, v)     _musmod_set_order_start (o, v)

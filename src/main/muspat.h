@@ -251,6 +251,33 @@ void __far muspatl_init (MUSPATLIST *self);
 #define    muspatl_get_used_EM(o)           _muspatl_get_used_EM (o)
 void __far muspatl_free (MUSPATLIST *self);
 
+/*** Patterns order ***/
+
+typedef uint8_t music_patterns_order_entry_t;
+typedef music_patterns_order_entry_t MUSPATORDENT;
+
+#define MUSPATORDENT_SKIP   0xfe
+#define MUSPATORDENT_END    0xff
+
+typedef struct music_patterns_order_t
+{
+    DYNARR list;
+};
+typedef struct music_patterns_order_t MUSPATORDER;
+
+#define _muspatorder_get_list(o)        & ((o)->list)
+#define _muspatorder_set_count(o, v)    dynarr_set_size (_muspatorder_get_list (o), v)
+#define _muspatorder_get_count(o)       dynarr_get_size (_muspatorder_get_list (o))
+#define _muspatorder_set(o, i, v)       dynarr_set_item (_muspatorder_get_list (o), i, v)
+#define _muspatorder_get(o, i)          dynarr_get_item (_muspatorder_get_list (o), i)
+
+void __far muspatorder_init (MUSPATORDER *self);
+#define    muspatorder_set_count(o, v)  _muspatorder_set_count (o, v)
+#define    muspatorder_get_count(o)     _muspatorder_get_count (o)
+#define    muspatorder_set(o, i, v)     _muspatorder_set (o, i, v)
+#define    muspatorder_get(o, i)        _muspatorder_get (o, i)
+void __far muspatorder_free (MUSPATORDER *self);
+
 /*** Debug ***/
 
 #if DEBUG == 1
@@ -285,6 +312,9 @@ bool __far DEBUG_dump_pattern (MUSPAT *self, char *s, uint8_t num_channels);    
 
 #pragma aux muspatl_init "*";
 #pragma aux muspatl_free "*";
+
+#pragma aux muspatorder_init "*";
+#pragma aux muspatorder_free "*";
 
 #if DEBUG == 1
 

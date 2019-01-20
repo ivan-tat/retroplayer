@@ -10,21 +10,7 @@ unit s3mtypes;
 
 interface
 
-uses types;
-
 (*$I defines.pas*)
-
-const
-    MAX_ORDERS = 255; (* 0..254 orders *)
-
-(* song arrangement *)
-
-type
-    TOrderEntry = byte;
-
-type
-    TOrderArray = array [0..MAX_ORDERS] of TOrderEntry;
-        (* song arrangement *)
 
 implementation
 

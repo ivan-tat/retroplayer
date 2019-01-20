@@ -239,13 +239,18 @@ void __near on_track_loop (TRACKSTATE *state)
 {
     MUSMOD *track;
     MUSPATLIST *patterns;
+    MUSPATORDER *order;
+    MUSPATORDENT *order_entry;
     unsigned int i;
 
     track = mod_Track;
+    order = musmod_get_order (track);
+    order_entry = muspatorder_get (order, playState_order);
 
-    i = Order[playState_order];
+    i = *order_entry;
 
-    if (i >= 254)
+    if ((i == MUSPATORDENT_SKIP)
+    ||  (i == MUSPATORDENT_END))
     {
         state->status = FLOWSTATE_PATTERNEND;
         return;
@@ -313,7 +318,6 @@ void __near on_track_stop (TRACKSTATE *state)
     if (playOption_LoopSong)
     {
         playState_order = 0;
-        //playState_pattern = 0;  // FIXME: stop
         state->status = FLOWSTATE_SONGLOOP;
     }
     else

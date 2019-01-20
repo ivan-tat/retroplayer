@@ -140,63 +140,101 @@ void __near display_playercfg(void)
     player_device_dump_conf();
 }
 
-uint8_t __near order_find_previous_entry(uint8_t nr)
+uint8_t __near order_find_previous_entry (uint8_t i)
 {
-    while (nr && (Order[nr] >= 254))
-        nr--;
+    MUSMOD *track;
+    MUSPATORDER *order;
+    MUSPATORDENT *order_entry;
+    bool found;
 
-    return nr;
+    track = mod_Track;
+    order = musmod_get_order (track);
+    found = false;
+    while ((!found) && (i > 0))
+    {
+        order_entry = muspatorder_get (order, i);
+        if ((*order_entry != MUSPATORDENT_SKIP)
+        &&  (*order_entry != MUSPATORDENT_END))
+            found = true;
+        else
+            i--;
+    }
+
+    return i;
 }
 
-uint8_t __near order_find_next_entry(uint8_t nr)
+uint8_t __near order_find_next_entry (uint8_t i)
 {
-    while ((nr <= LastOrder) && (Order[nr] >= 254))
-        nr++;
+    MUSMOD *track;
+    MUSPATORDER *order;
+    MUSPATORDENT *order_entry;
+    bool found;
 
-    return nr;
+    track = mod_Track;
+    order = musmod_get_order (track);
+    found = false;
+    while ((!found) && (i <= LastOrder))
+    {
+        order_entry = muspatorder_get (order, i);
+        if ((*order_entry != MUSPATORDENT_SKIP)
+        &&  (*order_entry != MUSPATORDENT_END))
+            found = true;
+        else
+            i++;
+    }
+
+    return i;
 }
 
-uint8_t __near order_go_to_next_entry(uint8_t nr)
+uint8_t __near order_go_to_next_entry (uint8_t i)
 {
-    nr = order_find_next_entry(nr);
+    i = order_find_next_entry (i);
 
-    if (nr > LastOrder)
+    if (i > LastOrder)
         playState_songEnded = true; // bad order - no real entry
 
-    return nr;
+    return i;
 }
 
-uint8_t nextord(uint8_t nr)
+uint8_t nextord (uint8_t i)
 {
     playState_patDelayCount = 0;
     playState_patLoopActive = false;
     playState_patLoopCount = 0;
     playState_patLoopStartRow = 0;
 
-    nr = order_find_next_entry(nr + 1);
+    i = order_find_next_entry (i + 1);
 
-    if (nr > LastOrder)
+    if (i > LastOrder)
     {
         if (playOption_LoopSong)
-            nr = order_go_to_next_entry(0);
+            i = order_go_to_next_entry (0);
         else
             playState_songEnded = true;
     }
 
-    return nr;
+    return i;
 }
 
-uint8_t prevorder(uint8_t nr)
+uint8_t prevorder (uint8_t i)
 {
-    if (!nr)
-        return nr;
+    MUSMOD *track;
+    MUSPATORDER *order;
+    MUSPATORDENT *order_entry;
 
-    nr = order_find_previous_entry(nr - 1);
+    if (!i)
+        return i;
 
-    if (Order[nr] >= 254)
-        nr = order_go_to_next_entry(nr);
+    i = order_find_previous_entry(i - 1);
 
-    return nr;
+    track = mod_Track;
+    order = musmod_get_order (track);
+    order_entry = muspatorder_get (order, i);
+    if ((*order_entry == MUSPATORDENT_SKIP)
+    ||  (*order_entry == MUSPATORDENT_END))
+        i = order_go_to_next_entry (i);
+
+    return i;
 }
 
 /* Information windows */

@@ -35,6 +35,9 @@ procedure __muspatl_set_flags;
 procedure muspatl_init;
 procedure muspatl_free;
 
+procedure muspatorder_init;
+procedure muspatorder_free;
+
 (*$ifdef DEBUG*)
 
 procedure DEBUG_get_pattern_channel_event_str;
@@ -74,6 +77,9 @@ procedure __muspatl_set_flags; external;
 
 procedure muspatl_init; external;
 procedure muspatl_free; external;
+
+procedure muspatorder_init; external;
+procedure muspatorder_free; external;
 
 (*$ifdef DEBUG*)
 

@@ -43,7 +43,6 @@ extern bool playOption_LoopSong;
 
 /* song arrangement */
 
-extern ordersList_t Order;
 extern uint8_t  LastOrder;  /* last order to play */
 
 /* initial state */
@@ -95,7 +94,6 @@ void playState_set_tempo(uint8_t value);
 #pragma aux playOption_ST3Order "*";
 #pragma aux playOption_LoopSong "*";
 
-#pragma aux Order "*";
 #pragma aux LastOrder "*";
 
 #pragma aux initState_startOrder "*";

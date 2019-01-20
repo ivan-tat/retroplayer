@@ -29,7 +29,6 @@ bool playOption_LoopSong;
 
 /* song arrangement */
 
-ordersList_t Order;
 uint8_t  LastOrder;
 
 MIXCHNLIST *mod_Channels;

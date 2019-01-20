@@ -49,6 +49,7 @@ uses
     stdio,
     stdlib,
     string_,
+    dynarray,
     debug,
     strutils,
     crt,

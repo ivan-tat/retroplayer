@@ -39,6 +39,7 @@ void __far musmod_init (MUSMOD *self)
         pcmsmpl_init (_musmod_get_samples (self));      // clear
         musinsl_init (_musmod_get_instruments (self));  // clear
         muspatl_init (_musmod_get_patterns (self));     // clear
+        muspatorder_init (_musmod_get_order (self));    // clear
     }
 }
 
@@ -67,6 +68,7 @@ void __far musmod_free (MUSMOD *self)
         musinsl_free (_musmod_get_instruments (self));
         pcmsmpl_free (_musmod_get_samples (self));
         muspatl_free (_musmod_get_patterns (self));
+        muspatorder_free (_musmod_get_order (self));
 
         musmod_init (self); // clear
     }

@@ -196,14 +196,14 @@ bool __far player_init_device (uint8_t type)
         player_device = sb_new();
         if (!player_device)
         {
-            DEBUG_FAIL("player_init_device", "Failed to create sound device object.");
+            ERROR ("player_init_device", "%s", "Failed to create sound device object.");
             return false;
         }
         sb_init(player_device);
     }
     else
     {
-        DEBUG_ERR("player_init_device", "Unknown method.");
+        ERROR ("player_init_device", "%s", "Unknown method.");
         return false;
     }
 
@@ -232,7 +232,7 @@ bool __far player_init_device (uint8_t type)
     }
     else
     {
-        DEBUG_FAIL("player_init_device", NULL);
+        ERROR ("player_init_device", "%s", "No sound device.");
         return false;
     }
 }
@@ -340,15 +340,15 @@ bool __near _player_setup_outbuf(SNDDMABUF *outbuf, uint16_t spc)
     }
     else
     {
-        DEBUG_FAIL("_player_setup_outbuf", "No play mode was set.");
+        ERROR ("_player_setup_outbuf", "%s", "No play mode was set.");
         return false;
     }
 }
 
 void __far player_set_master_volume (uint8_t value)
 {
-    if (value > 127)
-        value = 127;
+    if (value > MUSMOD_MASTER_VOLUME_MAX)
+        value = MUSMOD_MASTER_VOLUME_MAX;
     playState_mVolume = value;
     amptab_set_volume(value);
 }
@@ -360,25 +360,44 @@ uint8_t __far player_get_master_volume (void)
 
 void __near _player_setup_patterns_order (MUSMOD *track)
 {
+    MUSPATORDER *order;
+    MUSPATORDENT *order_entry;
     int i, last;
+    bool found;
 
     if (track && musmod_is_loaded (track))
     {
-        last = musmod_get_order_length (track) - 1;
+        order = musmod_get_order (track);
+        last = muspatorder_get_count (order) - 1;
+        found = false;
+
         if (playOption_ST3Order)
         {
             /* search for first '--' */
             i = 0;
-            while ((i < last) && (Order[i] < 255))
-                i++;
+            while ((!found) && (i < last))
+            {
+                order_entry = muspatorder_get (order, i);
+                if (*order_entry == MUSPATORDENT_END)
+                    found = true;
+                else
+                    i++;
+            }
             i--;
         }
         else
         {
             /* it is not important, we can also do simply LastOrder = order_length - 1 */
             i = last;
-            while ((i > 0) && (Order[i] >= 254))
-                i--;
+            while ((!found) && (i > 0))
+            {
+                order_entry = muspatorder_get (order, i);
+                if ((*order_entry != MUSPATORDENT_SKIP)
+                &&  (*order_entry != MUSPATORDENT_END))
+                    found = true;
+                else
+                    i--;
+            }
         }
     }
     else
@@ -432,24 +451,14 @@ bool __far player_load_s3m (char *name)
     return true;
 }
 
-bool __near _player_alloc_channels (MUSMOD *track)
+bool __near _player_alloc_channels (MIXCHNLIST *channels, MUSMOD *track)
 {
-    MIXCHNLIST *channels;
     uint8_t num_channels;
     uint8_t i;
     MIXCHN *chn;
     MIXCHNTYPE type;
     MIXCHNPAN pan;
     MIXCHNFLAGS flags;
-
-    channels = _new (MIXCHNLIST);
-    if (!channels)
-    {
-        ERROR ("_player_alloc_channels", "Failed to allocate memory for %s.", "mixing channels");
-        return false;
-    }
-    mixchnl_init (channels);
-    mod_Channels = channels;
 
     num_channels = musmod_get_channels_count (track);
 
@@ -509,11 +518,19 @@ void __near _player_set_initial_state (MUSMOD *track)
 
 void __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep)
 {
+    MUSMOD *track;
+    MUSPATORDER *order;
+    MUSPATORDENT *order_entry;
+
+    track = mod_Track;
+    order = musmod_get_order (track);
+
     // Module
     playState_tick = 1;         // last tick (go to next row)
     playState_row = start_row;  // next row to read from
-    playState_order = start_order;          // next order to read from
-    playState_pattern = Order[start_order]; // next pattern to read from
+    playState_order = start_order;  // next order to read from
+    order_entry = muspatorder_get (order, start_order);
+    playState_pattern = *order_entry;   // next pattern to read from
 
     if (!keep)
     {
@@ -561,10 +578,17 @@ bool __far player_play_start (void)
 
     // Allocate mixing channels
 
-    if (!_player_alloc_channels (track))
+    channels = _new (MIXCHNLIST);
+    if (!channels)
+    {
+        ERROR ("_player_alloc_channels", "Failed to allocate memory for %s.", "mixing channels");
         return false;
+    }
+    mixchnl_init (channels);
+    mod_Channels = channels;
 
-    channels = mod_Channels;
+    if (!_player_alloc_channels (channels, track))
+        return false;
 
     // 1. Setup output mode
 

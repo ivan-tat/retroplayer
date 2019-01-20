@@ -584,6 +584,29 @@ void __far muspatl_free (MUSPATLIST *self)
     }
 }
 
+/*** Music patterns order ***/
+
+void __far _muspatorder_init_item (void *self, void *item)
+{
+    *(MUSPATORDENT *) item = MUSPATORDENT_END;
+}
+
+void __far _muspatorder_free_item (void *self, void *item)
+{
+}
+
+void __far muspatorder_init (MUSPATORDER *self)
+{
+    if (self)
+        dynarr_init (_muspatorder_get_list (self), self, sizeof (MUSPATORDENT), _muspatorder_init_item, _muspatorder_free_item);
+}
+
+void __far muspatorder_free (MUSPATORDER *self)
+{
+    if (self)
+        dynarr_free (_muspatorder_get_list (self));
+}
+
 /*** Debug ***/
 
 #if DEBUG == 1

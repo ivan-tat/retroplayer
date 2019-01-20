@@ -212,6 +212,14 @@ typedef struct _s3m_instrument_t _S3M_INS;
 #define _ins_get_file_name(o)           (o)->dosname
 #define _ins_get_title(o)               (o)->title
 
+/*** Patterns order entry ***/
+
+typedef uint8_t _s3m_patterns_order_entry_t;
+typedef _s3m_patterns_order_entry_t _S3M_PATORDENT;
+
+#define _S3M_PATORDENT_SKIP 0xfe
+#define _S3M_PATORDENT_END  0xff
+
 /*** Loader ***/
 
 #pragma pack(push, 1);
@@ -236,6 +244,7 @@ typedef struct _s3m_loader_t
     uint8_t   ins_count;
     uint8_t   smp_count;
     uint8_t   pat_count;
+    uint8_t   ord_length;
     uint16_t *ins_offsets;
     _S3M_INSINFO *ins_info;
     uint16_t *pat_offsets;
@@ -263,6 +272,8 @@ typedef struct _s3m_loader_t _S3M_LOADER;
 #define _get_patterns_offsets(o)        (o)->pat_offsets
 #define _set_patterns_offsets(o, v)     _get_patterns_offsets (o) = (v)
 #define _get_pattern_offset(o, i)       (_get_patterns_offsets (o)[i] * 16)
+#define _get_order_length(o)            (o)->ord_length
+#define _set_order_length(o, v)         _get_order_length (o) = (v)
 
 /**********************************************************************/
 
@@ -434,7 +445,7 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
 
     _set_instruments_count (_Self, header.insnum);
     _set_patterns_count (_Self, header.patnum);
-    musmod_set_order_length (track, header.ordnum);
+    _set_order_length (_Self, header.ordnum);
     musmod_set_stereo (track, (header.mvolume & _S3M_MVOL_STEREO) != 0);
     musmod_set_amiga_limits (track, (header.flags & _S3M_FLAG_AMIGA_LIMITS) != 0);
     musmod_set_global_volume (track, header.gvolume);
@@ -1615,25 +1626,65 @@ void __near load_s3m_free_unused_patterns_pages (LOADER_S3M *self)
 bool __near load_s3m_load_patterns_order (LOADER_S3M *self)
 {
     _S3M_LOADER *_Self = self;
+    _S3M_PATORDENT *buf;
     MUSMOD *track;
-    int i;
+    MUSPATORDER *order;
+    MUSPATORDENT index, *p;
+    uint16_t count, size, i;
+    bool found;
 
     track = _Self->track;
+    order = musmod_get_order (track);
+    count = _get_order_length (_Self);
+    size = count * sizeof (_S3M_PATORDENT);
 
-    //if (!fread (order, musmod_get_order_length (track), 1, _Self->f))
-    if (!fread (&Order, musmod_get_order_length (track), 1, _Self->f))
+    buf = __new (size);
+    if (!buf)
     {
-        ERROR (self, "load_s3m_load", "Failed to read %s.", "patterns order");
+        ERROR (self, "load_s3m_load_patterns_order", "Failed to allocate memory for %s.", "patterns order");
         return false;
     }
 
-    // check order if there's one 'real' (playable) entry ...
-    i = 0;
-    //while ((i < musmod_get_order_length (track)) && (*order[i] >= 254))
-    while ((i < musmod_get_order_length (track)) && (Order[i] >= 254))
-        i++;
+    if (!fread (buf, size, 1, _Self->f))
+    {
+        ERROR (self, "load_s3m_load_patterns_order", "Failed to read %s.", "patterns order");
+        _delete (buf);
+        return false;
+    }
 
-    if (i == musmod_get_order_length (track))
+    for (i = 0; i < count; i++)
+    {
+        switch (buf[i])
+        {
+        case _S3M_PATORDENT_SKIP:
+            index = MUSPATORDENT_SKIP;
+            break;
+        case _S3M_PATORDENT_END:
+            index = MUSPATORDENT_END;
+            break;
+        default:
+            if (buf[i] < _S3M_MAX_PATTERNS)
+                index = buf[i];
+            else
+                index = MUSPATORDENT_END;
+            break;
+        }
+        muspatorder_set (order, i, &index);
+    }
+
+    _delete (buf);
+
+    // check order if there's one 'real' (playable) entry ...
+    found = false;
+    i = 0;
+    while ((i < count) && (!found))
+    {
+        p = muspatorder_get (order, i);
+        found = *p < _S3M_MAX_PATTERNS;
+        i++;
+    }
+
+    if (!found)
     {
         ERROR (self, "load_s3m_load", "%s", "Playable entry not found.");
         return false;
@@ -1652,9 +1703,7 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
     PCMSMPLIST *samples;
     MUSINSLIST *instruments;
     MUSPATLIST *patterns;
-    //PATORD *order;
-    uint8_t maxused, i, smpnum;
-    uint16_t count;
+    MUSPATORDER *order;
 
     if ((!_Self) || (!name))
     {
@@ -1673,7 +1722,7 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
     samples = musmod_get_samples (track);
     instruments = musmod_get_instruments (track);
     patterns = musmod_get_patterns (track);
-    //order = musmod_get_order (track);
+    order = musmod_get_order (track);
 
     UseEMS = UseEMS && emsInstalled && emsGetFreePagesCount ();
 
@@ -1688,8 +1737,6 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
     if (!load_s3m_read_header (_Self))
         return NULL;
 
-    // TODO: allocate patterns order array (order)
-
     if (!musinsl_set_count (instruments, _get_instruments_count (_Self)))
     {
         ERROR (self, "load_s3m_load", "Failed to allocate memory for %s.", "instruments list");
@@ -1699,6 +1746,12 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
     if (!muspatl_set_count (patterns, _get_patterns_count (_Self)))
     {
         ERROR (self, "load_s3m_load", "Failed to allocate memory for %s.", "patterns list");
+        return NULL;
+    }
+
+    if (!muspatorder_set_count (order, _get_order_length (_Self)))
+    {
+        ERROR (self, "load_s3m_load", "Failed to allocate memory for %s.", "patterns order");
         return NULL;
     }
 

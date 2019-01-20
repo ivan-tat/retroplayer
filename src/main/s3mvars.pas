@@ -36,7 +36,6 @@ var
 (* song arrangment *)
 
 var
-    Order: TOrderArray;
     LastOrder: byte;
 
 (* initial state *)
