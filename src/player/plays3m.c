@@ -191,17 +191,17 @@ uint8_t __near order_go_to_next_entry (uint8_t i)
     i = order_find_next_entry (i);
 
     if (i > LastOrder)
-        playState_songEnded = true; // bad order - no real entry
+        playState.flags |= PLAYSTATEFL_END; // bad order - no real entry
 
     return i;
 }
 
 uint8_t nextord (uint8_t i)
 {
-    playState_patDelayCount = 0;
-    playState_patLoopActive = false;
-    playState_patLoopCount = 0;
-    playState_patLoopStartRow = 0;
+    playState.flags &= ~PLAYSTATEFL_PATLOOP;
+    playState.patdelay_count = 0;
+    playState.patloop_count = 0;
+    playState.patloop_start_row = 0;
 
     i = order_find_next_entry (i + 1);
 
@@ -210,7 +210,7 @@ uint8_t nextord (uint8_t i)
         if (playOption_LoopSong)
             i = order_go_to_next_entry (0);
         else
-            playState_songEnded = true;
+            playState.flags |= PLAYSTATEFL_END;
     }
 
     return i;
@@ -987,12 +987,12 @@ void __far plays3m_main (void)
                 }
                 if (c == '+')
                 {
-                    player_set_pos(nextord(playState_order), 0, true);
+                    player_set_pos (nextord (playState.order), 0, true);
                     c = 0;
                 }
                 if (c == '-')
                 {
-                    player_set_pos(prevorder(playState_order), 0, false);
+                    player_set_pos (prevorder (playState.order), 0, false);
                     channels_stop_all();
                     c = 0;
                 }
@@ -1011,7 +1011,7 @@ void __far plays3m_main (void)
             }
         }
     }
-    while (((sndDMABuf.flags & SNDDMABUFFL_SLOW) == 0) && (!quit) && (!playState_songEnded));
+    while (((sndDMABuf.flags & SNDDMABUFFL_SLOW) == 0) && (!quit) && (!(playState.flags & PLAYSTATEFL_END)));
 
     textbackground(_black);
     textcolor(_lightgray);

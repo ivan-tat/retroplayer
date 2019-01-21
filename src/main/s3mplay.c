@@ -349,13 +349,13 @@ void __far player_set_master_volume (uint8_t value)
 {
     if (value > MUSMOD_MASTER_VOLUME_MAX)
         value = MUSMOD_MASTER_VOLUME_MAX;
-    playState_mVolume = value;
+    playState.master_volume = value;
     amptab_set_volume(value);
 }
 
 uint8_t __far player_get_master_volume (void)
 {
-    return playState_mVolume;
+    return playState.master_volume;
 }
 
 void __near _player_setup_patterns_order (MUSMOD *track)
@@ -510,10 +510,10 @@ void __near _player_reset_channels (MIXCHNLIST *channels)
 
 void __near _player_set_initial_state (MUSMOD *track)
 {
-    playState_set_tempo (musmod_get_tempo (track)); // first priority (is output mixer-dependant)
-    playState_set_speed (musmod_get_speed (track)); // second priority (is song's internal value)
-    playState_gVolume = musmod_get_global_volume (track);   // is song's internal value
-    playState_mVolume = musmod_get_master_volume (track);   // is song's output
+    playState_set_tempo (&playState, musmod_get_tempo (track)); // first priority (is output mixer-dependant)
+    playState_set_speed (&playState, musmod_get_speed (track)); // second priority (is song's internal value)
+    playState.global_volume = musmod_get_global_volume (track); // is song's internal value
+    playState.master_volume = musmod_get_master_volume (track); // is song's output
 }
 
 void __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep)
@@ -526,19 +526,19 @@ void __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep)
     order = musmod_get_order (track);
 
     // Module
-    playState_tick = 1;         // last tick (go to next row)
-    playState_row = start_row;  // next row to read from
-    playState_order = start_order;  // next order to read from
+    playState.tick = 1;         // last tick (go to next row)
+    playState.row = start_row;  // next row to read from
+    playState.order = start_order;  // next order to read from
     order_entry = muspatorder_get (order, start_order);
-    playState_pattern = *order_entry;   // next pattern to read from
+    playState.pattern = *order_entry;   // next pattern to read from
 
     if (!keep)
     {
         // reset pattern effects:
-        playState_patDelayCount = 0;
-        playState_patLoopActive = false;
-        playState_patLoopCount = 0;
-        playState_patLoopStartRow = 0;
+        playState.patdelay_count = 0;
+        playState.flags &= ~PLAYSTATEFL_PATLOOP;
+        playState.patloop_count = 0;
+        playState.patloop_start_row = 0;
     }
 }
 
@@ -598,14 +598,14 @@ bool __far player_play_start (void)
     player_mode_bits     = sb_mode_get_bits(player_device);
     player_mode_signed   = sb_mode_is_signed(player_device);
 
-    playState_rate = player_mode_lq ? player_mode_rate / 2 : player_mode_rate;
+    playState.rate = player_mode_lq ? player_mode_rate / 2 : player_mode_rate;
 
     // 2. Setup mixer mode
 
     mixbuf_set_mode(
         &mixBuf,
         player_mode_channels,
-        ((1000000L / (uint16_t)(1000000L / playState_rate)) / playOption_FPS) + 1
+        ((1000000L / (uint16_t)(1000000L / playState.rate)) / playOption_FPS) + 1
     );
 
     // 3. Setup output buffer
@@ -634,12 +634,12 @@ bool __far player_play_start (void)
     _player_set_initial_state (track);  // master volume affects mixer tables
 
     // mixer
-    amptab_set_volume (playState_mVolume);
+    amptab_set_volume (playState.master_volume);
 
     _player_reset_channels (channels);
     player_set_pos (initState_startOrder, 0, false);
-    playState_tick_samples_per_channel_left = 0;    // emmidiately next tick
-    playState_songEnded = false;    // resume playing
+    playState.tick_samples_per_channel_left = 0;    // emmidiately next tick
+    playState.flags = 0;    // resume playing
 
     // 6. Prefill output buffer
 
@@ -684,17 +684,17 @@ uint16_t __far player_get_buffer_pos (void)
 
 uint8_t __far player_get_speed (void)
 {
-    return playState_speed;
+    return playState.speed;
 }
 
 uint8_t __far player_get_tempo (void)
 {
-    return playState_tempo;
+    return playState.tempo;
 }
 
 uint8_t __far player_get_pattern_delay (void)
 {
-    return playState_patDelayCount;
+    return playState.patdelay_count;
 }
 
 void __far player_free_module (void)

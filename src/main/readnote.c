@@ -207,29 +207,29 @@ typedef struct track_state_t TRACKSTATE;
 
 void __near on_row_end (TRACKSTATE *state)
 {
-    playState_row++;
+    playState.row++;
 
-    if (playState_row < muspat_get_rows (state->pat))
+    if (playState.row < muspat_get_rows (state->pat))
         state->status = FLOWSTATE_WAIT;
     else
     {
-        playState_row = 0;
+        playState.row = 0;
         state->status = FLOWSTATE_PATTERNEND;
     }
 }
 
 void __near on_pattern_end (TRACKSTATE *state)
 {
-    playState_order++;
+    playState.order++;
 
     state->status = FLOWSTATE_PATTERNJUMP;
 }
 
 void __near on_pattern_jump (TRACKSTATE *state)
 {
-    playState_patLoopStartRow = 0;
+    playState.patloop_start_row = 0;
 
-    if (playState_order > LastOrder)
+    if (playState.order > LastOrder)
         state->status = FLOWSTATE_SONGSTOP;
     else
         state->status = FLOWSTATE_SONGLOOP;
@@ -245,7 +245,7 @@ void __near on_track_loop (TRACKSTATE *state)
 
     track = mod_Track;
     order = musmod_get_order (track);
-    order_entry = muspatorder_get (order, playState_order);
+    order_entry = muspatorder_get (order, playState.order);
 
     i = *order_entry;
 
@@ -257,7 +257,7 @@ void __near on_track_loop (TRACKSTATE *state)
     }
     else
     {
-        playState_pattern = i;
+        playState.pattern = i;
 
         if (state->firstPlay)
         {
@@ -266,25 +266,25 @@ void __near on_track_loop (TRACKSTATE *state)
             playState_patBreak_bFlag = false;
             playState_gVolume_bFlag = false;
             playState_patLoop_bNow = false;
-            playState_patDelay_bNow = playState_patDelayCount != 0;
+            playState_patDelay_bNow = playState.patdelay_count != 0;
             patterns = musmod_get_patterns (track);
             state->pat = muspatl_get (patterns, i);
 
-            if (!_play_row (state->pat, playState_row))
+            if (!_play_row (state->pat, playState.row))
             {
                 state->status = FLOWSTATE_ROWEND;
                 return;
             }
 
             if (playState_gVolume_bFlag)
-                playState_gVolume = playState_gVolume_bValue;
+                playState.global_volume = playState_gVolume_bValue;
 
-            playState_tick = playState_speed;
+            playState.tick = playState.speed;
 
             // Pattern break ?
             if (playState_patBreak_bFlag)
             {
-                playState_row = playState_patBreak_bPos;
+                playState.row = playState_patBreak_bPos;
                 state->status = FLOWSTATE_PATTERNEND;
                 return;
             }
@@ -292,17 +292,17 @@ void __near on_track_loop (TRACKSTATE *state)
             // Pattern loop ?
             if (playState_patLoop_bNow)
             {
-                playState_patLoopCount--;
-                if (playState_patLoopCount)
+                playState.patloop_count--;
+                if (playState.patloop_count)
                 {
-                    playState_row = playState_patLoopStartRow;
+                    playState.row = playState.patloop_start_row;
                     state->status = FLOWSTATE_WAIT;
                     return;
                 }
                 else
                 {
-                    playState_patLoopStartRow = playState_row + 1;
-                    playState_patLoopActive = false;
+                    playState.patloop_start_row = playState.row + 1;
+                    playState.flags &= ~PLAYSTATEFL_PATLOOP;
                 }
             }
 
@@ -317,12 +317,12 @@ void __near on_track_stop (TRACKSTATE *state)
 {
     if (playOption_LoopSong)
     {
-        playState_order = 0;
+        playState.order = 0;
         state->status = FLOWSTATE_SONGLOOP;
     }
     else
     {
-        playState_songEnded = true;
+        playState.flags |= PLAYSTATEFL_END;
         state->status = FLOWSTATE_WAIT;
     }
 }

@@ -265,8 +265,8 @@ void __near win_pattern_draw_list (SCRWIN *self)
     int line_start, line_cur, line_end, y;
 
     /* get play state */
-    pattern_num = playState_pattern;
-    row = playState_row;
+    pattern_num = playState.pattern;
+    row = playState.row;
 
     data = (struct win_pattern_data_t *) scrwin_get_data (self);
     track = data->track;
@@ -398,8 +398,8 @@ void __far win_pattern_draw (SCRWIN *self)
     data = (struct win_pattern_data_t *) scrwin_get_data (self);
 
     /* get play state */
-    pattern_num = playState_pattern;
-    row = playState_row;
+    pattern_num = playState.pattern;
+    row = playState.row;
 
     if (scrwin_get_flags (self) & WINFL_FULLREDRAW)
     {

@@ -119,7 +119,7 @@ void __far mixchn_setup_sample_period (MIXCHN *self, uint32_t value)
     {
         value = mixchn_check_sample_period(self, value);
         mixchn_set_sample_period(self, value);
-        mixchn_set_sample_step(self, _calc_sample_step(value, playState_rate));
+        mixchn_set_sample_step (self, _calc_sample_step (value, playState.rate));
     }
     else
     {
@@ -238,7 +238,7 @@ uint32_t __far chn_calcNoteStep (MIXCHN *chn, uint32_t rate, uint8_t note)
     unsigned int period;
     period = chn_calcNotePeriod(chn, rate, note);
     if (period)
-        return _calc_sample_step(period, playState_rate);
+        return _calc_sample_step (period, playState.rate);
     else
         return 0;
 }

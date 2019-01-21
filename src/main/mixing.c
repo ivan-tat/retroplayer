@@ -25,21 +25,21 @@
 
 void __near song_new_tick(MIXBUF *mb)
 {
-    playState_tick_samples_per_channel_left = playState_tick_samples_per_channel;
+    playState.tick_samples_per_channel_left = playState.tick_samples_per_channel;
 
-    if (playState_tick <= 1)
+    if (playState.tick <= 1)
     {
-        if (playState_patDelayCount)
+        if (playState.patdelay_count)
         {
-            playState_patDelayCount--;
-            if (playState_patDelayCount)
-                playState_row--;
+            playState.patdelay_count--;
+            if (playState.patdelay_count)
+                playState.row--;
         }
         readnewnotes();
     }
     else
     {
-        playState_tick--;
+        playState.tick--;
     }
 }
 
@@ -62,7 +62,7 @@ void __near song_play_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_
     if (callEffects)
     {
         /* do effects for this channel: */
-        if (playState_tick != playState_speed)
+        if (playState.tick != playState.speed)
             chn_effTick(chn);
     }
 
@@ -81,7 +81,7 @@ void __near song_play_channel(MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_
         Vol = mixchn_get_note_volume (chn); // = 0..64  (6 bits)
         IV = musins_get_volume (ins);       // = 0..128 (7 bits)
         SV = pcmsmp_get_volume (smp);       // = 0..64  (6 bits)
-        GV = playState_gVolume;             // = 0..64  (6 bits)
+        GV = playState.global_volume;       // = 0..64  (6 bits)
         if (Vol | IV | SV | GV)
         {
             // final_volume = 0..64 (6 bits)
@@ -147,11 +147,11 @@ void __near song_play(MIXBUF *mb, uint16_t len)
     bufSize = mixbuf_get_offset_from_count(mb, len);
     channels = mod_Channels;
 
-    if (!playState_songEnded)
+    if (!(playState.flags & PLAYSTATEFL_END))
     {
         bufOff = 0;
 
-        if (playState_tick_samples_per_channel_left)
+        if (playState.tick_samples_per_channel_left)
         {
             callEffects = false;
         }
@@ -161,11 +161,11 @@ void __near song_play(MIXBUF *mb, uint16_t len)
             song_new_tick(mb);
         }
 
-        while (! playState_songEnded)
+        while (!(playState.flags & PLAYSTATEFL_END))
         {
             count = mixbuf_get_count_from_offset(mb, bufSize - bufOff);
-            if (count > playState_tick_samples_per_channel_left)
-                count = playState_tick_samples_per_channel_left;
+            if (count > playState.tick_samples_per_channel_left)
+                count = playState.tick_samples_per_channel_left;
                 /* finish that tick and loop to fill the whole mixing buffer */
 
             if (!count)
@@ -179,7 +179,7 @@ void __near song_play(MIXBUF *mb, uint16_t len)
                         bufOff + ((mixbuf_get_channels (mb) == 2) && (mixchn_get_pan (chn) == MIXCHNPAN_RIGHT) ? sizeof(int32_t) : 0));   // NOTE: mixbuf is 32 bits
             }
 
-            playState_tick_samples_per_channel_left -= count;
+            playState.tick_samples_per_channel_left -= count;
             bufOff += mixbuf_get_offset_from_count(mb, count);
 
             if (bufOff < bufSize)

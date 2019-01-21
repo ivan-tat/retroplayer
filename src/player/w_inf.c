@@ -67,7 +67,7 @@ void __far win_information_draw(SCRWIN *self)
     {
         track = mod_Track;
         patterns = musmod_get_patterns (track);
-        pat = muspatl_get (patterns, playState_pattern);
+        pat = muspatl_get (patterns, playState.pattern);
 
         textbackground(_blue);
 
@@ -123,7 +123,7 @@ void __far win_information_draw(SCRWIN *self)
         gotoxy(18, 2);
         printf("%03u", player_get_tempo());
         gotoxy(27, 2);
-        printf("%02u", playState_gVolume);
+        printf("%02u", playState.global_volume);
         gotoxy(35, 2);
         printf("%03u", player_get_master_volume());
         gotoxy(45, 2);
@@ -131,29 +131,29 @@ void __far win_information_draw(SCRWIN *self)
         gotoxy(59, 2);
         printf(playOption_LoopSong ? "On" : "Off");
         gotoxy(6, 3);
-        printf("%03u", playState_order);
+        printf("%03u", playState.order);
         gotoxy(10, 3);
         printf("%03u", LastOrder);
         gotoxy(18, 3);
-        printf("%02u", playState_pattern);
+        printf("%02u", playState.pattern);
         gotoxy(21, 3);
         if (muspat_is_EM_data(pat))
             printf("E%04X", muspat_get_EM_data_page(pat));
         else
             printf("D%04X", FP_SEG(muspat_get_data(pat)));
         gotoxy(32, 3);
-        printf("%03u", playState_row);
+        printf("%03u", playState.row);
         gotoxy(36, 3);
         printf("%03u", muspat_get_rows(pat));
         gotoxy(45, 3);
-        printf("%03u", playState_tick);
+        printf("%03u", playState.tick);
         gotoxy(56, 3);
         printf("%02u", player_get_pattern_delay());
         gotoxy(65, 3);
-        printf("%03u", playState_patLoopStartRow);
+        printf("%03u", playState.patloop_start_row);
         gotoxy(69, 3);
-        if (playState_patLoopActive)
-            printf("%03u", playState_patLoopCount);
+        if (playState.flags & PLAYSTATEFL_PATLOOP)
+            printf("%03u", playState.patloop_count);
         else
             printf("---");
     }

@@ -39,47 +39,23 @@ uint16_t initState_startOrder;
 
 /* play state */
 
-bool     playState_songEnded;
-uint16_t playState_rate;
-uint8_t  playState_tempo;
-uint8_t  playState_speed;
-uint8_t  playState_gVolume;
-uint8_t  playState_mVolume;
-uint16_t playState_tick_samples_per_channel;    /* depends on rate and tempo */
-
-/* position in song - you can change it while playing to jump arround */
-
-uint8_t  playState_order;
-uint8_t  playState_pattern;
-uint8_t  playState_row;
-uint8_t  playState_tick;
-uint16_t playState_tick_samples_per_channel_left;   /* samples per channel left to next tick */
-
-/* pattern loop */
-
-bool    playState_patLoopActive;
-uint8_t playState_patLoopCount;
-uint8_t playState_patLoopStartRow;
-
-/* pattern delay */
-
-uint8_t playState_patDelayCount;
+PLAYSTATE playState;
 
 #endif  /* DEFINE_LOCAL_DATA */
 
-void playState_set_speed(uint8_t value)
+void __far playState_set_speed (PLAYSTATE *self, uint8_t value)
 {
     if (value > 0)
-        playState_speed = value;
+        self->speed = value;
 }
 
-void playState_set_tempo(uint8_t value)
+void __far playState_set_tempo (PLAYSTATE *self, uint8_t value)
 {
     if (value >= 32)
-        playState_tempo = value;
+        self->tempo = value;
     else
-        value = playState_tempo;
+        value = self->tempo;
 
     if (value)
-        playState_tick_samples_per_channel = (long)playState_rate * 5 / (int)(value * 2);
+        self->tick_samples_per_channel = (long)self->rate * 5 / (int)(value * 2);
 }

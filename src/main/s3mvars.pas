@@ -46,34 +46,23 @@ var
 (* play state *)
 
 var
-    playState_songEnded: boolean;
-    playState_rate: Word;
-    playState_tempo: byte;
-    playState_speed: byte;
-    playState_gVolume: byte;
-    playState_mVolume: byte;
-    playState_tick_samples_per_channel: Word;
-
-(* position in song - you can change it while playing to jump arround *)
-
-var
-    playState_order: byte;
-    playState_pattern: byte;
-    playState_row: byte;
-    playState_tick: byte;
-    playState_tick_samples_per_channel_left: Word;
-
-(* pattern loop *)
-
-var
-    playState_patLoopActive: boolean;
-    playState_patLoopCount: byte;
-    playState_patLoopStartRow: byte;
-
-(* pattern delay *)
-
-var
-    playState_patDelayCount: byte;
+    playState: packed record
+        flags: Byte;
+        rate: Word;
+        tempo: Byte;
+        speed: Byte;
+        gvolume: Byte;
+        mvolume: Byte;
+        tick_samples_per_channel: Word;
+        order: Byte;
+        pattern: Byte;
+        row: Byte;
+        tick: Byte;
+        tick_samples_per_channel_left: Word;
+        patloop_count: Byte;
+        patloop_start_row: Byte;
+        patdelay_count: Byte;
+    end;
 
 procedure playState_set_speed;
 procedure playState_set_tempo;

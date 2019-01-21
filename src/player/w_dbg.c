@@ -172,10 +172,10 @@ void __far win_debug_draw(SCRWIN *self)
     sndbuf = &sndDMABuf;
     dmabuf = sndbuf->buf;
     out_channels = mixbuf_get_channels (mixbuf);
-    out_rate = playState_rate;
+    out_rate = playState.rate;
     out_samples_per_channel = mixbuf_get_samples_per_channel (mixbuf);
-    out_tick_samples_per_channel = playState_tick_samples_per_channel;
-    out_tick_samples_per_channel_left = playState_tick_samples_per_channel_left;
+    out_tick_samples_per_channel = playState.tick_samples_per_channel;
+    out_tick_samples_per_channel_left = playState.tick_samples_per_channel_left;
     out_dma_buf_unaligned = dmabuf->unaligned;
     out_dma_buf = dmabuf->data;
     out_frame_size = sndbuf->frameSize;

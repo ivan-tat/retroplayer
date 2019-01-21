@@ -49,36 +49,43 @@ extern uint8_t  LastOrder;  /* last order to play */
 
 extern uint16_t initState_startOrder;
 
-/* play state */
+/*** play state ***/
 
-extern bool     playState_songEnded;
-extern uint16_t playState_rate;
-extern uint8_t  playState_tempo;
-extern uint8_t  playState_speed;
-extern uint8_t  playState_gVolume;
-extern uint8_t  playState_mVolume;
-extern uint16_t playState_tick_samples_per_channel;
+typedef uint8_t play_state_flags_t;
+typedef play_state_flags_t PLAYSTATEFLAGS;
 
-/* position in song - you can change it while playing to jump arround */
+#define PLAYSTATEFL_END     (1 << 0)    // end of song
+#define PLAYSTATEFL_PATLOOP (1 << 1)    // pattern loop
 
-extern uint8_t  playState_order;
-extern uint8_t  playState_pattern;
-extern uint8_t  playState_row;
-extern uint8_t  playState_tick;
-extern uint16_t playState_tick_samples_per_channel_left;
+#pragma pack(push, 1);
+typedef struct playState_t
+{
+    PLAYSTATEFLAGS flags;
+    uint16_t rate;
+    uint8_t  tempo;
+    uint8_t  speed;
+    uint8_t  global_volume;
+    uint8_t  master_volume;
+    uint16_t tick_samples_per_channel;  // depends on rate and tempo
+    // position in song - you can change it while playing to jump arround
+    uint8_t  order;
+    uint8_t  pattern;
+    uint8_t  row;
+    uint8_t  tick;
+    uint16_t tick_samples_per_channel_left; // samples per channel left to next tick
+    // pattern loop
+    uint8_t  patloop_count;
+    uint8_t  patloop_start_row;
+    // pattern delay
+    uint8_t  patdelay_count;
+};
+#pragma pack(pop);
+typedef struct playState_t PLAYSTATE;
 
-/* pattern loop */
+extern PLAYSTATE playState;
 
-extern bool    playState_patLoopActive;
-extern uint8_t playState_patLoopCount;
-extern uint8_t playState_patLoopStartRow;
-
-/* pattern delay */
-
-extern uint8_t playState_patDelayCount;
-
-void playState_set_speed(uint8_t value);
-void playState_set_tempo(uint8_t value);
+void __far playState_set_speed (PLAYSTATE *self, uint8_t value);
+void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
 
 /*** Linking ***/
 
@@ -98,25 +105,7 @@ void playState_set_tempo(uint8_t value);
 
 #pragma aux initState_startOrder "*";
 
-#pragma aux playState_songEnded "*";
-#pragma aux playState_rate "*";
-#pragma aux playState_tempo "*";
-#pragma aux playState_speed "*";
-#pragma aux playState_gVolume "*";
-#pragma aux playState_mVolume "*";
-#pragma aux playState_tick_samples_per_channel "*";
-
-#pragma aux playState_order "*";
-#pragma aux playState_pattern "*";
-#pragma aux playState_row "*";
-#pragma aux playState_tick "*";
-#pragma aux playState_tick_samples_per_channel_left "*";
-
-#pragma aux playState_patLoopActive "*";
-#pragma aux playState_patLoopCount "*";
-#pragma aux playState_patLoopStartRow "*";
-
-#pragma aux playState_patDelayCount "*";
+#pragma aux playState "*";
 
 #pragma aux playState_set_speed "*";
 #pragma aux playState_set_tempo "*";

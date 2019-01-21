@@ -706,7 +706,7 @@ METHOD_GET_NAME (none_na)
 METHOD_INIT(setSpeed)
 {
     param = checkPara0not(chn, param);
-    playState_set_speed(param);
+    playState_set_speed (&playState, param);
     return true;
 }
 
@@ -723,7 +723,7 @@ METHOD_GET_NAME (setSpeed)
 METHOD_INIT(setTempo)
 {
     param = checkPara0not(chn, param);
-    playState_set_tempo(param);
+    playState_set_tempo (&playState, param);
     return true;
 }
 
@@ -1189,7 +1189,7 @@ METHOD_STOP(vibNorm)
     period = chn->wSmpPeriodOld;
     mixchn_set_sample_period(chn, period);
     if (period)
-        mixchn_set_sample_step(chn, _calc_sample_step(period, playState_rate));
+        mixchn_set_sample_step (chn, _calc_sample_step (period, playState.rate));
 }
 
 METHOD_GET_NAME (vibNorm)
@@ -1582,14 +1582,14 @@ METHOD_INIT(special_setTremWave)
 METHOD_INIT(special_patLoop)
 {
     if (!param)
-        playState_patLoopStartRow = playState_row;
+        playState.patloop_start_row = playState.row;
     else
     {
-        if (!playState_patLoopActive)
+        if (!(playState.flags & PLAYSTATEFL_PATLOOP))
         {
-            playState_patLoopActive = true;
+            playState.flags |= PLAYSTATEFL_PATLOOP;
             param++;
-            playState_patLoopCount = param;
+            playState.patloop_count = param;
         }
         playState_patLoop_bNow = true;
     }
@@ -1645,7 +1645,7 @@ METHOD_INIT(special_patDelay)
 {
     if (!playState_patDelay_bNow)
     {
-        playState_patDelayCount = param + 1;
+        playState.patdelay_count = param + 1;
         chnState_patDelay_bParameterSaved = mixchn_get_command_parameter(chn);
     }
     return true;
