@@ -740,8 +740,8 @@ METHOD_GET_NAME (setTempo)
 METHOD_INIT(jumpToOrder)
 {
     param = checkPara0not(chn, param);
-    playState_jumpToOrder_bFlag = true;
-    playState_jumpToOrder_bPos = param;
+    rowState.flags |= ROWSTATEFL_JUMP_TO_ORDER;
+    rowState.jump_pos = param;
     return true;
 }
 
@@ -758,8 +758,8 @@ METHOD_GET_NAME (jumpToOrder)
 METHOD_INIT(patBreak)
 {
     param = checkPara0not(chn, param);
-    playState_patBreak_bFlag = true;
-    playState_patBreak_bPos = (((param >> 4) * 10) + (param & 0x0f)) & 0x3f;
+    rowState.flags |= ROWSTATEFL_PATTERN_BREAK;
+    rowState.break_pos = (((param >> 4) * 10) + (param & 0x0f)) & 0x3f;
     return true;
 }
 
@@ -776,8 +776,8 @@ METHOD_GET_NAME (patBreak)
 METHOD_INIT(setGVol)
 {
     param = checkPara0not(chn, param);
-    playState_gVolume_bFlag = true;
-    playState_gVolume_bValue = param > 64 ? 64 : param;
+    rowState.flags |= ROWSTATEFL_GLOBAL_VOLUME;
+    rowState.global_volume = param > 64 ? 64 : param;
     return true;
 }
 
@@ -1591,7 +1591,7 @@ METHOD_INIT(special_patLoop)
             param++;
             playState.patloop_count = param;
         }
-        playState_patLoop_bNow = true;
+        rowState.flags |= ROWSTATEFL_PATTERN_LOOP;
     }
 
     return true;
@@ -1606,7 +1606,7 @@ METHOD_TICK(special_noteCut)
 METHOD_INIT(special_noteDelay)
 {
     chn->bDelayTicks = param;
-    if (!playState_patDelay_bNow)
+    if (!(rowState.flags & ROWSTATEFL_PATTERN_DELAY))
     {
         /* new note, instrument, volume for later use */
         chn->bSavNote = chnState_cur_bNote;
@@ -1643,7 +1643,7 @@ METHOD_TICK(special_noteDelay)
 
 METHOD_INIT(special_patDelay)
 {
-    if (!playState_patDelay_bNow)
+    if (!(rowState.flags & ROWSTATEFL_PATTERN_DELAY))
     {
         playState.patdelay_count = param + 1;
         chnState_patDelay_bParameterSaved = mixchn_get_command_parameter(chn);

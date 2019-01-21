@@ -62,14 +62,28 @@
 
 /* Flow control variables */
 // TODO: make portable: place it to a structure and pass pointer to all effect's methods
-extern bool    playState_jumpToOrder_bFlag;
-extern uint8_t playState_jumpToOrder_bPos;
-extern bool    playState_patBreak_bFlag;
-extern uint8_t playState_patBreak_bPos;
-extern bool    playState_patLoop_bNow;
-extern bool    playState_gVolume_bFlag;
-extern uint8_t playState_gVolume_bValue;
-extern bool    playState_patDelay_bNow;
+
+typedef uint8_t row_state_flags_t;
+typedef row_state_flags_t ROWSTATEFLAGS;
+
+#define ROWSTATEFL_GLOBAL_VOLUME    (1 << 0)
+#define ROWSTATEFL_JUMP_TO_ORDER    (1 << 1)
+#define ROWSTATEFL_PATTERN_BREAK    (1 << 2)
+#define ROWSTATEFL_PATTERN_LOOP     (1 << 3)
+#define ROWSTATEFL_PATTERN_DELAY    (1 << 4)
+
+#pragma pack(push, 1);
+typedef struct row_state_t
+{
+    ROWSTATEFLAGS flags;
+    uint8_t jump_pos;
+    uint8_t break_pos;
+    uint8_t global_volume;
+};
+#pragma pack(pop);
+typedef struct row_state_t ROWSTATE;
+
+extern ROWSTATE rowState;
 
 /* Channel state */
 
@@ -108,14 +122,7 @@ void chn_effGetName(MIXCHN *chn, char *__s, size_t __maxlen);
 
 #ifdef __WATCOMC__
 
-#pragma aux playState_jumpToOrder_bFlag "*";
-#pragma aux playState_jumpToOrder_bPos "*";
-#pragma aux playState_patBreak_bFlag "*";
-#pragma aux playState_patBreak_bPos "*";
-#pragma aux playState_patLoop_bNow "*";
-#pragma aux playState_gVolume_bFlag "*";
-#pragma aux playState_gVolume_bValue "*";
-#pragma aux playState_patDelay_bNow "*";
+#pragma aux rowState "*";
 
 #pragma aux chnState_patDelay_bCommandSaved "*";
 #pragma aux chnState_patDelay_bParameterSaved "*";

@@ -51,7 +51,7 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
     chnState_porta_flag = false;
     chnState_patDelay_bCommandSaved = mixchn_get_command(chn);
 
-    if (playState_patDelay_bNow)
+    if (rowState.flags & ROWSTATEFL_PATTERN_DELAY)
     {
         chnState_cur_bIns  = CHN_INS_NONE;
         chnState_cur_bNote = CHN_NOTE_NONE;
@@ -262,11 +262,9 @@ void __near on_track_loop (TRACKSTATE *state)
         if (state->firstPlay)
         {
             state->firstPlay = false;
-            playState_jumpToOrder_bFlag = false;
-            playState_patBreak_bFlag = false;
-            playState_gVolume_bFlag = false;
-            playState_patLoop_bNow = false;
-            playState_patDelay_bNow = playState.patdelay_count != 0;
+            rowState.flags = 0;
+            if (playState.patdelay_count)
+                rowState.flags |= ROWSTATEFL_PATTERN_DELAY;
             patterns = musmod_get_patterns (track);
             state->pat = muspatl_get (patterns, i);
 
@@ -276,21 +274,21 @@ void __near on_track_loop (TRACKSTATE *state)
                 return;
             }
 
-            if (playState_gVolume_bFlag)
-                playState.global_volume = playState_gVolume_bValue;
+            if (rowState.flags & ROWSTATEFL_GLOBAL_VOLUME)
+                playState.global_volume = rowState.global_volume;
 
             playState.tick = playState.speed;
 
             // Pattern break ?
-            if (playState_patBreak_bFlag)
+            if (rowState.flags & ROWSTATEFL_PATTERN_BREAK)
             {
-                playState.row = playState_patBreak_bPos;
+                playState.row = rowState.break_pos;
                 state->status = FLOWSTATE_PATTERNEND;
                 return;
             }
 
             // Pattern loop ?
-            if (playState_patLoop_bNow)
+            if (rowState.flags & ROWSTATEFL_PATTERN_LOOP)
             {
                 playState.patloop_count--;
                 if (playState.patloop_count)

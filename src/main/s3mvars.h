@@ -58,7 +58,7 @@ typedef play_state_flags_t PLAYSTATEFLAGS;
 #define PLAYSTATEFL_PATLOOP (1 << 1)    // pattern loop
 
 #pragma pack(push, 1);
-typedef struct playState_t
+typedef struct play_state_t
 {
     PLAYSTATEFLAGS flags;
     uint16_t rate;
@@ -80,7 +80,7 @@ typedef struct playState_t
     uint8_t  patdelay_count;
 };
 #pragma pack(pop);
-typedef struct playState_t PLAYSTATE;
+typedef struct play_state_t PLAYSTATE;
 
 extern PLAYSTATE playState;
 

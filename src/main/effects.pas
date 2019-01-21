@@ -17,14 +17,12 @@ uses
     mixchn;
 
 var
-    playState_jumpToOrder_bFlag: boolean;
-    playState_jumpToOrder_bPos: byte;
-    playState_patBreak_bFlag: boolean;
-    playState_patBreak_bPos: byte;
-    playState_patLoop_bNow: boolean;
-    playState_gVolume_bFlag: boolean;
-    playState_gVolume_bValue: byte;
-    playState_patDelay_bNow: boolean;
+    rowState: packed record
+        flags: Byte;
+        jump_pos: Byte;
+        break_pos: Byte;
+        global_volume: Byte;
+    end;
     chnState_patDelay_bCommandSaved: byte;
     chnState_patDelay_bParameterSaved: byte;
     chnState_cur_bNote: byte;
