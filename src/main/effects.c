@@ -1028,19 +1028,19 @@ METHOD_GET_NAME (pitchUp)
 
 void __near eff_porta_start(MIXCHN *chn)
 {
-    chnState_porta_flag = true;
-    if (((chnState_cur_bNote) != CHN_NOTE_OFF)
-    &&  ((chnState_cur_bNote) != CHN_NOTE_NONE))
+    chnState.flags |= CHNSTATEFL_PORTAMENTO;
+    if (((chnState.cur_note) != CHN_NOTE_OFF)
+    &&  ((chnState.cur_note) != CHN_NOTE_NONE))
     {
         /* now save some values (we want to slide from) */
-        chnState_porta_dSmpStepOld   = mixchn_get_sample_step(chn);
-        chnState_porta_wSmpPeriodOld = mixchn_get_sample_period(chn);
+        chnState.porta_sample_step_old   = mixchn_get_sample_step (chn);
+        chnState.porta_sample_period_old = mixchn_get_sample_period (chn);
     }
 }
 
 void __near eff_porta_stop(MIXCHN *chn)
 {
-    chnState_porta_flag = false;
+    chnState.flags &= ~CHNSTATEFL_PORTAMENTO;
     mixchn_set_command(chn, EFFIDX_NONE);
 }
 
@@ -1061,12 +1061,12 @@ METHOD_INIT(porta)
 
 METHOD_HANDLE(porta)
 {
-    if (((chnState_cur_bNote) != CHN_NOTE_OFF)
-    &&  ((chnState_cur_bNote) != CHN_NOTE_NONE))
+    if (((chnState.cur_note) != CHN_NOTE_OFF)
+    &&  ((chnState.cur_note) != CHN_NOTE_NONE))
     {
         chn->wSmpPeriodDest = mixchn_get_sample_period(chn);
-        mixchn_set_sample_period(chn, chnState_porta_wSmpPeriodOld);
-        mixchn_set_sample_step(chn, chnState_porta_dSmpStepOld);
+        mixchn_set_sample_period (chn, chnState.porta_sample_period_old);
+        mixchn_set_sample_step (chn, chnState.porta_sample_step_old);
     }
 }
 
@@ -1103,7 +1103,7 @@ METHOD_INIT(porta_vol)
 {
     bool state;
     state = EFFECT(porta).init(chn, 0);
-    if (chnState_porta_flag)
+    if (chnState.flags & CHNSTATEFL_PORTAMENTO)
         state |= EFFECT(volSlide).init(chn, param);
     return state;
 }
@@ -1179,8 +1179,8 @@ METHOD_TICK(vibNorm)
 
 METHOD_CONT(vibNorm)
 {
-    return (((chnState_cur_bNote) == CHN_NOTE_OFF)
-    ||      ((chnState_cur_bNote) == CHN_NOTE_NONE));
+    return (((chnState.cur_note) == CHN_NOTE_OFF)
+    ||      ((chnState.cur_note) == CHN_NOTE_NONE));
 }
 
 METHOD_STOP(vibNorm)
@@ -1292,11 +1292,11 @@ METHOD_INIT(arpeggio)
 {
     if (param)
     {
-        chnState_arp_bFlag = true;
+        chnState.flags |= CHNSTATEFL_ARPEGGIO;
         mixchn_set_command_parameter(chn, param);
     }
     else
-        chnState_arp_bFlag = false;
+        chnState.flags &= ~CHNSTATEFL_ARPEGGIO;
     return true;
 }
 
@@ -1306,7 +1306,7 @@ METHOD_HANDLE(arpeggio)
     PCMSMP *smp;
     uint32_t rate;
 
-    if (!chnState_arp_bFlag)
+    if (!(chnState.flags & CHNSTATEFL_ARPEGGIO))
     {
         if (chn->bEffFlags & EFFFLAG_CONTINUE)
             return;
@@ -1364,8 +1364,8 @@ METHOD_HANDLE(sampleOffset)
     uint8_t param;
     param = mixchn_get_command_parameter(chn);
     chn->wSmpStart = param << 8;
-    if (((chnState_cur_bNote) != CHN_NOTE_OFF)
-    &&  ((chnState_cur_bNote) != CHN_NOTE_NONE))
+    if (((chnState.cur_note) != CHN_NOTE_OFF)
+    &&  ((chnState.cur_note) != CHN_NOTE_NONE))
         chn->dSmpPos = (unsigned long)chn->wSmpStart << 16;
 }
 
@@ -1527,8 +1527,8 @@ METHOD_INIT(tremolo)
 
 METHOD_HANDLE(tremolo)
 {
-    if ((chnState_cur_bIns != CHN_INS_NONE)
-    ||  (chnState_cur_bVol != CHN_NOTEVOL_NONE)
+    if ((chnState.cur_instrument != CHN_INS_NONE)
+    ||  (chnState.cur_note_volume != CHN_NOTEVOL_NONE)
     ||  (!(chn->bEffFlags & EFFFLAG_CONTINUE)))
         chn->bSmpVolOld = mixchn_get_note_volume (chn);
 }
@@ -1609,9 +1609,9 @@ METHOD_INIT(special_noteDelay)
     if (!(rowState.flags & ROWSTATEFL_PATTERN_DELAY))
     {
         /* new note, instrument, volume for later use */
-        chn->bSavNote = chnState_cur_bNote;
-        chn->bSavIns = chnState_cur_bIns;
-        chn->bSavVol = chnState_cur_bVol;
+        chn->bSavIns = chnState.cur_instrument;
+        chn->bSavNote = chnState.cur_note;
+        chn->bSavVol = chnState.cur_note_volume;
     }
     return false;   /* setup note, instrument, volume later */
 }
@@ -1646,16 +1646,16 @@ METHOD_INIT(special_patDelay)
     if (!(rowState.flags & ROWSTATEFL_PATTERN_DELAY))
     {
         playState.patdelay_count = param + 1;
-        chnState_patDelay_bParameterSaved = mixchn_get_command_parameter(chn);
+        chnState.patdelay_saved_parameter = mixchn_get_command_parameter (chn);
     }
     return true;
 }
 
 METHOD_HANDLE(special_patDelay)
 {
-    mixchn_set_command(chn, chnState_patDelay_bCommandSaved);
+    mixchn_set_command (chn, chnState.patdelay_saved_command);
     mixchn_set_sub_command(chn, 0);
-    mixchn_set_command_parameter(chn, chnState_patDelay_bParameterSaved);
+    mixchn_set_command_parameter (chn, chnState.patdelay_saved_parameter);
 }
 
 METHOD_INIT(special)

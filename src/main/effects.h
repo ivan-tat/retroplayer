@@ -87,29 +87,33 @@ extern ROWSTATE rowState;
 
 /* Channel state */
 
-/* [Andre] call 'readnotes' inside a pattern delay, */
-/* [Andre] if then ignore all notes/inst/vol ! */
+typedef uint8_t channel_state_flags_t;
+typedef channel_state_flags_t CHNSTATEFLAGS;
 
-/* [Andre] now some variables I added after I found out those amazing */
-/* [Andre] things about pattern delay */
+#define CHNSTATEFL_PORTAMENTO   (1 << 0)
+#define CHNSTATEFL_ARPEGGIO     (1 << 1)
 
-/* save effect,parameter for pattern delay */
-extern uint16_t chnState_patDelay_bCommandSaved;
-extern uint8_t  chnState_patDelay_bParameterSaved;
+#pragma pack(push, 1);
+typedef struct channel_state_t
+{
+    CHNSTATEFLAGS flags;
+    // [Andre] normaly it will be a copie of ins, note, vol in
+    // [Andre] pattern delay = 0 -> ignore note
+    // [Andre] call 'readnotes' inside a pattern delay, if then ignore all inst/notes/vol !
+    uint8_t cur_instrument;
+    uint8_t cur_note;
+    uint8_t cur_note_volume;
+    // save effect, parameter for pattern delay
+    uint8_t patdelay_saved_command;
+    uint8_t patdelay_saved_parameter;
+    // to save portamento values
+    uint16_t porta_sample_period_old;
+    uint32_t porta_sample_step_old;
+};
+#pragma pack(pop);
+typedef struct channel_state_t CHNSTATE;
 
-/* [Andre] normaly it will be a copie of es:[di], but in */
-/* [Andre] pattern delay = 0 -> ignore note */
-extern uint8_t chnState_cur_bNote;
-extern uint8_t chnState_cur_bIns;   /* the same thing for instrument */
-extern uint8_t chnState_cur_bVol;   /* and for volume */
-
-/* to save portamento values : */
-extern bool     chnState_porta_flag;
-extern uint16_t chnState_porta_wSmpPeriodOld;
-extern uint32_t chnState_porta_dSmpStepOld;
-
-extern bool     chnState_arp_bFlag;
-    /* a little one for arpeggio */
+extern CHNSTATE chnState;
 
 bool chn_effInit(MIXCHN *chn, uint8_t param);
 void chn_effHandle(MIXCHN *chn);
@@ -123,19 +127,7 @@ void chn_effGetName(MIXCHN *chn, char *__s, size_t __maxlen);
 #ifdef __WATCOMC__
 
 #pragma aux rowState "*";
-
-#pragma aux chnState_patDelay_bCommandSaved "*";
-#pragma aux chnState_patDelay_bParameterSaved "*";
-
-#pragma aux chnState_cur_bNote "*";
-#pragma aux chnState_cur_bIns "*";
-#pragma aux chnState_cur_bVol "*";
-
-#pragma aux chnState_porta_flag "*";
-#pragma aux chnState_porta_wSmpPeriodOld "*";
-#pragma aux chnState_porta_dSmpStepOld "*";
-
-#pragma aux chnState_arp_bFlag "*";
+#pragma aux chnState "*";
 
 #pragma aux chn_effInit "*";
 #pragma aux chn_effHandle "*";
