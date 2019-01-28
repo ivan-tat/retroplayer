@@ -16,8 +16,9 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "main/musmod.h"
 
-void __far readnewnotes (void);
+void __far readnewnotes (MUSMOD *track);
 
 /*** Linking ***/
 

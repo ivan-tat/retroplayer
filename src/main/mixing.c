@@ -19,6 +19,7 @@
 #include "main/voltab.h"
 #include "main/effects.h"
 #include "main/mixer.h"
+#include "main/musmod.h"
 #include "main/readnote.h"
 
 #include "main/mixing.h"
@@ -35,7 +36,7 @@ void __near song_new_tick(MIXBUF *mb)
             if (playState.patdelay_count)
                 playState.row--;
         }
-        readnewnotes();
+        readnewnotes (mod_Track);
     }
     else
     {

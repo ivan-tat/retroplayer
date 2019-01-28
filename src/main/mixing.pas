@@ -24,6 +24,7 @@ uses
     voltab,
     pcmsmp,
     musins,
+    musmod,
     s3mvars,
     effvars,
     fillvars,
