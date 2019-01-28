@@ -83,8 +83,6 @@ typedef struct row_state_t
 #pragma pack(pop);
 typedef struct row_state_t ROWSTATE;
 
-extern ROWSTATE rowState;
-
 /* Channel state */
 
 typedef uint8_t channel_state_flags_t;
@@ -113,7 +111,7 @@ typedef struct channel_state_t
 #pragma pack(pop);
 typedef struct channel_state_t CHNSTATE;
 
-bool chn_effInit (MIXCHN *chn, CHNSTATE *cs, uint8_t param);
+bool chn_effInit (ROWSTATE *rs, MIXCHN *chn, CHNSTATE *cs, uint8_t param);
 void chn_effHandle (MIXCHN *chn, CHNSTATE *cs);
 void chn_effTick(MIXCHN *chn);
 bool chn_effCanContinue (MIXCHN *chn, CHNSTATE *cs);
@@ -123,8 +121,6 @@ void chn_effGetName(MIXCHN *chn, char *__s, size_t __maxlen);
 /*** Linking ***/
 
 #ifdef __WATCOMC__
-
-#pragma aux rowState "*";
 
 #pragma aux chn_effInit "*";
 #pragma aux chn_effHandle "*";

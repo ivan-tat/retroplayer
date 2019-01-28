@@ -41,7 +41,7 @@ typedef patternFlowState_t PATFLOWSTATE;
 
 /**********************************************************************/
 
-void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
+void __near _play_channel (ROWSTATE *rs, MIXCHN *chn, MUSPATCHNEVENT *event)
 {
     MUSMOD *track;
     MUSINSLIST *instruments;
@@ -53,7 +53,7 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
     cs->flags &= ~CHNSTATEFL_PORTAMENTO;
     cs->patdelay_saved_command = mixchn_get_command (chn);
 
-    if (rowState.flags & ROWSTATEFL_PATTERN_DELAY)
+    if (rs->flags & ROWSTATEFL_PATTERN_DELAY)
     {
         cs->cur_instrument  = CHN_INS_NONE;
         cs->cur_note        = CHN_NOTE_NONE;
@@ -92,7 +92,7 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
     mixchn_set_command(chn, cmd);
     mixchn_set_sub_command(chn, 0);
 
-    if (chn_effInit (chn, cs, param))
+    if (chn_effInit (rs, chn, cs, param))
     {
         track = mod_Track;
         instruments = musmod_get_instruments (track);
@@ -126,7 +126,7 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
     }
 }
 
-void __near _play_event (MUSPATROWEVENT *e)
+void __near _play_event (ROWSTATE *rs, MUSPATROWEVENT *e)
 {
     MIXCHNLIST *channels;
     MIXCHN *chn;
@@ -135,10 +135,10 @@ void __near _play_event (MUSPATROWEVENT *e)
     chn = mixchnl_get (channels, e->channel);
 
     if (mixchn_get_type (chn) == MIXCHNTYPE_PCM)
-        _play_channel (chn, & (e->event));
+        _play_channel (rs, chn, & (e->event));
 }
 
-bool __near _play_row (MUSPAT *pat, uint16_t row)
+bool __near _play_row (ROWSTATE *rs, MUSPAT *pat, uint16_t row)
 {
     MUSPATIO f;
     MUSPATROWEVENT e, empty;
@@ -181,13 +181,13 @@ bool __near _play_row (MUSPAT *pat, uint16_t row)
         while (c < next_c)
         {
             empty.channel = c;
-            _play_event (&empty);
+            _play_event (rs, &empty);
             c++;
         }
 
         if (row_ev_ok)
         {
-            _play_event (&e);
+            _play_event (rs, &e);
             c++;
         }
     }
@@ -243,11 +243,13 @@ void __near on_track_loop (TRACKSTATE *state)
     MUSPATLIST *patterns;
     MUSPATORDER *order;
     MUSPATORDENT *order_entry;
+    ROWSTATE _rs, *rs;
     unsigned int i;
 
     track = mod_Track;
     order = musmod_get_order (track);
     order_entry = muspatorder_get (order, playState.order);
+    rs = &_rs;
 
     i = *order_entry;
 
@@ -264,33 +266,33 @@ void __near on_track_loop (TRACKSTATE *state)
         if (state->firstPlay)
         {
             state->firstPlay = false;
-            rowState.flags = 0;
+            rs->flags = 0;
             if (playState.patdelay_count)
-                rowState.flags |= ROWSTATEFL_PATTERN_DELAY;
+                rs->flags |= ROWSTATEFL_PATTERN_DELAY;
             patterns = musmod_get_patterns (track);
             state->pat = muspatl_get (patterns, i);
 
-            if (!_play_row (state->pat, playState.row))
+            if (!_play_row (rs, state->pat, playState.row))
             {
                 state->status = FLOWSTATE_ROWEND;
                 return;
             }
 
-            if (rowState.flags & ROWSTATEFL_GLOBAL_VOLUME)
-                playState.global_volume = rowState.global_volume;
+            if (rs->flags & ROWSTATEFL_GLOBAL_VOLUME)
+                playState.global_volume = rs->global_volume;
 
             playState.tick = playState.speed;
 
             // Pattern break ?
-            if (rowState.flags & ROWSTATEFL_PATTERN_BREAK)
+            if (rs->flags & ROWSTATEFL_PATTERN_BREAK)
             {
-                playState.row = rowState.break_pos;
+                playState.row = rs->break_pos;
                 state->status = FLOWSTATE_PATTERNEND;
                 return;
             }
 
             // Pattern loop ?
-            if (rowState.flags & ROWSTATEFL_PATTERN_LOOP)
+            if (rs->flags & ROWSTATEFL_PATTERN_LOOP)
             {
                 playState.patloop_count--;
                 if (playState.patloop_count)

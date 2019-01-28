@@ -25,7 +25,7 @@
 /*** Effects ***/
 
 // Effect's method
-typedef bool __near emInit_t  (MIXCHN *chn, CHNSTATE *cs, uint8_t param);
+typedef bool __near emInit_t  (ROWSTATE *rs, MIXCHN *chn, CHNSTATE *cs, uint8_t param);
 typedef void __near emHandle_t(MIXCHN *chn, CHNSTATE *cs);
 typedef void __near emTick_t  (MIXCHN *chn);
 typedef bool __near emCont_t  (MIXCHN *chn, CHNSTATE *cs);
@@ -53,7 +53,7 @@ typedef struct effMethodsTable_t EFFMT;
 #define NAME_GET_NAME(name) effm_##name##_get_name
 
 // Effect's method definition
-#define METHOD_INIT(name)   bool __near NAME_INIT(name)  (MIXCHN *chn, CHNSTATE *cs, uint8_t param)
+#define METHOD_INIT(name)   bool __near NAME_INIT(name)  (ROWSTATE *rs, MIXCHN *chn, CHNSTATE *cs, uint8_t param)
 #define METHOD_HANDLE(name) void __near NAME_HANDLE(name)(MIXCHN *chn, CHNSTATE *cs)
 #define METHOD_TICK(name)   void __near NAME_TICK(name)  (MIXCHN *chn)
 #define METHOD_CONT(name)   bool __near NAME_CONT(name)  (MIXCHN *chn, CHNSTATE *cs)
@@ -740,8 +740,8 @@ METHOD_GET_NAME (setTempo)
 METHOD_INIT(jumpToOrder)
 {
     param = checkPara0not(chn, param);
-    rowState.flags |= ROWSTATEFL_JUMP_TO_ORDER;
-    rowState.jump_pos = param;
+    rs->flags |= ROWSTATEFL_JUMP_TO_ORDER;
+    rs->jump_pos = param;
     return true;
 }
 
@@ -758,8 +758,8 @@ METHOD_GET_NAME (jumpToOrder)
 METHOD_INIT(patBreak)
 {
     param = checkPara0not(chn, param);
-    rowState.flags |= ROWSTATEFL_PATTERN_BREAK;
-    rowState.break_pos = (((param >> 4) * 10) + (param & 0x0f)) & 0x3f;
+    rs->flags |= ROWSTATEFL_PATTERN_BREAK;
+    rs->break_pos = (((param >> 4) * 10) + (param & 0x0f)) & 0x3f;
     return true;
 }
 
@@ -776,8 +776,8 @@ METHOD_GET_NAME (patBreak)
 METHOD_INIT(setGVol)
 {
     param = checkPara0not(chn, param);
-    rowState.flags |= ROWSTATEFL_GLOBAL_VOLUME;
-    rowState.global_volume = param > 64 ? 64 : param;
+    rs->flags |= ROWSTATEFL_GLOBAL_VOLUME;
+    rs->global_volume = param > 64 ? 64 : param;
     return true;
 }
 
@@ -1102,9 +1102,9 @@ METHOD_GET_NAME (porta)
 METHOD_INIT(porta_vol)
 {
     bool state;
-    state = EFFECT(porta).init (chn, cs, 0);
+    state = EFFECT(porta).init (rs, chn, cs, 0);
     if (cs->flags & CHNSTATEFL_PORTAMENTO)
-        state |= EFFECT(volSlide).init (chn, cs, param);
+        state |= EFFECT(volSlide).init (rs, chn, cs, param);
     return state;
 }
 
@@ -1229,7 +1229,7 @@ METHOD_INIT(vibNorm_vol)
 {
     if (!(chn->bEffFlags & EFFFLAG_CONTINUE))
         chn->bTabPos = 0;
-    EFFECT(volSlide).init (chn, cs, param);
+    EFFECT(volSlide).init (rs, chn, cs, param);
     return true;
 }
 
@@ -1396,7 +1396,7 @@ METHOD_INIT(retrig)
             return true;
         }
     }
-    return SUB_EFFECTS_LIST(retrig)[eff_retrig_route[param >> 4]]->init (chn, cs, param);
+    return SUB_EFFECTS_LIST(retrig)[eff_retrig_route[param >> 4]]->init (rs, chn, cs, param);
 }
 
 METHOD_TICK(retrig)
@@ -1591,7 +1591,7 @@ METHOD_INIT(special_patLoop)
             param++;
             playState.patloop_count = param;
         }
-        rowState.flags |= ROWSTATEFL_PATTERN_LOOP;
+        rs->flags |= ROWSTATEFL_PATTERN_LOOP;
     }
 
     return true;
@@ -1606,7 +1606,7 @@ METHOD_TICK(special_noteCut)
 METHOD_INIT(special_noteDelay)
 {
     chn->bDelayTicks = param;
-    if (!(rowState.flags & ROWSTATEFL_PATTERN_DELAY))
+    if (!(rs->flags & ROWSTATEFL_PATTERN_DELAY))
     {
         /* new note, instrument, volume for later use */
         chn->bSavIns = cs->cur_instrument;
@@ -1643,7 +1643,7 @@ METHOD_TICK(special_noteDelay)
 
 METHOD_INIT(special_patDelay)
 {
-    if (!(rowState.flags & ROWSTATEFL_PATTERN_DELAY))
+    if (!(rs->flags & ROWSTATEFL_PATTERN_DELAY))
     {
         playState.patdelay_count = param + 1;
         cs->patdelay_saved_parameter = mixchn_get_command_parameter (chn);
@@ -1664,7 +1664,7 @@ METHOD_INIT(special)
     param = checkPara0(chn, param);
     cmd = eff_special_route[param >> 4];
     mixchn_set_sub_command(chn, cmd);
-    return SUB_EFFECTS_LIST(special)[cmd]->init (chn, cs, param & 0x0f);
+    return SUB_EFFECTS_LIST(special)[cmd]->init (rs, chn, cs, param & 0x0f);
 }
 
 METHOD_TICK(special)
@@ -1703,12 +1703,12 @@ METHOD_GET_NAME (special)
 
 /*** General effects handling ***/
 
-bool chn_effInit (MIXCHN *chn, CHNSTATE *cs, uint8_t param)
+bool chn_effInit (ROWSTATE *rs, MIXCHN *chn, CHNSTATE *cs, uint8_t param)
 {
     uint8_t cmd;
     cmd = mixchn_get_command(chn);
     if (cmd <= MAXEFF)
-        return EFFECTS_LIST(main)[cmd]->init (chn, cs, param);
+        return EFFECTS_LIST(main)[cmd]->init (rs, chn, cs, param);
     else
         return false;
 }

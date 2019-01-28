@@ -16,14 +16,6 @@ uses
     s3mtypes,
     mixchn;
 
-var
-    rowState: packed record
-        flags: Byte;
-        jump_pos: Byte;
-        break_pos: Byte;
-        global_volume: Byte;
-    end;
-
 procedure chn_effInit;
 procedure chn_effHandle;
 procedure chn_effTick;
