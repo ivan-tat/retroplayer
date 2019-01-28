@@ -25,10 +25,10 @@
 /*** Effects ***/
 
 // Effect's method
-typedef bool __near emInit_t  (MIXCHN *chn, uint8_t param);
-typedef void __near emHandle_t(MIXCHN *chn);
+typedef bool __near emInit_t  (MIXCHN *chn, CHNSTATE *cs, uint8_t param);
+typedef void __near emHandle_t(MIXCHN *chn, CHNSTATE *cs);
 typedef void __near emTick_t  (MIXCHN *chn);
-typedef bool __near emCont_t  (MIXCHN *chn);
+typedef bool __near emCont_t  (MIXCHN *chn, CHNSTATE *cs);
 typedef void __near emStop_t  (MIXCHN *chn);
 typedef void __near emGetName_t (MIXCHN *chn, char *__s, size_t __maxlen);
 
@@ -53,10 +53,10 @@ typedef struct effMethodsTable_t EFFMT;
 #define NAME_GET_NAME(name) effm_##name##_get_name
 
 // Effect's method definition
-#define METHOD_INIT(name)   bool __near NAME_INIT(name)  (MIXCHN *chn, uint8_t param)
-#define METHOD_HANDLE(name) void __near NAME_HANDLE(name)(MIXCHN *chn)
+#define METHOD_INIT(name)   bool __near NAME_INIT(name)  (MIXCHN *chn, CHNSTATE *cs, uint8_t param)
+#define METHOD_HANDLE(name) void __near NAME_HANDLE(name)(MIXCHN *chn, CHNSTATE *cs)
 #define METHOD_TICK(name)   void __near NAME_TICK(name)  (MIXCHN *chn)
-#define METHOD_CONT(name)   bool __near NAME_CONT(name)  (MIXCHN *chn)
+#define METHOD_CONT(name)   bool __near NAME_CONT(name)  (MIXCHN *chn, CHNSTATE *cs)
 #define METHOD_STOP(name)   void __near NAME_STOP(name)  (MIXCHN *chn)
 #define METHOD_GET_NAME(name) void __near NAME_GET_NAME (name) (MIXCHN *chn, char *__s, size_t __maxlen)
 
@@ -834,7 +834,7 @@ METHOD_HANDLE(volSlide)
     uint8_t cmd;
     cmd = mixchn_get_sub_command(chn);
     if (cmd <= EFFIDX_VOLSLIDE_MAX)
-        SUB_EFFECTS_LIST(volSlide)[cmd]->handle(chn);
+        SUB_EFFECTS_LIST(volSlide)[cmd]->handle (chn, cs);
 }
 
 METHOD_TICK(volSlide)
@@ -909,7 +909,7 @@ METHOD_HANDLE(pitchDown)
     uint8_t cmd;
     cmd = mixchn_get_sub_command(chn);
     if (cmd <= EFFIDX_PITCHDOWN_MAX)
-        SUB_EFFECTS_LIST(pitchDown)[cmd]->handle(chn);
+        SUB_EFFECTS_LIST(pitchDown)[cmd]->handle (chn, cs);
 }
 
 METHOD_TICK(pitchDown)
@@ -979,7 +979,7 @@ METHOD_HANDLE(pitchUp)
     uint8_t cmd;
     cmd = mixchn_get_sub_command(chn);
     if (cmd <= EFFIDX_PITCHUP_MAX)
-        SUB_EFFECTS_LIST(pitchUp)[cmd]->handle(chn);
+        SUB_EFFECTS_LIST(pitchUp)[cmd]->handle (chn, cs);
 }
 
 METHOD_TICK(pitchUp)
@@ -1026,21 +1026,21 @@ METHOD_GET_NAME (pitchUp)
 
 /*** Portamento to note ***/
 
-void __near eff_porta_start(MIXCHN *chn)
+void __near eff_porta_start (MIXCHN *chn, CHNSTATE *cs)
 {
-    chnState.flags |= CHNSTATEFL_PORTAMENTO;
-    if (((chnState.cur_note) != CHN_NOTE_OFF)
-    &&  ((chnState.cur_note) != CHN_NOTE_NONE))
+    cs->flags |= CHNSTATEFL_PORTAMENTO;
+    if (((cs->cur_note) != CHN_NOTE_OFF)
+    &&  ((cs->cur_note) != CHN_NOTE_NONE))
     {
         /* now save some values (we want to slide from) */
-        chnState.porta_sample_step_old   = mixchn_get_sample_step (chn);
-        chnState.porta_sample_period_old = mixchn_get_sample_period (chn);
+        cs->porta_sample_step_old   = mixchn_get_sample_step (chn);
+        cs->porta_sample_period_old = mixchn_get_sample_period (chn);
     }
 }
 
-void __near eff_porta_stop(MIXCHN *chn)
+void __near eff_porta_stop (MIXCHN *chn, CHNSTATE *cs)
 {
-    chnState.flags &= ~CHNSTATEFL_PORTAMENTO;
+    cs->flags &= ~CHNSTATEFL_PORTAMENTO;
     mixchn_set_command(chn, EFFIDX_NONE);
 }
 
@@ -1052,21 +1052,21 @@ METHOD_INIT(porta)
         chn->bPortParam = param;
 
     if (mixchn_is_playing(chn))
-        eff_porta_start(chn);
+        eff_porta_start (chn, cs);
     else
-        eff_porta_stop(chn);
+        eff_porta_stop (chn, cs);
 
     return true;
 }
 
 METHOD_HANDLE(porta)
 {
-    if (((chnState.cur_note) != CHN_NOTE_OFF)
-    &&  ((chnState.cur_note) != CHN_NOTE_NONE))
+    if (((cs->cur_note) != CHN_NOTE_OFF)
+    &&  ((cs->cur_note) != CHN_NOTE_NONE))
     {
         chn->wSmpPeriodDest = mixchn_get_sample_period(chn);
-        mixchn_set_sample_period (chn, chnState.porta_sample_period_old);
-        mixchn_set_sample_step (chn, chnState.porta_sample_step_old);
+        mixchn_set_sample_period (chn, cs->porta_sample_period_old);
+        mixchn_set_sample_step (chn, cs->porta_sample_step_old);
     }
 }
 
@@ -1102,16 +1102,16 @@ METHOD_GET_NAME (porta)
 METHOD_INIT(porta_vol)
 {
     bool state;
-    state = EFFECT(porta).init(chn, 0);
-    if (chnState.flags & CHNSTATEFL_PORTAMENTO)
-        state |= EFFECT(volSlide).init(chn, param);
+    state = EFFECT(porta).init (chn, cs, 0);
+    if (cs->flags & CHNSTATEFL_PORTAMENTO)
+        state |= EFFECT(volSlide).init (chn, cs, param);
     return state;
 }
 
 METHOD_HANDLE(porta_vol)
 {
-    EFFECT(volSlide).handle(chn);
-    EFFECT(porta).handle(chn);
+    EFFECT(volSlide).handle (chn, cs);
+    EFFECT(porta).handle (chn, cs);
 }
 
 METHOD_TICK(porta_vol)
@@ -1179,8 +1179,8 @@ METHOD_TICK(vibNorm)
 
 METHOD_CONT(vibNorm)
 {
-    return (((chnState.cur_note) == CHN_NOTE_OFF)
-    ||      ((chnState.cur_note) == CHN_NOTE_NONE));
+    return (((cs->cur_note) == CHN_NOTE_OFF)
+    ||      ((cs->cur_note) == CHN_NOTE_NONE));
 }
 
 METHOD_STOP(vibNorm)
@@ -1229,14 +1229,14 @@ METHOD_INIT(vibNorm_vol)
 {
     if (!(chn->bEffFlags & EFFFLAG_CONTINUE))
         chn->bTabPos = 0;
-    EFFECT(volSlide).init(chn, param);
+    EFFECT(volSlide).init (chn, cs, param);
     return true;
 }
 
 METHOD_HANDLE(vibNorm_vol)
 {
-    EFFECT(volSlide).handle(chn);
-    EFFECT(vibNorm).handle(chn);
+    EFFECT(volSlide).handle (chn, cs);
+    EFFECT(vibNorm).handle (chn, cs);
 }
 
 METHOD_TICK(vibNorm_vol)
@@ -1292,11 +1292,11 @@ METHOD_INIT(arpeggio)
 {
     if (param)
     {
-        chnState.flags |= CHNSTATEFL_ARPEGGIO;
+        cs->flags |= CHNSTATEFL_ARPEGGIO;
         mixchn_set_command_parameter(chn, param);
     }
     else
-        chnState.flags &= ~CHNSTATEFL_ARPEGGIO;
+        cs->flags &= ~CHNSTATEFL_ARPEGGIO;
     return true;
 }
 
@@ -1306,7 +1306,7 @@ METHOD_HANDLE(arpeggio)
     PCMSMP *smp;
     uint32_t rate;
 
-    if (!(chnState.flags & CHNSTATEFL_ARPEGGIO))
+    if (!(cs->flags & CHNSTATEFL_ARPEGGIO))
     {
         if (chn->bEffFlags & EFFFLAG_CONTINUE)
             return;
@@ -1364,8 +1364,8 @@ METHOD_HANDLE(sampleOffset)
     uint8_t param;
     param = mixchn_get_command_parameter(chn);
     chn->wSmpStart = param << 8;
-    if (((chnState.cur_note) != CHN_NOTE_OFF)
-    &&  ((chnState.cur_note) != CHN_NOTE_NONE))
+    if (((cs->cur_note) != CHN_NOTE_OFF)
+    &&  ((cs->cur_note) != CHN_NOTE_NONE))
         chn->dSmpPos = (unsigned long)chn->wSmpStart << 16;
 }
 
@@ -1396,7 +1396,7 @@ METHOD_INIT(retrig)
             return true;
         }
     }
-    return SUB_EFFECTS_LIST(retrig)[eff_retrig_route[param >> 4]]->init(chn, param);
+    return SUB_EFFECTS_LIST(retrig)[eff_retrig_route[param >> 4]]->init (chn, cs, param);
 }
 
 METHOD_TICK(retrig)
@@ -1527,8 +1527,8 @@ METHOD_INIT(tremolo)
 
 METHOD_HANDLE(tremolo)
 {
-    if ((chnState.cur_instrument != CHN_INS_NONE)
-    ||  (chnState.cur_note_volume != CHN_NOTEVOL_NONE)
+    if ((cs->cur_instrument != CHN_INS_NONE)
+    ||  (cs->cur_note_volume != CHN_NOTEVOL_NONE)
     ||  (!(chn->bEffFlags & EFFFLAG_CONTINUE)))
         chn->bSmpVolOld = mixchn_get_note_volume (chn);
 }
@@ -1609,9 +1609,9 @@ METHOD_INIT(special_noteDelay)
     if (!(rowState.flags & ROWSTATEFL_PATTERN_DELAY))
     {
         /* new note, instrument, volume for later use */
-        chn->bSavIns = chnState.cur_instrument;
-        chn->bSavNote = chnState.cur_note;
-        chn->bSavVol = chnState.cur_note_volume;
+        chn->bSavIns = cs->cur_instrument;
+        chn->bSavNote = cs->cur_note;
+        chn->bSavVol = cs->cur_note_volume;
     }
     return false;   /* setup note, instrument, volume later */
 }
@@ -1646,16 +1646,16 @@ METHOD_INIT(special_patDelay)
     if (!(rowState.flags & ROWSTATEFL_PATTERN_DELAY))
     {
         playState.patdelay_count = param + 1;
-        chnState.patdelay_saved_parameter = mixchn_get_command_parameter (chn);
+        cs->patdelay_saved_parameter = mixchn_get_command_parameter (chn);
     }
     return true;
 }
 
 METHOD_HANDLE(special_patDelay)
 {
-    mixchn_set_command (chn, chnState.patdelay_saved_command);
+    mixchn_set_command (chn, cs->patdelay_saved_command);
     mixchn_set_sub_command(chn, 0);
-    mixchn_set_command_parameter (chn, chnState.patdelay_saved_parameter);
+    mixchn_set_command_parameter (chn, cs->patdelay_saved_parameter);
 }
 
 METHOD_INIT(special)
@@ -1664,7 +1664,7 @@ METHOD_INIT(special)
     param = checkPara0(chn, param);
     cmd = eff_special_route[param >> 4];
     mixchn_set_sub_command(chn, cmd);
-    return SUB_EFFECTS_LIST(special)[cmd]->init(chn, param & 0x0f);
+    return SUB_EFFECTS_LIST(special)[cmd]->init (chn, cs, param & 0x0f);
 }
 
 METHOD_TICK(special)
@@ -1703,22 +1703,22 @@ METHOD_GET_NAME (special)
 
 /*** General effects handling ***/
 
-bool chn_effInit(MIXCHN *chn, uint8_t param)
+bool chn_effInit (MIXCHN *chn, CHNSTATE *cs, uint8_t param)
 {
     uint8_t cmd;
     cmd = mixchn_get_command(chn);
     if (cmd <= MAXEFF)
-        return EFFECTS_LIST(main)[cmd]->init(chn, param);
+        return EFFECTS_LIST(main)[cmd]->init (chn, cs, param);
     else
         return false;
 }
 
-void chn_effHandle(MIXCHN *chn)
+void chn_effHandle (MIXCHN *chn, CHNSTATE *cs)
 {
     uint8_t cmd;
     cmd = mixchn_get_command(chn);
     if (cmd <= MAXEFF)
-        EFFECTS_LIST(main)[cmd]->handle(chn);
+        EFFECTS_LIST(main)[cmd]->handle (chn, cs);
 }
 
 void chn_effTick(MIXCHN *chn)
@@ -1729,12 +1729,12 @@ void chn_effTick(MIXCHN *chn)
         EFFECTS_LIST(main)[cmd]->tick(chn);
 }
 
-bool chn_effCanContinue(MIXCHN *chn)
+bool chn_effCanContinue (MIXCHN *chn, CHNSTATE *cs)
 {
     uint8_t cmd;
     cmd = mixchn_get_command(chn);
     if (cmd <= MAXEFF)
-        return EFFECTS_LIST(main)[cmd]->cont(chn);
+        return EFFECTS_LIST(main)[cmd]->cont (chn, cs);
     else
         return false;
 }

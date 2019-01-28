@@ -23,16 +23,6 @@ var
         break_pos: Byte;
         global_volume: Byte;
     end;
-    chnState: packed record
-        flags: Byte;
-        cur_instrument: Byte;
-        cur_note: Byte;
-        cur_note_volume: Byte;
-        patdelay_saved_command: Byte;
-        patdelay_saved_parameter: Byte;
-        porta_sample_period_old: Word;
-        porta_sample_step_old: LongInt;
-    end;
 
 procedure chn_effInit;
 procedure chn_effHandle;

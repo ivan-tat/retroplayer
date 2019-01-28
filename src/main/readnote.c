@@ -47,21 +47,23 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
     MUSINSLIST *instruments;
     MUSINS *ins;
     unsigned char cmd, param;
+    CHNSTATE _cs, *cs;
 
-    chnState.flags &= ~CHNSTATEFL_PORTAMENTO;
-    chnState.patdelay_saved_command = mixchn_get_command (chn);
+    cs = &_cs;
+    cs->flags &= ~CHNSTATEFL_PORTAMENTO;
+    cs->patdelay_saved_command = mixchn_get_command (chn);
 
     if (rowState.flags & ROWSTATEFL_PATTERN_DELAY)
     {
-        chnState.cur_instrument  = CHN_INS_NONE;
-        chnState.cur_note        = CHN_NOTE_NONE;
-        chnState.cur_note_volume = CHN_NOTEVOL_NONE;
+        cs->cur_instrument  = CHN_INS_NONE;
+        cs->cur_note        = CHN_NOTE_NONE;
+        cs->cur_note_volume = CHN_NOTEVOL_NONE;
     }
     else
     {
-        chnState.cur_instrument  = event->data.instrument;
-        chnState.cur_note        = event->data.note;
-        chnState.cur_note_volume = event->data.note_volume;
+        cs->cur_instrument  = event->data.instrument;
+        cs->cur_note        = event->data.note;
+        cs->cur_note_volume = event->data.note_volume;
     }
 
     /* read effects - it may change the read instr/note ! */
@@ -77,7 +79,7 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
     {
         if (mixchn_get_command(chn) == cmd)
         {
-            if (chn_effCanContinue(chn))
+            if (chn_effCanContinue (chn, cs))
                 chn->bEffFlags |= EFFFLAG_CONTINUE;
         }
     }
@@ -90,37 +92,37 @@ void __near _play_channel (MIXCHN *chn, MUSPATCHNEVENT *event)
     mixchn_set_command(chn, cmd);
     mixchn_set_sub_command(chn, 0);
 
-    if (chn_effInit(chn, param))
+    if (chn_effInit (chn, cs, param))
     {
         track = mod_Track;
         instruments = musmod_get_instruments (track);
 
         /* read instrument */
         /* reinit instrument data and keep sample position */
-        if (((chnState.cur_instrument) != CHN_INS_NONE)
-        &&  ((chnState.cur_instrument) <= CHN_INS_MAX))
+        if (((cs->cur_instrument) != CHN_INS_NONE)
+        &&  ((cs->cur_instrument) <= CHN_INS_MAX))
         {
-            ins = musinsl_get (instruments, _get_instrument (chnState.cur_instrument));
+            ins = musinsl_get (instruments, _get_instrument (cs->cur_instrument));
             if (musins_get_type(ins) == MUSINST_PCM)
-                chn_setupInstrument (chn, chnState.cur_instrument);
+                chn_setupInstrument (chn, cs->cur_instrument);
             else
-                chnState.cur_instrument = CHN_INS_NONE;
+                cs->cur_instrument = CHN_INS_NONE;
         }
         /* read note */
-        if (((chnState.cur_note) != CHN_NOTE_OFF)
-        &&  ((chnState.cur_note) != CHN_NOTE_NONE))
-            chn_setupNote (chn, chnState.cur_note, (chnState.flags & CHNSTATEFL_PORTAMENTO) != 0);
+        if (((cs->cur_note) != CHN_NOTE_OFF)
+        &&  ((cs->cur_note) != CHN_NOTE_NONE))
+            chn_setupNote (chn, cs->cur_note, (cs->flags & CHNSTATEFL_PORTAMENTO) != 0);
         else
-            if (chnState.cur_note == CHN_NOTE_OFF)
+            if (cs->cur_note == CHN_NOTE_OFF)
                 mixchn_set_playing(chn, false);
         /* read volume */
-        if (chnState.cur_note_volume != CHN_NOTEVOL_NONE)
+        if (cs->cur_note_volume != CHN_NOTEVOL_NONE)
         {
-            if (chnState.cur_note_volume > CHN_NOTEVOL_MAX)
-                chnState.cur_note_volume = CHN_NOTEVOL_MAX;
-            mixchn_set_note_volume (chn, chnState.cur_note_volume);
+            if (cs->cur_note_volume > CHN_NOTEVOL_MAX)
+                cs->cur_note_volume = CHN_NOTEVOL_MAX;
+            mixchn_set_note_volume (chn, cs->cur_note_volume);
         }
-        chn_effHandle(chn);
+        chn_effHandle (chn, cs);
     }
 }
 
