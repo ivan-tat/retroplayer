@@ -935,6 +935,7 @@ void __far plays3m_main (void)
     channels = mod_Channels;
 
     /* FIXME: move these here for now (MIXCHNLIST is allocated in player_play_start() ) */
+    win_channels_set_channels (win_channels, channels);
     win_pattern_set_channels (win_pattern, channels);
     win_instruments_set_channels (win_instruments, channels);
     win_samples_set_channels (win_samples, channels);

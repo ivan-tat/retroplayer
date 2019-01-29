@@ -31,8 +31,6 @@ bool playOption_LoopSong;
 
 uint8_t  LastOrder;
 
-MIXCHNLIST *mod_Channels;
-
 /* initial state */
 
 uint16_t initState_startOrder;

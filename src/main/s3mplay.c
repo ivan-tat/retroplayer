@@ -71,7 +71,7 @@ void __far ISR_play(void)
             err = false;
     }
 
-    fill_DMAbuffer (mod_Track, &playState, &mixBuf, &sndDMABuf);
+    fill_DMAbuffer (mod_Track, &playState, mod_Channels, &mixBuf, &sndDMABuf);
 
     if (UseEMS & !err)
         emsRestoreMap(SavHandle);
@@ -659,7 +659,7 @@ bool __far player_play_start (void)
 
     outbuf->frameActive = outbuf->framesCount - 1;
     outbuf->frameLast = outbuf->framesCount;
-    fill_DMAbuffer (track, ps, &mixBuf, outbuf);
+    fill_DMAbuffer (track, ps, channels, &mixBuf, outbuf);
 
     // 7. Start sound
 

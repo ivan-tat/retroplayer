@@ -18,6 +18,7 @@
 #include "cc/i86.h"
 #include "dynarray.h"
 #include "main/musins.h"
+#include "main/musmod.h"
 #include "main/s3mtypes.h"
 
 /* Mixing channel */
@@ -150,7 +151,7 @@ uint8_t  __far mixchn_get_command_parameter (MIXCHN *self);
 void     __far mixchn_reset_wave_tables (MIXCHN *self);
 void     __far mixchn_free (MIXCHN *self);
 
-void     __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum);
+void     __far chn_setupInstrument (MIXCHN *chn, MUSMOD *track, uint8_t insNum);
 uint16_t __far chn_calcNotePeriod (MIXCHN *chn, uint32_t rate, uint8_t note);
 uint32_t __far chn_calcNoteStep (MIXCHN *chn, uint32_t rate, uint8_t note, uint16_t mixrate);
 void     __far chn_setupNote (MIXCHN *chn, uint8_t note, uint16_t mixrate, bool keep);

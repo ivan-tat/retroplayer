@@ -172,9 +172,8 @@ void __far mixchn_free (MIXCHN *self)
     return;
 }
 
-void __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum)
+void __far chn_setupInstrument (MIXCHN *chn, MUSMOD *track, uint8_t insNum)
 {
-    MUSMOD *track;
     MUSINSLIST *instruments;
     PCMSMPLIST *samples;
     MUSINS *ins;
@@ -182,7 +181,6 @@ void __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum)
     unsigned int rate;
     unsigned int flags;
 
-    track = mod_Track;
     instruments = musmod_get_instruments (track);
     samples = musmod_get_samples (track);
     ins = musinsl_get (instruments, insNum - 1);

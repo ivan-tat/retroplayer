@@ -27,7 +27,7 @@
 // Effect's method
 typedef bool __near emInit_t  (PLAYSTATE *ps, ROWSTATE *rs, MIXCHN *chn, CHNSTATE *cs, uint8_t param);
 typedef void __near emHandle_t(PLAYSTATE *ps, MIXCHN *chn, CHNSTATE *cs);
-typedef void __near emTick_t  (PLAYSTATE *ps, MIXCHN *chn);
+typedef void __near emTick_t  (MUSMOD *track, PLAYSTATE *ps, MIXCHN *chn);
 typedef bool __near emCont_t  (MIXCHN *chn, CHNSTATE *cs);
 typedef void __near emStop_t  (PLAYSTATE *ps, MIXCHN *chn);
 typedef void __near emGetName_t (MIXCHN *chn, char *__s, size_t __maxlen);
@@ -55,7 +55,7 @@ typedef struct effMethodsTable_t EFFMT;
 // Effect's method definition
 #define METHOD_INIT(name)   bool __near NAME_INIT(name)  (PLAYSTATE *ps, ROWSTATE *rs, MIXCHN *chn, CHNSTATE *cs, uint8_t param)
 #define METHOD_HANDLE(name) void __near NAME_HANDLE(name)(PLAYSTATE *ps, MIXCHN *chn, CHNSTATE *cs)
-#define METHOD_TICK(name)   void __near NAME_TICK(name)  (PLAYSTATE *ps, MIXCHN *chn)
+#define METHOD_TICK(name)   void __near NAME_TICK(name)  (MUSMOD *track, PLAYSTATE *ps, MIXCHN *chn)
 #define METHOD_CONT(name)   bool __near NAME_CONT(name)  (MIXCHN *chn, CHNSTATE *cs)
 #define METHOD_STOP(name)   void __near NAME_STOP(name)  (PLAYSTATE *ps, MIXCHN *chn)
 #define METHOD_GET_NAME(name) void __near NAME_GET_NAME (name) (MIXCHN *chn, char *__s, size_t __maxlen)
@@ -842,7 +842,7 @@ METHOD_TICK(volSlide)
     uint8_t cmd;
     cmd = mixchn_get_sub_command(chn);
     if (cmd <= EFFIDX_VOLSLIDE_MAX)
-        SUB_EFFECTS_LIST(volSlide)[cmd]->tick (ps, chn);
+        SUB_EFFECTS_LIST(volSlide)[cmd]->tick (track, ps, chn);
 }
 
 METHOD_TICK(volSlide_down)
@@ -917,7 +917,7 @@ METHOD_TICK(pitchDown)
     uint8_t cmd;
     cmd = mixchn_get_sub_command(chn);
     if (cmd <= EFFIDX_PITCHDOWN_MAX)
-        SUB_EFFECTS_LIST(pitchDown)[cmd]->tick (ps, chn);
+        SUB_EFFECTS_LIST(pitchDown)[cmd]->tick (track, ps, chn);
 }
 
 METHOD_TICK(pitchDown_normal)
@@ -987,7 +987,7 @@ METHOD_TICK(pitchUp)
     uint8_t cmd;
     cmd = mixchn_get_sub_command(chn);
     if (cmd <= EFFIDX_PITCHUP_MAX)
-        SUB_EFFECTS_LIST(pitchUp)[cmd]->tick (ps, chn);
+        SUB_EFFECTS_LIST(pitchUp)[cmd]->tick (track, ps, chn);
 }
 
 METHOD_TICK(pitchUp_normal)
@@ -1116,8 +1116,8 @@ METHOD_HANDLE(porta_vol)
 
 METHOD_TICK(porta_vol)
 {
-    EFFECT(volSlide).tick (ps, chn);
-    EFFECT(porta).tick (ps, chn);
+    EFFECT(volSlide).tick (track, ps, chn);
+    EFFECT(porta).tick (track, ps, chn);
 }
 
 METHOD_GET_NAME (porta_vol)
@@ -1241,8 +1241,8 @@ METHOD_HANDLE(vibNorm_vol)
 
 METHOD_TICK(vibNorm_vol)
 {
-    EFFECT(volSlide).tick (ps, chn);
-    EFFECT(vibNorm).tick (ps, chn);
+    EFFECT(volSlide).tick (track, ps, chn);
+    EFFECT(vibNorm).tick (track, ps, chn);
 }
 
 METHOD_GET_NAME (vibNorm_vol)
@@ -1417,7 +1417,7 @@ METHOD_TICK(retrig)
         chn->bRetrigTicks = ticks;
         cmd = mixchn_get_sub_command(chn);
         if (cmd <= 6)
-            SUB_EFFECTS_LIST(retrig)[cmd]->tick (ps, chn);
+            SUB_EFFECTS_LIST(retrig)[cmd]->tick (track, ps, chn);
     }
 }
 
@@ -1625,7 +1625,7 @@ METHOD_TICK(special_noteDelay)
     {
         insNum = chn->bSavIns;
         if (insNum)
-            chn_setupInstrument(chn, insNum);
+            chn_setupInstrument(chn, track, insNum);
         note = chn->bSavNote;
         if (note != CHN_NOTE_NONE)
         {
@@ -1674,7 +1674,7 @@ METHOD_TICK(special)
     uint8_t cmd;
     cmd = mixchn_get_sub_command(chn);
     if (cmd <= EFFIDX_SPECIAL_MAX)
-        SUB_EFFECTS_LIST(special)[cmd]->tick (ps, chn);
+        SUB_EFFECTS_LIST(special)[cmd]->tick (track, ps, chn);
 }
 
 METHOD_GET_NAME (special)
@@ -1723,12 +1723,12 @@ void chn_effHandle (PLAYSTATE *ps, MIXCHN *chn, CHNSTATE *cs)
         EFFECTS_LIST(main)[cmd]->handle (ps, chn, cs);
 }
 
-void chn_effTick (PLAYSTATE *ps, MIXCHN *chn)
+void chn_effTick (MUSMOD *track, PLAYSTATE *ps, MIXCHN *chn)
 {
     uint8_t cmd;
     cmd = mixchn_get_command(chn);
     if (cmd <= MAXEFF)
-        EFFECTS_LIST(main)[cmd]->tick (ps, chn);
+        EFFECTS_LIST(main)[cmd]->tick (track, ps, chn);
 }
 
 bool chn_effCanContinue (MIXCHN *chn, CHNSTATE *cs)

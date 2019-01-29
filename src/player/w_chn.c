@@ -25,8 +25,8 @@ void __far win_channels_on_resize (SCRWIN *self);
 void __far win_channels_draw (SCRWIN *self);
 /*
 void __far win_channels_keypress (SCRWIN *self, char key);
-void __far win_channels_free (SCRWIN *self);
 */
+void __far win_channels_free (SCRWIN *self);
 
 static const SCRWINVMT __win_channels_vmt =
 {
@@ -34,13 +34,17 @@ static const SCRWINVMT __win_channels_vmt =
     &win_channels_draw,
     /*
     &win_channels_keypress,
-    &win_channels_free
     */
     NULL,
-    NULL
+    &win_channels_free
 };
 
 /* private data */
+
+typedef struct win_channels_data_t
+{
+    MIXCHNLIST *channels;
+};
 
 static const char *CHANTYPES[3] =
 {
@@ -53,9 +57,24 @@ static const char *CHANTYPES[3] =
 
 bool __far win_channels_init (SCRWIN *self)
 {
+    struct win_channels_data_t *data;
+
     scrwin_init (self, "channels list window");
     _copy_vmt (self, __win_channels_vmt, SCRWINVMT);
+    data = _new (struct win_channels_data_t);
+    if (!data)
+        return false;
+    scrwin_set_data (self, data);
+    memset (data, 0, sizeof (struct win_channels_data_t));
     return true;
+}
+
+void __far win_channels_set_channels (SCRWIN *self, MIXCHNLIST *value)
+{
+    struct win_channels_data_t *data;
+
+    data = (struct win_channels_data_t *) scrwin_get_data (self);
+    data->channels = value;
 }
 
 void __far win_channels_on_resize (SCRWIN *self)
@@ -65,6 +84,7 @@ void __far win_channels_on_resize (SCRWIN *self)
 void __far win_channels_draw(SCRWIN *self)
 {
     #define _BUF_SIZE 40
+    struct win_channels_data_t *data;
     uint8_t i, count;
     MIXCHNLIST *channels;
     MIXCHN *chn;
@@ -78,7 +98,8 @@ void __far win_channels_draw(SCRWIN *self)
 
     if (scrwin_is_created(self))
     {
-        channels = mod_Channels;
+        data = (struct win_channels_data_t *) scrwin_get_data (self);
+        channels = data->channels;
 
         textbackground(_black);
 
@@ -163,8 +184,12 @@ void __far win_channels_draw(SCRWIN *self)
 void __far win_channels_keypress (SCRWIN *self, char key)
 {
 }
+*/
+
+/* free */
 
 void __far win_channels_free (SCRWIN *self)
 {
+    if (scrwin_get_data (self))
+        _delete (scrwin_get_data (self));
 }
-*/

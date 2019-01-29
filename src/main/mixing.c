@@ -24,7 +24,7 @@
 
 #include "main/mixing.h"
 
-void __near song_new_tick (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb)
+void __near song_new_tick (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb)
 {
     ps->tick_samples_per_channel_left = ps->tick_samples_per_channel;
 
@@ -36,7 +36,7 @@ void __near song_new_tick (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb)
             if (ps->patdelay_count)
                 ps->row--;
         }
-        readnewnotes (track, ps);
+        readnewnotes (track, ps, channels);
     }
     else
     {
@@ -44,7 +44,7 @@ void __near song_new_tick (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb)
     }
 }
 
-void __near song_play_channel (PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_t count, uint16_t bufOff)
+void __near song_play_channel (MUSMOD *track, PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_t count, uint16_t bufOff)
 {
     void *outBuf;
     MIXCHNTYPE chtype;
@@ -64,7 +64,7 @@ void __near song_play_channel (PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIX
     {
         /* do effects for this channel: */
         if (ps->tick != ps->speed)
-            chn_effTick (ps, chn);
+            chn_effTick (track, ps, chn);
     }
 
     if (!mixchn_is_playing(chn))
@@ -133,7 +133,7 @@ void __near song_play_channel (PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIX
     chn->dSmpPos = (chn->dSmpPos & 0xffff) + ((unsigned long)smpPos << 16);
 }
 
-void __near song_play (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb, uint16_t len)
+void __near song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, uint16_t len)
 {
     void *outBuf;
     uint16_t bufSize;
@@ -141,12 +141,10 @@ void __near song_play (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb, uint16_t len)
     uint16_t count;   /* samples per channel to calculate */
     uint8_t i;
     bool callEffects;
-    MIXCHNLIST *channels;
     MIXCHN *chn;
 
     outBuf = mb->buf;
     bufSize = mixbuf_get_offset_from_count(mb, len);
-    channels = mod_Channels;
 
     if (!(ps->flags & PLAYSTATEFL_END))
     {
@@ -159,7 +157,7 @@ void __near song_play (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb, uint16_t len)
         else
         {
             callEffects = true;
-            song_new_tick (track, ps, mb);
+            song_new_tick (track, ps, channels, mb);
         }
 
         while (!(ps->flags & PLAYSTATEFL_END))
@@ -176,7 +174,7 @@ void __near song_play (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb, uint16_t len)
             {
                 chn = mixchnl_get (channels, i);
                 if (mixchn_is_enabled(chn))
-                    song_play_channel (ps, chn, callEffects, mb, count,
+                    song_play_channel (track, ps, chn, callEffects, mb, count,
                         bufOff + ((mixbuf_get_channels (mb) == 2) && (mixchn_get_pan (chn) == MIXCHNPAN_RIGHT) ? sizeof(int32_t) : 0));   // NOTE: mixbuf is 32 bits
             }
 
@@ -186,7 +184,7 @@ void __near song_play (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb, uint16_t len)
             if (bufOff < bufSize)
             {
                 callEffects = true;
-                song_new_tick (track, ps, mb);
+                song_new_tick (track, ps, channels, mb);
             }
             else
                 break;
@@ -194,7 +192,7 @@ void __near song_play (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb, uint16_t len)
     }
 }
 
-void sound_fill_buffer (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb, uint16_t len)
+void sound_fill_buffer (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, uint16_t len)
 {
     uint16_t size;
 
@@ -202,5 +200,5 @@ void sound_fill_buffer (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb, uint16_t len)
     size = mixbuf_get_offset_from_count(mb, len);
     memset(mb->buf, 0, size);
 
-    song_play (track, ps, mb, len);
+    song_play (track, ps, channels, mb, len);
 }

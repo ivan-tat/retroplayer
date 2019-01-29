@@ -19,5 +19,6 @@
 #include "player/screen.h"
 
 bool __far win_channels_init (SCRWIN *self);
+void __far win_channels_set_channels (SCRWIN *self, MIXCHNLIST *value);
 
 #endif  /* W_CHN_H */
