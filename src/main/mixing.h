@@ -16,9 +16,11 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "main/musmod.h"
 #include "main/mixer.h"
+#include "main/s3mvars.h"
 
-void sound_fill_buffer(MIXBUF *mb, uint16_t len);
+void sound_fill_buffer (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb, uint16_t len);
 
 /*** Linking ***/
 

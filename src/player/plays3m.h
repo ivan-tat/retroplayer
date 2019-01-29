@@ -18,6 +18,7 @@
 #include "pascal.h"
 #include "main/musmod.h"
 #include "main/mixchn.h"
+#include "main/s3mvars.h"
 
 uint32_t getFreeDOSMemory(void);
 uint32_t getFreeEMMMemory(void);
@@ -25,8 +26,8 @@ uint32_t getFreeEMMMemory(void);
 /* Information windows */
 
 void get_note_name(char *__dest, uint8_t note);
-uint8_t nextord(uint8_t nr);
-uint8_t prevorder(uint8_t nr);
+uint8_t nextord (MUSMOD *track, PLAYSTATE *ps, uint8_t i);
+uint8_t prevorder (MUSMOD *track, PLAYSTATE *ps, uint8_t i);
 
 void __far plays3m_main (void);
 

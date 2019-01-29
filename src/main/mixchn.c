@@ -113,13 +113,13 @@ uint32_t __far mixchn_get_sample_step (MIXCHN *self)
     return self->dSmpStep;
 }
 
-void __far mixchn_setup_sample_period (MIXCHN *self, uint32_t value)
+void __far mixchn_setup_sample_period (MIXCHN *self, uint32_t period, uint16_t mixrate)
 {
-    if (value)
+    if (period)
     {
-        value = mixchn_check_sample_period(self, value);
-        mixchn_set_sample_period(self, value);
-        mixchn_set_sample_step (self, _calc_sample_step (value, playState.rate));
+        period = mixchn_check_sample_period (self, period);
+        mixchn_set_sample_period (self, period);
+        mixchn_set_sample_step (self, _calc_sample_step (period, mixrate));
     }
     else
     {
@@ -233,17 +233,18 @@ uint16_t __far chn_calcNotePeriod (MIXCHN *chn, uint32_t rate, uint8_t note)
     return mixchn_check_sample_period(chn, period);
 }
 
-uint32_t __far chn_calcNoteStep (MIXCHN *chn, uint32_t rate, uint8_t note)
+uint32_t __far chn_calcNoteStep (MIXCHN *chn, uint32_t rate, uint8_t note, uint16_t mixrate)
 {
     unsigned int period;
+
     period = chn_calcNotePeriod(chn, rate, note);
     if (period)
-        return _calc_sample_step (period, playState.rate);
+        return _calc_sample_step (period, mixrate);
     else
         return 0;
 }
 
-void __far chn_setupNote (MIXCHN *chn, uint8_t note, bool keep)
+void __far chn_setupNote (MIXCHN *chn, uint8_t note, uint16_t mixrate, bool keep)
 {
     MUSINS *ins;
     PCMSMP *smp;
@@ -262,7 +263,7 @@ void __far chn_setupNote (MIXCHN *chn, uint8_t note, bool keep)
                 rate = pcmsmp_get_rate (smp);
                 if (rate)
                 {
-                    mixchn_setup_sample_period(chn, chn_calcNotePeriod(chn, rate, note));
+                    mixchn_setup_sample_period(chn, chn_calcNotePeriod(chn, rate, note), mixrate);
                     if (! keep)
                     {
                         // restart instrument

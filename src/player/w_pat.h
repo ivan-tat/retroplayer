@@ -20,6 +20,7 @@
 
 bool __far win_pattern_init (SCRWIN *self);
 void __far win_pattern_set_track (SCRWIN *self, MUSMOD *value);
+void __far win_pattern_set_play_state (SCRWIN *self, PLAYSTATE *value);
 void __far win_pattern_set_channels (SCRWIN *self, MIXCHNLIST *value);
 void __far win_pattern_set_start_channel (SCRWIN *self, int value);
 

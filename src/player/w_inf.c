@@ -25,8 +25,8 @@ void __far win_information_on_resize (SCRWIN *self);
 void __far win_information_draw (SCRWIN *self);
 /*
 void __far win_information_keypress (SCRWIN *self, char key);
-void __far win_information_free (SCRWIN *self);
 */
+void __far win_information_free (SCRWIN *self);
 
 static const SCRWINVMT __win_information_vmt =
 {
@@ -34,13 +34,18 @@ static const SCRWINVMT __win_information_vmt =
     &win_information_draw,
     /*
     &win_information_keypress,
-    &win_information_free
     */
     NULL,
-    NULL
+    &win_information_free
 };
 
 /* private data */
+
+typedef struct win_information_data_t
+{
+    MUSMOD *track;
+    PLAYSTATE *ps;
+};
 
 /* private methods */
 
@@ -48,9 +53,32 @@ static const SCRWINVMT __win_information_vmt =
 
 bool __far win_information_init (SCRWIN *self)
 {
+    struct win_information_data_t *data;
+
     scrwin_init (self, "information window");
     _copy_vmt (self, __win_information_vmt, SCRWINVMT);
+    data = _new (struct win_information_data_t);
+    if (!data)
+        return false;
+    scrwin_set_data (self, data);
+    memset (data, 0, sizeof (struct win_information_data_t));
     return true;
+}
+
+void __far win_information_set_track (SCRWIN *self, MUSMOD *value)
+{
+    struct win_information_data_t *data;
+
+    data = (struct win_information_data_t *) scrwin_get_data (self);
+    data->track = value;
+}
+
+void __far win_information_set_play_state (SCRWIN *self, PLAYSTATE *value)
+{
+    struct win_information_data_t *data;
+
+    data = (struct win_information_data_t *) scrwin_get_data (self);
+    data->ps = value;
 }
 
 void __far win_information_on_resize (SCRWIN *self)
@@ -59,15 +87,19 @@ void __far win_information_on_resize (SCRWIN *self)
 
 void __far win_information_draw(SCRWIN *self)
 {
+    struct win_information_data_t *data;
     MUSMOD *track;
+    PLAYSTATE *ps;
     MUSPATLIST *patterns;
     MUSPAT *pat;
 
     if (scrwin_is_created(self))
     {
-        track = mod_Track;
+        data = (struct win_information_data_t *) scrwin_get_data (self);
+        track = data->track;
+        ps = data->ps;
         patterns = musmod_get_patterns (track);
-        pat = muspatl_get (patterns, playState.pattern);
+        pat = muspatl_get (patterns, ps->pattern);
 
         textbackground(_blue);
 
@@ -123,7 +155,7 @@ void __far win_information_draw(SCRWIN *self)
         gotoxy(18, 2);
         printf("%03u", player_get_tempo());
         gotoxy(27, 2);
-        printf("%02u", playState.global_volume);
+        printf("%02u", ps->global_volume);
         gotoxy(35, 2);
         printf("%03u", player_get_master_volume());
         gotoxy(45, 2);
@@ -131,29 +163,29 @@ void __far win_information_draw(SCRWIN *self)
         gotoxy(59, 2);
         printf(playOption_LoopSong ? "On" : "Off");
         gotoxy(6, 3);
-        printf("%03u", playState.order);
+        printf("%03u", ps->order);
         gotoxy(10, 3);
         printf("%03u", LastOrder);
         gotoxy(18, 3);
-        printf("%02u", playState.pattern);
+        printf("%02u", ps->pattern);
         gotoxy(21, 3);
         if (muspat_is_EM_data(pat))
             printf("E%04X", muspat_get_EM_data_page(pat));
         else
             printf("D%04X", FP_SEG(muspat_get_data(pat)));
         gotoxy(32, 3);
-        printf("%03u", playState.row);
+        printf("%03u", ps->row);
         gotoxy(36, 3);
         printf("%03u", muspat_get_rows(pat));
         gotoxy(45, 3);
-        printf("%03u", playState.tick);
+        printf("%03u", ps->tick);
         gotoxy(56, 3);
         printf("%02u", player_get_pattern_delay());
         gotoxy(65, 3);
-        printf("%03u", playState.patloop_start_row);
+        printf("%03u", ps->patloop_start_row);
         gotoxy(69, 3);
-        if (playState.flags & PLAYSTATEFL_PATLOOP)
-            printf("%03u", playState.patloop_count);
+        if (ps->flags & PLAYSTATEFL_PATLOOP)
+            printf("%03u", ps->patloop_count);
         else
             printf("---");
     }
@@ -163,8 +195,12 @@ void __far win_information_draw(SCRWIN *self)
 void __far win_information_keypress (SCRWIN *self, char key)
 {
 }
+*/
+
+/* free */
 
 void __far win_information_free (SCRWIN *self)
 {
+    if (scrwin_get_data (self))
+        _delete (scrwin_get_data (self));
 }
-*/

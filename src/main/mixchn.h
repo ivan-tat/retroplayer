@@ -140,7 +140,7 @@ void     __far mixchn_set_sample_period (MIXCHN *self, uint16_t value);
 uint16_t __far mixchn_get_sample_period (MIXCHN *self);
 void     __far mixchn_set_sample_step (MIXCHN *self, uint32_t value);
 uint32_t __far mixchn_get_sample_step (MIXCHN *self);
-void     __far mixchn_setup_sample_period (MIXCHN *self, uint32_t value);
+void     __far mixchn_setup_sample_period (MIXCHN *self, uint32_t period, uint16_t mixrate);
 void     __far mixchn_set_command (MIXCHN *self, uint8_t value);
 uint8_t  __far mixchn_get_command (MIXCHN *self);
 void     __far mixchn_set_sub_command (MIXCHN *self, uint8_t value);
@@ -152,8 +152,8 @@ void     __far mixchn_free (MIXCHN *self);
 
 void     __far chn_setupInstrument (MIXCHN *chn, uint8_t insNum);
 uint16_t __far chn_calcNotePeriod (MIXCHN *chn, uint32_t rate, uint8_t note);
-uint32_t __far chn_calcNoteStep (MIXCHN *chn, uint32_t rate, uint8_t note);
-void     __far chn_setupNote (MIXCHN *chn, uint8_t note, bool keep);
+uint32_t __far chn_calcNoteStep (MIXCHN *chn, uint32_t rate, uint8_t note, uint16_t mixrate);
+void     __far chn_setupNote (MIXCHN *chn, uint8_t note, uint16_t mixrate, bool keep);
 
 /*** Mixing channels list ***/
 

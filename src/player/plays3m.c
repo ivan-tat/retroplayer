@@ -140,14 +140,12 @@ void __near display_playercfg(void)
     player_device_dump_conf();
 }
 
-uint8_t __near order_find_previous_entry (uint8_t i)
+uint8_t __near order_find_previous_entry (MUSMOD *track, uint8_t i)
 {
-    MUSMOD *track;
     MUSPATORDER *order;
     MUSPATORDENT *order_entry;
     bool found;
 
-    track = mod_Track;
     order = musmod_get_order (track);
     found = false;
     while ((!found) && (i > 0))
@@ -163,14 +161,12 @@ uint8_t __near order_find_previous_entry (uint8_t i)
     return i;
 }
 
-uint8_t __near order_find_next_entry (uint8_t i)
+uint8_t __near order_find_next_entry (MUSMOD *track, uint8_t i)
 {
-    MUSMOD *track;
     MUSPATORDER *order;
     MUSPATORDENT *order_entry;
     bool found;
 
-    track = mod_Track;
     order = musmod_get_order (track);
     found = false;
     while ((!found) && (i <= LastOrder))
@@ -186,53 +182,51 @@ uint8_t __near order_find_next_entry (uint8_t i)
     return i;
 }
 
-uint8_t __near order_go_to_next_entry (uint8_t i)
+uint8_t __near order_go_to_next_entry (MUSMOD *track, PLAYSTATE *ps, uint8_t i)
 {
-    i = order_find_next_entry (i);
+    i = order_find_next_entry (track, i);
 
     if (i > LastOrder)
-        playState.flags |= PLAYSTATEFL_END; // bad order - no real entry
+        ps->flags |= PLAYSTATEFL_END; // bad order - no real entry
 
     return i;
 }
 
-uint8_t nextord (uint8_t i)
+uint8_t nextord (MUSMOD *track, PLAYSTATE *ps, uint8_t i)
 {
-    playState.flags &= ~PLAYSTATEFL_PATLOOP;
-    playState.patdelay_count = 0;
-    playState.patloop_count = 0;
-    playState.patloop_start_row = 0;
+    ps->flags &= ~PLAYSTATEFL_PATLOOP;
+    ps->patdelay_count = 0;
+    ps->patloop_count = 0;
+    ps->patloop_start_row = 0;
 
-    i = order_find_next_entry (i + 1);
+    i = order_find_next_entry (track, i + 1);
 
     if (i > LastOrder)
     {
         if (playOption_LoopSong)
-            i = order_go_to_next_entry (0);
+            i = order_go_to_next_entry (track, ps, 0);
         else
-            playState.flags |= PLAYSTATEFL_END;
+            ps->flags |= PLAYSTATEFL_END;
     }
 
     return i;
 }
 
-uint8_t prevorder (uint8_t i)
+uint8_t prevorder (MUSMOD *track, PLAYSTATE *ps, uint8_t i)
 {
-    MUSMOD *track;
     MUSPATORDER *order;
     MUSPATORDENT *order_entry;
 
     if (!i)
         return i;
 
-    i = order_find_previous_entry(i - 1);
+    i = order_find_previous_entry (track, i - 1);
 
-    track = mod_Track;
     order = musmod_get_order (track);
     order_entry = muspatorder_get (order, i);
     if ((*order_entry == MUSPATORDENT_SKIP)
     ||  (*order_entry == MUSPATORDENT_END))
-        i = order_go_to_next_entry (i);
+        i = order_go_to_next_entry (track, ps, i);
 
     return i;
 }
@@ -782,6 +776,7 @@ void run_os_shell(void)
 
 void __far plays3m_main (void)
 {
+    PLAYSTATE *ps;
     MUSMOD *track;
     MIXCHNLIST *channels;
     int count, i;
@@ -869,6 +864,7 @@ void __far plays3m_main (void)
     }
 
     track = mod_Track;
+    ps = &playState;
 
     printf ("Song \"%s\" loaded (%s)." CRLF,
         musmod_get_title (track),
@@ -918,12 +914,17 @@ void __far plays3m_main (void)
 
     winlist_on_resize ();
 
+    win_information_set_track (win_information, track);
+    win_information_set_play_state (win_information, ps);
     win_pattern_set_track (win_pattern, track);
+    win_pattern_set_play_state (win_pattern, ps);
     win_pattern_set_start_channel (win_pattern, 1);
     win_instruments_set_track (win_instruments, track);
     win_instruments_set_page_start (win_instruments, 0);
     win_samples_set_track (win_samples, track);
     win_samples_set_page_start (win_samples, 0);
+    win_debug_set_track (win_debug, track);
+    win_debug_set_play_state (win_debug, ps);
 
     if (!player_play_start())
     {
@@ -987,12 +988,12 @@ void __far plays3m_main (void)
                 }
                 if (c == '+')
                 {
-                    player_set_pos (nextord (playState.order), 0, true);
+                    player_set_pos (nextord (track, ps, ps->order), 0, true);
                     c = 0;
                 }
                 if (c == '-')
                 {
-                    player_set_pos (prevorder (playState.order), 0, false);
+                    player_set_pos (prevorder (track, ps, ps->order), 0, false);
                     channels_stop_all();
                     c = 0;
                 }
@@ -1011,7 +1012,7 @@ void __far plays3m_main (void)
             }
         }
     }
-    while (((sndDMABuf.flags & SNDDMABUFFL_SLOW) == 0) && (!quit) && (!(playState.flags & PLAYSTATEFL_END)));
+    while (((sndDMABuf.flags & SNDDMABUFFL_SLOW) == 0) && (!quit) && (!(ps->flags & PLAYSTATEFL_END)));
 
     textbackground(_black);
     textcolor(_lightgray);

@@ -17,9 +17,11 @@
 
 #include "pascal.h"
 #include "main/mixer.h"
+#include "main/musmod.h"
 #include "main/fillvars.h"
+#include "main/s3mvars.h"
 
-void __far fill_DMAbuffer (MIXBUF *mb, SNDDMABUF *outbuf);
+void __far fill_DMAbuffer (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb, SNDDMABUF *outbuf);
 
 /*** Linking ***/
 

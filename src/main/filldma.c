@@ -44,7 +44,7 @@ static clip_proc_t *clip_procs[] =  // NOTE: mixbuf is 32 bits
 #define CLIP_8_LQ_STEREO 8
 #define CLIP_16_LQ_STEREO 10
 
-void __near fill_frame(MIXBUF *mb, SNDDMABUF *outbuf)
+void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb, SNDDMABUF *outbuf)
 {
     void *mixbuf;
     uint8_t f_bits;
@@ -112,7 +112,7 @@ void __near fill_frame(MIXBUF *mb, SNDDMABUF *outbuf)
 
     outbuf->flags |= SNDDMABUFFL_LOCKED;
 
-    sound_fill_buffer(mb, frame_spc);
+    sound_fill_buffer (track, ps, mb, frame_spc);
 
     amplify_s32(mixbuf, frame_len); // NOTE: mixbuf is 32 bits
 
@@ -194,10 +194,10 @@ void __near fill_frame(MIXBUF *mb, SNDDMABUF *outbuf)
     outbuf->flags &= ~SNDDMABUFFL_LOCKED;
 }
 
-void __far fill_DMAbuffer (MIXBUF *mb, SNDDMABUF *outbuf)
+void __far fill_DMAbuffer (MUSMOD *track, PLAYSTATE *ps, MIXBUF *mb, SNDDMABUF *outbuf)
 {
     while (outbuf->frameLast != outbuf->frameActive)
     {
-        fill_frame(mb, outbuf);
+        fill_frame (track, ps, mb, outbuf);
     }
 }

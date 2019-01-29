@@ -31,8 +31,8 @@ void __far win_debug_on_resize (SCRWIN *self);
 void __far win_debug_draw (SCRWIN *self);
 /*
 void __far win_debug_keypress (SCRWIN *self, char key);
-void __far win_debug_free (SCRWIN *self);
 */
+void __far win_debug_free (SCRWIN *self);
 
 static const SCRWINVMT __win_debug_vmt =
 {
@@ -42,14 +42,19 @@ static const SCRWINVMT __win_debug_vmt =
     NULL,
     &win_debug_draw,
     /*
-    &win_debug_on_keypress,
-    &win_debug_on_free,
+    &win_debug_keypress,
     */
     NULL,
-    NULL
+    &win_debug_free
 };
 
 /* private data */
+
+typedef struct win_debug_data_t
+{
+    MUSMOD *track;
+    PLAYSTATE *ps;
+};
 
 #define MIXBUF_Y    2
 #define MIXBUF_X    3
@@ -72,9 +77,32 @@ static const SCRWINVMT __win_debug_vmt =
 
 bool __far win_debug_init (SCRWIN *self)
 {
+    struct win_debug_data_t *data;
+
     scrwin_init (self, "debug window");
     _copy_vmt (self, __win_debug_vmt, SCRWINVMT);
+    data = _new (struct win_debug_data_t);
+    if (!data)
+        return false;
+    scrwin_set_data (self, data);
+    memset (data, 0, sizeof (struct win_debug_data_t));
     return true;
+}
+
+void __far win_debug_set_track (SCRWIN *self, MUSMOD *value)
+{
+    struct win_debug_data_t *data;
+
+    data = (struct win_debug_data_t *) scrwin_get_data (self);
+    data->track = value;
+}
+
+void __far win_debug_set_play_state (SCRWIN *self, PLAYSTATE *value)
+{
+    struct win_debug_data_t *data;
+
+    data = (struct win_debug_data_t *) scrwin_get_data (self);
+    data->ps = value;
 }
 
 /*
@@ -85,7 +113,9 @@ void __far win_debug_on_resize (SCRWIN *self)
 
 void __far win_debug_draw(SCRWIN *self)
 {
+    struct win_debug_data_t *data;
     MUSMOD *track;
+    PLAYSTATE *ps;
     PCMSMPLIST *samples;
     MUSINSLIST *instruments;
     MUSPATLIST *patterns;
@@ -106,7 +136,9 @@ void __far win_debug_draw(SCRWIN *self)
     unsigned out_frame_active;
     unsigned out_fps;
 
-    track = mod_Track;
+    data = (struct win_debug_data_t *) scrwin_get_data (self);
+    track = data->track;
+    ps = data->ps;
     samples = musmod_get_samples (track);
     instruments = musmod_get_instruments (track);
     patterns = musmod_get_patterns (track);
@@ -172,10 +204,10 @@ void __far win_debug_draw(SCRWIN *self)
     sndbuf = &sndDMABuf;
     dmabuf = sndbuf->buf;
     out_channels = mixbuf_get_channels (mixbuf);
-    out_rate = playState.rate;
+    out_rate = ps->rate;
     out_samples_per_channel = mixbuf_get_samples_per_channel (mixbuf);
-    out_tick_samples_per_channel = playState.tick_samples_per_channel;
-    out_tick_samples_per_channel_left = playState.tick_samples_per_channel_left;
+    out_tick_samples_per_channel = ps->tick_samples_per_channel;
+    out_tick_samples_per_channel_left = ps->tick_samples_per_channel_left;
     out_dma_buf_unaligned = dmabuf->unaligned;
     out_dma_buf = dmabuf->data;
     out_frame_size = sndbuf->frameSize;
@@ -205,8 +237,12 @@ void __far win_debug_draw(SCRWIN *self)
 void __far win_debug_keypress (SCRWIN *self, char key)
 {
 }
+*/
+
+/* free */
 
 void __far win_debug_free (SCRWIN *self)
 {
+    if (scrwin_get_data (self))
+        _delete (scrwin_get_data (self));
 }
-*/

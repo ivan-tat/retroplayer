@@ -41,7 +41,7 @@ typedef patternFlowState_t PATFLOWSTATE;
 
 /**********************************************************************/
 
-void __near _play_channel (MUSMOD *track, ROWSTATE *rs, MIXCHN *chn, MUSPATCHNEVENT *event)
+void __near _play_channel (MUSMOD *track, PLAYSTATE *ps, ROWSTATE *rs, MIXCHN *chn, MUSPATCHNEVENT *event)
 {
     MUSINSLIST *instruments;
     MUSINS *ins;
@@ -85,13 +85,13 @@ void __near _play_channel (MUSMOD *track, ROWSTATE *rs, MIXCHN *chn, MUSPATCHNEV
     else
     {
         if (mixchn_get_command(chn) != EFFIDX_NONE)
-            chn_effStop(chn);
+            chn_effStop (ps, chn);
     }
 
     mixchn_set_command(chn, cmd);
     mixchn_set_sub_command(chn, 0);
 
-    if (chn_effInit (rs, chn, cs, param))
+    if (chn_effInit (ps, rs, chn, cs, param))
     {
         instruments = musmod_get_instruments (track);
 
@@ -109,7 +109,7 @@ void __near _play_channel (MUSMOD *track, ROWSTATE *rs, MIXCHN *chn, MUSPATCHNEV
         /* read note */
         if (((cs->cur_note) != CHN_NOTE_OFF)
         &&  ((cs->cur_note) != CHN_NOTE_NONE))
-            chn_setupNote (chn, cs->cur_note, (cs->flags & CHNSTATEFL_PORTAMENTO) != 0);
+            chn_setupNote (chn, cs->cur_note, ps->rate, (cs->flags & CHNSTATEFL_PORTAMENTO) != 0);
         else
             if (cs->cur_note == CHN_NOTE_OFF)
                 mixchn_set_playing(chn, false);
@@ -120,11 +120,11 @@ void __near _play_channel (MUSMOD *track, ROWSTATE *rs, MIXCHN *chn, MUSPATCHNEV
                 cs->cur_note_volume = CHN_NOTEVOL_MAX;
             mixchn_set_note_volume (chn, cs->cur_note_volume);
         }
-        chn_effHandle (chn, cs);
+        chn_effHandle (ps, chn, cs);
     }
 }
 
-void __near _play_event (MUSMOD *track, ROWSTATE *rs, MUSPATROWEVENT *e)
+void __near _play_event (MUSMOD *track, PLAYSTATE *ps, ROWSTATE *rs, MUSPATROWEVENT *e)
 {
     MIXCHNLIST *channels;
     MIXCHN *chn;
@@ -133,10 +133,10 @@ void __near _play_event (MUSMOD *track, ROWSTATE *rs, MUSPATROWEVENT *e)
     chn = mixchnl_get (channels, e->channel);
 
     if (mixchn_get_type (chn) == MIXCHNTYPE_PCM)
-        _play_channel (track, rs, chn, & (e->event));
+        _play_channel (track, ps, rs, chn, & (e->event));
 }
 
-bool __near _play_row (MUSMOD *track, ROWSTATE *rs, MUSPAT *pat, uint16_t row)
+bool __near _play_row (MUSMOD *track, PLAYSTATE *ps, ROWSTATE *rs, MUSPAT *pat, uint16_t row)
 {
     MUSPATIO f;
     MUSPATROWEVENT e, empty;
@@ -179,13 +179,13 @@ bool __near _play_row (MUSMOD *track, ROWSTATE *rs, MUSPAT *pat, uint16_t row)
         while (c < next_c)
         {
             empty.channel = c;
-            _play_event (track, rs, &empty);
+            _play_event (track, ps, rs, &empty);
             c++;
         }
 
         if (row_ev_ok)
         {
-            _play_event (track, rs, &e);
+            _play_event (track, ps, rs, &e);
             c++;
         }
     }
@@ -205,37 +205,37 @@ typedef struct track_state_t
 };
 typedef struct track_state_t TRACKSTATE;
 
-void __near on_row_end (TRACKSTATE *state)
+void __near on_row_end (PLAYSTATE *ps, TRACKSTATE *state)
 {
-    playState.row++;
+    ps->row++;
 
-    if (playState.row < muspat_get_rows (state->pat))
+    if (ps->row < muspat_get_rows (state->pat))
         state->status = FLOWSTATE_WAIT;
     else
     {
-        playState.row = 0;
+        ps->row = 0;
         state->status = FLOWSTATE_PATTERNEND;
     }
 }
 
-void __near on_pattern_end (TRACKSTATE *state)
+void __near on_pattern_end (PLAYSTATE *ps, TRACKSTATE *state)
 {
-    playState.order++;
+    ps->order++;
 
     state->status = FLOWSTATE_PATTERNJUMP;
 }
 
-void __near on_pattern_jump (TRACKSTATE *state)
+void __near on_pattern_jump (PLAYSTATE *ps, TRACKSTATE *state)
 {
-    playState.patloop_start_row = 0;
+    ps->patloop_start_row = 0;
 
-    if (playState.order > LastOrder)
+    if (ps->order > LastOrder)
         state->status = FLOWSTATE_SONGSTOP;
     else
         state->status = FLOWSTATE_SONGLOOP;
 }
 
-void __near on_track_loop (MUSMOD *track, TRACKSTATE *state)
+void __near on_track_loop (MUSMOD *track, PLAYSTATE *ps, TRACKSTATE *state)
 {
     MUSPATLIST *patterns;
     MUSPATORDER *order;
@@ -244,7 +244,7 @@ void __near on_track_loop (MUSMOD *track, TRACKSTATE *state)
     unsigned int i;
 
     order = musmod_get_order (track);
-    order_entry = muspatorder_get (order, playState.order);
+    order_entry = muspatorder_get (order, ps->order);
     rs = &_rs;
 
     i = *order_entry;
@@ -257,32 +257,32 @@ void __near on_track_loop (MUSMOD *track, TRACKSTATE *state)
     }
     else
     {
-        playState.pattern = i;
+        ps->pattern = i;
 
         if (state->firstPlay)
         {
             state->firstPlay = false;
             rs->flags = 0;
-            if (playState.patdelay_count)
+            if (ps->patdelay_count)
                 rs->flags |= ROWSTATEFL_PATTERN_DELAY;
             patterns = musmod_get_patterns (track);
             state->pat = muspatl_get (patterns, i);
 
-            if (!_play_row (track, rs, state->pat, playState.row))
+            if (!_play_row (track, ps, rs, state->pat, ps->row))
             {
                 state->status = FLOWSTATE_ROWEND;
                 return;
             }
 
             if (rs->flags & ROWSTATEFL_GLOBAL_VOLUME)
-                playState.global_volume = rs->global_volume;
+                ps->global_volume = rs->global_volume;
 
-            playState.tick = playState.speed;
+            ps->tick = ps->speed;
 
             // Pattern break ?
             if (rs->flags & ROWSTATEFL_PATTERN_BREAK)
             {
-                playState.row = rs->break_pos;
+                ps->row = rs->break_pos;
                 state->status = FLOWSTATE_PATTERNEND;
                 return;
             }
@@ -290,17 +290,17 @@ void __near on_track_loop (MUSMOD *track, TRACKSTATE *state)
             // Pattern loop ?
             if (rs->flags & ROWSTATEFL_PATTERN_LOOP)
             {
-                playState.patloop_count--;
-                if (playState.patloop_count)
+                ps->patloop_count--;
+                if (ps->patloop_count)
                 {
-                    playState.row = playState.patloop_start_row;
+                    ps->row = ps->patloop_start_row;
                     state->status = FLOWSTATE_WAIT;
                     return;
                 }
                 else
                 {
-                    playState.patloop_start_row = playState.row + 1;
-                    playState.flags &= ~PLAYSTATEFL_PATLOOP;
+                    ps->patloop_start_row = ps->row + 1;
+                    ps->flags &= ~PLAYSTATEFL_PATLOOP;
                 }
             }
 
@@ -311,21 +311,21 @@ void __near on_track_loop (MUSMOD *track, TRACKSTATE *state)
     }
 }
 
-void __near on_track_stop (TRACKSTATE *state)
+void __near on_track_stop (PLAYSTATE *ps, TRACKSTATE *state)
 {
     if (playOption_LoopSong)
     {
-        playState.order = 0;
+        ps->order = 0;
         state->status = FLOWSTATE_SONGLOOP;
     }
     else
     {
-        playState.flags |= PLAYSTATEFL_END;
+        ps->flags |= PLAYSTATEFL_END;
         state->status = FLOWSTATE_WAIT;
     }
 }
 
-void __far readnewnotes (MUSMOD *track)
+void __far readnewnotes (MUSMOD *track, PLAYSTATE *ps)
 {
     TRACKSTATE ts;
 
@@ -337,23 +337,23 @@ void __far readnewnotes (MUSMOD *track)
         switch (ts.status)
         {
             case FLOWSTATE_ROWEND:
-                on_row_end (& ts);
+                on_row_end (ps, &ts);
                 break;
 
             case FLOWSTATE_PATTERNEND:
-                on_pattern_end (& ts);
+                on_pattern_end (ps, &ts);
                 break;
 
             case FLOWSTATE_PATTERNJUMP:
-                on_pattern_jump (& ts);
+                on_pattern_jump (ps, &ts);
                 break;
 
             case FLOWSTATE_SONGLOOP:
-                on_track_loop (track, & ts);
+                on_track_loop (track, ps, &ts);
                 break;
 
             case FLOWSTATE_SONGSTOP:
-                on_track_stop (& ts);
+                on_track_stop (ps, &ts);
                 break;
 
             default:

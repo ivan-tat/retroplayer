@@ -44,6 +44,7 @@ static const char _hexdigits[16] = "0123456789ABCDEF";
 typedef struct win_pattern_data_t
 {
     MUSMOD *track;
+    PLAYSTATE *ps;
     MIXCHNLIST *channels;
     int pattern_num;
     int row;
@@ -258,18 +259,20 @@ void __near win_pattern_draw_list (SCRWIN *self)
 {
     struct win_pattern_data_t *data;
     MUSMOD *track;
+    PLAYSTATE *ps;
     MUSPATLIST *patterns;
     MUSPAT *pattern;
     int pattern_num, row, rows;
     MUSPATIO f;
     int line_start, line_cur, line_end, y;
 
-    /* get play state */
-    pattern_num = playState.pattern;
-    row = playState.row;
-
     data = (struct win_pattern_data_t *) scrwin_get_data (self);
+
+    /* get play state */
     track = data->track;
+    ps = data->ps;
+    pattern_num = ps->pattern;
+    row = ps->row;
     patterns = musmod_get_patterns (track);
     pattern = muspatl_get (patterns, pattern_num);
     rows = muspat_get_rows (pattern);
@@ -374,6 +377,14 @@ void __far win_pattern_set_track (SCRWIN *self, MUSMOD *value)
     data->track = value;
 }
 
+void __far win_pattern_set_play_state (SCRWIN *self, PLAYSTATE *value)
+{
+    struct win_pattern_data_t *data;
+
+    data = (struct win_pattern_data_t *) scrwin_get_data (self);
+    data->ps = value;
+}
+
 void __far win_pattern_set_channels (SCRWIN *self, MIXCHNLIST *value)
 {
     struct win_pattern_data_t *data;
@@ -393,13 +404,15 @@ void __far win_pattern_set_start_channel (SCRWIN *self, int value)
 void __far win_pattern_draw (SCRWIN *self)
 {
     struct win_pattern_data_t *data;
+    PLAYSTATE *ps;
     int pattern_num, row;
 
     data = (struct win_pattern_data_t *) scrwin_get_data (self);
 
     /* get play state */
-    pattern_num = playState.pattern;
-    row = playState.row;
+    ps = data->ps;
+    pattern_num = ps->pattern;
+    row = ps->row;
 
     if (scrwin_get_flags (self) & WINFL_FULLREDRAW)
     {

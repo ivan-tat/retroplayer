@@ -71,7 +71,7 @@ void __far ISR_play(void)
             err = false;
     }
 
-    fill_DMAbuffer(&mixBuf, &sndDMABuf);
+    fill_DMAbuffer (mod_Track, &playState, &mixBuf, &sndDMABuf);
 
     if (UseEMS & !err)
         emsRestoreMap(SavHandle);
@@ -347,15 +347,21 @@ bool __near _player_setup_outbuf(SNDDMABUF *outbuf, uint16_t spc)
 
 void __far player_set_master_volume (uint8_t value)
 {
+    PLAYSTATE *ps;
+
+    ps = &playState;
     if (value > MUSMOD_MASTER_VOLUME_MAX)
         value = MUSMOD_MASTER_VOLUME_MAX;
-    playState.master_volume = value;
+    ps->master_volume = value;
     amptab_set_volume(value);
 }
 
 uint8_t __far player_get_master_volume (void)
 {
-    return playState.master_volume;
+    PLAYSTATE *ps;
+
+    ps = &playState;
+    return ps->master_volume;
 }
 
 void __near _player_setup_patterns_order (MUSMOD *track)
@@ -510,46 +516,54 @@ void __near _player_reset_channels (MIXCHNLIST *channels)
 
 void __near _player_set_initial_state (MUSMOD *track)
 {
-    playState_set_tempo (&playState, musmod_get_tempo (track)); // first priority (is output mixer-dependant)
-    playState_set_speed (&playState, musmod_get_speed (track)); // second priority (is song's internal value)
-    playState.global_volume = musmod_get_global_volume (track); // is song's internal value
-    playState.master_volume = musmod_get_master_volume (track); // is song's output
+    PLAYSTATE *ps;
+
+    ps = &playState;
+    playState_set_tempo (ps, musmod_get_tempo (track)); // first priority (is output mixer-dependant)
+    playState_set_speed (ps, musmod_get_speed (track)); // second priority (is song's internal value)
+    ps->global_volume = musmod_get_global_volume (track); // is song's internal value
+    ps->master_volume = musmod_get_master_volume (track); // is song's output
 }
 
 void __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep)
 {
+    PLAYSTATE *ps;
     MUSMOD *track;
     MUSPATORDER *order;
     MUSPATORDENT *order_entry;
 
+    ps = &playState;
     track = mod_Track;
     order = musmod_get_order (track);
 
     // Module
-    playState.tick = 1;         // last tick (go to next row)
-    playState.row = start_row;  // next row to read from
-    playState.order = start_order;  // next order to read from
+    ps->tick = 1;         // last tick (go to next row)
+    ps->row = start_row;  // next row to read from
+    ps->order = start_order;  // next order to read from
     order_entry = muspatorder_get (order, start_order);
-    playState.pattern = *order_entry;   // next pattern to read from
+    ps->pattern = *order_entry;   // next pattern to read from
 
     if (!keep)
     {
         // reset pattern effects:
-        playState.patdelay_count = 0;
-        playState.flags &= ~PLAYSTATEFL_PATLOOP;
-        playState.patloop_count = 0;
-        playState.patloop_start_row = 0;
+        ps->patdelay_count = 0;
+        ps->flags &= ~PLAYSTATEFL_PATLOOP;
+        ps->patloop_count = 0;
+        ps->patloop_start_row = 0;
     }
 }
 
 bool __far player_play_start (void)
 {
     MUSMOD *track;
+    PLAYSTATE *ps;
     MIXCHNLIST *channels;
     SNDDMABUF *outbuf;
     uint16_t frame_size;
 
     DEBUG_BEGIN("player_play_start");
+
+    ps = &playState;
 
     if (!player_flags_bufalloc)
     {
@@ -581,7 +595,7 @@ bool __far player_play_start (void)
     channels = _new (MIXCHNLIST);
     if (!channels)
     {
-        ERROR ("_player_alloc_channels", "Failed to allocate memory for %s.", "mixing channels");
+        ERROR ("player_play_start", "Failed to allocate memory for %s.", "mixing channels");
         return false;
     }
     mixchnl_init (channels);
@@ -598,14 +612,14 @@ bool __far player_play_start (void)
     player_mode_bits     = sb_mode_get_bits(player_device);
     player_mode_signed   = sb_mode_is_signed(player_device);
 
-    playState.rate = player_mode_lq ? player_mode_rate / 2 : player_mode_rate;
+    ps->rate = player_mode_lq ? player_mode_rate / 2 : player_mode_rate;
 
     // 2. Setup mixer mode
 
     mixbuf_set_mode(
         &mixBuf,
         player_mode_channels,
-        ((1000000L / (uint16_t)(1000000L / playState.rate)) / playOption_FPS) + 1
+        ((1000000L / (uint16_t)(1000000L / ps->rate)) / playOption_FPS) + 1
     );
 
     // 3. Setup output buffer
@@ -634,18 +648,18 @@ bool __far player_play_start (void)
     _player_set_initial_state (track);  // master volume affects mixer tables
 
     // mixer
-    amptab_set_volume (playState.master_volume);
+    amptab_set_volume (ps->master_volume);
 
     _player_reset_channels (channels);
     player_set_pos (initState_startOrder, 0, false);
-    playState.tick_samples_per_channel_left = 0;    // emmidiately next tick
-    playState.flags = 0;    // resume playing
+    ps->tick_samples_per_channel_left = 0;    // emmidiately next tick
+    ps->flags = 0;    // resume playing
 
     // 6. Prefill output buffer
 
     outbuf->frameActive = outbuf->framesCount - 1;
     outbuf->frameLast = outbuf->framesCount;
-    fill_DMAbuffer(&mixBuf, outbuf);
+    fill_DMAbuffer (track, ps, &mixBuf, outbuf);
 
     // 7. Start sound
 
@@ -684,17 +698,26 @@ uint16_t __far player_get_buffer_pos (void)
 
 uint8_t __far player_get_speed (void)
 {
-    return playState.speed;
+    PLAYSTATE *ps;
+
+    ps = &playState;
+    return ps->speed;
 }
 
 uint8_t __far player_get_tempo (void)
 {
-    return playState.tempo;
+    PLAYSTATE *ps;
+
+    ps = &playState;
+    return ps->tempo;
 }
 
 uint8_t __far player_get_pattern_delay (void)
 {
-    return playState.patdelay_count;
+    PLAYSTATE *ps;
+
+    ps = &playState;
+    return ps->patdelay_count;
 }
 
 void __far player_free_module (void)
