@@ -25,7 +25,6 @@ var
 
 var
     UseEMS: boolean;
-    SavHandle: TEMSHDL;
 
 (* play options *)
 

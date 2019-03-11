@@ -28,8 +28,6 @@ extern FILE *_debug_stream[2];
 /* EMS */
 
 extern bool UseEMS;
-extern EMSHDL SavHandle;
-    /* EM handle to save mapping while playing */
 
 /* play options */
 
@@ -96,7 +94,6 @@ void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
 #endif
 
 #pragma aux UseEMS "*";
-#pragma aux SavHandle "*";
 
 #pragma aux playOption_ST3Order "*";
 #pragma aux playOption_LoopSong "*";

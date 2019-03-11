@@ -20,7 +20,6 @@
 /* EMS */
 
 bool UseEMS;
-EMSHDL SavHandle;
 
 /* play options */
 

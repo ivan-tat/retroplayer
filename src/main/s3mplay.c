@@ -45,9 +45,11 @@ static uint16_t player_mode_rate;
 static bool     player_mode_lq;
 static bool     inside;
 
-static EMSNAME _EM_map_name = "saveMAP";
-
 /* IRQ routines */
+
+/* EM handle to save mapping while playing */
+static EMSHDL  _EM_map_handle = EMSBADHDL;
+static EMSNAME _EM_map_name = "saveMAP";
 
 void __far ISR_play(void)
 {
@@ -67,14 +69,14 @@ void __far ISR_play(void)
     if (UseEMS)
     {
         err = true;
-        if (emsSaveMap(SavHandle))
+        if (emsSaveMap (_EM_map_handle))
             err = false;
     }
 
     fill_DMAbuffer (mod_Track, &playState, mod_Channels, &mixBuf, &sndDMABuf);
 
     if (UseEMS & !err)
-        emsRestoreMap(SavHandle);
+        emsRestoreMap (_EM_map_handle);
 }
 
 /*** Player ***/
@@ -142,13 +144,13 @@ bool __far player_init (void)
 
     if (UseEMS)
     {
-        SavHandle = emsAlloc(1);    // is 1 page enough?
+        _EM_map_handle = emsAlloc (1);  // is 1 page enough?
         if (emsEC != E_EMS_SUCCESS)
         {
             ERROR ("player_init", "%s", "Failed to allocate EM handle for mapping.");
             return false;
         }
-        emsSetHandleName(SavHandle, &_EM_map_name);
+        emsSetHandleName (_EM_map_handle, &_EM_map_name);
     }
 
     if (!volumetableptr)
@@ -773,7 +775,7 @@ void __far player_free (void)
     player_flags_bufalloc = false;
 
     if (UseEMS)
-        emsFree(SavHandle);
+        emsFree (_EM_map_handle);
 
     DEBUG_END("player_free");
 }
@@ -807,7 +809,7 @@ void __near s3mplay_init(void)
     smpbuf_init(&smpbuf);
     mixbuf_init(&mixBuf);
     snddmabuf_init(&sndDMABuf);
-    SavHandle = EMSBADHDL;
+    _EM_map_handle = EMSBADHDL;
     mod_Track = NULL;
     mod_Channels = NULL;
 }
