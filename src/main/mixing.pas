@@ -12,7 +12,7 @@ interface
 
 (*$I defines.pas*)
 
-procedure sound_fill_buffer;
+procedure song_play;
 
 implementation
 
@@ -35,6 +35,6 @@ uses
 
 (*$l mixing.obj*)
 
-procedure sound_fill_buffer; external;
+procedure song_play; external;
 
 end.

@@ -112,7 +112,10 @@ void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXB
 
     outbuf->flags |= SNDDMABUFFL_LOCKED;
 
-    sound_fill_buffer (track, ps, channels, mb, frame_spc);
+    /* clear mixing buffer */
+    memset (mixbuf, 0, mixbuf_get_offset_from_count (mb, frame_spc));
+
+    song_play (track, ps, channels, mb, frame_spc);
 
     amplify_s32(mixbuf, frame_len); // NOTE: mixbuf is 32 bits
 

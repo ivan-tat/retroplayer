@@ -133,7 +133,7 @@ void __near song_play_channel (MUSMOD *track, PLAYSTATE *ps, MIXCHN *chn, bool c
     chn->dSmpPos = (chn->dSmpPos & 0xffff) + ((unsigned long)smpPos << 16);
 }
 
-void __near song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, uint16_t len)
+void song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, uint16_t len)
 {
     void *outBuf;
     uint16_t bufSize;
@@ -190,15 +190,4 @@ void __near song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBU
                 break;
         }
     }
-}
-
-void sound_fill_buffer (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, uint16_t len)
-{
-    uint16_t size;
-
-    /* clear mixing buffer */
-    size = mixbuf_get_offset_from_count(mb, len);
-    memset(mb->buf, 0, size);
-
-    song_play (track, ps, channels, mb, len);
 }

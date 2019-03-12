@@ -21,13 +21,13 @@
 #include "main/mixer.h"
 #include "main/s3mvars.h"
 
-void sound_fill_buffer (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, uint16_t len);
+void song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, uint16_t len);
 
 /*** Linking ***/
 
 #ifdef __WATCOMC__
 
-#pragma aux sound_fill_buffer "*";
+#pragma aux song_play "*";
 
 #endif  /* __WATCOMC__ */
 
