@@ -45,6 +45,105 @@ static uint16_t player_mode_rate;
 static bool     player_mode_lq;
 static bool     inside;
 
+/* Each element is a pointer */
+
+typedef struct pointers_list_t
+{
+    DYNARR list;
+};
+typedef struct pointers_list_t PTRLIST;
+
+#define _ptrlist_get_list(o)        & ((o)->list)
+#define _ptrlist_set_count(o, v)    dynarr_set_size (_ptrlist_get_list (o), v)
+#define _ptrlist_get_count(o)       dynarr_get_size (_ptrlist_get_list (o))
+#define _ptrlist_set(o, i, v)       dynarr_set_item (_ptrlist_get_list (o), i, v)
+#define _ptrlist_get(o, i)          dynarr_get_item (_ptrlist_get_list (o), i)
+
+void __near ptrlist_init (PTRLIST *self);
+#define     ptrlist_set_count(o, v) _ptrlist_set_count (o, v)
+#define     ptrlist_get_count(o)    _ptrlist_get_count (o)
+#define     ptrlist_set(o, i, v)    _ptrlist_set (o, i, v)
+#define     ptrlist_get(o, i)       _ptrlist_get (o, i)
+void __near ptrlist_free (PTRLIST *self);
+
+void __far _ptrlist_init_item (void *self, void *item)
+{
+    *(void **) item = NULL;
+}
+
+void __far _ptrlist_free_item (void *self, void *item)
+{
+    *((void **) item) = NULL;
+}
+
+void __near ptrlist_init (PTRLIST *self)
+{
+    if (self)
+        dynarr_init (_ptrlist_get_list (self), self, sizeof (MUSMOD *), _ptrlist_init_item, _ptrlist_free_item);
+}
+
+void __near ptrlist_free (PTRLIST *self)
+{
+    if (self)
+        dynarr_free (_ptrlist_get_list (self));
+}
+
+/*** Musical modules list ***/
+
+typedef PTRLIST MUSMODLIST;
+
+#define _musmodlist_init(o)         ptrlist_init (o)
+#define _musmodlist_set_count(o, v) ptrlist_set_count (o, v)
+#define _musmodlist_get_count(o)    ptrlist_get_count (o)
+#define _musmodlist_set(o, i, v)    ptrlist_set (o, i, v)
+#define _musmodlist_get(o, i)       (MUSMOD **) ptrlist_get (o, i)
+#define _musmodlist_free(o)         ptrlist_free (o)
+
+static MUSMODLIST _musmodlist;
+
+void __near _init_modules (void)
+{
+    _musmodlist_init (&_musmodlist);
+}
+
+bool __near _add_module (MUSMOD *track)
+{
+    int count;
+
+    count = _musmodlist_get_count (&_musmodlist);
+
+    if (!_musmodlist_set_count (&_musmodlist, count + 1))
+        return false;
+
+    _musmodlist_set (&_musmodlist, count, &track);
+    return true;
+}
+
+void __near _free_module (MUSMOD *track)
+{
+    musmod_free (track);
+    _delete (track);
+}
+
+void __near _free_modules (void)
+{
+    int count, i;
+    MUSMOD **track;
+
+    count = _musmodlist_get_count (&_musmodlist);
+    for (i = 0; i < count; i++)
+    {
+        track = _musmodlist_get (&_musmodlist, i);
+        if (track && *track)
+        {
+            _free_module (*track);
+            _musmodlist_set (&_musmodlist, i, NULL);
+        }
+    }
+
+    _musmodlist_free (&_musmodlist);
+}
+
 /* IRQ routines */
 
 /* EM handle to save mapping while playing */
@@ -442,18 +541,28 @@ bool __far player_load_s3m (char *name)
     load_s3m_init(p);
 
     track = load_s3m_load (p, name);
-    mod_Track = track;
     if ((!track) || (!musmod_is_loaded (track)))
     {
         ERROR ("player_load_s3m", "Failed to load S3M file (%s).", load_s3m_get_error (p));
+        // free partially loaded track
+        if (track)
+            _free_module (track);
         load_s3m_free(p);
         load_s3m_delete(&p);
-        player_free_module();
         return false;
     }
 
     load_s3m_free(p);
     load_s3m_delete(&p);
+
+    if (!_add_module (track))
+    {
+        ERROR ("player_load_s3m", "%s", "Failed to register loaded music module.");
+        _free_module (track);
+        return false;
+    }
+
+    mod_Track = track;  // set active track
 
     DEBUG_SUCCESS("player_load_s3m");
     return true;
@@ -722,20 +831,25 @@ uint8_t __far player_get_pattern_delay (void)
     return ps->patdelay_count;
 }
 
-void __far player_free_module (void)
+void __far player_free_module (MUSMOD *track)
 {
-    MUSMOD *track;
-    MIXCHNLIST *channels;
-
-    DEBUG_BEGIN("player_free_module");
-
-    track = mod_Track;
+    DEBUG_BEGIN ("player_free_module");
     if (track)
     {
-        musmod_free (track);
-        _delete (track);
+        if (mod_Track == track)
+            mod_Track = NULL;
+        _free_module (track);
     }
-    mod_Track = NULL;
+    DEBUG_END ("player_free_module");
+}
+
+void __far player_free_modules (void)
+{
+    MIXCHNLIST *channels;
+
+    DEBUG_BEGIN ("player_free_modules");
+
+    _free_modules ();
 
     channels = mod_Channels;
     if (channels)
@@ -744,8 +858,9 @@ void __far player_free_module (void)
         _delete (channels);
     }
     channels = NULL;
+    mod_Channels = NULL;
 
-    DEBUG_END("player_free_module");
+    DEBUG_END ("player_free_modules");
 }
 
 void __far player_free_device (void)
@@ -766,7 +881,7 @@ void __far player_free (void)
     DEBUG_BEGIN("player_free");
 
     player_play_stop();
-    player_free_module();
+    player_free_modules ();
     player_free_device();
     voltab_free();
     snddmabuf_free(&sndDMABuf);
@@ -809,6 +924,7 @@ void __near s3mplay_init(void)
     smpbuf_init(&smpbuf);
     mixbuf_init(&mixBuf);
     snddmabuf_init(&sndDMABuf);
+    _init_modules ();
     _EM_map_handle = EMSBADHDL;
     mod_Track = NULL;
     mod_Channels = NULL;

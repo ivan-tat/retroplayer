@@ -45,7 +45,8 @@ uint16_t __far player_get_buffer_pos (void);
 uint8_t  __far player_get_speed (void);
 uint8_t  __far player_get_tempo (void);
 uint8_t  __far player_get_pattern_delay (void);
-void     __far player_free_module (void);
+void     __far player_free_module (MUSMOD *track);
+void     __far player_free_modules (void);
 void     __far player_free (void);
 
 /*** Initialization ***/
@@ -84,6 +85,7 @@ DECLARE_REGISTRATION (s3mplay)
 #pragma aux player_get_tempo "*";
 #pragma aux player_get_pattern_delay "*";
 #pragma aux player_free_module "*";
+#pragma aux player_free_modules "*";
 #pragma aux player_free "*";
 
 #pragma aux register_s3mplay "*";

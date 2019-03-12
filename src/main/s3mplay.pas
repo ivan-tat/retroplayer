@@ -35,6 +35,7 @@ procedure player_get_speed;
 procedure player_get_tempo;
 procedure player_get_pattern_delay;
 procedure player_free_module;
+procedure player_free_modules;
 procedure player_free;
 
 procedure register_s3mplay;
@@ -104,6 +105,7 @@ procedure player_get_speed; external;
 procedure player_get_tempo; external;
 procedure player_get_pattern_delay; external;
 procedure player_free_module; external;
+procedure player_free_modules; external;
 procedure player_free; external;
 
 procedure register_s3mplay; external;

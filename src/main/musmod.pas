@@ -12,9 +12,6 @@ interface
 
 (*$I defines.pas*)
 
-const
-    MUSMOD_CHANNELS_MAX = 32;
-
 procedure __musmod_set_flags;
 
 procedure musmod_init;
