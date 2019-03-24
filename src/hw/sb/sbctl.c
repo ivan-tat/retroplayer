@@ -265,13 +265,13 @@ void __far _ISR_play(SBDEV *self, uint8_t irq)
 
     hwowner_eoi(_sbdriver, irq);
 
+    _enable();
+
     if (_Self->transfer_callback)
         _Self->transfer_callback();
 
     if ((_Self->transfer_flags & SBTRFL_AUTOINIT) && !(_Self->caps_flags & SBCAPS_AUTOINIT))
         _sb_start_DSP_transfer(_Self);
-
-    _enable();
 }
 
 /* Private methods, assuming 'self != NULL' */

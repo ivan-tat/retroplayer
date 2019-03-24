@@ -38,7 +38,7 @@ typedef struct sound_DMA_buffer_t
     HWSMPFMT format;
     uint16_t frameSize;
     uint8_t  framesCount;
-    uint8_t  frameLast;
+    int8_t   frameLast;
     uint8_t  frameActive;
 };
 #pragma pack(pop);

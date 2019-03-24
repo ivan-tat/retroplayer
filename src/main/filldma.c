@@ -44,6 +44,47 @@ static clip_proc_t *clip_procs[] =  // NOTE: mixbuf is 32 bits
 #define CLIP_8_LQ_STEREO 8
 #define CLIP_16_LQ_STEREO 10
 
+void __near clear_frame (SNDDMABUF *outbuf)
+{
+    uint8_t (*data)[1];
+    uint16_t frame_size, frame_spc, frame_len, srcoff, dstoff;
+    uint8_t framePrev;
+    union
+    {
+        uint8_t u8;
+        uint16_t u16;
+        uint32_t u32;
+    } fill_value;
+
+    data = outbuf->buf->data;
+    frame_size = outbuf->frameSize;
+    frame_spc = snddmabuf_get_count_from_offset (outbuf, frame_size);
+    frame_len = frame_spc * get_sample_format_channels (& (outbuf->format));
+
+    /* simply fill the half with last correct mixed value */
+    dstoff = snddmabuf_get_frame_offset (outbuf, outbuf->frameActive);
+    framePrev = (outbuf->frameActive - 1) & (outbuf->framesCount - 1);
+    srcoff = snddmabuf_get_frame_offset (outbuf, framePrev) + frame_size;
+
+    switch (get_sample_format_width (& (outbuf->format)))
+    {
+    case 8:
+        fill_value.u8 = *((uint8_t *) (data [srcoff - 1]));
+        fill_8 (&(data [dstoff]), fill_value.u8, frame_len);
+        break;
+    case 16:
+        fill_value.u16 = *((uint16_t *) (data [srcoff - 2]));
+        fill_16 (&(data [dstoff]), fill_value.u16, frame_len);
+        break;
+    case 32:
+        fill_value.u32 = *((uint32_t *) (data [srcoff - 4]));
+        fill_32 (& (data [dstoff]), fill_value.u32, frame_len);
+        break;
+    default:
+        break;
+    }
+}
+
 void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, SNDDMABUF *outbuf)
 {
     void *mixbuf;
@@ -51,14 +92,8 @@ void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXB
     bool f_signed;
     uint8_t f_channels;
     uint8_t f_width;
-    uint16_t wait, frame_size, frame_spc, frame_len, srcoff, dstoff;
+    uint16_t frame_size, frame_spc, frame_len, srcoff, dstoff;
     uint8_t (*buf)[1];
-    union
-    {
-        uint8_t u8;
-        uint16_t u16;
-        uint32_t u32;
-    } fill_value;
     int8_t clip;
 
     mixbuf = mb->buf;
@@ -68,49 +103,9 @@ void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXB
     f_channels = get_sample_format_channels(&(outbuf->format));
     f_width = get_sample_format_width(&(outbuf->format));
 
-    buf = outbuf->buf->data;
     frame_size = outbuf->frameSize;
     frame_spc = snddmabuf_get_count_from_offset(outbuf, frame_size);
     frame_len = frame_spc * f_channels;
-
-    if (outbuf->flags & SNDDMABUFFL_LOCKED)
-    {
-        wait = 0xffff;
-        while (wait && (outbuf->flags & SNDDMABUFFL_LOCKED))
-        {
-            wait--;
-        }
-        if (outbuf->flags & SNDDMABUFFL_LOCKED)
-        {
-            outbuf->flags |= SNDDMABUFFL_SLOW;
-
-            /* simply fill the half with last correct mixed value */
-            dstoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameActive);
-            outbuf->frameActive = 1 - outbuf->frameActive;
-            srcoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameActive) + frame_size;
-
-            switch (f_width)
-            {
-            case 8:
-                fill_value.u8 = *((uint8_t *)(buf[srcoff - 1]));
-                fill_8(&(buf[dstoff]), fill_value.u8, frame_len);
-                break;
-            case 16:
-                fill_value.u16 = *((uint16_t *)(buf[srcoff - 2]));
-                fill_16(&(buf[dstoff]), fill_value.u16, frame_len);
-                break;
-            case 32:
-                fill_value.u32 = *((uint32_t *)(buf[srcoff - 4]));
-                fill_32(&(buf[dstoff]), fill_value.u32, frame_len);
-                break;
-            default:
-                break;
-            }
-            return;
-        }
-    }
-
-    outbuf->flags |= SNDDMABUFFL_LOCKED;
 
     /* clear mixing buffer */
     memset (mixbuf, 0, mixbuf_get_offset_from_count (mb, frame_spc));
@@ -119,7 +114,6 @@ void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXB
 
     amplify_s32(mixbuf, frame_len); // NOTE: mixbuf is 32 bits
 
-    outbuf->frameLast = (outbuf->frameLast + 1) & (outbuf->framesCount - 1);
     dstoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameLast);
 
     clip = -1;
@@ -184,6 +178,8 @@ void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXB
                 fwrite (mixbuf, frame_len * sizeof (int32_t), 1, _debug_stream[0]);
         }
 
+        buf = outbuf->buf->data;
+
         if (clip_procs[clip])
             clip_procs[clip](&(buf[dstoff]), mixbuf, frame_len);
 
@@ -193,14 +189,31 @@ void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXB
                 fwrite (& (buf[dstoff]), frame_size, 1, _debug_stream[1]);
         }
     }
-
-    outbuf->flags &= ~SNDDMABUFFL_LOCKED;
 }
 
 void __far fill_DMAbuffer (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, SNDDMABUF *outbuf)
 {
     while (outbuf->frameLast != outbuf->frameActive)
     {
-        fill_frame (track, ps, channels, mb, outbuf);
+        // critical section
+        _disable ();
+        if (outbuf->flags & SNDDMABUFFL_LOCKED)
+        {
+            outbuf->flags |= SNDDMABUFFL_SLOW;
+            _enable ();
+        }
+        else
+        {
+            outbuf->flags |= SNDDMABUFFL_LOCKED;
+            outbuf->frameLast = (outbuf->frameLast + 1) & (outbuf->framesCount - 1);
+            _enable ();
+
+            fill_frame (track, ps, channels, mb, outbuf);
+
+            // critical section
+            _disable ();
+            outbuf->flags &= ~SNDDMABUFFL_LOCKED;
+            _enable ();
+        }
     }
 }

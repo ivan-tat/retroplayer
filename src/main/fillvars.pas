@@ -34,7 +34,7 @@ type
         format: THWSMPFMT;
         frameSize: word;
         framesCount: byte;
-        frameLast: byte;
+        frameLast: shortint;
         frameActive: byte;
     end;
     PSNDDMABUF = ^TSNDDMABUF;

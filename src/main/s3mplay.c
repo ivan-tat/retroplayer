@@ -43,7 +43,7 @@ static bool     player_mode_signed;
 static uint8_t  player_mode_channels;
 static uint16_t player_mode_rate;
 static bool     player_mode_lq;
-static bool     inside;
+static bool     _ISR_busy;
 
 /* Each element is a pointer */
 
@@ -152,30 +152,38 @@ static EMSNAME _EM_map_name = "saveMAP";
 
 void __far ISR_play(void)
 {
+    SNDDMABUF *dmabuf;
     bool err;
 
-    while (inside)
+    dmabuf = &sndDMABuf;
+
+    if (_ISR_busy)
     {
-        __asm "nop";
+        dmabuf->flags |= SNDDMABUFFL_SLOW;
+        dmabuf->frameActive = (dmabuf->frameActive + 1) & (dmabuf->framesCount - 1);
     }
-
-    inside = true;
-    sndDMABuf.frameActive = (sndDMABuf.frameActive + 1) & (sndDMABuf.framesCount - 1);
-    inside = false;
-
-    err = false;
-
-    if (UseEMS)
+    else
     {
-        err = true;
-        if (emsSaveMap (_EM_map_handle))
-            err = false;
+        _ISR_busy = true;
+
+        dmabuf->frameActive = (dmabuf->frameActive + 1) & (dmabuf->framesCount - 1);
+
+        err = false;
+
+        if (UseEMS)
+        {
+            err = true;
+            if (emsSaveMap (_EM_map_handle))
+                err = false;
+        }
+
+        fill_DMAbuffer (mod_Track, &playState, mod_Channels, &mixBuf, dmabuf);
+
+        if (UseEMS & !err)
+            emsRestoreMap (_EM_map_handle);
+
+        _ISR_busy = false;
     }
-
-    fill_DMAbuffer (mod_Track, &playState, mod_Channels, &mixBuf, &sndDMABuf);
-
-    if (UseEMS & !err)
-        emsRestoreMap (_EM_map_handle);
 }
 
 /*** Player ***/
@@ -768,8 +776,8 @@ bool __far player_play_start (void)
 
     // 6. Prefill output buffer
 
+    outbuf->frameLast = -1;
     outbuf->frameActive = outbuf->framesCount - 1;
-    outbuf->frameLast = outbuf->framesCount;
     fill_DMAbuffer (track, ps, channels, &mixBuf, outbuf);
 
     // 7. Start sound
@@ -909,7 +917,7 @@ void __near s3mplay_init(void)
     player_flags_bufalloc = false;
     player_flags_snddev = false;
     UseEMS = emsInstalled;
-    inside = false;
+    _ISR_busy = false;
     player_device = NULL;
     player_mode_set = false;
     player_mode_bits = 0;
