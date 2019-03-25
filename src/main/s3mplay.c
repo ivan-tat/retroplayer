@@ -535,7 +535,7 @@ void __far player_set_order (bool extended)
     _player_setup_patterns_order (track);
 }
 
-bool __far player_load_s3m (char *name)
+bool __far player_load_s3m (char *name, MUSMOD **_track)
 {
     LOADER_S3M *p;
     MUSMOD *track;
@@ -571,6 +571,7 @@ bool __far player_load_s3m (char *name)
     }
 
     mod_Track = track;  // set active track
+    *_track = track;
 
     DEBUG_SUCCESS("player_load_s3m");
     return true;

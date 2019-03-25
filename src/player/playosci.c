@@ -41,6 +41,8 @@ static char opt_filename[pascal_String_size] = { 0 };
 static void *bufdata = NULL;
 static uint8_t scr[2][320] = { 0 };
 
+static MUSMOD *song_track;
+
 void __near draw_channels_volume(void)
 {
     int16_t i;
@@ -219,15 +221,15 @@ void __far playosci_main (void)
         exit (1);
     }
 
-    if (!player_load_s3m (opt_filename))
+    if (!player_load_s3m (opt_filename, &song_track))
     {
         printf ("Failed to load file." CRLF);
         exit (1);
     }
 
     printf ("Loaded '%s' (%s)" CRLF,
-        musmod_get_title (mod_Track),
-        musmod_get_format (mod_Track)
+        musmod_get_title (song_track),
+        musmod_get_format (song_track)
     );
 
     if (!player_init ())

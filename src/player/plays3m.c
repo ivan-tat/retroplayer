@@ -66,6 +66,8 @@ static bool     opt_loop;
 static bool     opt_em;
 static uint8_t  opt_fps;
 
+static MUSMOD  *song_track;
+
 uint32_t getFreeDOSMemory(void)
 {
     return _memmax();
@@ -851,7 +853,7 @@ void __far plays3m_main (void)
         memstats ();
     }
 
-    if (!player_load_s3m(opt_filename))
+    if (!player_load_s3m (opt_filename, &song_track))
     {
         display_errormsg();
         exit(1);
@@ -863,7 +865,7 @@ void __far plays3m_main (void)
         memstats ();
     }
 
-    track = mod_Track;
+    track = song_track;
     ps = &playState;
 
     printf ("Song \"%s\" loaded (%s)." CRLF,

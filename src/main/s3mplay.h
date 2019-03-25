@@ -35,7 +35,7 @@ bool     __far player_get_output_lq (void);
 void     __far player_set_master_volume (uint8_t value);
 uint8_t  __far player_get_master_volume (void);
 void     __far player_set_order (bool extended);
-bool     __far player_load_s3m (char *name);
+bool     __far player_load_s3m (char *name, MUSMOD **_track);
 void     __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep);
 bool     __far player_play_start (void);
 void     __far player_play_pause (void);

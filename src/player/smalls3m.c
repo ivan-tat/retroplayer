@@ -48,6 +48,8 @@ static bool opt_16bits;
 static bool opt_lq;
 static char opt_filename[pascal_String_size];
 
+static MUSMOD *song_track;
+
 void __near
 show_usage (void)
 {
@@ -125,15 +127,15 @@ smalls3m_main (void)
     opt_16bits = def_16bits;
     opt_lq = def_lq;
 
-    if (!player_load_s3m (s))
+    if (!player_load_s3m (s, &song_track))
         exit (1);
 
     printf (
         "Music module loaded." CRLF
         "Format: %s" CRLF
         "Title: \"%s\"" CRLF,
-        musmod_get_format (mod_Track),
-        musmod_get_title (mod_Track)
+        musmod_get_format (song_track),
+        musmod_get_title (song_track)
     );
 
     if (!player_init ())
