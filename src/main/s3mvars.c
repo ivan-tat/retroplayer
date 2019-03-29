@@ -21,10 +21,6 @@
 
 bool UseEMS;
 
-/* initial state */
-
-uint16_t initState_startOrder;
-
 /* play state */
 
 PLAYSTATE playState;

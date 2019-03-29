@@ -537,6 +537,15 @@ void __far player_set_order (bool skipend)
     _player_setup_patterns_order (track, ps);
 }
 
+void __far player_set_order_start (uint8_t value)
+{
+    PLAYSTATE *ps;
+
+    ps = &playState;
+
+    ps->order_start = value;
+}
+
 void __far player_set_song_loop (bool value)
 {
     PLAYSTATE *ps;
@@ -782,7 +791,7 @@ bool __far player_play_start (void)
     amptab_set_volume (ps->master_volume);
 
     _player_reset_channels (channels);
-    player_set_pos (initState_startOrder, 0, false);
+    player_set_pos (ps->order_start, 0, false);
     ps->tick_samples_per_channel_left = 0;    // emmidiately next tick
     ps->flags = 0;    // resume playing
 

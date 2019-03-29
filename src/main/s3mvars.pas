@@ -26,11 +26,6 @@ var
 var
     UseEMS: boolean;
 
-(* initial state *)
-
-var
-    initState_startOrder: word;
-
 (* play state *)
 
 var
@@ -42,6 +37,7 @@ var
         gvolume: Byte;
         mvolume: Byte;
         tick_samples_per_channel: Word;
+        order_start: Byte;
         order_last: Byte;
         order: Byte;
         pattern: Byte;

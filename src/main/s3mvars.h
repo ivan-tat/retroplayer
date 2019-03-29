@@ -29,10 +29,6 @@ extern FILE *_debug_stream[2];
 
 extern bool UseEMS;
 
-/* initial state */
-
-extern uint16_t initState_startOrder;
-
 /*** play state ***/
 
 typedef uint8_t play_state_flags_t;
@@ -54,6 +50,7 @@ typedef struct play_state_t
     uint8_t  master_volume;
     uint16_t tick_samples_per_channel;  // depends on rate and tempo
     // position in song - you can change it while playing to jump arround
+    uint8_t  order_start;   // start position
     uint8_t  order_last;    // last order to play
     uint8_t  order;
     uint8_t  pattern;
@@ -83,8 +80,6 @@ void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
 #endif
 
 #pragma aux UseEMS "*";
-
-#pragma aux initState_startOrder "*";
 
 #pragma aux playState "*";
 

@@ -902,7 +902,7 @@ void __far plays3m_main (void)
     }
 
     player_set_order(opt_st3order);
-    initState_startOrder = opt_startpos;
+    player_set_order_start (opt_startpos);
     player_set_song_loop (opt_loop);
     playOption_FPS = opt_fps;
 
