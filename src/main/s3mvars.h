@@ -29,14 +29,6 @@ extern FILE *_debug_stream[2];
 
 extern bool UseEMS;
 
-/* play options */
-
-extern bool playOption_ST3Order;
-    /* if true then handle order like ST3 - if a "--"=255 is found -
-        stop or loop to the song start (if PLAYSTATEFL_SONGLOOP flag is set) */
-    /* if false - play the whole order and simply skip the "--"
-        if (CurOrder==order_length) then stop or loop to the beginning */
-
 /* initial state */
 
 extern uint16_t initState_startOrder;
@@ -49,6 +41,7 @@ typedef play_state_flags_t PLAYSTATEFLAGS;
 #define PLAYSTATEFL_END         (1 << 0)    // end of song
 #define PLAYSTATEFL_PATLOOP     (1 << 1)    // pattern loop
 #define PLAYSTATEFL_SONGLOOP    (1 << 2)    // song loop
+#define PLAYSTATEFL_SKIPENDMARK (1 << 3)    // skip "end" mark in patterns' order
 
 #pragma pack(push, 1);
 typedef struct play_state_t
@@ -90,8 +83,6 @@ void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
 #endif
 
 #pragma aux UseEMS "*";
-
-#pragma aux playOption_ST3Order "*";
 
 #pragma aux initState_startOrder "*";
 

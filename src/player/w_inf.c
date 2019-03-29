@@ -159,9 +159,9 @@ void __far win_information_draw(SCRWIN *self)
         gotoxy(35, 2);
         printf("%03u", player_get_master_volume());
         gotoxy(45, 2);
-        printf(playOption_ST3Order ? "Extended" : "Normal");
+        printf ((ps->flags & PLAYSTATEFL_SKIPENDMARK) ? "Extended" : "Normal");
         gotoxy(59, 2);
-        printf( (ps->flags & PLAYSTATEFL_SONGLOOP) ? "On" : "Off");
+        printf ((ps->flags & PLAYSTATEFL_SONGLOOP) ? "On" : "Off");
         gotoxy(6, 3);
         printf("%03u", ps->order);
         gotoxy(10, 3);

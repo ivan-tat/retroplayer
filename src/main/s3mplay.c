@@ -486,9 +486,9 @@ void __near _player_setup_patterns_order (MUSMOD *track, PLAYSTATE *ps)
         last = muspatorder_get_count (order) - 1;
         found = false;
 
-        if (playOption_ST3Order)
+        if (! (ps->flags & PLAYSTATEFL_SKIPENDMARK))
         {
-            /* search for first '--' */
+            /* Search for first MUSPATORDENT_END mark (as usual) */
             i = 0;
             while ((!found) && (i < last))
             {
@@ -502,7 +502,7 @@ void __near _player_setup_patterns_order (MUSMOD *track, PLAYSTATE *ps)
         }
         else
         {
-            /* it is not important, we can also do simply order_last = order_length - 1 */
+            /* It is not important, we can also do simply order_last = order_length - 1 */
             i = last;
             while ((!found) && (i > 0))
             {
@@ -521,7 +521,7 @@ void __near _player_setup_patterns_order (MUSMOD *track, PLAYSTATE *ps)
     ps->order_last = i;
 }
 
-void __far player_set_order (bool extended)
+void __far player_set_order (bool skipend)
 {
     MUSMOD *track;
     PLAYSTATE *ps;
@@ -529,10 +529,10 @@ void __far player_set_order (bool extended)
     track = mod_Track;
     ps = &playState;
 
-    if (playOption_ST3Order != extended)
-    {
-        playOption_ST3Order = extended;
-    }
+    if (skipend)
+        ps->flags |= PLAYSTATEFL_SKIPENDMARK;
+    else
+        ps->flags &= ~PLAYSTATEFL_SKIPENDMARK;
 
     _player_setup_patterns_order (track, ps);
 }
@@ -648,11 +648,8 @@ void __near _player_reset_channels (MIXCHNLIST *channels)
     }
 }
 
-void __near _player_set_initial_state (MUSMOD *track)
+void __near _player_set_initial_state (MUSMOD *track, PLAYSTATE *ps)
 {
-    PLAYSTATE *ps;
-
-    ps = &playState;
     playState_set_tempo (ps, musmod_get_tempo (track)); // first priority (is output mixer-dependant)
     playState_set_speed (ps, musmod_get_speed (track)); // second priority (is song's internal value)
     ps->global_volume = musmod_get_global_volume (track); // is song's internal value
@@ -779,7 +776,7 @@ bool __far player_play_start (void)
     // 5. Setup playing state
 
     _player_setup_patterns_order (track, ps);
-    _player_set_initial_state (track);  // master volume affects mixer tables
+    _player_set_initial_state (track, ps);  // master volume affects mixer tables
 
     // mixer
     amptab_set_volume (ps->master_volume);
@@ -940,7 +937,6 @@ void __near s3mplay_init(void)
     player_mode_channels = 0;
     player_mode_rate = 0;
     player_mode_lq = false;
-    playOption_ST3Order = false;
     playOption_FPS = 70;
     voltab_init();
     smpbuf_init(&smpbuf);

@@ -26,11 +26,6 @@ var
 var
     UseEMS: boolean;
 
-(* play options *)
-
-var
-    playOption_ST3Order: boolean;
-
 (* initial state *)
 
 var

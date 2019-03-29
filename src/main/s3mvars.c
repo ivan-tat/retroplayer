@@ -21,10 +21,6 @@
 
 bool UseEMS;
 
-/* play options */
-
-bool playOption_ST3Order;
-
 /* initial state */
 
 uint16_t initState_startOrder;
