@@ -33,11 +33,9 @@ extern bool UseEMS;
 
 extern bool playOption_ST3Order;
     /* if true then handle order like ST3 - if a "--"=255 is found -
-        stop or loop to the song start (look playOption_LoopSong) */
+        stop or loop to the song start (if PLAYSTATEFL_SONGLOOP flag is set) */
     /* if false - play the whole order and simply skip the "--"
         if (CurOrder==order_length) then stop or loop to the beginning */
-extern bool playOption_LoopSong;
-    /* flag if restart if we reach the end of the S3M module */
 
 /* song arrangement */
 
@@ -52,8 +50,9 @@ extern uint16_t initState_startOrder;
 typedef uint8_t play_state_flags_t;
 typedef play_state_flags_t PLAYSTATEFLAGS;
 
-#define PLAYSTATEFL_END     (1 << 0)    // end of song
-#define PLAYSTATEFL_PATLOOP (1 << 1)    // pattern loop
+#define PLAYSTATEFL_END         (1 << 0)    // end of song
+#define PLAYSTATEFL_PATLOOP     (1 << 1)    // pattern loop
+#define PLAYSTATEFL_SONGLOOP    (1 << 2)    // song loop
 
 #pragma pack(push, 1);
 typedef struct play_state_t
@@ -96,7 +95,6 @@ void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
 #pragma aux UseEMS "*";
 
 #pragma aux playOption_ST3Order "*";
-#pragma aux playOption_LoopSong "*";
 
 #pragma aux LastOrder "*";
 

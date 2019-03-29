@@ -30,7 +30,6 @@ var
 
 var
     playOption_ST3Order: boolean;
-    playOption_LoopSong: boolean;
 
 (* song arrangment *)
 

@@ -161,7 +161,7 @@ void __far win_information_draw(SCRWIN *self)
         gotoxy(45, 2);
         printf(playOption_ST3Order ? "Extended" : "Normal");
         gotoxy(59, 2);
-        printf(playOption_LoopSong ? "On" : "Off");
+        printf( (ps->flags & PLAYSTATEFL_SONGLOOP) ? "On" : "Off");
         gotoxy(6, 3);
         printf("%03u", ps->order);
         gotoxy(10, 3);

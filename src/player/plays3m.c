@@ -205,7 +205,7 @@ uint8_t nextord (MUSMOD *track, PLAYSTATE *ps, uint8_t i)
 
     if (i > LastOrder)
     {
-        if (playOption_LoopSong)
+        if (ps->flags & PLAYSTATEFL_SONGLOOP)
             i = order_go_to_next_entry (track, ps, 0);
         else
             ps->flags |= PLAYSTATEFL_END;
@@ -903,7 +903,7 @@ void __far plays3m_main (void)
 
     player_set_order(opt_st3order);
     initState_startOrder = opt_startpos;
-    playOption_LoopSong = opt_loop;
+    player_set_song_loop (opt_loop);
     playOption_FPS = opt_fps;
 
     channels_save_all();
@@ -1002,7 +1002,7 @@ void __far plays3m_main (void)
                 }
                 if (upcase(c) == 'L')
                 {
-                    playOption_LoopSong = !playOption_LoopSong;
+                    ps->flags ^= PLAYSTATEFL_SONGLOOP;
                     c = 0;
                 }
                 if (upcase(c) == 'D')

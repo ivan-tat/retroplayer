@@ -24,7 +24,6 @@ bool UseEMS;
 /* play options */
 
 bool playOption_ST3Order;
-bool playOption_LoopSong;
 
 /* song arrangement */
 

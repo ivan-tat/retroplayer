@@ -246,7 +246,7 @@ void __far playosci_main (void)
 
     player_set_mode (opt_16bits, opt_stereo, opt_rate, opt_lq);
     player_set_order (true);
-    playOption_LoopSong = true;
+    player_set_song_loop (true);
 
     if (!player_set_mode (opt_16bits, opt_stereo, opt_rate, opt_lq))
         exit (1);

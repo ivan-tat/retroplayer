@@ -309,7 +309,7 @@ void __near on_track_loop (MUSMOD *track, PLAYSTATE *ps, TRACKSTATE *state, MIXC
 
 void __near on_track_stop (PLAYSTATE *ps, TRACKSTATE *state)
 {
-    if (playOption_LoopSong)
+    if (ps->flags & PLAYSTATEFL_SONGLOOP)
     {
         ps->order = 0;
         state->status = FLOWSTATE_SONGLOOP;

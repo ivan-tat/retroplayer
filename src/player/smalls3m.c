@@ -148,8 +148,7 @@ smalls3m_main (void)
         exit (1);
 
     player_set_order (true);
-
-    playOption_LoopSong = true;
+    player_set_song_loop (true);
 
     if (!player_play_start ())
         exit (1);

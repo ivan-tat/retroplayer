@@ -535,6 +535,18 @@ void __far player_set_order (bool extended)
     _player_setup_patterns_order (track);
 }
 
+void __far player_set_song_loop (bool value)
+{
+    PLAYSTATE *ps;
+
+    ps = &playState;
+
+    if (value)
+        ps->flags |= PLAYSTATEFL_SONGLOOP;
+    else
+        ps->flags &= ~PLAYSTATEFL_SONGLOOP;
+}
+
 bool __far player_load_s3m (char *name, MUSMOD **_track)
 {
     LOADER_S3M *p;
@@ -926,7 +938,6 @@ void __near s3mplay_init(void)
     player_mode_channels = 0;
     player_mode_rate = 0;
     player_mode_lq = false;
-    playOption_LoopSong = false;
     playOption_ST3Order = false;
     playOption_FPS = 70;
     voltab_init();
