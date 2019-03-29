@@ -31,11 +31,6 @@ var
 var
     playOption_ST3Order: boolean;
 
-(* song arrangment *)
-
-var
-    LastOrder: byte;
-
 (* initial state *)
 
 var
@@ -52,6 +47,7 @@ var
         gvolume: Byte;
         mvolume: Byte;
         tick_samples_per_channel: Word;
+        order_last: Byte;
         order: Byte;
         pattern: Byte;
         row: Byte;

@@ -165,7 +165,7 @@ void __far win_information_draw(SCRWIN *self)
         gotoxy(6, 3);
         printf("%03u", ps->order);
         gotoxy(10, 3);
-        printf("%03u", LastOrder);
+        printf("%03u", ps->order_last);
         gotoxy(18, 3);
         printf("%02u", ps->pattern);
         gotoxy(21, 3);

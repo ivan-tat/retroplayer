@@ -473,7 +473,7 @@ uint8_t __far player_get_master_volume (void)
     return ps->master_volume;
 }
 
-void __near _player_setup_patterns_order (MUSMOD *track)
+void __near _player_setup_patterns_order (MUSMOD *track, PLAYSTATE *ps)
 {
     MUSPATORDER *order;
     MUSPATORDENT *order_entry;
@@ -502,7 +502,7 @@ void __near _player_setup_patterns_order (MUSMOD *track)
         }
         else
         {
-            /* it is not important, we can also do simply LastOrder = order_length - 1 */
+            /* it is not important, we can also do simply order_last = order_length - 1 */
             i = last;
             while ((!found) && (i > 0))
             {
@@ -518,21 +518,23 @@ void __near _player_setup_patterns_order (MUSMOD *track)
     else
         i = 0;
 
-    LastOrder = i;
+    ps->order_last = i;
 }
 
 void __far player_set_order (bool extended)
 {
     MUSMOD *track;
+    PLAYSTATE *ps;
 
     track = mod_Track;
+    ps = &playState;
 
     if (playOption_ST3Order != extended)
     {
         playOption_ST3Order = extended;
     }
 
-    _player_setup_patterns_order (track);
+    _player_setup_patterns_order (track, ps);
 }
 
 void __far player_set_song_loop (bool value)
@@ -776,7 +778,7 @@ bool __far player_play_start (void)
 
     // 5. Setup playing state
 
-    _player_setup_patterns_order (track);
+    _player_setup_patterns_order (track, ps);
     _player_set_initial_state (track);  // master volume affects mixer tables
 
     // mixer

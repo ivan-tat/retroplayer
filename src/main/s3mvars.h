@@ -37,10 +37,6 @@ extern bool playOption_ST3Order;
     /* if false - play the whole order and simply skip the "--"
         if (CurOrder==order_length) then stop or loop to the beginning */
 
-/* song arrangement */
-
-extern uint8_t  LastOrder;  /* last order to play */
-
 /* initial state */
 
 extern uint16_t initState_startOrder;
@@ -65,6 +61,7 @@ typedef struct play_state_t
     uint8_t  master_volume;
     uint16_t tick_samples_per_channel;  // depends on rate and tempo
     // position in song - you can change it while playing to jump arround
+    uint8_t  order_last;    // last order to play
     uint8_t  order;
     uint8_t  pattern;
     uint8_t  row;
@@ -95,8 +92,6 @@ void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
 #pragma aux UseEMS "*";
 
 #pragma aux playOption_ST3Order "*";
-
-#pragma aux LastOrder "*";
 
 #pragma aux initState_startOrder "*";
 

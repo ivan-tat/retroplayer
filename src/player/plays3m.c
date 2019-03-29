@@ -163,7 +163,7 @@ uint8_t __near order_find_previous_entry (MUSMOD *track, uint8_t i)
     return i;
 }
 
-uint8_t __near order_find_next_entry (MUSMOD *track, uint8_t i)
+uint8_t __near order_find_next_entry (MUSMOD *track, PLAYSTATE *ps, uint8_t i)
 {
     MUSPATORDER *order;
     MUSPATORDENT *order_entry;
@@ -171,7 +171,7 @@ uint8_t __near order_find_next_entry (MUSMOD *track, uint8_t i)
 
     order = musmod_get_order (track);
     found = false;
-    while ((!found) && (i <= LastOrder))
+    while ((!found) && (i <= ps->order_last))
     {
         order_entry = muspatorder_get (order, i);
         if ((*order_entry != MUSPATORDENT_SKIP)
@@ -186,9 +186,9 @@ uint8_t __near order_find_next_entry (MUSMOD *track, uint8_t i)
 
 uint8_t __near order_go_to_next_entry (MUSMOD *track, PLAYSTATE *ps, uint8_t i)
 {
-    i = order_find_next_entry (track, i);
+    i = order_find_next_entry (track, ps, i);
 
-    if (i > LastOrder)
+    if (i > ps->order_last)
         ps->flags |= PLAYSTATEFL_END; // bad order - no real entry
 
     return i;
@@ -201,9 +201,9 @@ uint8_t nextord (MUSMOD *track, PLAYSTATE *ps, uint8_t i)
     ps->patloop_count = 0;
     ps->patloop_start_row = 0;
 
-    i = order_find_next_entry (track, i + 1);
+    i = order_find_next_entry (track, ps, i + 1);
 
-    if (i > LastOrder)
+    if (i > ps->order_last)
     {
         if (ps->flags & PLAYSTATEFL_SONGLOOP)
             i = order_go_to_next_entry (track, ps, 0);

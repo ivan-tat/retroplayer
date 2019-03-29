@@ -25,10 +25,6 @@ bool UseEMS;
 
 bool playOption_ST3Order;
 
-/* song arrangement */
-
-uint8_t  LastOrder;
-
 /* initial state */
 
 uint16_t initState_startOrder;

@@ -225,7 +225,7 @@ void __near on_pattern_jump (PLAYSTATE *ps, TRACKSTATE *state)
 {
     ps->patloop_start_row = 0;
 
-    if (ps->order > LastOrder)
+    if (ps->order > ps->order_last)
         state->status = FLOWSTATE_SONGSTOP;
     else
         state->status = FLOWSTATE_SONGLOOP;
