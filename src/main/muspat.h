@@ -276,6 +276,7 @@ void __far muspatorder_init (MUSPATORDER *self);
 #define    muspatorder_get_count(o)     _muspatorder_get_count (o)
 #define    muspatorder_set(o, i, v)     _muspatorder_set (o, i, v)
 #define    muspatorder_get(o, i)        _muspatorder_get (o, i)
+int  __far muspatorder_find_next_pattern (MUSPATORDER *self, int first, int last, int pos, int step, bool skipend);
 int  __far muspatorder_find_last (MUSPATORDER *self, bool skipend);
 void __far muspatorder_free (MUSPATORDER *self);
 
@@ -315,6 +316,7 @@ bool __far DEBUG_dump_pattern (MUSPAT *self, char *s, uint8_t num_channels);    
 #pragma aux muspatl_free "*";
 
 #pragma aux muspatorder_init "*";
+#pragma aux muspatorder_find_next_pattern "*";
 #pragma aux muspatorder_find_last "*";
 #pragma aux muspatorder_free "*";
 

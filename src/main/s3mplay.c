@@ -511,6 +511,46 @@ void __far player_set_order_start (uint8_t value)
     ps->order_start = value;
 }
 
+int __far player_find_next_pattern (MUSMOD *track, PLAYSTATE *ps, int index, int step)
+{
+    MUSPATORDER *order;
+    int start, last, pos;
+    bool skipend;
+
+    order = musmod_get_order (track);
+    start = ps->order_start;
+    last = ps->order_last;
+    pos = index;
+    skipend =  ps->flags & PLAYSTATEFL_SKIPENDMARK;
+
+    // Check bounds
+
+    if ((step < 0) && (pos <= start))
+        // Rewind
+        return muspatorder_find_next_pattern (order, start, last, start, 1, skipend);
+
+    if ((step > 0) && (pos >= ps->order_last))
+    {
+        if (ps->flags & PLAYSTATEFL_SONGLOOP)
+            // Rewind
+            return muspatorder_find_next_pattern (order, start, last, start, 1, skipend);
+        else
+            // Stop
+            return -1;
+    }
+
+    pos = muspatorder_find_next_pattern (order, start, last, pos + step, step, skipend);
+
+    if (pos < 0)
+    {
+        if ((step < 0) || (ps->flags & PLAYSTATEFL_SONGLOOP))
+            // Rewind
+            return muspatorder_find_next_pattern (order, start, last, start, 1, skipend);
+    }
+
+    return pos;
+}
+
 void __far player_set_song_loop (bool value)
 {
     PLAYSTATE *ps;
@@ -630,23 +670,20 @@ void __near _player_set_initial_state (MUSMOD *track, PLAYSTATE *ps)
     ps->master_volume = musmod_get_master_volume (track); // is song's output
 }
 
-void __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep)
+void __far player_set_pos (MUSMOD *track, PLAYSTATE *ps, uint8_t start_order, uint8_t start_row, bool keep)
 {
-    PLAYSTATE *ps;
-    MUSMOD *track;
     MUSPATORDER *order;
     MUSPATORDENT *order_entry;
 
-    ps = &playState;
-    track = mod_Track;
     order = musmod_get_order (track);
 
     // Module
-    ps->tick = 1;         // last tick (go to next row)
-    ps->row = start_row;  // next row to read from
-    ps->order = start_order;  // next order to read from
+    ps->order = start_order;                // next order to read from
     order_entry = muspatorder_get (order, start_order);
-    ps->pattern = *order_entry;   // next pattern to read from
+    ps->pattern = *order_entry;             // next pattern to read from
+    ps->row = start_row;                    // next row to read from
+    ps->tick = 1;                           // last tick (go to next row)
+    ps->tick_samples_per_channel_left = 0;  // immediately next tick
 
     if (!keep)
     {
@@ -656,6 +693,11 @@ void __far player_set_pos (uint8_t start_order, uint8_t start_row, bool keep)
         ps->patloop_count = 0;
         ps->patloop_start_row = 0;
     }
+}
+
+void __far player_song_stop (MUSMOD *track, PLAYSTATE *ps)
+{
+    ps->flags |= PLAYSTATEFL_END;
 }
 
 bool __far player_play_start (void)
@@ -756,8 +798,7 @@ bool __far player_play_start (void)
     amptab_set_volume (ps->master_volume);
 
     _player_reset_channels (channels);
-    player_set_pos (ps->order_start, 0, false);
-    ps->tick_samples_per_channel_left = 0;    // emmidiately next tick
+    player_set_pos (track, ps, ps->order_start, 0, false);
     ps->flags = 0;    // resume playing
 
     // 6. Prefill output buffer

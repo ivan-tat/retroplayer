@@ -142,97 +142,6 @@ void __near display_playercfg(void)
     player_device_dump_conf();
 }
 
-uint8_t __near order_find_previous_entry (MUSMOD *track, uint8_t i)
-{
-    MUSPATORDER *order;
-    MUSPATORDENT *order_entry;
-    bool found;
-
-    order = musmod_get_order (track);
-    found = false;
-    while ((!found) && (i > 0))
-    {
-        order_entry = muspatorder_get (order, i);
-        if ((*order_entry != MUSPATORDENT_SKIP)
-        &&  (*order_entry != MUSPATORDENT_END))
-            found = true;
-        else
-            i--;
-    }
-
-    return i;
-}
-
-uint8_t __near order_find_next_entry (MUSMOD *track, PLAYSTATE *ps, uint8_t i)
-{
-    MUSPATORDER *order;
-    MUSPATORDENT *order_entry;
-    bool found;
-
-    order = musmod_get_order (track);
-    found = false;
-    while ((!found) && (i <= ps->order_last))
-    {
-        order_entry = muspatorder_get (order, i);
-        if ((*order_entry != MUSPATORDENT_SKIP)
-        &&  (*order_entry != MUSPATORDENT_END))
-            found = true;
-        else
-            i++;
-    }
-
-    return i;
-}
-
-uint8_t __near order_go_to_next_entry (MUSMOD *track, PLAYSTATE *ps, uint8_t i)
-{
-    i = order_find_next_entry (track, ps, i);
-
-    if (i > ps->order_last)
-        ps->flags |= PLAYSTATEFL_END; // bad order - no real entry
-
-    return i;
-}
-
-uint8_t nextord (MUSMOD *track, PLAYSTATE *ps, uint8_t i)
-{
-    ps->flags &= ~PLAYSTATEFL_PATLOOP;
-    ps->patdelay_count = 0;
-    ps->patloop_count = 0;
-    ps->patloop_start_row = 0;
-
-    i = order_find_next_entry (track, ps, i + 1);
-
-    if (i > ps->order_last)
-    {
-        if (ps->flags & PLAYSTATEFL_SONGLOOP)
-            i = order_go_to_next_entry (track, ps, 0);
-        else
-            ps->flags |= PLAYSTATEFL_END;
-    }
-
-    return i;
-}
-
-uint8_t prevorder (MUSMOD *track, PLAYSTATE *ps, uint8_t i)
-{
-    MUSPATORDER *order;
-    MUSPATORDENT *order_entry;
-
-    if (!i)
-        return i;
-
-    i = order_find_previous_entry (track, i - 1);
-
-    order = musmod_get_order (track);
-    order_entry = muspatorder_get (order, i);
-    if ((*order_entry == MUSPATORDENT_SKIP)
-    ||  (*order_entry == MUSPATORDENT_END))
-        i = order_go_to_next_entry (track, ps, i);
-
-    return i;
-}
-
 /* Information windows */
 
 static const char _halftone_names[12][2] =
@@ -781,7 +690,7 @@ void __far plays3m_main (void)
     PLAYSTATE *ps;
     MUSMOD *track;
     MIXCHNLIST *channels;
-    int count, i;
+    int count, i, pos;
     char s[pascal_String_size];
     bool quit, result;
     char c;
@@ -991,13 +900,23 @@ void __far plays3m_main (void)
                 }
                 if (c == '+')
                 {
-                    player_set_pos (nextord (track, ps, ps->order), 0, true);
+                    pos = player_find_next_pattern (track, ps, ps->order, 1);
+                    if (pos < 0)
+                        player_song_stop (track, ps);
+                    else
+                        player_set_pos (track, ps, pos, 0, true);
                     c = 0;
                 }
                 if (c == '-')
                 {
-                    player_set_pos (prevorder (track, ps, ps->order), 0, false);
-                    channels_stop_all();
+                    pos = player_find_next_pattern (track, ps, ps->order, -1);
+                    if (pos < 0)
+                        player_song_stop (track, ps);
+                    else
+                    {
+                        player_set_pos (track, ps, pos, 0, false);
+                        channels_stop_all ();
+                    }
                     c = 0;
                 }
                 if (upcase(c) == 'L')

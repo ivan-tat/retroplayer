@@ -601,6 +601,35 @@ void __far muspatorder_init (MUSPATORDER *self)
         dynarr_init (_muspatorder_get_list (self), self, sizeof (MUSPATORDENT), _muspatorder_init_item, _muspatorder_free_item);
 }
 
+int __far muspatorder_find_next_pattern (MUSPATORDER *self, int first, int last, int pos, int step, bool skipend)
+{
+    MUSPATORDENT *entry;
+    bool found;
+
+    found = false;
+    while ((!found) && (first <= pos) && (pos <= last))
+    {
+        entry = muspatorder_get (self, pos);
+        switch (*entry)
+        {
+        case MUSPATORDENT_SKIP:
+            pos += step;
+            break;
+        case MUSPATORDENT_END:
+            if (skipend)
+                pos += step;
+            else
+                pos = -1;
+            break;
+        default:
+            found = true;
+            break;
+        }
+    }
+
+    return found ? pos : -1;
+}
+
 int __far muspatorder_find_last (MUSPATORDER *self, bool skipend)
 {
     MUSPATORDENT *entry;

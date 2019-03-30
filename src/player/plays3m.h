@@ -26,8 +26,6 @@ uint32_t getFreeEMMMemory(void);
 /* Information windows */
 
 void get_note_name(char *__dest, uint8_t note);
-uint8_t nextord (MUSMOD *track, PLAYSTATE *ps, uint8_t i);
-uint8_t prevorder (MUSMOD *track, PLAYSTATE *ps, uint8_t i);
 
 void __far plays3m_main (void);
 
@@ -43,8 +41,6 @@ DECLARE_REGISTRATION (plays3m)
 #pragma aux getFreeEMMMemory "*";
 
 #pragma aux get_note_name "*";
-#pragma aux nextord "*";
-#pragma aux prevorder "*";
 
 #pragma aux plays3m_main "*";
 
