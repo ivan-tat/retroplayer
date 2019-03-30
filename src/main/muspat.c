@@ -601,6 +601,52 @@ void __far muspatorder_init (MUSPATORDER *self)
         dynarr_init (_muspatorder_get_list (self), self, sizeof (MUSPATORDENT), _muspatorder_init_item, _muspatorder_free_item);
 }
 
+int __far muspatorder_find_last (MUSPATORDER *self, bool skipend)
+{
+    MUSPATORDENT *entry;
+    int i, last;
+    bool found;
+
+    if (self)
+    {
+        last = muspatorder_get_count (self) - 1;
+        found = false;
+
+        if (! skipend)
+        {
+            /* Search for first MUSPATORDENT_END mark (as usual) */
+            i = 0;
+            while ((!found) && (i < last))
+            {
+                entry = muspatorder_get (self, i);
+                if (*entry == MUSPATORDENT_END)
+                    found = true;
+                else
+                    i++;
+            }
+            i--;
+        }
+        else
+        {
+            /* It is not important, we can also do simply order_last = order_length - 1 */
+            i = last;
+            while ((!found) && (i > 0))
+            {
+                entry = muspatorder_get (self, i);
+                if ((*entry != MUSPATORDENT_SKIP)
+                &&  (*entry != MUSPATORDENT_END))
+                    found = true;
+                else
+                    i--;
+            }
+        }
+    }
+    else
+        i = 0;
+
+    return i;
+}
+
 void __far muspatorder_free (MUSPATORDER *self)
 {
     if (self)

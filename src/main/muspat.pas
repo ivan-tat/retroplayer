@@ -36,6 +36,7 @@ procedure muspatl_init;
 procedure muspatl_free;
 
 procedure muspatorder_init;
+procedure muspatorder_find_last;
 procedure muspatorder_free;
 
 (*$ifdef DEBUG*)
@@ -79,6 +80,7 @@ procedure muspatl_init; external;
 procedure muspatl_free; external;
 
 procedure muspatorder_init; external;
+procedure muspatorder_find_last; external;
 procedure muspatorder_free; external;
 
 (*$ifdef DEBUG*)

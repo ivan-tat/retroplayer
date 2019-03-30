@@ -476,45 +476,10 @@ uint8_t __far player_get_master_volume (void)
 void __near _player_setup_patterns_order (MUSMOD *track, PLAYSTATE *ps)
 {
     MUSPATORDER *order;
-    MUSPATORDENT *order_entry;
-    int i, last;
-    bool found;
+    int i;
 
     if (track && musmod_is_loaded (track))
-    {
-        order = musmod_get_order (track);
-        last = muspatorder_get_count (order) - 1;
-        found = false;
-
-        if (! (ps->flags & PLAYSTATEFL_SKIPENDMARK))
-        {
-            /* Search for first MUSPATORDENT_END mark (as usual) */
-            i = 0;
-            while ((!found) && (i < last))
-            {
-                order_entry = muspatorder_get (order, i);
-                if (*order_entry == MUSPATORDENT_END)
-                    found = true;
-                else
-                    i++;
-            }
-            i--;
-        }
-        else
-        {
-            /* It is not important, we can also do simply order_last = order_length - 1 */
-            i = last;
-            while ((!found) && (i > 0))
-            {
-                order_entry = muspatorder_get (order, i);
-                if ((*order_entry != MUSPATORDENT_SKIP)
-                &&  (*order_entry != MUSPATORDENT_END))
-                    found = true;
-                else
-                    i--;
-            }
-        }
-    }
+        i = muspatorder_find_last (musmod_get_order (track), ps->flags & PLAYSTATEFL_SKIPENDMARK);
     else
         i = 0;
 
