@@ -44,8 +44,9 @@ void __near song_new_tick (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, M
     }
 }
 
-void __near song_play_channel (MUSMOD *track, PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIXBUF *mb, uint16_t count, uint16_t bufOff)
+void __near song_play_channel (MUSMOD *track, PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIXER *mixer, uint16_t count, uint16_t bufOff)
 {
+    MIXBUF *mb;
     void *outBuf;
     MIXCHNTYPE chtype;
     struct playSampleInfo_t smpInfo;
@@ -54,6 +55,7 @@ void __near song_play_channel (MUSMOD *track, PLAYSTATE *ps, MIXCHN *chn, bool c
     PCMSMP *smp;
     uint8_t Vol, IV, SV, GV, final_volume;
 
+    mb = mixer_get_mixbuf (mixer);
     outBuf = MK_FP(FP_SEG(mb->buf), FP_OFF(mb->buf) + bufOff);
     chtype = mixchn_get_type(chn);
 
@@ -133,8 +135,9 @@ void __near song_play_channel (MUSMOD *track, PLAYSTATE *ps, MIXCHN *chn, bool c
     chn->dSmpPos = (chn->dSmpPos & 0xffff) + ((unsigned long)smpPos << 16);
 }
 
-void song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, uint16_t len)
+void song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXER *mixer, uint16_t len)
 {
+    MIXBUF *mb;
     void *outBuf;
     uint16_t bufSize;
     uint16_t bufOff;
@@ -143,7 +146,8 @@ void song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, 
     bool callEffects;
     MIXCHN *chn;
 
-    outBuf = mb->buf;
+    mb = mixer_get_mixbuf (mixer);
+    outBuf = mixbuf_get (mb);
     bufSize = mixbuf_get_offset_from_count(mb, len);
 
     if (!(ps->flags & PLAYSTATEFL_END))
@@ -174,7 +178,7 @@ void song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, 
             {
                 chn = mixchnl_get (channels, i);
                 if (mixchn_is_enabled(chn))
-                    song_play_channel (track, ps, chn, callEffects, mb, count,
+                    song_play_channel (track, ps, chn, callEffects, mixer, count,
                         bufOff + ((mixbuf_get_channels (mb) == 2) && (mixchn_get_pan (chn) == MIXCHNPAN_RIGHT) ? sizeof(int32_t) : 0));   // NOTE: mixbuf is 32 bits
             }
 

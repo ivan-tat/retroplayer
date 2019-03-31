@@ -101,7 +101,7 @@ smalls3m_main (void)
     printf (
         "Simple music player for DOS, version %s." CRLF
         "Originally written by Andre Baresel, 1994, 1995." CRLF
-        "Modified by Ivan Tatarinov <ivan-tat@ya.ru>, 2016, 2017, 2018." CRLF
+        "Modified by Ivan Tatarinov <ivan-tat@ya.ru>, 2016, 2017, 2018, 2019." CRLF
         "This is free and unencumbered software released into the public domain." CRLF
         "For more information, please refer to <http://unlicense.org>." CRLF,
         PLAYER_VERSION
@@ -141,7 +141,7 @@ smalls3m_main (void)
     if (!player_init ())
         exit (1);
 
-    if (!player_init_device (2))
+    if (!player_init_device (SNDDEVTYPE_SB, SNDDEVSETMET_ENV))
         exit (1);
 
     if (!player_set_mode (opt_16bits, opt_stereo, opt_rate, opt_lq))

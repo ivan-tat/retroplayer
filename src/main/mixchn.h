@@ -185,10 +185,6 @@ bool        __far mixchnl_set_count (MIXCHNLIST *self, uint16_t value);
 uint16_t    __far mixchnl_get_count (MIXCHNLIST *self);
 void        __far mixchnl_free (MIXCHNLIST *self);
 
-/*** Variables ***/
-
-extern MIXCHNLIST *mod_Channels;
-
 /*** Linking ***/
 
 #ifdef __WATCOMC__
@@ -226,8 +222,6 @@ extern MIXCHNLIST *mod_Channels;
 #pragma aux mixchnl_set_count "*";
 #pragma aux mixchnl_get_count "*";
 #pragma aux mixchnl_free "*";
-
-#pragma aux mod_Channels "*";
 
 #endif  /* __WATCOMC__ */
 

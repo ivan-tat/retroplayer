@@ -49,7 +49,7 @@ void __near draw_channels_volume(void)
     MIXCHNLIST *channels;
     MIXCHN *chn;
 
-    channels = mod_Channels;
+    channels = player_get_mixing_channels ();
     for (i = 0; i < mixchnl_get_count (channels); i++)
     {
         chn = mixchnl_get (channels, i);
@@ -199,8 +199,8 @@ void __far playosci_main (void)
 
     printf (
         "Simple music player with oscillator for DOS, version %s." CRLF
-        "Originally written by Andre Baresel, 1994-1995." CRLF
-        "Modified by Ivan Tatarinov <ivan-tat@ya.ru>, 2016-2018." CRLF
+        "Originally written by Andre Baresel, 1994, 1995." CRLF
+        "Modified by Ivan Tatarinov <ivan-tat@ya.ru>, 2016, 2017, 2018, 2019." CRLF
         "This is free and unencumbered software released into the public domain." CRLF
         "For more information, please refer to <http://unlicense.org>." CRLF,
         PLAYER_VERSION
@@ -238,7 +238,7 @@ void __far playosci_main (void)
         exit (1);
     }
 
-    if (!player_init_device (2))
+    if (!player_init_device (SNDDEVTYPE_SB, SNDDEVSETMET_ENV))
     {
         printf ("Failed to initialize sound device." CRLF);
         exit (1);

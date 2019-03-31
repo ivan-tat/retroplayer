@@ -73,12 +73,3 @@ void __far musmod_free (MUSMOD *self)
         musmod_init (self); // clear
     }
 }
-
-/*** Variables ***/
-
-#ifdef DEFINE_LOCAL_DATA
-
-MUSMOD *mod_Track;
-
-#endif  /* DEFINE_LOCAL_DATA */
-

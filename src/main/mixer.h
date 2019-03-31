@@ -110,10 +110,67 @@ uint16_t mixbuf_get_offset_from_count(MIXBUF *self, uint16_t value);
 uint16_t mixbuf_get_count_from_offset(MIXBUF *self, uint16_t value);
 void     mixbuf_free(MIXBUF *self);
 
-/*** Variables ***/
+/*** Mixer ***/
 
-extern SMPBUF smpbuf;
-extern MIXBUF mixBuf;
+typedef uint8_t mixer_flags_t;
+typedef mixer_flags_t MIXERFLAGS;
+
+#define MIXERFL_OWN_SMPBUF  (1 << 0)    // has own sample buffer, free it when done
+#define MIXERFL_OWN_MIXBUF  (1 << 1)    // has own mixing buffer, free it when done
+
+typedef uint8_t mixer_buffers_mask_t;
+typedef mixer_buffers_mask_t MIXERBUFMASK;
+
+#define MIXERBUFMASK_SMPBUF   (1 << 0)
+#define MIXERBUFMASK_MIXBUF   (1 << 1)
+
+#pragma pack(push, 1);
+typedef struct mixer_t
+{
+    MIXERFLAGS flags;
+    uint8_t num_channels;
+    uint16_t num_spc;   // samples per channel
+    SMPBUF *smpbuf;
+    MIXBUF *mixbuf;
+};
+#pragma pack(pop);
+typedef struct mixer_t MIXER;
+
+MIXERFLAGS __mixer_set_flags (MIXERFLAGS _flags, MIXERFLAGS _mask, MIXERFLAGS _set, bool raise);
+
+#define _mixer_get_flags(o)             (o)->flags
+#define _mixer_set_flags(o, v)          _mixer_get_flags (o) = v
+#define _mixer_is_own_smpbuf(o)         ((_mixer_get_flags (o) & MIXERBUFMASK_SMPBUF) != 0)
+#define _mixer_set_own_smpbuf(o, v)     _mixer_set_flags (o, __mixer_set_flags (_mixer_get_flags (o), ~MIXERFL_OWN_SMPBUF, MIXERFL_OWN_SMPBUF, v))
+#define _mixer_is_own_mixbuf(o)         ((_mixer_get_flags (o) & MIXERBUFMASK_MIXBUF) != 0)
+#define _mixer_set_own_mixbuf(o, v)     _mixer_set_flags (o, __mixer_set_flags (_mixer_get_flags (o), ~MIXERFL_OWN_MIXBUF, MIXERFL_OWN_MIXBUF, v))
+#define _mixer_get_num_channels(o)      (o)->num_channels
+#define _mixer_set_num_channels(o, v)   _mixer_get_num_channels (o) = v
+#define _mixer_get_num_spc(o)           (o)->num_spc
+#define _mixer_set_num_spc(o, v)        _mixer_get_num_spc (o) = v
+#define _mixer_get_smpbuf(o)            (o)->smpbuf
+#define _mixer_set_smpbuf(o, v)         _mixer_get_smpbuf (o) = v
+#define _mixer_get_mixbuf(o)            (o)->mixbuf
+#define _mixer_set_mixbuf(o, v)         _mixer_get_mixbuf (o) = v
+
+void    mixer_init (MIXER *self);
+#define mixer_get_flags(o)              _mixer_get_flags(o)
+#define mixer_set_flags(o, v)           _mixer_set_flags(o, v)
+#define mixer_is_own_smpbuf(o)          _mixer_is_own_smpbuf (o)
+#define mixer_set_own_smpbuf(o, v)      _mixer_set_own_smpbuf (o, v)
+#define mixer_is_own_mixbuf(o)          _mixer_is_own_mixbuf (o)
+#define mixer_set_own_mixbuf(o, v)      _mixer_set_own_mixbuf (o, v)
+#define mixer_get_num_channels(o)       _mixer_get_num_channels (o)
+#define mixer_set_num_channels(o, v)    _mixer_set_num_channels (o, v)
+#define mixer_get_num_spc(o)            _mixer_get_num_spc (o)
+#define mixer_set_num_spc(o, v)         _mixer_set_num_spc (o, v)
+#define mixer_get_smpbuf(o)             _mixer_get_smpbuf (o)
+#define mixer_set_smpbuf(o, v)          _mixer_set_smpbuf (o, v)
+#define mixer_get_mixbuf(o)             _mixer_get_mixbuf (o)
+#define mixer_set_mixbuf(o, v)          _mixer_set_mixbuf (o, v)
+bool    mixer_alloc_buffers (MIXER *self, MIXERBUFMASK mask);
+void    mixer_free_buffers (MIXER *self, MIXERBUFMASK mask);
+void    mixer_free (MIXER *self);
 
 /*** Linking ***/
 
@@ -149,8 +206,11 @@ extern MIXBUF mixBuf;
 #pragma aux mixbuf_get_count_from_offset "*";
 #pragma aux mixbuf_free "*";
 
-#pragma aux smpbuf "*";
-#pragma aux mixBuf "*";
+#pragma aux __mixer_set_flags "*";
+#pragma aux mixer_init "*";
+#pragma aux mixer_alloc_buffers "*";
+#pragma aux mixer_free_buffers "*";
+#pragma aux mixer_free "*";
 
 #endif  /* __WATCOMC__ */
 

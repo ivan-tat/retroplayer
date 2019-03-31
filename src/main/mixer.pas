@@ -26,27 +26,11 @@ const
 
 procedure _calc_sample_step;
 
-type
-    TSMPBUF = packed record
-        buf: Pointer;
-        len: Word;
-    end;
-    PSMPBUF = ^TSMPBUF;
-
 procedure smpbuf_init;
 procedure smpbuf_alloc;
 procedure smpbuf_get;
 procedure smpbuf_get_length;
 procedure smpbuf_free;
-
-type
-    TMIXBUF = packed record
-        buf: Pointer;
-        len: Word;
-        channels: Byte;
-        samples_per_channel: Word;
-    end;
-    PMIXBUF = ^TMIXBUF;
 
 procedure mixbuf_init;
 procedure mixbuf_alloc;
@@ -61,9 +45,11 @@ procedure mixbuf_get_offset_from_count;
 procedure mixbuf_get_count_from_offset;
 procedure mixbuf_free;
 
-var
-    smpbuf: TSMPBUF;
-    mixBuf: TMIXBUF;
+procedure __mixer_set_flags;
+procedure mixer_init;
+procedure mixer_alloc_buffers;
+procedure mixer_free_buffers;
+procedure mixer_free;
 
 implementation
 
@@ -72,6 +58,7 @@ uses
     i86,
     string_,
     dos_,
+    common,
     debug;
 
 (*$l mixer_.obj*)
@@ -92,6 +79,7 @@ procedure smpbuf_alloc; external;
 procedure smpbuf_get; external;
 procedure smpbuf_get_length; external;
 procedure smpbuf_free; external;
+
 procedure mixbuf_init; external;
 procedure mixbuf_alloc; external;
 procedure mixbuf_get; external;
@@ -104,5 +92,11 @@ procedure mixbuf_set_mode; external;
 procedure mixbuf_get_offset_from_count; external;
 procedure mixbuf_get_count_from_offset; external;
 procedure mixbuf_free; external;
+
+procedure __mixer_set_flags; external;
+procedure mixer_init; external;
+procedure mixer_alloc_buffers; external;
+procedure mixer_free_buffers; external;
+procedure mixer_free; external;
 
 end.

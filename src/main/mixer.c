@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "common.h"
 #include "cc/i86.h"
 #include "cc/string.h"
 #include "cc/dos.h"
@@ -31,8 +32,6 @@ static uint16_t ST3Periods[12] =
 {
     1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
 };
-
-static MIXBUF mixBuf;
 
 #endif
 
@@ -250,4 +249,121 @@ void mixbuf_free(MIXBUF *self)
             _dos_freemem(FP_SEG(self->buf));
             self->buf = NULL;
         }
+}
+
+/*** Mixer ***/
+
+MIXERFLAGS __mixer_set_flags (MIXERFLAGS _flags, MIXERFLAGS _mask, MIXERFLAGS _set, bool raise)
+{
+    if (raise)
+        return (_flags & _mask) | _set;
+    else
+        return _flags & _mask;
+}
+
+void mixer_init (MIXER *self)
+{
+    memset (self, 0, sizeof (MIXER));
+}
+
+bool __near _mixer_alloc_smpbuf (MIXER *self)
+{
+    SMPBUF *smpbuf;
+
+    smpbuf = _new (SMPBUF);
+    if (!smpbuf)
+        return false;
+
+    _mixer_set_smpbuf (self, smpbuf);
+    _mixer_set_own_smpbuf (self, true);
+
+    if (!smpbuf_alloc (smpbuf, _mixer_get_num_spc (self)))
+        return false;
+
+    return true;
+}
+
+void __near _mixer_free_smpbuf (MIXER *self)
+{
+    SMPBUF *smpbuf;
+
+    smpbuf = _mixer_get_smpbuf (self);
+    if (smpbuf)
+    {
+        if (_mixer_is_own_smpbuf (self))
+        {
+            smpbuf_free (smpbuf);
+            _delete (smpbuf);
+            _mixer_set_own_smpbuf (self, false);
+        }
+        _mixer_set_smpbuf (self, NULL);
+    }
+}
+
+bool __near _mixer_alloc_mixbuf (MIXER *self)
+{
+    MIXBUF *mixbuf;
+
+    mixbuf = _new (MIXBUF);
+    if (!mixbuf)
+        return false;
+
+    _mixer_set_mixbuf (self, mixbuf);
+    _mixer_set_own_mixbuf (self, true);
+
+    if (!mixbuf_alloc (mixbuf, _mixer_get_num_channels (self) * _mixer_get_num_spc (self)))
+        return false;
+
+    return true;
+}
+
+void __near _mixer_free_mixbuf (MIXER *self)
+{
+    MIXBUF *mixbuf;
+
+    mixbuf = _mixer_get_mixbuf (self);
+    if (mixbuf)
+    {
+        if (_mixer_is_own_mixbuf (self))
+        {
+            mixbuf_free (mixbuf);
+            _delete (mixbuf);
+            _mixer_set_own_mixbuf (self, false);
+        }
+        _mixer_set_mixbuf (self, NULL);
+    }
+}
+
+bool mixer_alloc_buffers (MIXER *self, MIXERBUFMASK mask)
+{
+    if (mask & MIXERBUFMASK_SMPBUF)
+    {
+        _mixer_free_smpbuf (self);
+        if (!_mixer_alloc_smpbuf (self))
+            return false;
+    }
+
+    if (mask & MIXERBUFMASK_MIXBUF)
+    {
+        _mixer_free_mixbuf (self);
+        if (!_mixer_alloc_mixbuf (self))
+            return false;
+    }
+
+    return true;
+}
+
+void mixer_free_buffers (MIXER *self, MIXERBUFMASK mask)
+{
+    if (mask & MIXERBUFMASK_SMPBUF)
+        _mixer_free_smpbuf (self);
+
+    if (mask & MIXERBUFMASK_MIXBUF)
+        _mixer_free_mixbuf (self);
+}
+
+void mixer_free (MIXER *self)
+{
+    _mixer_free_smpbuf (self);
+    _mixer_free_mixbuf (self);
 }

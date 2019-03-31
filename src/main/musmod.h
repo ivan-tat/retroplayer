@@ -153,10 +153,6 @@ void __far musmod_set_format (MUSMOD *self, char *value);
 #define    musmod_set_speed(o, v)           _musmod_set_speed (o, v)
 void __far musmod_free (MUSMOD *self);
 
-/*** Variables ***/
-
-extern MUSMOD *mod_Track;
-
 /*** Linking ***/
 
 #ifdef __WATCOMC__
@@ -167,8 +163,6 @@ extern MUSMOD *mod_Track;
 #pragma aux musmod_set_title "*";
 #pragma aux musmod_set_format "*";
 #pragma aux musmod_free "*";
-
-#pragma aux mod_Track "*";
 
 #endif  /* __WATCOMC__ */
 

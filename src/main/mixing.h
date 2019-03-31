@@ -21,7 +21,7 @@
 #include "main/mixer.h"
 #include "main/s3mvars.h"
 
-void song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXBUF *mb, uint16_t len);
+void song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXER *mixer, uint16_t len);
 
 /*** Linking ***/
 

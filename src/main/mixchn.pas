@@ -46,9 +46,6 @@ procedure mixchnl_set_count;
 procedure mixchnl_get_count;
 procedure mixchnl_free;
 
-var
-    mod_Channels: Pointer;
-
 implementation
 
 uses

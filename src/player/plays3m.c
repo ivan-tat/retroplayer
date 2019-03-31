@@ -419,7 +419,7 @@ void __near channels_save_all(void)
     MIXCHN *chn;
     uint8_t num_channels, i;
 
-    channels = mod_Channels;
+    channels = player_get_mixing_channels ();
     num_channels = mixchnl_get_count (channels);
 
     for (i = 0; i < num_channels; i++)
@@ -434,7 +434,7 @@ void __near channels_toggle_mixing(uint8_t index)
     MIXCHNLIST *channels;
     MIXCHN *chn;
 
-    channels = mod_Channels;
+    channels = player_get_mixing_channels ();
     chn = mixchnl_get (channels, index);
     mixchn_set_mixing (chn, !mixchn_is_mixing(chn));
 }
@@ -445,7 +445,7 @@ void __near channels_stop_all(void)
     MIXCHN *chn;
     uint8_t num_channels, i;
 
-    channels = mod_Channels;
+    channels = player_get_mixing_channels ();
     num_channels = mixchnl_get_count (channels);
 
     for (i = 0; i < num_channels; i++)
@@ -717,8 +717,8 @@ void __far plays3m_main (void)
 
     printf(
         "Simple music player for DOS, version %s." CRLF
-        "Originally written by Andre Baresel, 1994-1995." CRLF
-        "Modified by Ivan Tatarinov <ivan-tat@ya.ru>, 2016-2018." CRLF
+        "Originally written by Andre Baresel, 1994, 1995." CRLF
+        "Modified by Ivan Tatarinov <ivan-tat@ya.ru>, 2016, 2017, 2018, 2019." CRLF
         "This is free and unencumbered software released into the public domain." CRLF
         "For more information, please refer to <http://unlicense.org>." CRLF,
         PLAYER_VERSION
@@ -787,7 +787,7 @@ void __far plays3m_main (void)
         exit(1);
     }
 
-    if (!player_init_device(opt_devselect))
+    if (!player_init_device (SNDDEVTYPE_SB, opt_devselect))
     {
         printf("No sound device found." CRLF);
         exit(1);
@@ -843,7 +843,7 @@ void __far plays3m_main (void)
         exit(1);
     }
 
-    channels = mod_Channels;
+    channels = player_get_mixing_channels ();
 
     /* FIXME: move these here for now (MIXCHNLIST is allocated in player_play_start() ) */
     win_channels_set_channels (win_channels, channels);

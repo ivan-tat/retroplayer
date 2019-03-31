@@ -340,9 +340,3 @@ void __far mixchnl_free (MIXCHNLIST *self)
         mixchnl_init (self);    // clear
     }
 }
-
-#ifdef DEFINE_LOCAL_DATA
-
-MIXCHNLIST *mod_Channels;
-
-#endif  /* DEFINE_LOCAL_DATA */

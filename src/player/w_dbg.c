@@ -120,6 +120,7 @@ void __far win_debug_draw(SCRWIN *self)
     MUSINSLIST *instruments;
     MUSPATLIST *patterns;
     uint8_t y;
+    MIXER *mixer;
     MIXBUF *mixbuf;
     SNDDMABUF *sndbuf;
     DMABUF *dmabuf;
@@ -200,7 +201,8 @@ void __far win_debug_draw(SCRWIN *self)
         gotoxy (VERSION_V, y); printf ("%s", PLAYER_VERSION);
     }
 
-    mixbuf = &mixBuf;
+    mixer = player_get_mixer ();
+    mixbuf = mixer_get_mixbuf (mixer);
     sndbuf = &sndDMABuf;
     dmabuf = sndbuf->buf;
     out_channels = mixbuf_get_channels (mixbuf);

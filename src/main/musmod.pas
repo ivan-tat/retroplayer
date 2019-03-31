@@ -19,9 +19,6 @@ procedure musmod_set_title;
 procedure musmod_set_format;
 procedure musmod_free;
 
-var
-    mod_Track: Pointer;
-
 implementation
 
 uses
