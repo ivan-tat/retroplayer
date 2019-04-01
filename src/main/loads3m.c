@@ -233,14 +233,20 @@ typedef struct _s3m_instrument_info_t _S3M_INSINFO;
 
 #define _S3M_ERROR_LEN 128
 
+typedef uint8_t _s3m_loader_flags_t;
+typedef _s3m_loader_flags_t _S3M_LOADERFLAGS;
+
+#define _S3M_LOADERFL_USE_EM        (1 << 0)
+#define _S3M_LOADERFL_SIGNED_DATA   (1 << 1)
+
 typedef struct _s3m_loader_t
 {
+    _S3M_LOADERFLAGS flags;
     char err[_S3M_ERROR_LEN];
     MUSMOD *track;
     FILE *f;
     char *in_buf;
     char *pat_buf;
-    bool signed_data;
     uint8_t   ins_count;
     uint8_t   smp_count;
     uint8_t   pat_count;
@@ -452,7 +458,8 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
     musmod_set_master_volume (track, (header.mvolume & _S3M_MVOL_MASK) >> _S3M_MVOL_SHIFT);
     musmod_set_tempo (track, header.initialtempo);
     musmod_set_speed (track, header.initialspeed);
-    _Self->signed_data = (header.format == _S3M_FILE_FORMAT_1);
+    if (header.format == _S3M_FILE_FORMAT_1)
+        _Self->flags |= _S3M_LOADERFL_SIGNED_DATA;
 
     return true;
 }
@@ -664,7 +671,7 @@ bool __near load_s3m_load_sample (LOADER_S3M *self, uint8_t index)
 
     data = NULL;
 
-    if (UseEMS && pcmsmpl_is_EM_data (samples))
+    if ((_Self->flags & _S3M_LOADERFL_USE_EM) && pcmsmpl_is_EM_data (samples))
     {
         start_offset = _Self->smp_EM_page_offset;
         if (start_offset)
@@ -703,7 +710,7 @@ bool __near load_s3m_load_sample (LOADER_S3M *self, uint8_t index)
         return false;
     }
 
-    if (!_Self->signed_data)
+    if (!(_Self->flags & _S3M_LOADERFL_SIGNED_DATA))
         convert_sign_8 (data, load_size);
 
     switch (pcmsmp_get_loop (smp))
@@ -1695,7 +1702,7 @@ bool __near load_s3m_load_patterns_order (LOADER_S3M *self)
 
 /**********************************************************************/
 
-MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
+MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name, bool use_EM)
 {
     _S3M_LOADER *_Self = self;
     _S3M_HEADER header;
@@ -1711,6 +1718,11 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
         return NULL;
     }
 
+    if (use_EM && emsInstalled && emsGetFreePagesCount ())
+        _Self->flags |= _S3M_LOADERFL_USE_EM;
+    else
+        _Self->flags &= ~_S3M_LOADERFL_USE_EM;
+
     track = _new (MUSMOD);
     if (!track)
     {
@@ -1723,8 +1735,6 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
     instruments = musmod_get_instruments (track);
     patterns = musmod_get_patterns (track);
     order = musmod_get_order (track);
-
-    UseEMS = UseEMS && emsInstalled && emsGetFreePagesCount ();
 
     load_s3m_clear_error (self);
     _Self->f = fopen (name, "rb");
@@ -1778,13 +1788,13 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
         return NULL;
     }
 
-    if (UseEMS)
+    if (_Self->flags & _S3M_LOADERFL_USE_EM)
         load_s3m_alloc_EM_patterns_pages (_Self);
 
     if (!load_s3m_load_patterns (_Self))
         return NULL;
 
-    if (UseEMS)
+    if (_Self->flags & _S3M_LOADERFL_USE_EM)
         load_s3m_free_unused_patterns_pages (_Self);
 
     if (!load_s3m_load_ins_headers (_Self))
@@ -1799,13 +1809,13 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name)
     if (!load_s3m_load_instruments (_Self))
         return NULL;
 
-    if (UseEMS)
+    if (_Self->flags & _S3M_LOADERFL_USE_EM)
         load_s3m_alloc_EM_samples_pages (_Self);
 
     if (!load_s3m_load_samples (_Self))
         return NULL;
 
-    if (UseEMS)
+    if (_Self->flags & _S3M_LOADERFL_USE_EM)
         load_s3m_free_unused_samples_pages (_Self);
 
     musmod_set_loaded (track, true);

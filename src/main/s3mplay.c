@@ -626,7 +626,7 @@ bool __far player_load_s3m (char *name, MUSMOD **_track)
     }
     load_s3m_init(p);
 
-    track = load_s3m_load (p, name);
+    track = load_s3m_load (p, name, UseEMS);
     if ((!track) || (!musmod_is_loaded (track)))
     {
         ERROR ("player_load_s3m", "Failed to load S3M file (%s).", load_s3m_get_error (p));

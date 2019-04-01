@@ -22,7 +22,7 @@ typedef void LOADER_S3M;
 
 LOADER_S3M *load_s3m_new (void);
 void        load_s3m_init (LOADER_S3M *self);
-MUSMOD     *load_s3m_load (LOADER_S3M *self, const char *name);
+MUSMOD     *load_s3m_load (LOADER_S3M *self, const char *name, bool use_EM);
 const char *load_s3m_get_error (LOADER_S3M *self);
 void        load_s3m_free (LOADER_S3M *self);
 void        load_s3m_delete (LOADER_S3M **self);
