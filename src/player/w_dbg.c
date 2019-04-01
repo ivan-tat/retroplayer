@@ -184,7 +184,7 @@ void __far win_debug_draw(SCRWIN *self)
 
         textcolor (_yellow);
 
-        if (UseEMS)
+        if (player_is_EM_in_use ())
         {
             gotoxy (MEMORY_V - 5, MEMORY_Y + 2); printf ("%5u", pcmsmpl_get_used_EM (samples));
             gotoxy (MEMORY_V - 5, MEMORY_Y + 3); printf ("%5u", muspatl_get_used_EM (patterns));

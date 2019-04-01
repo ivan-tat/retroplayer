@@ -25,10 +25,6 @@
 extern FILE *_debug_stream[2];
 #endif  /* DEBUG_WRITE_OUTPUT_STREAM */
 
-/* EMS */
-
-extern bool UseEMS;
-
 /*** play state ***/
 
 typedef uint8_t play_state_flags_t;
@@ -76,8 +72,6 @@ void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
 #ifdef DEBUG_WRITE_OUTPUT_STREAM
 #pragma aux _debug_stream "*";
 #endif
-
-#pragma aux UseEMS "*";
 
 #pragma aux playState_set_speed "*";
 #pragma aux playState_set_tempo "*";

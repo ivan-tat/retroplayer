@@ -44,6 +44,8 @@ void     __far player_clear_error (void);
 bool     __far player_is_error (void);
 const char *__far player_get_error (void);
 bool     __far player_init (void);
+void     __far player_set_EM_usage (bool value);
+bool     __far player_is_EM_in_use (void);
 bool     __far player_init_device (SNDDEVTYPE type, SNDDEVSETMET method);
 void     __far player_device_dump_conf (void);
 char    *__far player_device_get_name (void);
@@ -91,6 +93,8 @@ DECLARE_REGISTRATION (s3mplay)
 #pragma aux player_is_error "*";
 #pragma aux player_get_error "*";
 #pragma aux player_init "*";
+#pragma aux player_set_EM_usage "*";
+#pragma aux player_is_EM_in_use "*";
 #pragma aux player_init_device "*";
 #pragma aux player_device_dump_conf "*";
 #pragma aux player_device_get_name "*";

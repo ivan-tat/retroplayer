@@ -15,14 +15,6 @@
 
 #include "main/s3mvars.h"
 
-#ifdef DEFINE_LOCAL_DATA
-
-/* EMS */
-
-bool UseEMS;
-
-#endif  /* DEFINE_LOCAL_DATA */
-
 void __far playState_set_speed (PLAYSTATE *self, uint8_t value)
 {
     if (value > 0)

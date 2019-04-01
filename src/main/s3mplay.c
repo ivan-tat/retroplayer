@@ -34,6 +34,7 @@
 
 static char     player_error[_PLAYER_ERROR_LEN];
 static bool     player_flags_i386;
+static bool     player_flags_use_EM;
 static bool     player_flags_bufalloc;
 static bool     player_flags_snddev;
 static SBDEV   *player_device;
@@ -183,7 +184,7 @@ void __far ISR_play(void)
 
         err = false;
 
-        if (UseEMS)
+        if (player_flags_use_EM)
         {
             err = true;
             if (emsSaveMap (_EM_map_handle))
@@ -192,7 +193,7 @@ void __far ISR_play(void)
 
         fill_DMAbuffer (_player_track, &_player_play_state, _player_mixing_channels, mixer, dmabuf);
 
-        if (UseEMS & !err)
+        if (player_flags_use_EM & !err)
             emsRestoreMap (_EM_map_handle);
 
         _ISR_busy = false;
@@ -264,7 +265,7 @@ bool __far player_init (void)
         return false;
     }
 
-    if (UseEMS)
+    if (player_flags_use_EM)
     {
         _EM_map_handle = emsAlloc (1);  // is 1 page enough?
         if (emsEC != E_EMS_SUCCESS)
@@ -328,6 +329,16 @@ bool __far player_init (void)
 
     DEBUG_SUCCESS("player_init");
     return true;
+}
+
+void __far player_set_EM_usage (bool value)
+{
+    player_flags_use_EM = value && emsInstalled;
+}
+
+bool __far player_is_EM_in_use (void)
+{
+    return player_flags_use_EM;
 }
 
 bool __far player_init_device (SNDDEVTYPE type, SNDDEVSETMET method)
@@ -626,7 +637,7 @@ bool __far player_load_s3m (char *name, MUSMOD **_track)
     }
     load_s3m_init(p);
 
-    track = load_s3m_load (p, name, UseEMS);
+    track = load_s3m_load (p, name, player_flags_use_EM);
     if ((!track) || (!musmod_is_loaded (track)))
     {
         ERROR ("player_load_s3m", "Failed to load S3M file (%s).", load_s3m_get_error (p));
@@ -990,7 +1001,7 @@ void __far player_free (void)
 
     player_flags_bufalloc = false;
 
-    if (UseEMS)
+    if (player_flags_use_EM)
         emsFree (_EM_map_handle);
 
     DEBUG_END("player_free");
@@ -1007,9 +1018,9 @@ void __near s3mplay_init(void)
     }
 
     player_flags_i386 = isCPU_i386();
+    player_flags_use_EM = emsInstalled;
     player_flags_bufalloc = false;
     player_flags_snddev = false;
-    UseEMS = emsInstalled;
 
     // Sound
     _EM_map_handle = EMSBADHDL;

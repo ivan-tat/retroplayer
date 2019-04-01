@@ -11,7 +11,6 @@ unit s3mvars;
 interface
 
 uses
-    ems,
     s3mtypes;
 
 (*$I defines.pas*)
@@ -20,11 +19,6 @@ uses
 var
     _debug_stream: array [0..1] of Pointer;
 (*$endif*)  (* DEBUG_WRITE_OUTPUT_STREAM *)
-
-(* EMM *)
-
-var
-    UseEMS: boolean;
 
 procedure playState_set_speed;
 procedure playState_set_tempo;

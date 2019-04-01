@@ -754,7 +754,7 @@ void __far plays3m_main (void)
         exit(1);
     }
 
-    UseEMS = opt_em;
+    player_set_EM_usage (opt_em);
 
     if (DEBUG_FILE_S3M_LOAD)
     {
@@ -781,7 +781,7 @@ void __far plays3m_main (void)
         musmod_get_title (track),
         musmod_get_format (track));
 
-    if (!player_init())
+    if (!player_init ())
     {
         display_errormsg();
         exit(1);
