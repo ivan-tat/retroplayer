@@ -47,6 +47,7 @@ bool     __far player_init (void);
 bool     __far player_init_device (SNDDEVTYPE type, SNDDEVSETMET method);
 void     __far player_device_dump_conf (void);
 char    *__far player_device_get_name (void);
+void     __far player_set_sound_buffer_fps (uint8_t value);
 bool     __far player_set_mode (bool f_16bits, bool f_stereo, uint16_t rate, bool LQ);
 uint16_t __far player_get_output_rate (void);
 uint8_t  __far player_get_output_channels (void);
@@ -61,6 +62,7 @@ int      __far player_find_next_pattern (MUSMOD *track, PLAYSTATE *ps, int index
 void     __far player_set_song_loop (bool value);
 bool     __far player_load_s3m (char *name, MUSMOD **_track);
 MIXCHNLIST *__far player_get_mixing_channels (void);
+PLAYSTATE *__far player_get_play_state (void);
 void     __far player_set_pos (MUSMOD *track, PLAYSTATE *ps, uint8_t start_order, uint8_t start_row, bool keep);
 void     __far player_song_stop (MUSMOD *track, PLAYSTATE *ps);
 bool     __far player_play_start (void);
@@ -92,6 +94,7 @@ DECLARE_REGISTRATION (s3mplay)
 #pragma aux player_init_device "*";
 #pragma aux player_device_dump_conf "*";
 #pragma aux player_device_get_name "*";
+#pragma aux player_set_sound_buffer_fps "*";
 #pragma aux player_set_mode "*";
 #pragma aux player_get_output_rate "*";
 #pragma aux player_get_output_channels "*";
@@ -106,6 +109,7 @@ DECLARE_REGISTRATION (s3mplay)
 #pragma aux player_set_song_loop "*";
 #pragma aux player_load_s3m "*";
 #pragma aux player_get_mixing_channels "*";
+#pragma aux player_get_play_state "*";
 #pragma aux player_set_pos "*";
 #pragma aux player_song_stop "*";
 #pragma aux player_play_start "*";

@@ -21,10 +21,6 @@
 
 bool UseEMS;
 
-/* play state */
-
-PLAYSTATE playState;
-
 #endif  /* DEFINE_LOCAL_DATA */
 
 void __far playState_set_speed (PLAYSTATE *self, uint8_t value)

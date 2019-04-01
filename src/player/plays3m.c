@@ -737,7 +737,7 @@ void __far plays3m_main (void)
     opt_startpos = 0;
     opt_loop = false;
     opt_em = true;
-    opt_fps = playOption_FPS;
+    opt_fps = 70;
 
     count = custom_argc();
     for (i = 1; i < count; i++)
@@ -775,7 +775,7 @@ void __far plays3m_main (void)
     }
 
     track = song_track;
-    ps = &playState;
+    ps = player_get_play_state ();
 
     printf ("Song \"%s\" loaded (%s)." CRLF,
         musmod_get_title (track),
@@ -813,7 +813,7 @@ void __far plays3m_main (void)
     player_set_order(opt_st3order);
     player_set_order_start (opt_startpos);
     player_set_song_loop (opt_loop);
-    playOption_FPS = opt_fps;
+    player_set_sound_buffer_fps (opt_fps);
 
     channels_save_all();
 

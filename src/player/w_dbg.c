@@ -216,7 +216,7 @@ void __far win_debug_draw(SCRWIN *self)
     out_frames_count = sndbuf->framesCount;
     out_frame_last = sndbuf->frameLast;
     out_frame_active = sndbuf->frameActive;
-    out_fps = playOption_FPS;
+    out_fps = (long) player_get_output_rate () * get_sample_format_width (& (sndbuf->format)) / sndbuf->frameSize;
 
     textcolor (_yellow);
 

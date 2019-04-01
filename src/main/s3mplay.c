@@ -37,6 +37,7 @@ static bool     player_flags_i386;
 static bool     player_flags_bufalloc;
 static bool     player_flags_snddev;
 static SBDEV   *player_device;
+static uint8_t  player_sound_buffer_fps;
 static bool     player_mode_set;
 static uint8_t  player_mode_bits;
 static bool     player_mode_signed;
@@ -45,6 +46,7 @@ static uint16_t player_mode_rate;
 static bool     player_mode_lq;
 static MUSMOD  *_player_track;
 static MIXCHNLIST *_player_mixing_channels;
+static PLAYSTATE _player_play_state;
 static SMPBUF   _player_smpbuf;
 static MIXBUF   _player_mixbuf;
 static MIXER   *_player_mixer;
@@ -188,7 +190,7 @@ void __far ISR_play(void)
                 err = false;
         }
 
-        fill_DMAbuffer (_player_track, &playState, _player_mixing_channels, mixer, dmabuf);
+        fill_DMAbuffer (_player_track, &_player_play_state, _player_mixing_channels, mixer, dmabuf);
 
         if (UseEMS & !err)
             emsRestoreMap (_EM_map_handle);
@@ -398,6 +400,11 @@ char *__far player_device_get_name (void)
         return NULL;
 }
 
+void __far player_set_sound_buffer_fps (uint8_t value)
+{
+    player_sound_buffer_fps = value;
+}
+
 bool __far player_set_mode (bool f_16bits, bool f_stereo, uint16_t rate, bool LQ)
 {
     DEBUG_BEGIN("player_set_mode");
@@ -496,7 +503,7 @@ void __far player_set_master_volume (uint8_t value)
 {
     PLAYSTATE *ps;
 
-    ps = &playState;
+    ps = &_player_play_state;
     if (value > MUSMOD_MASTER_VOLUME_MAX)
         value = MUSMOD_MASTER_VOLUME_MAX;
     ps->master_volume = value;
@@ -507,7 +514,7 @@ uint8_t __far player_get_master_volume (void)
 {
     PLAYSTATE *ps;
 
-    ps = &playState;
+    ps = &_player_play_state;
     return ps->master_volume;
 }
 
@@ -535,7 +542,7 @@ void __far player_set_order (bool skipend)
     PLAYSTATE *ps;
 
     track = _player_track;
-    ps = &playState;
+    ps = &_player_play_state;
 
     if (skipend)
         ps->flags |= PLAYSTATEFL_SKIPENDMARK;
@@ -549,7 +556,7 @@ void __far player_set_order_start (uint8_t value)
 {
     PLAYSTATE *ps;
 
-    ps = &playState;
+    ps = &_player_play_state;
 
     ps->order_start = value;
 }
@@ -598,7 +605,7 @@ void __far player_set_song_loop (bool value)
 {
     PLAYSTATE *ps;
 
-    ps = &playState;
+    ps = &_player_play_state;
 
     if (value)
         ps->flags |= PLAYSTATEFL_SONGLOOP;
@@ -651,6 +658,11 @@ bool __far player_load_s3m (char *name, MUSMOD **_track)
 MIXCHNLIST *__far player_get_mixing_channels (void)
 {
     return _player_mixing_channels;
+}
+
+PLAYSTATE *__far player_get_play_state (void)
+{
+    return &_player_play_state;
 }
 
 bool __near _player_alloc_channels (MIXCHNLIST *channels, MUSMOD *track)
@@ -758,7 +770,7 @@ bool __far player_play_start (void)
 
     DEBUG_BEGIN("player_play_start");
 
-    ps = &playState;
+    ps = &_player_play_state;
 
     if (!player_flags_bufalloc)
     {
@@ -814,7 +826,7 @@ bool __far player_play_start (void)
     mixbuf_set_mode(
         &_player_mixbuf,
         player_mode_channels,
-        ((1000000L / (uint16_t)(1000000L / ps->rate)) / playOption_FPS) + 1
+        ((1000000L / (uint16_t)(1000000L / ps->rate)) / player_sound_buffer_fps) + 1
     );
 
     // 3. Setup output buffer
@@ -894,7 +906,7 @@ uint8_t __far player_get_speed (void)
 {
     PLAYSTATE *ps;
 
-    ps = &playState;
+    ps = &_player_play_state;
     return ps->speed;
 }
 
@@ -902,7 +914,7 @@ uint8_t __far player_get_tempo (void)
 {
     PLAYSTATE *ps;
 
-    ps = &playState;
+    ps = &_player_play_state;
     return ps->tempo;
 }
 
@@ -910,7 +922,7 @@ uint8_t __far player_get_pattern_delay (void)
 {
     PLAYSTATE *ps;
 
-    ps = &playState;
+    ps = &_player_play_state;
     return ps->patdelay_count;
 }
 
@@ -1012,13 +1024,13 @@ void __near s3mplay_init(void)
 
     // Player
     player_device = NULL;
+    player_sound_buffer_fps = 70;
     player_mode_set = false;
     player_mode_bits = 0;
     player_mode_signed = false;
     player_mode_channels = 0;
     player_mode_rate = 0;
     player_mode_lq = false;
-    playOption_FPS = 70;
 
     // Music modules
     _init_modules ();

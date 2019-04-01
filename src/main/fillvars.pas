@@ -41,7 +41,6 @@ type
 
 var
     sndDMABuf: TSNDDMABUF;
-    playOption_FPS: byte;
 
 procedure snddmabuf_init;
 procedure snddmabuf_alloc;

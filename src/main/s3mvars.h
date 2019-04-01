@@ -66,8 +66,6 @@ typedef struct play_state_t
 #pragma pack(pop);
 typedef struct play_state_t PLAYSTATE;
 
-extern PLAYSTATE playState;
-
 void __far playState_set_speed (PLAYSTATE *self, uint8_t value);
 void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
 
@@ -80,8 +78,6 @@ void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
 #endif
 
 #pragma aux UseEMS "*";
-
-#pragma aux playState "*";
 
 #pragma aux playState_set_speed "*";
 #pragma aux playState_set_tempo "*";

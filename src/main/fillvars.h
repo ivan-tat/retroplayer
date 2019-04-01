@@ -46,9 +46,6 @@ typedef struct sound_DMA_buffer_t SNDDMABUF;
 
 /* player */
 
-extern uint8_t playOption_FPS;
-    /* frames per second ... default is about 70Hz */
-
 void     __far snddmabuf_init (SNDDMABUF *self);
 bool     __far snddmabuf_alloc (SNDDMABUF *self, uint32_t dmaSize);
 uint16_t __far snddmabuf_get_frame_offset (SNDDMABUF *self, uint8_t index);
@@ -62,8 +59,6 @@ extern SNDDMABUF sndDMABuf;
 /*** Linking ***/
 
 #ifdef __WATCOMC__
-
-#pragma aux playOption_FPS "*";
 
 #pragma aux snddmabuf_init "*";
 #pragma aux snddmabuf_alloc "*";

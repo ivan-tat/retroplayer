@@ -26,29 +26,6 @@ var
 var
     UseEMS: boolean;
 
-(* play state *)
-
-var
-    playState: packed record
-        flags: Byte;
-        rate: Word;
-        tempo: Byte;
-        speed: Byte;
-        gvolume: Byte;
-        mvolume: Byte;
-        tick_samples_per_channel: Word;
-        order_start: Byte;
-        order_last: Byte;
-        order: Byte;
-        pattern: Byte;
-        row: Byte;
-        tick: Byte;
-        tick_samples_per_channel_left: Word;
-        patloop_count: Byte;
-        patloop_start_row: Byte;
-        patdelay_count: Byte;
-    end;
-
 procedure playState_set_speed;
 procedure playState_set_tempo;
 

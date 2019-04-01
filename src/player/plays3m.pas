@@ -25,6 +25,7 @@ uses
     pic,
     dma,
     sbctl,
+    sndctl_t,
     s3mtypes,
     musins,
     muspat,
