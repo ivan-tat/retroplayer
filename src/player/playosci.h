@@ -19,11 +19,18 @@
 
 void __far playosci_main (void);
 
+/*** Initialization ***/
+
+DECLARE_REGISTRATION (playosci)
+
 /*** Linking ***/
 
 #ifdef __WATCOMC__
 
 #pragma aux playosci_main "*";
+
+#pragma aux register_playosci "*";
+#pragma aux unregister_playosci "*";
 
 #endif  /* __WATCOMC__ */
 

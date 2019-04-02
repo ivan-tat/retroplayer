@@ -9,6 +9,7 @@ interface
 const
     PLAYER_VERSION: PChar = '1.70.1';
 
+procedure player_new;
 procedure player_init;
 procedure player_is_error;
 procedure player_get_error;
@@ -46,6 +47,7 @@ procedure player_get_pattern_delay;
 procedure player_free_module;
 procedure player_free_modules;
 procedure player_free;
+procedure player_delete;
 
 procedure register_s3mplay;
 
@@ -88,6 +90,7 @@ uses
 
 (*$l s3mplay.obj*)
 
+procedure player_new; external;
 procedure player_init; external;
 procedure player_is_error; external;
 procedure player_get_error; external;
@@ -125,6 +128,7 @@ procedure player_get_pattern_delay; external;
 procedure player_free_module; external;
 procedure player_free_modules; external;
 procedure player_free; external;
+procedure player_delete; external;
 
 procedure register_s3mplay; external;
 

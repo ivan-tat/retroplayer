@@ -52,6 +52,7 @@ static const SCRWINVMT __win_debug_vmt =
 
 typedef struct win_debug_data_t
 {
+    MUSPLAYER *player;
     MUSMOD *track;
     PLAYSTATE *ps;
 };
@@ -89,6 +90,14 @@ bool __far win_debug_init (SCRWIN *self)
     return true;
 }
 
+void __far win_debug_set_player (SCRWIN *self, MUSPLAYER *value)
+{
+    struct win_debug_data_t *data;
+
+    data = (struct win_debug_data_t *) scrwin_get_data (self);
+    data->player = value;
+}
+
 void __far win_debug_set_track (SCRWIN *self, MUSMOD *value)
 {
     struct win_debug_data_t *data;
@@ -114,6 +123,7 @@ void __far win_debug_on_resize (SCRWIN *self)
 void __far win_debug_draw(SCRWIN *self)
 {
     struct win_debug_data_t *data;
+    MUSPLAYER *player;
     MUSMOD *track;
     PLAYSTATE *ps;
     PCMSMPLIST *samples;
@@ -138,6 +148,7 @@ void __far win_debug_draw(SCRWIN *self)
     unsigned out_fps;
 
     data = (struct win_debug_data_t *) scrwin_get_data (self);
+    player = data->player;
     track = data->track;
     ps = data->ps;
     samples = musmod_get_samples (track);
@@ -184,7 +195,7 @@ void __far win_debug_draw(SCRWIN *self)
 
         textcolor (_yellow);
 
-        if (player_is_EM_in_use ())
+        if (player_is_EM_in_use (player))
         {
             gotoxy (MEMORY_V - 5, MEMORY_Y + 2); printf ("%5u", pcmsmpl_get_used_EM (samples));
             gotoxy (MEMORY_V - 5, MEMORY_Y + 3); printf ("%5u", muspatl_get_used_EM (patterns));
@@ -201,7 +212,7 @@ void __far win_debug_draw(SCRWIN *self)
         gotoxy (VERSION_V, y); printf ("%s", PLAYER_VERSION);
     }
 
-    mixer = player_get_mixer ();
+    mixer = player_get_mixer (player);
     mixbuf = mixer_get_mixbuf (mixer);
     sndbuf = &sndDMABuf;
     dmabuf = sndbuf->buf;
@@ -216,7 +227,7 @@ void __far win_debug_draw(SCRWIN *self)
     out_frames_count = sndbuf->framesCount;
     out_frame_last = sndbuf->frameLast;
     out_frame_active = sndbuf->frameActive;
-    out_fps = (long) player_get_output_rate () * get_sample_format_width (& (sndbuf->format)) / sndbuf->frameSize;
+    out_fps = (long) player_get_output_rate (player) * get_sample_format_width (& (sndbuf->format)) / sndbuf->frameSize;
 
     textcolor (_yellow);
 

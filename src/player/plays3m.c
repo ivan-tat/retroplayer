@@ -66,6 +66,7 @@ static bool     opt_loop;
 static bool     opt_em;
 static uint8_t  opt_fps;
 
+static MUSPLAYER *mp;
 static MUSMOD  *song_track;
 
 uint32_t getFreeDOSMemory(void)
@@ -93,8 +94,8 @@ void __near display_errormsg(void)
 {
     printf("PLAYER STATUS - ");
 
-    if (player_is_error())
-        printf("Error: %s." CRLF, player_get_error());
+    if (player_is_error (mp))
+        printf("Error: %s." CRLF, player_get_error (mp));
     else
         printf("No error." CRLF);
 }
@@ -139,7 +140,7 @@ void __near display_help(void)
 
 void __near display_playercfg(void)
 {
-    player_device_dump_conf();
+    player_device_dump_conf (mp);
 }
 
 /* Information windows */
@@ -419,7 +420,7 @@ void __near channels_save_all(void)
     MIXCHN *chn;
     uint8_t num_channels, i;
 
-    channels = player_get_mixing_channels ();
+    channels = player_get_mixing_channels (mp);
     num_channels = mixchnl_get_count (channels);
 
     for (i = 0; i < num_channels; i++)
@@ -434,7 +435,7 @@ void __near channels_toggle_mixing(uint8_t index)
     MIXCHNLIST *channels;
     MIXCHN *chn;
 
-    channels = player_get_mixing_channels ();
+    channels = player_get_mixing_channels (mp);
     chn = mixchnl_get (channels, index);
     mixchn_set_mixing (chn, !mixchn_is_mixing(chn));
 }
@@ -445,7 +446,7 @@ void __near channels_stop_all(void)
     MIXCHN *chn;
     uint8_t num_channels, i;
 
-    channels = player_get_mixing_channels ();
+    channels = player_get_mixing_channels (mp);
     num_channels = mixchnl_get_count (channels);
 
     for (i = 0; i < num_channels; i++)
@@ -754,13 +755,20 @@ void __far plays3m_main (void)
         exit(1);
     }
 
-    if (!player_init ())
+    mp = player_new ();
+    if (!mp)
+    {
+        printf ("%s", "Failed to create music player object." CRLF);
+        exit (1);
+    }
+
+    if (!player_init (mp))
     {
         display_errormsg();
         exit(1);
     }
 
-    player_set_EM_usage (opt_em);
+    player_set_EM_usage (mp, opt_em);
 
     if (DEBUG_FILE_S3M_LOAD)
     {
@@ -768,7 +776,7 @@ void __far plays3m_main (void)
         memstats ();
     }
 
-    if (!player_load_s3m (opt_filename, &song_track))
+    if (!player_load_s3m (mp, opt_filename, &song_track))
     {
         display_errormsg();
         exit(1);
@@ -781,13 +789,13 @@ void __far plays3m_main (void)
     }
 
     track = song_track;
-    ps = player_get_play_state ();
+    ps = player_get_play_state (mp);
 
     printf ("Song \"%s\" loaded (%s)." CRLF,
         musmod_get_title (track),
         musmod_get_format (track));
 
-    if (!player_init_device (SNDDEVTYPE_SB, opt_devselect))
+    if (!player_init_device (mp, SNDDEVTYPE_SB, opt_devselect))
     {
         printf("No sound device found." CRLF);
         exit(1);
@@ -802,18 +810,18 @@ void __far plays3m_main (void)
     }
 
     if (opt_mvolume)
-        player_set_master_volume(opt_mvolume);
+        player_set_master_volume (mp, opt_mvolume);
 
-    if (!player_set_mode(opt_mode_16bits, opt_mode_stereo, opt_mode_rate, opt_mode_lq))
+    if (!player_set_mode (mp, opt_mode_16bits, opt_mode_stereo, opt_mode_rate, opt_mode_lq))
     {
         display_errormsg();
         exit(1);
     }
 
-    player_set_order(opt_st3order);
-    player_set_order_start (opt_startpos);
-    player_set_song_loop (opt_loop);
-    player_set_sound_buffer_fps (opt_fps);
+    player_set_order (mp, opt_st3order);
+    player_set_order_start (mp, opt_startpos);
+    player_set_song_loop (mp, opt_loop);
+    player_set_sound_buffer_fps (mp, opt_fps);
 
     channels_save_all();
 
@@ -825,6 +833,7 @@ void __far plays3m_main (void)
 
     winlist_on_resize ();
 
+    win_information_set_player (win_information, mp);
     win_information_set_track (win_information, track);
     win_information_set_play_state (win_information, ps);
     win_pattern_set_track (win_pattern, track);
@@ -834,16 +843,17 @@ void __far plays3m_main (void)
     win_instruments_set_page_start (win_instruments, 0);
     win_samples_set_track (win_samples, track);
     win_samples_set_page_start (win_samples, 0);
+    win_debug_set_player (win_debug, mp);
     win_debug_set_track (win_debug, track);
     win_debug_set_play_state (win_debug, ps);
 
-    if (!player_play_start())
+    if (!player_play_start (mp))
     {
         display_errormsg();
         exit(1);
     }
 
-    channels = player_get_mixing_channels ();
+    channels = player_get_mixing_channels (mp);
 
     /* FIXME: move these here for now (MIXCHNLIST is allocated in player_play_start() ) */
     win_channels_set_channels (win_channels, channels);
@@ -893,28 +903,28 @@ void __far plays3m_main (void)
                 }
                 if (upcase(c) == 'P')
                 {
-                    player_play_pause();
+                    player_play_pause (mp);
                     getch();
-                    player_play_continue();
+                    player_play_continue (mp);
                     c = 0;
                 }
                 if (c == '+')
                 {
-                    pos = player_find_next_pattern (track, ps, ps->order, 1);
+                    pos = player_find_next_pattern (mp, track, ps, ps->order, 1);
                     if (pos < 0)
-                        player_song_stop (track, ps);
+                        player_song_stop (mp, track, ps);
                     else
-                        player_set_pos (track, ps, pos, 0, true);
+                        player_set_pos (mp, track, ps, pos, 0, true);
                     c = 0;
                 }
                 if (c == '-')
                 {
-                    pos = player_find_next_pattern (track, ps, ps->order, -1);
+                    pos = player_find_next_pattern (mp, track, ps, ps->order, -1);
                     if (pos < 0)
-                        player_song_stop (track, ps);
+                        player_song_stop (mp, track, ps);
                     else
                     {
-                        player_set_pos (track, ps, pos, 0, false);
+                        player_set_pos (mp, track, ps, pos, 0, false);
                         channels_stop_all ();
                     }
                     c = 0;
@@ -945,7 +955,8 @@ void __far plays3m_main (void)
         if (sndDMABuf.flags & SNDDMABUFFL_SLOW)
             DEBUG_FAIL ("plays3m_main", "PC is too slow");
 
-    player_free();
+    player_free (mp);
+    player_delete (&mp);
 
     if (DEBUG)
     {
@@ -959,13 +970,24 @@ void __far plays3m_main (void)
 void __near plays3m_init(void)
 {
     DEBUG_BEGIN("plays3m_init");
+
+    mp = NULL;
+
     DEBUG_END("plays3m_init");
 }
 
 void __near plays3m_done(void)
 {
     DEBUG_BEGIN("plays3m_done");
+
     winlist_free();
+
+    if (mp)
+    {
+        player_free (mp);
+        player_delete (&mp);
+    }
+
     DEBUG_END("plays3m_done");
 }
 

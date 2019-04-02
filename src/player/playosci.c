@@ -41,6 +41,7 @@ static char opt_filename[pascal_String_size] = { 0 };
 static void *bufdata = NULL;
 static uint8_t scr[2][320] = { 0 };
 
+static MUSPLAYER *mp;
 static MUSMOD *song_track;
 
 void __near draw_channels_volume(void)
@@ -49,7 +50,7 @@ void __near draw_channels_volume(void)
     MIXCHNLIST *channels;
     MIXCHN *chn;
 
-    channels = player_get_mixing_channels ();
+    channels = player_get_mixing_channels (mp);
     for (i = 0; i < mixchnl_get_count (channels); i++)
     {
         chn = mixchnl_get (channels, i);
@@ -63,7 +64,7 @@ void __near get_current_sample1(int16_t *v)
     uint16_t value;
     void *p;
 
-    pos = player_get_buffer_pos ();
+    pos = player_get_buffer_pos (mp);
     if (opt_16bits)
     {
         p = &((uint16_t *)bufdata)[pos >> 1];
@@ -86,7 +87,7 @@ void __near get_current_sample2(int16_t *v)
     uint16_t values[2];
     void *p;
 
-    pos = player_get_buffer_pos ();
+    pos = player_get_buffer_pos (mp);
     if (opt_16bits)
     {
         p = &((uint16_t *)bufdata)[(pos >> 1) & 0xfffe];
@@ -185,6 +186,7 @@ void __far playosci_main (void)
     register_vga ();
     register_sbctl ();
     register_s3mplay ();
+    register_playosci ();
 
     console_init ();
 
@@ -221,13 +223,20 @@ void __far playosci_main (void)
         exit (1);
     }
 
-    if (!player_init ())
+    mp = player_new ();
+    if (!mp)
+    {
+        printf ("%s", "Failed to create music player object." CRLF);
+        exit (1);
+    }
+
+    if (!player_init (mp))
     {
         printf ("Failed to initialize player." CRLF);
         exit (1);
     }
 
-    if (!player_load_s3m (opt_filename, &song_track))
+    if (!player_load_s3m (mp, opt_filename, &song_track))
     {
         printf ("Failed to load file." CRLF);
         exit (1);
@@ -238,20 +247,20 @@ void __far playosci_main (void)
         musmod_get_format (song_track)
     );
 
-    if (!player_init_device (SNDDEVTYPE_SB, SNDDEVSETMET_ENV))
+    if (!player_init_device (mp, SNDDEVTYPE_SB, SNDDEVSETMET_ENV))
     {
         printf ("Failed to initialize sound device." CRLF);
         exit (1);
     }
 
-    player_set_mode (opt_16bits, opt_stereo, opt_rate, opt_lq);
-    player_set_order (true);
-    player_set_song_loop (true);
+    player_set_mode (mp, opt_16bits, opt_stereo, opt_rate, opt_lq);
+    player_set_order (mp, true);
+    player_set_song_loop (mp, true);
 
-    if (!player_set_mode (opt_16bits, opt_stereo, opt_rate, opt_lq))
+    if (!player_set_mode (mp, opt_16bits, opt_stereo, opt_rate, opt_lq))
         exit (1);
 
-    if (!player_play_start ())
+    if (!player_play_start (mp))
         exit (1);
 
     printf (
@@ -276,5 +285,32 @@ void __far playosci_main (void)
     }
     while (kbhit ()) getch ();
     vbios_set_mode (3);
-    player_free ();
+    player_free (mp);
+    player_delete (&mp);
 }
+
+/*** Initialization ***/
+
+void __near playosci_init (void)
+{
+    DEBUG_BEGIN ("playosci_init");
+
+    mp = NULL;
+
+    DEBUG_END ("playosci_init");
+}
+
+void __near playosci_done (void)
+{
+    DEBUG_BEGIN ("playosci_done");
+
+    if (mp)
+    {
+        player_free (mp);
+        player_delete (&mp);
+    }
+
+    DEBUG_END ("playosci_done");
+}
+
+DEFINE_REGISTRATION (playosci, playosci_init, playosci_done)

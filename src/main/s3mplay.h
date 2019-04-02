@@ -40,43 +40,47 @@ typedef sound_device_setup_method_t SNDDEVSETMET;
 
 extern char *PLAYER_VERSION;
 
-bool     __far player_init (void);
-bool     __far player_is_error (void);
-const char *__far player_get_error (void);
-void     __far player_set_EM_usage (bool value);
-bool     __far player_is_EM_in_use (void);
-bool     __far player_init_device (SNDDEVTYPE type, SNDDEVSETMET method);
-void     __far player_device_dump_conf (void);
-char    *__far player_device_get_name (void);
-void     __far player_set_sound_buffer_fps (uint8_t value);
-bool     __far player_set_mode (bool f_16bits, bool f_stereo, uint16_t rate, bool LQ);
-uint16_t __far player_get_output_rate (void);
-uint8_t  __far player_get_output_channels (void);
-uint8_t  __far player_get_output_bits (void);
-bool     __far player_get_output_lq (void);
-void     __far player_set_master_volume (uint8_t value);
-uint8_t  __far player_get_master_volume (void);
-MIXER   *__far player_get_mixer (void);
-void     __far player_set_order (bool skipend);
-void     __far player_set_order_start (uint8_t value);
-int      __far player_find_next_pattern (MUSMOD *track, PLAYSTATE *ps, int index, int step);
-void     __far player_set_song_loop (bool value);
-bool     __far player_load_s3m (char *name, MUSMOD **_track);
-MIXCHNLIST *__far player_get_mixing_channels (void);
-PLAYSTATE *__far player_get_play_state (void);
-void     __far player_set_pos (MUSMOD *track, PLAYSTATE *ps, uint8_t start_order, uint8_t start_row, bool keep);
-void     __far player_song_stop (MUSMOD *track, PLAYSTATE *ps);
-bool     __far player_play_start (void);
-void     __far player_play_pause (void);
-void     __far player_play_continue (void);
-void     __far player_play_stop (void);
-uint16_t __far player_get_buffer_pos (void);
-uint8_t  __far player_get_speed (void);
-uint8_t  __far player_get_tempo (void);
-uint8_t  __far player_get_pattern_delay (void);
-void     __far player_free_module (MUSMOD *track);
-void     __far player_free_modules (void);
-void     __far player_free (void);
+typedef void MUSPLAYER;
+
+MUSPLAYER  *__far player_new (void);
+bool        __far player_init (MUSPLAYER *self);
+bool     __far player_is_error (MUSPLAYER *self);
+const char *__far player_get_error (MUSPLAYER *self);
+void     __far player_set_EM_usage (MUSPLAYER *self, bool value);
+bool     __far player_is_EM_in_use (MUSPLAYER *self);
+bool     __far player_init_device (MUSPLAYER *self, SNDDEVTYPE type, SNDDEVSETMET method);
+void     __far player_device_dump_conf (MUSPLAYER *self);
+char    *__far player_device_get_name (MUSPLAYER *self);
+void     __far player_set_sound_buffer_fps (MUSPLAYER *self, uint8_t value);
+bool     __far player_set_mode (MUSPLAYER *self, bool f_16bits, bool f_stereo, uint16_t rate, bool LQ);
+uint16_t __far player_get_output_rate (MUSPLAYER *self);
+uint8_t  __far player_get_output_channels (MUSPLAYER *self);
+uint8_t  __far player_get_output_bits (MUSPLAYER *self);
+bool     __far player_get_output_lq (MUSPLAYER *self);
+void     __far player_set_master_volume (MUSPLAYER *self, uint8_t value);
+uint8_t  __far player_get_master_volume (MUSPLAYER *self);
+MIXER   *__far player_get_mixer (MUSPLAYER *self);
+void     __far player_set_order (MUSPLAYER *self, bool skipend);
+void     __far player_set_order_start (MUSPLAYER *self, uint8_t value);
+int      __far player_find_next_pattern (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps, int index, int step);
+void     __far player_set_song_loop (MUSPLAYER *self, bool value);
+bool     __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track);
+MIXCHNLIST *__far player_get_mixing_channels (MUSPLAYER *self);
+PLAYSTATE *__far player_get_play_state (MUSPLAYER *self);
+void     __far player_set_pos (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps, uint8_t start_order, uint8_t start_row, bool keep);
+void     __far player_song_stop (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps);
+bool     __far player_play_start (MUSPLAYER *self);
+void     __far player_play_pause (MUSPLAYER *self);
+void     __far player_play_continue (MUSPLAYER *self);
+void     __far player_play_stop (MUSPLAYER *self);
+uint16_t __far player_get_buffer_pos (MUSPLAYER *self);
+uint8_t  __far player_get_speed (MUSPLAYER *self);
+uint8_t  __far player_get_tempo (MUSPLAYER *self);
+uint8_t  __far player_get_pattern_delay (MUSPLAYER *self);
+void     __far player_free_module (MUSPLAYER *self, MUSMOD *track);
+void     __far player_free_modules (MUSPLAYER *self);
+void        __far player_free (MUSPLAYER *self);
+void        __far player_delete (MUSPLAYER **self);
 
 /*** Initialization ***/
 
@@ -88,6 +92,7 @@ DECLARE_REGISTRATION (s3mplay)
 
 #pragma aux PLAYER_VERSION "*";
 
+#pragma aux player_new "*";
 #pragma aux player_init "*";
 #pragma aux player_is_error "*";
 #pragma aux player_get_error "*";
@@ -125,6 +130,7 @@ DECLARE_REGISTRATION (s3mplay)
 #pragma aux player_free_module "*";
 #pragma aux player_free_modules "*";
 #pragma aux player_free "*";
+#pragma aux player_delete "*";
 
 #pragma aux register_s3mplay "*";
 #pragma aux unregister_s3mplay "*";

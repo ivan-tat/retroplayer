@@ -48,6 +48,7 @@ static bool opt_16bits;
 static bool opt_lq;
 static char opt_filename[pascal_String_size];
 
+static MUSPLAYER *mp;
 static MUSMOD *song_track;
 
 void __near
@@ -75,6 +76,7 @@ smalls3m_main (void)
     register_vga ();
     register_sbctl ();
     register_s3mplay ();
+    register_smalls3m ();
 
     console_init ();
 
@@ -127,10 +129,17 @@ smalls3m_main (void)
     opt_16bits = def_16bits;
     opt_lq = def_lq;
 
-    if (!player_init ())
+    mp = player_new ();
+    if (!mp)
+    {
+        printf ("%s", "Failed to create music player object.");
+        exit (1);
+    }
+
+    if (!player_init (mp))
         exit (1);
 
-    if (!player_load_s3m (s, &song_track))
+    if (!player_load_s3m (mp, s, &song_track))
         exit (1);
 
     printf (
@@ -141,16 +150,16 @@ smalls3m_main (void)
         musmod_get_title (song_track)
     );
 
-    if (!player_init_device (SNDDEVTYPE_SB, SNDDEVSETMET_ENV))
+    if (!player_init_device (mp, SNDDEVTYPE_SB, SNDDEVSETMET_ENV))
         exit (1);
 
-    if (!player_set_mode (opt_16bits, opt_stereo, opt_rate, opt_lq))
+    if (!player_set_mode (mp, opt_16bits, opt_stereo, opt_rate, opt_lq))
         exit (1);
 
-    player_set_order (true);
-    player_set_song_loop (true);
+    player_set_order (mp, true);
+    player_set_song_loop (mp, true);
 
-    if (!player_play_start ())
+    if (!player_play_start (mp))
         exit (1);
 
     printf (CRLF "Type 'EXIT' to return to player and stop playing." CRLF);
@@ -163,5 +172,32 @@ smalls3m_main (void)
             errno
         );
 
-    player_free ();
+    player_free (mp);
+    player_delete (&mp);
 }
+
+/*** Initialization ***/
+
+void __near smalls3m_init(void)
+{
+    DEBUG_BEGIN("smalls3m_init");
+
+    mp = NULL;
+
+    DEBUG_END("smalls3m_init");
+}
+
+void __near smalls3m_done(void)
+{
+    DEBUG_BEGIN("smalls3m_done");
+
+    if (mp)
+    {
+        player_free (mp);
+        player_delete (&mp);
+    }
+
+    DEBUG_END("smalls3m_done");
+}
+
+DEFINE_REGISTRATION (smalls3m, smalls3m_init, smalls3m_done)

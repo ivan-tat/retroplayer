@@ -43,6 +43,7 @@ static const SCRWINVMT __win_information_vmt =
 
 typedef struct win_information_data_t
 {
+    MUSPLAYER *player;
     MUSMOD *track;
     PLAYSTATE *ps;
 };
@@ -65,6 +66,13 @@ bool __far win_information_init (SCRWIN *self)
     return true;
 }
 
+void __far win_information_set_player (SCRWIN *self, MUSPLAYER *value)
+{
+    struct win_information_data_t *data;
+
+    data = (struct win_information_data_t *) scrwin_get_data (self);
+    data->player = value;
+}
 void __far win_information_set_track (SCRWIN *self, MUSMOD *value)
 {
     struct win_information_data_t *data;
@@ -88,6 +96,7 @@ void __far win_information_on_resize (SCRWIN *self)
 void __far win_information_draw(SCRWIN *self)
 {
     struct win_information_data_t *data;
+    MUSPLAYER *player;
     MUSMOD *track;
     PLAYSTATE *ps;
     MUSPATLIST *patterns;
@@ -96,6 +105,7 @@ void __far win_information_draw(SCRWIN *self)
     if (scrwin_is_created(self))
     {
         data = (struct win_information_data_t *) scrwin_get_data (self);
+        player = data->player;
         track = data->track;
         ps = data->ps;
         patterns = musmod_get_patterns (track);
@@ -138,26 +148,26 @@ void __far win_information_draw(SCRWIN *self)
             printf("%s", musmod_get_format (track));
             textcolor(_yellow);
             gotoxy(9, 4);
-            printf("%s", player_device_get_name());
+            printf("%s", player_device_get_name (player));
             gotoxy(43, 4);
-            printf("%05u", player_get_output_rate());
+            printf("%05u", player_get_output_rate (player));
             gotoxy(58, 4);
-            printf("%hu", player_get_output_channels());
+            printf("%hu", player_get_output_channels (player));
             gotoxy(65, 4);
-            printf("%02hu", player_get_output_bits());
+            printf("%02hu", player_get_output_bits (player));
             gotoxy(76, 4);
-            printf(player_get_output_lq() ? "Low" : "High");
+            printf(player_get_output_lq (player) ? "Low" : "High");
         }
 
         textcolor(_lightcyan);
         gotoxy(8, 2);
-        printf("%03u", player_get_speed());
+        printf("%03u", player_get_speed (player));
         gotoxy(18, 2);
-        printf("%03u", player_get_tempo());
+        printf("%03u", player_get_tempo (player));
         gotoxy(27, 2);
         printf("%02u", ps->global_volume);
         gotoxy(35, 2);
-        printf("%03u", player_get_master_volume());
+        printf("%03u", player_get_master_volume (player));
         gotoxy(45, 2);
         printf ((ps->flags & PLAYSTATEFL_SKIPENDMARK) ? "Extended" : "Normal");
         gotoxy(59, 2);
@@ -180,7 +190,7 @@ void __far win_information_draw(SCRWIN *self)
         gotoxy(45, 3);
         printf("%03u", ps->tick);
         gotoxy(56, 3);
-        printf("%02u", player_get_pattern_delay());
+        printf("%02u", player_get_pattern_delay (player));
         gotoxy(65, 3);
         printf("%03u", ps->patloop_start_row);
         gotoxy(69, 3);

@@ -19,6 +19,7 @@
 #include "player/screen.h"
 
 bool __far win_debug_init (SCRWIN *self);
+void __far win_debug_set_player (SCRWIN *self, MUSPLAYER *value);
 void __far win_debug_set_track (SCRWIN *self, MUSMOD *value);
 void __far win_debug_set_play_state (SCRWIN *self, PLAYSTATE *value);
 

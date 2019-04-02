@@ -19,11 +19,18 @@
 
 void __far smalls3m_main (void);
 
+/*** Initialization ***/
+
+DECLARE_REGISTRATION (smalls3m)
+
 /*** Linking ***/
 
 #ifdef __WATCOMC__
 
 #pragma aux smalls3m_main "*";
+
+#pragma aux register_smalls3m "*";
+#pragma aux unregister_smalls3m "*";
 
 #endif  /* __WATCOMC__ */
 
