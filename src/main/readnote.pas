@@ -24,9 +24,9 @@ uses
     musins,
     muspat,
     musmod,
-    s3mvars,
-    effvars,
+    musmodps,
     mixchn,
+    effvars,
     effects,
     mixer;
 

@@ -37,9 +37,9 @@ uses
     dos_,
 (*$endif*)
     sndctl_t,
-    posttab,
-    s3mvars,
-    mixing;
+    musmodps,
+    mixing,
+    posttab;
 
 (*$l filldma.obj*)
 

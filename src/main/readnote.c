@@ -13,13 +13,13 @@
 #include "cc/string.h"
 #include "dos/ems.h"
 #include "main/s3mtypes.h"
-#include "main/mixchn.h"
 #include "main/muspat.h"
 #include "main/musmod.h"
-#include "main/s3mvars.h"
+#include "main/mixchn.h"
+#include "main/musmodps.h"
 #include "main/effvars.h"
-#include "main/mixer.h"
 #include "main/effects.h"
+#include "main/mixer.h"
 
 #include "main/readnote.h"
 

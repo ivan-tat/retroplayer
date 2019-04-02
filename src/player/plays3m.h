@@ -18,7 +18,7 @@
 #include "pascal.h"
 #include "main/musmod.h"
 #include "main/mixchn.h"
-#include "main/s3mvars.h"
+#include "main/musmodps.h"
 
 uint32_t getFreeDOSMemory(void);
 uint32_t getFreeEMMMemory(void);

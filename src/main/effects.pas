@@ -31,7 +31,7 @@ uses
     stdio,
     ems,
     musins,
-    s3mvars,
+    musmodps,
     effvars,
     mixer;
 

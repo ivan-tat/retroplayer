@@ -467,8 +467,8 @@ build_target $T_MAIN   inc-linux src/main/_wsquare.c
 build_target $T_MAIN   obj src/main/pcmsmp.c
 build_target $T_MAIN   obj src/main/musins.c
 build_target $T_MAIN   obj src/main/musmod.c
+build_target $T_MAIN   obj src/main/musmodps.c
 build_target $T_MAIN   obj src/main/muspat.c
-build_target $T_MAIN   obj src/main/s3mvars.c
 build_target $T_MAIN   obj src/main/fillvars.c
 build_target $T_MAIN   obj src/main/voltab.c
 build_target $T_MAIN   obj src/main/posttab.c
@@ -538,8 +538,8 @@ build_target $T_MAIN_TP   obj src/main/pcmsmp.pas
 build_target $T_MAIN_TP   obj src/main/musins.pas
 build_target $T_MAIN_TP   obj src/main/muspat.pas
 build_target $T_MAIN_TP   obj src/main/musmod.pas
+build_target $T_MAIN_TP   obj src/main/musmodps.pas
 build_target $T_MAIN_TP   obj src/main/effvars.pas
-build_target $T_MAIN_TP   obj src/main/s3mvars.pas
 build_target $T_MAIN_TP   obj src/main/fillvars.pas
 build_target $T_MAIN_TP   obj src/main/voltab.pas
 build_target $T_MAIN_TP   obj src/main/posttab.pas

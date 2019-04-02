@@ -28,11 +28,11 @@ uses
     musins,
     muspat,
     musmod,
-    s3mvars,
-    fillvars,
-    mixer,
     mixchn,
     effects,
+    mixer,
+    musmodps,
+    fillvars,
     s3mplay;
 
 (*$I defines.pas*)

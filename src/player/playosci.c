@@ -17,10 +17,10 @@
 #include "hw/sb/sbctl.h"
 #include "hw/vbios.h"
 #include "hw/vga.h"
-#include "main/s3mvars.h"
-#include "main/fillvars.h"
 #include "main/musmod.h"
 #include "main/mixchn.h"
+#include "main/musmodps.h"
+#include "main/fillvars.h"
 #include "main/s3mplay.h"
 
 #include "playosci.h"

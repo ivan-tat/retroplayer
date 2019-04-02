@@ -18,10 +18,10 @@ uses
     vbios,
     vga,
     sbctl,
-    s3mvars,
-    fillvars,
-    mixchn,
     musmod,
+    mixchn,
+    musmodps,
+    fillvars,
     s3mplay;
 
 (*$I defines.pas*)

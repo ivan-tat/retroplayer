@@ -1,10 +1,10 @@
-/* s3mvars.h -- declarations for s3mvars.c.
+/* musmodps.h -- declarations for musmodps.c.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef S3MVARS_H
-#define S3MVARS_H 1
+#ifndef MUSMODPS_H
+#define MUSMODPS_H 1
 
 #include "defines.h"
 
@@ -67,4 +67,4 @@ void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* S3MVARS_H */
+#endif  /* MUSMODPS_H */

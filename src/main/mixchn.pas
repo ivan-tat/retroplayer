@@ -53,10 +53,10 @@ uses
     types,
     string_,
     dynarray,
-    effvars,
-    s3mvars,
     musins,
     musmod,
+    musmodps,
+    effvars,
     mixer;
 
 (*$l mixchn.obj*)

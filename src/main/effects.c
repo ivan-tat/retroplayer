@@ -14,11 +14,11 @@
 #include "cc/stdio.h"
 #include "dos/ems.h"
 #include "main/s3mtypes.h"
-#include "main/s3mvars.h"
-#include "main/effvars.h"
-#include "main/mixer.h"
 #include "main/muspat.h"
+#include "main/effvars.h"
 #include "main/effects.h"
+#include "main/musmodps.h"
+#include "main/mixer.h"
 
 #define get_i8_value(off, pos) *(int8_t *)MK_FP(FP_SEG(&wavetab), off + pos)
 

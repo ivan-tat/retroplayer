@@ -25,12 +25,12 @@ uses
     pcmsmp,
     musins,
     musmod,
-    s3mvars,
+    musmodps,
     effvars,
-    fillvars,
-    mixer,
-    mixchn,
     effects,
+    mixchn,
+    mixer,
+    fillvars,
     readnote;
 
 (*$l mixing.obj*)

@@ -17,7 +17,6 @@
 #include "common.h"
 #include "hw/dma.h"
 #include "hw/sb/sbctl.h"
-#include "main/s3mvars.h"
 #include "main/fillvars.h"
 
 void __far snddmabuf_init (SNDDMABUF *self)

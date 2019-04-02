@@ -33,12 +33,11 @@ uses
     dos_,
     ems,
     common,
+    s3mtypes,
     pcmsmp,
     musins,
     muspat,
     musmod,
-    s3mtypes,
-    s3mvars,
     mixchn;
 
 (*$l loads3m.obj*)

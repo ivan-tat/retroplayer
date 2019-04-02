@@ -71,21 +71,21 @@ uses
     pic,
     sndctl_t,
     sbctl,
-    fillvars,
     s3mtypes,
     musins,
     muspat,
     musmod,
-    s3mvars,
+    mixchn,
+    musmodps,
     effvars,
+    effects,
     voltab,
     posttab,
+    readnote,
     mixer,
-    mixchn,
-    filldma,
     mixing,
-    effects,
-    readnote;
+    fillvars,
+    filldma;
 
 (*$l s3mplay.obj*)
 

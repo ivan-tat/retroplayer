@@ -10,11 +10,11 @@
 
 #include "pascal.h"
 #include "cc/string.h"
-#include "main/posttab.h"
-#include "main/s3mvars.h"
-#include "main/fillvars.h"
+#include "main/musmodps.h"
 #include "main/mixer.h"
 #include "main/mixing.h"
+#include "main/fillvars.h"
+#include "main/posttab.h"
 
 #include "main/filldma.h"
 

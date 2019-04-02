@@ -60,7 +60,7 @@ uses
     debug,
     common,
     sbctl,
-    s3mvars;
+    musmodps;
 
 (*$l fillvars.obj*)
 

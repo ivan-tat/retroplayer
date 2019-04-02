@@ -16,10 +16,10 @@
 #include <stdint.h>
 
 #include "pascal.h"
-#include "main/musins.h"
 #include "main/s3mtypes.h"
-#include "main/s3mvars.h"
+#include "main/musins.h"
 #include "main/mixchn.h"
+#include "main/musmodps.h"
 
 #define EFFGROUP_EMPTY   0
 #define EFFGROUP_GLOBAL  1

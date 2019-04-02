@@ -1,4 +1,4 @@
-/* s3mvars.c -- variables for s3m play.
+/* musmodps.c -- music module play state handling methods.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -11,7 +11,7 @@
 #include "pascal.h"
 #include "main/s3mtypes.h"
 
-#include "main/s3mvars.h"
+#include "main/musmodps.h"
 
 void __far playState_set_speed (PLAYSTATE *self, uint8_t value)
 {

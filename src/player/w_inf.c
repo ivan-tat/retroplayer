@@ -15,7 +15,7 @@
 #include "hw/sb/sbctl.h"
 #include "main/muspat.h"
 #include "main/musmod.h"
-#include "main/s3mvars.h"
+#include "main/musmodps.h"
 #include "main/s3mplay.h"
 #include "player/screen.h"
 

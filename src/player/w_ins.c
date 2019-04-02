@@ -16,7 +16,6 @@
 #include "main/musins.h"
 #include "main/musmod.h"
 #include "main/mixchn.h"
-#include "main/s3mvars.h"
 #include "player/screen.h"
 #include "player/plays3m.h"
 

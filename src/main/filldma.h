@@ -17,11 +17,11 @@
 
 #include "pascal.h"
 #include "cc/dos.h"
-#include "main/mixer.h"
 #include "main/musmod.h"
 #include "main/mixchn.h"
+#include "main/musmodps.h"
+#include "main/mixer.h"
 #include "main/fillvars.h"
-#include "main/s3mvars.h"
 
 #ifdef DEBUG_WRITE_OUTPUT_STREAM
 

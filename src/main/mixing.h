@@ -18,8 +18,8 @@
 #include "pascal.h"
 #include "main/musmod.h"
 #include "main/mixchn.h"
+#include "main/musmodps.h"
 #include "main/mixer.h"
-#include "main/s3mvars.h"
 
 void song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXER *mixer, uint16_t len);
 

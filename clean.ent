@@ -113,12 +113,12 @@
 ./src/main/mixing.asm
 ./src/main/musins.asm
 ./src/main/musmod.asm
+./src/main/musmodps.asm
 ./src/main/muspat.asm
 ./src/main/pcmsmp.asm
 ./src/main/posttab.asm
 ./src/main/readnote.asm
 ./src/main/s3mplay.asm
-./src/main/s3mvars.asm
 ./src/main/voltab.asm
 ./src/main/_wramp
 ./src/main/_wramp.inc

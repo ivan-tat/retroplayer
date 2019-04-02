@@ -23,7 +23,6 @@
 #include "main/musmod.h"
 #include "main/effects.h"
 #include "main/s3mtypes.h"
-#include "main/s3mvars.h"
 #include "main/s3mplay.h"
 #include "main/loads3m.h"
 
