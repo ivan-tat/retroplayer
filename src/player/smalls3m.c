@@ -127,6 +127,9 @@ smalls3m_main (void)
     opt_16bits = def_16bits;
     opt_lq = def_lq;
 
+    if (!player_init ())
+        exit (1);
+
     if (!player_load_s3m (s, &song_track))
         exit (1);
 
@@ -137,9 +140,6 @@ smalls3m_main (void)
         musmod_get_format (song_track),
         musmod_get_title (song_track)
     );
-
-    if (!player_init ())
-        exit (1);
 
     if (!player_init_device (SNDDEVTYPE_SB, SNDDEVSETMET_ENV))
         exit (1);

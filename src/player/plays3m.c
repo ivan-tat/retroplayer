@@ -26,9 +26,9 @@
 #include "main/musins.h"
 #include "main/muspat.h"
 #include "main/musmod.h"
-#include "main/effects.h"
 #include "main/mixchn.h"
 #include "main/musmodps.h"
+#include "main/effects.h"
 #include "main/mixer.h"
 #include "main/fillvars.h"
 #include "main/s3mplay.h"
@@ -754,6 +754,12 @@ void __far plays3m_main (void)
         exit(1);
     }
 
+    if (!player_init ())
+    {
+        display_errormsg();
+        exit(1);
+    }
+
     player_set_EM_usage (opt_em);
 
     if (DEBUG_FILE_S3M_LOAD)
@@ -780,12 +786,6 @@ void __far plays3m_main (void)
     printf ("Song \"%s\" loaded (%s)." CRLF,
         musmod_get_title (track),
         musmod_get_format (track));
-
-    if (!player_init ())
-    {
-        display_errormsg();
-        exit(1);
-    }
 
     if (!player_init_device (SNDDEVTYPE_SB, opt_devselect))
     {

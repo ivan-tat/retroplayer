@@ -40,10 +40,9 @@ typedef sound_device_setup_method_t SNDDEVSETMET;
 
 extern char *PLAYER_VERSION;
 
-void     __far player_clear_error (void);
+bool     __far player_init (void);
 bool     __far player_is_error (void);
 const char *__far player_get_error (void);
-bool     __far player_init (void);
 void     __far player_set_EM_usage (bool value);
 bool     __far player_is_EM_in_use (void);
 bool     __far player_init_device (SNDDEVTYPE type, SNDDEVSETMET method);
@@ -89,10 +88,9 @@ DECLARE_REGISTRATION (s3mplay)
 
 #pragma aux PLAYER_VERSION "*";
 
-#pragma aux player_clear_error "*";
+#pragma aux player_init "*";
 #pragma aux player_is_error "*";
 #pragma aux player_get_error "*";
-#pragma aux player_init "*";
 #pragma aux player_set_EM_usage "*";
 #pragma aux player_is_EM_in_use "*";
 #pragma aux player_init_device "*";

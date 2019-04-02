@@ -221,6 +221,12 @@ void __far playosci_main (void)
         exit (1);
     }
 
+    if (!player_init ())
+    {
+        printf ("Failed to initialize player." CRLF);
+        exit (1);
+    }
+
     if (!player_load_s3m (opt_filename, &song_track))
     {
         printf ("Failed to load file." CRLF);
@@ -231,12 +237,6 @@ void __far playosci_main (void)
         musmod_get_title (song_track),
         musmod_get_format (song_track)
     );
-
-    if (!player_init ())
-    {
-        printf ("Failed to initialize player." CRLF);
-        exit (1);
-    }
 
     if (!player_init_device (SNDDEVTYPE_SB, SNDDEVSETMET_ENV))
     {

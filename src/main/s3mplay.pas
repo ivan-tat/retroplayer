@@ -9,10 +9,9 @@ interface
 const
     PLAYER_VERSION: PChar = '1.70.1';
 
-procedure player_clear_error;
+procedure player_init;
 procedure player_is_error;
 procedure player_get_error;
-procedure player_init;
 procedure player_set_EM_usage;
 procedure player_is_EM_in_use;
 procedure player_init_device;
@@ -89,10 +88,9 @@ uses
 
 (*$l s3mplay.obj*)
 
-procedure player_clear_error; external;
+procedure player_init; external;
 procedure player_is_error; external;
 procedure player_get_error; external;
-procedure player_init; external;
 procedure player_set_EM_usage; external;
 procedure player_is_EM_in_use; external;
 procedure player_init_device; external;

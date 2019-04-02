@@ -29,9 +29,9 @@ uses
     muspat,
     musmod,
     mixchn,
+    musmodps,
     effects,
     mixer,
-    musmodps,
     fillvars,
     s3mplay;
 

@@ -35,7 +35,6 @@
 #define _PLAYER_ERROR_LEN 128
 
 static char     player_error[_PLAYER_ERROR_LEN];
-static bool     player_flags_i386;
 static bool     player_flags_use_EM;
 static bool     player_flags_bufalloc;
 static bool     player_flags_snddev;
@@ -204,7 +203,9 @@ void __far ISR_play(void)
 
 /*** Player ***/
 
-void __far player_clear_error (void)
+/* Error handling */
+
+void __near _player_clear_error (void)
 {
     memset (player_error, 0, _PLAYER_ERROR_LEN);
 }
@@ -249,7 +250,7 @@ void __near player_set_error (const char *format, ...)
 
 #endif  /* DEBUG */
 
-/*** Initialization ***/
+/* Initialization */
 
 bool __far player_init (void)
 {
@@ -257,11 +258,41 @@ bool __far player_init (void)
     MIXBUF *_mixbuf;
     uint16_t len;
 
-    DEBUG_BEGIN("player_init");
+    DEBUG_BEGIN ("player_init");
 
-    player_clear_error();
+    _player_clear_error ();
 
-    if (!player_flags_i386)
+    player_flags_use_EM = emsInstalled;
+    player_flags_bufalloc = false;
+    player_flags_snddev = false;
+
+    // Sound
+    _EM_map_handle = EMSBADHDL;
+    _ISR_busy = false;
+    snddmabuf_init (&sndDMABuf);
+
+    // Mixer
+    smpbuf_init (&_player_smpbuf);
+    mixbuf_init (&_player_mixbuf);
+    voltab_init();
+    _player_mixer = NULL;
+
+    // Player
+    player_device = NULL;
+    player_sound_buffer_fps = 70;
+    player_mode_set = false;
+    player_mode_bits = 0;
+    player_mode_signed = false;
+    player_mode_channels = 0;
+    player_mode_rate = 0;
+    player_mode_lq = false;
+
+    // Music modules
+    _init_modules ();
+    _player_track = NULL;
+    _player_mixing_channels = NULL;
+
+    if (!isCPU_i386 ())
     {
         ERROR ("player_init", "%s", "CPU is not supported.");
         return false;
@@ -329,9 +360,11 @@ bool __far player_init (void)
 
     player_flags_bufalloc = true;
 
-    DEBUG_SUCCESS("player_init");
+    DEBUG_SUCCESS ("player_init");
     return true;
 }
+
+/* Private and public methods */
 
 void __far player_set_EM_usage (bool value)
 {
@@ -983,6 +1016,8 @@ void __far player_free_device (void)
     DEBUG_END("player_free_device");
 }
 
+/* Finalization */
+
 void __far player_free (void)
 {
     DEBUG_BEGIN("player_free");
@@ -1016,37 +1051,6 @@ void __near s3mplay_init(void)
 #if DEBUG_WRITE_OUTPUT_STREAM == 1
     DEBUG_open_output_streams ();
 #endif  /* DEBUG_WRITE_OUTPUT_STREAM */
-
-    player_flags_i386 = isCPU_i386();
-    player_flags_use_EM = emsInstalled;
-    player_flags_bufalloc = false;
-    player_flags_snddev = false;
-
-    // Sound
-    _EM_map_handle = EMSBADHDL;
-    _ISR_busy = false;
-    snddmabuf_init (&sndDMABuf);
-
-    // Mixer
-    smpbuf_init (&_player_smpbuf);
-    mixbuf_init (&_player_mixbuf);
-    voltab_init();
-    _player_mixer = NULL;
-
-    // Player
-    player_device = NULL;
-    player_sound_buffer_fps = 70;
-    player_mode_set = false;
-    player_mode_bits = 0;
-    player_mode_signed = false;
-    player_mode_channels = 0;
-    player_mode_rate = 0;
-    player_mode_lq = false;
-
-    // Music modules
-    _init_modules ();
-    _player_track = NULL;
-    _player_mixing_channels = NULL;
 }
 
 void __near s3mplay_done(void)
