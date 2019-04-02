@@ -34,6 +34,19 @@
 
 #define _PLAYER_ERROR_LEN 128
 
+/* EM handle to save mapping while playing */
+static EMSHDL  _EM_map_handle = EMSBADHDL;
+static EMSNAME _EM_map_name = "saveMAP";
+
+#pragma pack(push, 1);
+typedef struct play_isr_param_t {
+    void *player;
+    bool busy;
+    SNDDMABUF *dmabuf;
+};
+#pragma pack(pop);
+typedef struct play_isr_param_t PLAYISRPARAM;
+
 static char     player_error[_PLAYER_ERROR_LEN];
 static bool     player_flags_use_EM;
 static bool     player_flags_bufalloc;
@@ -52,6 +65,7 @@ static PLAYSTATE _player_play_state;
 static SMPBUF   _player_smpbuf;
 static MIXBUF   _player_mixbuf;
 static MIXER   *_player_mixer;
+static PLAYISRPARAM player_play_isr_param;
 
 /* Each element is a pointer */
 
@@ -156,30 +170,25 @@ void __near _free_modules (void)
 
 /* IRQ routines */
 
-/* EM handle to save mapping while playing */
-static EMSHDL  _EM_map_handle = EMSBADHDL;
-static EMSNAME _EM_map_name = "saveMAP";
-
-static bool _ISR_busy;
-
-void __far ISR_play(void)
+void __far ISR_play (void *param)
 {
-    MIXER *mixer;
+    PLAYISRPARAM *self;
+    void *player;
     SNDDMABUF *dmabuf;
     bool err;
 
-    // TODO: make current track(s), mixer and dmabuf available via parameter
-    mixer = _player_mixer;
-    dmabuf = &sndDMABuf;
+    self = (PLAYISRPARAM *) param;
+    player = self->player;
+    dmabuf = self->dmabuf;
 
-    if (_ISR_busy)
+    if (self->busy)
     {
         dmabuf->flags |= SNDDMABUFFL_SLOW;
         dmabuf->frameActive = (dmabuf->frameActive + 1) & (dmabuf->framesCount - 1);
     }
     else
     {
-        _ISR_busy = true;
+        self->busy = true;
 
         dmabuf->frameActive = (dmabuf->frameActive + 1) & (dmabuf->framesCount - 1);
 
@@ -192,12 +201,12 @@ void __far ISR_play(void)
                 err = false;
         }
 
-        fill_DMAbuffer (_player_track, &_player_play_state, _player_mixing_channels, mixer, dmabuf);
+        fill_DMAbuffer (_player_track, &_player_play_state, _player_mixing_channels, _player_mixer, dmabuf);
 
         if (player_flags_use_EM & !err)
             emsRestoreMap (_EM_map_handle);
 
-        _ISR_busy = false;
+        self->busy = false;
     }
 }
 
@@ -268,7 +277,6 @@ bool __far player_init (void)
 
     // Sound
     _EM_map_handle = EMSBADHDL;
-    _ISR_busy = false;
     snddmabuf_init (&sndDMABuf);
 
     // Mixer
@@ -889,7 +897,10 @@ bool __far player_play_start (void)
     if (player_mode_lq)
         frame_size *= 2;
 
-    sb_set_transfer_buffer(player_device, outbuf->buf->data, frame_size, outbuf->framesCount, true, &ISR_play);
+    player_play_isr_param.busy = false;
+    player_play_isr_param.player = NULL;
+    player_play_isr_param.dmabuf = &sndDMABuf;
+    sb_set_transfer_buffer(player_device, outbuf->buf->data, frame_size, outbuf->framesCount, true, &ISR_play, &player_play_isr_param);
 
     // 4. Setup mixer tables
 

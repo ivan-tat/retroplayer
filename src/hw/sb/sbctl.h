@@ -47,7 +47,7 @@ char    *sb_get_name(SBDEV *self);
 void     sb_set_volume(SBDEV *self, uint8_t value);
 bool     sb_adjust_transfer_mode(SBDEV *self, uint16_t *m_rate, uint8_t *m_channels, uint8_t *m_bits, bool *f_sign);
 bool     sb_set_transfer_mode(SBDEV *self, uint16_t m_rate, uint8_t m_channels, uint8_t m_bits, bool f_sign);
-bool     sb_set_transfer_buffer(SBDEV *self, void *buffer, uint16_t frame_size, uint16_t frames_count, bool autoinit, void *callback);
+bool     sb_set_transfer_buffer(SBDEV *self, void *buffer, uint16_t frame_size, uint16_t frames_count, bool autoinit, void *callback, void *cb_param);
 uint8_t  sb_mode_get_bits(SBDEV *self);
 bool     sb_mode_is_signed(SBDEV *self);
 uint8_t  sb_mode_get_channels(SBDEV *self);

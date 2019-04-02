@@ -37,7 +37,7 @@ uint8_t  __far get_sample_format_channels (HWSMPFMT *p);
 uint16_t __far get_sample_format_width (HWSMPFMT *p);
 void     __far clear_sample_format (HWSMPFMT *p);
 
-typedef void __far SoundHWISRCallback_t(void);
+typedef void __far SoundHWISRCallback_t (void *param);
 
 /*** Linking ***/
 

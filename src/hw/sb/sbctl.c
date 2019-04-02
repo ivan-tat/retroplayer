@@ -153,6 +153,7 @@ typedef struct sb_device_t
     uint16_t  transfer_frame_size;
     uint16_t  transfer_frames_count;
     SoundHWISRCallback_t *transfer_callback;
+    void     *transfer_callback_param;
     // transfer mode
     SBMODEFLAGS transfer_mode_flags;
     uint16_t  transfer_mode_rate;
@@ -268,7 +269,7 @@ void __far _ISR_play(SBDEV *self, uint8_t irq)
     _enable();
 
     if (_Self->transfer_callback)
-        _Self->transfer_callback();
+        _Self->transfer_callback (_Self->transfer_callback_param);
 
     if ((_Self->transfer_flags & SBTRFL_AUTOINIT) && !(_Self->caps_flags & SBCAPS_AUTOINIT))
         _sb_start_DSP_transfer(_Self);
@@ -648,7 +649,7 @@ void __near _sb_set_transfer_mode(SBDEV *self, bool f_mode, SBMODEFLAGS f_flags,
     _sb_unset_transfer_mode_DSP_command(_Self);
 }
 
-void __near _sb_set_transfer_buffer(SBDEV *self, bool f_buffer, void *buffer, uint16_t frame_size, uint16_t frames_count, bool f_autoinit, void *callback)
+void __near _sb_set_transfer_buffer(SBDEV *self, bool f_buffer, void *buffer, uint16_t frame_size, uint16_t frames_count, bool f_autoinit, void *callback, void *cb_param)
 {
     declare_Self;
 
@@ -666,6 +667,7 @@ void __near _sb_set_transfer_buffer(SBDEV *self, bool f_buffer, void *buffer, ui
     _Self->transfer_frame_size = frame_size;
     _Self->transfer_frames_count = frames_count;
     _Self->transfer_callback = callback;
+    _Self->transfer_callback_param = cb_param;
 }
 
 void __near _sb_unset_transfer_buffer(SBDEV *self)
@@ -676,7 +678,8 @@ void __near _sb_unset_transfer_buffer(SBDEV *self)
     _Self->transfer_buffer = NULL;
     _Self->transfer_frame_size = 0;
     _Self->transfer_frames_count = 0;
-    _Self->transfer_callback = 0;
+    _Self->transfer_callback = NULL;
+    _Self->transfer_callback_param = NULL;
 }
 
 bool __near _sb_setup_transfer_mode_DSP_commands(SBDEV *self)
@@ -1133,7 +1136,7 @@ bool __near _sb_detect_IRQ(SBDEV *self, uint8_t dma, uint8_t bits)
         _Self->hw_dma8 = dma;
 
     sb_transfer_stop(_Self);
-    sb_set_transfer_buffer(_Self, (void *)&_sb_silence_u, 1, 1, false, NULL);
+    sb_set_transfer_buffer(_Self, (void *)&_sb_silence_u, 1, 1, false, NULL, NULL);
     sb_set_transfer_mode(_Self, 8000, 1, bits, false);
     sb_transfer_start(_Self);
     delay(10);
@@ -1448,13 +1451,13 @@ bool sb_set_transfer_mode(SBDEV *self, uint16_t m_rate, uint8_t m_channels, uint
     return false;
 }
 
-bool sb_set_transfer_buffer(SBDEV *self, void *buffer, uint16_t frame_size, uint16_t frames_count, bool autoinit, void *callback)
+bool sb_set_transfer_buffer(SBDEV *self, void *buffer, uint16_t frame_size, uint16_t frames_count, bool autoinit, void *callback, void *cb_param)
 {
     declare_Self;
 
     if (!(_Self->transfer_flags & SBTRFL_ACTIVE))
     {
-        _sb_set_transfer_buffer(_Self, true, buffer, frame_size, frames_count, autoinit, callback);
+        _sb_set_transfer_buffer(_Self, true, buffer, frame_size, frames_count, autoinit, callback, cb_param);
         return true;
     }
 
