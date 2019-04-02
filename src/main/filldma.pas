@@ -16,6 +16,14 @@ uses
 
 (*$I defines.pas*)
 
+(*$ifdef DEBUG_WRITE_OUTPUT_STREAM*)
+var
+    _debug_stream: array [0..1] of Pointer;
+
+procedure DEBUG_open_output_streams;
+procedure DEBUG_close_output_streams;
+(*$endif*)  (* DEBUG_WRITE_OUTPUT_STREAM *)
+
 procedure fill_DMAbuffer;
 
 implementation
@@ -25,13 +33,21 @@ uses
 (*$ifdef DEBUG*)
     stdio,
 (*$endif*)
-    ems,
+(*$ifdef DEBUG_WRITE_OUTPUT_STREAM*)
+    dos_,
+(*$endif*)
     sndctl_t,
     posttab,
     s3mvars,
     mixing;
 
 (*$l filldma.obj*)
+
+(*$ifdef DEBUG_WRITE_OUTPUT_STREAM*)
+procedure DEBUG_open_output_streams; external;
+procedure DEBUG_close_output_streams; external;
+(*$endif*)  (* DEBUG_WRITE_OUTPUT_STREAM *)
+
 procedure fill_DMAbuffer; external;
 
 end.

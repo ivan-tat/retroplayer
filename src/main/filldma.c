@@ -10,7 +10,6 @@
 
 #include "pascal.h"
 #include "cc/string.h"
-#include "dos/ems.h"
 #include "main/posttab.h"
 #include "main/s3mvars.h"
 #include "main/fillvars.h"
@@ -18,6 +17,24 @@
 #include "main/mixing.h"
 
 #include "main/filldma.h"
+
+#if DEBUG_WRITE_OUTPUT_STREAM == 1
+
+void __far DEBUG_open_output_streams (void)
+{
+    _debug_stream[0] = fopen ("_STREAM0", "wb");
+    _debug_stream[1] = fopen ("_STREAM1", "wb");
+}
+
+void __far DEBUG_close_output_streams (void)
+{
+    if (_debug_stream[0])
+        fclose (_debug_stream[0]);
+    if (_debug_stream[1])
+        fclose (_debug_stream[1]);
+}
+
+#endif  /* DEBUG_WRITE_OUTPUT_STREAM */
 
 typedef void clip_proc_t(void *, int32_t *, uint16_t);
 
@@ -116,6 +133,11 @@ void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXE
 
     amplify_s32(mixbuf, frame_len); // NOTE: mixbuf is 32 bits
 
+    #if DEBUG_WRITE_OUTPUT_STREAM == 1
+    if (_debug_stream[0])
+        fwrite (mixbuf, frame_len * sizeof (int32_t), 1, _debug_stream[0]);
+    #endif  /* DEBUG_WRITE_OUTPUT_STREAM */
+
     dstoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameLast);
 
     clip = -1;
@@ -169,28 +191,21 @@ void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXE
         }
     }
 
+    buf = outbuf->buf->data;
+
     if (clip >= 0)
     {
         if (f_signed)
             clip++;
 
-        if (DEBUG_WRITE_OUTPUT_STREAM)
-        {
-            if (_debug_stream[0])
-                fwrite (mixbuf, frame_len * sizeof (int32_t), 1, _debug_stream[0]);
-        }
-
-        buf = outbuf->buf->data;
-
         if (clip_procs[clip])
             clip_procs[clip](&(buf[dstoff]), mixbuf, frame_len);
-
-        if (DEBUG_WRITE_OUTPUT_STREAM)
-        {
-            if (_debug_stream[1])
-                fwrite (& (buf[dstoff]), frame_size, 1, _debug_stream[1]);
-        }
     }
+
+    #if DEBUG_WRITE_OUTPUT_STREAM == 1
+    if (_debug_stream[1])
+        fwrite (& (buf[dstoff]), frame_size, 1, _debug_stream[1]);
+    #endif  /* DEBUG_WRITE_OUTPUT_STREAM */
 }
 
 void __far fill_DMAbuffer (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXER *mixer, SNDDMABUF *outbuf)

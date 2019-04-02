@@ -16,14 +16,7 @@
 #include <stdint.h>
 
 #include "pascal.h"
-#include "dos/ems.h"
 #include "main/s3mtypes.h"
-
-#ifdef DEBUG_WRITE_OUTPUT_STREAM
-// write sound output streams to files (mixing buffer and DMA buffer)
-#include "cc/stdio.h"
-extern FILE *_debug_stream[2];
-#endif  /* DEBUG_WRITE_OUTPUT_STREAM */
 
 /*** play state ***/
 
@@ -68,10 +61,6 @@ void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
 /*** Linking ***/
 
 #ifdef __WATCOMC__
-
-#ifdef DEBUG_WRITE_OUTPUT_STREAM
-#pragma aux _debug_stream "*";
-#endif
 
 #pragma aux playState_set_speed "*";
 #pragma aux playState_set_tempo "*";

@@ -13,21 +13,13 @@ interface
 uses
     s3mtypes;
 
-(*$I defines.pas*)
-
-(*$ifdef DEBUG_WRITE_OUTPUT_STREAM*)
-var
-    _debug_stream: array [0..1] of Pointer;
-(*$endif*)  (* DEBUG_WRITE_OUTPUT_STREAM *)
-
 procedure playState_set_speed;
 procedure playState_set_tempo;
 
 implementation
 
 uses
-    watcom,
-    dos_;
+    watcom;
 
 (*$l s3mvars.obj*)
 

@@ -16,17 +16,35 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "cc/dos.h"
 #include "main/mixer.h"
 #include "main/musmod.h"
 #include "main/mixchn.h"
 #include "main/fillvars.h"
 #include "main/s3mvars.h"
 
+#ifdef DEBUG_WRITE_OUTPUT_STREAM
+
+// write sound output streams to files (mixing buffer and DMA buffer)
+#include "cc/stdio.h"
+extern FILE *_debug_stream[2];
+
+void __far DEBUG_open_output_streams (void);
+void __far DEBUG_close_output_streams (void);
+
+#endif  /* DEBUG_WRITE_OUTPUT_STREAM */
+
 void __far fill_DMAbuffer (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXER *mixer, SNDDMABUF *outbuf);
 
 /*** Linking ***/
 
 #ifdef __WATCOMC__
+
+#if DEBUG_WRITE_OUTPUT_STREAM == 1
+#pragma aux _debug_stream "*";
+#pragma aux DEBUG_open_output_streams "*";
+#pragma aux DEBUG_close_output_streams "*";
+#endif
 
 #pragma aux fill_DMAbuffer "*";
 

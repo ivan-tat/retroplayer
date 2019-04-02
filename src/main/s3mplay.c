@@ -1011,11 +1011,9 @@ void __far player_free (void)
 
 void __near s3mplay_init(void)
 {
-    if (DEBUG_WRITE_OUTPUT_STREAM)
-    {
-        _debug_stream[0] = fopen ("_STREAM0", "wb");
-        _debug_stream[1] = fopen ("_STREAM1", "wb");
-    }
+#if DEBUG_WRITE_OUTPUT_STREAM == 1
+    DEBUG_open_output_streams ();
+#endif  /* DEBUG_WRITE_OUTPUT_STREAM */
 
     player_flags_i386 = isCPU_i386();
     player_flags_use_EM = emsInstalled;
@@ -1052,13 +1050,10 @@ void __near s3mplay_init(void)
 void __near s3mplay_done(void)
 {
     player_free();
-    if (DEBUG_WRITE_OUTPUT_STREAM)
-    {
-        if (_debug_stream[0])
-            fclose (_debug_stream[0]);
-        if (_debug_stream[1])
-            fclose (_debug_stream[1]);
-    }
+
+#if DEBUG_WRITE_OUTPUT_STREAM == 1
+    DEBUG_close_output_streams ();
+#endif  /* DEBUG_WRITE_OUTPUT_STREAM */
 }
 
 DEFINE_REGISTRATION(s3mplay, s3mplay_init, s3mplay_done)
