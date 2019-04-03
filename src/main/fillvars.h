@@ -54,8 +54,6 @@ uint16_t __far snddmabuf_get_offset_from_count (SNDDMABUF *self, uint16_t count)
 uint16_t __far snddmabuf_get_count_from_offset (SNDDMABUF *self, uint16_t bufOff);
 void     __far snddmabuf_free (SNDDMABUF *self);
 
-extern SNDDMABUF sndDMABuf;
-
 /*** Linking ***/
 
 #ifdef __WATCOMC__
@@ -67,8 +65,6 @@ extern SNDDMABUF sndDMABuf;
 #pragma aux snddmabuf_get_offset_from_count "*";
 #pragma aux snddmabuf_get_count_from_offset "*";
 #pragma aux snddmabuf_free "*";
-
-#pragma aux sndDMABuf "*";
 
 #endif  /* __WATCOMC__ */
 

@@ -16,32 +16,6 @@ uses
 
 (*$I defines.pas*)
 
-type
-    TSNDDMABUFFLAGS = Word;
-
-const
-    SNDDMABUFFL_LOCKED = 1 shl 0;
-    SNDDMABUFFL_SLOW   = 1 shl 1;
-    SNDDMABUFFL_LQ     = 1 shl 2;
-
-const
-    DMA_BUF_SIZE_MAX = 8*1024;
-
-type
-    TSNDDMABUF = packed record
-        flags: TSNDDMABUFFLAGS;
-        buf: PDMABUF;
-        format: THWSMPFMT;
-        frameSize: word;
-        framesCount: byte;
-        frameLast: shortint;
-        frameActive: byte;
-    end;
-    PSNDDMABUF = ^TSNDDMABUF;
-
-var
-    sndDMABuf: TSNDDMABUF;
-
 procedure snddmabuf_init;
 procedure snddmabuf_alloc;
 procedure snddmabuf_get_frame_offset;

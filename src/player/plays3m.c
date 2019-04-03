@@ -691,6 +691,7 @@ void __far plays3m_main (void)
     PLAYSTATE *ps;
     MUSMOD *track;
     MIXCHNLIST *channels;
+    SNDDMABUF *sndbuf;
     int count, i, pos;
     char s[pascal_String_size];
     bool quit, result;
@@ -822,6 +823,7 @@ void __far plays3m_main (void)
     player_set_order_start (mp, opt_startpos);
     player_set_song_loop (mp, opt_loop);
     player_set_sound_buffer_fps (mp, opt_fps);
+    sndbuf = player_get_sound_buffer (mp);
 
     channels_save_all();
 
@@ -944,7 +946,7 @@ void __far plays3m_main (void)
             }
         }
     }
-    while (((sndDMABuf.flags & SNDDMABUFFL_SLOW) == 0) && (!quit) && (!(ps->flags & PLAYSTATEFL_END)));
+    while (((sndbuf->flags & SNDDMABUFFL_SLOW) == 0) && (!quit) && (!(ps->flags & PLAYSTATEFL_END)));
 
     textbackground(_black);
     textcolor(_lightgray);
@@ -952,7 +954,7 @@ void __far plays3m_main (void)
     cursor_show();
 
     if (DEBUG)
-        if (sndDMABuf.flags & SNDDMABUFFL_SLOW)
+        if (sndbuf->flags & SNDDMABUFFL_SLOW)
             DEBUG_FAIL ("plays3m_main", "PC is too slow");
 
     player_free (mp);

@@ -43,6 +43,7 @@ static uint8_t scr[2][320] = { 0 };
 
 static MUSPLAYER *mp;
 static MUSMOD *song_track;
+static SNDDMABUF *sndbuf;
 
 void __near draw_channels_volume(void)
 {
@@ -260,6 +261,8 @@ void __far playosci_main (void)
     if (!player_set_mode (mp, opt_16bits, opt_stereo, opt_rate, opt_lq))
         exit (1);
 
+    sndbuf = player_get_sound_buffer (mp);
+
     if (!player_play_start (mp))
         exit (1);
 
@@ -267,13 +270,13 @@ void __far playosci_main (void)
         "DMA buffer frame size: %u" CRLF
         "Stop playing and exit with <ESC>" CRLF
         "Press any key to switch to oscillator..." CRLF,
-        sndDMABuf.frameSize
+        sndbuf->frameSize
     );
     getch ();
 
     vbios_set_mode (0x13);
     vga_clear_page_320x200x8 (COL_BACKGROUND);
-    bufdata = sndDMABuf.buf->data;
+    bufdata = sndbuf->buf->data;
     while (!kbhit ())
     {
         vga_wait_vsync ();

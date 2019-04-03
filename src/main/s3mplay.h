@@ -19,6 +19,7 @@
 #include "debug.h"
 #include "main/mixchn.h"
 #include "main/mixer.h"
+#include "main/fillvars.h"
 
 /*** Sound ***/
 
@@ -51,6 +52,7 @@ bool     __far player_is_EM_in_use (MUSPLAYER *self);
 bool     __far player_init_device (MUSPLAYER *self, SNDDEVTYPE type, SNDDEVSETMET method);
 void     __far player_device_dump_conf (MUSPLAYER *self);
 char    *__far player_device_get_name (MUSPLAYER *self);
+SNDDMABUF *__far player_get_sound_buffer (MUSPLAYER *self);
 void     __far player_set_sound_buffer_fps (MUSPLAYER *self, uint8_t value);
 bool     __far player_set_mode (MUSPLAYER *self, bool f_16bits, bool f_stereo, uint16_t rate, bool LQ);
 uint16_t __far player_get_output_rate (MUSPLAYER *self);
@@ -101,6 +103,7 @@ DECLARE_REGISTRATION (s3mplay)
 #pragma aux player_init_device "*";
 #pragma aux player_device_dump_conf "*";
 #pragma aux player_device_get_name "*";
+#pragma aux player_get_sound_buffer "*";
 #pragma aux player_set_sound_buffer_fps "*";
 #pragma aux player_set_mode "*";
 #pragma aux player_get_output_rate "*";

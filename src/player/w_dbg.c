@@ -214,7 +214,7 @@ void __far win_debug_draw(SCRWIN *self)
 
     mixer = player_get_mixer (player);
     mixbuf = mixer_get_mixbuf (mixer);
-    sndbuf = &sndDMABuf;
+    sndbuf = player_get_sound_buffer (player);
     dmabuf = sndbuf->buf;
     out_channels = mixbuf_get_channels (mixbuf);
     out_rate = ps->rate;
