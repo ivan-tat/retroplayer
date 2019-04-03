@@ -34,13 +34,14 @@
 
 #define _PLAYER_ERROR_LEN 128
 
-/* EM handle to save mapping while playing */
-static EMSHDL  _EM_map_handle = EMSBADHDL;
-static EMSNAME _EM_map_name = "saveMAP";
+// Current index to generate unique EM handle name to save EM mapping while in ISR
+static uint16_t _isr_index;
+
+typedef struct _music_player_t _MUSPLAYER;
 
 #pragma pack(push, 1);
 typedef struct play_isr_param_t {
-    void *player;
+    _MUSPLAYER *player;
     bool busy;
     SNDDMABUF *dmabuf;
 };
@@ -51,28 +52,28 @@ typedef struct play_isr_param_t PLAYISRPARAM;
 typedef struct _music_player_t
 {
     char error[_PLAYER_ERROR_LEN];
+    bool flags_use_EM;
+    bool flags_bufalloc;
+    bool flags_snddev;
+    SBDEV *device;
+    uint8_t sound_buffer_fps;
+    bool     mode_set;
+    uint8_t  mode_bits;
+    bool     mode_signed;
+    uint8_t  mode_channels;
+    uint16_t mode_rate;
+    bool     mode_lq;
+    MUSMOD     *track;
+    MIXCHNLIST *channels;
+    PLAYSTATE   play_state;
+    SMPBUF smpbuf;
+    MIXBUF mixbuf;
+    MIXER *mixer;
+    EMSHDL EM_map_handle;
+    EMSNAME EM_map_name;
+    PLAYISRPARAM play_isr_param;
 };
 #pragma pack(pop);
-typedef struct _music_player_t _MUSPLAYER;
-
-static bool     player_flags_use_EM;
-static bool     player_flags_bufalloc;
-static bool     player_flags_snddev;
-static SBDEV   *player_device;
-static uint8_t  player_sound_buffer_fps;
-static bool     player_mode_set;
-static uint8_t  player_mode_bits;
-static bool     player_mode_signed;
-static uint8_t  player_mode_channels;
-static uint16_t player_mode_rate;
-static bool     player_mode_lq;
-static MUSMOD  *_player_track;
-static MIXCHNLIST *_player_mixing_channels;
-static PLAYSTATE _player_play_state;
-static SMPBUF   _player_smpbuf;
-static MIXBUF   _player_mixbuf;
-static MIXER   *_player_mixer;
-static PLAYISRPARAM player_play_isr_param;
 
 /* Each element is a pointer */
 
@@ -180,7 +181,7 @@ void __near _free_modules (void)
 void __far ISR_play (void *param)
 {
     PLAYISRPARAM *self;
-    void *player;
+    _MUSPLAYER *player;
     SNDDMABUF *dmabuf;
     bool err;
 
@@ -201,17 +202,23 @@ void __far ISR_play (void *param)
 
         err = false;
 
-        if (player_flags_use_EM)
+        if (player->flags_use_EM)
         {
             err = true;
-            if (emsSaveMap (_EM_map_handle))
+            if (emsSaveMap (player->EM_map_handle))
                 err = false;
         }
 
-        fill_DMAbuffer (_player_track, &_player_play_state, _player_mixing_channels, _player_mixer, dmabuf);
+        fill_DMAbuffer (
+            player->track,
+            &player->play_state,
+            player->channels,
+            player->mixer,
+            dmabuf
+        );
 
-        if (player_flags_use_EM & !err)
-            emsRestoreMap (_EM_map_handle);
+        if (player->flags_use_EM && !err)
+            emsRestoreMap (player->EM_map_handle);
 
         self->busy = false;
     }
@@ -291,38 +298,40 @@ bool __far player_init (MUSPLAYER *self)
     DEBUG_BEGIN ("player_init");
 
     if (_Self)
+    {
         memset (_Self, 0, sizeof (_MUSPLAYER));
-
-    _player_clear_error (self);
-
-    player_flags_use_EM = emsInstalled;
-    player_flags_bufalloc = false;
-    player_flags_snddev = false;
+        _Self->flags_use_EM = emsInstalled;
+    }
+    else
+    {
+        DEBUG_FAIL ("player_init", "Empty object.");
+        return false;
+    }
 
     // Sound
-    _EM_map_handle = EMSBADHDL;
+    _Self->EM_map_handle = EMSBADHDL;
     snddmabuf_init (&sndDMABuf);
 
     // Mixer
-    smpbuf_init (&_player_smpbuf);
-    mixbuf_init (&_player_mixbuf);
+    smpbuf_init (&_Self->smpbuf);
+    mixbuf_init (&_Self->mixbuf);
     voltab_init();
-    _player_mixer = NULL;
+    _Self->mixer = NULL;
 
     // Player
-    player_device = NULL;
-    player_sound_buffer_fps = 70;
-    player_mode_set = false;
-    player_mode_bits = 0;
-    player_mode_signed = false;
-    player_mode_channels = 0;
-    player_mode_rate = 0;
-    player_mode_lq = false;
+    _Self->device = NULL;
+    _Self->sound_buffer_fps = 70;
+    _Self->mode_set = false;
+    _Self->mode_bits = 0;
+    _Self->mode_signed = false;
+    _Self->mode_channels = 0;
+    _Self->mode_rate = 0;
+    _Self->mode_lq = false;
 
     // Music modules
     _init_modules ();
-    _player_track = NULL;
-    _player_mixing_channels = NULL;
+    _Self->track = NULL;
+    _Self->channels = NULL;
 
     if (!isCPU_i386 ())
     {
@@ -330,15 +339,17 @@ bool __far player_init (MUSPLAYER *self)
         return false;
     }
 
-    if (player_flags_use_EM)
+    if (_Self->flags_use_EM)
     {
-        _EM_map_handle = emsAlloc (1);  // is 1 page enough?
+        _Self->EM_map_handle = emsAlloc (1);  // is 1 page enough?
         if (emsEC != E_EMS_SUCCESS)
         {
             ERROR ("player_init", "%s", "Failed to allocate EM handle for mapping.");
             return false;
         }
-        emsSetHandleName (_EM_map_handle, &_EM_map_name);
+        snprintf (&_Self->EM_map_name, sizeof (EMSNAME), "map%04x", _isr_index);
+        _isr_index++;
+        emsSetHandleName (_Self->EM_map_handle, &_Self->EM_map_name);
     }
 
     // Sound
@@ -352,22 +363,22 @@ bool __far player_init (MUSPLAYER *self)
 
     // Mixer
 
-    if (!_player_mixer)
+    if (!_Self->mixer)
     {
-        _player_mixer = _new (MIXER);
-        if (!_player_mixer)
+        _Self->mixer = _new (MIXER);
+        if (!_Self->mixer)
         {
             ERROR ("player_init", "Failed to initialize %s.", "sound mixer");
             return false;
         }
-        mixer_init (_player_mixer);
-        mixer_set_smpbuf (_player_mixer, &_player_smpbuf);
-        mixer_set_mixbuf (_player_mixer, &_player_mixbuf);
+        mixer_init (_Self->mixer);
+        mixer_set_smpbuf (_Self->mixer, &_Self->smpbuf);
+        mixer_set_mixbuf (_Self->mixer, &_Self->mixbuf);
     }
 
     len = sndDMABuf.buf->size / 2;  // half DMA transfer buffer size (but in samples)
 
-    _smpbuf = mixer_get_smpbuf (_player_mixer);
+    _smpbuf = mixer_get_smpbuf (_Self->mixer);
     if (!smpbuf_get (_smpbuf))
         if (!smpbuf_alloc (_smpbuf, len))
         {
@@ -375,7 +386,7 @@ bool __far player_init (MUSPLAYER *self)
             return false;
         }
 
-    _mixbuf = mixer_get_mixbuf (_player_mixer);
+    _mixbuf = mixer_get_mixbuf (_Self->mixer);
     if (!mixbuf_get (_mixbuf))
         if (!mixbuf_alloc (_mixbuf, len))
         {
@@ -390,7 +401,7 @@ bool __far player_init (MUSPLAYER *self)
             return false;
         }
 
-    player_flags_bufalloc = true;
+    _Self->flags_bufalloc = true;
 
     DEBUG_SUCCESS ("player_init");
     return true;
@@ -400,16 +411,21 @@ bool __far player_init (MUSPLAYER *self)
 
 void __far player_set_EM_usage (MUSPLAYER *self, bool value)
 {
-    player_flags_use_EM = value && emsInstalled;
+    _MUSPLAYER *_Self = self;
+
+    _Self->flags_use_EM = value && emsInstalled;
 }
 
 bool __far player_is_EM_in_use (MUSPLAYER *self)
 {
-    return player_flags_use_EM;
+    _MUSPLAYER *_Self = self;
+
+    return _Self->flags_use_EM;
 }
 
 bool __far player_init_device (MUSPLAYER *self, SNDDEVTYPE type, SNDDEVSETMET method)
 {
+    _MUSPLAYER *_Self = self;
     bool result;
 
     DEBUG_BEGIN("player_init_device");
@@ -417,13 +433,13 @@ bool __far player_init_device (MUSPLAYER *self, SNDDEVTYPE type, SNDDEVSETMET me
     switch (type)
     {
     case SNDDEVTYPE_SB:
-        player_device = sb_new();
-        if (!player_device)
+        _Self->device = sb_new();
+        if (!_Self->device)
         {
             ERROR ("player_init_device", "%s", "Failed to create sound device object.");
             return false;
         }
-        sb_init(player_device);
+        sb_init (_Self->device);
         break;
     default:
         ERROR ("player_init_device", "%s", "Unknown device type.");
@@ -436,76 +452,84 @@ bool __far player_init_device (MUSPLAYER *self, SNDDEVTYPE type, SNDDEVSETMET me
         result = true;
         break;
     case SNDDEVSETMET_DETECT:
-        result = sb_conf_detect(player_device);
+        result = sb_conf_detect (_Self->device);
         break;
     case SNDDEVSETMET_ENV:
-        result = sb_conf_env(player_device);
+        result = sb_conf_env (_Self->device);
         break;
     case SNDDEVSETMET_INPUT:
-        result = sb_conf_input(player_device);
+        result = sb_conf_input (_Self->device);
         break;
     default:
         ERROR ("player_init_device", "%s", "Unknown method.");
-        sb_free (player_device);
+        sb_free (_Self->device);
         return false;
     }
 
     if (result)
     {
         DEBUG_SUCCESS("player_init_device");
-        player_flags_snddev = true;
+        _Self->flags_snddev = true;
         return true;
     }
     else
     {
         ERROR ("player_init_device", "%s", "No sound device.");
-        sb_free (player_device);
+        sb_free (_Self->device);
         return false;
     }
 }
 
 void __far player_device_dump_conf (MUSPLAYER *self)
 {
-    if (player_flags_snddev)
-        sb_conf_dump(player_device);
+    _MUSPLAYER *_Self = self;
+
+    if (_Self->flags_snddev)
+        sb_conf_dump (_Self->device);
 }
 
 char *__far player_device_get_name (MUSPLAYER *self)
 {
-    if (player_flags_snddev)
-        return sb_get_name(player_device);
+    _MUSPLAYER *_Self = self;
+
+    if (_Self->flags_snddev)
+        return sb_get_name (_Self->device);
     else
         return NULL;
 }
 
 void __far player_set_sound_buffer_fps (MUSPLAYER *self, uint8_t value)
 {
-    player_sound_buffer_fps = value;
+    _MUSPLAYER *_Self = self;
+
+    _Self->sound_buffer_fps = value;
 }
 
 bool __far player_set_mode (MUSPLAYER *self, bool f_16bits, bool f_stereo, uint16_t rate, bool LQ)
 {
+    _MUSPLAYER *_Self = self;
+
     DEBUG_BEGIN("player_set_mode");
 
     if (f_16bits)
     {
-        player_mode_bits = 16;
-        player_mode_signed = true;
+        _Self->mode_bits = 16;
+        _Self->mode_signed = true;
     }
     else
     {
-        player_mode_bits = 8;
-        player_mode_signed = false;
+        _Self->mode_bits = 8;
+        _Self->mode_signed = false;
     }
 
     if (f_stereo)
-        player_mode_channels = 2;
+        _Self->mode_channels = 2;
     else
-        player_mode_channels = 1;
+        _Self->mode_channels = 1;
 
-    player_mode_rate = rate;
-    player_mode_lq = LQ;
-    player_mode_set = true;
+    _Self->mode_rate = rate;
+    _Self->mode_lq = LQ;
+    _Self->mode_set = true;
 
     DEBUG_SUCCESS("player_set_mode");
     return true;
@@ -513,46 +537,55 @@ bool __far player_set_mode (MUSPLAYER *self, bool f_16bits, bool f_stereo, uint1
 
 uint16_t __far player_get_output_rate (MUSPLAYER *self)
 {
-    return player_mode_rate;
+    _MUSPLAYER *_Self = self;
+
+    return _Self->mode_rate;
 }
 
 uint8_t __far player_get_output_channels (MUSPLAYER *self)
 {
-    return player_mode_channels;
+    _MUSPLAYER *_Self = self;
+
+    return _Self->mode_channels;
 }
 
 uint8_t __far player_get_output_bits (MUSPLAYER *self)
 {
-    return player_mode_bits;
+    _MUSPLAYER *_Self = self;
+
+    return _Self->mode_bits;
 }
 
 bool __far player_get_output_lq (MUSPLAYER *self)
 {
-    return player_mode_lq;
+    _MUSPLAYER *_Self = self;
+
+    return _Self->mode_lq;
 }
 
 bool __near _player_setup_outbuf(MUSPLAYER *self, SNDDMABUF *outbuf, uint16_t spc)
 {
+    _MUSPLAYER *_Self = self;
     uint16_t size;
     uint16_t i, count;
 
     DEBUG_BEGIN("_player_setup_outbuf");
 
-    if (player_mode_set)
+    if (_Self->mode_set)
     {
         outbuf->flags = 0;
 
-        if (player_mode_lq)
+        if (_Self->mode_lq)
             outbuf->flags |= SNDDMABUFFL_LQ;
 
         set_sample_format(&(outbuf->format),
-            player_mode_bits, player_mode_signed, player_mode_channels);
+            _Self->mode_bits, _Self->mode_signed, _Self->mode_channels);
 
         size = spc;
-        if (player_mode_bits == 16)
+        if (_Self->mode_bits == 16)
             size *= 2;
 
-        if (player_mode_channels == 2)
+        if (_Self->mode_channels == 2)
             size *= 2;
 
         outbuf->frameSize = size;
@@ -562,7 +595,7 @@ bool __near _player_setup_outbuf(MUSPLAYER *self, SNDDMABUF *outbuf, uint16_t sp
         while (count < i)
             count *= 2;
 
-        if (player_mode_lq)
+        if (_Self->mode_lq)
             count /= 2;
 
         outbuf->framesCount = count / 2;
@@ -579,9 +612,10 @@ bool __near _player_setup_outbuf(MUSPLAYER *self, SNDDMABUF *outbuf, uint16_t sp
 
 void __far player_set_master_volume (MUSPLAYER *self, uint8_t value)
 {
+    _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_player_play_state;
+    ps = &_Self->play_state;
     if (value > MUSMOD_MASTER_VOLUME_MAX)
         value = MUSMOD_MASTER_VOLUME_MAX;
     ps->master_volume = value;
@@ -590,19 +624,23 @@ void __far player_set_master_volume (MUSPLAYER *self, uint8_t value)
 
 uint8_t __far player_get_master_volume (MUSPLAYER *self)
 {
+    _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_player_play_state;
+    ps = &_Self->play_state;
     return ps->master_volume;
 }
 
 MIXER *__far player_get_mixer (MUSPLAYER *self)
 {
-    return _player_mixer;
+    _MUSPLAYER *_Self = self;
+
+    return _Self->mixer;
 }
 
 void __near _player_setup_patterns_order (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps)
 {
+    _MUSPLAYER *_Self = self;
     MUSPATORDER *order;
     int i;
 
@@ -616,11 +654,12 @@ void __near _player_setup_patterns_order (MUSPLAYER *self, MUSMOD *track, PLAYST
 
 void __far player_set_order (MUSPLAYER *self, bool skipend)
 {
+    _MUSPLAYER *_Self = self;
     MUSMOD *track;
     PLAYSTATE *ps;
 
-    track = _player_track;
-    ps = &_player_play_state;
+    track = _Self->track;
+    ps = &_Self->play_state;
 
     if (skipend)
         ps->flags |= PLAYSTATEFL_SKIPENDMARK;
@@ -632,15 +671,17 @@ void __far player_set_order (MUSPLAYER *self, bool skipend)
 
 void __far player_set_order_start (MUSPLAYER *self, uint8_t value)
 {
+    _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_player_play_state;
+    ps = &_Self->play_state;
 
     ps->order_start = value;
 }
 
 int __far player_find_next_pattern (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps, int index, int step)
 {
+    _MUSPLAYER *_Self = self;
     MUSPATORDER *order;
     int start, last, pos;
     bool skipend;
@@ -681,9 +722,10 @@ int __far player_find_next_pattern (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *p
 
 void __far player_set_song_loop (MUSPLAYER *self, bool value)
 {
+    _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_player_play_state;
+    ps = &_Self->play_state;
 
     if (value)
         ps->flags |= PLAYSTATEFL_SONGLOOP;
@@ -693,6 +735,7 @@ void __far player_set_song_loop (MUSPLAYER *self, bool value)
 
 bool __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track)
 {
+    _MUSPLAYER *_Self = self;
     LOADER_S3M *p;
     MUSMOD *track;
 
@@ -704,7 +747,7 @@ bool __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track)
     }
     load_s3m_init(p);
 
-    track = load_s3m_load (p, name, player_flags_use_EM);
+    track = load_s3m_load (p, name, _Self->flags_use_EM);
     if ((!track) || (!musmod_is_loaded (track)))
     {
         ERROR ("player_load_s3m", "Failed to load S3M file (%s).", load_s3m_get_error (p));
@@ -726,7 +769,7 @@ bool __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track)
         return false;
     }
 
-    _player_track = track;  // set active track
+    _Self->track = track;  // set active track
     *_track = track;
 
     DEBUG_SUCCESS("player_load_s3m");
@@ -735,16 +778,21 @@ bool __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track)
 
 MIXCHNLIST *__far player_get_mixing_channels (MUSPLAYER *self)
 {
-    return _player_mixing_channels;
+    _MUSPLAYER *_Self = self;
+
+    return _Self->channels;
 }
 
 PLAYSTATE *__far player_get_play_state (MUSPLAYER *self)
 {
-    return &_player_play_state;
+    _MUSPLAYER *_Self = self;
+
+    return &_Self->play_state;
 }
 
 bool __near _player_alloc_channels (MUSPLAYER *self, MIXCHNLIST *channels, MUSMOD *track)
 {
+    _MUSPLAYER *_Self = self;
     uint8_t num_channels;
     uint8_t i;
     MIXCHN *chn;
@@ -787,6 +835,7 @@ bool __near _player_alloc_channels (MUSPLAYER *self, MIXCHNLIST *channels, MUSMO
 
 void __near _player_reset_channels (MUSPLAYER *self, MIXCHNLIST *channels)
 {
+    _MUSPLAYER *_Self = self;
     uint8_t num_channels, i;
     MIXCHN *chn;
 
@@ -802,6 +851,8 @@ void __near _player_reset_channels (MUSPLAYER *self, MIXCHNLIST *channels)
 
 void __near _player_set_initial_state (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps)
 {
+    _MUSPLAYER *_Self = self;
+
     playState_set_tempo (ps, musmod_get_tempo (track)); // first priority (is output mixer-dependant)
     playState_set_speed (ps, musmod_get_speed (track)); // second priority (is song's internal value)
     ps->global_volume = musmod_get_global_volume (track); // is song's internal value
@@ -810,6 +861,7 @@ void __near _player_set_initial_state (MUSPLAYER *self, MUSMOD *track, PLAYSTATE
 
 void __far player_set_pos (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps, uint8_t start_order, uint8_t start_row, bool keep)
 {
+    _MUSPLAYER *_Self = self;
     MUSPATORDER *order;
     MUSPATORDENT *order_entry;
 
@@ -835,11 +887,14 @@ void __far player_set_pos (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps, uint8_
 
 void __far player_song_stop (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps)
 {
+    _MUSPLAYER *_Self = self;
+
     ps->flags |= PLAYSTATEFL_END;
 }
 
 bool __far player_play_start (MUSPLAYER *self)
 {
+    _MUSPLAYER *_Self = self;
     MUSMOD *track;
     PLAYSTATE *ps;
     MIXCHNLIST *channels;
@@ -848,27 +903,27 @@ bool __far player_play_start (MUSPLAYER *self)
 
     DEBUG_BEGIN("player_play_start");
 
-    ps = &_player_play_state;
+    ps = &_Self->play_state;
 
-    if (!player_flags_bufalloc)
+    if (!(_Self->flags_bufalloc))
     {
         ERROR ("player_play_start", "%s", "No sound buffers were allocated.");
         return false;
     }
 
-    if (!player_flags_snddev)
+    if (!_Self->flags_snddev)
     {
         ERROR ("player_play_start", "%s", "No sound device was set.");
         return false;
     }
 
-    if (!player_mode_set)
+    if (!_Self->mode_set)
     {
         ERROR ("player_play_start", "%s", "No play mode was set.");
         return false;
     }
 
-    track = _player_track;
+    track = _Self->track;
     if ((!track) || (!musmod_is_loaded (track)))
     {
         ERROR ("player_play_start", "%s", "No music module was loaded.");
@@ -884,47 +939,47 @@ bool __far player_play_start (MUSPLAYER *self)
         return false;
     }
     mixchnl_init (channels);
-    _player_mixing_channels = channels;
+    _Self->channels = channels;
 
     if (!_player_alloc_channels (self, channels, track))
         return false;
 
     // 1. Setup output mode
 
-    sb_set_transfer_mode(player_device, player_mode_rate, player_mode_channels, player_mode_bits, player_mode_signed);
-    player_mode_rate     = sb_mode_get_rate(player_device);
-    player_mode_channels = sb_mode_get_channels(player_device);
-    player_mode_bits     = sb_mode_get_bits(player_device);
-    player_mode_signed   = sb_mode_is_signed(player_device);
+    sb_set_transfer_mode (_Self->device, _Self->mode_rate, _Self->mode_channels, _Self->mode_bits, _Self->mode_signed);
+    _Self->mode_rate     = sb_mode_get_rate (_Self->device);
+    _Self->mode_channels = sb_mode_get_channels (_Self->device);
+    _Self->mode_bits     = sb_mode_get_bits (_Self->device);
+    _Self->mode_signed   = sb_mode_is_signed (_Self->device);
 
-    ps->rate = player_mode_lq ? player_mode_rate / 2 : player_mode_rate;
+    ps->rate = _Self->mode_lq ? _Self->mode_rate / 2 : _Self->mode_rate;
 
     // 2. Setup mixer mode
 
     mixbuf_set_mode(
-        &_player_mixbuf,
-        player_mode_channels,
-        ((1000000L / (uint16_t)(1000000L / ps->rate)) / player_sound_buffer_fps) + 1
+        &_Self->mixbuf,
+        _Self->mode_channels,
+        ((1000000L / (uint16_t)(1000000L / ps->rate)) / _Self->sound_buffer_fps) + 1
     );
 
     // 3. Setup output buffer
 
     outbuf = &sndDMABuf;
 
-    if (!_player_setup_outbuf(self, outbuf, mixbuf_get_samples_per_channel(&_player_mixbuf)))
+    if (!_player_setup_outbuf (self, outbuf, mixbuf_get_samples_per_channel (&_Self->mixbuf)))
     {
         DEBUG_FAIL("player_play_start", "Failed to setup output buffer.");
         return false;
     }
 
     frame_size = outbuf->frameSize;
-    if (player_mode_lq)
+    if (_Self->mode_lq)
         frame_size *= 2;
 
-    player_play_isr_param.busy = false;
-    player_play_isr_param.player = NULL;
-    player_play_isr_param.dmabuf = &sndDMABuf;
-    sb_set_transfer_buffer(player_device, outbuf->buf->data, frame_size, outbuf->framesCount, true, &ISR_play, &player_play_isr_param);
+    _Self->play_isr_param.busy = false;
+    _Self->play_isr_param.player = _Self;
+    _Self->play_isr_param.dmabuf = &sndDMABuf;
+    sb_set_transfer_buffer (_Self->device, outbuf->buf->data, frame_size, outbuf->framesCount, true, &ISR_play, &_Self->play_isr_param);
 
     // 4. Setup mixer tables
 
@@ -946,11 +1001,11 @@ bool __far player_play_start (MUSPLAYER *self)
 
     outbuf->frameLast = -1;
     outbuf->frameActive = outbuf->framesCount - 1;
-    fill_DMAbuffer (track, ps, channels, _player_mixer, outbuf);
+    fill_DMAbuffer (track, ps, channels, _Self->mixer, outbuf);
 
     // 7. Start sound
 
-    if (!sb_transfer_start(player_device))
+    if (!sb_transfer_start (_Self->device))
     {
         ERROR ("player_play_start", "%s", "Failed to start transfer.");
         return false;
@@ -962,58 +1017,71 @@ bool __far player_play_start (MUSPLAYER *self)
 
 void __far player_play_pause (MUSPLAYER *self)
 {
-    if (player_device)
-        sb_transfer_pause(player_device);
+    _MUSPLAYER *_Self = self;
+
+    if (_Self->device)
+        sb_transfer_pause (_Self->device);
 }
 
 void __far player_play_continue (MUSPLAYER *self)
 {
-    if (player_device)
-        sb_transfer_continue(player_device);
+    _MUSPLAYER *_Self = self;
+
+    if (_Self->device)
+        sb_transfer_continue (_Self->device);
 }
 
 void __far player_play_stop (MUSPLAYER *self)
 {
-    if (player_device)
-        sb_transfer_stop(player_device);
+    _MUSPLAYER *_Self = self;
+
+    if (_Self->device)
+        sb_transfer_stop (_Self->device);
 }
 
 uint16_t __far player_get_buffer_pos (MUSPLAYER *self)
 {
-    return sb_get_buffer_pos(player_device);
+    _MUSPLAYER *_Self = self;
+
+    return sb_get_buffer_pos (_Self->device);
 }
 
 uint8_t __far player_get_speed (MUSPLAYER *self)
 {
+    _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_player_play_state;
+    ps = &_Self->play_state;
     return ps->speed;
 }
 
 uint8_t __far player_get_tempo (MUSPLAYER *self)
 {
+    _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_player_play_state;
+    ps = &_Self->play_state;
     return ps->tempo;
 }
 
 uint8_t __far player_get_pattern_delay (MUSPLAYER *self)
 {
+    _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_player_play_state;
+    ps = &_Self->play_state;
     return ps->patdelay_count;
 }
 
 void __far player_free_module (MUSPLAYER *self, MUSMOD *track)
 {
+    _MUSPLAYER *_Self = self;
+
     DEBUG_BEGIN ("player_free_module");
     if (track)
     {
-        if (_player_track == track)
-            _player_track = NULL;
+        if (_Self->track == track)
+            _Self->track = NULL;
         _free_module (track);
     }
     DEBUG_END ("player_free_module");
@@ -1021,31 +1089,31 @@ void __far player_free_module (MUSPLAYER *self, MUSMOD *track)
 
 void __far player_free_modules (MUSPLAYER *self)
 {
-    MIXCHNLIST *channels;
+    _MUSPLAYER *_Self = self;
 
     DEBUG_BEGIN ("player_free_modules");
 
     _free_modules ();
 
-    channels = _player_mixing_channels;
-    if (channels)
+    if (_Self->channels)
     {
-        mixchnl_free (channels);
-        _delete (channels);
+        mixchnl_free (_Self->channels);
+        _delete (_Self->channels);
     }
-    _player_mixing_channels = NULL;
 
     DEBUG_END ("player_free_modules");
 }
 
 void __far player_free_device (MUSPLAYER *self)
 {
+    _MUSPLAYER *_Self = self;
+
     DEBUG_BEGIN("player_free_device");
 
-    if (player_device)
+    if (_Self->device)
     {
-        sb_free(player_device);
-        sb_delete(&player_device);
+        sb_free (_Self->device);
+        sb_delete (&_Self->device);
     }
 
     DEBUG_END("player_free_device");
@@ -1059,28 +1127,27 @@ void __far player_free (MUSPLAYER *self)
 
     DEBUG_BEGIN("player_free");
 
-    if (_Self)
-    {
-    }
-
     player_play_stop (self);
     player_free_modules (self);
     player_free_device (self);
     voltab_free();
     snddmabuf_free(&sndDMABuf);
 
-    if (_player_mixer)
+    if (_Self->mixer)
     {
-        mixer_free (_player_mixer);
-        _delete (_player_mixer);
+        mixer_free (_Self->mixer);
+        _delete (_Self->mixer);
     }
-    smpbuf_free (&_player_smpbuf);
-    mixbuf_free (&_player_mixbuf);
+    smpbuf_free (&_Self->smpbuf);
+    mixbuf_free (&_Self->mixbuf);
 
-    player_flags_bufalloc = false;
+    if (_Self)
+    {
+        _Self->flags_bufalloc = false;
 
-    if (player_flags_use_EM)
-        emsFree (_EM_map_handle);
+        if (_Self->flags_use_EM)
+            emsFree (_Self->EM_map_handle);
+    }
 
     DEBUG_END("player_free");
 }
@@ -1097,6 +1164,8 @@ void __near s3mplay_init(void)
 #if DEBUG_WRITE_OUTPUT_STREAM == 1
     DEBUG_open_output_streams ();
 #endif  /* DEBUG_WRITE_OUTPUT_STREAM */
+
+    _isr_index = 0;
 }
 
 void __near s3mplay_done(void)
