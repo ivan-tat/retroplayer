@@ -19,6 +19,7 @@
 #include "player/screen.h"
 
 bool __far win_pattern_init (SCRWIN *self);
+void __far win_pattern_set_player (SCRWIN *self, MUSPLAYER *value);
 void __far win_pattern_set_track (SCRWIN *self, MUSMOD *value);
 void __far win_pattern_set_play_state (SCRWIN *self, PLAYSTATE *value);
 void __far win_pattern_set_channels (SCRWIN *self, MIXCHNLIST *value);

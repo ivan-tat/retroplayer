@@ -107,7 +107,7 @@ void __far win_information_draw(SCRWIN *self)
         data = (struct win_information_data_t *) scrwin_get_data (self);
         player = data->player;
         track = data->track;
-        ps = data->ps;
+        ps = player_get_play_state (player);
         patterns = musmod_get_patterns (track);
         pat = muspatl_get (patterns, ps->pattern);
 

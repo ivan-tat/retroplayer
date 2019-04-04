@@ -790,7 +790,7 @@ void __far plays3m_main (void)
     }
 
     track = song_track;
-    ps = player_get_play_state (mp);
+    ps = player_get_play_state (mp);    // =NULL for now, will be allocated in player_start_play()
 
     printf ("Song \"%s\" loaded (%s)." CRLF,
         musmod_get_title (track),
@@ -838,6 +838,7 @@ void __far plays3m_main (void)
     win_information_set_player (win_information, mp);
     win_information_set_track (win_information, track);
     win_information_set_play_state (win_information, ps);
+    win_pattern_set_player (win_pattern, mp);
     win_pattern_set_track (win_pattern, track);
     win_pattern_set_play_state (win_pattern, ps);
     win_pattern_set_start_channel (win_pattern, 1);
@@ -854,6 +855,8 @@ void __far plays3m_main (void)
         display_errormsg();
         exit(1);
     }
+
+    ps = player_get_play_state (mp);    // !=NULL now, PLAYSTATE is allocated
 
     channels = player_get_mixing_channels (mp);
 

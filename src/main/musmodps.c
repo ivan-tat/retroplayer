@@ -9,9 +9,16 @@
 #include <stdint.h>
 
 #include "pascal.h"
+#include "cc/string.h"
 #include "main/s3mtypes.h"
 
 #include "main/musmodps.h"
+
+void __far playstate_init (PLAYSTATE *self)
+{
+    if (self)
+        memset (self, 0, sizeof (PLAYSTATE));
+}
 
 void __far playState_set_speed (PLAYSTATE *self, uint8_t value)
 {
@@ -28,4 +35,8 @@ void __far playState_set_tempo (PLAYSTATE *self, uint8_t value)
 
     if (value)
         self->tick_samples_per_channel = (long)self->rate * 5 / (int)(value * 2);
+}
+
+void __far playstate_free (PLAYSTATE *self)
+{
 }

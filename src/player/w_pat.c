@@ -43,6 +43,7 @@ static const char _hexdigits[16] = "0123456789ABCDEF";
 
 typedef struct win_pattern_data_t
 {
+    MUSPLAYER *player;
     MUSMOD *track;
     PLAYSTATE *ps;
     MIXCHNLIST *channels;
@@ -258,6 +259,7 @@ void __near win_pattern_draw_row_empty (SCRWIN *self)
 void __near win_pattern_draw_list (SCRWIN *self)
 {
     struct win_pattern_data_t *data;
+    MUSPLAYER *player;
     MUSMOD *track;
     PLAYSTATE *ps;
     MUSPATLIST *patterns;
@@ -269,8 +271,9 @@ void __near win_pattern_draw_list (SCRWIN *self)
     data = (struct win_pattern_data_t *) scrwin_get_data (self);
 
     /* get play state */
+    player = data->player;
     track = data->track;
-    ps = data->ps;
+    ps = player_get_play_state (player);
     pattern_num = ps->pattern;
     row = ps->row;
     patterns = musmod_get_patterns (track);
@@ -369,6 +372,14 @@ void __far win_pattern_on_resize (SCRWIN *self)
 
 /* public methods */
 
+void __far win_pattern_set_player (SCRWIN *self, MUSPLAYER *value)
+{
+    struct win_pattern_data_t *data;
+
+    data = (struct win_pattern_data_t *) scrwin_get_data (self);
+    data->player = value;
+}
+
 void __far win_pattern_set_track (SCRWIN *self, MUSMOD *value)
 {
     struct win_pattern_data_t *data;
@@ -404,13 +415,15 @@ void __far win_pattern_set_start_channel (SCRWIN *self, int value)
 void __far win_pattern_draw (SCRWIN *self)
 {
     struct win_pattern_data_t *data;
+    MUSPLAYER *player;
     PLAYSTATE *ps;
     int pattern_num, row;
 
     data = (struct win_pattern_data_t *) scrwin_get_data (self);
 
     /* get play state */
-    ps = data->ps;
+    player = data->player;
+    ps = player_get_play_state (player);
     pattern_num = ps->pattern;
     row = ps->row;
 

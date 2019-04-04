@@ -66,7 +66,7 @@ typedef struct _music_player_t
     bool     mode_lq;
     MUSMOD     *track;
     MIXCHNLIST *channels;
-    PLAYSTATE   play_state;
+    PLAYSTATE  *play_state;
     SMPBUF *smpbuf;
     MIXBUF *mixbuf;
     MIXER *mixer;
@@ -213,7 +213,7 @@ void __far ISR_play (void *param)
 
         fill_DMAbuffer (
             player->track,
-            &player->play_state,
+            player->play_state,
             player->channels,
             player->mixer,
             dmabuf
@@ -359,7 +359,7 @@ bool __far player_init (MUSPLAYER *self)
         // Active track
         _Self->track = NULL;
         _Self->channels = NULL;
-        //_Self->play_state
+        _Self->play_state = NULL;
 
         // ISR
         if (_Self->flags_use_EM)
@@ -648,7 +648,7 @@ void __far player_set_master_volume (MUSPLAYER *self, uint8_t value)
     _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_Self->play_state;
+    ps = _Self->play_state;
     if (value > MUSMOD_MASTER_VOLUME_MAX)
         value = MUSMOD_MASTER_VOLUME_MAX;
     ps->master_volume = value;
@@ -660,7 +660,7 @@ uint8_t __far player_get_master_volume (MUSPLAYER *self)
     _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_Self->play_state;
+    ps = _Self->play_state;
     return ps->master_volume;
 }
 
@@ -692,7 +692,7 @@ void __far player_set_order (MUSPLAYER *self, bool skipend)
     PLAYSTATE *ps;
 
     track = _Self->track;
-    ps = &_Self->play_state;
+    ps = _Self->play_state;
 
     if (skipend)
         ps->flags |= PLAYSTATEFL_SKIPENDMARK;
@@ -707,7 +707,7 @@ void __far player_set_order_start (MUSPLAYER *self, uint8_t value)
     _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_Self->play_state;
+    ps = _Self->play_state;
 
     ps->order_start = value;
 }
@@ -758,7 +758,7 @@ void __far player_set_song_loop (MUSPLAYER *self, bool value)
     _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_Self->play_state;
+    ps = _Self->play_state;
 
     if (value)
         ps->flags |= PLAYSTATEFL_SONGLOOP;
@@ -820,7 +820,7 @@ PLAYSTATE *__far player_get_play_state (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
 
-    return &_Self->play_state;
+    return _Self->play_state;
 }
 
 bool __near _player_alloc_channels (MUSPLAYER *self, MIXCHNLIST *channels, MUSMOD *track)
@@ -936,8 +936,6 @@ bool __far player_play_start (MUSPLAYER *self)
 
     DEBUG_BEGIN("player_play_start");
 
-    ps = &_Self->play_state;
-
     if (!(_Self->flags_bufalloc))
     {
         ERROR ("player_play_start", "%s", "No sound buffers were allocated.");
@@ -973,6 +971,17 @@ bool __far player_play_start (MUSPLAYER *self)
     }
     mixchnl_init (channels);
     _Self->channels = channels;
+
+    // Allocate play state
+
+    ps = _new (PLAYSTATE);
+    if (!ps)
+    {
+        ERROR ("player_play_start", "Failed to allocate memory for %s.", "play state");
+        return false;
+    }
+    playstate_init (ps);
+    _Self->play_state = ps;
 
     if (!_player_alloc_channels (self, channels, track))
         return false;
@@ -1084,7 +1093,7 @@ uint8_t __far player_get_speed (MUSPLAYER *self)
     _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_Self->play_state;
+    ps = _Self->play_state;
     return ps->speed;
 }
 
@@ -1093,7 +1102,7 @@ uint8_t __far player_get_tempo (MUSPLAYER *self)
     _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_Self->play_state;
+    ps = _Self->play_state;
     return ps->tempo;
 }
 
@@ -1102,7 +1111,7 @@ uint8_t __far player_get_pattern_delay (MUSPLAYER *self)
     _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    ps = &_Self->play_state;
+    ps = _Self->play_state;
     return ps->patdelay_count;
 }
 
@@ -1132,6 +1141,12 @@ void __far player_free_modules (MUSPLAYER *self)
     {
         mixchnl_free (_Self->channels);
         _delete (_Self->channels);
+    }
+
+    if (_Self->play_state)
+    {
+        playstate_free (_Self->play_state);
+        _delete (_Self->play_state);
     }
 
     DEBUG_END ("player_free_modules");

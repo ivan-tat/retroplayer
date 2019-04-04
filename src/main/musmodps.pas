@@ -13,17 +13,22 @@ interface
 uses
     s3mtypes;
 
+procedure playstate_init;
 procedure playState_set_speed;
 procedure playState_set_tempo;
+procedure playstate_free;
 
 implementation
 
 uses
-    watcom;
+    watcom,
+    string_;
 
 (*$l musmodps.obj*)
 
+procedure playstate_init; external;
 procedure playState_set_speed; external;
 procedure playState_set_tempo; external;
+procedure playstate_free; external;
 
 end.

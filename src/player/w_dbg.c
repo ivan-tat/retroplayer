@@ -150,7 +150,7 @@ void __far win_debug_draw(SCRWIN *self)
     data = (struct win_debug_data_t *) scrwin_get_data (self);
     player = data->player;
     track = data->track;
-    ps = data->ps;
+    ps = player_get_play_state (player);
     samples = musmod_get_samples (track);
     instruments = musmod_get_instruments (track);
     patterns = musmod_get_patterns (track);

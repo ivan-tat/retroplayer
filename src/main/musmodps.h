@@ -55,15 +55,19 @@ typedef struct play_state_t
 #pragma pack(pop);
 typedef struct play_state_t PLAYSTATE;
 
+void __far playstate_init (PLAYSTATE *self);
 void __far playState_set_speed (PLAYSTATE *self, uint8_t value);
 void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
+void __far playstate_free (PLAYSTATE *self);
 
 /*** Linking ***/
 
 #ifdef __WATCOMC__
 
+#pragma aux playstate_init "*";
 #pragma aux playState_set_speed "*";
 #pragma aux playState_set_tempo "*";
+#pragma aux playstate_free "*";
 
 #endif  /* __WATCOMC__ */
 
