@@ -18,7 +18,7 @@
 #include "pascal.h"
 #include "main/musmod.h"
 
-void __far readnewnotes (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels);
+void __far readnewnotes (PLAYSTATE *ps);
 
 /*** Linking ***/
 

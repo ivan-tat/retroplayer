@@ -33,8 +33,7 @@ uses
     string_,
     debug,
     common,
-    sbctl,
-    musmodps;
+    sbctl;
 
 (*$l fillvars.obj*)
 

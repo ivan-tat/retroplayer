@@ -55,7 +55,6 @@ uses
     dynarray,
     musins,
     musmod,
-    musmodps,
     effvars,
     mixer;
 

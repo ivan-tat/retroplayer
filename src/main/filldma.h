@@ -34,7 +34,7 @@ void __far DEBUG_close_output_streams (void);
 
 #endif  /* DEBUG_WRITE_OUTPUT_STREAM */
 
-void __far fill_DMAbuffer (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXER *mixer, SNDDMABUF *outbuf);
+void __far fill_DMAbuffer (PLAYSTATE *ps, MIXER *mixer, SNDDMABUF *outbuf);
 
 /*** Linking ***/
 

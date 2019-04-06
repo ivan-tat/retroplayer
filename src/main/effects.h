@@ -114,7 +114,7 @@ typedef struct channel_state_t CHNSTATE;
 
 bool chn_effInit (PLAYSTATE *ps, ROWSTATE *rs, MIXCHN *chn, CHNSTATE *cs, uint8_t param);
 void chn_effHandle (PLAYSTATE *ps, MIXCHN *chn, CHNSTATE *cs);
-void chn_effTick (MUSMOD *track, PLAYSTATE *ps, MIXCHN *chn);
+void chn_effTick (PLAYSTATE *ps, MIXCHN *chn);
 bool chn_effCanContinue (MIXCHN *chn, CHNSTATE *cs);
 void chn_effStop (PLAYSTATE *ps, MIXCHN *chn);
 void chn_effGetName(MIXCHN *chn, char *__s, size_t __maxlen);

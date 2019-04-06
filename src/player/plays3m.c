@@ -416,11 +416,13 @@ static bool savchn[MUSMOD_CHANNELS_MAX];
 
 void __near channels_save_all(void)
 {
+    PLAYSTATE *ps;
     MIXCHNLIST *channels;
     MIXCHN *chn;
     uint8_t num_channels, i;
 
-    channels = player_get_mixing_channels (mp);
+    ps = player_get_play_state (mp);
+    channels = ps->channels;
     num_channels = mixchnl_get_count (channels);
 
     for (i = 0; i < num_channels; i++)
@@ -432,21 +434,25 @@ void __near channels_save_all(void)
 
 void __near channels_toggle_mixing(uint8_t index)
 {
+    PLAYSTATE *ps;
     MIXCHNLIST *channels;
     MIXCHN *chn;
 
-    channels = player_get_mixing_channels (mp);
+    ps = player_get_play_state (mp);
+    channels = ps->channels;
     chn = mixchnl_get (channels, index);
     mixchn_set_mixing (chn, !mixchn_is_mixing(chn));
 }
 
 void __near channels_stop_all(void)
 {
+    PLAYSTATE *ps;
     MIXCHNLIST *channels;
     MIXCHN *chn;
     uint8_t num_channels, i;
 
-    channels = player_get_mixing_channels (mp);
+    ps = player_get_play_state (mp);
+    channels = ps->channels;
     num_channels = mixchnl_get_count (channels);
 
     for (i = 0; i < num_channels; i++)
@@ -783,6 +789,12 @@ void __far plays3m_main (void)
         exit(1);
     }
 
+    if (!player_set_active_track (mp, song_track))
+    {
+        display_errormsg ();
+        exit (1);
+    }
+
     if (DEBUG_FILE_S3M_LOAD)
     {
         printf ("After loading:" CRLF);
@@ -790,7 +802,8 @@ void __far plays3m_main (void)
     }
 
     track = song_track;
-    ps = player_get_play_state (mp);    // =NULL for now, will be allocated in player_start_play()
+    ps = player_get_play_state (mp);
+    channels = ps->channels;
 
     printf ("Song \"%s\" loaded (%s)." CRLF,
         musmod_get_title (track),
@@ -856,10 +869,6 @@ void __far plays3m_main (void)
         exit(1);
     }
 
-    ps = player_get_play_state (mp);    // !=NULL now, PLAYSTATE is allocated
-
-    channels = player_get_mixing_channels (mp);
-
     /* FIXME: move these here for now (MIXCHNLIST is allocated in player_play_start() ) */
     win_channels_set_channels (win_channels, channels);
     win_pattern_set_channels (win_pattern, channels);
@@ -915,21 +924,21 @@ void __far plays3m_main (void)
                 }
                 if (c == '+')
                 {
-                    pos = player_find_next_pattern (mp, track, ps, ps->order, 1);
+                    pos = playstate_find_next_pattern (ps, ps->order, 1);
                     if (pos < 0)
-                        player_song_stop (mp, track, ps);
+                        player_song_stop (mp, ps);
                     else
-                        player_set_pos (mp, track, ps, pos, 0, true);
+                        playstate_set_pos (ps, pos, 0, true);
                     c = 0;
                 }
                 if (c == '-')
                 {
-                    pos = player_find_next_pattern (mp, track, ps, ps->order, -1);
+                    pos = playstate_find_next_pattern (ps, ps->order, -1);
                     if (pos < 0)
-                        player_song_stop (mp, track, ps);
+                        player_song_stop (mp, ps);
                     else
                     {
-                        player_set_pos (mp, track, ps, pos, 0, false);
+                        playstate_set_pos (ps, pos, 0, false);
                         channels_stop_all ();
                     }
                     c = 0;

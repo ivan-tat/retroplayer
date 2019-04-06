@@ -102,7 +102,7 @@ void __near clear_frame (SNDDMABUF *outbuf)
     }
 }
 
-void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXER *mixer, SNDDMABUF *outbuf)
+void __near fill_frame (PLAYSTATE *ps, MIXER *mixer, SNDDMABUF *outbuf)
 {
     MIXBUF *mb;
     void *mixbuf;
@@ -129,7 +129,7 @@ void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXE
     /* clear mixing buffer */
     memset (mixbuf, 0, mixbuf_get_offset_from_count (mb, frame_spc));
 
-    song_play (track, ps, channels, mixer, frame_spc);
+    song_play (ps, mixer, frame_spc);
 
     amplify_s32(mixbuf, frame_len); // NOTE: mixbuf is 32 bits
 
@@ -208,7 +208,7 @@ void __near fill_frame (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXE
     #endif  /* DEBUG_WRITE_OUTPUT_STREAM */
 }
 
-void __far fill_DMAbuffer (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXER *mixer, SNDDMABUF *outbuf)
+void __far fill_DMAbuffer (PLAYSTATE *ps, MIXER *mixer, SNDDMABUF *outbuf)
 {
     while (outbuf->frameLast != outbuf->frameActive)
     {
@@ -225,7 +225,7 @@ void __far fill_DMAbuffer (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, M
             outbuf->frameLast = (outbuf->frameLast + 1) & (outbuf->framesCount - 1);
             _enable ();
 
-            fill_frame (track, ps, channels, mixer, outbuf);
+            fill_frame (ps, mixer, outbuf);
 
             // critical section
             _disable ();

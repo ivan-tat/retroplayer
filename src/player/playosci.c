@@ -47,11 +47,13 @@ static SNDDMABUF *sndbuf;
 
 void __near draw_channels_volume(void)
 {
-    int16_t i;
+    PLAYSTATE *ps;
     MIXCHNLIST *channels;
+    int16_t i;
     MIXCHN *chn;
 
-    channels = player_get_mixing_channels (mp);
+    ps = player_get_play_state (mp);
+    channels = ps->channels;
     for (i = 0; i < mixchnl_get_count (channels); i++)
     {
         chn = mixchnl_get (channels, i);
@@ -247,6 +249,12 @@ void __far playosci_main (void)
         musmod_get_title (song_track),
         musmod_get_format (song_track)
     );
+
+    if (!player_set_active_track (mp, song_track))
+    {
+        printf ("Failed to set active track." CRLF);
+        exit (1);
+    }
 
     if (!player_init_device (mp, SNDDEVTYPE_SB, SNDDEVSETMET_ENV))
     {

@@ -17,6 +17,8 @@
 
 #include "pascal.h"
 #include "main/s3mtypes.h"
+#include "main/musmod.h"
+#include "main/mixchn.h"
 
 /*** play state ***/
 
@@ -31,6 +33,8 @@ typedef play_state_flags_t PLAYSTATEFLAGS;
 #pragma pack(push, 1);
 typedef struct play_state_t
 {
+    MUSMOD *track;
+    MIXCHNLIST *channels;
     PLAYSTATEFLAGS flags;
     uint16_t rate;
     uint8_t  tempo;
@@ -56,8 +60,15 @@ typedef struct play_state_t
 typedef struct play_state_t PLAYSTATE;
 
 void __far playstate_init (PLAYSTATE *self);
-void __far playState_set_speed (PLAYSTATE *self, uint8_t value);
-void __far playState_set_tempo (PLAYSTATE *self, uint8_t value);
+bool __far playstate_alloc_channels (PLAYSTATE *self);
+void __far playstate_reset_channels (PLAYSTATE *self);
+void __far playstate_free_channels (PLAYSTATE *self);
+void __far playstate_set_speed (PLAYSTATE *self, uint8_t value);
+void __far playstate_set_tempo (PLAYSTATE *self, uint8_t value);
+void __far playstate_setup_patterns_order (PLAYSTATE *self);
+int  __far playstate_find_next_pattern (PLAYSTATE *self, int index, int step);
+void __far playstate_set_pos (PLAYSTATE *self, uint8_t start_order, uint8_t start_row, bool keep);
+void __far playstate_set_initial_state (PLAYSTATE *self);
 void __far playstate_free (PLAYSTATE *self);
 
 /*** Linking ***/
@@ -65,8 +76,15 @@ void __far playstate_free (PLAYSTATE *self);
 #ifdef __WATCOMC__
 
 #pragma aux playstate_init "*";
-#pragma aux playState_set_speed "*";
-#pragma aux playState_set_tempo "*";
+#pragma aux playstate_alloc_channels "*";
+#pragma aux playstate_reset_channels "*";
+#pragma aux playstate_free_channels "*";
+#pragma aux playstate_set_speed "*";
+#pragma aux playstate_set_tempo "*";
+#pragma aux playstate_setup_patterns_order "*";
+#pragma aux playstate_find_next_pattern "*";
+#pragma aux playstate_set_pos "*";
+#pragma aux playstate_set_initial_state "*";
 #pragma aux playstate_free "*";
 
 #endif  /* __WATCOMC__ */

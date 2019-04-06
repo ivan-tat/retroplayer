@@ -21,7 +21,7 @@
 #include "main/musmodps.h"
 #include "main/mixer.h"
 
-void song_play (MUSMOD *track, PLAYSTATE *ps, MIXCHNLIST *channels, MIXER *mixer, uint16_t len);
+void song_play (PLAYSTATE *ps, MIXER *mixer, uint16_t len);
 
 /*** Linking ***/
 

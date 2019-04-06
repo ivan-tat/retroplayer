@@ -150,6 +150,9 @@ smalls3m_main (void)
         musmod_get_title (song_track)
     );
 
+    if (!player_set_active_track (mp, song_track))
+        exit (1);
+
     if (!player_init_device (mp, SNDDEVTYPE_SB, SNDDEVSETMET_ENV))
         exit (1);
 

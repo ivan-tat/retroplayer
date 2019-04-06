@@ -64,9 +64,7 @@ typedef struct _music_player_t
     uint8_t  mode_channels;
     uint16_t mode_rate;
     bool     mode_lq;
-    MUSMOD     *track;
-    MIXCHNLIST *channels;
-    PLAYSTATE  *play_state;
+    PLAYSTATE *play_state;
     SMPBUF *smpbuf;
     MIXBUF *mixbuf;
     MIXER *mixer;
@@ -211,13 +209,7 @@ void __far ISR_play (void *param)
                 err = false;
         }
 
-        fill_DMAbuffer (
-            player->track,
-            player->play_state,
-            player->channels,
-            player->mixer,
-            dmabuf
-        );
+        fill_DMAbuffer (player->play_state, player->mixer, dmabuf);
 
         if (player->flags_use_EM && !err)
             emsRestoreMap (player->EM_map_handle);
@@ -357,8 +349,6 @@ bool __far player_init (MUSPLAYER *self)
         _init_modules ();
 
         // Active track
-        _Self->track = NULL;
-        _Self->channels = NULL;
         _Self->play_state = NULL;
 
         // ISR
@@ -649,10 +639,15 @@ void __far player_set_master_volume (MUSPLAYER *self, uint8_t value)
     PLAYSTATE *ps;
 
     ps = _Self->play_state;
-    if (value > MUSMOD_MASTER_VOLUME_MAX)
-        value = MUSMOD_MASTER_VOLUME_MAX;
-    ps->master_volume = value;
-    amptab_set_volume(value);
+    if (ps)
+    {
+        if (value > MUSMOD_MASTER_VOLUME_MAX)
+            value = MUSMOD_MASTER_VOLUME_MAX;
+        ps->master_volume = value;
+        amptab_set_volume(value);
+    }
+    else
+        ERROR ("player_set_master_volume", "%s", "Active track is not set.");
 }
 
 uint8_t __far player_get_master_volume (MUSPLAYER *self)
@@ -661,7 +656,13 @@ uint8_t __far player_get_master_volume (MUSPLAYER *self)
     PLAYSTATE *ps;
 
     ps = _Self->play_state;
-    return ps->master_volume;
+    if (ps)
+        return ps->master_volume;
+    else
+    {
+        ERROR ("player_set_master_volume", "%s", "Active track is not set.");
+        return 0;
+    }
 }
 
 MIXER *__far player_get_mixer (MUSPLAYER *self)
@@ -671,35 +672,26 @@ MIXER *__far player_get_mixer (MUSPLAYER *self)
     return _Self->mixer;
 }
 
-void __near _player_setup_patterns_order (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps)
-{
-    _MUSPLAYER *_Self = self;
-    MUSPATORDER *order;
-    int i;
-
-    if (track && musmod_is_loaded (track))
-        i = muspatorder_find_last (musmod_get_order (track), ps->flags & PLAYSTATEFL_SKIPENDMARK);
-    else
-        i = 0;
-
-    ps->order_last = i;
-}
-
 void __far player_set_order (MUSPLAYER *self, bool skipend)
 {
     _MUSPLAYER *_Self = self;
     MUSMOD *track;
     PLAYSTATE *ps;
 
-    track = _Self->track;
     ps = _Self->play_state;
+    if (ps)
+    {
+        track = ps->track;
 
-    if (skipend)
-        ps->flags |= PLAYSTATEFL_SKIPENDMARK;
+        if (skipend)
+            ps->flags |= PLAYSTATEFL_SKIPENDMARK;
+        else
+            ps->flags &= ~PLAYSTATEFL_SKIPENDMARK;
+
+        playstate_setup_patterns_order (self);
+    }
     else
-        ps->flags &= ~PLAYSTATEFL_SKIPENDMARK;
-
-    _player_setup_patterns_order (self, track, ps);
+        ERROR ("player_set_order", "%s", "Active track is not set.");
 }
 
 void __far player_set_order_start (MUSPLAYER *self, uint8_t value)
@@ -709,48 +701,10 @@ void __far player_set_order_start (MUSPLAYER *self, uint8_t value)
 
     ps = _Self->play_state;
 
-    ps->order_start = value;
-}
-
-int __far player_find_next_pattern (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps, int index, int step)
-{
-    _MUSPLAYER *_Self = self;
-    MUSPATORDER *order;
-    int start, last, pos;
-    bool skipend;
-
-    order = musmod_get_order (track);
-    start = ps->order_start;
-    last = ps->order_last;
-    pos = index;
-    skipend =  ps->flags & PLAYSTATEFL_SKIPENDMARK;
-
-    // Check bounds
-
-    if ((step < 0) && (pos <= start))
-        // Rewind
-        return muspatorder_find_next_pattern (order, start, last, start, 1, skipend);
-
-    if ((step > 0) && (pos >= ps->order_last))
-    {
-        if (ps->flags & PLAYSTATEFL_SONGLOOP)
-            // Rewind
-            return muspatorder_find_next_pattern (order, start, last, start, 1, skipend);
-        else
-            // Stop
-            return -1;
-    }
-
-    pos = muspatorder_find_next_pattern (order, start, last, pos + step, step, skipend);
-
-    if (pos < 0)
-    {
-        if ((step < 0) || (ps->flags & PLAYSTATEFL_SONGLOOP))
-            // Rewind
-            return muspatorder_find_next_pattern (order, start, last, start, 1, skipend);
-    }
-
-    return pos;
+    if (ps)
+        ps->order_start = value;
+    else
+        ERROR ("player_set_order_start", "%s", "Active track is not set.");
 }
 
 void __far player_set_song_loop (MUSPLAYER *self, bool value)
@@ -802,18 +756,39 @@ bool __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track)
         return false;
     }
 
-    _Self->track = track;  // set active track
     *_track = track;
 
     DEBUG_SUCCESS("player_load_s3m");
     return true;
 }
 
-MIXCHNLIST *__far player_get_mixing_channels (MUSPLAYER *self)
+bool __far player_set_active_track (MUSPLAYER *self, MUSMOD *track)
 {
     _MUSPLAYER *_Self = self;
+    PLAYSTATE *ps;
 
-    return _Self->channels;
+    ps = _Self->play_state;
+    if (!ps)
+    {
+        ps = _new (PLAYSTATE);
+        if (!ps)
+        {
+            ERROR ("player_set_active_track", "Failed to allocate memory for %s.", "play state object");
+            return false;
+        }
+        playstate_init (ps);
+        _Self->play_state = ps;
+    }
+
+    ps->track = track;
+
+    if (!playstate_alloc_channels (ps))
+    {
+        ERROR ("player_set_active_track", "Failed to allocate memory for %s.", "mixing channels");
+        return false;
+    }
+
+    return true;
 }
 
 PLAYSTATE *__far player_get_play_state (MUSPLAYER *self)
@@ -823,106 +798,12 @@ PLAYSTATE *__far player_get_play_state (MUSPLAYER *self)
     return _Self->play_state;
 }
 
-bool __near _player_alloc_channels (MUSPLAYER *self, MIXCHNLIST *channels, MUSMOD *track)
-{
-    _MUSPLAYER *_Self = self;
-    uint8_t num_channels;
-    uint8_t i;
-    MIXCHN *chn;
-    MIXCHNTYPE type;
-    MIXCHNPAN pan;
-    MIXCHNFLAGS flags;
-
-    num_channels = musmod_get_channels_count (track);
-
-    if (mixchnl_get_count (channels) != num_channels)
-        if (!mixchnl_set_count (channels, musmod_get_channels_count (track)))
-        {
-            ERROR ("_player_alloc_channels", "Failed to allocate memory for %s.", "mixing channels");
-            return false;
-        }
-
-    for (i = 0; i < num_channels; i++)
-    {
-        chn = mixchnl_get (channels, i);
-        pan = musmod_get_channels (track)[i].pan & MUSMODCHNPANFL_PAN_MASK;
-
-        if (musmod_get_channels (track)[i].pan & MUSMODCHNPANFL_ENABLED)
-        {
-            type = MIXCHNTYPE_PCM;
-            flags = MIXCHNFL_ENABLED | MIXCHNFL_MIXING;
-        }
-        else
-        {
-            type = MIXCHNTYPE_NONE;
-            flags = 0;
-        }
-
-        mixchn_set_type (chn, type);
-        mixchn_set_pan (chn, pan);
-        mixchn_set_flags (chn, flags);
-    }
-
-    return true;
-}
-
-void __near _player_reset_channels (MUSPLAYER *self, MIXCHNLIST *channels)
-{
-    _MUSPLAYER *_Self = self;
-    uint8_t num_channels, i;
-    MIXCHN *chn;
-
-    num_channels = mixchnl_get_count (channels);
-
-    for (i = 0; i < num_channels; i++)
-    {
-        chn = mixchnl_get (channels, i);
-        if (mixchn_get_type (chn) != MIXCHNTYPE_NONE)
-            mixchn_reset_wave_tables (chn);
-    }
-}
-
-void __near _player_set_initial_state (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps)
+void __far player_song_stop (MUSPLAYER *self, PLAYSTATE *ps)
 {
     _MUSPLAYER *_Self = self;
 
-    playState_set_tempo (ps, musmod_get_tempo (track)); // first priority (is output mixer-dependant)
-    playState_set_speed (ps, musmod_get_speed (track)); // second priority (is song's internal value)
-    ps->global_volume = musmod_get_global_volume (track); // is song's internal value
-    ps->master_volume = musmod_get_master_volume (track); // is song's output
-}
-
-void __far player_set_pos (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps, uint8_t start_order, uint8_t start_row, bool keep)
-{
-    _MUSPLAYER *_Self = self;
-    MUSPATORDER *order;
-    MUSPATORDENT *order_entry;
-
-    order = musmod_get_order (track);
-
-    // Module
-    ps->order = start_order;                // next order to read from
-    order_entry = muspatorder_get (order, start_order);
-    ps->pattern = *order_entry;             // next pattern to read from
-    ps->row = start_row;                    // next row to read from
-    ps->tick = 1;                           // last tick (go to next row)
-    ps->tick_samples_per_channel_left = 0;  // immediately next tick
-
-    if (!keep)
-    {
-        // reset pattern effects:
-        ps->patdelay_count = 0;
-        ps->flags &= ~PLAYSTATEFL_PATLOOP;
-        ps->patloop_count = 0;
-        ps->patloop_start_row = 0;
-    }
-}
-
-void __far player_song_stop (MUSPLAYER *self, MUSMOD *track, PLAYSTATE *ps)
-{
-    _MUSPLAYER *_Self = self;
-
-    ps->flags |= PLAYSTATEFL_END;
+    if (ps)
+        ps->flags |= PLAYSTATEFL_END;
 }
 
 bool __far player_play_start (MUSPLAYER *self)
@@ -954,37 +835,17 @@ bool __far player_play_start (MUSPLAYER *self)
         return false;
     }
 
-    track = _Self->track;
-    if ((!track) || (!musmod_is_loaded (track)))
-    {
-        ERROR ("player_play_start", "%s", "No music module was loaded.");
-        return false;
-    }
-
-    // Allocate mixing channels
-
-    channels = _new (MIXCHNLIST);
-    if (!channels)
-    {
-        ERROR ("player_play_start", "Failed to allocate memory for %s.", "mixing channels");
-        return false;
-    }
-    mixchnl_init (channels);
-    _Self->channels = channels;
-
-    // Allocate play state
-
-    ps = _new (PLAYSTATE);
+    ps = _Self->play_state;
     if (!ps)
     {
-        ERROR ("player_play_start", "Failed to allocate memory for %s.", "play state");
+        ERROR ("player_play_start", "%s", "Active track is not set.");
         return false;
     }
-    playstate_init (ps);
-    _Self->play_state = ps;
 
-    if (!_player_alloc_channels (self, channels, track))
-        return false;
+    ps->flags = PLAYSTATEFL_END;    // stop for setup
+
+    track = ps->track;
+    channels = ps->channels;
 
     // 1. Setup output mode
 
@@ -995,6 +856,12 @@ bool __far player_play_start (MUSPLAYER *self)
     _Self->mode_signed   = sb_mode_is_signed (_Self->device);
 
     ps->rate = _Self->mode_lq ? _Self->mode_rate / 2 : _Self->mode_rate;
+
+    // Setup playing state
+    playstate_setup_patterns_order (ps);
+    playstate_set_initial_state (ps);   // depends on rate, master volume affects mixer tables
+    playstate_set_pos (ps, ps->order_start, 0, false);
+    playstate_reset_channels (ps);
 
     // 2. Setup mixer mode
 
@@ -1027,25 +894,18 @@ bool __far player_play_start (MUSPLAYER *self)
 
     voltab_calc();
 
-    // 5. Setup playing state
-
-    _player_setup_patterns_order (self, track, ps);
-    _player_set_initial_state (self, track, ps);  // master volume affects mixer tables
-
     // mixer
     amptab_set_volume (ps->master_volume);
 
-    _player_reset_channels (self, channels);
-    player_set_pos (self, track, ps, ps->order_start, 0, false);
     ps->flags = 0;    // resume playing
 
-    // 6. Prefill output buffer
+    // 5. Prefill output buffer
 
     outbuf->frameLast = -1;
     outbuf->frameActive = outbuf->framesCount - 1;
-    fill_DMAbuffer (track, ps, channels, _Self->mixer, outbuf);
+    fill_DMAbuffer (ps, _Self->mixer, outbuf);
 
-    // 7. Start sound
+    // 6. Start sound
 
     if (!sb_transfer_start (_Self->device))
     {
@@ -1115,15 +975,29 @@ uint8_t __far player_get_pattern_delay (MUSPLAYER *self)
     return ps->patdelay_count;
 }
 
+void __near player_free_play_state (MUSPLAYER *self)
+{
+    _MUSPLAYER *_Self = self;
+
+    if (_Self->play_state)
+    {
+        playstate_free (_Self->play_state);
+        _delete (_Self->play_state);
+    }
+}
+
 void __far player_free_module (MUSPLAYER *self, MUSMOD *track)
 {
     _MUSPLAYER *_Self = self;
+    PLAYSTATE *ps;
 
     DEBUG_BEGIN ("player_free_module");
     if (track)
     {
-        if (_Self->track == track)
-            _Self->track = NULL;
+        ps = _Self->play_state;
+        if (ps)
+            if (ps->track == track)
+                player_free_play_state (self);
         _free_module (track);
     }
     DEBUG_END ("player_free_module");
@@ -1135,19 +1009,8 @@ void __far player_free_modules (MUSPLAYER *self)
 
     DEBUG_BEGIN ("player_free_modules");
 
+    player_free_play_state (self);
     _free_modules ();
-
-    if (_Self->channels)
-    {
-        mixchnl_free (_Self->channels);
-        _delete (_Self->channels);
-    }
-
-    if (_Self->play_state)
-    {
-        playstate_free (_Self->play_state);
-        _delete (_Self->play_state);
-    }
 
     DEBUG_END ("player_free_modules");
 }
