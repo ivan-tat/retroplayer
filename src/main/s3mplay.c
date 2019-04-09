@@ -423,8 +423,6 @@ bool __far player_init (MUSPLAYER *self)
     }
 }
 
-/* Private and public methods */
-
 void __far player_set_EM_usage (MUSPLAYER *self, bool value)
 {
     _MUSPLAYER *_Self = self;
@@ -438,6 +436,8 @@ bool __far player_is_EM_in_use (MUSPLAYER *self)
 
     return _Self->flags_use_EM;
 }
+
+/* Output device */
 
 bool __far player_init_device (MUSPLAYER *self, SNDDEVTYPE type, SNDDEVSETMET method)
 {
@@ -496,14 +496,6 @@ bool __far player_init_device (MUSPLAYER *self, SNDDEVTYPE type, SNDDEVSETMET me
     }
 }
 
-void __far player_device_dump_conf (MUSPLAYER *self)
-{
-    _MUSPLAYER *_Self = self;
-
-    if (_Self->flags_snddev)
-        sb_conf_dump (_Self->device);
-}
-
 char *__far player_device_get_name (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
@@ -512,6 +504,14 @@ char *__far player_device_get_name (MUSPLAYER *self)
         return sb_get_name (_Self->device);
     else
         return NULL;
+}
+
+void __far player_device_dump_conf (MUSPLAYER *self)
+{
+    _MUSPLAYER *_Self = self;
+
+    if (_Self->flags_snddev)
+        sb_conf_dump (_Self->device);
 }
 
 SNDDMABUF *__far player_get_sound_buffer (MUSPLAYER *self)
@@ -631,179 +631,6 @@ bool __near _player_setup_outbuf(MUSPLAYER *self, SNDDMABUF *outbuf, uint16_t sp
         ERROR ("_player_setup_outbuf", "%s", "No play mode was set.");
         return false;
     }
-}
-
-void __far player_set_master_volume (MUSPLAYER *self, uint8_t value)
-{
-    _MUSPLAYER *_Self = self;
-    PLAYSTATE *ps;
-
-    ps = _Self->play_state;
-    if (ps)
-    {
-        if (value > MUSMOD_MASTER_VOLUME_MAX)
-            value = MUSMOD_MASTER_VOLUME_MAX;
-        ps->master_volume = value;
-        amptab_set_volume(value);
-    }
-    else
-        ERROR ("player_set_master_volume", "%s", "Active track is not set.");
-}
-
-uint8_t __far player_get_master_volume (MUSPLAYER *self)
-{
-    _MUSPLAYER *_Self = self;
-    PLAYSTATE *ps;
-
-    ps = _Self->play_state;
-    if (ps)
-        return ps->master_volume;
-    else
-    {
-        ERROR ("player_set_master_volume", "%s", "Active track is not set.");
-        return 0;
-    }
-}
-
-MIXER *__far player_get_mixer (MUSPLAYER *self)
-{
-    _MUSPLAYER *_Self = self;
-
-    return _Self->mixer;
-}
-
-void __far player_set_order (MUSPLAYER *self, bool skipend)
-{
-    _MUSPLAYER *_Self = self;
-    MUSMOD *track;
-    PLAYSTATE *ps;
-
-    ps = _Self->play_state;
-    if (ps)
-    {
-        track = ps->track;
-
-        if (skipend)
-            ps->flags |= PLAYSTATEFL_SKIPENDMARK;
-        else
-            ps->flags &= ~PLAYSTATEFL_SKIPENDMARK;
-
-        playstate_setup_patterns_order (self);
-    }
-    else
-        ERROR ("player_set_order", "%s", "Active track is not set.");
-}
-
-void __far player_set_order_start (MUSPLAYER *self, uint8_t value)
-{
-    _MUSPLAYER *_Self = self;
-    PLAYSTATE *ps;
-
-    ps = _Self->play_state;
-
-    if (ps)
-        ps->order_start = value;
-    else
-        ERROR ("player_set_order_start", "%s", "Active track is not set.");
-}
-
-void __far player_set_song_loop (MUSPLAYER *self, bool value)
-{
-    _MUSPLAYER *_Self = self;
-    PLAYSTATE *ps;
-
-    ps = _Self->play_state;
-
-    if (value)
-        ps->flags |= PLAYSTATEFL_SONGLOOP;
-    else
-        ps->flags &= ~PLAYSTATEFL_SONGLOOP;
-}
-
-bool __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track)
-{
-    _MUSPLAYER *_Self = self;
-    LOADER_S3M *p;
-    MUSMOD *track;
-
-    p = load_s3m_new();
-    if (!p)
-    {
-        ERROR ("player_load_s3m", "Failed to initialize %s.", "S3M loader");
-        return false;
-    }
-    load_s3m_init(p);
-
-    track = load_s3m_load (p, name, _Self->flags_use_EM);
-    if ((!track) || (!musmod_is_loaded (track)))
-    {
-        ERROR ("player_load_s3m", "Failed to load S3M file (%s).", load_s3m_get_error (p));
-        // free partially loaded track
-        if (track)
-            _free_module (track);
-        load_s3m_free(p);
-        load_s3m_delete(&p);
-        return false;
-    }
-
-    load_s3m_free(p);
-    load_s3m_delete(&p);
-
-    if (!_add_module (track))
-    {
-        ERROR ("player_load_s3m", "%s", "Failed to register loaded music module.");
-        _free_module (track);
-        return false;
-    }
-
-    *_track = track;
-
-    DEBUG_SUCCESS("player_load_s3m");
-    return true;
-}
-
-bool __far player_set_active_track (MUSPLAYER *self, MUSMOD *track)
-{
-    _MUSPLAYER *_Self = self;
-    PLAYSTATE *ps;
-
-    ps = _Self->play_state;
-    if (!ps)
-    {
-        ps = _new (PLAYSTATE);
-        if (!ps)
-        {
-            ERROR ("player_set_active_track", "Failed to allocate memory for %s.", "play state object");
-            return false;
-        }
-        playstate_init (ps);
-        _Self->play_state = ps;
-    }
-
-    ps->track = track;
-
-    if (!playstate_alloc_channels (ps))
-    {
-        ERROR ("player_set_active_track", "Failed to allocate memory for %s.", "mixing channels");
-        return false;
-    }
-
-    return true;
-}
-
-PLAYSTATE *__far player_get_play_state (MUSPLAYER *self)
-{
-    _MUSPLAYER *_Self = self;
-
-    return _Self->play_state;
-}
-
-void __far player_song_stop (MUSPLAYER *self, PLAYSTATE *ps)
-{
-    _MUSPLAYER *_Self = self;
-
-    if (ps)
-        ps->flags |= PLAYSTATEFL_END;
 }
 
 bool __far player_play_start (MUSPLAYER *self)
@@ -945,7 +772,202 @@ uint16_t __far player_get_buffer_pos (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
 
-    return sb_get_buffer_pos (_Self->device);
+    if (_Self->device)
+        return sb_get_buffer_pos (_Self->device);
+    else
+        return 0;
+}
+
+void __far player_free_device (MUSPLAYER *self)
+{
+    _MUSPLAYER *_Self = self;
+
+    DEBUG_BEGIN("player_free_device");
+
+    if (_Self->device)
+    {
+        sb_free (_Self->device);
+        sb_delete (&_Self->device);
+    }
+
+    DEBUG_END("player_free_device");
+}
+
+/* Mixer */
+
+MIXER *__far player_get_mixer (MUSPLAYER *self)
+{
+    _MUSPLAYER *_Self = self;
+
+    return _Self->mixer;
+}
+
+/* Song */
+
+bool __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track)
+{
+    _MUSPLAYER *_Self = self;
+    LOADER_S3M *p;
+    MUSMOD *track;
+
+    p = load_s3m_new();
+    if (!p)
+    {
+        ERROR ("player_load_s3m", "Failed to initialize %s.", "S3M loader");
+        return false;
+    }
+    load_s3m_init(p);
+
+    track = load_s3m_load (p, name, _Self->flags_use_EM);
+    if ((!track) || (!musmod_is_loaded (track)))
+    {
+        ERROR ("player_load_s3m", "Failed to load S3M file (%s).", load_s3m_get_error (p));
+        // free partially loaded track
+        if (track)
+            _free_module (track);
+        load_s3m_free(p);
+        load_s3m_delete(&p);
+        return false;
+    }
+
+    load_s3m_free(p);
+    load_s3m_delete(&p);
+
+    if (!_add_module (track))
+    {
+        ERROR ("player_load_s3m", "%s", "Failed to register loaded music module.");
+        _free_module (track);
+        return false;
+    }
+
+    *_track = track;
+
+    DEBUG_SUCCESS("player_load_s3m");
+    return true;
+}
+
+bool __far player_set_active_track (MUSPLAYER *self, MUSMOD *track)
+{
+    _MUSPLAYER *_Self = self;
+    PLAYSTATE *ps;
+
+    ps = _Self->play_state;
+    if (!ps)
+    {
+        ps = _new (PLAYSTATE);
+        if (!ps)
+        {
+            ERROR ("player_set_active_track", "Failed to allocate memory for %s.", "play state object");
+            return false;
+        }
+        playstate_init (ps);
+        _Self->play_state = ps;
+    }
+
+    ps->track = track;
+
+    if (!playstate_alloc_channels (ps))
+    {
+        ERROR ("player_set_active_track", "Failed to allocate memory for %s.", "mixing channels");
+        return false;
+    }
+
+    return true;
+}
+
+PLAYSTATE *__far player_get_play_state (MUSPLAYER *self)
+{
+    _MUSPLAYER *_Self = self;
+
+    return _Self->play_state;
+}
+
+void __far player_set_order (MUSPLAYER *self, bool skipend)
+{
+    _MUSPLAYER *_Self = self;
+    MUSMOD *track;
+    PLAYSTATE *ps;
+
+    ps = _Self->play_state;
+    if (ps)
+    {
+        track = ps->track;
+
+        if (skipend)
+            ps->flags |= PLAYSTATEFL_SKIPENDMARK;
+        else
+            ps->flags &= ~PLAYSTATEFL_SKIPENDMARK;
+
+        playstate_setup_patterns_order (self);
+    }
+    else
+        ERROR ("player_set_order", "%s", "Active track is not set.");
+}
+
+void __far player_set_order_start (MUSPLAYER *self, uint8_t value)
+{
+    _MUSPLAYER *_Self = self;
+    PLAYSTATE *ps;
+
+    ps = _Self->play_state;
+
+    if (ps)
+        ps->order_start = value;
+    else
+        ERROR ("player_set_order_start", "%s", "Active track is not set.");
+}
+
+void __far player_set_song_loop (MUSPLAYER *self, bool value)
+{
+    _MUSPLAYER *_Self = self;
+    PLAYSTATE *ps;
+
+    ps = _Self->play_state;
+
+    if (value)
+        ps->flags |= PLAYSTATEFL_SONGLOOP;
+    else
+        ps->flags &= ~PLAYSTATEFL_SONGLOOP;
+}
+
+uint8_t __far player_get_master_volume (MUSPLAYER *self)
+{
+    _MUSPLAYER *_Self = self;
+    PLAYSTATE *ps;
+
+    ps = _Self->play_state;
+    if (ps)
+        return ps->master_volume;
+    else
+    {
+        ERROR ("player_set_master_volume", "%s", "Active track is not set.");
+        return 0;
+    }
+}
+
+void __far player_set_master_volume (MUSPLAYER *self, uint8_t value)
+{
+    _MUSPLAYER *_Self = self;
+    PLAYSTATE *ps;
+
+    ps = _Self->play_state;
+    if (ps)
+    {
+        if (value > MUSMOD_MASTER_VOLUME_MAX)
+            value = MUSMOD_MASTER_VOLUME_MAX;
+        ps->master_volume = value;
+        amptab_set_volume(value);
+    }
+    else
+        ERROR ("player_set_master_volume", "%s", "Active track is not set.");
+}
+
+void __far player_song_stop (MUSPLAYER *self, PLAYSTATE *ps)
+{
+    _MUSPLAYER *_Self = self;
+
+    if (ps)
+        ps->flags |= PLAYSTATEFL_END;
 }
 
 uint8_t __far player_get_speed (MUSPLAYER *self)
@@ -1013,21 +1035,6 @@ void __far player_free_modules (MUSPLAYER *self)
     _free_modules ();
 
     DEBUG_END ("player_free_modules");
-}
-
-void __far player_free_device (MUSPLAYER *self)
-{
-    _MUSPLAYER *_Self = self;
-
-    DEBUG_BEGIN("player_free_device");
-
-    if (_Self->device)
-    {
-        sb_free (_Self->device);
-        sb_delete (&_Self->device);
-    }
-
-    DEBUG_END("player_free_device");
 }
 
 /* Finalization */
