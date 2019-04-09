@@ -161,9 +161,9 @@ void __far win_information_draw(SCRWIN *self)
 
         textcolor(_lightcyan);
         gotoxy(8, 2);
-        printf("%03u", player_get_speed (player));
+        printf("%03u", ps->speed);
         gotoxy(18, 2);
-        printf("%03u", player_get_tempo (player));
+        printf("%03u", ps->tempo);
         gotoxy(27, 2);
         printf("%02u", ps->global_volume);
         gotoxy(35, 2);
@@ -190,7 +190,7 @@ void __far win_information_draw(SCRWIN *self)
         gotoxy(45, 3);
         printf("%03u", ps->tick);
         gotoxy(56, 3);
-        printf("%02u", player_get_pattern_delay (player));
+        printf("%02u", ps->patdelay_count);
         gotoxy(65, 3);
         printf("%03u", ps->patloop_start_row);
         gotoxy(69, 3);

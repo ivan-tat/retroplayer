@@ -49,6 +49,7 @@ static bool opt_lq;
 static char opt_filename[pascal_String_size];
 
 static MUSPLAYER *mp;
+static PLAYSTATE *ps;
 static MUSMOD *song_track;
 
 void __near
@@ -153,14 +154,17 @@ smalls3m_main (void)
     if (!player_set_active_track (mp, song_track))
         exit (1);
 
+    ps = player_get_play_state (mp);
+
     if (!player_init_device (mp, SNDDEVTYPE_SB, SNDDEVSETMET_ENV))
         exit (1);
 
     if (!player_set_mode (mp, opt_16bits, opt_stereo, opt_rate, opt_lq))
         exit (1);
 
-    player_set_order (mp, true);
-    player_set_song_loop (mp, true);
+    playstate_set_skip_end_mark (ps, true);
+    playstate_setup_patterns_order (ps);
+    playstate_set_song_loop (ps, true);
 
     if (!player_play_start (mp))
         exit (1);

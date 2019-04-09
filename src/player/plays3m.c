@@ -832,9 +832,10 @@ void __far plays3m_main (void)
         exit(1);
     }
 
-    player_set_order (mp, opt_st3order);
-    player_set_order_start (mp, opt_startpos);
-    player_set_song_loop (mp, opt_loop);
+    playstate_set_skip_end_mark (ps, opt_st3order);
+    playstate_setup_patterns_order (ps);
+    playstate_set_order_start (ps, opt_startpos);
+    playstate_set_song_loop (ps, opt_loop);
     player_set_sound_buffer_fps (mp, opt_fps);
     sndbuf = player_get_sound_buffer (mp);
 
@@ -926,7 +927,7 @@ void __far plays3m_main (void)
                 {
                     pos = playstate_find_next_pattern (ps, ps->order, 1);
                     if (pos < 0)
-                        player_song_stop (mp, ps);
+                        playstate_set_song_end (ps, true);
                     else
                         playstate_set_pos (ps, pos, 0, true);
                     c = 0;
@@ -935,7 +936,7 @@ void __far plays3m_main (void)
                 {
                     pos = playstate_find_next_pattern (ps, ps->order, -1);
                     if (pos < 0)
-                        player_song_stop (mp, ps);
+                        playstate_set_song_end (ps, true);
                     else
                     {
                         playstate_set_pos (ps, pos, 0, false);
@@ -958,7 +959,7 @@ void __far plays3m_main (void)
             }
         }
     }
-    while (((sndbuf->flags & SNDDMABUFFL_SLOW) == 0) && (!quit) && (!(ps->flags & PLAYSTATEFL_END)));
+    while (((sndbuf->flags & SNDDMABUFFL_SLOW) == 0) && (!quit) && (!(playstate_is_song_end (ps))));
 
     textbackground(_black);
     textcolor(_lightgray);

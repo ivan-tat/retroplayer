@@ -13,6 +13,8 @@ interface
 uses
     s3mtypes;
 
+procedure __playstate_set_flags;
+
 procedure playstate_init;
 procedure playstate_alloc_channels;
 procedure playstate_reset_channels;
@@ -38,6 +40,8 @@ uses
     mixchn;
 
 (*$l musmodps.obj*)
+
+procedure __playstate_set_flags; external;
 
 procedure playstate_init; external;
 procedure playstate_alloc_channels; external;

@@ -29,6 +29,8 @@
 #define def_stereo false
 #define def_16bits false
 #define def_lq false
+#define def_skip_end_mark true
+#define def_song_loop true
 
 #define COL_BACKGROUND 1
 #define COL_FOREGROUND 14
@@ -42,6 +44,7 @@ static void *bufdata = NULL;
 static uint8_t scr[2][320] = { 0 };
 
 static MUSPLAYER *mp;
+static PLAYSTATE *ps;
 static MUSMOD *song_track;
 static SNDDMABUF *sndbuf;
 
@@ -262,14 +265,15 @@ void __far playosci_main (void)
         exit (1);
     }
 
-    player_set_mode (mp, opt_16bits, opt_stereo, opt_rate, opt_lq);
-    player_set_order (mp, true);
-    player_set_song_loop (mp, true);
-
     if (!player_set_mode (mp, opt_16bits, opt_stereo, opt_rate, opt_lq))
         exit (1);
 
     sndbuf = player_get_sound_buffer (mp);
+    ps = player_get_play_state (mp);
+
+    playstate_set_skip_end_mark (ps, def_skip_end_mark);
+    playstate_setup_patterns_order (ps);
+    playstate_set_song_loop (ps, def_song_loop);
 
     if (!player_play_start (mp))
         exit (1);

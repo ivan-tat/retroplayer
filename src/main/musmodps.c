@@ -19,6 +19,14 @@
 
 #include "main/musmodps.h"
 
+PLAYSTATEFLAGS __far __playstate_set_flags (PLAYSTATEFLAGS _flags, PLAYSTATEFLAGS _mask, PLAYSTATEFLAGS _set, bool _raise)
+{
+    if (_raise)
+        return (_flags & _mask) | _set;
+    else
+        return _flags & _mask;
+}
+
 void __far playstate_init (PLAYSTATE *self)
 {
     if (self)

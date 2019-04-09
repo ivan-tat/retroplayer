@@ -882,54 +882,6 @@ PLAYSTATE *__far player_get_play_state (MUSPLAYER *self)
     return _Self->play_state;
 }
 
-void __far player_set_order (MUSPLAYER *self, bool skipend)
-{
-    _MUSPLAYER *_Self = self;
-    MUSMOD *track;
-    PLAYSTATE *ps;
-
-    ps = _Self->play_state;
-    if (ps)
-    {
-        track = ps->track;
-
-        if (skipend)
-            ps->flags |= PLAYSTATEFL_SKIPENDMARK;
-        else
-            ps->flags &= ~PLAYSTATEFL_SKIPENDMARK;
-
-        playstate_setup_patterns_order (self);
-    }
-    else
-        ERROR ("player_set_order", "%s", "Active track is not set.");
-}
-
-void __far player_set_order_start (MUSPLAYER *self, uint8_t value)
-{
-    _MUSPLAYER *_Self = self;
-    PLAYSTATE *ps;
-
-    ps = _Self->play_state;
-
-    if (ps)
-        ps->order_start = value;
-    else
-        ERROR ("player_set_order_start", "%s", "Active track is not set.");
-}
-
-void __far player_set_song_loop (MUSPLAYER *self, bool value)
-{
-    _MUSPLAYER *_Self = self;
-    PLAYSTATE *ps;
-
-    ps = _Self->play_state;
-
-    if (value)
-        ps->flags |= PLAYSTATEFL_SONGLOOP;
-    else
-        ps->flags &= ~PLAYSTATEFL_SONGLOOP;
-}
-
 uint8_t __far player_get_master_volume (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
@@ -960,41 +912,6 @@ void __far player_set_master_volume (MUSPLAYER *self, uint8_t value)
     }
     else
         ERROR ("player_set_master_volume", "%s", "Active track is not set.");
-}
-
-void __far player_song_stop (MUSPLAYER *self, PLAYSTATE *ps)
-{
-    _MUSPLAYER *_Self = self;
-
-    if (ps)
-        ps->flags |= PLAYSTATEFL_END;
-}
-
-uint8_t __far player_get_speed (MUSPLAYER *self)
-{
-    _MUSPLAYER *_Self = self;
-    PLAYSTATE *ps;
-
-    ps = _Self->play_state;
-    return ps->speed;
-}
-
-uint8_t __far player_get_tempo (MUSPLAYER *self)
-{
-    _MUSPLAYER *_Self = self;
-    PLAYSTATE *ps;
-
-    ps = _Self->play_state;
-    return ps->tempo;
-}
-
-uint8_t __far player_get_pattern_delay (MUSPLAYER *self)
-{
-    _MUSPLAYER *_Self = self;
-    PLAYSTATE *ps;
-
-    ps = _Self->play_state;
-    return ps->patdelay_count;
 }
 
 void __near player_free_play_state (MUSPLAYER *self)

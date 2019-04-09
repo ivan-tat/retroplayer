@@ -80,15 +80,8 @@ MIXER   *__far player_get_mixer (MUSPLAYER *self);
 bool     __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track);
 bool     __far player_set_active_track (MUSPLAYER *self, MUSMOD *track);
 PLAYSTATE *__far player_get_play_state (MUSPLAYER *self);
-void     __far player_set_order (MUSPLAYER *self, bool skipend);
-void     __far player_set_order_start (MUSPLAYER *self, uint8_t value);
-void     __far player_set_song_loop (MUSPLAYER *self, bool value);
 uint8_t  __far player_get_master_volume (MUSPLAYER *self);
 void     __far player_set_master_volume (MUSPLAYER *self, uint8_t value);
-uint8_t  __far player_get_speed (MUSPLAYER *self);
-uint8_t  __far player_get_tempo (MUSPLAYER *self);
-uint8_t  __far player_get_pattern_delay (MUSPLAYER *self);
-void     __far player_song_stop (MUSPLAYER *self, PLAYSTATE *ps);
 void     __far player_free_module (MUSPLAYER *self, MUSMOD *track);
 void     __far player_free_modules (MUSPLAYER *self);
 
@@ -136,15 +129,8 @@ DECLARE_REGISTRATION (s3mplay)
 #pragma aux player_load_s3m "*";
 #pragma aux player_set_active_track "*";
 #pragma aux player_get_play_state "*";
-#pragma aux player_set_order "*";
-#pragma aux player_set_order_start "*";
-#pragma aux player_set_song_loop "*";
 #pragma aux player_set_master_volume "*";
 #pragma aux player_get_master_volume "*";
-#pragma aux player_get_speed "*";
-#pragma aux player_get_tempo "*";
-#pragma aux player_get_pattern_delay "*";
-#pragma aux player_song_stop "*";
 #pragma aux player_free_module "*";
 #pragma aux player_free_modules "*";
 
