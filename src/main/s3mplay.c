@@ -48,13 +48,18 @@ typedef struct play_isr_param_t {
 #pragma pack(pop);
 typedef struct play_isr_param_t PLAYISRPARAM;
 
+typedef uint8_t _music_player_flags_t;
+typedef _music_player_flags_t _MUSPLAYERFLAGS;
+
+#define _MUSPLAYERFL_USE_EM     (1 << 0)
+#define _MUSPLAYERFL_BUFFERS    (1 << 1)
+#define _MUSPLAYERFL_DEVICE     (1 << 2)
+
 #pragma pack(push, 1);
 typedef struct _music_player_t
 {
     char error[_PLAYER_ERROR_LEN];
-    bool flags_use_EM;
-    bool flags_bufalloc;
-    bool flags_snddev;
+    _MUSPLAYERFLAGS flags;
     SBDEV *device;
     SNDDMABUF *sndbuf;
     uint8_t sound_buffer_fps;
@@ -74,6 +79,22 @@ typedef struct _music_player_t
 };
 #pragma pack(pop);
 
+_MUSPLAYERFLAGS __near __player_set_flags (_MUSPLAYERFLAGS _flags, _MUSPLAYERFLAGS _mask, _MUSPLAYERFLAGS _set, bool _raise)
+{
+    if (_raise)
+        return (_flags & _mask) | _set;
+    else
+        return _flags & _mask;
+}
+
+#define _player_get_flags(o)                (o)->flags
+#define _player_set_flags(o, v)             _player_get_flags (o) = v
+#define _player_is_EM_in_use(o)             ((_player_get_flags (o) & _MUSPLAYERFL_USE_EM) != 0)
+#define _player_set_EM_usage(o, v)          _player_set_flags (o, __player_set_flags (_player_get_flags (o), ~_MUSPLAYERFL_USE_EM, _MUSPLAYERFL_USE_EM, v))
+#define _player_are_buffers_allocated(o)    ((_player_get_flags (o) & _MUSPLAYERFL_BUFFERS) != 0)
+#define _player_set_buffers_allocated(o, v) _player_set_flags (o, __player_set_flags (_player_get_flags (o), ~_MUSPLAYERFL_BUFFERS, _MUSPLAYERFL_BUFFERS, v))
+#define _player_is_device_set(o)            ((_player_get_flags (o) & _MUSPLAYERFL_DEVICE) != 0)
+#define _player_set_device_set(o, v)        _player_set_flags (o, __player_set_flags (_player_get_flags (o), ~_MUSPLAYERFL_DEVICE, _MUSPLAYERFL_DEVICE, v))
 
 /* Each element is a pointer */
 
@@ -202,7 +223,7 @@ void __far ISR_play (void *param)
 
         err = false;
 
-        if (player->flags_use_EM)
+        if (_player_is_EM_in_use (player))
         {
             err = true;
             if (emsSaveMap (player->EM_map_handle))
@@ -211,7 +232,7 @@ void __far ISR_play (void *param)
 
         fill_DMAbuffer (player->play_state, player->mixer, dmabuf);
 
-        if (player->flags_use_EM && !err)
+        if (_player_is_EM_in_use (player) && !err)
             emsRestoreMap (player->EM_map_handle);
 
         self->busy = false;
@@ -294,7 +315,7 @@ bool __far player_init (MUSPLAYER *self)
     if (_Self)
     {
         memset (_Self, 0, sizeof (_MUSPLAYER));
-        _Self->flags_use_EM = emsInstalled;
+        _player_set_EM_usage (_Self, emsInstalled);
 
         // Sound
         _Self->EM_map_handle = EMSBADHDL;
@@ -352,7 +373,7 @@ bool __far player_init (MUSPLAYER *self)
         _Self->play_state = NULL;
 
         // ISR
-        if (_Self->flags_use_EM)
+        if (_player_is_EM_in_use (_Self))
         {
             _Self->EM_map_handle = emsAlloc (1);  // is 1 page enough?
             if (emsEC != E_EMS_SUCCESS)
@@ -411,7 +432,7 @@ bool __far player_init (MUSPLAYER *self)
                 return false;
             }
 
-        _Self->flags_bufalloc = true;
+        _player_set_buffers_allocated (_Self, true);
 
         DEBUG_SUCCESS ("player_init");
         return true;
@@ -427,14 +448,14 @@ void __far player_set_EM_usage (MUSPLAYER *self, bool value)
 {
     _MUSPLAYER *_Self = self;
 
-    _Self->flags_use_EM = value && emsInstalled;
+    _player_set_EM_usage (_Self, value && emsInstalled);
 }
 
 bool __far player_is_EM_in_use (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
 
-    return _Self->flags_use_EM;
+    return _player_is_EM_in_use (_Self);
 }
 
 /* Output device */
@@ -485,7 +506,7 @@ bool __far player_init_device (MUSPLAYER *self, SNDDEVTYPE type, SNDDEVSETMET me
     if (result)
     {
         DEBUG_SUCCESS("player_init_device");
-        _Self->flags_snddev = true;
+        _player_set_device_set (_Self, true);
         return true;
     }
     else
@@ -500,7 +521,7 @@ char *__far player_device_get_name (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
 
-    if (_Self->flags_snddev)
+    if (_player_is_device_set (_Self))
         return sb_get_name (_Self->device);
     else
         return NULL;
@@ -510,7 +531,7 @@ void __far player_device_dump_conf (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
 
-    if (_Self->flags_snddev)
+    if (_player_is_device_set (_Self))
         sb_conf_dump (_Self->device);
 }
 
@@ -644,13 +665,13 @@ bool __far player_play_start (MUSPLAYER *self)
 
     DEBUG_BEGIN("player_play_start");
 
-    if (!(_Self->flags_bufalloc))
+    if (!_player_are_buffers_allocated (_Self))
     {
         ERROR ("player_play_start", "%s", "No sound buffers were allocated.");
         return false;
     }
 
-    if (!_Self->flags_snddev)
+    if (!_player_is_device_set (_Self))
     {
         ERROR ("player_play_start", "%s", "No sound device was set.");
         return false;
@@ -790,6 +811,8 @@ void __far player_free_device (MUSPLAYER *self)
         sb_delete (&_Self->device);
     }
 
+    _player_set_device_set (_Self, false);
+
     DEBUG_END("player_free_device");
 }
 
@@ -818,7 +841,7 @@ bool __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track)
     }
     load_s3m_init(p);
 
-    track = load_s3m_load (p, name, _Self->flags_use_EM);
+    track = load_s3m_load (p, name, _player_is_EM_in_use (_Self));
     if ((!track) || (!musmod_is_loaded (track)))
     {
         ERROR ("player_load_s3m", "Failed to load S3M file (%s).", load_s3m_get_error (p));
@@ -993,9 +1016,9 @@ void __far player_free (MUSPLAYER *self)
             _delete (_Self->mixbuf);
         }
 
-        _Self->flags_bufalloc = false;
+        _player_set_buffers_allocated (_Self, false);
 
-        if (_Self->flags_use_EM)
+        if (_player_is_EM_in_use (_Self))
             emsFree (_Self->EM_map_handle);
     }
 
