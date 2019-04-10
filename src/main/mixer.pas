@@ -61,7 +61,7 @@ uses
     common,
     debug;
 
-(*$l mixer_.obj*)
+(*$l asm\mixer_.obj*)
 
 procedure _MixSampleMono8; external;
 procedure _MixSampleStereo8; external;

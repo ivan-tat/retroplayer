@@ -464,6 +464,7 @@ build_target $T_HW_SB  obj src/hw/sb/sbctl.c
 build_target $T_MAIN   inc-linux src/main/_wramp.c
 build_target $T_MAIN   inc-linux src/main/_wsinus.c
 build_target $T_MAIN   inc-linux src/main/_wsquare.c
+build_target $T_MAIN   obj src/main/asm/mixer_.asm
 build_target $T_MAIN   obj src/main/pcmsmp.c
 build_target $T_MAIN   obj src/main/musins.c
 build_target $T_MAIN   obj src/main/musmod.c
@@ -472,7 +473,6 @@ build_target $T_MAIN   obj src/main/muspat.c
 build_target $T_MAIN   obj src/main/fillvars.c
 build_target $T_MAIN   obj src/main/voltab.c
 build_target $T_MAIN   obj src/main/posttab.c
-build_target $T_MAIN   obj src/main/mixer_.asm
 build_target $T_MAIN   obj src/main/mixer.c
 build_target $T_MAIN   obj src/main/mixchn.c
 build_target $T_MAIN   obj src/main/effects.c

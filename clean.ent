@@ -104,6 +104,7 @@
 ./src/hw/vbios.asm
 ./src/hw/vga.asm
 ./src/main/
+./src/main/asm/
 ./src/main/effects.asm
 ./src/main/filldma.asm
 ./src/main/fillvars.asm
