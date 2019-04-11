@@ -122,6 +122,7 @@ void __near song_play_channel (PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIX
                     _mix_sample2 (outBuf, smpbuf, FP_SEG(*volumetableptr), final_volume, count);
                 else
                     _mix_sample (outBuf, smpbuf, FP_SEG(*volumetableptr), final_volume, count);
+                break;
             default:
                 // fastest
                 if (pcmsmp_get_bits (smp) == 16)

@@ -77,6 +77,7 @@
 
 /* Tracker type */
 #define _S3M_TRACKER_ST3    1
+#define _S3M_TRACKER_SCHISM 4
 
 /* Tracker version */
 #define _S3M_TRACKER_VER_MAJOR_ST3  3
@@ -204,6 +205,7 @@ typedef struct _s3m_instrument_t _S3M_INS;
 #define _ins_get_sample_offset(o)       (((o)->data.sample.filepos + ((uint32_t)(o)->data.sample.filepos_hi << 16)) << 4)
 #define _ins_get_sample_length(o)       (o)->data.sample.length
 #define _ins_is_sample_looped(o)        (((o)->data.sample.flags & _S3M_SMPFL_LOOP) != 0)
+#define _ins_is_sample_16_bits(o)       (((o)->data.sample.flags & _S3M_SMPFL_16BITS) != 0)
 #define _ins_get_sample_loop_start(o)   (o)->data.sample.loopbeg
 #define _ins_get_sample_loop_end(o)     (o)->data.sample.loopend
 #define _ins_get_sample_rate(o)         (o)->data.sample.rate
@@ -387,12 +389,84 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
     }
 
     if ((header.type != _S3M_FILE_TYPE)
-    || (header.magic != _S3M_FILE_MAGIC)
-    || ((header.tracker & (_S3M_TRACKER_TYPE_MASK | _S3M_TRACKER_VER_MAJOR_MASK)) !=
-        ((_S3M_TRACKER_ST3 << _S3M_TRACKER_TYPE_SHIFT) | (_S3M_TRACKER_VER_MAJOR_ST3 << _S3M_TRACKER_VER_MAJOR_SHIFT)))
-    || ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2)))
+    || (header.magic != _S3M_FILE_MAGIC))
     {
+        DEBUG_INFO_ ("load_s3m_load",
+            "type=%04X (%s)",
+            header.type,
+            (header.type != _S3M_FILE_TYPE)
+                ? "wrong" : "ok"
+        );
+        DEBUG_INFO_ ("load_s3m_load",
+            "magic=%08lX (%s)",
+            (long) header.magic,
+            (header.magic != _S3M_FILE_MAGIC)
+                ? "wrong" : "ok"
+        );
         ERROR (self, "load_s3m_load", "%s is not supported.", "file format");
+        return false;
+    }
+
+    switch ((header.tracker & _S3M_TRACKER_TYPE_MASK) >> _S3M_TRACKER_TYPE_SHIFT)
+    {
+    case _S3M_TRACKER_ST3:
+        if (((header.tracker & _S3M_TRACKER_VER_MAJOR_MASK) != (_S3M_TRACKER_VER_MAJOR_ST3 << _S3M_TRACKER_VER_MAJOR_SHIFT))
+        || ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2)))
+        {
+            DEBUG_INFO_ ("load_s3m_load",
+                "tracker=%04X (%s)",
+                header.tracker,
+                ((header.tracker & _S3M_TRACKER_VER_MAJOR_MASK) != (_S3M_TRACKER_VER_MAJOR_ST3 << _S3M_TRACKER_VER_MAJOR_SHIFT))
+                    ? "wrong" : "ok"
+            );
+            DEBUG_INFO_ ("load_s3m_load",
+                "format=%04X (%s)",
+                header.format,
+                ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2))
+                    ? "wrong" : "ok"
+            );
+
+            ERROR (self, "load_s3m_load", "%s", "Unknown Scream Tracker version.");
+            return false;
+        }
+        snprintf (
+            musmod_get_format (track),
+            MUSMOD_FORMAT_LEN,
+            "Scream Tracker %hhx.%02hhx module",
+            (header.tracker & _S3M_TRACKER_VER_MAJOR_MASK) >> _S3M_TRACKER_VER_MAJOR_SHIFT,
+            (header.tracker & _S3M_TRACKER_VER_MINOR_MASK) >> _S3M_TRACKER_VER_MINOR_SHIFT
+        );
+        break;
+    case _S3M_TRACKER_SCHISM:
+        if ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2))
+        {
+            DEBUG_INFO_ ("load_s3m_load",
+                "format=%04X (%s)",
+                header.format,
+                ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2))
+                    ? "wrong" : "ok"
+            );
+
+            ERROR (self, "load_s3m_load", "%s is not supported.", "Schism Tracker file format");
+            return false;
+        }
+        snprintf (
+            musmod_get_format (track),
+            MUSMOD_FORMAT_LEN,
+            "%s",
+            "Schism Tracker module"
+        );
+        break;
+    default:
+        DEBUG_INFO_ ("load_s3m_load",
+            "tracker=%04X",
+            header.tracker
+        );
+        DEBUG_INFO_ ("load_s3m_load",
+            "format=%04X",
+            header.format
+        );
+        ERROR (self, "load_s3m_load", "%s", "Unknown tracker.");
         return false;
     }
 
@@ -437,14 +511,6 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
     if (DEBUG_FILE_S3M_LOAD)
         DEBUG_INFO_ ("load_s3m_load", "Channels: %hu", musmod_get_channels_count (track));
 
-    snprintf (
-        musmod_get_format (track),
-        MUSMOD_FORMAT_LEN,
-        "Scream Tracker %hhx.%02hhx module",
-        (header.tracker & _S3M_TRACKER_VER_MAJOR_MASK) >> _S3M_TRACKER_VER_MAJOR_SHIFT,
-        (header.tracker & _S3M_TRACKER_VER_MINOR_MASK) >> _S3M_TRACKER_VER_MINOR_SHIFT
-    );
-
     header.name[_S3M_TITLE_LEN - 1] = 0;
     musmod_set_title (track, header.name);
 
@@ -465,7 +531,8 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
 
 /*** Samples ***/
 
-#define SAMPLE_SIZE_MAX 0x10000
+// minus 1 to fit in 16 bits
+#define SAMPLE_SIZE_MAX (0x10000 - 1)
 
 uint32_t __near _calc_sample_load_size (PCMSMP *smp)
 {
@@ -662,7 +729,7 @@ bool __near load_s3m_load_sample (LOADER_S3M *self, uint8_t index)
     smp = pcmsmpl_get (samples, info->smp_num);
     load_size = _calc_sample_load_size (smp);
     data_size = _calc_sample_mem_size (smp, load_size);
-    if (data_size > 0xffff)
+    if (data_size > SAMPLE_SIZE_MAX)
     {
         ERROR (self, "load_s3m_load_sample", "%s", "Sample is too large.");
         return false;
@@ -873,11 +940,6 @@ bool __near load_s3m_load_ins_headers (LOADER_S3M *self)
                 ERROR (self, "load_s3m_load_ins_headers", "%s is not supported.", "Stereo sample");
                 return false;
             }
-            if (info->header.data.sample.flags & _S3M_SMPFL_16BITS)
-            {
-                ERROR (self, "load_s3m_load_ins_headers", "%s is not supported.", "16-bits sample");
-                return false;
-            }
             info->smp_num = _get_samples_count (_Self);
             _get_samples_count (_Self)++;
             break;
@@ -915,6 +977,7 @@ bool __near load_s3m_load_instrument (LOADER_S3M *self, uint8_t index)
     MUSINSLIST *instruments;
     MUSINS *ins;
     PCMSMP *smp;
+    uint16_t size;
     char smp_title[_S3M_INS_FILENAME_LEN + 1];  /* including terminating zero */
     char ins_title[MUSINS_TITLE_LEN + 1];       /* including terminating zero */
 
@@ -931,7 +994,16 @@ bool __near load_s3m_load_instrument (LOADER_S3M *self, uint8_t index)
     {
         smp = pcmsmpl_get (samples, info->smp_num);
         pcmsmp_set_available (smp, true);
-        pcmsmp_set_size (smp, _ins_get_sample_length (_ins));
+
+        size = _ins_get_sample_length (_ins);
+        if (_ins_is_sample_16_bits (_ins))
+        {
+            pcmsmp_set_bits (smp, 16);
+            size <<= 1;
+        }
+        else
+            pcmsmp_set_bits (smp, 8);
+        pcmsmp_set_size (smp, size);
 
         if (_ins_is_sample_looped (_ins))
         {
@@ -1152,10 +1224,10 @@ bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATROWEVENT *event)
 
     if (flags)
     {
-        event->channel = flags & 0x1f;
+        event->channel = flags & _S3M_EVENTFL_CHNMASK;
         event->event.flags = 0;
 
-        if (flags & 0x20)
+        if (flags & _S3M_EVENTFL_NOTE_INS)
         {
             // note, instrument
             if (!_s3m_patio_read (self, v, 2))
@@ -1192,7 +1264,7 @@ bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATROWEVENT *event)
             }
         }
 
-        if (flags & 0x40)
+        if (flags & _S3M_EVENTFL_VOL)
         {
             // note volume
             if (!_s3m_patio_read (self, v, 1))
@@ -1212,7 +1284,7 @@ bool __near _s3m_patio_read_event (_S3M_PATIO *self, _S3M_PATROWEVENT *event)
             }
         }
 
-        if (flags & 0x80)
+        if (flags & _S3M_EVENTFL_CMD_PARM)
         {
             // command, parameter
             if (!_s3m_patio_read (self, v, 2))

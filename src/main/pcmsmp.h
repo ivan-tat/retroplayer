@@ -96,7 +96,7 @@ PCMSMPFLAGS __far __pcmsmp_set_flags (PCMSMPFLAGS _flags, PCMSMPFLAGS _mask, PCM
 #define _pcmsmp_is_EM_data(o)               ((_pcmsmp_get_flags (o) & PCMSMPFL_EM) != 0)
 #define _pcmsmp_set_own_EM_handle(o, v)     _pcmsmp_set_flags (o, __pcmsmp_set_flags (_pcmsmp_get_flags (o), ~PCMSMPFL_OWNHDL, PCMSMPFL_OWNHDL, v))
 #define _pcmsmp_is_own_EM_handle(o)         ((_pcmsmp_get_flags (o) & PCMSMPFL_OWNHDL) != 0)
-#define _pcmsmp_set_16bits(o)               _pcmsmp_set_flags (o, __pcmsmp_set_flags (_pcmsmp_get_flags (o), ~PCMSMPFL_16BITS, PCMSMPFL_16BITS, v))
+#define _pcmsmp_set_16bits(o, v)            _pcmsmp_set_flags (o, __pcmsmp_set_flags (_pcmsmp_get_flags (o), ~PCMSMPFL_16BITS, PCMSMPFL_16BITS, v))
 #define _pcmsmp_get_16bits(o)               ((_pcmsmp_get_flags (o) & PCMSMPFL_16BITS) != 0)
 #define _pcmsmp_set_bits(o, v)              _pcmsmp_set_16bits (o, (v) == 16)
 #define _pcmsmp_get_bits(o)                 (_pcmsmp_get_16bits (o) ? 16 : 8)

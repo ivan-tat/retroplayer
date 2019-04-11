@@ -125,7 +125,7 @@ _mix_sample@_no0:
     mov     edx,8000h
 ; word at ss:[sp] = jump target
 ; cx = loops count
-; ebx = ((volume & 0x7f) << 8) + (x & 0xff)
+; ebx = ((volume & 0x3f) << 8) + (x & 0xff)
 ; edx = 0x8000
 ; ds:si = sample buffer
 ; es:di = output buffer
@@ -229,7 +229,7 @@ rept LOOP_2_LENGTH
 endm
 
     add     si,LOOP_2_LENGTH*2
-    add     di,LOOP_2_LENGTH*4*2
+    add     di,LOOP_2_LENGTH*8
     dec     cx
     jnz     loop_2_0
 
@@ -569,7 +569,7 @@ loop_mix_16_stereo_&no:
     mov     bl,ds:[esi+esi]
     add     ax,word ptr fs:[edx+ebx*2]
     add     cx,[_step_frac]
-    adc     si,dx
+    adc     si,[_step_int]
     add     es:[di][counter*8],eax
 endm
 
