@@ -1,18 +1,22 @@
-; mixer_.def -- Assembler declarations for "mixer_" library.
+; mixer_.def - assembler declarations for mixer library.
 ;
 ; This is free and unencumbered software released into the public domain.
 ; For more information, please refer to <http://unlicense.org>.
 
-ifndef MIXER__DEF
-MIXER__DEF equ 1
+ifndef MIXER_DEF
+MIXER_DEF equ 1
 
-include "mixer_t.def"
+MIXSMPFL_16BITS equ 001h
+MIXSMPFL_LOOP   equ 002h
 
-MIXER__TEXT segment word public use16 'CODE'
+TPlaySampleInfo struc
+    dData       dd ?
+    dPos        dd ?
+    dStep       dd ?
+    wLen        dw ?
+    wLoopStart  dw ?
+    wLoopEnd    dw ?
+    wFlags      dw ?
+TPlaySampleInfo ends
 
-extrn _MixSampleMono8: far
-extrn _MixSampleStereo8: far
-
-MIXER__TEXT ends
-
-endif   ; MIXER__DEF
+endif   ; MIXER_DEF

@@ -1,15 +1,15 @@
-; mixer_t.def -- Assembler type declarations for "mixer_" library.
+; sampler.def - assembler declarations for sampler library.
 ;
 ; This is free and unencumbered software released into the public domain.
 ; For more information, please refer to <http://unlicense.org>.
 
-ifndef MIXER_T_DEF
-MIXER_T_DEF equ 1
+ifndef SAMPLER_DEF
+SAMPLER_DEF equ 1
 
-MIXSMPFL_16BITS equ 001h
-MIXSMPFL_LOOP   equ 002h
+SAMPLERFL_16BITS equ 001h
+SAMPLERFL_LOOP   equ 002h
 
-TPlaySampleInfo struc
+play_sample_info_t struc
     dData       dd ?
     dPos        dd ?
     dStep       dd ?
@@ -17,6 +17,6 @@ TPlaySampleInfo struc
     wLoopStart  dw ?
     wLoopEnd    dw ?
     wFlags      dw ?
-TPlaySampleInfo ends
+play_sample_info_t ends
 
-endif   ; MIXER_T_DEF
+endif   ; SAMPLER_DEF

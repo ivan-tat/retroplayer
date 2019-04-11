@@ -42,6 +42,7 @@ void voltab_calc(void)
     FILE *f;
     #endif
 
+    // MSB (signed)
     for (vol = 1; vol <= 64; vol++)
         for (sample = 0; !(sample & 0x100); sample++)
         {
@@ -49,12 +50,26 @@ void voltab_calc(void)
             p++;
         }
 
+    // LSB (unsigned)
+    for (vol = 1; vol <= 64; vol++)
+        for (sample = 0; !(sample & 0x100); sample++)
+        {
+            *p = (int16_t)(sample * vol) >> 6;
+            p++;
+        }
+
     if (DEBUG)
     {
-        f = fopen ("_vol", "wb+");
+        f = fopen ("_vol0", "wb+");
         if (f)
         {
-            fwrite (volumetableptr, sizeof (voltab_t), 1, f);
+            fwrite (volumetableptr, sizeof (voltab_t) / 2, 1, f);
+            fclose (f);
+        }
+        f = fopen ("_vol1", "wb+");
+        if (f)
+        {
+            fwrite ((uint8_t *)volumetableptr + sizeof (voltab_t) / 2, sizeof (voltab_t) / 2, 1, f);
             fclose (f);
         }
     }

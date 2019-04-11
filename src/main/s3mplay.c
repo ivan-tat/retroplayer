@@ -426,11 +426,14 @@ bool __far player_init (MUSPLAYER *self)
             }
 
         if (!volumetableptr)
+        {
             if (!voltab_alloc())
             {
                 ERROR ("player_init", "Failed to initialize %s.", "volume table");
                 return false;
             }
+            voltab_calc ();
+        }
 
         _player_set_buffers_allocated (_Self, true);
 
@@ -740,9 +743,6 @@ bool __far player_play_start (MUSPLAYER *self)
 
     // 4. Setup mixer tables
 
-    voltab_calc();
-
-    // mixer
     amptab_set_volume (ps->master_volume);
 
     ps->flags = 0;    // resume playing

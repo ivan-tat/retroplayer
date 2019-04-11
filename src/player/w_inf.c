@@ -16,6 +16,7 @@
 #include "main/muspat.h"
 #include "main/musmod.h"
 #include "main/musmodps.h"
+#include "main/mixer.h"
 #include "main/s3mplay.h"
 #include "player/screen.h"
 
@@ -46,6 +47,12 @@ typedef struct win_information_data_t
     MUSPLAYER *player;
     MUSMOD *track;
     PLAYSTATE *ps;
+};
+
+static const char *mixq[MIXQ_MAX + 1] =
+{
+    "nearest",
+    "fastest"
 };
 
 /* private methods */
@@ -101,6 +108,7 @@ void __far win_information_draw(SCRWIN *self)
     PLAYSTATE *ps;
     MUSPATLIST *patterns;
     MUSPAT *pat;
+    MIXER *mixer;
 
     if (scrwin_is_created(self))
     {
@@ -110,6 +118,7 @@ void __far win_information_draw(SCRWIN *self)
         ps = player_get_play_state (player);
         patterns = musmod_get_patterns (track);
         pat = muspatl_get (patterns, ps->pattern);
+        mixer = player_get_mixer (player);
 
         textbackground(_blue);
 
@@ -120,7 +129,7 @@ void __far win_information_draw(SCRWIN *self)
             gotoxy(2, 1);
             printf("Title:........................... Type:...............................");
             gotoxy(2, 2);
-            printf("Speed:... Tempo:... GVol:.. MVol:... Order:........ Loop:...");
+            printf("Speed:... Tempo:... GVol:.. MVol:... Order:........ Loop:... MixQ:.......");
             gotoxy(2, 3);
             printf("Pos:.../... Pat:..(.....) Row:.../... Tick:... PDelay:.. PLoop:...(...)");
             gotoxy(2, 4);
@@ -172,6 +181,8 @@ void __far win_information_draw(SCRWIN *self)
         printf ((ps->flags & PLAYSTATEFL_SKIPENDMARK) ? "Extended" : "Normal");
         gotoxy(59, 2);
         printf ((ps->flags & PLAYSTATEFL_SONGLOOP) ? "On" : "Off");
+        gotoxy (68, 2);
+        printf (mixq[mixer_get_quality (mixer)]);
         gotoxy(6, 3);
         printf("%03u", ps->order);
         gotoxy(10, 3);

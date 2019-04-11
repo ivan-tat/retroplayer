@@ -465,6 +465,7 @@ build_target $T_MAIN   inc-linux src/main/_wramp.c
 build_target $T_MAIN   inc-linux src/main/_wsinus.c
 build_target $T_MAIN   inc-linux src/main/_wsquare.c
 build_target $T_MAIN   obj src/main/asm/mixer_.asm
+build_target $T_MAIN   obj src/main/asm/sampler.asm
 build_target $T_MAIN   obj src/main/pcmsmp.c
 build_target $T_MAIN   obj src/main/musins.c
 build_target $T_MAIN   obj src/main/musmod.c

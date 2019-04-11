@@ -17,7 +17,7 @@
 
 #include "pascal.h"
 
-typedef int16_t voltab_t[64][256];
+typedef int16_t voltab_t[2][64][256];
 
 extern voltab_t *volumetableptr;
 

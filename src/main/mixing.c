@@ -45,6 +45,8 @@ void __near song_new_tick (PLAYSTATE *ps)
 
 void __near song_play_channel (PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIXER *mixer, uint16_t count, uint16_t bufOff)
 {
+    SMPBUF *sb;
+    void *smpbuf;
     MIXBUF *mb;
     void *outBuf;
     MIXCHNTYPE chtype;
@@ -52,10 +54,10 @@ void __near song_play_channel (PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIX
     unsigned int smpPos;
     MUSINS *ins;
     PCMSMP *smp;
-    uint8_t Vol, IV, SV, GV, final_volume;
+    uint8_t NV, IV, SV, GV, final_volume;
 
     mb = mixer_get_mixbuf (mixer);
-    outBuf = MK_FP(FP_SEG(mb->buf), FP_OFF(mb->buf) + bufOff);
+    outBuf = (void *)((uint8_t *)mb->buf + bufOff);
     chtype = mixchn_get_type(chn);
 
     if (chtype != MIXCHNTYPE_PCM)
@@ -80,14 +82,14 @@ void __near song_play_channel (PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIX
     {
         ins = mixchn_get_instrument (chn);
         smp = mixchn_get_sample (chn);
-        Vol = mixchn_get_note_volume (chn); // = 0..64  (6 bits)
+        NV = mixchn_get_note_volume (chn);  // = 0..64  (6 bits)
         IV = musins_get_volume (ins);       // = 0..128 (7 bits)
         SV = pcmsmp_get_volume (smp);       // = 0..64  (6 bits)
         GV = ps->global_volume;             // = 0..64  (6 bits)
-        if (Vol | IV | SV | GV)
+        if (NV && IV && SV && GV)
         {
             // final_volume = 0..64 (6 bits)
-            final_volume = ((uint32_t) Vol * IV * SV * GV) >> (6 + 7 + 6 + 6 - 6);
+            final_volume = ((uint32_t) NV * IV * SV * GV) >> (6 + 7 + 6 + 6 - 6);
             if (final_volume > 64)
                 final_volume = 64;
         }
@@ -105,10 +107,39 @@ void __near song_play_channel (PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIX
             if (!smpInfo.dData)
                 return;
 
-            if (mb->channels == 2)
-                _MixSampleStereo8(outBuf, &smpInfo, FP_SEG(*volumetableptr), final_volume, count);
-            else
-                _MixSampleMono8(outBuf, &smpInfo, FP_SEG(*volumetableptr), final_volume, count);
+            sb = mixer_get_smpbuf (mixer);
+            smpbuf = smpbuf_get (sb);
+
+            switch (mixer_get_quality (mixer))
+            {
+            case MIXQ_NEAREST:
+                if (pcmsmp_get_bits (smp) == 16)
+                    _play_sample_nearest_16 (smpbuf, &smpInfo, count);
+                else
+                    _play_sample_nearest_8 (smpbuf, &smpInfo, count);
+
+                if (mb->channels == 2)
+                    _mix_sample2 (outBuf, smpbuf, FP_SEG(*volumetableptr), final_volume, count);
+                else
+                    _mix_sample (outBuf, smpbuf, FP_SEG(*volumetableptr), final_volume, count);
+            default:
+                // fastest
+                if (pcmsmp_get_bits (smp) == 16)
+                {
+                    if (mb->channels == 2)
+                        _MixSampleStereo16 (outBuf, &smpInfo, FP_SEG(*volumetableptr), final_volume, count);
+                    else
+                        _MixSampleMono16 (outBuf, &smpInfo, FP_SEG(*volumetableptr), final_volume, count);
+                }
+                else
+                {
+                    if (mb->channels == 2)
+                        _MixSampleStereo8 (outBuf, &smpInfo, FP_SEG(*volumetableptr), final_volume, count);
+                    else
+                        _MixSampleMono8 (outBuf, &smpInfo, FP_SEG(*volumetableptr), final_volume, count);
+                }
+                break;
+            }
         }
         else
         {

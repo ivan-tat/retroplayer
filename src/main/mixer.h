@@ -36,7 +36,35 @@ typedef struct playSampleInfo_t
 };
 #pragma pack(pop);
 
-extern void __far __pascal _MixSampleMono8(
+extern void __far __pascal _play_sample_nearest_8 (
+    void *outbuf,
+    struct playSampleInfo_t *smpInfo,
+    uint16_t count
+);
+
+extern void __far __pascal _play_sample_nearest_16 (
+    void *outbuf,
+    struct playSampleInfo_t *smpInfo,
+    uint16_t count
+);
+
+extern void __far __pascal _mix_sample (
+    void *outbuf,
+    void *smpbuf,
+    uint16_t voltab,
+    uint8_t vol,
+    uint16_t count
+);
+
+extern void __far __pascal _mix_sample2 (
+    void *outbuf,
+    void *smpbuf,
+    uint16_t voltab,
+    uint8_t vol,
+    uint16_t count
+);
+
+extern void __far __pascal _MixSampleMono8 (
     void *outBuf,
     struct playSampleInfo_t *smpInfo,
     uint16_t volTab,
@@ -44,7 +72,23 @@ extern void __far __pascal _MixSampleMono8(
     uint16_t count
 );
 
-extern void __far __pascal _MixSampleStereo8(
+extern void __far __pascal _MixSampleMono16 (
+    void *outBuf,
+    struct playSampleInfo_t *smpInfo,
+    uint16_t volTab,
+    uint8_t vol,
+    uint16_t count
+);
+
+extern void __far __pascal _MixSampleStereo8 (
+    void *outBuf,
+    struct playSampleInfo_t *smpInfo,
+    uint16_t volTab,
+    uint8_t vol,
+    uint16_t count
+);
+
+extern void __far __pascal _MixSampleStereo16 (
     void *outBuf,
     struct playSampleInfo_t *smpInfo,
     uint16_t volTab,
@@ -118,6 +162,13 @@ typedef mixer_flags_t MIXERFLAGS;
 #define MIXERFL_OWN_SMPBUF  (1 << 0)    // has own sample buffer, free it when done
 #define MIXERFL_OWN_MIXBUF  (1 << 1)    // has own mixing buffer, free it when done
 
+typedef uint8_t mixer_quality_t;
+typedef mixer_quality_t MIXERQUALITY;
+
+#define MIXQ_NEAREST    0
+#define MIXQ_FASTEST    1
+#define MIXQ_MAX        1
+
 typedef uint8_t mixer_buffers_mask_t;
 typedef mixer_buffers_mask_t MIXERBUFMASK;
 
@@ -128,6 +179,7 @@ typedef mixer_buffers_mask_t MIXERBUFMASK;
 typedef struct mixer_t
 {
     MIXERFLAGS flags;
+    MIXERQUALITY quality;
     uint8_t num_channels;
     uint16_t num_spc;   // samples per channel
     SMPBUF *smpbuf;
@@ -144,6 +196,8 @@ MIXERFLAGS __mixer_set_flags (MIXERFLAGS _flags, MIXERFLAGS _mask, MIXERFLAGS _s
 #define _mixer_set_own_smpbuf(o, v)     _mixer_set_flags (o, __mixer_set_flags (_mixer_get_flags (o), ~MIXERFL_OWN_SMPBUF, MIXERFL_OWN_SMPBUF, v))
 #define _mixer_is_own_mixbuf(o)         ((_mixer_get_flags (o) & MIXERBUFMASK_MIXBUF) != 0)
 #define _mixer_set_own_mixbuf(o, v)     _mixer_set_flags (o, __mixer_set_flags (_mixer_get_flags (o), ~MIXERFL_OWN_MIXBUF, MIXERFL_OWN_MIXBUF, v))
+#define _mixer_get_quality(o)           (o)->quality
+#define _mixer_set_quality(o, v)        _mixer_get_quality (o) = v
 #define _mixer_get_num_channels(o)      (o)->num_channels
 #define _mixer_set_num_channels(o, v)   _mixer_get_num_channels (o) = v
 #define _mixer_get_num_spc(o)           (o)->num_spc
@@ -160,6 +214,8 @@ void    mixer_init (MIXER *self);
 #define mixer_set_own_smpbuf(o, v)      _mixer_set_own_smpbuf (o, v)
 #define mixer_is_own_mixbuf(o)          _mixer_is_own_mixbuf (o)
 #define mixer_set_own_mixbuf(o, v)      _mixer_set_own_mixbuf (o, v)
+#define mixer_get_quality(o)            _mixer_get_quality (o)
+#define mixer_set_quality(o, v)         _mixer_set_quality (o, v)
 #define mixer_get_num_channels(o)       _mixer_get_num_channels (o)
 #define mixer_set_num_channels(o, v)    _mixer_set_num_channels (o, v)
 #define mixer_get_num_spc(o)            _mixer_get_num_spc (o)
@@ -178,8 +234,16 @@ void    mixer_free (MIXER *self);
 
 #pragma aux ST3Periods "*";
 
+#pragma aux _play_sample_nearest_8 "*";
+#pragma aux _play_sample_nearest_16 "*";
+
+#pragma aux _mix_sample "*";
+#pragma aux _mix_sample2 "*";
+
 #pragma aux _MixSampleMono8 "*";
 #pragma aux _MixSampleMono16 "*";
+#pragma aux _MixSampleStereo8 "*";
+#pragma aux _MixSampleStereo16 "*";
 
 #pragma aux fill_8 "*";
 #pragma aux fill_16 "*";

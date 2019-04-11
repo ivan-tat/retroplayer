@@ -83,6 +83,7 @@ void __far win_help_draw(SCRWIN *self)
                 "  F6 .... display debug information" CRLF
                 "  P ..... pause playback (only on SB16)" CRLF
                 "  L ..... enable/disable song loop." CRLF
+                "  F ..... switch mixer quality mode." CRLF
                 "  <Alt>+(<1>-<0>,<Q>-<R>) ... toggle channel 1-16 on/off." CRLF
                 "  + ..... jump to next pattern" CRLF
                 "  - ..... jump to previous pattern" CRLF

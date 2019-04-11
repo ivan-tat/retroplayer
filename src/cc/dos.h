@@ -56,7 +56,7 @@ void _cc_dos_gettime(struct cc_dostime_t *t);
 void __far *_cc_dos_getvect(unsigned num);
 void __far _cc_dos_setvect(unsigned num, void __far *p);
 
-#define __cc_dos_para(size) (((size) + 15) >> 4)
+#define __cc_dos_para(size) (((unsigned long)(size) + 15) >> 4)
 
 #ifdef USE_INTRINSICS
 

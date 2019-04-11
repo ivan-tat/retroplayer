@@ -12,8 +12,16 @@ interface
 
 (*$I defines.pas*)
 
+procedure _play_sample_nearest_8;
+procedure _play_sample_nearest_16;
+
+procedure _mix_sample;
+procedure _mix_sample2;
+
 procedure _MixSampleMono8;
+procedure _MixSampleMono16;
 procedure _MixSampleStereo8;
+procedure _MixSampleStereo16;
 
 procedure fill_8;
 procedure fill_16;
@@ -61,10 +69,20 @@ uses
     common,
     debug;
 
+(*$l asm\sampler.obj*)
+
+procedure _play_sample_nearest_8; external;
+procedure _play_sample_nearest_16; external;
+
 (*$l asm\mixer_.obj*)
 
+procedure _mix_sample; external;
+procedure _mix_sample2; external;
+
 procedure _MixSampleMono8; external;
+procedure _MixSampleMono16; external;
 procedure _MixSampleStereo8; external;
+procedure _MixSampleStereo16; external;
 
 (*$l mixer.obj*)
 

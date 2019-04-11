@@ -67,6 +67,8 @@ static bool     opt_em;
 static uint8_t  opt_fps;
 
 static MUSPLAYER *mp;
+static MIXER *mixer;
+static MIXERQUALITY mixer_quality;
 static MUSMOD  *song_track;
 
 uint32_t getFreeDOSMemory(void)
@@ -881,6 +883,8 @@ void __far plays3m_main (void)
     winlist_select(0);
     winlist_show_all();
 
+    mixer = player_get_mixer (mp);
+
     quit = false;
     do
     {
@@ -947,6 +951,14 @@ void __far plays3m_main (void)
                 if (upcase(c) == 'L')
                 {
                     ps->flags ^= PLAYSTATEFL_SONGLOOP;
+                    c = 0;
+                }
+                if (upcase(c) == 'F')
+                {
+                    mixer_quality = mixer_get_quality (mixer) + 1;
+                    if (mixer_quality > MIXQ_MAX)
+                        mixer_quality = 0;
+                    mixer_set_quality (mixer, mixer_quality);
                     c = 0;
                 }
                 if (upcase(c) == 'D')
