@@ -76,8 +76,9 @@
 #define _S3M_TRACKER_TYPE_SHIFT         12
 
 /* Tracker type */
-#define _S3M_TRACKER_ST3    1
-#define _S3M_TRACKER_SCHISM 4
+#define _S3M_TRACKER_ST3        1
+#define _S3M_TRACKER_IMPULSE    3
+#define _S3M_TRACKER_SCHISM     4
 
 /* Tracker version */
 #define _S3M_TRACKER_VER_MAJOR_ST3  3
@@ -378,7 +379,6 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
     MUSMOD *track;
     MUSMODCHNPAN pan;
     uint8_t maxused, i, smpnum;
-    uint16_t count;
 
     track = _Self->track;
 
@@ -389,7 +389,8 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
     }
 
     if ((header.type != _S3M_FILE_TYPE)
-    || (header.magic != _S3M_FILE_MAGIC))
+    || (header.magic != _S3M_FILE_MAGIC)
+    || ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2)))
     {
         DEBUG_INFO_ ("load_s3m_load",
             "type=%04X (%s)",
@@ -403,6 +404,12 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
             (header.magic != _S3M_FILE_MAGIC)
                 ? "wrong" : "ok"
         );
+        DEBUG_INFO_ ("load_s3m_load",
+            "format=%04X (%s)",
+            header.format,
+            ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2))
+                ? "wrong" : "ok"
+        );
         ERROR (self, "load_s3m_load", "%s is not supported.", "file format");
         return false;
     }
@@ -410,8 +417,7 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
     switch ((header.tracker & _S3M_TRACKER_TYPE_MASK) >> _S3M_TRACKER_TYPE_SHIFT)
     {
     case _S3M_TRACKER_ST3:
-        if (((header.tracker & _S3M_TRACKER_VER_MAJOR_MASK) != (_S3M_TRACKER_VER_MAJOR_ST3 << _S3M_TRACKER_VER_MAJOR_SHIFT))
-        || ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2)))
+        if ((header.tracker & _S3M_TRACKER_VER_MAJOR_MASK) != (_S3M_TRACKER_VER_MAJOR_ST3 << _S3M_TRACKER_VER_MAJOR_SHIFT))
         {
             DEBUG_INFO_ ("load_s3m_load",
                 "tracker=%04X (%s)",
@@ -419,13 +425,6 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
                 ((header.tracker & _S3M_TRACKER_VER_MAJOR_MASK) != (_S3M_TRACKER_VER_MAJOR_ST3 << _S3M_TRACKER_VER_MAJOR_SHIFT))
                     ? "wrong" : "ok"
             );
-            DEBUG_INFO_ ("load_s3m_load",
-                "format=%04X (%s)",
-                header.format,
-                ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2))
-                    ? "wrong" : "ok"
-            );
-
             ERROR (self, "load_s3m_load", "%s", "Unknown Scream Tracker version.");
             return false;
         }
@@ -437,19 +436,26 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
             (header.tracker & _S3M_TRACKER_VER_MINOR_MASK) >> _S3M_TRACKER_VER_MINOR_SHIFT
         );
         break;
-    case _S3M_TRACKER_SCHISM:
-        if ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2))
-        {
-            DEBUG_INFO_ ("load_s3m_load",
-                "format=%04X (%s)",
-                header.format,
-                ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2))
-                    ? "wrong" : "ok"
+    case _S3M_TRACKER_IMPULSE:
+        if ((header.tracker & (_S3M_TRACKER_VER_MAJOR_MASK | _S3M_TRACKER_VER_MINOR_MASK))
+        <=  ((2 << _S3M_TRACKER_VER_MAJOR_SHIFT) | (0x14 << _S3M_TRACKER_VER_MINOR_SHIFT)))
+            snprintf (
+                musmod_get_format (track),
+                MUSMOD_FORMAT_LEN,
+                "Impulse Tracker %hhd.%02hhx module",
+                (header.tracker & _S3M_TRACKER_VER_MAJOR_MASK) >> _S3M_TRACKER_VER_MAJOR_SHIFT,
+                (header.tracker & _S3M_TRACKER_VER_MINOR_MASK) >> _S3M_TRACKER_VER_MINOR_SHIFT
             );
-
-            ERROR (self, "load_s3m_load", "%s is not supported.", "Schism Tracker file format");
-            return false;
-        }
+        else
+            snprintf (
+                musmod_get_format (track),
+                MUSMOD_FORMAT_LEN,
+                "Impulse Tracker 2.14p%d module",
+                (header.tracker & (_S3M_TRACKER_VER_MAJOR_MASK | _S3M_TRACKER_VER_MINOR_MASK)) -
+                ((2 << _S3M_TRACKER_VER_MAJOR_SHIFT) | (0x14 << _S3M_TRACKER_VER_MINOR_SHIFT))
+            );
+        break;
+    case _S3M_TRACKER_SCHISM:
         snprintf (
             musmod_get_format (track),
             MUSMOD_FORMAT_LEN,
@@ -551,7 +557,7 @@ uint32_t __near _calc_sample_load_size (PCMSMP *smp)
 
 uint32_t __near _calc_sample_mem_size (PCMSMP *smp, uint32_t size)
 {
-    return size + 1024;
+    return size + PCMSMP_EXTRA_DATA_SIZE;
 }
 
 void __near convert_sign_8 (void *data, uint32_t size)
@@ -651,6 +657,12 @@ bool __near load_s3m_allocate_EM_for_sample (LOADER_S3M *self, PCMSMP *smp, uint
     PCMSMPLIST *samples;
     uint16_t start_page, start_offset, end_page, end_offset;
     uint32_t s;
+
+    if (size > SAMPLE_SIZE_MAX - PCMSMP_EXTRA_DATA_SIZE)
+    {
+        ERROR (self, "load_s3m_allocate_EM_for_sample", "%s", "Sample is too large.");
+        return false;
+    }
 
     track = _Self->track;
     samples = musmod_get_samples (track);
@@ -977,7 +989,7 @@ bool __near load_s3m_load_instrument (LOADER_S3M *self, uint8_t index)
     MUSINSLIST *instruments;
     MUSINS *ins;
     PCMSMP *smp;
-    uint16_t size;
+    uint32_t size;
     char smp_title[_S3M_INS_FILENAME_LEN + 1];  /* including terminating zero */
     char ins_title[MUSINS_TITLE_LEN + 1];       /* including terminating zero */
 

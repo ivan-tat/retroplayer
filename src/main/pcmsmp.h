@@ -86,6 +86,8 @@ typedef struct pcm_sample_t PCMSMP;
 
 /* Methods */
 
+#define PCMSMP_EXTRA_DATA_SIZE 1024
+
 PCMSMPFLAGS __far __pcmsmp_set_flags (PCMSMPFLAGS _flags, PCMSMPFLAGS _mask, PCMSMPFLAGS _set, bool raise);
 
 #define _pcmsmp_get_flags(o)                (o)->flags
@@ -105,7 +107,7 @@ PCMSMPFLAGS __far __pcmsmp_set_flags (PCMSMPFLAGS _flags, PCMSMPFLAGS _mask, PCM
 #define _pcmsmp_get_size(o)                 (o)->size
 #define _pcmsmp_set_size(o, v)              _pcmsmp_get_size (o) = (v)
 #define _pcmsmp_get_length(o)               (_pcmsmp_get_16bits (o) ? _pcmsmp_get_size (o) >> 1 : _pcmsmp_get_size (o))
-#define _pcmsmp_get_mem_size(o)             (_pcmsmp_get_size (o) + 1024)
+#define _pcmsmp_get_mem_size(o)             (_pcmsmp_get_size (o) + PCMSMP_EXTRA_DATA_SIZE)
 #define _pcmsmp_get_data(o)                 (o)->data.dos.ptr
 #define _pcmsmp_set_data(o, v)              _pcmsmp_get_data (o) = (v)
 #define _pcmsmp_get_EM_data_offset(o)       (o)->data.em.offset
