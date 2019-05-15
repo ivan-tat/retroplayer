@@ -203,10 +203,10 @@ DEFINE_SUB_EFFECTS_LIST(volSlide) =
 
 DEFINE_SUB_EFFECTS_NAME_LIST (volSlide) =
 {
-    "vol.dn (norm)",
-    "vol.up (norm)",
-    "vol.dn (fine)",
-    "vol.up (fine)"
+    (const char __near *) "vol.dn (norm)",
+    (const char __near *) "vol.up (norm)",
+    (const char __near *) "vol.dn (fine)",
+    (const char __near *) "vol.up (fine)"
 };
 
 #define EFFIDX_VOLSLIDE_DOWN      0
@@ -248,9 +248,9 @@ DEFINE_SUB_EFFECTS_LIST(pitchDown) =
 
 DEFINE_SUB_EFFECTS_NAME_LIST (pitchDown) =
 {
-    "pit.dn (norm)",
-    "pit.dn (fine)",
-    "pit.dn (extr)"
+    (const char __near *) "pit.dn (norm)",
+    (const char __near *) "pit.dn (fine)",
+    (const char __near *) "pit.dn (extr)"
 };
 
 #define EFFIDX_PITCHDOWN_NORMAL 0
@@ -291,9 +291,9 @@ DEFINE_SUB_EFFECTS_LIST(pitchUp) =
 
 DEFINE_SUB_EFFECTS_NAME_LIST (pitchUp) =
 {
-    "pit.up (norm)",
-    "pit.up (fine)",
-    "pit.up (extr)"
+    (const char __near *) "pit.up (norm)",
+    (const char __near *) "pit.up (fine)",
+    (const char __near *) "pit.up (extr)"
 };
 
 #define EFFIDX_PITCHUP_NORMAL 0
@@ -329,10 +329,10 @@ DEFINE_EFFECT (porta_vol, porta_vol, porta_vol, porta_vol, allow, none, porta_vo
 
 DEFINE_SUB_EFFECTS_NAME_LIST (porta_vol) =
 {
-    "port.+vol.dn (norm)",
-    "port.+vol.up (norm)",
-    "port.+vol.dn (fine)",
-    "port.+vol.up (fine)"
+    (const char __near *) "port.+vol.dn (norm)",
+    (const char __near *) "port.+vol.up (norm)",
+    (const char __near *) "port.+vol.dn (fine)",
+    (const char __near *) "port.+vol.up (fine)"
 };
 
 /*** Vibrato (normal) ***/
@@ -364,10 +364,10 @@ DEFINE_EFFECT (vibNorm_vol, vibNorm_vol, vibNorm_vol, vibNorm_vol, vibNorm, vibN
 
 DEFINE_SUB_EFFECTS_NAME_LIST (vibNorm_vol) =
 {
-    "vib.+vol.dn (norm)",
-    "vib.+vol.up (norm)",
-    "vib.+vol.dn (fine)",
-    "vib.+vol.up (fine)"
+    (const char __near *) "vib.+vol.dn (norm)",
+    (const char __near *) "vib.+vol.up (norm)",
+    (const char __near *) "vib.+vol.dn (fine)",
+    (const char __near *) "vib.+vol.up (fine)"
 };
 
 /*** Tremor ***/
@@ -447,13 +447,13 @@ DEFINE_SUB_EFFECTS_LIST(retrig) =
 
 DEFINE_SUB_EFFECTS_NAME_LIST (retrig) =
 {
-    "retrig. (no sld)",
-    "retrig. (vol.dn)",
-    "retrig. (vol2/3)",
-    "retrig. (vol./2)",
-    "retrig. (vol.up)",
-    "retrig. (vol3/2)",
-    "retrig. (vol.*2)"
+    (const char __near *) "retrig. (no sld)",
+    (const char __near *) "retrig. (vol.dn)",
+    (const char __near *) "retrig. (vol2/3)",
+    (const char __near *) "retrig. (vol./2)",
+    (const char __near *) "retrig. (vol.up)",
+    (const char __near *) "retrig. (vol3/2)",
+    (const char __near *) "retrig. (vol.*2)"
 };
 
 #define EFFIDX_RETRIG_VOLSLIDE_NONE     0
@@ -556,14 +556,14 @@ DEFINE_SUB_EFFECTS_LIST(special) =
 
 DEFINE_SUB_EFFECTS_NAME_LIST (special) =
 {
-    NULL,
-    "set finetune",
-    "set vib. wave",
-    "set trm. wave",
-    "pat. loop",
-    "note cut",
-    "note delay",
-    "pat. delay"
+    (const char __near *) NULL,
+    (const char __near *) "set finetune",
+    (const char __near *) "set vib. wave",
+    (const char __near *) "set trm. wave",
+    (const char __near *) "pat. loop",
+    (const char __near *) "note cut",
+    (const char __near *) "note delay",
+    (const char __near *) "pat. delay"
 };
 
 #define EFFIDX_SPECIAL_NONE      0
