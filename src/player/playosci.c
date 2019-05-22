@@ -268,6 +268,9 @@ void __far playosci_main (void)
     if (!player_set_mode (mp, opt_16bits, opt_stereo, opt_rate, opt_lq))
         exit (1);
 
+    if (!player_init_mixer (mp))
+        exit (1);
+
     sndbuf = player_get_sound_buffer (mp);
     ps = player_get_play_state (mp);
 

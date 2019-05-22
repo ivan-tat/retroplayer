@@ -166,6 +166,9 @@ smalls3m_main (void)
     playstate_setup_patterns_order (ps);
     playstate_set_song_loop (ps, true);
 
+    if (!player_init_mixer (mp))
+        exit (1);
+
     if (!player_play_start (mp))
         exit (1);
 

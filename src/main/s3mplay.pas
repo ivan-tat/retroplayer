@@ -33,7 +33,9 @@ procedure player_play_stop;
 procedure player_get_buffer_pos;
 procedure player_free_device;
 
+procedure player_init_mixer;
 procedure player_get_mixer;
+procedure player_free_mixer;
 
 procedure player_load_s3m;
 procedure player_set_active_track;
@@ -111,7 +113,9 @@ procedure player_play_stop; external;
 procedure player_get_buffer_pos; external;
 procedure player_free_device; external;
 
+procedure player_init_mixer; external;
 procedure player_get_mixer; external;
+procedure player_free_mixer; external;
 
 procedure player_load_s3m; external;
 procedure player_set_active_track; external;

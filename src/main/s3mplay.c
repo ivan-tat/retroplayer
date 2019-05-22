@@ -52,8 +52,7 @@ typedef uint8_t _music_player_flags_t;
 typedef _music_player_flags_t _MUSPLAYERFLAGS;
 
 #define _MUSPLAYERFL_USE_EM     (1 << 0)
-#define _MUSPLAYERFL_BUFFERS    (1 << 1)
-#define _MUSPLAYERFL_DEVICE     (1 << 2)
+#define _MUSPLAYERFL_DEVICE     (1 << 1)
 
 #pragma pack(push, 1);
 typedef struct _music_player_t
@@ -91,8 +90,6 @@ _MUSPLAYERFLAGS __near __player_set_flags (_MUSPLAYERFLAGS _flags, _MUSPLAYERFLA
 #define _player_set_flags(o, v)             _player_get_flags (o) = v
 #define _player_is_EM_in_use(o)             ((_player_get_flags (o) & _MUSPLAYERFL_USE_EM) != 0)
 #define _player_set_EM_usage(o, v)          _player_set_flags (o, __player_set_flags (_player_get_flags (o), ~_MUSPLAYERFL_USE_EM, _MUSPLAYERFL_USE_EM, v))
-#define _player_are_buffers_allocated(o)    ((_player_get_flags (o) & _MUSPLAYERFL_BUFFERS) != 0)
-#define _player_set_buffers_allocated(o, v) _player_set_flags (o, __player_set_flags (_player_get_flags (o), ~_MUSPLAYERFL_BUFFERS, _MUSPLAYERFL_BUFFERS, v))
 #define _player_is_device_set(o)            ((_player_get_flags (o) & _MUSPLAYERFL_DEVICE) != 0)
 #define _player_set_device_set(o, v)        _player_set_flags (o, __player_set_flags (_player_get_flags (o), ~_MUSPLAYERFL_DEVICE, _MUSPLAYERFL_DEVICE, v))
 
@@ -303,22 +300,51 @@ MUSPLAYER *__far player_new (void)
     return _new (_MUSPLAYER);
 }
 
+void __far player_clear (MUSPLAYER *self)
+{
+    _MUSPLAYER *_Self = self;
+
+    if (_Self)
+    {
+        memset (_Self, 0, sizeof (_MUSPLAYER));
+
+        /* Device */
+        //_Self->device = NULL;
+        //_Self->sndbuf = NULL;
+
+        /* Player */
+        _Self->sound_buffer_fps = 70;
+        //_Self->mode_set = false;
+        //_Self->mode_bits = 0;
+        //_Self->mode_signed = false;
+        //_Self->mode_channels = 0;
+        //_Self->mode_rate = 0;
+        //_Self->mode_lq = false;
+
+        /* Mixer */
+        //_Self->smpbuf = NULL;
+        //_Self->mixbuf = NULL;
+        //_Self->mixer = NULL;
+
+        /* ISR */
+        _Self->EM_map_handle = EMSBADHDL;
+
+        /* Active track */
+        //_Self->play_state = NULL;
+    }
+}
+
 bool __far player_init (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
-    SMPBUF *_smpbuf;
-    MIXBUF *_mixbuf;
-    uint16_t len;
 
     DEBUG_BEGIN ("player_init");
 
     if (_Self)
     {
-        memset (_Self, 0, sizeof (_MUSPLAYER));
-        _player_set_EM_usage (_Self, emsInstalled);
+        player_clear (_Self);
 
-        // Sound
-        _Self->EM_map_handle = EMSBADHDL;
+        _player_set_EM_usage (_Self, emsInstalled);
 
         _Self->sndbuf = _new (SNDDMABUF);
         if (!_Self->sndbuf)
@@ -335,42 +361,8 @@ bool __far player_init (MUSPLAYER *self)
                 return false;
             }
 
-        // Mixer
-        _Self->smpbuf = _new (SMPBUF);
-        if (!_Self->smpbuf)
-        {
-            ERROR ("player_init", "Failed to allocate %s.", "sample buffer object");
-            return false;
-        }
-        smpbuf_init (_Self->smpbuf);
-
-        _Self->mixbuf = _new (MIXBUF);
-        if (!_Self->mixbuf)
-        {
-            ERROR ("player_init", "Failed to allocate %s.", "mixing buffer object");
-            return false;
-        }
-        mixbuf_init (_Self->mixbuf);
-
-        voltab_init();
-
-        _Self->mixer = NULL;
-
-        // Player
-        _Self->device = NULL;
-        _Self->sound_buffer_fps = 70;
-        _Self->mode_set = false;
-        _Self->mode_bits = 0;
-        _Self->mode_signed = false;
-        _Self->mode_channels = 0;
-        _Self->mode_rate = 0;
-        _Self->mode_lq = false;
-
         // Music modules
         _init_modules ();
-
-        // Active track
-        _Self->play_state = NULL;
 
         // ISR
         if (_player_is_EM_in_use (_Self))
@@ -386,44 +378,7 @@ bool __far player_init (MUSPLAYER *self)
             emsSetHandleName (_Self->EM_map_handle, &_Self->EM_map_name);
         }
 
-        // Mixer
-
-        if (!isCPU_i386 ())
-        {
-            ERROR ("player_init", "%s", "CPU is not supported.");
-            return false;
-        }
-
-        if (!_Self->mixer)
-        {
-            _Self->mixer = _new (MIXER);
-            if (!_Self->mixer)
-            {
-                ERROR ("player_init", "Failed to initialize %s.", "sound mixer");
-                return false;
-            }
-            mixer_init (_Self->mixer);
-            mixer_set_smpbuf (_Self->mixer, _Self->smpbuf);
-            mixer_set_mixbuf (_Self->mixer, _Self->mixbuf);
-        }
-
-        len = _Self->sndbuf->buf->size / 2;  // half DMA transfer buffer size (but in samples)
-
-        _smpbuf = mixer_get_smpbuf (_Self->mixer);
-        if (!smpbuf_get (_smpbuf))
-            if (!smpbuf_alloc (_smpbuf, len))
-            {
-                ERROR ("player_init", "Failed to initialize %s.", "sample buffer");
-                return false;
-            }
-
-        _mixbuf = mixer_get_mixbuf (_Self->mixer);
-        if (!mixbuf_get (_mixbuf))
-            if (!mixbuf_alloc (_mixbuf, len))
-            {
-                ERROR ("player_init", "Failed to initialize %s.", "mixing buffer");
-                return false;
-            }
+        voltab_init ();
 
         if (!volumetableptr)
         {
@@ -434,8 +389,6 @@ bool __far player_init (MUSPLAYER *self)
             }
             voltab_calc ();
         }
-
-        _player_set_buffers_allocated (_Self, true);
 
         DEBUG_SUCCESS ("player_init");
         return true;
@@ -668,28 +621,28 @@ bool __far player_play_start (MUSPLAYER *self)
 
     DEBUG_BEGIN("player_play_start");
 
-    if (!_player_are_buffers_allocated (_Self))
-    {
-        ERROR ("player_play_start", "%s", "No sound buffers were allocated.");
-        return false;
-    }
-
     if (!_player_is_device_set (_Self))
     {
-        ERROR ("player_play_start", "%s", "No sound device was set.");
+        ERROR ("player_play_start", "No %s was set.", "sound device");
         return false;
     }
 
     if (!_Self->mode_set)
     {
-        ERROR ("player_play_start", "%s", "No play mode was set.");
+        ERROR ("player_play_start", "No %s was set.", "play mode");
+        return false;
+    }
+
+    if (!_Self->mixer)
+    {
+        ERROR ("player_play_start", "No %s was set.", "mixer");
         return false;
     }
 
     ps = _Self->play_state;
     if (!ps)
     {
-        ERROR ("player_play_start", "%s", "Active track is not set.");
+        ERROR ("player_play_start", "No %s was set.", "active track");
         return false;
     }
 
@@ -818,11 +771,120 @@ void __far player_free_device (MUSPLAYER *self)
 
 /* Mixer */
 
+bool __far player_init_mixer (MUSPLAYER *self)
+{
+    _MUSPLAYER *_Self = self;
+    SMPBUF *_smpbuf;
+    MIXBUF *_mixbuf;
+    uint16_t len;
+
+    DEBUG_BEGIN ("player_init_mixer");
+
+    if (!isCPU_i386 ())
+    {
+        ERROR ("player_init_mixer", "%s", "CPU is not supported.");
+        return false;
+    }
+
+    if (!_Self->mixer)
+    {
+        _Self->mixer = _new (MIXER);
+        if (!_Self->mixer)
+        {
+            ERROR ("player_init_mixer", "Failed to allocate %s.", "sound mixer object");
+            return false;
+        }
+        mixer_init (_Self->mixer);
+    }
+
+    if (!_Self->smpbuf)
+    {
+        _Self->smpbuf = _new (SMPBUF);
+        if (!_Self->smpbuf)
+        {
+            ERROR ("player_init_mixer", "Failed to allocate %s.", "sample buffer object");
+            return false;
+        }
+        smpbuf_init (_Self->smpbuf);
+    }
+    mixer_set_smpbuf (_Self->mixer, _Self->smpbuf);
+
+    if (!_Self->mixbuf)
+    {
+        _Self->mixbuf = _new (MIXBUF);
+        if (!_Self->mixbuf)
+        {
+            ERROR ("player_init_mixer", "Failed to allocate %s.", "mixing buffer object");
+            return false;
+        }
+        mixbuf_init (_Self->mixbuf);
+    }
+    mixer_set_mixbuf (_Self->mixer, _Self->mixbuf);
+
+    // allocate internal buffers
+
+    if (_Self->sndbuf)
+    {
+        len = _Self->sndbuf->buf->size / 2;  // half DMA transfer buffer size (but in samples)
+
+        _smpbuf = mixer_get_smpbuf (_Self->mixer);
+        if (!smpbuf_get (_smpbuf))
+            if (!smpbuf_alloc (_smpbuf, len))
+            {
+                ERROR ("player_init_mixer", "Failed to initialize %s.", "sample buffer");
+                return false;
+            }
+
+        _mixbuf = mixer_get_mixbuf (_Self->mixer);
+        if (!mixbuf_get (_mixbuf))
+            if (!mixbuf_alloc (_mixbuf, len))
+            {
+                ERROR ("player_init_mixer", "Failed to initialize %s.", "mixing buffer");
+                return false;
+            }
+    }
+    else
+    {
+        ERROR ("player_init_mixer", "No %s was set.", "sound buffer");
+        return false;
+    }
+
+    DEBUG_SUCCESS ("player_init_mixer");
+    return true;
+}
+
 MIXER *__far player_get_mixer (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
 
     return _Self->mixer;
+}
+
+void __far player_free_mixer (MUSPLAYER *self)
+{
+    _MUSPLAYER *_Self = self;
+
+    DEBUG_BEGIN ("player_free_mixer");
+
+    if (_Self->mixer)
+    {
+        mixer_free (_Self->mixer);
+        _delete (_Self->mixer);
+    }
+
+    if (_Self->smpbuf)
+    {
+        smpbuf_free (_Self->smpbuf);
+        _delete (_Self->smpbuf);
+    }
+
+    if (_Self->mixbuf)
+    {
+        mixbuf_free (_Self->mixbuf);
+        _delete (_Self->mixbuf);
+    }
+
+    DEBUG_END ("player_free_mixer");
 }
 
 /* Song */
@@ -998,25 +1060,7 @@ void __far player_free (MUSPLAYER *self)
             _delete (_Self->sndbuf);
         }
 
-        if (_Self->mixer)
-        {
-            mixer_free (_Self->mixer);
-            _delete (_Self->mixer);
-        }
-
-        if (_Self->smpbuf)
-        {
-            smpbuf_free (_Self->smpbuf);
-            _delete (_Self->smpbuf);
-        }
-
-        if (_Self->mixbuf)
-        {
-            mixbuf_free (_Self->mixbuf);
-            _delete (_Self->mixbuf);
-        }
-
-        _player_set_buffers_allocated (_Self, false);
+        player_free_mixer (_Self);
 
         if (_player_is_EM_in_use (_Self))
             emsFree (_Self->EM_map_handle);

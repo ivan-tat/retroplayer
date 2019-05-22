@@ -73,7 +73,9 @@ void     __far player_free_device (MUSPLAYER *self);
 
 // Mixer
 
+bool     __far player_init_mixer (MUSPLAYER *self);
 MIXER   *__far player_get_mixer (MUSPLAYER *self);
+void     __far player_free_mixer (MUSPLAYER *self);
 
 // Song
 
@@ -124,7 +126,9 @@ DECLARE_REGISTRATION (s3mplay)
 #pragma aux player_get_buffer_pos "*";
 #pragma aux player_free_device "*";
 
+#pragma aux player_init_mixer "*";
 #pragma aux player_get_mixer "*";
+#pragma aux player_free_mixer "*";
 
 #pragma aux player_load_s3m "*";
 #pragma aux player_set_active_track "*";

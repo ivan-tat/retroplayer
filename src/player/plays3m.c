@@ -839,6 +839,13 @@ void __far plays3m_main (void)
     playstate_set_order_start (ps, opt_startpos);
     playstate_set_song_loop (ps, opt_loop);
     player_set_sound_buffer_fps (mp, opt_fps);
+
+    if (!player_init_mixer (mp))
+    {
+        display_errormsg ();
+        exit (1);
+    }
+
     sndbuf = player_get_sound_buffer (mp);
 
     channels_save_all();
