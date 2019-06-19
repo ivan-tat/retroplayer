@@ -31,7 +31,10 @@
 typedef struct _cc_iobuf_t;
 typedef struct _cc_iobuf_t _cc_iobuf;
 
-typedef uint16_t __far _cc_iobuf_proc_t(_cc_iobuf *f);
+typedef int cc_inoutres_t;
+typedef cc_inoutres_t inoutres_t;
+
+typedef cc_inoutres_t __far _cc_iobuf_proc_t (_cc_iobuf *f);
 
 #pragma pack(push, 1);
 typedef struct _cc_iobuf_t {
@@ -57,6 +60,7 @@ typedef struct _cc_iobuf_t {
 #define EINOUTRES_NOT_OPENED 103
 #define EINOUTRES_NOT_INPUT 104
 #define EINOUTRES_NOT_OUTPUT 105
+#define EINOUTRES_NOT_NUMBER 106
 
 /* Global variables */
 
@@ -64,7 +68,7 @@ extern uint16_t     cc_PrefixSeg;
 extern void __far  *cc_ErrorAddr;
 extern void *(__far cc_ExitProc);
 extern int16_t      cc_ExitCode;
-extern int          cc_InOutRes;
+extern inoutres_t   cc_InOutRes;
 extern uint8_t      cc_Test8086;
 extern _cc_iobuf    cc_Input;
 extern _cc_iobuf    cc_Output;

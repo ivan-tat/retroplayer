@@ -50,6 +50,7 @@ procedure _cc_Exit;
 implementation
 
 uses
+    watcom,
     pascal,
     cpu,
     string_,
