@@ -47,6 +47,7 @@ size_t cc_fread(void *ptr, size_t size, size_t n, FILE *stream)
             cc_InOutRes = EINOUTRES_SUCCESS;
             return actual / size;
         }
+        else
         {
             cc_InOutRes = _cc_doserrno;
             return 0;

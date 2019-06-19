@@ -104,6 +104,8 @@ procedure _cc_dos_write;
 
 procedure _cc_dos_seek;
 
+procedure _cc_dos_ioctl_query_flags;
+
 procedure _cc_dos_terminate;
 
 implementation
@@ -176,6 +178,9 @@ procedure _cc_dos_write; external;
 
 (*$L dos\seekdos.obj*)
 procedure _cc_dos_seek; external;
+
+(*$L dos\dosioctl.obj*)
+procedure _cc_dos_ioctl_query_flags; external;
 
 (*$L dos\dosterm.obj*)
 procedure _cc_dos_terminate; external;

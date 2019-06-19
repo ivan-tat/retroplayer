@@ -21,6 +21,7 @@
 ./src/cc/dos/creatdos.asm
 ./src/cc/dos/d_getvec.asm
 ./src/cc/dos/dosexter.asm
+./src/cc/dos/dosioctl.asm
 ./src/cc/dos/dosret.asm
 ./src/cc/dos/dosterm.asm
 ./src/cc/dos/d_setvec.asm

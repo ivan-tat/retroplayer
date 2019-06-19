@@ -146,6 +146,40 @@ unsigned _cc_dos_getmasterpsp(void);
 #define CC_SEEK_CUR_DOS 1   // Seek relative to current position
 #define CC_SEEK_END_DOS 2   // Seek relative to the end of the file
 
+/* IOCTL */
+
+/* IOCTL file/device information record (bit-field)
+ *
+ * For file:
+ *   0x003f - drive ID (0=A, 1=B, etc.)
+ *   0x0040 - 0=EOF on input; 1=not EOF
+ *   0x0080 - 0=file
+ *   0x0700 - 0
+ *   0x0800 - supports device open and close, removable media (0x0d, 0x0e, 0x0f)
+ *   0x1000 - 0
+ *   0x2000 - 0=needs FAT with BIOS parameter block (0x02)
+ *   0x4000 - supports IOCTL read, write (0x03, 0x0c)
+ *   0x8000 - 0=block device; 1=char device
+ *
+ * For device:
+ *   0x0001 - console input device
+ *   0x0002 - console output device
+ *   0x0004 - null device
+ *   0x0008 - clock device
+ *   0x0010 - special device; fast output
+ *   0x0020 - 0=ASCII mode; 1=binary mode
+ *   0x0040 - 0=EOF on input; 1=not EOF
+ *   0x0080 - 1=device
+ *   0x0700 - 0
+ *   0x0800 - supports device open, close (0x0d, 0x0e)
+ *   0x1000 - 0
+ *   0x2000 - supports output till busy (0x10)
+ *   0x4000 - supports IOCTL read, write (0x03, 0x0c)
+ *   0x8000 - 0=block device; 1=char device
+ */
+
+typedef uint16_t cc_ioctl_info_t;
+
 /*
 unsigned _cc_dos_creat(const char *fname, unsigned attr, int *fd);
 unsigned _cc_dos_creatnew(const char *fname, unsigned attr, int *fd);
@@ -155,6 +189,8 @@ unsigned _cc_dos_commit(int fd);
 unsigned _cc_dos_read(int fd, void __far *buf, unsigned count, unsigned *numbytes);
 unsigned _cc_dos_write(int fd, void __far *buf, unsigned count, unsigned *numbytes);
 unsigned _cc_dos_seek(int fd, long offset, int kind, long *newoffset);
+
+unsigned _cc_dos_ioctl_query_flags (int16_t fd, cc_ioctl_info_t *info);
 */
 uint16_t __far _cc_dos_creat (const char *fname, uint16_t attr, int16_t *fd);
 uint16_t __far _cc_dos_creatnew (const char *fname, uint16_t attr, int16_t *fd);
@@ -165,6 +201,8 @@ uint16_t __far _cc_dos_read (int16_t fd, void __far *buf, uint16_t count, uint16
 uint16_t __far _cc_dos_write (int16_t fd, void __far *buf, uint16_t count, uint16_t *numbytes);
 uint16_t __far _cc_dos_seek (int16_t fd, int32_t offset, int16_t kind, int32_t *newoffset);
 
+uint16_t __far _cc_dos_ioctl_query_flags (int16_t fd, cc_ioctl_info_t __far *info);
+
 void _cc_dos_terminate(uint8_t code);
 
 extern void __far __pascal pascal_swapvectors(void);
@@ -174,6 +212,7 @@ extern void __far __pascal pascal_exec(char *name, char *cmdline);
 
 #define DOSERROR CC_DOSERROR
 
+#define _doserrno _cc_doserrno
 #define dosexterr cc_dosexterr
 
 #define _dos_console_out _cc_dos_console_out
@@ -218,6 +257,8 @@ extern void __far __pascal pascal_exec(char *name, char *cmdline);
 #define SEEK_CUR_DOS    CC_SEEK_CUR_DOS
 #define SEEK_END_DOS    CC_SEEK_END_DOS
 
+#define ioctl_info_t cc_ioctl_info_t
+
 #define _dos_creat      _cc_dos_creat
 #define _dos_creatnew   _cc_dos_creatnew
 #define _dos_open       _cc_dos_open
@@ -226,6 +267,8 @@ extern void __far __pascal pascal_exec(char *name, char *cmdline);
 #define _dos_read       _cc_dos_read
 #define _dos_write      _cc_dos_write
 #define _dos_seek       _cc_dos_seek
+
+#define _dos_ioctl_query_flags _cc_dos_ioctl_query_flags
 
 #define _dos_terminate _cc_dos_terminate
 
@@ -262,6 +305,7 @@ extern void __far __pascal pascal_exec(char *name, char *cmdline);
 #pragma aux _cc_dos_read "*";
 #pragma aux _cc_dos_write "*";
 #pragma aux _cc_dos_seek "*";
+#pragma aux _cc_dos_ioctl_query_flags "*";
 #pragma aux _cc_dos_terminate "*";
 
 #endif  /* __WATCOMC__ */
