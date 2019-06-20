@@ -100,10 +100,7 @@ inoutres_t __far  FileWriteString (_cc_iobuf *f, char *str, uint16_t _n);/* +InO
 int32_t    __far  FileReadNumber (_cc_iobuf *f);                        /* -InOutRes+ */
 bool       __far  _iostream_read_find_printable (_cc_iobuf_reader *stream);
 bool       __far  _iostream_read_printable (_cc_iobuf_reader *stream);
-bool       __far  _iostream_read_store (_cc_iobuf_reader *stream);
-bool       __far  _iostream_char_is_eot (_cc_iobuf_reader *stream);
-bool       __far  _iostream_read__cx_zero (_cc_iobuf_reader *stream);
-void       __far  FileWriteNumber (void);
+inoutres_t __far  FileWriteNumber (_cc_iobuf *f, uint32_t value, int n);
 inoutres_t __far  _sys_file_open (_cc_iobuf *f);                        /* -InOutRes- */
 void       __near _sys_file_append (_cc_iobuf *f);                      /* -InOutRes- */
 uint16_t   __near _sys_store_sint32_decimal (int32_t value, char *endptr, char **startptr);
@@ -785,9 +782,19 @@ bool __far _iostream_read_printable (_cc_iobuf_reader *stream)
     return true;
 }
 
-void __far FileWriteNumber (void)
+inoutres_t __far FileWriteNumber (_cc_iobuf *f, uint32_t value, int n)
 {
-    /* TODO */
+    inoutres_t status;
+    char tmp[32], *startptr;
+    int len;
+
+    len = _sys_store_sint32_decimal (value, &(tmp[32]), &startptr);
+    if (len)
+        status = _sysio_write_pad_string (f, len);
+
+    /* FIXME: no check for status in original code */
+
+    return FileWrite (f, startptr, n);
 }
 
 inoutres_t __far _sys_file_open (_cc_iobuf *f)
@@ -898,7 +905,12 @@ uint16_t __near _sys_store_sint32_decimal (int32_t value, char *endptr, char **s
         return _sys_store_uint32 (value, 10, endptr, startptr);
 }
 
-/* Returns length of converted integer. */
+/*
+ * Returns length of converted integer.
+ *
+ * IN:
+ *      endptr - first byte after the output buffer.
+ */
 uint16_t __near _sys_store_uint32 (uint32_t value, uint8_t base, char *endptr, char **startptr)
 {
     char *s;
