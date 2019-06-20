@@ -444,6 +444,16 @@ build_target $T_CC     obj src/cc/string/strncmp.c
 build_target $T_CC     obj src/cc/string/strncpy.c
 build_target $T_CC     obj src/cc/string/strnicmp.c
 build_target $T_CC     obj src/cc/unistd/exv.c
+
+if [ -n "$T_CC" ]; then
+    if [ ! -f "$PROJDIR/src/cc/cc.lib" ]; then
+        tmp=`mktemp`
+        find "$PROJDIR/src/cc/" -type f -name '*.obj' -printf '+%p ' | sort -u > $tmp
+        wlib -q -t -zld -o "$PROJDIR/src/cc/cc.lib" @$tmp
+        rm $tmp
+    fi
+fi
+
 build_target $T_DEBUG  obj src/debug.c
 build_target $T_DOS    obj src/dos/ems.c
 build_target $T_MISC   obj src/common.c

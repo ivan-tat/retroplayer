@@ -1,6 +1,7 @@
 ./src/
 ./src/cc/
 ./src/cc/_printf.asm
+./src/cc/cc.lib
 ./src/cc/dstream.asm
 ./src/cc/conio/
 ./src/cc/conio/clreol.asm
