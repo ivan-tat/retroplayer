@@ -95,6 +95,19 @@ extern void     __far __pascal pascal_Halt(uint16_t status);
 uint16_t custom_argc(void);
 void     custom_argv(char *dest, uint16_t n, uint8_t i);
 
+/* System unit */
+
+/* (+|-)InOutRes(+|-): prefix "+" means IO state check is done on enter, postfix "+" - on exit. */
+
+inoutres_t __far  FileWriteString (_cc_iobuf *f, char *str, uint16_t _n);   /* +InOutRes+ */
+inoutres_t __far  FileWriteNewLine (_cc_iobuf *f);                          /* +InOutRes+ */
+inoutres_t __far  FileFlushBuffer (_cc_iobuf *f);                           /* +InOutRes+ */
+unsigned   __far  FileReadString (_cc_iobuf *f, char *dest, uint16_t max);  /* +InOutRes? */
+inoutres_t __far  FileSkipToNextLine (_cc_iobuf *f);                        /* +InOutRes+ */
+inoutres_t __far  FileWriteChar (_cc_iobuf *f, char _c, uint16_t _n);       /* +InOutRes+ */
+int32_t    __far  FileReadNumber (_cc_iobuf *f);                            /* -InOutRes+ */
+inoutres_t __far  FileWriteNumber (_cc_iobuf *f, uint32_t value, int n);    /* +InOutRes+ */
+
 /* Application startup */
 
 void _cc_startup(void);
@@ -124,6 +137,15 @@ void _cc_startup(void);
 
 #pragma aux custom_argc "*";
 #pragma aux custom_argv "*";
+
+#pragma aux FileWriteString "*";
+#pragma aux FileWriteNewLine "*";
+#pragma aux FileFlushBuffer "*";
+#pragma aux FileReadString "*";
+#pragma aux FileSkipToNextLine "*";
+#pragma aux FileWriteChar "*";
+#pragma aux FileReadNumber "*";
+#pragma aux FileWriteNumber "*";
 
 #pragma aux _cc_startup "*";
 

@@ -85,19 +85,12 @@ inoutres_t __far  _sysio_file_close (_cc_iobuf *f);                     /* -InOu
 bool       __far  _iostream_read_string (_cc_iobuf_reader *stream);     /* +InOutRes+ */
 inoutres_t __near _sysio_write_pad_string (_cc_iobuf *f, uint16_t _n);  /* +InOutRes+ */
 inoutres_t __near FileWrite (_cc_iobuf *f, void *src, uint16_t _n);     /* +InOutRes+ */
-inoutres_t __far  FileSkipToNextLine (_cc_iobuf *f);                    /* +InOutRes+ */
 bool       __far  _iostream_find_string_end (_cc_iobuf_reader *stream);
 bool       __far  _iostream_end_of_line (_cc_iobuf_reader *stream);
-inoutres_t __far  FileWriteNewLine (_cc_iobuf *f);                      /* +InOutRes+ */
-inoutres_t __far  FileFlushBuffer (_cc_iobuf *f);                       /* +InOutRes+ */
 inoutres_t __far  _sysio_call_1 (_cc_iobuf *f);                         /* +InOutRes+ */
 inoutres_t __far  _sysio_call_2 (_cc_iobuf *f);                         /* +InOutRes+ */
 char       __far  FileReadChar (_cc_iobuf *f);                          /* +InOutRes+ */
-inoutres_t __far  FileWriteChar (_cc_iobuf *f, char _c, uint16_t _n);   /* +InOutRes+ */
-char       __far  FileReadString (_cc_iobuf *f, char *dest, uint16_t max);
 bool       __far  _iostream_read_line (_cc_iobuf_reader *stream);
-inoutres_t __far  FileWriteString (_cc_iobuf *f, char *str, uint16_t _n);/* +InOutRes+ */
-int32_t    __far  FileReadNumber (_cc_iobuf *f);                        /* -InOutRes+ */
 bool       __far  _iostream_read_find_printable (_cc_iobuf_reader *stream);
 bool       __far  _iostream_read_printable (_cc_iobuf_reader *stream);
 inoutres_t __far  FileWriteNumber (_cc_iobuf *f, uint32_t value, int n);
@@ -589,7 +582,10 @@ inoutres_t __far FileWriteChar (_cc_iobuf *f, char _c, uint16_t _n)
     return status;
 }
 
-char __far FileReadString (_cc_iobuf *f, char *dest, uint16_t max)
+/*
+ * Returns length of read string.
+ */
+unsigned __far FileReadString (_cc_iobuf *f, char *dest, uint16_t max)
 {
     _cc_iobuf_reader stream;
 
