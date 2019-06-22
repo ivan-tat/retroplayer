@@ -74,7 +74,7 @@ Use script [scripts/dosemu/dosemu](../scripts/dosemu/dosemu) for that.
 
 ```sh
 cd ~/Projects/retroplayer
-./make
+make all
 ```
 
 Start DOSEMU. You are now in DOS project's directory. Type `make`.
@@ -90,5 +90,5 @@ cd ~/Projects/retroplayer
 
 ```sh
 cd ~/Projects/retroplayer
-./clean
+make clean
 ```

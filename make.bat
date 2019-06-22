@@ -1,2 +1,2 @@
 @echo off
-bash make
+make.exe %1

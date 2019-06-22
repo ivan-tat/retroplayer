@@ -3,8 +3,8 @@
 
 set -e
 
-./watcom
 ./djgpp
+./watcom
 ./tp
 ./project
 ./dosemu

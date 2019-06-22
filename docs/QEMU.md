@@ -144,7 +144,7 @@ Type `clean` in the project's folder.
 
 ## 2.3. Compile on the host
 
-In the project's folder on the host type `make` to compile what is possible on the host.
+In the project's folder on the host type `make all` to compile what is possible on the host.
 
 ## 2.4. [Client] Compile in SSH session
 

@@ -186,7 +186,7 @@ recompile_obj() {
     $W_DIS -a -fi "$f_obj" >"$f_tmp"
     sed -r -e "s/(^DGROUP[[:space:]]+GROUP[[:space:]]+)CONST,CONST2,(_DATA)/\1\2/;\
 s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$)/_DATA\1/;\
-s/([[:space:]]|,|-|\+)(4|7ffc|7ffd|7ffe|7fff|20200000|0ffffffff)([0-9a-f]{8}H)/\10\3/;\
+s/([[:space:]]|,|-|\+)(0[a-f]{1}[[:xdigit:]]{0,7}|[1-9]{1}[[:xdigit:]]{0,7})([[:xdigit:]]{8}H)/\10\3/g;\
 s/(.+\,DGROUP:)CONST$/\1_DATA/;" \
 "$f_tmp" >"$f_asm"
     rm -f "$f_tmp"
@@ -198,8 +198,10 @@ mkobj_c() {
     local f_nam="${f_c%.c}"
     local f_obj="${f_nam}.obj"
     local segname
-    #segname="${f_nam^^}_TEXT" # such expansion is not supported by Bash-2.05b.0 in DJGPP
-    segname="`echo $f_nam | tr a-z A-Z`_TEXT"
+    # such expansion works in Bash-4.1.17 release 1 (not in Bash-2.05b release 1) in DJGPP V2:
+    segname="${f_nam^^}_TEXT"
+    # workaraound for Bash-2.05b release 1 in DJGPP V2:
+    #segname="`echo $f_nam | tr a-z A-Z`_TEXT"
     $W_CC -nt=$segname -fo="$f_obj" "$f_c"
     recompile_obj "$f_obj"
 }

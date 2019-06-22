@@ -38,6 +38,8 @@ Plans for the future:
 
 ## Links
 
+* [GNU coding standards](https://www.gnu.org/prep/standards/)
+
 * [FreeDOS](http://www.freedos.org/) (a complete, free, DOS-compatible operating system)
 
 * [GnuDOS](https://www.gnu.org/software/gnudos/) (a library designed to help new users of the GNU system, who are coming from a DOS background)

@@ -17,7 +17,7 @@ echo_warn() {
 
 if [ ! -e "$SYS_PROJECT_DIR" ]; then
     mkdir -p "$SYS_PROJECT_DIR"
-    git clone https://github.com/ivan-tat/retroplayer.git "$SYS_PROJECT_DIR"
+    git clone https://gitlab.com/ivan-tat/retroplayer.git "$SYS_PROJECT_DIR"
     echo_info "Created '$SYS_PROJECT_DIR' directory."
 else
     echo_warn "Skip: Target '$SYS_PROJECT_DIR' already exists."

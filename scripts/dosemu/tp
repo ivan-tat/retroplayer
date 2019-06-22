@@ -25,7 +25,7 @@ fi
 if [ ! -f "$ENV_TP_INIT" ]; then
     cat >"$ENV_TP_INIT" <<EOF
 @echo off
-set PATH=$DOS_TP_DIR\\bin;%PATH%
+set PATH=%PATH%;$DOS_TP_DIR\\bin
 EOF
     echo_info "Created '$ENV_TP_INIT' file."
 else

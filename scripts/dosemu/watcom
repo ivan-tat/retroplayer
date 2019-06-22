@@ -58,10 +58,10 @@ if [ ! -f "$SYS_WATCOM_CONF" ]; then
 export WATCOM="$SYS_WATCOM_DIR"
 case \`uname -m\` in
 x86_64)
-    export PATH=\$WATCOM/binl64:\$WATCOM/binl:\$PATH
+    export PATH=\$PATH:\$WATCOM/binl64:\$WATCOM/binl
     ;;
 *)
-    export PATH=\$WATCOM/binl:\$PATH
+    export PATH=\$PATH:\$WATCOM/binl
     ;;
 esac
 export EDPATH=\$WATCOM/eddat
