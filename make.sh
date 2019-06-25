@@ -374,6 +374,9 @@ if [ -n "$T_CC" ]; then
         rm $tmp
     fi
 fi
+build_target $T_MAIN inc-linux src/main/_wramp.c
+build_target $T_MAIN inc-linux src/main/_wsinus.c
+build_target $T_MAIN inc-linux src/main/_wsquare.c
 fi
 
 if [ -n "$DJGPP" ]; then
