@@ -13,7 +13,6 @@
 #include "cc/errno.h"
 #include "cc/dos.h"
 #include "cc/dos/dosret.h"
-#include "cc/dos/dosret.h"
 
 /*
  * Requirements:

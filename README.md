@@ -40,6 +40,8 @@ Plans for the future:
 
 * [GNU coding standards](https://www.gnu.org/prep/standards/)
 
+* [GNU Make](https://www.gnu.org/software/make/) (a tool which controls the generation of executables and other non-source files of a program from the program's source files)
+
 * [FreeDOS](http://www.freedos.org/) (a complete, free, DOS-compatible operating system)
 
 * [GnuDOS](https://www.gnu.org/software/gnudos/) (a library designed to help new users of the GNU system, who are coming from a DOS background)
