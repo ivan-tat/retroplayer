@@ -16,17 +16,17 @@
 
 static const int8_t __near sinuswave[64] =
 {
-#include "main/_wsinus.inc"
+#include "main/wsinus.inc"
 };
 
 static const int8_t __near rampwave[64] =
 {
-#include "main/_wramp.inc"
+#include "main/wramp.inc"
 };
 
 static const int8_t __near squarewave[64] =
 {
-#include "main/_wsquare.inc"
+#include "main/wsquare.inc"
 };
 
 static const uint8_t __near *wavetab[3] =

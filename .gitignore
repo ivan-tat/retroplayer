@@ -33,7 +33,9 @@
 *.su
 
 # Project specific files
+*.as_
 *.bak
+*.dep
 *.map
 *.lst
 *.tpu
@@ -134,9 +136,6 @@ src/hw/vga.asm
 src/hw/sndctl_t.asm
 src/hw/sb/sbctl.asm
 src/hw/sb/sbio.asm
-src/main/_wramp.inc
-src/main/_wsinus.inc
-src/main/_wsquare.inc
 src/main/effects.asm
 src/main/filldma.asm
 src/main/fillvars.asm
@@ -153,6 +152,12 @@ src/main/readnote.asm
 src/main/s3mplay.asm
 src/main/s3mvars.asm
 src/main/voltab.asm
+src/main/wramp.inc
+src/main/wsinus.inc
+src/main/wsquare.inc
+src/main/scripts/wramp
+src/main/scripts/wsinus
+src/main/scripts/wsquare
 src/player/playosci.asm
 src/player/plays3m.asm
 src/player/screen.asm

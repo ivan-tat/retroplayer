@@ -107,6 +107,10 @@
 ./src/hw/vga.asm
 ./src/main/
 ./src/main/asm/
+./src/main/scripts/
+./src/main/scripts/wramp
+./src/main/scripts/wsinus
+./src/main/scripts/wsquare
 ./src/main/effects.asm
 ./src/main/filldma.asm
 ./src/main/fillvars.asm
@@ -123,12 +127,9 @@
 ./src/main/readnote.asm
 ./src/main/s3mplay.asm
 ./src/main/voltab.asm
-./src/main/_wramp
-./src/main/_wramp.inc
-./src/main/_wsinus
-./src/main/_wsinus.inc
-./src/main/_wsquare
-./src/main/_wsquare.inc
+./src/main/wramp.inc
+./src/main/wsinus.inc
+./src/main/wsquare.inc
 ./src/pascal.asm
 ./src/player/
 ./src/player/playosci.asm

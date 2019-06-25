@@ -17,19 +17,19 @@ interface
 const
     sinuswave: array [0..63] of shortint =
 (
-(*$I _wsinus.inc*)
+(*$I wsinus.inc*)
 );
 
 const
     rampwave: array [0..63] of shortint =
 (
-(*$I _wramp.inc*)
+(*$I wramp.inc*)
 );
 
 const
     squarewave: array [0..63] of shortint =
 (
-(*$I _wsquare.inc*)
+(*$I wsquare.inc*)
 );
 
 const

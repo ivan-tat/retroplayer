@@ -45,6 +45,19 @@ AFLAGS := -zld -zq -i=$(INCLUDE_DIRS)
 DA     := wdis
 DFLAGS := -a
 
+#CC_HOST_EXEC     := gcc
+#CFLAGS_HOST_EXEC := -lm -I $(INCLUDE_DIRS)
+
+CC_HOST_EXEC     := wcl386
+CFLAGS_HOST_EXEC := -q -3 -fp3 -fpi87 -om -bcl=linux -i=$(INCLUDE_DIRS)
+
+ifeq (gcc,$(CC_HOST_EXEC))
+make_c_exec = $(CC_HOST_EXEC) $(CFLAGS_HOST_EXEC) $< -o $@
+endif
+ifeq (wcl386,$(CC_HOST_EXEC))
+make_c_exec = $(CC_HOST_EXEC) $(CFLAGS_HOST_EXEC) -fo=$*.o -fe=$@ $< && rm -f $*.o
+endif
+
 #CC     := gcc
 #CFLAGS := -I $(INCLUDE_DIRS)
 
@@ -108,51 +121,123 @@ endif
 ## Dependency generation rules ##
 ##=---------------------------=##
 
+## For "C-source -> object" rules:
 ## 1. Convert "main.o : main.c defs.h" into "main.o main.$(DEPEXT) : main.c defs.h"
 ## 2. Add "main.$(ASMTMPEXT) : main.o" dependency.
 ## 3. Add "main.obj : main.$(ASMTMPEXT)" dependency.
 ## 4. Optionally: Replace "/" with "\" for DOS.
 
 ifeq (gcc,$(DEPCC))
-DEP_SED_SCRIPT = -e 's,\($*\)\.o[ :]*,\1.o $@ : $*.c,g'
-endif
-ifeq (owcc,$(DEPCC))
-DEP_SED_SCRIPT = -e 's,\($*\)\.o[ :]*\($(*F)\),\1.o $@ : $*,g'
-endif
-
-ifeq (gcc,$(DEPCC))
-%.$(DEPEXT): %.c
+define make_c_obj_deps =
 	set -e; rm -f $@; \
 	$(DEPCC) $(DEPCFLAGS) -MT $*.o -MF $@.$$$$ $<; \
 	echo $*.$(ASMTMPEXT) : $*.o >> $@.$$$$; \
 	echo $*.obj : $*.$(ASMTMPEXT) >> $@.$$$$; \
-	sed $(DEP_SED_SCRIPT) < $@.$$$$ > $@; \
+	sed -e 's,\($*\)\.o[ :]*,\1.o $@ : $*.c,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
+endef
 endif
 ifeq (owcc,$(DEPCC))
-%.$(DEPEXT): %.c
+define make_c_obj_deps =
 	set -e; rm -f $@; \
 	$(DEPCC) $(DEPCFLAGS) -MT $*.o -MF $@.$$$$ $< > /dev/null; \
 	echo $*.$(ASMTMPEXT) : $*.o >> $@.$$$$; \
 	echo $*.obj : $*.$(ASMTMPEXT) >> $@.$$$$; \
-	sed $(DEP_SED_SCRIPT) < $@.$$$$ > $@; \
+	sed -e 's,\($*\)\.o[ :]*\($(*F)\),\1.o $@ : $*,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
+endef
 endif
+
+## For "C-source -> executable" rules:
+## 1. Convert "main : main.c defs.h" into "main main.$(DEPEXT) : main.c defs.h"
+## 2. Optionally: Replace "/" with "\" for DOS.
+
+ifeq (gcc,$(DEPCC))
+define make_c_exec_deps =
+	set -e; rm -f $@; \
+	$(DEPCC) $(DEPCFLAGS) -MT $*.o -MF $@.$$$$ $<; \
+	sed -e 's,\($*\)\.o[ :]*,\1 $@ : $*.c,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+endef
+endif
+ifeq (owcc,$(DEPCC))
+define make_c_exec_deps =
+	set -e; rm -f $@; \
+	$(DEPCC) $(DEPCFLAGS) -MT $*.o -MF $@.$$$$ $< > /dev/null; \
+	sed -e 's,\($*\)\.o[ :]*\($(*F)\)\.c,$(patsubst %.c,%,$<) $@ : $<,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+endef
+endif
+
+## Global dependency generation rules:
+%.$(DEPEXT): %.c
+	$(make_c_obj_deps)
 
 ##=---------=##
 ## Variables ##
 ##=---------=##
 
 ## Naming template:
+## <name>_INCS - source files to be included in other source files
 ## <name>_SRCS - source files
 ## <name>_OBJS - object files
 ## <name>_DEPS - dependency files
 ## <name>_TMPS - temporary files
 
+INCS =
 SRCS =
 OBJS =
 DEPS =
 TMPS =
+
+##=--------------------------=##
+## Helper executables scripts ##
+##=--------------------------=##
+
+HELPER_EXECS_DIR := main/scripts
+
+## Dependency generation rules:
+$(HELPER_EXECS_DIR)/%.$(DEPEXT): $(HELPER_EXECS_DIR)/%.c
+	$(make_c_exec_deps)
+
+## Build rules
+$(HELPER_EXECS_DIR)/%: $(HELPER_EXECS_DIR)/%.c
+	$(make_c_exec)
+
+#scripts_INCS :=
+scripts_SRCS := $(wildcard $(HELPER_EXECS_DIR)/*.c)
+scripts_OBJS := $(patsubst %.c,%,$(filter %.c,$(scripts_SRCS)))
+scripts_DEPS := $(patsubst %.c,%.$(DEPEXT),$(filter %.c,$(scripts_SRCS)))
+#scripts_TMPS :=
+
+#INCS += $(scripts_INCS)
+SRCS += $(scripts_SRCS)
+OBJS += $(scripts_OBJS)
+DEPS += $(scripts_DEPS)
+#TMPS += $(scripts_TMPS)
+
+## Auto-generated source files
+## ===========================
+
+## Build rules
+main/%.inc: $(HELPER_EXECS_DIR)/%
+	./$< > $@
+
+autogen_INCS := \
+ main/wramp.inc \
+ main/wsinus.inc \
+ main/wsquare.inc
+
+#autogen_SRCS :=
+#autogen_OBJS :=
+#autogen_DEPS :=
+#autogen_TMPS :=
+
+INCS += $(autogen_INCS)
+#SRCS += $(autogen_SRCS)
+#OBJS += $(autogen_OBJS)
+#DEPS += $(autogen_DEPS)
+#TMPS += $(autogen_TMPS)
 
 ##=--------------=##
 ## Custom C files ##
@@ -165,6 +250,8 @@ cc/i86/dointr.obj \
 cc/i86/dointr.o: cc/i86/dointr.asm
 cc/i86/intr.obj \
 cc/i86/intr.o: cc/i86/intr.asm
+
+#cc_INCS :=
 
 cc_SRCS := \
  $(wildcard cc/*.asm) \
@@ -204,6 +291,7 @@ cc_OBJS_TP := $(cc_OBJS:.o=.obj)
 cc_OBJS += $(cc_OBJS_TP)
 cc_TMPS += $(patsubst %.c,%.$(ASMTMPEXT),$(filter %.c,$(cc_SRCS)))
 
+#INCS += $(cc_INCS)
 SRCS += $(cc_SRCS)
 OBJS += $(cc_OBJS)
 DEPS += $(cc_DEPS)
@@ -226,6 +314,8 @@ main/asm/sampler.obj \
 main/asm/sampler.o: main/asm/sampler.asm main/asm/sampler.def
 startup/ints.obj \
 startup/ints.o: startup/ints.asm
+
+#common_INCS :=
 
 common_SRCS := \
  $(wildcard *.asm) \
@@ -259,6 +349,7 @@ common_OBJS_TP := $(common_OBJS:.o=.obj)
 common_OBJS += $(common_OBJS_TP)
 common_TMPS += $(patsubst %.c,%.$(ASMTMPEXT),$(filter %.c,$(common_SRCS)))
 
+#INCS += $(common_INCS)
 SRCS += $(common_SRCS)
 OBJS += $(common_OBJS)
 DEPS += $(common_DEPS)
@@ -269,6 +360,7 @@ TMPS += $(common_TMPS)
 ##=------------------------------=##
 
 ifneq (,$(DOS_HOST))
+#INCS := $(subst /,\,$(INCS))
 #SRCS := $(subst /,\,$(SRCS))
 #OBJS := $(subst /,\,$(OBJS))
 #DEPS := $(subst /,\,$(DEPS))
@@ -283,10 +375,10 @@ include $(DEPS)
 
 SUCCESS := 'Done.'
 
-all: $(OBJS)
+all: $(INCS) $(OBJS)
 	@echo $(SUCCESS)
 
 .PHONY: clean
 clean:
-	$(RM) $(OBJS) $(DEPS) $(TMPS)
+	$(RM) $(INCS) $(OBJS) $(DEPS) $(TMPS)
 	@echo $(SUCCESS)
