@@ -5,30 +5,23 @@
 
 error_not_implemented = $(error This function is not implemented for current environment.)
 error_not_known_params = $(error This function is not implemented for selected parameters.)
-info_done = $(info Done.)
+info_done = @echo Done.
 
 ifneq "$(DJGPP)" ""
-HOST_TYPE := DJGPP
+HOST_TYPE       := DJGPP
 else
-HOST_TYPE := native
+HOST_TYPE       := native
 endif
 
-INCLUDE_DIRS := .
-
-## Temporary assembler source file extension (without a dot)
-ASMTMPEXT := as_
+INCLUDE_DIRS    := .
 
 ifeq "$(HOST_TYPE)" "DJGPP"
 tmp := $(subst /,\,$(INCLUDE_DIRS))
 INCLUDE_DIRS := $(tmp)
 endif
 
-##=----------------------------=##
-## Dependency files compilation ##
-##=----------------------------=##
-
-DEPDIR_NATIVE := .deps
-DEPDIR_DOS    := _deps.dos
+DEPDIR_NATIVE   := .deps
+DEPDIR_DOS      := _deps.dos
 
 ifeq "$(HOST_TYPE)" "native"
 DEPDIR := $(DEPDIR_NATIVE)
@@ -36,141 +29,50 @@ else
 DEPDIR := $(DEPDIR_DOS)
 endif
 
-ifeq "$(HOST_TYPE)" "native"
-remove_deps = if [ $(DEPDIR) != . ]; then rm -rf $(DEPDIR); fi
-#else ifeq "$(HOST_TYPE)" "DJGPP"
-#remove_deps = if not "$(DEPDIR)"=="." deltree /y $(DEPDIR)
-else
-$(error_not_implemented)
-endif
+DEPEXT          := d
+#DEPCC          := gcc
+#DEPCFLAGS      := -E -MM -I $(INCLUDE_DIRS)
+DEPCC           := owcc
+DEPCFLAGS       := -zq -E -MM -I $(INCLUDE_DIRS)
+DEPCC_DOS       := $(DEPCC)
+DEPCFLAGS_DOS   := $(DEPCFLAGS)
+ASMTMPEXT_DOS   := as_
+AS_DOS          := wasm
+AFLAGS_DOS      := -zld -zq -i=$(INCLUDE_DIRS)
+DA_DOS          := wdis
+DFLAGS_DOS      := -a
+#CC              := gcc
+#CFLAGS          := -lm -I $(INCLUDE_DIRS)
+CC              := wcl386
+CFLAGS          := -q -3 -fp3 -fpi87 -om -bcl=linux -i=$(INCLUDE_DIRS)
+#CC_DOS          := gcc
+#CFLAGS_DOS      := -I $(INCLUDE_DIRS)
+CC_DOS          := wcc
+CFLAGS_DOS      := -3 -fp3 -ml -oi -oc -os -q -r -s -zdp -zff -zgf -zl -zld -zls -zp=1 -zq -zu -i=$(INCLUDE_DIRS)
 
-## Dependency file's extension (without a dot)
+## Naming template:
+## <name>_DIR(S) - local directory(s)
+## <name>_INCS - source files to be included in other source files
+## <name>_SRCS - source files
+## <name>_OBJS - object files and binary executable files
+## <name>_DEPS - dependency files
+## <name>_TMPS - temporary files
 
-## GNU C Compiler "gcc" (default):
-DEPEXT = d
-## Open Watcom C Compiler with GNU syntax "owcc":
-## HINT: Do not use "d" as a file's extension when using Open Watcom "owcc" v2.0 beta - it will delete present "*.d" file after a compilation step (if they are in the same directory as source files)!
-#DEPEXT = dep
+INCS =
+SRCS =
+OBJS =
+DEPS =
+TMPS =
 
-#DEPCC     := gcc
-#DEPCFLAGS = -E -MM -I $(INCLUDE_DIRS)
-DEPCC     := owcc
-DEPCFLAGS = -zq -E -MM -I $(INCLUDE_DIRS)
-
-##=-----------=##
-## Compilation ##
-##=-----------=##
-
-AS     := wasm
-AFLAGS = -zld -zq -i=$(INCLUDE_DIRS)
-
-DA     := wdis
-DFLAGS := -a
-
-#CC_HOST_EXEC     := gcc
-#CFLAGS_HOST_EXEC = -lm -I $(INCLUDE_DIRS)
-CC_HOST_EXEC     := wcl386
-CFLAGS_HOST_EXEC = -q -3 -fp3 -fpi87 -om -bcl=linux -i=$(INCLUDE_DIRS)
-
-ifeq "$(CC_HOST_EXEC)" "gcc"
-make_c_exec = $(CC_HOST_EXEC) $(CFLAGS_HOST_EXEC) $< -o $@
-else ifeq "$(CC_HOST_EXEC)" "wcl386"
-make_c_exec = $(CC_HOST_EXEC) $(CFLAGS_HOST_EXEC) -fo=$*.o -fe=$@ $< && $(RM) $*.o
-else
-$(error_not_known_params)
-endif
-
-#CC     := gcc
-#CFLAGS = -I $(INCLUDE_DIRS)
-CC     := wcc
-CFLAGS = -3 -fp3 -ml -oi -oc -os -q -r -s -zdp -zff -zgf -zl -zld -zls -zp=1 -zq -zu -i=$(INCLUDE_DIRS)
-
-##=--------------=##
-## Default target ##
-##=--------------=##
-
+.DEFAULT_GOAL := empty
 .PHONY: empty
 empty:
 	@echo "Usage:"
 	@echo '    make [ all | clean ]'
 
-##=-----------------=##
-## Compilation rules ##
-##=-----------------=##
-
-## HINT: ORDER MATTERS!
-
-## Native linking:
-
-%.o: %.c
-ifeq "$(CC)" "wcc"
-	$(CC) $(CFLAGS) $< -fo=$@
-else ifeq "$(CC)" "gcc"
-	$(CC) $(CFLAGS) -c $< -o $@
-else
-$(error_not_known_params)
-endif
-
-## Used multiple times:
-ifeq "$(AS)" "wasm"
-make_asm_obj = $(AS) $(AFLAGS) $< -fo=$@
-else
-$(error_not_known_params)
-endif
-
-%.o: %.$(ASMTMPEXT)
-	$(make_asm_obj)
-
-%.o: %.asm
-	$(make_asm_obj)
-
-## Turbo Pascal linking:
-
-%.$(ASMTMPEXT): %.o
-ifeq "$(DA)" "wdis"
-	set -e; $(RM) $*.$(ASMTMPEXT); \
-	$(DA) $(DFLAGS) $< | sed -r -e 's/(^DGROUP[[:space:]]+GROUP[[:space:]]+)CONST,CONST2,(_DATA)/\1\2/;s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$$)/_DATA\1/;s/([[:space:]]|,|:|-|\+)(0[a-f]{1}[[:xdigit:]]{0,7}|[1-9]{1}[[:xdigit:]]{0,7})([[:xdigit:]]{8}H)/\10\3/g;s/(.+\,DGROUP:)CONST$$/\1_DATA/' > $*.$(ASMTMPEXT)
-else
-$(error_not_known_params)
-endif
-
-%.obj: %.asm
-	$(make_asm_obj)
-
-%.obj: %.$(ASMTMPEXT)
-	$(make_asm_obj)
-
-##=---------------------------=##
-## Dependency generation rules ##
-##=---------------------------=##
-
-## For "C-source -> object" rules:
-## 1. Convert "main.o : main.c defs.h" into "main.o main.$(DEPEXT) : main.c defs.h"
-## 2. Add "main.$(ASMTMPEXT) : main.o" dependency.
-## 3. Add "main.obj : main.$(ASMTMPEXT)" dependency.
-## 4. Optionally: Replace "/" with "\" for DOS.
-
-ifeq "$(DEPCC)" "gcc"
-define make_c_obj_deps =
-	set -e; $(RM) $@; mkdir -p $(@D); \
-	$(DEPCC) $(DEPCFLAGS) -MT $*.o -MF $@.$$$$ $<; \
-	echo $*.$(ASMTMPEXT) : $*.o >> $@.$$$$; \
-	echo $*.obj : $*.$(ASMTMPEXT) >> $@.$$$$; \
-	sed -e 's,\($*\)\.o[ :]*,\1.o $@ : $*.c,g' < $@.$$$$ > $@; \
-	$(RM) $@.$$$$
-endef
-else ifeq "$(DEPCC)" "owcc"
-define make_c_obj_deps =
-	set -e; $(RM) $@; mkdir -p $(@D); \
-	$(DEPCC) $(DEPCFLAGS) -MT $*.o -MF $@.$$$$ $< > /dev/null; \
-	echo $*.$(ASMTMPEXT) : $*.o >> $@.$$$$; \
-	echo $*.obj : $*.$(ASMTMPEXT) >> $@.$$$$; \
-	sed -e 's,\($*\)\.o[ :]*\($(*F)\),\1.o $@ : $*,g' < $@.$$$$ > $@; \
-	$(RM) $@.$$$$
-endef
-else
-$(error_not_known_params)
-endif
+##=----------------=##
+## Dependency files ##
+##=----------------=##
 
 ## For "C-source -> executable" rules:
 ## 1. Convert "main : main.c defs.h" into "main main.$(DEPEXT) : main.c defs.h"
@@ -194,31 +96,101 @@ else
 $(error_not_known_params)
 endif
 
+## For "C-source -> object" rules:
+## 1. Convert "main.o : main.c defs.h" into "main.o main.$(DEPEXT) : main.c defs.h"
+## 2. Add "main.$(ASMTMPEXT_DOS) : main.o" dependency.
+## 3. Add "main.obj : main.$(ASMTMPEXT_DOS)" dependency.
+## 4. Optionally: Replace "/" with "\" for DOS.
+
+ifeq "$(DEPCC_DOS)" "gcc"
+define make_c_obj_dos_deps =
+	set -e; $(RM) $@; mkdir -p $(@D); \
+	$(DEPCC_DOS) $(DEPCFLAGS_DOS) -MT $*.o -MF $@.$$$$ $<; \
+	echo $*.$(ASMTMPEXT_DOS) : $*.o >> $@.$$$$; \
+	echo $*.obj : $*.$(ASMTMPEXT_DOS) >> $@.$$$$; \
+	sed -e 's,\($*\)\.o[ :]*,\1.o $@ : $*.c,g' < $@.$$$$ > $@; \
+	$(RM) $@.$$$$
+endef
+else ifeq "$(DEPCC_DOS)" "owcc"
+define make_c_obj_dos_deps =
+	set -e; $(RM) $@; mkdir -p $(@D); \
+	$(DEPCC_DOS) $(DEPCFLAGS_DOS) -MT $*.o -MF $@.$$$$ $< > /dev/null; \
+	echo $*.$(ASMTMPEXT_DOS) : $*.o >> $@.$$$$; \
+	echo $*.obj : $*.$(ASMTMPEXT_DOS) >> $@.$$$$; \
+	sed -e 's,\($*\)\.o[ :]*\($(*F)\),\1.o $@ : $*,g' < $@.$$$$ > $@; \
+	$(RM) $@.$$$$
+endef
+else
+$(error_not_known_params)
+endif
+
 ## Global dependency generation rules:
 $(DEPDIR)/%.$(DEPEXT): %.c
-	$(make_c_obj_deps)
+	$(make_c_obj_dos_deps)
 
-##=---------=##
-## Variables ##
-##=---------=##
+ifeq "$(HOST_TYPE)" "native"
+remove_deps = if [ $(DEPDIR) != . ]; then rm -rf $(DEPDIR); fi
+#else ifeq "$(HOST_TYPE)" "DJGPP"
+#remove_deps = if not "$(DEPDIR)"=="." deltree /y $(DEPDIR)
+else
+$(error_not_implemented)
+endif
 
-## Naming template:
-## <name>_DIR(S) - local directory(s)
-## <name>_INCS - source files to be included in other source files
-## <name>_SRCS - source files
-## <name>_OBJS - object files and binary executable files
-## <name>_DEPS - dependency files
-## <name>_TMPS - temporary files
+##=-----------=##
+## Compilation ##
+##=-----------=##
 
-INCS =
-SRCS =
-OBJS =
-DEPS =
-TMPS =
+ifeq "$(CC)" "gcc"
+make_c_exec = $(CC) $(CFLAGS) $< -o $@
+else ifeq "$(CC)" "wcl386"
+make_c_exec = $(CC) $(CFLAGS) -fo=$*.o -fe=$@ $< && $(RM) $*.o
+else
+$(error_not_known_params)
+endif
 
-##=--------------------------=##
-## Helper executables scripts ##
-##=--------------------------=##
+## HINT: RULES' ORDER MATTERS!
+
+%.o: %.c
+ifeq "$(CC_DOS)" "wcc"
+	$(CC_DOS) $(CFLAGS_DOS) $< -fo=$@
+else ifeq "$(CC_DOS)" "gcc"
+	$(CC_DOS) $(CFLAGS_DOS) -c $< -o $@
+else
+$(error_not_known_params)
+endif
+
+## Used multiple times:
+ifeq "$(AS_DOS)" "wasm"
+make_asm_obj = $(AS_DOS) $(AFLAGS_DOS) $< -fo=$@
+else
+$(error_not_known_params)
+endif
+
+%.o: %.$(ASMTMPEXT_DOS)
+	$(make_asm_obj)
+
+%.o: %.asm
+	$(make_asm_obj)
+
+## Turbo Pascal linking:
+
+%.$(ASMTMPEXT_DOS): %.o
+ifeq "$(DA_DOS)" "wdis"
+	set -e; $(RM) $*.$(ASMTMPEXT_DOS); \
+	$(DA_DOS) $(DFLAGS_DOS) $< | sed -r -e 's/(^DGROUP[[:space:]]+GROUP[[:space:]]+)CONST,CONST2,(_DATA)/\1\2/;s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$$)/_DATA\1/;s/([[:space:]]|,|:|-|\+)(0[a-f]{1}[[:xdigit:]]{0,7}|[1-9]{1}[[:xdigit:]]{0,7})([[:xdigit:]]{8}H)/\10\3/g;s/(.+\,DGROUP:)CONST$$/\1_DATA/' > $*.$(ASMTMPEXT_DOS)
+else
+$(error_not_known_params)
+endif
+
+%.obj: %.asm
+	$(make_asm_obj)
+
+%.obj: %.$(ASMTMPEXT_DOS)
+	$(make_asm_obj)
+
+##=-------------------------=##
+## Helper executable scripts ##
+##=-------------------------=##
 
 scripts_DIR := main/scripts
 
@@ -292,7 +264,7 @@ cc_TMPS :=
 ## Turbo Pascal target files:
 cc_OBJS_TP := $(cc_OBJS:.o=.obj)
 cc_OBJS += $(cc_OBJS_TP)
-cc_TMPS += $(patsubst %.c,%.$(ASMTMPEXT),$(filter %.c,$(cc_SRCS)))
+cc_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(cc_SRCS)))
 
 #INCS += $(cc_INCS)
 SRCS += $(cc_SRCS)
@@ -344,7 +316,7 @@ common_TMPS :=
 ## Turbo Pascal target files:
 common_OBJS_TP := $(common_OBJS:.o=.obj)
 common_OBJS += $(common_OBJS_TP)
-common_TMPS += $(patsubst %.c,%.$(ASMTMPEXT),$(filter %.c,$(common_SRCS)))
+common_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(common_SRCS)))
 
 #INCS += $(common_INCS)
 SRCS += $(common_SRCS)
@@ -373,6 +345,7 @@ endif
 ## Targets ##
 ##=-------=##
 
+.PHONY: all
 all: $(INCS) $(OBJS)
 	$(info_done)
 
