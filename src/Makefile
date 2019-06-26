@@ -110,19 +110,18 @@ else
 $(error_not_known_params)
 endif
 
-%.o: %.$(ASMTMPEXT)
+## Used multiple times:
 ifeq "$(AS)" "wasm"
-	$(AS) $(AFLAGS) $< -fo=$@
+make_asm_obj = $(AS) $(AFLAGS) $< -fo=$@
 else
 $(error_not_known_params)
 endif
 
+%.o: %.$(ASMTMPEXT)
+	$(make_asm_obj)
+
 %.o: %.asm
-ifeq "$(AS)" "wasm"
-	$(AS) $(AFLAGS) $< -fo=$@
-else
-$(error_not_known_params)
-endif
+	$(make_asm_obj)
 
 ## Turbo Pascal linking:
 
@@ -135,18 +134,10 @@ $(error_not_known_params)
 endif
 
 %.obj: %.asm
-ifeq "$(AS)" "wasm"
-	$(AS) $(AFLAGS) $< -fo=$@
-else
-$(error_not_known_params)
-endif
+	$(make_asm_obj)
 
 %.obj: %.$(ASMTMPEXT)
-ifeq "$(AS)" "wasm"
-	$(AS) $(AFLAGS) $< -fo=$@
-else
-$(error_not_known_params)
-endif
+	$(make_asm_obj)
 
 ##=---------------------------=##
 ## Dependency generation rules ##
