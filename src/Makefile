@@ -203,6 +203,7 @@ $(DEPDIR)/%.$(DEPEXT): %.c
 ##=---------=##
 
 ## Naming template:
+## <name>_DIR(S) - local directory(s)
 ## <name>_INCS - source files to be included in other source files
 ## <name>_SRCS - source files
 ## <name>_OBJS - object files and binary executable files
@@ -219,18 +220,18 @@ TMPS =
 ## Helper executables scripts ##
 ##=--------------------------=##
 
-HELPER_EXECS_DIR := main/scripts
+scripts_DIR := main/scripts
 
 ## Dependency generation rules:
-$(DEPDIR)/$(HELPER_EXECS_DIR)/%.$(DEPEXT): $(HELPER_EXECS_DIR)/%.c
+$(DEPDIR)/$(scripts_DIR)/%.$(DEPEXT): $(scripts_DIR)/%.c
 	$(make_c_exec_deps)
 
 ## Build rules
-$(HELPER_EXECS_DIR)/%: $(HELPER_EXECS_DIR)/%.c
+$(scripts_DIR)/%: $(scripts_DIR)/%.c
 	$(make_c_exec)
 
 #scripts_INCS :=
-scripts_SRCS := $(wildcard $(HELPER_EXECS_DIR)/*.c)
+scripts_SRCS := $(wildcard $(scripts_DIR)/*.c)
 scripts_OBJS := $(patsubst %.c,%,$(filter %.c,$(scripts_SRCS)))
 scripts_DEPS := $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(scripts_SRCS)))
 #scripts_TMPS :=
@@ -245,7 +246,7 @@ DEPS += $(scripts_DEPS)
 ## ===========================
 
 ## Build rules
-main/%.inc: $(HELPER_EXECS_DIR)/%
+main/%.inc: $(scripts_DIR)/%
 	./$< > $@
 
 autogen_INCS := \
@@ -303,6 +304,17 @@ TMPS += $(cc_TMPS)
 ## Common files ##
 ##=------------=##
 
+common_DIRS := \
+ . \
+ dos \
+ hw \
+ hw/sb \
+ main \
+ main/asm \
+ player \
+ player/asm \
+ startup
+
 ## FIXME: Manual dependencies of assembler source files
 hw/cpu.obj \
 hw/cpu.o: hw/cpu.asm
@@ -319,24 +331,8 @@ startup/ints.o: startup/ints.asm
 
 #common_INCS :=
 common_SRCS := \
- $(wildcard *.asm) \
- $(wildcard *.c) \
- $(wildcard dos/*.asm) \
- $(wildcard dos/*.c) \
- $(wildcard hw/*.asm) \
- $(wildcard hw/*.c) \
- $(wildcard hw/sb/*.asm) \
- $(wildcard hw/sb/*.c) \
- $(wildcard main/*.asm) \
- $(wildcard main/*.c) \
- $(wildcard main/asm/*.asm) \
- $(wildcard main/asm/*.c) \
- $(wildcard player/*.asm) \
- $(wildcard player/*.c) \
- $(wildcard player/asm/*.asm) \
- $(wildcard player/asm/*.c) \
- $(wildcard startup/*.asm) \
- $(wildcard startup/*.c)
+ $(wildcard $(patsubst %,%/*.asm,$(common_DIRS))) \
+ $(wildcard $(patsubst %,%/*.c,$(common_DIRS)))
 
 common_OBJS := \
  $(patsubst %.asm,%.o,$(filter %.asm,$(common_SRCS))) \
