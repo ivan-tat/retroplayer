@@ -5,6 +5,7 @@
 
 error_not_implemented = $(error This function is not implemented for current environment.)
 error_not_known_params = $(error This function is not implemented for selected parameters.)
+info_done = $(info Done.)
 
 ifneq "$(DJGPP)" ""
 HOST_TYPE := DJGPP
@@ -267,16 +268,18 @@ INCS += $(autogen_INCS)
 ## Custom C files ##
 ##=--------------=##
 
+cc_DIR := cc
+
 ## FIXME: Manual dependencies of assembler source files
-cc/dos/int24.obj \
-cc/dos/int24.o: cc/dos/int24.asm
-cc/i86/dointr.obj \
-cc/i86/dointr.o: cc/i86/dointr.asm
-cc/i86/intr.obj \
-cc/i86/intr.o: cc/i86/intr.asm
+$(cc_DIR)/dos/int24.obj \
+$(cc_DIR)/dos/int24.o: $(cc_DIR)/dos/int24.asm
+$(cc_DIR)/i86/dointr.obj \
+$(cc_DIR)/i86/dointr.o: $(cc_DIR)/i86/dointr.asm
+$(cc_DIR)/i86/intr.obj \
+$(cc_DIR)/i86/intr.o: $(cc_DIR)/i86/intr.asm
 
 #cc_INCS :=
-cc_SRCS := $(shell find cc -type f \( -name '*.asm' -o -name '*.c' \))
+cc_SRCS := $(shell find $(cc_DIR) -type f \( -name '*.asm' -o -name '*.c' \))
 
 cc_OBJS := \
  $(patsubst %.asm,%.o,$(filter %.asm,$(cc_SRCS))) \
@@ -315,7 +318,6 @@ startup/ints.obj \
 startup/ints.o: startup/ints.asm
 
 #common_INCS :=
-
 common_SRCS := \
  $(wildcard *.asm) \
  $(wildcard *.c) \
@@ -366,19 +368,20 @@ ifeq "$(HOST_TYPE)" "DJGPP"
 #TMPS := $(subst /,\,$(TMPS))
 endif
 
+ifeq "$(MAKECMDGOALS)" "clean"
+else
 include $(DEPS)
+endif
 
 ##=-------=##
 ## Targets ##
 ##=-------=##
 
-SUCCESS := 'Done.'
-
 all: $(INCS) $(OBJS)
-	@echo $(SUCCESS)
+	$(info_done)
 
 .PHONY: clean
 clean:
 	$(remove_deps)
 	$(RM) $(INCS) $(OBJS) $(TMPS)
-	@echo $(SUCCESS)
+	$(info_done)
