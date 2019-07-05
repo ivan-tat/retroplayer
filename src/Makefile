@@ -45,11 +45,55 @@ DFLAGS_DOS      := -a
 #CC              := gcc
 #CFLAGS          := -lm -I $(INCLUDE_DIRS)
 CC              := wcl386
-CFLAGS          := -q -3 -fp3 -fpi87 -om -bcl=linux -i=$(INCLUDE_DIRS)
+CFLAGS          := -q -3r -fp3 -fpi87 -om -bcl=linux -i=$(INCLUDE_DIRS)
 #CC_DOS          := gcc
 #CFLAGS_DOS      := -I $(INCLUDE_DIRS)
 CC_DOS          := wcc
 CFLAGS_DOS      := -3 -fp3 -ml -oi -oc -os -q -r -s -zdp -zff -zgf -zl -zld -zls -zp=1 -zq -zu -i=$(INCLUDE_DIRS)
+
+# Description of options for "wasm":
+# -zld      suppress file dependency info in object file
+# -zq       operate quietly
+
+# Description of options for "owcc":
+# -E        preprocess source file
+# -M[M]D    output autodepend make rule
+# -I <dir>  include directory
+# -zq       operate quietly
+
+# Description of options for "wcc":
+# -3        386 instructions
+# -fp3      generate floating-point code (80387 FPU code)
+# -ml       memory model (large - large code/large data)
+# -ecc      set default calling convention to __cdecl
+# -ecp      set default calling convention to __pascal
+# -ecw      set default calling convention to __watcall (default)
+# -oc       disable <call followed by return> to <jump> optimization
+#           reason: "wdis" incorrectly writes "je near ptr <near_extern_label>"
+#           (without "near ptr")
+# -oi       expand intrinsic functions inline
+# -os       favor code size over execution time in optimizations
+# -q        operate quietly (display only error messages)
+# -r        save/restore segment registers across calls
+# -s        remove stack overflow checks
+# -zdp      DS is pegged to DGROUP
+# -zff      FS floats (i.e. not fixed to a segment)
+# -zgf      GS floats (i.e. not fixed to a segment)
+# -zl       remove default library information
+# -zld      remove file dependency information
+# -zls      remove automatically inserted symbols
+# -zp=1     pack structure members with alignment (1)
+# -zu       SS != DGROUP (i.e., do not assume stack is in data segment)
+# -i=<dir>  include directory
+
+# Description of options for "wcl386":
+# -3r       386 register calling conventions
+# -fpi87    inline 80x87
+# -fp3      generate 387 floating-point code
+# -bcl=<os> compile and link for OS
+# -q        operate quietly
+# -om       generate inline math functions
+# -i=<dir>  include directory
 
 ## Naming template:
 ## <name>_DIR(S) - local directory(s)

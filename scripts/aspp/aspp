@@ -26,7 +26,6 @@ declare -a v_input_sources_base # real base path names
 declare -a v_input_sources_user # user file names
 declare -a v_sources_real       # real file names
 declare -a v_sources_base       # real base path names
-declare -a v_sources_rel        # real relative file names
 declare -a v_sources_user       # user file names
 declare    v_target_name
 declare    v_output_name
@@ -34,7 +33,6 @@ declare -a v_prerequisites
 declare    inc_real
 declare    inc_base
 declare    inc_user
-
 
 # $1=message
 _dbg() {
