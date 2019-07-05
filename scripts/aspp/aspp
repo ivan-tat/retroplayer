@@ -12,21 +12,26 @@ set -e
 
 DEBUG=0
 
+# Naming convention:
+#   *_real - real file/path name
+#   *_base - real file/path base name
+#   *_user - user file/path name
+
 declare -a errors
 declare    v_act
 declare -i v_act_show_help
 declare -i v_act_preprocess
 declare -i v_act_make_rule
-declare    v_base_path_real     # real base path name
-declare -a v_include_paths_real # real path names
-declare -a v_include_paths_base # real base path names
-declare -a v_include_paths_user # user path names
-declare -a v_input_sources_real # real file names
-declare -a v_input_sources_base # real base path names
-declare -a v_input_sources_user # user file names
-declare -a v_sources_real       # real file names
-declare -a v_sources_base       # real base path names
-declare -a v_sources_user       # user file names
+declare    v_base_path_real
+declare -a v_include_paths_real
+declare -a v_include_paths_base
+declare -a v_include_paths_user
+declare -a v_input_sources_real
+declare -a v_input_sources_base
+declare -a v_input_sources_user
+declare -a v_sources_real
+declare -a v_sources_base
+declare -a v_sources_user
 declare    v_target_name
 declare    v_output_name
 declare -a v_prerequisites
@@ -123,7 +128,7 @@ add_include_path() {
 
 # $1=real path
 # $2=(refname) index or -1
-# return value: 0=success or 1=fail
+# returns: 0=success or 1=fail
 find_include_path_real() {
     local -n index=$2
     local -i i
@@ -149,7 +154,7 @@ find_include_path_real() {
 
 # $1=user path
 # $2=(refname) index or -1
-# return value: 0=success or 1=fail
+# returns: 0=success or 1=fail
 find_include_path_user() {
     local -n index=$2
     local -i i
@@ -175,7 +180,7 @@ find_include_path_user() {
 
 # $1=user path
 # $2=(refname) index or -1
-# return value: 0=success or 1=fail
+# returns: 0=success or 1=fail
 add_include_dir_with_check() {
     local f="$1"
     local -n index=$2
@@ -208,7 +213,7 @@ add_include_dir_with_check() {
 }
 
 # $1=real file, $2=base path, $3=user file
-# OUT: $4=(refname) index
+# $4=(refname) index
 add_input_source() {
     local -n index=$4
     local -i i
@@ -225,8 +230,8 @@ add_input_source() {
 }
 
 # $1=real file
-# OUT: $2=(refname) index or -1
-# return value: 0=success or 1=fail
+# $2=(refname) index or -1
+# returns: 0=success or 1=fail
 find_input_source_real() {
     local -n index=$2
     local -i i
@@ -251,8 +256,8 @@ find_input_source_real() {
 }
 
 # $1=user file
-# OUT: $2=(refname) index or -1
-# return value: 0=success or 1=fail
+# $2=(refname) index or -1
+# returns: 0=success or 1=fail
 find_input_source_user() {
     local -n index=$2
     local -i i
@@ -277,8 +282,8 @@ find_input_source_user() {
 }
 
 # $1=user file
-# OUT: $2=(refname) file index or -1
-# return value: 0=success or 1=fail
+# $2=(refname) file index or -1
+# returns: 0=success or 1=fail
 add_input_source_with_check() {
     local f="$1"
     local index=$2
@@ -332,7 +337,7 @@ add_source() {
 
 # $1=real file
 # $2=(refname) index or -1
-# return value: 0=success or 1=fail
+# returns: 0=success or 1=fail
 find_source_real() {
     local -n index=$2
     local -i i
@@ -358,7 +363,7 @@ find_source_real() {
 
 # $1=user file
 # $2=(refname) index or -1
-# return value: 0=success or 1=fail
+# returns: 0=success or 1=fail
 find_source_user() {
     local -n index=$2
     local -i i
@@ -429,7 +434,6 @@ EOT
 }
 
 # $1=relative file
-# OUT:
 # $2=(refname) relative file
 # $3=(refname) base directory
 # $4=(refname) real file
