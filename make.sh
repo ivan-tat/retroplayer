@@ -22,12 +22,17 @@ esac
 echo "Building for target \`$target' ..."
 
 PROJDIR="$PWD"
-LASTDIR="$PROJDIR"
+SRCDIR="$PROJDIR/src"
 
-W_LIB='wlib'
+WLIB='wlib'
+WLIBFLAGS='-q'
 
 PC='tpc'
 PCFLAGS='-gd -m -v -$d+,e-,g+,l+,n+'
+
+# Description of options for "wlib":
+# -q    don't print header
+
 # Description of options for "tpc":
 # -gd   detailed map file
 # -m    make modified units
@@ -44,25 +49,18 @@ if [ -z "$DJGPP" ]; then
     echo 'Extracting Watcom C specific files...'
     . ./scripts/ow/ow.sh
     . ./scripts/ow/clib.sh
-    cd "$PROJDIR/src"
-    $W_LIB "$CLIB" ':i4d.asm' ':i4m.asm' ':i8d086.asm'
+    cd "$SRCDIR"
+    $WLIB $WLIBFLAGS "$CLIB" ':i4d.asm' ':i4m.asm' ':i8d086.asm'
     mv i4d.o i4d.obj
     mv i4m.o i4m.obj
     mv i8d086.o i8d086.obj
-    cd "$PROJDIR"
-
-    if [ ! -f "$PROJDIR/src/cc/cc.lib" ]; then
-        tmp=`mktemp`
-        find "$PROJDIR/src/cc/" -type f -name '*.obj' -printf '+%p ' | sort -u > $tmp
-        wlib -q -t -zld -o "$PROJDIR/src/cc/cc.lib" @$tmp
-        rm $tmp
-    fi
 else
 # DJGPP
-    cd "$PROJDIR/src"
+    cd "$SRCDIR"
     $PC $PCFLAGS 'player\plays3m.pas'
     $PC $PCFLAGS 'player\smalls3m.pas'
     $PC $PCFLAGS 'player\playosci.pas'
 fi
 
 cd "$PROJDIR"
+echo 'Done.'
