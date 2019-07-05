@@ -1,4 +1,3 @@
-## TODO: Make automatic dependencies of assembler source files.
 ## HINT: (?) Replace all "/" with "\" in paths and filenames when using DJGPP.
 
 ## Debian packages used: coreutils, sed, findutils.
@@ -30,6 +29,8 @@ DEPDIR := $(DEPDIR_DOS)
 endif
 
 DEPEXT          := d
+DEPAS_DOS		:= ../scripts/aspp/aspp
+DEPAFLAGS_DOS	:= -E -MM -I $(INCLUDE_DIRS)
 #DEPCC          := gcc
 #DEPCFLAGS      := -E -MM -I $(INCLUDE_DIRS)
 DEPCC           := owcc
@@ -125,6 +126,13 @@ $(error_not_known_params)
 endif
 
 ## Global dependency generation rules:
+
+$(DEPDIR)/%.$(DEPEXT): %.asm
+	set -e; $(RM) $@; mkdir -p $(@D); \
+	$(DEPAS_DOS) $(DEPAFLAGS_DOS) -MT $*.o -MF $@.$$$$ $<; \
+	sed -e 's,\($*\)\.o\([ :]*\),\1.o $@\2,' < $@.$$$$ > $@; \
+	$(RM) $@.$$$$
+
 $(DEPDIR)/%.$(DEPEXT): %.c
 	$(make_c_obj_dos_deps)
 
@@ -243,14 +251,6 @@ INCS += $(autogen_INCS)
 
 cc_DIR := cc
 
-## FIXME: Manual dependencies of assembler source files
-$(cc_DIR)/dos/int24.obj \
-$(cc_DIR)/dos/int24.o: $(cc_DIR)/dos/int24.asm
-$(cc_DIR)/i86/dointr.obj \
-$(cc_DIR)/i86/dointr.o: $(cc_DIR)/i86/dointr.asm
-$(cc_DIR)/i86/intr.obj \
-$(cc_DIR)/i86/intr.o: $(cc_DIR)/i86/intr.asm
-
 #cc_INCS :=
 cc_SRCS := $(shell find $(cc_DIR) -type f \( -name '*.asm' -o -name '*.c' \))
 
@@ -258,7 +258,10 @@ cc_OBJS := \
  $(patsubst %.asm,%.o,$(filter %.asm,$(cc_SRCS))) \
  $(patsubst %.c,%.o,$(filter %.c,$(cc_SRCS)))
 
-cc_DEPS := $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(cc_SRCS)))
+cc_DEPS := \
+ $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(cc_SRCS))) \
+ $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(cc_SRCS)))
+
 cc_TMPS :=
 
 ## Turbo Pascal target files:
@@ -287,21 +290,9 @@ common_DIRS := \
  player/asm \
  startup
 
-## FIXME: Manual dependencies of assembler source files
-hw/cpu.obj \
-hw/cpu.o: hw/cpu.asm
-hw/isr.obj \
-hw/isr.o: hw/isr.asm
-hw/line.obj \
-hw/line.o: hw/line.asm
-main/asm/_mixer.obj \
-main/asm/_mixer.o: main/asm/_mixer.asm main/asm/_mixer.def
-main/asm/sampler.obj \
-main/asm/sampler.o: main/asm/sampler.asm main/asm/sampler.def
-startup/ints.obj \
-startup/ints.o: startup/ints.asm
 
 #common_INCS :=
+
 common_SRCS := \
  $(wildcard $(patsubst %,%/*.asm,$(common_DIRS))) \
  $(wildcard $(patsubst %,%/*.c,$(common_DIRS)))
@@ -310,7 +301,10 @@ common_OBJS := \
  $(patsubst %.asm,%.o,$(filter %.asm,$(common_SRCS))) \
  $(patsubst %.c,%.o,$(filter %.c,$(common_SRCS)))
 
-common_DEPS := $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(common_SRCS)))
+common_DEPS := \
+ $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(common_SRCS))) \
+ $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(common_SRCS)))
+
 common_TMPS :=
 
 ## Turbo Pascal target files:

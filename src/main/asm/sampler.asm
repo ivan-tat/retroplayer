@@ -8,7 +8,7 @@
 
 DGROUP group _DATA
 
-include sampler.def
+include "sampler.def"
 
 _DATA segment word public use16 'DATA'
 
