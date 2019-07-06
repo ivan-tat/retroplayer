@@ -1,37 +1,49 @@
-## HINT: (?) Replace all "/" with "\" in paths and filenames when using DJGPP.
+## Supported environments:
+##   * GNU/Linux
+##   * DOS/DJGPP
 
-ifneq (,$(DJGPP))
-HOST_MODE := DJGPP
+error_not_implemented = $(error This function is not implemented for current environment)
+
+ifneq "$(DJGPP)" ""
+HOST_MODE   := DJGPP
+SHELL       = bash.exe
 else
-HOST_MODE := native
+HOST_MODE   := native
 endif
+srcdir      := src
 
-srcdir := src
-
-ifeq (DJGPP,$(HOST_MODE))
-tmp := $(subst /,\,$(srcdir))
-srcdir := $(tmp)
-endif
+.DEFAULT_GOAL := empty
 
 .PHONY: empty
 empty: show_banner
-	@echo 'Usage:'
-	@echo '    make [ all | clean ]'
+	@echo 'Usage:'; \
+	echo '    make [ all | clean ]'
 
 .PHONY: show_banner
 show_banner:
-	@echo "Hint: Running in a $(HOST_MODE) mode."
+	@echo 'Hint: Running in $(HOST_MODE) mode.'
 
-#cd $(srcdir); make $@; cd ..
 .PHONY: all
-all: show_banner
-ifeq (native,$(HOST_MODE))
-	make -C $(srcdir) $@
-endif
+
+ifeq "$(HOST_MODE)" "native"
+
+all: show_banner $(srcdir)/Makefile
+	make -C $(srcdir) -f Makefile $@
 	./make.sh $@
+
+else ifeq "$(HOST_MODE)" "DJGPP"
+
+all: show_banner $(srcdir)/Makefile.dos
+	make -C $(srcdir) -f Makefile.dos $@
+
+else
+$(error_not_implemented)
+endif
 
 .PHONY: clean
 clean: show_banner
-ifeq (native,$(HOST_MODE))
+ifeq "$(HOST_MODE)" "native"
 	make -C $(srcdir) $@
+else
+	$(error_not_implemented)
 endif

@@ -1,7 +1,5 @@
 #!/bin/bash
-# This script must be run in two steps:
-# 1) in a GNU/Linux terminal;
-# 2) in a DOS/DJGPP Bash shell.
+# This script can run in a GNU/Linux terminal and in a DOS/DJGPP Bash shell.
 
 set -e
 shopt -s extglob
@@ -64,26 +62,8 @@ SRCDIR="$PROJDIR/src"
 WLIB='wlib'
 WLIBFLAGS='-q'
 
-PC='tpc'
-PCDEBUG='-gd -v -$d+,l+'
-if [[ $DEBUG -eq 1 ]]; then
-    PCDEBUG="$PCDEBUG"' -dDEBUG'
-fi
-PCFLAGS="$PCDEBUG"' -m -$e-,g+,n+'
-
 # Description of options for "wlib":
 # -q    don't print header
-
-# Description of options for "tpc":
-# -gd   detailed map file
-# -m    make modified units
-# -q    quiet compile
-# -v    debug information in EXE
-# -$d+  debug information (yes)
-# -$e-  80x87 emulation (no)
-# -$g+  80286 instructions (yes)
-# -$l+  local debug symbols (yes)
-# -$n+  80x87 instructions (yes)
 
 if [[ -z "$DJGPP" ]]; then
 # !DJGPP
@@ -95,12 +75,6 @@ if [[ -z "$DJGPP" ]]; then
     mv i4d.o i4d.obj
     mv i4m.o i4m.obj
     mv i8d086.o i8d086.obj
-else
-# DJGPP
-    cd "$SRCDIR"
-    $PC $PCFLAGS 'player\plays3m.pas'
-    $PC $PCFLAGS 'player\smalls3m.pas'
-    $PC $PCFLAGS 'player\playosci.pas'
 fi
 
 cd "$PROJDIR"

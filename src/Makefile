@@ -1,33 +1,20 @@
-## HINT: (?) Replace all "/" with "\" in paths and filenames when using DJGPP.
+## Supported environments:
+##   * GNU/Linux
+##
+## Notes:
+##   * Debian packages used: coreutils, sed, findutils.
 
-## Debian packages used: coreutils, sed, findutils.
+ifneq "$(DJGPP)" ""
+$(error This script does not support DJGPP DOS environment.)
+endif
 
 error_not_implemented = $(error This function is not implemented for current environment.)
 error_not_known_params = $(error This function is not implemented for selected parameters.)
 info_done = @echo Done.
 
-ifneq "$(DJGPP)" ""
-HOST_TYPE       := DJGPP
-else
 HOST_TYPE       := native
-endif
-
 INCLUDE_DIRS    := .
-
-ifeq "$(HOST_TYPE)" "DJGPP"
-tmp := $(subst /,\,$(INCLUDE_DIRS))
-INCLUDE_DIRS := $(tmp)
-endif
-
-DEPDIR_NATIVE   := .deps
-DEPDIR_DOS      := _deps.dos
-
-ifeq "$(HOST_TYPE)" "native"
-DEPDIR := $(DEPDIR_NATIVE)
-else
-DEPDIR := $(DEPDIR_DOS)
-endif
-
+DEPDIR          := .deps
 DEPEXT          := d
 DEPAS_DOS		:= ../scripts/aspp/aspp
 DEPAFLAGS_DOS	:= -E -MM -I $(INCLUDE_DIRS)
@@ -137,8 +124,8 @@ TMPS =
 .DEFAULT_GOAL := empty
 .PHONY: empty
 empty:
-	@echo "Usage:"
-	@echo '    make [ all | clean ]'
+	@echo 'Usage:'; \
+	echo '    make [ all | clean ]'
 
 ##=----------------=##
 ## Dependency files ##
@@ -359,7 +346,6 @@ common_DIRS := \
  player/asm \
  startup
 
-
 #common_INCS :=
 
 common_SRCS := \
@@ -390,14 +376,6 @@ TMPS += $(common_TMPS)
 ##=------------------------------=##
 ## Include dependency information ##
 ##=------------------------------=##
-
-ifeq "$(HOST_TYPE)" "DJGPP"
-#INCS := $(subst /,\,$(INCS))
-#SRCS := $(subst /,\,$(SRCS))
-#OBJS := $(subst /,\,$(OBJS))
-#DEPS := $(subst /,\,$(DEPS))
-#TMPS := $(subst /,\,$(TMPS))
-endif
 
 ifeq "$(MAKECMDGOALS)" "clean"
 else

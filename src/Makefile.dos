@@ -1,0 +1,59 @@
+## Supported environments:
+##   * DOS/DJGPP
+##
+## Notes:
+##   * Replace "$" with "\$$" to survive double substitution
+##     (first by "make", second by "bash");
+##   * Replace "/" with "\\" when passing paths to DOS programs
+##     ("bash" will replace "\\" with "\").
+
+ifeq "$(DJGPP)" ""
+$(error This script must be run in DJGPP DOS environment)
+endif
+
+SHELL       = bash.exe
+PC          := tpc
+PCDEBUG     := -gd -v -\$$d+,l+
+ifeq "$(DEBUG)" "1"
+PCDEBUG     := $(PCDEBUG) -dDEBUG
+endif
+PCFLAGS     := $(PCDEBUG) -m -\$$e-,g+,n+
+
+SRCS        := \
+ player/plays3m.pas \
+ player/smalls3m.pas \
+ player/playosci.pas
+
+EXES        := $(patsubst %.pas,%.exe,$(SRCS))
+
+# Description of options for "tpc":
+# -gd   detailed map file
+# -m    make modified units
+# -q    quiet compile
+# -v    debug information in EXE
+# -$d+  debug information (yes)
+# -$e-  80x87 emulation (no)
+# -$g+  80286 instructions (yes)
+# -$l+  local debug symbols (yes)
+# -$n+  80x87 instructions (yes)
+
+.DEFAULT_GOAL := empty
+.PHONY: empty
+empty: show_banner
+	@echo 'Usage:'; \
+	echo '    make [ option ... ] [ all ] [ option ... ]'; \
+	echo 'Where:'; \
+	echo '    option: in the form "name=value"'; \
+	echo '    target: "all"'; \
+	echo ''; \
+	echo 'Note: Use "" to surround options.'
+
+.PHONY: show_banner
+show_banner:
+	@if [[ "$(DEBUG)" == 1 ]]; then echo 'Note: DEBUG is on.'; fi
+
+%.exe: %.pas
+	$(PC) $(PCFLAGS) $(subst /,\\,$<)
+
+all: show_banner $(EXES)
+	@echo 'Done.'
