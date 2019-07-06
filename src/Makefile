@@ -416,4 +416,5 @@ all: $(INCS) $(OBJS)
 clean:
 	$(remove_deps)
 	$(RM) $(INCS) $(OBJS) $(TMPS)
+	find . -type f \( -name '*.err' -o -name '*.exe' -o -name '*.map' -o -name '*.tpu' \) -delete
 	$(info_done)
