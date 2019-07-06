@@ -5,7 +5,7 @@
 ##   * Debian packages used: coreutils, sed, findutils.
 
 ifneq "$(DJGPP)" ""
-$(error This script does not support DJGPP DOS environment.)
+$(error This script does not support DJGPP DOS environment)
 endif
 
 error_not_implemented = $(error This function is not implemented for current environment.)
@@ -62,6 +62,9 @@ CFLAGS_DOS      := $(CDEBUG_DOS) -3 -fp3 -ml -oi -oc -os -q -r -s -zdp -zff -zgf
 else
 $(error_not_known_params)
 endif
+WLIB            := wlib
+WLIBFLAGS       := -q
+CLIB_WATCOM     := $(WATCOM)/lib286/dos/clibl.lib
 
 # Description of options for "wasm":
 # -zld      suppress file dependency info in object file
@@ -107,6 +110,9 @@ endif
 # -om       generate inline math functions
 # -i=<dir>  include directory
 
+# Description of options for "wlib":
+# -q        don't print header
+
 ## Naming template:
 ## <name>_DIR(S) - local directory(s)
 ## <name>_INCS - source files to be included in other source files
@@ -122,10 +128,14 @@ DEPS =
 TMPS =
 
 .DEFAULT_GOAL := empty
+
 .PHONY: empty
 empty:
 	@echo 'Usage:'; \
-	echo '    make [ all | clean ]'
+	echo '    make [ option ... ] [ target ] [ option ... ]'; \
+	echo 'Where:'; \
+	echo '    option: in the form "name=value"'; \
+	echo '    target: "all" | "clean"'
 
 ##=----------------=##
 ## Dependency files ##
@@ -266,17 +276,13 @@ $(DEPDIR)/$(scripts_DIR)/%.$(DEPEXT): $(scripts_DIR)/%.c
 $(scripts_DIR)/%: $(scripts_DIR)/%.c
 	$(make_c_exec)
 
-#scripts_INCS :=
 scripts_SRCS := $(wildcard $(scripts_DIR)/*.c)
 scripts_OBJS := $(patsubst %.c,%,$(filter %.c,$(scripts_SRCS)))
 scripts_DEPS := $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(scripts_SRCS)))
-#scripts_TMPS :=
 
-#INCS += $(scripts_INCS)
 SRCS += $(scripts_SRCS)
 OBJS += $(scripts_OBJS)
 DEPS += $(scripts_DEPS)
-#TMPS += $(scripts_TMPS)
 
 ## Auto-generated source files
 ## ===========================
@@ -290,16 +296,22 @@ autogen_INCS := \
  main/wsinus.inc \
  main/wsquare.inc
 
-#autogen_SRCS :=
-#autogen_OBJS :=
-#autogen_DEPS :=
-#autogen_TMPS :=
-
 INCS += $(autogen_INCS)
-#SRCS += $(autogen_SRCS)
-#OBJS += $(autogen_OBJS)
-#DEPS += $(autogen_DEPS)
-#TMPS += $(autogen_TMPS)
+
+##=----------------------------=##
+## Open Watcom C specific files ##
+##=----------------------------=##
+
+ow_OBJS := \
+ i4d.obj \
+ i4m.obj \
+ i8d086.obj
+
+## Build rules
+$(ow_OBJS): $(CLIB_WATCOM)
+	$(WLIB) $< ':$(patsubst %.obj,%.asm,$@)' && mv $(patsubst %.obj,%.o,$@) $@
+
+OBJS += $(ow_OBJS)
 
 ##=--------------=##
 ## Custom C files ##
@@ -307,7 +319,6 @@ INCS += $(autogen_INCS)
 
 cc_DIR := cc
 
-#cc_INCS :=
 cc_SRCS := $(shell find $(cc_DIR) -type f \( -name '*.asm' -o -name '*.c' \))
 
 cc_OBJS := \
@@ -325,7 +336,6 @@ cc_OBJS_TP := $(cc_OBJS:.o=.obj)
 cc_OBJS += $(cc_OBJS_TP)
 cc_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(cc_SRCS)))
 
-#INCS += $(cc_INCS)
 SRCS += $(cc_SRCS)
 OBJS += $(cc_OBJS)
 DEPS += $(cc_DEPS)
@@ -346,8 +356,6 @@ common_DIRS := \
  player/asm \
  startup
 
-#common_INCS :=
-
 common_SRCS := \
  $(wildcard $(patsubst %,%/*.asm,$(common_DIRS))) \
  $(wildcard $(patsubst %,%/*.c,$(common_DIRS)))
@@ -367,7 +375,6 @@ common_OBJS_TP := $(common_OBJS:.o=.obj)
 common_OBJS += $(common_OBJS_TP)
 common_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(common_SRCS)))
 
-#INCS += $(common_INCS)
 SRCS += $(common_SRCS)
 OBJS += $(common_OBJS)
 DEPS += $(common_DEPS)
@@ -377,8 +384,7 @@ TMPS += $(common_TMPS)
 ## Include dependency information ##
 ##=------------------------------=##
 
-ifeq "$(MAKECMDGOALS)" "clean"
-else
+ifeq "$(MAKECMDGOALS)" "all"
 include $(DEPS)
 endif
 

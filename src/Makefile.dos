@@ -11,6 +11,9 @@ ifeq "$(DJGPP)" ""
 $(error This script must be run in DJGPP DOS environment)
 endif
 
+error_unsupported_target = $(error The target '$@' is not supported)
+info_done = @echo 'Done.'
+
 SHELL       = bash.exe
 PC          := tpc
 PCDEBUG     := -gd -v -\$$d+,l+
@@ -38,15 +41,15 @@ EXES        := $(patsubst %.pas,%.exe,$(SRCS))
 # -$n+  80x87 instructions (yes)
 
 .DEFAULT_GOAL := empty
+
 .PHONY: empty
 empty: show_banner
 	@echo 'Usage:'; \
-	echo '    make [ option ... ] [ all ] [ option ... ]'; \
+	echo '    make [ option ... ] [ target ] [ option ... ]'; \
 	echo 'Where:'; \
 	echo '    option: in the form "name=value"'; \
 	echo '    target: "all"'; \
-	echo ''; \
-	echo 'Note: Use "" to surround options.'
+	echo 'Note: Pass all options in double quotes "".'
 
 .PHONY: show_banner
 show_banner:
@@ -55,5 +58,10 @@ show_banner:
 %.exe: %.pas
 	$(PC) $(PCFLAGS) $(subst /,\\,$<)
 
+.PHONY: all
 all: show_banner $(EXES)
-	@echo 'Done.'
+	$(info_done)
+
+.PHONY: clean
+clean: empty
+	$(error_unsupported_target)
