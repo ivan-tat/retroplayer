@@ -58,8 +58,12 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
         case DBGLOG_INFO:
         case DBGLOG_WARN:
         case DBGLOG_ERR:
+            #if DEBUG_WRITE_LOG == 1
             if (!debuglogfile)
                 textcol = msg_tags[type].textcolor;
+            #else
+            textcol = msg_tags[type].textcolor;
+            #endif
             tag = msg_tags[type].tag;
             if (tag)
             {
@@ -95,6 +99,7 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
     if (len)
     {
         s = format ? "%s: " : "%s";
+        #if DEBUG_WRITE_LOG == 1
         if (debuglogfile)
             cc_fprintf(debuglogfile, s, _tag);
         else
@@ -102,10 +107,15 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
             textcolor(7);
             cc_printf(s, _tag);
         }
+        #else
+        textcolor (7);
+        cc_printf (s, _tag);
+        #endif
     }
 
     if (format)
     {
+        #if DEBUG_WRITE_LOG == 1
         if (debuglogfile)
             cc_vfprintf(debuglogfile, format, ap);
         else
@@ -113,11 +123,16 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
             textcolor(textcol);
             cc_vprintf(format, ap);
         }
+        #else
+        textcolor (textcol);
+        cc_vprintf (format, ap);
+        #endif
     }
 
     va_end(ap);
 
     s = CRLF;
+    #if DEBUG_WRITE_LOG == 1
     if (debuglogfile)
         cc_fprintf(debuglogfile, s);
     else
@@ -125,6 +140,10 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
         textcolor(7);
         cc_printf(s);
     }
+    #else
+    textcolor (7);
+    cc_printf (s);
+    #endif
 }
 
 void __far _DEBUG_BEGIN(const char *file, int line, const char *method)
@@ -300,18 +319,19 @@ void __far __pascal Debug_Success (const char *file, const char *method)
 
 void debug_init (void)
 {
-    if (DEBUG_WRITE_LOG)
-        debuglogfile = fopen ("debug.log", "wb");
-    else
-        debuglogfile = NULL;
+    #if DEBUG_WRITE_LOG == 1
+    debuglogfile = fopen ("debug.log", "wb");
+    #endif
     DEBUG_INFO ("debug_init", "Start logging.");
 }
 
 void debug_done (void)
 {
     DEBUG_INFO ("debug_done", "End logging.");
+    #if DEBUG_WRITE_LOG == 1
     if (debuglogfile)
         fclose (debuglogfile);
+    #endif
 }
 
 DEFINE_REGISTRATION (debug, debug_init, debug_done)

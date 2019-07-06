@@ -28,7 +28,7 @@ procedure pcmsmpl_free;
 
 procedure DEBUG_dump_sample_info;
 
-(*$endif DEBUG*)
+(*$endif*)  (* DEBUG *)
 
 implementation
 
@@ -59,6 +59,6 @@ procedure pcmsmpl_free; external;
 
 procedure DEBUG_dump_sample_info; external;
 
-(*$endif DEBUG*)
+(*$endif*)  (* DEBUG *)
 
 end.

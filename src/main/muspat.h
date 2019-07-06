@@ -288,7 +288,13 @@ void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event);
 void __far DEBUG_dump_pattern_info (MUSPAT *pattern, uint8_t index);
 bool __far DEBUG_dump_pattern (MUSPAT *self, char *s, uint8_t num_channels);    // "s" must hold atleast 64 bytes or (num_channels * 13) bytes
 
-#endif  /* DEBUG */
+#else  /* DEBUG */
+
+#define DEBUG_get_pattern_channel_event_str(s, event)
+#define DEBUG_dump_pattern_info(pattern, index)
+#define DEBUG_dump_pattern(self, s, num_channels)
+
+#endif  /* !DEBUG */
 
 /*** Linking ***/
 

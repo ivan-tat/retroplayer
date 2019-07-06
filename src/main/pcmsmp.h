@@ -239,7 +239,7 @@ void __far DEBUG_dump_sample_info (PCMSMP *smp, uint8_t index);
 
 #define DEBUG_dump_sample_info(smp, index)
 
-#endif  // DEBUG
+#endif  /* DEBUG */
 
 /*** Linking ***/
 
@@ -257,7 +257,11 @@ void __far DEBUG_dump_sample_info (PCMSMP *smp, uint8_t index);
 #pragma aux pcmsmpl_init "*";
 #pragma aux pcmsmpl_free "*";
 
+#if DEBUG == 1
+
 #pragma aux DEBUG_dump_sample_info "*";
+
+#endif  /* DEBUG */
 
 #endif  /* __WATCOMC__ */
 

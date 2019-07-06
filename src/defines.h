@@ -1,4 +1,4 @@
-// Common defines
+/* Common defines */
 
 #ifndef DEFINES_H
 #define DEFINES_H 1
@@ -7,10 +7,22 @@
 #pragma once
 #endif
 
-#define DEBUG 1
-#define DEBUG_WRITE_LOG 1
-#define DEBUG_FILE_S3M_LOAD 1
-#define DEBUG_WRITE_OUTPUT_STREAM 0
+#undef DEBUG_WRITE_LOG
+#undef DEBUG_FILE_S3M_LOAD
+#undef DEBUG_WRITE_OUTPUT_STREAM
+
+#if DEBUG == 1
+# define DEBUG_WRITE_LOG 1
+# define DEBUG_FILE_S3M_LOAD 1
+# define DEBUG_WRITE_OUTPUT_STREAM 0
+#else
+# undef  DEBUG
+# define DEBUG 0
+# define DEBUG_WRITE_LOG 0
+# define DEBUG_FILE_S3M_LOAD 0
+# define DEBUG_WRITE_OUTPUT_STREAM 0
+#endif
+
 //#define DEFINE_LOCAL_DATA 1
 //#define USE_INTRINSICS 1
 

@@ -72,12 +72,33 @@ Use script [scripts/dosemu/dosemu](../scripts/dosemu/dosemu) for that.
 
 # Build project
 
+## Debug build
+
+```sh
+cd ~/Projects/retroplayer
+make all DEBUG=1
+```
+
+Start DOSEMU. When you are in DOS project's directory type:
+
+```sh
+make all "DEBUG=1"
+```
+
+## Release build
+
 ```sh
 cd ~/Projects/retroplayer
 make all
 ```
 
-Start DOSEMU. You are now in DOS project's directory. Type `make`.
+Start DOSEMU. When you are in DOS project's directory type:
+
+```sh
+make all
+```
+
+**Note**: You must clean project's folder each time you want to build other type of target (when switching between *release* and *debug* versions).
 
 # Test project
 

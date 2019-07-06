@@ -4,22 +4,59 @@
 # 2) in a DOS/DJGPP Bash shell.
 
 set -e
+shopt -s extglob
 
-target="$1"
-if [ -z "$target" ]; then
-    target=all
+# $1=message
+error_exit() {
+    echo "Error: $1" >&2
+    exit 1
+}
+
+if [[ $# -eq 0 ]]; then
+    cat <<EOT
+Usage:
+    $0 [ options ] [ target ] [ options ]
+Where:
+    option: in the form "name=value"
+    target: "all"
+EOT
+    if [[ -n "$DJGPP" ]]; then
+        cat <<EOT
+
+Note: You are running in a DJGPP DOS environment. Use "" to surround options.
+EOT
+    fi
+    exit
 fi
+
+target=''
+
+while [[ $# -ne 0 ]]; do
+    arg="$1"
+    if [[ "$arg" =~ .*=.* ]]; then
+        eval export "$arg"
+        shift 1
+    else
+        if [[ -n "$target" ]]; then
+            error_exit "Multiple targets are not supported."
+        fi
+        target="$1"
+        shift 1
+    fi
+done
 
 case "$target" in
     all)
         ;;
     *)
-        echo "Error: unknown target \"$target\"."
-        exit 1
+        error_exit "Unknown target '$target'."
         ;;
 esac
 
 echo "Building for target \`$target' ..."
+if [[ $DEBUG -eq 1 ]]; then
+    echo "Note: DEBUG is on."
+fi
 
 PROJDIR="$PWD"
 SRCDIR="$PROJDIR/src"
@@ -28,7 +65,11 @@ WLIB='wlib'
 WLIBFLAGS='-q'
 
 PC='tpc'
-PCFLAGS='-gd -m -v -$d+,e-,g+,l+,n+'
+PCDEBUG='-gd -v -$d+,l+'
+if [[ $DEBUG -eq 1 ]]; then
+    PCDEBUG="$PCDEBUG"' -dDEBUG'
+fi
+PCFLAGS="$PCDEBUG"' -m -$e-,g+,n+'
 
 # Description of options for "wlib":
 # -q    don't print header
@@ -44,7 +85,7 @@ PCFLAGS='-gd -m -v -$d+,e-,g+,l+,n+'
 # -$l+  local debug symbols (yes)
 # -$n+  80x87 instructions (yes)
 
-if [ -z "$DJGPP" ]; then
+if [[ -z "$DJGPP" ]]; then
 # !DJGPP
     echo 'Extracting Watcom C specific files...'
     . ./scripts/ow/ow.sh

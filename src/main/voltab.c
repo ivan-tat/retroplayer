@@ -9,7 +9,7 @@
 #include "cc/string.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
-#ifdef DEBUG
+#if DEBUG == 1
 # include "cc/stdio.h"
 #endif
 
@@ -38,7 +38,7 @@ void voltab_calc(void)
 {
     uint8_t vol;
     int16_t sample, *p = (int16_t *)volumetableptr;
-    #ifdef DEBUG
+    #if DEBUG == 1
     FILE *f;
     #endif
 
@@ -58,21 +58,20 @@ void voltab_calc(void)
             p++;
         }
 
-    if (DEBUG)
+    #if DEBUG == 1
+    f = fopen ("_vol0", "wb+");
+    if (f)
     {
-        f = fopen ("_vol0", "wb+");
-        if (f)
-        {
-            fwrite (volumetableptr, sizeof (voltab_t) / 2, 1, f);
-            fclose (f);
-        }
-        f = fopen ("_vol1", "wb+");
-        if (f)
-        {
-            fwrite ((uint8_t *)volumetableptr + sizeof (voltab_t) / 2, sizeof (voltab_t) / 2, 1, f);
-            fclose (f);
-        }
+        fwrite (volumetableptr, sizeof (voltab_t) / 2, 1, f);
+        fclose (f);
     }
+    f = fopen ("_vol1", "wb+");
+    if (f)
+    {
+        fwrite ((uint8_t *)volumetableptr + sizeof (voltab_t) / 2, sizeof (voltab_t) / 2, 1, f);
+        fclose (f);
+    }
+    #endif  /* DEBUG */
 }
 
 void voltab_free(void)

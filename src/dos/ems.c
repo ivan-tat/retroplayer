@@ -545,9 +545,8 @@ void __near ems_init (void)
             DEBUG_ERR("ems_init", "Failed to get EMS version.");
         }
     }
-    if (DEBUG)
-        if (!emsInstalled)
-            DEBUG_MSG("ems_init", "No EMS is available.");
+    if (!emsInstalled)
+        DEBUG_MSG("ems_init", "No EMS is available.");
 }
 
 void __near ems_done (void)

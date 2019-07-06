@@ -1452,34 +1452,35 @@ bool __near load_s3m_convert_pattern (LOADER_S3M *self, uint8_t *src, uint16_t s
                         e.event.flags |= MUSPATCHNEVFL_CMD;
                     }
 
-                    if (DEBUG_FILE_S3M_LOAD)
+                    #if DEBUG_FILE_S3M_LOAD == 1
+                    if (e.event.flags)
                     {
-                        if (e.event.flags)
-                        {
-                            DEBUG_get_pattern_channel_event_str (s, & (e.event));
-                            e_str = s;
-                        }
-                        else
-                            e_str = "empty";
+                        DEBUG_get_pattern_channel_event_str (s, & (e.event));
+                        e_str = s;
                     }
+                    else
+                        e_str = "empty";
+                    #endif  /* DEBUG_FILE_S3M_LOAD */
 
                     memcpy (& (events [e.channel]), & (e.event), sizeof (MUSPATCHNEVENT));
                 }
                 else
                 {
-                    if (DEBUG_FILE_S3M_LOAD)
-                        e_str = "empty";
+                    #if DEBUG_FILE_S3M_LOAD == 1
+                    e_str = "empty";
+                    #endif  /* DEBUG_FILE_S3M_LOAD */
                 }
 
-                if (DEBUG_FILE_S3M_LOAD)
-                    _DEBUG_LOG (DBGLOG_MSG, NULL, 0, NULL,
-                        "row=%02hhu, offset=0x%04X, size=%hhu, type=event <%02hhu:%s>",
-                        r,
-                        offset,
-                        fi.offset - offset,
-                        e.channel,
-                        e_str
-                    );
+                #if DEBUG_FILE_S3M_LOAD == 1
+                _DEBUG_LOG (DBGLOG_MSG, NULL, 0, NULL,
+                    "row=%02hhu, offset=0x%04X, size=%hhu, type=event <%02hhu:%s>",
+                    r,
+                    offset,
+                    fi.offset - offset,
+                    e.channel,
+                    e_str
+                );
+                #endif
             }
         }
         else

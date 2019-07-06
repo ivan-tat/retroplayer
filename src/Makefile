@@ -31,10 +31,15 @@ endif
 DEPEXT          := d
 DEPAS_DOS		:= ../scripts/aspp/aspp
 DEPAFLAGS_DOS	:= -E -MM -I $(INCLUDE_DIRS)
-#DEPCC          := gcc
-#DEPCFLAGS      := -E -MM -I $(INCLUDE_DIRS)
+#DEPCC           := gcc
 DEPCC           := owcc
+ifeq "$(DEPCC)" "gcc"
+DEPCFLAGS       := -E -MM -I $(INCLUDE_DIRS)
+else ifeq "$(DEPCC)" "owcc"
 DEPCFLAGS       := -zq -E -MM -I $(INCLUDE_DIRS)
+else
+$(error_not_known_params)
+endif
 DEPCC_DOS       := $(DEPCC)
 DEPCFLAGS_DOS   := $(DEPCFLAGS)
 ASMTMPEXT_DOS   := as_
@@ -43,13 +48,33 @@ AFLAGS_DOS      := -zld -zq -i=$(INCLUDE_DIRS)
 DA_DOS          := wdis
 DFLAGS_DOS      := -a
 #CC              := gcc
-#CFLAGS          := -lm -I $(INCLUDE_DIRS)
 CC              := wcl386
+ifeq "$(CC)" "gcc"
+CFLAGS          := -lm -I $(INCLUDE_DIRS)
+else ifeq "$(CC)" "wcl386"
 CFLAGS          := -q -3r -fp3 -fpi87 -om -bcl=linux -i=$(INCLUDE_DIRS)
+else
+$(error_not_known_params)
+endif
 #CC_DOS          := gcc
-#CFLAGS_DOS      := -I $(INCLUDE_DIRS)
 CC_DOS          := wcc
-CFLAGS_DOS      := -3 -fp3 -ml -oi -oc -os -q -r -s -zdp -zff -zgf -zl -zld -zls -zp=1 -zq -zu -i=$(INCLUDE_DIRS)
+ifeq "$(CC_DOS)" "gcc"
+ifeq "$(DEBUG)" "1"
+CDEBUG_DOS      := -D DEBUG=1
+else
+CDEBUG_DOS      :=
+endif
+CFLAGS_DOS      := $(CDEBUG_DOS) -I $(INCLUDE_DIRS)
+else ifeq "$(CC_DOS)" "wcc"
+ifeq "$(DEBUG)" "1"
+CDEBUG_DOS      := -dDEBUG=1
+else
+CDEBUG_DOS      :=
+endif
+CFLAGS_DOS      := $(CDEBUG_DOS) -3 -fp3 -ml -oi -oc -os -q -r -s -zdp -zff -zgf -zl -zld -zls -zp=1 -zq -zu -i=$(INCLUDE_DIRS)
+else
+$(error_not_known_params)
+endif
 
 # Description of options for "wasm":
 # -zld      suppress file dependency info in object file

@@ -140,19 +140,46 @@ Now we are in a virtual DOS environment. Type `init` to setup current DOS path a
 
 ## 2.2. Clean the project directory tree on the host
 
-Type `clean` in the project's folder.
+Type `make clean` in the project's folder:
+
+```sh
+cd ~/Projects/retroplayer
+make clean
+```
 
 ## 2.3. Compile on the host
 
-In the project's folder on the host type `make all` to compile what is possible on the host.
+In the project's folder on the host type:
+
+```sh
+make all
+```
+
+to compile what is possible on the host (*release* version). Add `DEBUG=1` parameter to compile *debug* version:
+
+```sh
+make all DEBUG=1
+```
+
+**Note**: You must clean project's folder each time you want to build other type of target (when switching between *release* and *debug* versions).
 
 ## 2.4. [Client] Compile in SSH session
 
-Type `make` to compile the rest of the project.
+In the project's folder type:
+
+```sh
+make all
+```
+
+to compile the rest of the project (*release* version). Add `"DEBUG=1"` parameter (remember to use *double quotes* in DOS for that) to compile *debug* version:
+
+```sh
+make all "DEBUG=1"
+```
 
 ## 2.5. Test compiled binaries
 
-In the project's folder on the host type `test`. Ths will launch DOS environment with tests.
+In the project's folder on the host type `test`. This will launch DOS environment with tests.
 
 ## 2.6. [Client] Close QEMU build environment
 

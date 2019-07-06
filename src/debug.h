@@ -32,7 +32,7 @@ void __far _DEBUG_get_xnum(uint32_t value, char len, char *dest);
 void __far _DEBUG_get_xline(void *buf, uint8_t size, uint8_t max, char *dest);
 void __far _DEBUG_dump_mem(void *buf, unsigned size, const char *padstr);
 
-#ifdef DEBUG
+#if DEBUG == 1
  #define DEBUG_LOG(type, method, text)         _DEBUG_LOG(type, __FILE__, __LINE__, method, text)
  #define DEBUG_LOG_(type, method, format, ...) _DEBUG_LOG(type, __FILE__, __LINE__, method, format, __VA_ARGS__)
  #define DEBUG_MSG(method, text)               _DEBUG_LOG(DBGLOG_MSG, __FILE__, __LINE__, method, text)
@@ -85,7 +85,11 @@ void __far __pascal Debug_Success (const char *file, const char *method);
 
 /*** Variables ***/
 
+#if DEBUG_WRITE_LOG == 1
+
 extern FILE *debuglogfile;
+
+#endif  /* DEBUG_WRITE_LOG */
 
 /*** Initialization ***/
 
@@ -106,7 +110,11 @@ DECLARE_REGISTRATION (debug)
 #pragma aux _DEBUG_get_xline "*";
 #pragma aux _DEBUG_dump_mem "*";
 
+#if DEBUG_WRITE_LOG == 1
+
 #pragma aux debuglogfile "*";
+
+#endif  /* DEBUG_WRITE_LOG */
 
 #pragma aux register_debug "*";
 #pragma aux unregister_debug "*";

@@ -23,7 +23,7 @@
 #include "main/mixer.h"
 #include "main/fillvars.h"
 
-#ifdef DEBUG_WRITE_OUTPUT_STREAM
+#if DEBUG_WRITE_OUTPUT_STREAM == 1
 
 // write sound output streams to files (mixing buffer and DMA buffer)
 #include "cc/stdio.h"

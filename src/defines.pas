@@ -3,16 +3,29 @@
 (*$ifndef _DEFINES_PAS_INCLUDED*)
 (*$define _DEFINES_PAS_INCLUDED*)
 
-(*$define DEBUG*)
-(*-$define DEBUG_WRITE_LOG*)
-(*$define DEBUG_FILE_S3M_LOAD*)
-(*-$define DEBUG_WRITE_OUTPUT_STREAM*)
+(* "interface" part on first inclusion *)
+
+(*$undef DEBUG_WRITE_LOG*)
+(*$undef DEBUG_FILE_S3M_LOAD*)
+(*$undef DEBUG_WRITE_OUTPUT_STREAM*)
+
+(*$ifdef DEBUG*)
+ (*$define DEBUG_WRITE_LOG*)
+ (*$define DEBUG_FILE_S3M_LOAD*)
+ (*-$define DEBUG_WRITE_OUTPUT_STREAM*)
+(*$endif*)
+
 (*$define DEFINE_LOCAL_DATA*)
 (*-$define USE_INTRINSICS*)
 
 (*$define CONFIG_VBIOS_ENABLE_LIGHT_PEN*)
 
 (*$else*)   (* _DEFINES_PAS_INCLUDED *)
+
+(*$ifndef _DEFINES_PAS_CONSTS_INCLUDED*)
+(*$define _DEFINES_PAS_CONSTS_INCLUDED*)
+
+(* "implementation" part on second inclusion *)
 
 const
 (*$ifdef DEBUG*)
@@ -50,6 +63,12 @@ const
     CONFIG_VBIOS_ENABLE_LIGHT_PEN = true;
 (*$else*)
     CONFIG_VBIOS_ENABLE_LIGHT_PEN = false;
-(*$endif*);
+(*$endif*)
 
-(*$endif*)  (* _DEFINES_PAS_INCLUDED *)
+(*$else*)
+
+? (*Error: third inclusion is not possible.*)
+
+(*$endif*)  (* _DEFINES_PAS_CONSTS_INCLUDED *)
+
+(*$endif*)  (* !_DEFINES_PAS_INCLUDED *)

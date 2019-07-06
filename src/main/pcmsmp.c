@@ -190,4 +190,4 @@ void __far DEBUG_dump_sample_info (PCMSMP *smp, uint8_t index)
     #undef _BUF_SIZE
 }
 
-#endif  // DEBUG
+#endif  /* DEBUG */

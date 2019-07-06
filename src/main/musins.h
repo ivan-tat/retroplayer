@@ -101,7 +101,7 @@ void __far DEBUG_dump_instrument_info (MUSINS *self, uint8_t index, PCMSMPLIST *
 
 #define DEBUG_dump_instrument_info(self, index, samples)
 
-#endif  // DEBUG
+#endif  /* DEBUG */
 
 /*** Linking ***/
 

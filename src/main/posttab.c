@@ -9,7 +9,7 @@
 #include <stdint.h>
 
 #include "pascal.h"
-#ifdef DEBUG
+#if DEBUG == 1
 # include "cc/stdio.h"
 #endif
 
@@ -39,7 +39,7 @@ void amptab_set_volume(uint8_t volume)
     int16_t vol;
     int32_t *p, s, d;
     int16_t i;
-    #ifdef DEBUG
+    #if DEBUG == 1
     FILE *f;
     #endif
 
@@ -91,27 +91,26 @@ void amptab_set_volume(uint8_t volume)
         p++;
     }
 
-    if (DEBUG)
+    #if DEBUG == 1
+    f = fopen ("_amp0", "wb+");
+    if (f)
     {
-        f = fopen ("_amp0", "wb+");
-        if (f)
-        {
-            fwrite (&amptab[0], 256*4, 1, f);
-            fclose (f);
-        }
-        f = fopen ("_amp1", "wb+");
-        if (f)
-        {
-            fwrite (&amptab[1], 256*4, 1, f);
-            fclose (f);
-        }
-        f = fopen ("_amp2", "wb+");
-        if (f)
-        {
-            fwrite (&amptab[2], 256*4, 1, f);
-            fclose (f);
-        }
+        fwrite (&amptab[0], 256*4, 1, f);
+        fclose (f);
     }
+    f = fopen ("_amp1", "wb+");
+    if (f)
+    {
+        fwrite (&amptab[1], 256*4, 1, f);
+        fclose (f);
+    }
+    f = fopen ("_amp2", "wb+");
+    if (f)
+    {
+        fwrite (&amptab[2], 256*4, 1, f);
+        fclose (f);
+    }
+    #endif  /* DEBUG */
 }
 
 // "mb" is mixing buffer

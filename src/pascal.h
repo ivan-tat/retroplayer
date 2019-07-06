@@ -45,7 +45,7 @@ _UNREGMETHOD(name);
 
 #define _EXITVARNAME(name) _oldexit_##name
 
-#ifdef DEBUG
+#if DEBUG == 1
  #define LOG_REGMETHOD(name, init)   DEBUG_REG(#init, #name);
  #define LOG_UNREGMETHOD(name, done) DEBUG_UNREG(#done, #name);
 #else

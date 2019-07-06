@@ -125,4 +125,4 @@ void __far DEBUG_dump_instrument_info (MUSINS *self, uint8_t index, PCMSMPLIST *
     #undef _BUF_SIZE
 }
 
-#endif  // DEBUG
+#endif  /* DEBUG */

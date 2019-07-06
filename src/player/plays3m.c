@@ -985,9 +985,8 @@ void __far plays3m_main (void)
     clrscr();
     cursor_show();
 
-    if (DEBUG)
-        if (sndbuf->flags & SNDDMABUFFL_SLOW)
-            DEBUG_FAIL ("plays3m_main", "PC is too slow");
+    if (sndbuf->flags & SNDDMABUFFL_SLOW)
+        DEBUG_FAIL ("plays3m_main", "PC is too slow");
 
     player_free (mp);
     player_delete (&mp);

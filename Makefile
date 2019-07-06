@@ -28,7 +28,7 @@ all: show_banner
 ifeq (native,$(HOST_MODE))
 	make -C $(srcdir) $@
 endif
-	./make.sh
+	./make.sh $@
 
 .PHONY: clean
 clean: show_banner
