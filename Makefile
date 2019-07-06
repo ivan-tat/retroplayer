@@ -35,4 +35,4 @@ clean: show_banner
 ifeq (native,$(HOST_MODE))
 	make -C $(srcdir) $@
 endif
-	./clean.sh
+	find $(srcdir) -type f \( -name '*.err' -o -name '*.exe' -o -name '*.map' -o -name '*.tpu' \) -delete
