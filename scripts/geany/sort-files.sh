@@ -38,9 +38,10 @@ tmp_lines=`mktemp`
 grep -n -E -e '^FILE_NAME_[0-9]+=.+' $FILE_INPUT > $tmp_lines
 LINES_COUNT=`wc -l $tmp_lines | cut -d ' ' -f 1`
 
+tmp=`mktemp`
+
 # Check for gaps beetwen lines
 
-tmp=`mktemp`
 cut -d : -f 1 $tmp_lines > $tmp
 LINE_START=`head -n 1 $tmp`
 LINE_END=`tail -n 1 $tmp`
@@ -54,7 +55,6 @@ fi
 
 FILE_OUTPUT=`mktemp`
 head -n $((LINE_START-1)) $FILE_INPUT > $FILE_OUTPUT
-tmp=`mktemp`
 sed -E -e 's/^[0-9]+:FILE_NAME_[0-9]+=(.+)/\1/' $tmp_lines | sort -t \; -k 8 > $tmp
 seq 0 $((LINES_COUNT-1)) | paste -d = - $tmp | sed -E -e 's/(.+)/FILE_NAME_\1/' >> $FILE_OUTPUT
 tail -n +$((LINE_END+1)) $FILE_INPUT >> $FILE_OUTPUT
