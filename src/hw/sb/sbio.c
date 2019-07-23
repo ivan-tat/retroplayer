@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$hw$sb$sbio$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "cc/conio.h"
 #include "hw/sb/sbio.h"
 

@@ -5,12 +5,14 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$conio$textcol$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "cc/i86.h"
 #include "hw/vbios.h"
-
 #include "cc/conio.h"
 
 void cc_textbackground(uint8_t color)

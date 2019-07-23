@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdio$fread$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "startup.h"
 #include "cc/i86.h"
@@ -15,7 +18,6 @@
 #include "cc/dos.h"
 #include "cc/string.h"
 #include "cc/io.h"
-
 #include "cc/stdio.h"
 
 size_t cc_fread(void *ptr, size_t size, size_t n, FILE *stream)

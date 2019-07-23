@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$string$strncpy$*"
+#endif
+
 #include <stddef.h>
 #include <stdbool.h>
-
 #include "cc/string.h"
 
 char *cc_strncpy(char *dest, const char *src, size_t n)

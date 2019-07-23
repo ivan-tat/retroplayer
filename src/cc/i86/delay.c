@@ -5,11 +5,13 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$i86$delay$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
-
 #include "cc/i86.h"
 
 extern void __far __pascal pascal_delay(uint16_t count);

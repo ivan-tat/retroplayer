@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$io$open$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include "pascal.h"

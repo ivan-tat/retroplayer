@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$dos$psp$*"
+#endif
+
 #include <stdint.h>
 #include "cc/i86.h"
 #include "cc/dos.h"

@@ -5,15 +5,17 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$player$w_hlp$*"
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/conio.h"
 #include "cc/stdio.h"
 #include "common.h"
 #include "player/screen.h"
-
 #include "player/w_hlp.h"
 
 /*

@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$conio$outp$*"
+#endif
+
 #include "cc/conio.h"
 
 #ifndef __WATCOMC__

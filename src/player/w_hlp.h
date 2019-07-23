@@ -20,4 +20,12 @@
 
 bool __far win_help_init (SCRWIN *self);
 
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux win_help_init "*";
+
+#endif  /* __WATCOMC__ */
+
 #endif  /* W_HLP_H */

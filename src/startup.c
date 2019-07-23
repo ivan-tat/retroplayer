@@ -5,10 +5,13 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$startup$*"
+#endif
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "startup/ints.h"
 #include "hw/cpu.h"
@@ -16,7 +19,6 @@
 #include "cc/dos.h"
 #include "cc/stdlib.h"
 #include "cc/string.h"
-
 #include "startup.h"
 
 #ifdef DEFINE_LOCAL_DATA

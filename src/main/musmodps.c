@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$musmodps$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/string.h"
 #include "common.h"
@@ -16,7 +19,6 @@
 #include "main/s3mtypes.h"
 #include "main/musmod.h"
 #include "main/mixchn.h"
-
 #include "main/musmodps.h"
 
 PLAYSTATEFLAGS __far __playstate_set_flags (PLAYSTATEFLAGS _flags, PLAYSTATEFLAGS _mask, PLAYSTATEFLAGS _set, bool _raise)

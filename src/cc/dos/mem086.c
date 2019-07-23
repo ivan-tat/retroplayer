@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$dos$mem086$*"
+#endif
+
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/dos.h"

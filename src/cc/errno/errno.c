@@ -5,8 +5,11 @@
 
 #include "defines.h"
 
-#include <stdint.h>
+#ifdef __WATCOMC__
+#pragma aux default "$cc$errno$errno$*"
+#endif
 
+#include <stdint.h>
 #include "pascal.h"
 #include "cc/errno.h"
 

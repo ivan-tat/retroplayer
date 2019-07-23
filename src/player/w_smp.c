@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$player$w_smp$*"
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/conio.h"
 #include "cc/stdio.h"
@@ -18,7 +21,6 @@
 #include "main/mixchn.h"
 #include "player/screen.h"
 #include "player/plays3m.h"
-
 #include "player/w_smp.h"
 
 void __far win_samples_on_resize (SCRWIN *self);

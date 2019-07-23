@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$debug$*"
+#endif
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -14,7 +18,6 @@
 #include "cc/stdlib.h"
 #include "cc/stdio.h"
 #include "cc/string.h"
-
 #include "debug.h"
 
 #ifdef DEFINE_LOCAL_DATA

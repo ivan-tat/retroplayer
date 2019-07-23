@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$player$w_inf$*"
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/conio.h"
 #include "cc/stdio.h"
@@ -19,7 +22,6 @@
 #include "main/mixer.h"
 #include "main/s3mplay.h"
 #include "player/screen.h"
-
 #include "player/w_inf.h"
 
 void __far win_information_on_resize (SCRWIN *self);

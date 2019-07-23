@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$filldma$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/string.h"
 #include "main/musmodps.h"
@@ -15,7 +18,6 @@
 #include "main/mixing.h"
 #include "main/fillvars.h"
 #include "main/posttab.h"
-
 #include "main/filldma.h"
 
 #if DEBUG_WRITE_OUTPUT_STREAM == 1

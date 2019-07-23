@@ -5,14 +5,16 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$player$screen$*"
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/conio.h"
 #include "cc/string.h"
 #include "common.h"
-
 #include "player/screen.h"
 
 void __far __scrwin_on_resize (SCRWIN *self);

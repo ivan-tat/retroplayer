@@ -5,8 +5,11 @@
 
 #include "defines.h"
 
-#include "cc/ctype.h"
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdlib$atoi$*"
+#endif
 
+#include "cc/ctype.h"
 #include "cc/stdlib.h"
 
 int cc_atoi(const char *src)

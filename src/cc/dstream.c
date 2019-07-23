@@ -5,15 +5,17 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$dstream$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/string.h"
 #include "dstream.h"
-
 #include "cc/stdio.h"
 
 /*** Data stream ***/

@@ -5,8 +5,11 @@
 
 #include "defines.h"
 
-#include <stdint.h>
+#ifdef __WATCOMC__
+#pragma aux default "$cc$string$memcmp$*"
+#endif
 
+#include <stdint.h>
 #include "cc/string.h"
 
 int cc_memcmp(const void *s1, const void *s2, size_t n)

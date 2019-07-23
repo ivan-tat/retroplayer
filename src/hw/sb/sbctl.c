@@ -5,10 +5,13 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$hw$sb$sbctl$*"
+#endif
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/conio.h"
@@ -23,7 +26,6 @@
 #include "hw/pic.h"
 #include "hw/sndctl_t.h"
 #include "hw/sb/sbio.h"
-
 #include "hw/sb/sbctl.h"
 
 #define toupper(c) (((c >= 'a') && (c <= 'z')) ? (c - 'a' + 'A') : c)

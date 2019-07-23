@@ -5,11 +5,13 @@
 
 #include "defines.h"
 
-#include <stdint.h>
+#ifdef __WATCOMC__
+#pragma aux default "$cc$malloc$memmax$*"
+#endif
 
+#include <stdint.h>
 #include "pascal.h"
 #include "cc/dos.h"
-
 #include "cc/malloc.h"
 
 uint32_t _memmax(void)

@@ -5,10 +5,13 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdlib$setenv$*"
+#endif
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "common.h"
 #include "cc/i86.h"

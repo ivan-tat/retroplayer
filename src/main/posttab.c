@@ -5,14 +5,16 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$posttab$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #if DEBUG == 1
 # include "cc/stdio.h"
 #endif
-
 #include "main/posttab.h"
 
 #pragma pack(push, 1)

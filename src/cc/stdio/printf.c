@@ -5,8 +5,11 @@
 
 #include "defines.h"
 
-#include <stdarg.h>
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdio$printf$*"
+#endif
 
+#include <stdarg.h>
 #include "pascal.h"
 #include "cc/dstream.h"
 #include "cc/_printf.h"

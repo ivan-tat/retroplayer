@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$dos$dosret$*"
+#endif
+
 #include "cc/errno.h"
 #include "cc/dos/dosret.h"
 

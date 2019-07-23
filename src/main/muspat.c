@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$muspat$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/string.h"
@@ -16,7 +19,6 @@
 #include "debug.h"
 #include "dynarray.h"
 #include "dos/ems.h"
-
 #include "main/muspat.h"
 
 /*** Music pattern channel's event ***/

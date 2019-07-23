@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$string$strnicmp$*"
+#endif
+
 #include <stddef.h>
 #include <stdbool.h>
-
 #include "cc/string.h"
 
 #define tolower(c) (((c >= 'A') && (c <= 'Z')) ? (c - 'A' + 'a') : c)

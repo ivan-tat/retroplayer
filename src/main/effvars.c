@@ -5,11 +5,13 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$effvars$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "cc/i86.h"
-
 #include "main/effvars.h"
 
 #ifdef DEFINE_LOCAL_DATA

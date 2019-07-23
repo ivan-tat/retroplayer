@@ -5,12 +5,14 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$conio$textmode$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "cc/i86.h"
 #include "hw/vbios.h"
-
 #include "cc/conio.h"
 
 void cc_textmode(uint16_t mode)

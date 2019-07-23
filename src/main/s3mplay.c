@@ -5,10 +5,13 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$s3mplay$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
-
 #include "pascal.h"
 #include "cc/stdio.h"
 #include "cc/stdlib.h"
@@ -29,7 +32,6 @@
 #include "main/posttab.h"
 #include "main/fillvars.h"
 #include "main/filldma.h"
-
 #include "main/s3mplay.h"
 
 #define _PLAYER_ERROR_LEN 128

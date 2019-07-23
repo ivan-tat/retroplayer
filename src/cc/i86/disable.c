@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$i86$disable$*"
+#endif
+
 #include "cc/i86.h"
 
 #ifndef __WATCOMC__

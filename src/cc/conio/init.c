@@ -5,12 +5,14 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$conio$init$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "cc/i86.h"
 #include "hw/vbios.h"
-
 #include "cc/conio.h"
 
 #ifdef DEFINE_LOCAL_DATA

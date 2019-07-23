@@ -5,8 +5,11 @@
 
 #include "defines.h"
 
-#include <stdint.h>
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdio$fwrite$*"
+#endif
 
+#include <stdint.h>
 #include "pascal.h"
 #include "startup.h"
 #include "cc/i86.h"
@@ -14,7 +17,6 @@
 #include "cc/dos.h"
 #include "cc/string.h"
 #include "cc/io.h"
-
 #include "cc/stdio.h"
 
 size_t cc_fwrite(void *ptr, size_t size, size_t n, FILE *stream)

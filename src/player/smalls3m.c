@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$player$smalls3m$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "startup.h"
 #include "cc/i86.h"
@@ -34,7 +37,6 @@
 #include "main/effects.h"
 #include "main/fillvars.h"
 #include "main/s3mplay.h"
-
 #include "player/smalls3m.h"
 
 #define def_rate 45454

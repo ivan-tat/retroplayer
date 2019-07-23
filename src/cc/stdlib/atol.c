@@ -5,8 +5,11 @@
 
 #include "defines.h"
 
-#include "cc/ctype.h"
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdlib$atol$*"
+#endif
 
+#include "cc/ctype.h"
 #include "cc/stdlib.h"
 
 long cc_atol(const char *src)

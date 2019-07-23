@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdio$sprintf$*"
+#endif
+
 #include <stdarg.h>
 #include "cc/dstream.h"
 #include "cc/_printf.h"

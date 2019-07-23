@@ -5,10 +5,13 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdlib$_env$*"
+#endif
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "common.h"
 #include "cc/i86.h"
@@ -16,7 +19,6 @@
 #include "cc/dos.h"
 #include "cc/errno.h"
 #include "cc/stdlib.h"
-
 #include "cc/stdlib/_env.h"
 
 /* For the case if environment is not initialized */

@@ -5,10 +5,13 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdlib$atexit$*"
+#endif
+
 #include <stdint.h>
 #include "startup.h"
 #include "cc/i86.h"
-
 #include "cc/stdlib.h"
 
 int cc_atexit(void (*__far function)())

@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$readnote$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/string.h"
@@ -20,7 +23,6 @@
 #include "main/effvars.h"
 #include "main/effects.h"
 #include "main/mixer.h"
-
 #include "main/readnote.h"
 
 /**********************************************************************/

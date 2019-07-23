@@ -23,4 +23,15 @@ void __far win_debug_set_player (SCRWIN *self, MUSPLAYER *value);
 void __far win_debug_set_track (SCRWIN *self, MUSMOD *value);
 void __far win_debug_set_play_state (SCRWIN *self, PLAYSTATE *value);
 
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux win_debug_init "*";
+#pragma aux win_debug_set_player "*";
+#pragma aux win_debug_set_track "*";
+#pragma aux win_debug_set_play_state "*";
+
+#endif  /* __WATCOMC__ */
+
 #endif  /* W_DBG_H */

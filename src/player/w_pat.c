@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$player$w_pat$*"
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/string.h"
 #include "cc/conio.h"
@@ -19,7 +22,6 @@
 #include "main/s3mplay.h"
 #include "player/screen.h"
 #include "player/plays3m.h"
-
 #include "player/w_pat.h"
 
 void __far win_pattern_on_resize (SCRWIN *self);

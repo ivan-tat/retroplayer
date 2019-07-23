@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$hw$pic$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
@@ -17,7 +20,6 @@
 #include "cc/string.h"
 #include "debug.h"
 #include "hw/hwowner.h"
-
 #include "hw/pic.h"
 
 /* PIC1: IRQ 0-7 */

@@ -5,10 +5,13 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$loads3m$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/stdio.h"

@@ -5,11 +5,13 @@
 
 #include "defines.h"
 
-#include <limits.h>
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdlib$strtol$*"
+#endif
 
+#include <limits.h>
 #include "cc/ctype.h"
 #include "cc/errno.h"
-
 #include "cc/stdlib.h"
 
 #define _BigInt(base) LONG_MAX / base

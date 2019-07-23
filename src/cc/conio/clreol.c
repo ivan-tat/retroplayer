@@ -5,11 +5,13 @@
 
 #include "defines.h"
 
-#include <stdbool.h>
+#ifdef __WATCOMC__
+#pragma aux default "$cc$conio$clreol$*"
+#endif
 
+#include <stdbool.h>
 #include "cc/i86.h"
 #include "hw/vbios.h"
-
 #include "cc/conio.h"
 
 void cc_clreol(void)

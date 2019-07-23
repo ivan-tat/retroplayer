@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$player$w_dbg$*"
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/conio.h"
@@ -22,7 +25,6 @@
 #include "main/s3mplay.h"
 #include "player/screen.h"
 #include "player/plays3m.h"
-
 #include "player/w_dbg.h"
 
 /*

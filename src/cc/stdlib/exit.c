@@ -5,12 +5,14 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdlib$exit$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "startup.h"
-
 #include "cc/stdlib.h"
 
 void cc_exit(int status)

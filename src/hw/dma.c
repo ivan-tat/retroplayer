@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$hw$dma$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/conio.h"
@@ -16,7 +19,6 @@
 #include "cc/stdlib.h"
 #include "cc/string.h"
 #include "debug.h"
-
 #include "hw/dma.h"
 
 /* I/O ports */

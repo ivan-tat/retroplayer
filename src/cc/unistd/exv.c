@@ -5,12 +5,15 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$unistd$exv$*"
+#endif
+
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
 #include "cc/errno.h"
 #include "cc/string.h"
-
 #include "cc/unistd.h"
 
 extern int16_t pascal_doserror;

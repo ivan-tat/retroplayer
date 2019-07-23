@@ -5,11 +5,14 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$hw$vbios$*"
+#endif
+
 #include <stdint.h>
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/string.h"
-
 #include "hw/vbios.h"
 
 #define Seg0040 0x40

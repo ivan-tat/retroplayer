@@ -5,10 +5,13 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$dos$ems$*"
+#endif
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/stdlib.h"
@@ -17,7 +20,6 @@
 #include "cc/dos.h"
 #include "common.h"
 #include "debug.h"
-
 #include "dos/ems.h"
 
 #ifdef DEFINE_LOCAL_DATA

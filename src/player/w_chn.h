@@ -21,4 +21,13 @@
 bool __far win_channels_init (SCRWIN *self);
 void __far win_channels_set_channels (SCRWIN *self, MIXCHNLIST *value);
 
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux win_channels_init "*";
+#pragma aux win_channels_set_channels "*";
+
+#endif  /* __WATCOMC__ */
+
 #endif  /* W_CHN_H */

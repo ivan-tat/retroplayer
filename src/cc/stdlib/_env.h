@@ -79,6 +79,22 @@ void environ_free(void);
 #pragma aux _dos_env "*";
 #pragma aux _env_list "*";
 
+#pragma aux _dos_env "*";
+#pragma aux _psp_get_dosenv "*";
+#pragma aux _dosenv_next "*";
+#pragma aux _dosenv_find_end "*";
+#pragma aux _dosenv_find "*";
+#pragma aux _env_name_check "*";
+#pragma aux _environ_clear "*";
+#pragma aux _environ_alloc "*";
+#pragma aux _environ_fill "*";
+#pragma aux _environ_free "*";
+#pragma aux cc_environ_clear "*";
+#pragma aux cc_environ_build "*";
+#pragma aux cc_environ_rebuild "*";
+#pragma aux cc_environ_init "*";
+#pragma aux cc_environ_free "*";
+
 #endif  /* __WATCOMC__ */
 
 #endif

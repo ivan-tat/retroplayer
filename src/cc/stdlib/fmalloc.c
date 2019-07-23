@@ -5,12 +5,14 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdlib$fmalloc$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
-
 #include "cc/stdlib.h"
 
 extern void __far __pascal pascal_getmem(void **p, uint16_t size);

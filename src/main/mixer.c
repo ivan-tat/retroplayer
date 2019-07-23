@@ -5,17 +5,19 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$mixer$*"
+#endif
+
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "common.h"
 #include "cc/i86.h"
 #include "cc/string.h"
 #include "cc/dos.h"
 #include "debug.h"
-
 #include "main/mixer.h"
 
 uint32_t _calc_sample_step(uint16_t period, uint16_t rate)

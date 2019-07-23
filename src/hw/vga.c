@@ -5,8 +5,11 @@
 
 #include "defines.h"
 
-#include <stdint.h>
+#ifdef __WATCOMC__
+#pragma aux default "$hw$vga$*"
+#endif
 
+#include <stdint.h>
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/conio.h"
@@ -14,7 +17,6 @@
 #include "cc/string.h"
 #include "debug.h"
 #include "hw/vbios.h"
-
 #include "hw/vga.h"
 
 void __far vga_wait_vsync (void)

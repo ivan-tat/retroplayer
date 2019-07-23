@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$string$strchr$*"
+#endif
+
 #include "cc/string.h"
 
 char *cc_strchr(const char *s, int c)

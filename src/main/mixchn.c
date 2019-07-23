@@ -5,13 +5,15 @@
 
 #include "defines.h"
 
-#include <stdint.h>
+#ifdef __WATCOMC__
+#pragma aux default "$main$mixchn$*"
+#endif
 
+#include <stdint.h>
 #include "main/effvars.h"
 #include "main/effects.h"
 #include "main/musmod.h"
 #include "main/mixer.h"
-
 #include "main/mixchn.h"
 
 MIXCHNFLAGS __far __mixchn_set_flags (MIXCHNFLAGS _flags, MIXCHNFLAGS _mask, MIXCHNFLAGS _set, bool raise)

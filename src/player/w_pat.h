@@ -25,4 +25,17 @@ void __far win_pattern_set_play_state (SCRWIN *self, PLAYSTATE *value);
 void __far win_pattern_set_channels (SCRWIN *self, MIXCHNLIST *value);
 void __far win_pattern_set_start_channel (SCRWIN *self, int value);
 
+/*** Linking ***/
+
+#ifdef __WATCOMC__
+
+#pragma aux win_pattern_init "*";
+#pragma aux win_pattern_set_player "*";
+#pragma aux win_pattern_set_track "*";
+#pragma aux win_pattern_set_play_state "*";
+#pragma aux win_pattern_set_channels "*";
+#pragma aux win_pattern_set_start_channel "*";
+
+#endif  /* __WATCOMC__ */
+
 #endif  /* W_PAT_H */

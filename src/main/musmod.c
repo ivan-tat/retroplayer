@@ -5,16 +5,18 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$musmod$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "common.h"
 #include "cc/string.h"
 #include "main/pcmsmp.h"
 #include "main/musins.h"
 #include "main/muspat.h"
-
 #include "main/musmod.h"
 
 MUSMODFLAGS __far __musmod_set_flags (MUSMODFLAGS _flags, MUSMODFLAGS _mask, MUSMODFLAGS _set, bool raise)

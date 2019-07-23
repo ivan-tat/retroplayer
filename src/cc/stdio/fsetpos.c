@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdio$fsetpos$*"
+#endif
+
 #include "pascal.h"
 #include "startup.h"
 #include "cc/i86.h"
@@ -12,7 +16,6 @@
 #include "cc/dos.h"
 #include "cc/string.h"
 #include "cc/io.h"
-
 #include "cc/stdio.h"
 
 int cc_fsetpos(FILE *stream, fpos_t pos)

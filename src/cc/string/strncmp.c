@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$string$strncmp$*"
+#endif
+
 #include <stddef.h>
 #include <stdbool.h>
-
 #include "cc/string.h"
 
 int cc_strncmp(const char *s1, const char *s2, size_t n)

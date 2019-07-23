@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$pcmsmp$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/string.h"
@@ -16,7 +19,6 @@
 #include "cc/stdio.h"
 #include "dos/ems.h"
 #include "main/s3mtypes.h"
-
 #include "main/pcmsmp.h"
 
 /*** PCM sample ***/

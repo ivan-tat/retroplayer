@@ -5,14 +5,16 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$dynarray$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/string.h"
 #include "cc/dos.h"
-
 #include "dynarray.h"
 
 void __far dynarr_init(DYNARR *self, void *parent, uint16_t item_size, dynarr_init_item_t init_item, dynarr_free_item_t free_item)

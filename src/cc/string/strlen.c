@@ -5,8 +5,11 @@
 
 #include "defines.h"
 
-#include <stddef.h>
+#ifdef __WATCOMC__
+#pragma aux default "$cc$string$strlen$*"
+#endif
 
+#include <stddef.h>
 #include "cc/string.h"
 
 size_t cc_strlen(const char *s)

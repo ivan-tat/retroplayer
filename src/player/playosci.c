@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$player$playosci$*"
+#endif
+
 #include "pascal.h"
 #include "startup.h"
 #include "cc/stdio.h"
@@ -22,7 +26,6 @@
 #include "main/musmodps.h"
 #include "main/fillvars.h"
 #include "main/s3mplay.h"
-
 #include "playosci.h"
 
 #define def_rate 45454

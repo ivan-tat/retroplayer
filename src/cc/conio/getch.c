@@ -5,10 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$conio$getch$*"
+#endif
+
 #include <stdbool.h>
-
 #include "cc/i86.h"
-
 #include "cc/conio.h"
 
 char cc_getch(void)

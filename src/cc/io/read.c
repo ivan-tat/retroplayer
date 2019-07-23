@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$io$read$*"
+#endif
+
 #include "cc/dos.h"
 #include "cc/io.h"
 

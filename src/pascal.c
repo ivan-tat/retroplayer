@@ -5,10 +5,13 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$pascal$*"
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 #include "cc/i86.h"
-
 #include "pascal.h"
 
 void __far __pascal strpastoc (char *dest, char const *src, uint16_t maxlen)

@@ -5,11 +5,14 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$common$*"
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 #include "cc/i86.h"
 #include "cc/dos.h"
-
 #include "common.h"
 
 void *__new(size_t size)

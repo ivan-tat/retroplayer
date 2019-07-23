@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$hw$hwowner$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
@@ -15,7 +18,6 @@
 #include "cc/string.h"
 #include "common.h"
 #include "debug.h"
-
 #include "hw/hwowner.h"
 
 #pragma pack(push, 1);

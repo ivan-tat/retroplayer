@@ -5,10 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$conio$kbhit$*"
+#endif
+
 #include <stdbool.h>
-
 #include "cc/i86.h"
-
 #include "cc/conio.h"
 
 bool cc_kbhit(void)

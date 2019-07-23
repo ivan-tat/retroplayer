@@ -5,9 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$musins$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/string.h"
@@ -17,7 +20,6 @@
 #include "dynarray.h"
 #include "dos/ems.h"
 #include "main/pcmsmp.h"
-
 #include "main/musins.h"
 
 /*** Musical instrument ***/

@@ -5,13 +5,16 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$_printf$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdarg.h>
 #include "cc/i86.h"
 #include "cc/string.h"
 #include "cc/dstream.h"
-
 #include "cc/_printf.h"
 
 /*

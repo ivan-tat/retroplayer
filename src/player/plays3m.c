@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$player$plays3m$*"
+#endif
+
 #include "pascal.h"
 #include "startup.h"
 #include "cc/i86.h"
@@ -40,7 +44,6 @@
 #include "player/w_ins.h"
 #include "player/w_smp.h"
 #include "player/w_dbg.h"
-
 #include "player/plays3m.h"
 
 #define upcase(c) (((c >= 'a') && (c <= 'z')) ? c - 'a' + 'A' : c)

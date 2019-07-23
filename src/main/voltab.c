@@ -5,6 +5,10 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$main$voltab$*"
+#endif
+
 #include "pascal.h"
 #include "cc/string.h"
 #include "cc/i86.h"
@@ -12,7 +16,6 @@
 #if DEBUG == 1
 # include "cc/stdio.h"
 #endif
-
 #include "main/voltab.h"
 
 void voltab_init(void)

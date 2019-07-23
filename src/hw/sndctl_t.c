@@ -5,11 +5,13 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$hw$sndctl_t$*"
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
-
 #include "hw/sndctl_t.h"
 
 bool __far set_sample_format (HWSMPFMT *p, uint8_t b, bool s, uint8_t c)

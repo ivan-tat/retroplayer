@@ -5,10 +5,12 @@
 
 #include "defines.h"
 
+#ifdef __WATCOMC__
+#pragma aux default "$cc$stdlib$crwdata$*"
+#endif
+
 #include <stdint.h>
-
 #include "pascal.h"
-
 #include "cc/stdlib.h"
 
 #ifdef DEFINE_LOCAL_DATA

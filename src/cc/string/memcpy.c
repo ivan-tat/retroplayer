@@ -5,8 +5,11 @@
 
 #include "defines.h"
 
-#include <stdint.h>
+#ifdef __WATCOMC__
+#pragma aux default "$cc$string$memcpy$*"
+#endif
 
+#include <stdint.h>
 #include "cc/string.h"
 
 void *cc_memcpy(void *dest, const void *src, size_t n)
