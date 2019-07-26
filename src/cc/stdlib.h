@@ -14,7 +14,6 @@
 
 #include <stddef.h>
 #include <stdarg.h>
-
 #include "pascal.h"
 #include "startup.h"
 #include "cc/errno.h"

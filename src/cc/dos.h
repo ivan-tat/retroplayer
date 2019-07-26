@@ -13,7 +13,6 @@
 #endif
 
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/dos/limits.h"
 #include "cc/dos/int24.h"

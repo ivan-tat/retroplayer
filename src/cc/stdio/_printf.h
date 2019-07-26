@@ -18,7 +18,6 @@
 #include "cc/i86.h"
 #include "cc/string.h"
 #include "cc/dstream.h"
-
 #include "cc/stdio.h"
 
 bool __far _datastream_flush_console (DATASTREAM *self);

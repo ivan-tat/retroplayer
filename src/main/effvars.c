@@ -16,26 +16,26 @@
 
 #ifdef DEFINE_LOCAL_DATA
 
-static const int8_t __near sinuswave[64] =
+const int8_t __near sinuswave[64] =
 {
 #include "main/wsinus.inc"
 };
 
-static const int8_t __near rampwave[64] =
+const int8_t __near rampwave[64] =
 {
 #include "main/wramp.inc"
 };
 
-static const int8_t __near squarewave[64] =
+const uint8_t __near squarewave[64] =
 {
 #include "main/wsquare.inc"
 };
 
-static const uint8_t __near *wavetab[3] =
+const void __near * __near wavetab[3] =
 {
-    &sinuswave,
-    &rampwave,
-    &squarewave
+    (void __near *)&sinuswave,
+    (void __near *)&rampwave,
+    (void __near *)&squarewave
     /* 'random wave' is not a table, but a call for a random number ! */
 };
 

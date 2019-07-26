@@ -14,7 +14,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "player/screen.h"
 

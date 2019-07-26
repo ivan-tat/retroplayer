@@ -13,7 +13,6 @@
 #endif
 
 #include <stdint.h>
-
 #include "pascal.h"
 
 /* Symbolic constants for the cc_lseek() function */

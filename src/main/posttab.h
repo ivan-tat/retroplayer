@@ -14,7 +14,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 
 void amptab_set_volume(uint8_t vol);

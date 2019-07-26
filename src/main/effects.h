@@ -14,7 +14,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "main/s3mtypes.h"
 #include "main/musins.h"

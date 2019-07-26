@@ -5,6 +5,7 @@
 
 #ifdef __WATCOMC__
 #pragma once
+#define __attribute__(x)
 #endif
 
 #undef DEBUG_WRITE_LOG
@@ -23,7 +24,9 @@
 # define DEBUG_WRITE_OUTPUT_STREAM 0
 #endif
 
-//#define DEFINE_LOCAL_DATA 1
+#if LINKER_TPC != 1
+# define DEFINE_LOCAL_DATA 1
+#endif
 //#define USE_INTRINSICS 1
 
 #define CONFIG_VBIOS_ENABLE_LIGHT_PEN 1

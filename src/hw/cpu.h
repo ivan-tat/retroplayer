@@ -14,7 +14,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 
 extern bool isCPU_8086(void);

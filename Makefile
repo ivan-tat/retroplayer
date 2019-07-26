@@ -12,18 +12,22 @@ HOST_MODE   := native
 endif
 srcdir      := src
 ifeq "$(HOST_MODE)" "native"
-TARGET_MK   := Makefile
+TARGET_MK   := $(srcdir)/Makefile
 else ifeq "$(HOST_MODE)" "DJGPP"
-TARGET_MK   := Makefile.dos
+TARGET_MK   := $(srcdir)/Makefile.dos
 else
 $(error_unsupported_environment)
 endif
 
 .DEFAULT_GOAL := empty
 
-.PHONY: empty all clean show_banner
-empty all clean: show_banner $(srcdir)/$(TARGET_MK)
-	@make -C $(srcdir) -f $(TARGET_MK) $@
+.PHONY: empty autogenfiles all clean show_banner
+
+empty autogenfiles clean: $(TARGET_MK) | show_banner
+	@make -C $(<D) -f $(<F) $@
+
+all: $(TARGET_MK) | show_banner autogenfiles
+	@make -C $(<D) -f $(<F) $@
 
 show_banner:
 	@echo 'Hint: Running in $(HOST_MODE) mode.'

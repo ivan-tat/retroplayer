@@ -12,18 +12,33 @@ error_not_implemented = $(error This function is not implemented for current env
 error_not_known_params = $(error This function is not implemented for selected parameters.)
 info_done = @echo Done.
 
+DEFS :=
+ifeq "$(DEBUG)" "1"
+DEFS += DEBUG=1
+endif
+ifeq "$(LINKER_TPC)" "1"
+DEFS += LINKER_TPC=1
+endif
+
 HOST_TYPE       := native
 INCLUDE_DIRS    := .
 DEPDIR          := .deps
 DEPEXT          := d
-DEPAS_DOS		:= ../scripts/aspp/aspp
-DEPAFLAGS_DOS	:= -E -MM -I $(INCLUDE_DIRS)
+DEPAS_DOS       := ../scripts/aspp/aspp
+DEPAFLAGS_DOS   := -E -MM -I $(INCLUDE_DIRS)
 #DEPCC           := gcc
 DEPCC           := owcc
+DEPCDEFS        :=
 ifeq "$(DEPCC)" "gcc"
-DEPCFLAGS       := -E -MM -I $(INCLUDE_DIRS)
+ifneq "$(DEFS)" ""
+DEPCDEFS        := $(patsubst %,-D %,$(DEFS))
+endif
+DEPCFLAGS       := $(DEPCDEFS) -E -MM -I $(INCLUDE_DIRS)
 else ifeq "$(DEPCC)" "owcc"
-DEPCFLAGS       := -zq -E -MM -I $(INCLUDE_DIRS)
+ifneq "$(DEFS)" ""
+DEPCDEFS        := $(patsubst %,-D%,$(DEFS))
+endif
+DEPCFLAGS       := -zq -E -MM $(DEPCDEFS) -I $(INCLUDE_DIRS)
 else
 $(error_not_known_params)
 endif
@@ -45,20 +60,17 @@ $(error_not_known_params)
 endif
 #CC_DOS          := gcc
 CC_DOS          := wcc
+CDEFS_DOS       :=
 ifeq "$(CC_DOS)" "gcc"
-ifeq "$(DEBUG)" "1"
-CDEBUG_DOS      := -D DEBUG=1
-else
-CDEBUG_DOS      :=
+ifneq "$(DEFS)" ""
+CDEFS_DOS       := $(patsubst %,-D %,$(DEFS))
 endif
-CFLAGS_DOS      := $(CDEBUG_DOS) -I $(INCLUDE_DIRS)
+CFLAGS_DOS      := $(CDEFS_DOS) -I $(INCLUDE_DIRS)
 else ifeq "$(CC_DOS)" "wcc"
-ifeq "$(DEBUG)" "1"
-CDEBUG_DOS      := -dDEBUG=1
-else
-CDEBUG_DOS      :=
+ifneq "$(DEFS)" ""
+CDEFS_DOS       := $(patsubst %,-d%,$(DEFS))
 endif
-CFLAGS_DOS      := $(CDEBUG_DOS) -3 -fp3 -ml -oi -oc -os -q -r -s -zdp -zff -zgf -zl -zld -zls -zp=1 -zq -zu -i=$(INCLUDE_DIRS)
+CFLAGS_DOS      := $(CDEFS_DOS) -3 -fp3 -ml -oi -oc -os -q -r -s -zdp -zff -zgf -zl -zld -zls -zp=1 -zq -zu -i=$(INCLUDE_DIRS)
 else
 $(error_not_known_params)
 endif
@@ -135,7 +147,55 @@ empty:
 	echo '    make [ option ... ] [ target ] [ option ... ]'; \
 	echo 'Where:'; \
 	echo '    option: in the form "name=value"'; \
-	echo '    target: "all" | "clean"'
+	echo '    target: "autogenfiles" | "all" | "clean"'; \
+	echo 'Supported options:'; \
+	echo '    DEBUG=1'; \
+	echo '    LINKER_TPC=1'
+
+##=-------------------------=##
+## Helper executable scripts ##
+##=-------------------------=##
+
+scripts_DIR := main/scripts
+
+## Dependency generation rules:
+$(DEPDIR)/$(scripts_DIR)/%.$(DEPEXT): $(scripts_DIR)/%.c
+	$(make_c_exec_deps)
+
+## Build rules
+$(scripts_DIR)/%: $(scripts_DIR)/%.c
+	$(make_c_exec)
+
+scripts_SRCS := $(wildcard $(scripts_DIR)/*.c)
+scripts_OBJS := $(patsubst %.c,%,$(filter %.c,$(scripts_SRCS)))
+scripts_DEPS := $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(scripts_SRCS)))
+
+SRCS += $(scripts_SRCS)
+OBJS += $(scripts_OBJS)
+DEPS += $(scripts_DEPS)
+
+##=---------------------------=##
+## Auto-generated source files ##
+##=---------------------------=##
+
+## Build rules
+main/%.inc: $(scripts_DIR)/%
+	./$< > $@
+
+autogen_INCS := \
+ main/wramp.inc \
+ main/wsinus.inc \
+ main/wsquare.inc
+
+INCS += $(autogen_INCS)
+
+##=--------------------=##
+## Auto-generated files ##
+##=--------------------=##
+
+.PHONY: autogenfiles
+autogenfiles: $(INCS)
+	$(info_done)
 
 ##=----------------=##
 ## Dependency files ##
@@ -251,7 +311,7 @@ endif
 %.$(ASMTMPEXT_DOS): %.o
 ifeq "$(DA_DOS)" "wdis"
 	set -e; $(RM) $*.$(ASMTMPEXT_DOS); \
-	$(DA_DOS) $(DFLAGS_DOS) $< | sed -r -e 's/(^DGROUP[[:space:]]+GROUP[[:space:]]+)CONST,CONST2,(_DATA)/\1\2/;s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$$)/_DATA\1/;s/([[:space:]]|,|:|-|\+)(0[a-f]{1}[[:xdigit:]]{0,7}|[1-9]{1}[[:xdigit:]]{0,7})([[:xdigit:]]{8}H)/\10\3/g;s/(.+\,DGROUP:)CONST$$/\1_DATA/' > $*.$(ASMTMPEXT_DOS)
+	$(DA_DOS) $(DFLAGS_DOS) $< | sed -r -e 's/(^DGROUP[[:space:]]+GROUP[[:space:]]+)CONST,CONST2,(_DATA)/\1\2/;s/^CONST[2]?([[:space:]]+(SEGMENT[[:space:]]+.+*|ENDS[[:space:]]*)$$)/_DATA\1/;s/([[:space:]]|,|:|-|\+|\()(0[a-f]{1}[[:xdigit:]]{0,7}|[1-9]{1}[[:xdigit:]]{0,7})([[:xdigit:]]{8}H)/\10\3/g;s/(.+\,DGROUP:)CONST$$/\1_DATA/' > $*.$(ASMTMPEXT_DOS)
 else
 $(error_not_known_params)
 endif
@@ -261,42 +321,6 @@ endif
 
 %.obj: %.$(ASMTMPEXT_DOS)
 	$(make_asm_obj)
-
-##=-------------------------=##
-## Helper executable scripts ##
-##=-------------------------=##
-
-scripts_DIR := main/scripts
-
-## Dependency generation rules:
-$(DEPDIR)/$(scripts_DIR)/%.$(DEPEXT): $(scripts_DIR)/%.c
-	$(make_c_exec_deps)
-
-## Build rules
-$(scripts_DIR)/%: $(scripts_DIR)/%.c
-	$(make_c_exec)
-
-scripts_SRCS := $(wildcard $(scripts_DIR)/*.c)
-scripts_OBJS := $(patsubst %.c,%,$(filter %.c,$(scripts_SRCS)))
-scripts_DEPS := $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(scripts_SRCS)))
-
-SRCS += $(scripts_SRCS)
-OBJS += $(scripts_OBJS)
-DEPS += $(scripts_DEPS)
-
-## Auto-generated source files
-## ===========================
-
-## Build rules
-main/%.inc: $(scripts_DIR)/%
-	./$< > $@
-
-autogen_INCS := \
- main/wramp.inc \
- main/wsinus.inc \
- main/wsquare.inc
-
-INCS += $(autogen_INCS)
 
 ##=----------------------------=##
 ## Open Watcom C specific files ##
@@ -393,7 +417,7 @@ endif
 ##=-------=##
 
 .PHONY: all
-all: $(INCS) $(OBJS)
+all: autogenfiles $(INCS) $(OBJS)
 	$(info_done)
 
 .PHONY: clean

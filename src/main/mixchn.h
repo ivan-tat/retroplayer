@@ -14,7 +14,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "cc/i86.h"
 #include "dynarray.h"
 #include "main/musins.h"

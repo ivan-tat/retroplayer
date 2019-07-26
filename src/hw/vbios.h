@@ -13,7 +13,6 @@
 #endif
 
 #include <stdint.h>
-
 #include "pascal.h"
 
 /* Video BIOS data area functions */

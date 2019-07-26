@@ -15,7 +15,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "startup.h"
 
 /*** Initialization ***/

@@ -14,7 +14,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "cc/string.h"
 #include "main/pcmsmp.h"

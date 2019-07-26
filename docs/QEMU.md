@@ -152,13 +152,13 @@ make clean
 In the project's folder on the host type:
 
 ```sh
-make all
+make all LINKER_TPC=1
 ```
 
-to compile what is possible on the host (*release* version). Add `DEBUG=1` parameter to compile *debug* version:
+to compile what is possible on the host using Turbo Pascal linker (*release* version). Add `DEBUG=1` parameter to compile *debug* version:
 
 ```sh
-make all DEBUG=1
+make all LINKER_TPC=1 DEBUG=1
 ```
 
 **Note**: You must clean project's folder each time you want to build other type of target (when switching between *release* and *debug* versions).

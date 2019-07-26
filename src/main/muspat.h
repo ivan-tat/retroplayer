@@ -14,7 +14,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "s3mtypes.h"
 #include "pascal.h"
 #include "cc/i86.h"

@@ -13,7 +13,6 @@
 #endif
 
 #include <stdarg.h>
-
 #include "cc/stdio.h"
 
 #define DBGLOG_MSG  0

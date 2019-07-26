@@ -23,16 +23,17 @@
 
 #ifdef DEFINE_LOCAL_DATA
 
-static uint16_t     cc_PrefixSeg = 0;
-static void __far  *cc_ErrorAddr = NULL;
-static void (*__far cc_ExitProc) = NULL;
-static int16_t      cc_ExitCode = 0;
-static uint8_t      cc_Test8086 = 0;
-static _cc_iobuf    cc_Input;
-static _cc_iobuf    cc_Output;
+uint16_t     cc_PrefixSeg = 0;
+void __far  *cc_ErrorAddr = NULL;
+void (*__far cc_ExitProc) = NULL;
+int16_t      cc_ExitCode = 0;
+inoutres_t   cc_InOutRes = EINOUTRES_SUCCESS;
+uint8_t      cc_Test8086 = 0;
+_cc_iobuf    cc_Input = { 0 };
+_cc_iobuf    cc_Output = { 0 };
 
-static void *__far _cc_ExitList[_CC_ATEXIT_MAX] = { 0 };
-static uint8_t _cc_ExitCount = 0;
+void *__far _cc_ExitList[_CC_ATEXIT_MAX] = { 0 };
+uint8_t     _cc_ExitCount = 0;
 
 #endif
 
@@ -41,8 +42,8 @@ static uint8_t _cc_ExitCount = 0;
 #define STDINBUF_SIZE 128
 #define STDOUTBUF_SIZE 128
 
-static uint8_t _stdin_buf[STDINBUF_SIZE];
-static uint8_t _stdout_buf[STDOUTBUF_SIZE];
+static uint8_t _stdin_buf[STDINBUF_SIZE] = { 0 };
+static uint8_t _stdout_buf[STDOUTBUF_SIZE] = { 0 };
 
 // Saved critical interrupt vectors
 #define SAVEINTVEC_COUNT 19
@@ -51,7 +52,7 @@ const static uint8_t SaveIntVecIndexes[SAVEINTVEC_COUNT] =
     0x00, 0x02, 0x1B, 0x21, 0x23, 0x24, 0x34, 0x35, 0x36, 0x37,
     0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x75
 };
-static void __far *SaveIntVecs[SAVEINTVEC_COUNT];
+static void __far *SaveIntVecs[SAVEINTVEC_COUNT] = { 0 };
 
 static const char NewLine[] = { 13, 10 };
 
@@ -134,7 +135,7 @@ void __near cc_SetFileMode (_cc_iobuf *f, uint16_t mode)
     case cc_fmInput:
     case cc_fmOutput:
         _sysio_close_1 (f);
-        /*__attribute__ ((fallthrough));*/  /* GNU */
+        __attribute__ ((fallthrough));  /* GNU */
 
     case cc_fmClosed:
         f->mode = mode;
@@ -183,7 +184,7 @@ inoutres_t __far _sysio_close (_cc_iobuf *f, bool do_close)
     {
     case cc_fmOutput:
         _sysio_call (f, 1);
-        /*__attribute__ ((fallthrough));*/  /* GNU */
+        __attribute__ ((fallthrough));  /* GNU */
 
     case cc_fmInput:
         if (do_close)

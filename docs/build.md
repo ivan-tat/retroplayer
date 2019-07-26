@@ -76,7 +76,7 @@ Use script [scripts/dosemu/dosemu](../scripts/dosemu/dosemu) for that.
 
 ```sh
 cd ~/Projects/retroplayer
-make all DEBUG=1
+make all LINKER_TPC=1 DEBUG=1
 ```
 
 Start DOSEMU. When you are in DOS project's directory type:
@@ -89,7 +89,7 @@ make all "DEBUG=1"
 
 ```sh
 cd ~/Projects/retroplayer
-make all
+make all LINKER_TPC=1
 ```
 
 Start DOSEMU. When you are in DOS project's directory type:

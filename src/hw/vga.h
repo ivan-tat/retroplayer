@@ -13,7 +13,6 @@
 #endif
 
 #include <stdint.h>
-
 #include "pascal.h"
 
 extern uint16_t drawseg;

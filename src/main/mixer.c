@@ -30,7 +30,7 @@ uint32_t _calc_sample_step(uint16_t period, uint16_t rate)
 
 #ifdef DEFINE_LOCAL_DATA
 
-static uint16_t ST3Periods[12] =
+uint16_t ST3Periods[12] =
 {
     1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
 };

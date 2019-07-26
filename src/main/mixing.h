@@ -14,7 +14,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "main/musmod.h"
 #include "main/mixchn.h"

@@ -15,9 +15,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdarg.h>
-
 #include "pascal.h"
-
 #include "cc/dos.h"
 
 /* Types */

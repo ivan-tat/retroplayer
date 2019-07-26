@@ -13,7 +13,6 @@
 #endif
 
 #include <stdint.h>
-
 #include "pascal.h"
 
 uint32_t _memmax(void);

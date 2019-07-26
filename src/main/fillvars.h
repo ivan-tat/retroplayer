@@ -14,7 +14,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 #include "hw/dma.h"
 #include "hw/sndctl_t.h"

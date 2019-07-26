@@ -17,19 +17,19 @@
 
 #ifdef DEFINE_LOCAL_DATA
 
-static uint16_t cc_lastmode;
-static uint16_t cc_screenwidth;
-static uint16_t cc_screenheight;
-static bool cc_checksnow;
-static bool cc_directvideo;
-static union text_rect_t cc_windmin;
-static union text_rect_t cc_windmax;
-static uint8_t cc_textattrorig;
-static uint8_t cc_textattr;
-static char cc_lastkey;
-static bool cc_checkeof;
-static bool cc_gotbreak;
-static bool cc_checkbreak;
+uint16_t cc_lastmode = 0;
+uint16_t cc_screenwidth = 0;
+uint16_t cc_screenheight = 0;
+bool cc_checksnow = false;
+bool cc_directvideo = false;
+union text_rect_t cc_windmin = { .value = 0 };
+union text_rect_t cc_windmax = { .value = 0 };
+uint8_t cc_textattrorig = 0;
+uint8_t cc_textattr = 0;
+char cc_lastkey = 0;
+bool cc_checkeof = false;
+bool cc_gotbreak = false;
+bool cc_checkbreak = false;
 
 #endif  /* DEFINE_LOCAL_DATA */
 

@@ -15,6 +15,6 @@
 
 #ifdef DEFINE_LOCAL_DATA
 
-static int16_t cc_errno;
+int16_t cc_errno = EZERO;
 
 #endif

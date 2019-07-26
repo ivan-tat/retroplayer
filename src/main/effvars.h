@@ -14,13 +14,12 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
 #include "pascal.h"
 
-extern int8_t   sinuswave[64];
-extern int8_t   rampwave[64];
-extern uint8_t  squarewave[64];
-extern uint16_t wavetab[3];
+extern const int8_t  __near sinuswave[64];
+extern const int8_t  __near rampwave[64];
+extern const uint8_t __near squarewave[64];
+extern const void __near * __near wavetab[3];
 
 /*** Linking ***/
 
