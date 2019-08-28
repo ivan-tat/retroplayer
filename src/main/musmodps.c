@@ -34,7 +34,7 @@ void __far playstate_init (PLAYSTATE *self)
     if (self)
         memset (self, 0, sizeof (PLAYSTATE));
     else
-        DEBUG_ERR_ ("playstate_init", "%s", "self is NULL!");
+        DEBUG_ERR ("self is NULL!");
 }
 
 bool __far playstate_alloc_channels (PLAYSTATE *self)
@@ -54,7 +54,7 @@ bool __far playstate_alloc_channels (PLAYSTATE *self)
                 channels = _new (MIXCHNLIST);
                 if (!channels)
                 {
-                    DEBUG_ERR_ ("playstate_alloc_channels", "Failed to allocate memory for %s.", "mixing channels object");
+                    DEBUG_ERR_ ("Failed to allocate memory for %s.", "mixing channels object");
                     return false;
                 }
                 mixchnl_init (channels);
@@ -66,7 +66,7 @@ bool __far playstate_alloc_channels (PLAYSTATE *self)
             if (mixchnl_get_count (channels) != num_channels)
                 if (!mixchnl_set_count (channels, musmod_get_channels_count (track)))
                 {
-                    DEBUG_ERR_ ("playstate_alloc_channels", "Failed to allocate memory for %s.", "mixing channels");
+                    DEBUG_ERR_ ("Failed to allocate memory for %s.", "mixing channels");
                     return false;
                 }
 
@@ -74,13 +74,13 @@ bool __far playstate_alloc_channels (PLAYSTATE *self)
         }
         else
         {
-            DEBUG_ERR_ ("playstate_alloc_channels", "%s", "Track is not set or loaded.");
+            DEBUG_ERR ("Track is not set or loaded.");
             return false;
         }
     }
     else
     {
-        DEBUG_ERR_ ("playstate_alloc_channels", "%s", "self is NULL!");
+        DEBUG_ERR ("self is NULL!");
         return false;
     }
 }
@@ -132,13 +132,13 @@ void __far playstate_reset_channels (PLAYSTATE *self)
                 }
             }
             else
-                DEBUG_ERR_ ("playstate_reset_channels", "%s", "No mixing channels.");
+                DEBUG_ERR ("No mixing channels.");
         }
         else
-            DEBUG_ERR_ ("playstate_reset_channels", "%s", "Track is not set or loaded.");
+            DEBUG_ERR ("Track is not set or loaded.");
     }
     else
-        DEBUG_ERR_ ("playstate_reset_channels", "%s", "self is NULL!");
+        DEBUG_ERR ("self is NULL!");
 }
 
 void __far playstate_free_channels (PLAYSTATE *self)
@@ -152,7 +152,7 @@ void __far playstate_free_channels (PLAYSTATE *self)
         }
     }
     else
-        DEBUG_ERR_ ("playstate_free_channels", "%s", "self is NULL!");
+        DEBUG_ERR ("self is NULL!");
 }
 
 void __far playstate_set_speed (PLAYSTATE *self, uint8_t value)
@@ -163,7 +163,7 @@ void __far playstate_set_speed (PLAYSTATE *self, uint8_t value)
             self->speed = value;
     }
     else
-        DEBUG_ERR_ ("playstate_set_speed", "%s", "self is NULL!");
+        DEBUG_ERR ("self is NULL!");
 }
 
 void __far playstate_set_tempo (PLAYSTATE *self, uint8_t value)
@@ -179,7 +179,7 @@ void __far playstate_set_tempo (PLAYSTATE *self, uint8_t value)
             self->tick_samples_per_channel = (long)self->rate * 5 / (int)(value * 2);
     }
     else
-        DEBUG_ERR_ ("playstate_set_tempo", "%s", "self is NULL!");
+        DEBUG_ERR ("self is NULL!");
 }
 
 void __far playstate_setup_patterns_order (PLAYSTATE *self)
@@ -198,7 +198,7 @@ void __far playstate_setup_patterns_order (PLAYSTATE *self)
         self->order_last = i;
     }
     else
-        DEBUG_ERR_ ("playstate_setup_patterns_order", "%s", "self is NULL!");
+        DEBUG_ERR ("self is NULL!");
 }
 
 int __far playstate_find_next_pattern (PLAYSTATE *self, int index, int step)
@@ -248,13 +248,13 @@ int __far playstate_find_next_pattern (PLAYSTATE *self, int index, int step)
         }
         else
         {
-            DEBUG_ERR_ ("playstate_find_next_pattern", "%s", "Track is not set or loaded.");
+            DEBUG_ERR ("Track is not set or loaded.");
             return -1;
         }
     }
     else
     {
-        DEBUG_ERR_ ("playstate_find_next_pattern", "%s", "self is NULL!");
+        DEBUG_ERR ("self is NULL!");
         return -1;
     }
 }
@@ -289,10 +289,10 @@ void __far playstate_set_pos (PLAYSTATE *self, uint8_t start_order, uint8_t star
             }
         }
         else
-            DEBUG_ERR_ ("playstate_set_pos", "%s", "Track is not set or loaded.");
+            DEBUG_ERR ("Track is not set or loaded.");
     }
     else
-        DEBUG_ERR_ ("playstate_set_pos", "%s", "self is NULL!");
+        DEBUG_ERR ("self is NULL!");
 }
 
 void __far playstate_set_initial_state (PLAYSTATE *self)
@@ -310,10 +310,10 @@ void __far playstate_set_initial_state (PLAYSTATE *self)
             self->master_volume = musmod_get_master_volume (track); // is song's output
         }
         else
-            DEBUG_ERR_ ("playstate_set_initial_state", "%s", "Track is not set or loaded.");
+            DEBUG_ERR ("Track is not set or loaded.");
     }
     else
-        DEBUG_ERR_ ("playstate_set_initial_state", "%s", "self is NULL!");
+        DEBUG_ERR ("self is NULL!");
 }
 
 void __far playstate_free (PLAYSTATE *self)
@@ -321,5 +321,5 @@ void __far playstate_free (PLAYSTATE *self)
     if (self)
         playstate_free_channels (self);
     else
-        DEBUG_ERR_ ("playstate_free", "%s", "self is NULL!");
+        DEBUG_ERR ("self is NULL!");
 }

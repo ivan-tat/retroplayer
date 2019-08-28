@@ -538,17 +538,17 @@ void __near ems_init (void)
         {
             emsFrameSeg = emsGetFrameSeg();
             emsFramePtr = MK_FP(emsFrameSeg, 0);
-            DEBUG_MSG_("ems_init", "Found EMS version %hu.%03hu.", emsVersion.Hi, emsVersion.Lo);
-            DEBUG_MSG_("ems_init", "%lu KiB of expanded memory available.", (uint32_t)emsGetFreePagesCount()<<4);
+            DEBUG_MSG_ ("Found EMS version %hu.%03hu.", emsVersion.Hi, emsVersion.Lo);
+            DEBUG_MSG_ ("%lu KiB of expanded memory available.", (uint32_t)emsGetFreePagesCount()<<4);
         }
         else
         {
             emsInstalled = false;
-            DEBUG_ERR("ems_init", "Failed to get EMS version.");
+            DEBUG_ERR ("Failed to get EMS version.");
         }
     }
     if (!emsInstalled)
-        DEBUG_MSG("ems_init", "No EMS is available.");
+        DEBUG_MSG ("No EMS is available.");
 }
 
 void __near ems_done (void)

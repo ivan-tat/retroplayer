@@ -324,7 +324,7 @@ void __near load_s3m_set_error (LOADER_S3M *self, const char *method, int line, 
     _DEBUG_LOG (DBGLOG_ERR, __FILE__, line, method, "%s", _Self->err);
 }
 
-#define ERROR(o, m, f, ...) load_s3m_set_error (o, m, __LINE__, f, __VA_ARGS__)
+#define ERROR(o, f, ...) load_s3m_set_error (o, __func__, __LINE__, f, __VA_ARGS__)
 
 #else
 
@@ -337,7 +337,7 @@ void __near load_s3m_set_error (LOADER_S3M *self, const char *format, ...)
     vsnprintf (_Self->err, _S3M_ERROR_LEN, format, ap);
 }
 
-#define ERROR(o, m, f, ...) load_s3m_set_error (o, f, __VA_ARGS__)
+#define ERROR(o, f, ...) load_s3m_set_error (o, f, __VA_ARGS__)
 
 #endif  /* DEBUG */
 
@@ -387,7 +387,7 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
 
     if (!fread (&header, sizeof (_S3M_HEADER), 1, _Self->f))
     {
-        ERROR (self, "load_s3m_load", "Failed to read %s.", "file''s header");
+        ERROR (self, "Failed to read %s.", "file's header");
         return false;
     }
 
@@ -395,25 +395,22 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
     || (header.magic != _S3M_FILE_MAGIC)
     || ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2)))
     {
-        DEBUG_INFO_ ("load_s3m_load",
-            "type=%04X (%s)",
+        DEBUG_INFO_ ("type=%04X (%s)",
             header.type,
             (header.type != _S3M_FILE_TYPE)
                 ? "wrong" : "ok"
         );
-        DEBUG_INFO_ ("load_s3m_load",
-            "magic=%08lX (%s)",
+        DEBUG_INFO_ ("magic=%08lX (%s)",
             (long) header.magic,
             (header.magic != _S3M_FILE_MAGIC)
                 ? "wrong" : "ok"
         );
-        DEBUG_INFO_ ("load_s3m_load",
-            "format=%04X (%s)",
+        DEBUG_INFO_ ("format=%04X (%s)",
             header.format,
             ((header.format != _S3M_FILE_FORMAT_1) && (header.format != _S3M_FILE_FORMAT_2))
                 ? "wrong" : "ok"
         );
-        ERROR (self, "load_s3m_load", "%s is not supported.", "file format");
+        ERROR (self, "%s is not supported.", "file format");
         return false;
     }
 
@@ -422,13 +419,12 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
     case _S3M_TRACKER_ST3:
         if ((header.tracker & _S3M_TRACKER_VER_MAJOR_MASK) != (_S3M_TRACKER_VER_MAJOR_ST3 << _S3M_TRACKER_VER_MAJOR_SHIFT))
         {
-            DEBUG_INFO_ ("load_s3m_load",
-                "tracker=%04X (%s)",
+            DEBUG_INFO_ ("tracker=%04X (%s)",
                 header.tracker,
                 ((header.tracker & _S3M_TRACKER_VER_MAJOR_MASK) != (_S3M_TRACKER_VER_MAJOR_ST3 << _S3M_TRACKER_VER_MAJOR_SHIFT))
                     ? "wrong" : "ok"
             );
-            ERROR (self, "load_s3m_load", "%s", "Unknown Scream Tracker version.");
+            ERROR (self, "%s", "Unknown Scream Tracker version.");
             return false;
         }
         snprintf (
@@ -467,15 +463,8 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
         );
         break;
     default:
-        DEBUG_INFO_ ("load_s3m_load",
-            "tracker=%04X",
-            header.tracker
-        );
-        DEBUG_INFO_ ("load_s3m_load",
-            "format=%04X",
-            header.format
-        );
-        ERROR (self, "load_s3m_load", "%s", "Unknown tracker.");
+        DEBUG_INFO_ ("tracker=%04X, format=%04X", header.tracker, header.format);
+        ERROR (self, "%s", "Unknown tracker.");
         return false;
     }
 
@@ -511,14 +500,14 @@ bool __near load_s3m_read_header (LOADER_S3M *self)
 
     if (!maxused)
     {
-        ERROR (self, "load_s3m_load", "%s", "All channels are disabled.");
+        ERROR (self, "%s", "All channels are disabled.");
         return false;
     }
 
     musmod_set_channels_count (track, maxused);
 
     if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_INFO_ ("load_s3m_load", "Channels: %hu", musmod_get_channels_count (track));
+        DEBUG_INFO_ ("Channels: %hu", musmod_get_channels_count (track));
 
     header.name[_S3M_TITLE_LEN - 1] = 0;
     musmod_set_title (track, header.name);
@@ -604,7 +593,7 @@ void __near load_s3m_alloc_EM_samples_pages (LOADER_S3M *self)
             smp = musins_get_sample (ins);
             if (emsEC != E_EMS_SUCCESS)
             {
-                ERROR (self, "load_s3m_alloc_EM_samples_pages", "Failed to allocate EM for %s.", "samples");
+                ERROR (self, "Failed to allocate EM for %s.", "samples");
                 pcmsmpl_set_EM_data (samples, false);
                 return;
             }
@@ -614,16 +603,12 @@ void __near load_s3m_alloc_EM_samples_pages (LOADER_S3M *self)
     }
 
     if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_INFO_ ("load_s3m_alloc_EM_samples_pages",
-            "Samples to load: %u (EM pages: %u)",
-            _get_samples_count (_Self),
-            pages
-        );
+        DEBUG_INFO_ ("Samples to load: %u (EM pages: %u)", _get_samples_count (_Self), pages);
 
     free_pages = emsGetFreePagesCount ();
     if (!free_pages)
     {
-        DEBUG_WARN_ ("load_s3m_alloc_EM_samples_pages", "Not enough EM for %s.", "samples");
+        DEBUG_WARN_ ("Not enough EM for %s.", "samples");
         pcmsmpl_set_EM_data (samples, false);
         return;
     }
@@ -634,7 +619,7 @@ void __near load_s3m_alloc_EM_samples_pages (LOADER_S3M *self)
     handle = emsAlloc (pages);
     if (emsEC != E_EMS_SUCCESS)
     {
-        ERROR (self, "load_s3m_alloc_EM_samples_pages", "Failed to allocate EM for %s.", "samples");
+        ERROR (self, "Failed to allocate EM for %s.", "samples");
         pcmsmpl_set_EM_data (samples, false);
         return;
     }
@@ -647,10 +632,7 @@ void __near load_s3m_alloc_EM_samples_pages (LOADER_S3M *self)
     _Self->smp_EM_page_offset = 0;
 
     if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_INFO_ ("load_s3m_alloc_EM_samples_pages",
-            "EM pages allocated: %u.",
-            pages
-        );
+        DEBUG_INFO_ ("EM pages allocated: %u.", pages);
 }
 
 bool __near load_s3m_allocate_EM_for_sample (LOADER_S3M *self, PCMSMP *smp, uint8_t index, uint32_t size, uint16_t offset, char **data)
@@ -663,7 +645,7 @@ bool __near load_s3m_allocate_EM_for_sample (LOADER_S3M *self, PCMSMP *smp, uint
 
     if (size > SAMPLE_SIZE_MAX - PCMSMP_EXTRA_DATA_SIZE)
     {
-        ERROR (self, "load_s3m_allocate_EM_for_sample", "%s", "Sample is too large.");
+        ERROR (self, "%s", "Sample is too large.");
         return false;
     }
 
@@ -679,8 +661,7 @@ bool __near load_s3m_allocate_EM_for_sample (LOADER_S3M *self, PCMSMP *smp, uint
     if (end_page < _Self->smp_EM_pages)
     {
         if (DEBUG_FILE_S3M_LOAD)
-            DEBUG_INFO_ ("load_s3m_allocate_EM_for_sample",
-                "sample=%02hhu, size=0x%08lX, handle=0x%04hX, pages=0x%04hX:0x%04hX-0x%04hX:0x%04hX",
+            DEBUG_INFO_ ("sample=%02hhu, size=0x%08lX, handle=0x%04hX, pages=0x%04hX:0x%04hX-0x%04hX:0x%04hX",
                 (uint8_t) index,
                 (uint32_t) size,
                 (uint16_t) pcmsmpl_get_EM_handle (samples),
@@ -697,7 +678,7 @@ bool __near load_s3m_allocate_EM_for_sample (LOADER_S3M *self, PCMSMP *smp, uint
         *data = pcmsmp_map_EM_data (smp);
         if (!*data)
         {
-            ERROR (self, "load_s3m_allocate_EM_for_sample", "Failed to map EM for %s.", "sample");
+            ERROR (self, "Failed to map EM for %s.", "sample");
             return false;
         }
         // next EM position
@@ -733,7 +714,7 @@ bool __near load_s3m_load_sample (LOADER_S3M *self, uint8_t index)
     info = & (_get_instrument_info (_Self, index));
     if (fsetpos (_Self->f, _ins_get_sample_offset (& (info->header))))
     {
-        ERROR (self, "load_s3m_load_sample", "Failed to read %s.", "file");
+        ERROR (self, "Failed to read %s.", "file");
         return false;
     }
 
@@ -746,7 +727,7 @@ bool __near load_s3m_load_sample (LOADER_S3M *self, uint8_t index)
     data_size = _calc_sample_mem_size (smp, load_size);
     if (data_size > SAMPLE_SIZE_MAX)
     {
-        ERROR (self, "load_s3m_load_sample", "%s", "Sample is too large.");
+        ERROR (self, "%s", "Sample is too large.");
         return false;
     }
 
@@ -771,12 +752,11 @@ bool __near load_s3m_load_sample (LOADER_S3M *self, uint8_t index)
         data = __new (data_size);
         if (!data)
         {
-            ERROR (self, "load_s3m_load_sample", "Failed to allocate memory for %s.", "sample data");
+            ERROR (self, "Failed to allocate memory for %s.", "sample data");
             return false;
         }
         if (DEBUG_FILE_S3M_LOAD)
-            DEBUG_INFO_ ("load_s3m_load_sample",
-                "sample=%02u, data=DOS, address=0x%04X:0x%04X.",
+            DEBUG_INFO_ ("sample=%02u, data=DOS, address=0x%04X:0x%04X.",
                 index,
                 FP_SEG (data),
                 FP_OFF (data)
@@ -787,7 +767,7 @@ bool __near load_s3m_load_sample (LOADER_S3M *self, uint8_t index)
 
     if (!fread (data, load_size, 1, _Self->f))
     {
-        ERROR (self, "load_s3m_load_sample", "Failed to read %s.", "sample data");
+        ERROR (self, "Failed to read %s.", "sample data");
         return false;
     }
 
@@ -856,11 +836,7 @@ void __near load_s3m_free_unused_samples_pages (LOADER_S3M *self)
             pages++;
         pages_free = _Self->smp_EM_pages - pages;
 
-        DEBUG_INFO_ ("load_s3m_free_unused_samples_pages",
-            "EM pages: %u used, %u free",
-            pages,
-            pages_free
-        );
+        DEBUG_INFO_ ("EM pages: %u used, %u free", pages, pages_free);
 
         // try to free unused pages
         if (pages_free)
@@ -869,7 +845,7 @@ void __near load_s3m_free_unused_samples_pages (LOADER_S3M *self)
             if (pages)
             {
                 if (!emsResize (handle, pages))
-                    DEBUG_WARN_ ("load_s3m_free_unused_samples_pages", "Failed to free unused pages for %s.", "samples");
+                    DEBUG_WARN_ ("Failed to free unused EM pages for %s.", "samples");
             }
             else
             {
@@ -879,7 +855,7 @@ void __near load_s3m_free_unused_samples_pages (LOADER_S3M *self)
                     pcmsmpl_set_EM_handle (samples, EMSBADHDL);
                 }
                 else
-                    DEBUG_WARN_ ("load_s3m_free_unused_samples_pages", "Failed to free unused pages for %s.", "samples");
+                    DEBUG_WARN_ ("Failed to free unused EM pages for %s.", "samples");
             }
         }
     }
@@ -897,13 +873,13 @@ bool __near load_s3m_load_ins_offsets (LOADER_S3M *self)
     _set_instruments_offsets (_Self, __new (size));
     if (!_get_instruments_offsets (_Self))
     {
-        ERROR (self, "load_s3m_load_ins_offsets", "Failed to allocate memory for %s.", "instruments offsets");
+        ERROR (self, "Failed to allocate memory for %s.", "instruments offsets");
         return false;
     }
 
     if (!fread (_get_instruments_offsets (_Self), size, 1, _Self->f))
     {
-        ERROR (self, "load_s3m_load_ins_offsets", "Failed to read %s.", "instruments offsets");
+        ERROR (self, "Failed to read %s.", "instruments offsets");
         return false;
     }
 
@@ -919,7 +895,7 @@ bool __near load_s3m_load_ins_headers (LOADER_S3M *self)
     _set_instruments_info (_Self, __new (sizeof (_S3M_INSINFO) * _get_instruments_count (_Self)));
     if (!_get_instruments_info (_Self))
     {
-        ERROR (self, "load_s3m_load_ins_headers", "Failed to allocate memory for %s.", "instruments headers");
+        ERROR (self, "Failed to allocate memory for %s.", "instruments headers");
         return false;
     }
 
@@ -928,14 +904,14 @@ bool __near load_s3m_load_ins_headers (LOADER_S3M *self)
     {
         if (fsetpos (_Self->f, _get_instrument_offset (_Self, i)))
         {
-            ERROR (self, "load_s3m_load_ins_headers", "Failed to read %s.", "file");
+            ERROR (self, "Failed to read %s.", "file");
             return false;
         }
 
         info = & (_get_instrument_info (_Self, i));
         if (!fread (& (info->header), sizeof (_S3M_INS), 1, _Self->f))
         {
-            ERROR (self, "load_s3m_load_ins_headers", "Failed to read %s.", "instrument header");
+            ERROR (self, "Failed to read %s.", "instrument header");
             return false;
         }
 
@@ -947,12 +923,12 @@ bool __near load_s3m_load_ins_headers (LOADER_S3M *self)
         case _S3M_INST_PCM:
             if (info->header.data.sample.packinfo)
             {
-                ERROR (self, "load_s3m_load_ins_headers", "%s is not supported.", "Packed sample");
+                ERROR (self, "%s is not supported.", "Packed sample");
                 return false;
             }
             if (info->header.data.sample.flags & _S3M_SMPFL_STEREO)
             {
-                ERROR (self, "load_s3m_load_ins_headers", "%s is not supported.", "Stereo sample");
+                ERROR (self, "%s is not supported.", "Stereo sample");
                 return false;
             }
             info->smp_num = _get_samples_count (_Self);
@@ -964,19 +940,15 @@ bool __near load_s3m_load_ins_headers (LOADER_S3M *self)
         case _S3M_INST_ATOM:
         case _S3M_INST_ACYM:
         case _S3M_INST_AHIHAT:
-            ERROR (self, "load_s3m_load_ins_headers", "%s is not supported.", "Adlib instrument");
+            ERROR (self, "%s is not supported.", "Adlib instrument");
             return false;
         default:
-            ERROR (self, "load_s3m_load_ins_headers", "%s", "Unknown instrument type.");
+            ERROR (self, "%s", "Unknown instrument type.");
             return false;
         }
 
         if (DEBUG_FILE_S3M_LOAD)
-            DEBUG_INFO_ ("load_s3m_load_ins_headers",
-                "index=%hd, sample=%hd",
-                i,
-                info->smp_num
-            );
+            DEBUG_INFO_ ("index=%hd, sample=%hd", i, info->smp_num);
     }
 
     return true;
@@ -1082,13 +1054,13 @@ bool __near load_s3m_load_pat_offsets (LOADER_S3M *self)
     _set_patterns_offsets (_Self, __new (size));
     if (!_get_patterns_offsets (_Self))
     {
-        ERROR (self, "load_s3m_load_pat_offsets", "Failed to allocate memory for %s.", "pattern offsets");
+        ERROR (self, "Failed to allocate memory for %s.", "pattern offsets");
         return false;
     }
 
     if (!fread (_get_patterns_offsets (_Self), size, 1, _Self->f))
     {
-        ERROR (self, "load_s3m_load_pat_offsets", "Failed to read %s.", "patterns offsets");
+        ERROR (self, "Failed to read %s.", "patterns offsets");
         return false;
     }
 
@@ -1121,8 +1093,7 @@ void __near load_s3m_alloc_EM_patterns_pages (LOADER_S3M *self)
         _Self->pat_EM_pages = freepages;
 
     if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_INFO_ ("load_s3m_alloc_EM_patterns_pages",
-            "Memory info:" CRLF
+        DEBUG_INFO_ ("Memory info:" CRLF
             "All patterns size:       %5lu KiB (%u patterns, each %u bytes size)" CRLF
             "All patterns size in EM: %5lu KiB (%u patterns, %u pages, %u per page)" CRLF
             "Free EM:                 %5lu KiB (%u patterns, %u pages)" CRLF
@@ -1136,7 +1107,7 @@ void __near load_s3m_alloc_EM_patterns_pages (LOADER_S3M *self)
     handle = emsAlloc (_Self->pat_EM_pages);
     if (emsEC != E_EMS_SUCCESS)
     {
-        ERROR (self, "load_s3m_alloc_EM_patterns_pages", "Failed to allocate EM for %s.", "patterns");
+        ERROR (self, "Failed to allocate EM for %s.", "patterns");
         muspatl_set_EM_data (patterns, false);
         return;
     }
@@ -1363,7 +1334,7 @@ bool __near load_s3m_convert_pattern (LOADER_S3M *self, uint8_t *src, uint16_t s
 
     if (!muspatio_open (&f, pattern, MUSPATIOMD_WRITE))
     {
-        ERROR (self, "load_s3m_convert_pattern", "Failed to open pattern for writing (%s).", f.error);
+        ERROR (self, "Failed to open pattern for writing (%s).", f.error);
         return false;
     }
 
@@ -1488,7 +1459,7 @@ bool __near load_s3m_convert_pattern (LOADER_S3M *self, uint8_t *src, uint16_t s
         }
         else
         {
-            ERROR (self, "load_s3m_convert_pattern", "Failed to read pattern (%s).", fi.error);
+            ERROR (self, "Failed to read pattern (%s).", fi.error);
             muspatio_close (&f);
             _s3m_patio_close (&fi);
             return false;
@@ -1517,11 +1488,7 @@ bool __near load_s3m_load_pattern (LOADER_S3M *self, uint8_t index)
     pos = _get_pattern_offset (_Self, index);
 
     if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_MSG_ ("load_s3m_load_pattern",
-            "pattern_index=%u, file_offset=0x%08lX",
-            index,
-            (uint32_t) pos
-        );
+        DEBUG_MSG_ ("pattern_index=%u, file_offset=0x%08lX", index, (uint32_t) pos);
 
     if (!pos)
     {
@@ -1534,39 +1501,33 @@ bool __near load_s3m_load_pattern (LOADER_S3M *self, uint8_t index)
 
     if (fsetpos (_Self->f, pos))
     {
-        ERROR (self, "load_s3m_load_pattern", "Failed to read %s.", "file");
+        ERROR (self, "Failed to read %s.", "file");
         return false;
     }
 
     if (!fread (&in_size, 2, 1, _Self->f))
     {
-        ERROR (self, "load_s3m_load_pattern", "Failed to read %s.", "pattern");
+        ERROR (self, "Failed to read %s.", "pattern");
         return false;
     }
 
     if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_MSG_ ("load_s3m_load_pattern",
-            "file_size=0x%04X",
-            in_size
-        );
+        DEBUG_MSG_ ("file_size=0x%04X", in_size);
 
     if ((in_size <= 2) || (in_size > _S3M_IN_PATTERN_SIZE_MAX))
     {
-        ERROR (self, "load_s3m_load_pattern", "%s", "Bad pattern size.");
+        ERROR (self, "%s", "Bad pattern size.");
         return false;
     }
 
     in_size -= 2;
 
     if (DEBUG_FILE_S3M_LOAD)
-        DEBUG_MSG_ ("load_s3m_load_pattern",
-            "load_size=0x%04X",
-            in_size
-        );
+        DEBUG_MSG_ ("load_size=0x%04X", in_size);
 
     if (!fread (_Self->in_buf, in_size, 1, _Self->f))
     {
-        ERROR (self, "load_s3m_load_pattern", "Failed to read %s.", "pattern");
+        ERROR (self, "Failed to read %s.", "pattern");
         return false;
     }
 
@@ -1620,7 +1581,7 @@ bool __near load_s3m_load_pattern (LOADER_S3M *self, uint8_t index)
         data = muspat_map_EM_data (pat);
         if (!data)
         {
-            ERROR (self, "load_s3m_load_pattern", "Failed to map EM for %s.", "pattern");
+            ERROR (self, "Failed to map EM for %s.", "pattern");
             return false;
         }
         _Self->pat_EM_page_offset += em_size;   // calculate next available offset
@@ -1630,7 +1591,7 @@ bool __near load_s3m_load_pattern (LOADER_S3M *self, uint8_t index)
         data = __new (mem_size);
         if (!data)
         {
-            ERROR (self, "load_s3m_load_pattern", "Failed to allocate memory for %s.", "pattern");
+            ERROR (self, "Failed to allocate memory for %s.", "pattern");
             return false;
         }
         muspat_set_EM_data (pat, false);
@@ -1686,11 +1647,7 @@ void __near load_s3m_free_unused_patterns_pages (LOADER_S3M *self)
             pages++;
         pages_free = _Self->pat_EM_pages - pages;
 
-        DEBUG_INFO_ ("load_s3m_free_unused_patterns_pages",
-            "EM pages: %u used, %u free",
-            pages,
-            pages_free
-        );
+        DEBUG_INFO_ ("EM pages: %u used, %u free", pages, pages_free);
 
         // try to free unused pages
         if (pages_free)
@@ -1699,7 +1656,7 @@ void __near load_s3m_free_unused_patterns_pages (LOADER_S3M *self)
             if (pages)
             {
                 if (!emsResize (handle, pages))
-                    DEBUG_WARN_ ("load_s3m_free_unused_patterns_pages", "Failed to free unused pages for %s.", "patterns");
+                    DEBUG_WARN_ ("Failed to free unused EM pages for %s.", "patterns");
             }
             else
             {
@@ -1709,7 +1666,7 @@ void __near load_s3m_free_unused_patterns_pages (LOADER_S3M *self)
                     muspatl_set_EM_handle (patterns, EMSBADHDL);
                 }
                 else
-                    DEBUG_WARN_ ("load_s3m_free_unused_patterns_pages", "Failed to free unused pages for %s.", "patterns");
+                    DEBUG_WARN_ ("Failed to free unused EM pages for %s.", "patterns");
             }
         }
     }
@@ -1735,13 +1692,13 @@ bool __near load_s3m_load_patterns_order (LOADER_S3M *self)
     buf = __new (size);
     if (!buf)
     {
-        ERROR (self, "load_s3m_load_patterns_order", "Failed to allocate memory for %s.", "patterns order");
+        ERROR (self, "Failed to allocate memory for %s.", "patterns order");
         return false;
     }
 
     if (!fread (buf, size, 1, _Self->f))
     {
-        ERROR (self, "load_s3m_load_patterns_order", "Failed to read %s.", "patterns order");
+        ERROR (self, "Failed to read %s.", "patterns order");
         _delete (buf);
         return false;
     }
@@ -1780,7 +1737,7 @@ bool __near load_s3m_load_patterns_order (LOADER_S3M *self)
 
     if (!found)
     {
-        ERROR (self, "load_s3m_load", "%s", "Playable entry not found.");
+        ERROR (self, "%s", "Playable entry not found.");
         return false;
     }
 
@@ -1801,7 +1758,7 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name, bool use_EM)
 
     if ((!_Self) || (!name))
     {
-        ERROR (self, "load_s3m_load", "%s", "Bad arguments.");
+        ERROR (self, "%s", "Bad arguments.");
         return NULL;
     }
 
@@ -1813,7 +1770,7 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name, bool use_EM)
     track = _new (MUSMOD);
     if (!track)
     {
-        ERROR (self, "load_s3m_load", "Failed to allocate memory for %s.", "music module");
+        ERROR (self, "Failed to allocate memory for %s.", "music module");
         return NULL;
     }
     musmod_init (track);
@@ -1827,7 +1784,7 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name, bool use_EM)
     _Self->f = fopen (name, "rb");
     if (!_Self->f)
     {
-        ERROR (self, "load_s3m_load", "Failed to open file '%s'.", name);
+        ERROR (self, "Failed to open file '%s'.", name);
         return NULL;
     }
 
@@ -1836,19 +1793,19 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name, bool use_EM)
 
     if (!musinsl_set_count (instruments, _get_instruments_count (_Self)))
     {
-        ERROR (self, "load_s3m_load", "Failed to allocate memory for %s.", "instruments list");
+        ERROR (self, "Failed to allocate memory for %s.", "instruments list");
         return NULL;
     }
 
     if (!muspatl_set_count (patterns, _get_patterns_count (_Self)))
     {
-        ERROR (self, "load_s3m_load", "Failed to allocate memory for %s.", "patterns list");
+        ERROR (self, "Failed to allocate memory for %s.", "patterns list");
         return NULL;
     }
 
     if (!muspatorder_set_count (order, _get_order_length (_Self)))
     {
-        ERROR (self, "load_s3m_load", "Failed to allocate memory for %s.", "patterns order");
+        ERROR (self, "Failed to allocate memory for %s.", "patterns order");
         return NULL;
     }
 
@@ -1864,14 +1821,14 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name, bool use_EM)
     _Self->in_buf = __new (_S3M_IN_PATTERN_SIZE_MAX);
     if (!_Self->in_buf)
     {
-        ERROR (self, "load_s3m_load", "Failed to allocate memory for %s.", "input pattern buffer");
+        ERROR (self, "Failed to allocate memory for %s.", "input pattern buffer");
         return NULL;
     }
 
     _Self->pat_buf = __new (_S3M_OUT_PATTERN_SIZE_MAX);
     if (!_Self->pat_buf)
     {
-        ERROR (self, "load_s3m_load", "Failed to allocate memory for %s.", "output pattern buffer");
+        ERROR (self, "Failed to allocate memory for %s.", "output pattern buffer");
         return NULL;
     }
 
@@ -1889,7 +1846,7 @@ MUSMOD *load_s3m_load (LOADER_S3M *self, const char *name, bool use_EM)
 
     if (!pcmsmpl_set_count (samples, _get_samples_count (_Self)))
     {
-        ERROR (self, "load_s3m_load", "Failed to allocate memory for %s.", "samples list");
+        ERROR (self, "Failed to allocate memory for %s.", "samples list");
         return NULL;
     }
 

@@ -18,6 +18,8 @@
 #include "startup.h"
 #include "cc/errno.h"
 
+/* _cc_psp is defined in startup.h */
+
 extern char **cc_environ;
 
 #define CC_ATEXIT_MAX _CC_ATEXIT_MAX
@@ -43,9 +45,6 @@ int16_t cc_setenv(const char *name, const char *value, int16_t overwrite);
 bool environ_init(void);
 
 /*** Aliases ***/
-
-/* cc_PrefixSeg is defined in startup.h */
-#define _psp cc_PrefixSeg
 
 #define ATEXIT_MAX CC_ATEXIT_MAX
 

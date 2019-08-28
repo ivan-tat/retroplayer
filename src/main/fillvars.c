@@ -38,7 +38,7 @@ void __far snddmabuf_init (SNDDMABUF *self)
 
 bool __far snddmabuf_alloc (SNDDMABUF *self, uint32_t dmaSize)
 {
-    DEBUG_BEGIN("snddmabuf_alloc");
+    DEBUG_BEGIN ();
 
     if (self)
     {
@@ -47,7 +47,7 @@ bool __far snddmabuf_alloc (SNDDMABUF *self, uint32_t dmaSize)
 
         if (!self->buf)
         {
-            DEBUG_FAIL("snddmabuf_alloc", "Failed to initialize DMA buffer object.");
+            DEBUG_ERR ("Failed to initialize DMA buffer object.");
             return false;
         }
 
@@ -55,18 +55,18 @@ bool __far snddmabuf_alloc (SNDDMABUF *self, uint32_t dmaSize)
 
         if (dmaBuf_alloc(self->buf, dmaSize))
         {
-            DEBUG_SUCCESS("snddmabuf_alloc");
+            DEBUG_SUCCESS ();
             return true;
         }
         else
         {
-            DEBUG_FAIL("snddmabuf_alloc", "Failed to allocate DMA buffer.");
+            DEBUG_ERR ("Failed to allocate DMA buffer.");
             return false;
         }
     }
     else
     {
-        DEBUG_FAIL("snddmabuf_alloc", "Self is NULL.");
+        DEBUG_ERR ("Self is NULL.");
         return false;
     }
 }

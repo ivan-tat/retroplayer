@@ -224,7 +224,7 @@ void __far playosci_main (void)
 
     drawseg = 0xa000;
 
-    custom_argv (opt_filename, pascal_String_size, 1);
+    strncpy (opt_filename, _argv[1], pascal_String_size);
 
     if (!strlen(opt_filename))
     {
@@ -314,16 +314,16 @@ void __far playosci_main (void)
 
 void __near playosci_init (void)
 {
-    DEBUG_BEGIN ("playosci_init");
+    DEBUG_BEGIN ();
 
     mp = NULL;
 
-    DEBUG_END ("playosci_init");
+    DEBUG_END ();
 }
 
 void __near playosci_done (void)
 {
-    DEBUG_BEGIN ("playosci_done");
+    DEBUG_BEGIN ();
 
     if (mp)
     {
@@ -331,7 +331,7 @@ void __near playosci_done (void)
         player_delete (&mp);
     }
 
-    DEBUG_END ("playosci_done");
+    DEBUG_END ();
 }
 
 DEFINE_REGISTRATION (playosci, playosci_init, playosci_done)

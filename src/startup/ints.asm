@@ -5,6 +5,8 @@
 
 .model large
 
+include "startup.def"
+
 _DATA segment word public use16 'DATA'
 _DATA ends
 
@@ -13,7 +15,6 @@ DGROUP group _DATA
 INTS_TEXT segment word public use16 'CODE'
 assume cs:INTS_TEXT,ds:DGROUP
 
-extrn _cc_local_int0: far
 public _cc_local_int0_asm
 ; Stack:
 ;   SP+0:   IP, CS, FLAGS - to get back to application via IRET
@@ -22,7 +23,6 @@ _cc_local_int0_asm:
     mov     ds,ax
     call    far ptr _cc_local_int0
 
-extrn _cc_local_int23: far
 public _cc_local_int23_asm
 ; To abort application raise carry flag and perform a far return via "RETF".
 ; Stack:

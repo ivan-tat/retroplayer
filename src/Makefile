@@ -13,6 +13,9 @@ error_not_known_params = $(error This function is not implemented for selected p
 info_done = @echo Done.
 
 DEFS :=
+ifeq "$(SYSDEBUG)" "1"
+DEFS += SYSDEBUG=1
+endif
 ifeq "$(DEBUG)" "1"
 DEFS += DEBUG=1
 endif
@@ -46,7 +49,16 @@ DEPCC_DOS       := $(DEPCC)
 DEPCFLAGS_DOS   := $(DEPCFLAGS)
 ASMTMPEXT_DOS   := as_
 AS_DOS          := wasm
-AFLAGS_DOS      := -zld -zq -i=$(INCLUDE_DIRS)
+ifeq "$(DEBUG)" "1"
+ifeq "$(LINKER_TPC)" "1"
+ADEBUG_DOS      :=
+else
+ADEBUG_DOS      := -d1
+endif
+else
+ADEBUG_DOS      :=
+endif
+AFLAGS_DOS      := $(ADEBUG_DOS) -zld -zq -i=$(INCLUDE_DIRS)
 DA_DOS          := wdis
 DFLAGS_DOS      := -a
 #CC              := gcc
@@ -65,22 +77,48 @@ ifeq "$(CC_DOS)" "gcc"
 ifneq "$(DEFS)" ""
 CDEFS_DOS       := $(patsubst %,-D %,$(DEFS))
 endif
-CFLAGS_DOS      := $(CDEFS_DOS) -I $(INCLUDE_DIRS)
+ifeq "$(DEBUG)" "1"
+CDEBUG_DOS      := -g
+else
+CDEBUG_DOS      :=
+endif
+CFLAGS_DOS      := $(CDEFS_DOS) $(CDEBUG_DOS) -I $(INCLUDE_DIRS)
 else ifeq "$(CC_DOS)" "wcc"
 ifneq "$(DEFS)" ""
 CDEFS_DOS       := $(patsubst %,-d%,$(DEFS))
 endif
-CFLAGS_DOS      := $(CDEFS_DOS) -3 -fp3 -ml -oi -oc -os -q -r -s -zdp -zff -zgf -zl -zld -zls -zp=1 -zq -zu -i=$(INCLUDE_DIRS)
+ifeq "$(DEBUG)" "1"
+ifeq "$(LINKER_TPC)" "1"
+CDEBUG_DOS      :=
+else
+CDEBUG_DOS      := -d3 -hw
+endif
+else
+CDEBUG_DOS      :=
+endif
+CFLAGS_DOS      := $(CDEFS_DOS) $(CDEBUG_DOS) -3 -fp3 -ml -oi -oc -os -q -r -s -we -zdp -zff -zgf -zl -zld -zls -zp=1 -zq -zu -i=$(INCLUDE_DIRS)
 else
 $(error_not_known_params)
 endif
 WLIB            := wlib
 WLIBFLAGS       := -q
 CLIB_WATCOM     := $(WATCOM)/lib286/dos/clibl.lib
+AR              := wlib
+ARFLAGS         := -q -t -zld
+LD              := wlink
+LFLAGS          := option quiet
+ifeq "$(DEBUG)" "1"
+ifeq "$(LINKER_TPC)" "1"
+else
+LFLAGS          += debug Watcom All
+endif
+endif
 
 # Description of options for "wasm":
 # -zld      suppress file dependency info in object file
 # -zq       operate quietly
+# DEBUG:
+# -d1       line number debugging support
 
 # Description of options for "owcc":
 # -E        preprocess source file
@@ -90,11 +128,11 @@ CLIB_WATCOM     := $(WATCOM)/lib286/dos/clibl.lib
 
 # Description of options for "wcc":
 # -3        386 instructions
-# -fp3      generate floating-point code (80387 FPU code)
-# -ml       memory model (large - large code/large data)
 # -ecc      set default calling convention to __cdecl
 # -ecp      set default calling convention to __pascal
 # -ecw      set default calling convention to __watcall (default)
+# -fp3      generate floating-point code (80387 FPU code)
+# -ml       memory model (large - large code/large data)
 # -oc       disable <call followed by return> to <jump> optimization
 #           reason: "wdis" incorrectly writes "je near ptr <near_extern_label>"
 #           (without "near ptr")
@@ -103,6 +141,7 @@ CLIB_WATCOM     := $(WATCOM)/lib286/dos/clibl.lib
 # -q        operate quietly (display only error messages)
 # -r        save/restore segment registers across calls
 # -s        remove stack overflow checks
+# -we       treat all warnings as errors
 # -zdp      DS is pegged to DGROUP
 # -zff      FS floats (i.e. not fixed to a segment)
 # -zgf      GS floats (i.e. not fixed to a segment)
@@ -112,6 +151,12 @@ CLIB_WATCOM     := $(WATCOM)/lib286/dos/clibl.lib
 # -zp=1     pack structure members with alignment (1)
 # -zu       SS != DGROUP (i.e., do not assume stack is in data segment)
 # -i=<dir>  include directory
+# DEBUG:
+# -d2       symbolic information
+# -db       generate browsing information
+# -hc       generate Codeview debugging information
+# -hd       generate DWARF debugging information
+# -hw       generate Watcom debugging information
 
 # Description of options for "wcl386":
 # -3r       386 register calling conventions
@@ -124,18 +169,24 @@ CLIB_WATCOM     := $(WATCOM)/lib286/dos/clibl.lib
 
 # Description of options for "wlib":
 # -q        don't print header
+# -t        trim THEADR pathnames
+# -zld      strip file dependency info
 
 ## Naming template:
 ## <name>_DIR(S) - local directory(s)
 ## <name>_INCS - source files to be included in other source files
 ## <name>_SRCS - source files
-## <name>_OBJS - object files and binary executable files
+## <name>_OBJS - object files files
+## <name>_LIBS - library files
+## <name>_EXES - executable files
 ## <name>_DEPS - dependency files
 ## <name>_TMPS - temporary files
 
 INCS =
 SRCS =
 OBJS =
+LIBS =
+EXES =
 DEPS =
 TMPS =
 
@@ -149,6 +200,7 @@ empty:
 	echo '    option: in the form "name=value"'; \
 	echo '    target: "autogenfiles" | "all" | "clean"'; \
 	echo 'Supported options:'; \
+	echo '    SYSDEBUG=1'; \
 	echo '    DEBUG=1'; \
 	echo '    LINKER_TPC=1'
 
@@ -306,6 +358,8 @@ endif
 %.o: %.asm
 	$(make_asm_obj)
 
+ifeq "$(LINKER_TPC)" "1"
+
 ## Turbo Pascal linking:
 
 %.$(ASMTMPEXT_DOS): %.o
@@ -316,24 +370,64 @@ else
 $(error_not_known_params)
 endif
 
+else
+
+## Watcom linking:
+
+%.$(ASMTMPEXT_DOS): %.o
+ifeq "$(DA_DOS)" "wdis"
+	set -e; $(RM) $*.$(ASMTMPEXT_DOS); \
+	$(DA_DOS) $(DFLAGS_DOS) $< | sed -r -e 's/([[:space:]]|,|:|-|\+|\()(0[a-f]{1}[[:xdigit:]]{0,7}|[1-9]{1}[[:xdigit:]]{0,7})([[:xdigit:]]{8}H)/\10\3/g' > $*.$(ASMTMPEXT_DOS)
+else
+$(error_not_known_params)
+endif
+
+endif
+
 %.obj: %.asm
 	$(make_asm_obj)
 
+ifeq "$(LINKER_TPC)" "1"
+
+## Turbo Pascal linking:
+
 %.obj: %.$(ASMTMPEXT_DOS)
 	$(make_asm_obj)
+
+else
+
+## Watcom linking:
+
+%.obj: %.o
+	cp $< $@
+
+endif
 
 ##=----------------------------=##
 ## Open Watcom C specific files ##
 ##=----------------------------=##
 
 ow_OBJS := \
- i4d.obj \
- i4m.obj \
- i8d086.obj
+ i4d.o \
+ i4m.o \
+ i8d086.o
 
 ## Build rules
 $(ow_OBJS): $(CLIB_WATCOM)
-	$(WLIB) $< ':$(patsubst %.obj,%.asm,$@)' && mv $(patsubst %.obj,%.o,$@) $@
+	$(WLIB) $(WLIBFLAGS) $< ':$(patsubst %.o,%.asm,$@)'
+
+## Turbo Pascal target files:
+ow_OBJS_TP := $(ow_OBJS:.o=.obj)
+
+## Build rules
+i4d.obj: i4d.o
+	cp $< $@
+i4m.obj: i4m.o
+	cp $< $@
+i8d086.obj: i8d086.o
+	cp $< $@
+
+ow_OBJS += $(ow_OBJS_TP)
 
 OBJS += $(ow_OBJS)
 
@@ -364,6 +458,20 @@ SRCS += $(cc_SRCS)
 OBJS += $(cc_OBJS)
 DEPS += $(cc_DEPS)
 TMPS += $(cc_TMPS)
+
+##=----------------=##
+## Custom C library ##
+##=----------------=##
+
+cclib_DIR := $(cc_DIR)
+
+CCLIB := $(cclib_DIR)/cc.lib
+
+LIBS += $(CCLIB)
+
+$(CCLIB): $(cc_OBJS_TP)
+	$(RM) $@; \
+	$(AR) $(ARFLAGS) -o $@ $(patsubst %,+%,$(cc_OBJS_TP))
 
 ##=------------=##
 ## Common files ##
@@ -404,6 +512,50 @@ OBJS += $(common_OBJS)
 DEPS += $(common_DEPS)
 TMPS += $(common_TMPS)
 
+##=------------------=##
+## Binary executables ##
+##=------------------=##
+
+## All tests
+
+tests_DIRS := tests
+tests_SRCS := $(wildcard $(patsubst %,%/*.c,$(tests_DIRS)))
+tests_OBJS := $(patsubst %.c,%.o,$(filter %.c,$(tests_SRCS)))
+tests_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(tests_SRCS)))
+tests_DEPS := $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(tests_SRCS)))
+tests_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(tests_SRCS)))
+
+SRCS += $(tests_SRCS)
+OBJS += $(tests_OBJS)
+ifeq "$(LINKER_TPC)" "1"
+else
+EXES += $(tests_EXES)
+endif
+DEPS += $(tests_DEPS)
+TMPS += $(tests_TMPS)
+
+## Common objects for all tests
+
+tests_common_OBJS := \
+ startup/dosexe16.o \
+ i4d.o \
+ i4m.o \
+ i8d086.o \
+ commdbg.o \
+ sysdbg.o \
+ startup.o \
+ startup/ints.o \
+ hw/cpu.o
+
+## test.exe
+
+test_exe_SRCS := $(filter %/test.c,$(tests_SRCS))
+test_exe_OBJS := $(patsubst %.c,%.o,$(filter %.c,$(test_exe_SRCS)))
+test_exe_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(test_exe_SRCS)))
+
+$(test_exe_EXES): $(CCLIB)
+	$(LD) $(LFLAGS) library $< $(patsubst %,file %,$(tests_common_OBJS)) $(patsubst %,file %,$(test_exe_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,map,fullheader name $@
+
 ##=------------------------------=##
 ## Include dependency information ##
 ##=------------------------------=##
@@ -417,12 +569,12 @@ endif
 ##=-------=##
 
 .PHONY: all
-all: autogenfiles $(INCS) $(OBJS)
+all: autogenfiles $(INCS) $(OBJS) $(LIBS) $(EXES)
 	$(info_done)
 
 .PHONY: clean
 clean:
 	$(remove_deps)
-	$(RM) $(INCS) $(OBJS) $(TMPS)
+	$(RM) $(INCS) $(OBJS) $(LIBS) $(EXES) $(TMPS)
 	find . -type f \( -name '*.err' -o -name '*.exe' -o -name '*.map' -o -name '*.tpu' \) -delete
 	$(info_done)

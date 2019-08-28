@@ -242,8 +242,8 @@ bool environ_init(void)
 {
     cc_atexit(&environ_done);
 
-    cc_PrefixSeg = _dos_getmasterpsp();
-    _psp_get_dosenv(cc_PrefixSeg, &_dos_env);
+    _cc_psp = _dos_getmasterpsp ();
+    _psp_get_dosenv (_cc_psp, &_dos_env);
 
     return cc_environ_init();
 }

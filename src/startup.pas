@@ -16,7 +16,9 @@ interface
 (*$ifdef DEFINE_LOCAL_DATA*)
 
 var
-    cc_PrefixSeg: Word;     (* absolute System.PrefixSeg; *)
+    _cc_psp: Word;          (* absolute System.PrefixSeg; *)
+    _cc_argc: Word;
+    _cc_argv: Pointer;
     cc_ErrorAddr: Pointer;  (* absolute System.ErrorAddr; *)
     cc_ExitProc: Pointer       absolute System.ExitProc;
     cc_ExitCode: Integer;   (* absolute System.ExitCode; *)
@@ -40,8 +42,6 @@ function  pascal_paramcount: Word;
 procedure pascal_paramstr(var dest: String; i: Byte);
 procedure pascal_Halt(status: Integer);
 
-procedure custom_argc;
-procedure custom_argv;
 (*procedure _cc_on_exit;*)
 procedure _cc_startup;
 procedure _cc_ExitWithError;
@@ -54,6 +54,8 @@ uses
     pascal,
     cpu,
     string_,
+    stdio,
+    sysdbg,
     dos_;
 
 function pascal_paramcount: Word;
@@ -80,8 +82,6 @@ procedure _cc_local_int23_asm; external;
 
 procedure _cc_local_int0; external;
 procedure _cc_local_int23; external;
-procedure custom_argc; external;
-procedure custom_argv; external;
 (*procedure _cc_on_exit; external;*)
 procedure _cc_startup; external;
 procedure _cc_ExitWithError; external;

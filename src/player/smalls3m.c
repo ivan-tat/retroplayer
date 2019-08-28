@@ -112,17 +112,17 @@ smalls3m_main (void)
         PLAYER_VERSION
     );
 
-    if (custom_argc () != 2)
+    if (_argc != 2)
     {
         show_usage ();
         exit (0);
     }
 
-    custom_argv (s, pascal_String_size, 1);
+    strncpy (s, _argv [1], pascal_String_size);
 
     if (strlen (s) == 0)
     {
-        DEBUG_FAIL ("smalls3m_main", "No filename specified.");
+        DEBUG_ERR ("No filename specified.");
         show_usage ();
         exit (1);
     }
@@ -192,16 +192,16 @@ smalls3m_main (void)
 
 void __near smalls3m_init(void)
 {
-    DEBUG_BEGIN("smalls3m_init");
+    DEBUG_BEGIN ();
 
     mp = NULL;
 
-    DEBUG_END("smalls3m_init");
+    DEBUG_END ();
 }
 
 void __near smalls3m_done(void)
 {
-    DEBUG_BEGIN("smalls3m_done");
+    DEBUG_BEGIN ();
 
     if (mp)
     {
@@ -209,7 +209,7 @@ void __near smalls3m_done(void)
         player_delete (&mp);
     }
 
-    DEBUG_END("smalls3m_done");
+    DEBUG_END ();
 }
 
 DEFINE_REGISTRATION (smalls3m, smalls3m_init, smalls3m_done)

@@ -63,7 +63,9 @@ typedef struct _cc_iobuf_t {
 
 /* Global variables */
 
-extern uint16_t     cc_PrefixSeg;
+extern uint16_t     _cc_psp;
+extern uint16_t     _cc_argc;
+extern const char **_cc_argv;
 extern void __far  *cc_ErrorAddr;
 extern void *(__far cc_ExitProc);
 extern int16_t      cc_ExitCode;
@@ -79,20 +81,16 @@ extern uint8_t _cc_ExitCount;
 
 //void _cc_on_exit(void);   // internal
 
-// No return.
-void _cc_ExitWithError(int16_t status, void __far *addr);
-// No return.
-void _cc_Exit(int16_t status);
+void __noreturn _cc_ExitWithError (int16_t status, void __far *addr);
+void __noreturn _cc_Exit (int16_t status);
 
 /* Arguments handling */
 
+#if LINKER_TPC == 1
 extern uint16_t __far __pascal pascal_paramcount(void);
 extern void     __far __pascal pascal_paramstr(char *dest, uint8_t i);
-//extern void __declspec(noreturn) __far __pascal pascal_Halt(uint16_t status);
-extern void     __far __pascal pascal_Halt(uint16_t status);
-
-uint16_t custom_argc(void);
-void     custom_argv(char *dest, uint16_t n, uint8_t i);
+extern void     __noreturn __far __pascal pascal_Halt (uint16_t status);
+#endif
 
 /* System unit */
 
@@ -107,15 +105,26 @@ inoutres_t __far  FileWriteChar (_cc_iobuf *f, char _c, uint16_t _n);       /* +
 int32_t    __far  FileReadNumber (_cc_iobuf *f);                            /* -InOutRes+ */
 inoutres_t __far  FileWriteNumber (_cc_iobuf *f, uint32_t value, int n);    /* +InOutRes+ */
 
+void __noreturn __far __stdcall _cc_local_int0 (void __far *addr, uint16_t flags);
+void __noreturn __far __stdcall _cc_local_int23 (void __far *addr, uint16_t flags);
+
 /* Application startup */
 
 void _cc_startup(void);
+
+/*** Aliases ***/
+
+#define _psp _cc_psp
+#define _argc _cc_argc
+#define _argv _cc_argv
 
 /*** Linking ***/
 
 #ifdef __WATCOMC__
 
-#pragma aux cc_PrefixSeg "*";
+#pragma aux _cc_psp "*";
+#pragma aux _cc_argc "*";
+#pragma aux _cc_argv "*";
 #pragma aux cc_ErrorAddr "*";
 #pragma aux cc_ExitProc "*";
 #pragma aux cc_ExitCode "*";
@@ -130,12 +139,11 @@ void _cc_startup(void);
 #pragma aux _cc_ExitWithError "*";
 #pragma aux _cc_Exit "*";
 
+#if LINKER_TPC == 1
 #pragma aux pascal_paramcount "*" modify [    bx cx dx si di es ];
 #pragma aux pascal_paramstr   "*" modify [ ax bx cx dx si di es ];
 #pragma aux pascal_Halt       "*";
-
-#pragma aux custom_argc "*";
-#pragma aux custom_argv "*";
+#endif  /* LINKER_TPC == 1 */
 
 #pragma aux FileWriteString "*";
 #pragma aux FileWriteNewLine "*";
@@ -145,6 +153,9 @@ void _cc_startup(void);
 #pragma aux FileWriteChar "*";
 #pragma aux FileReadNumber "*";
 #pragma aux FileWriteNumber "*";
+
+#pragma aux _cc_local_int0 "*";
+#pragma aux _cc_local_int23 "*";
 
 #pragma aux _cc_startup "*";
 

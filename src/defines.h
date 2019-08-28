@@ -8,6 +8,11 @@
 #define __attribute__(x)
 #endif
 
+#if SYSDEBUG != 1
+# undef  SYSDEBUG
+# define SYSDEBUG 0
+#endif
+
 #undef DEBUG_WRITE_LOG
 #undef DEBUG_FILE_S3M_LOAD
 #undef DEBUG_WRITE_OUTPUT_STREAM
@@ -33,5 +38,15 @@
 
 #define CRLF "\r\n"
 //#define CRLF "\n"
+
+#ifdef __WATCOMC__
+# ifndef __noreturn
+#  define __noreturn __declspec (noreturn)
+# endif
+#else
+# ifndef __noreturn
+#  define __noreturn
+# endif
+#endif
 
 #endif  /* DEFINES_H */

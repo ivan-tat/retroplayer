@@ -262,12 +262,12 @@ HWOWNER *hwowner_register(const char *name)
         hwowner_init(owner, name);
         if (_list_add_item(&_hwowners_list, owner))
         {
-            DEBUG_INFO_("hwowner_register", "Registered HW owner \"%s\" with id=0x%04X.", name, owner->id);
+            DEBUG_INFO_ ("Registered HW owner \"%s\" with id=0x%04X.", name, owner->id);
             return owner;
         }
     }
 
-    DEBUG_FAIL("hwowner_register", "Failed to register HW owner.");
+    DEBUG_ERR ("Failed to register HW owner.");
     return NULL;
 }
 
@@ -302,7 +302,7 @@ void hwowner_unregister(HWOWNER *owner)
         name = OWNER->name;
         _list_remove_item(&_hwowners_list, owner);
         _delete(owner);
-        DEBUG_INFO_("hwowner_unregister", "Unregistered HW owner \"%s\" with id=0x%04X.", name, id);
+        DEBUG_INFO_ ("Unregistered HW owner \"%s\" with id=0x%04X.", name, id);
     }
 }
 

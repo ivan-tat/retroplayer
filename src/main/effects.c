@@ -1567,9 +1567,9 @@ METHOD_INIT(special_setVibWave)
     // FIXME: random wave is not a table but a call to a random()
     param &= 3;
     if (param == 3)
-        chn->wVibTab = wavetab[0];
+        chn->wVibTab = (uint16_t) wavetab[0];
     else
-        chn->wVibTab = wavetab[param];
+        chn->wVibTab = (uint16_t) wavetab[param];
     return true;
 }
 
@@ -1578,9 +1578,9 @@ METHOD_INIT(special_setTremWave)
     // FIXME: random wave is not a table but a call to a random()
     param &= 3;
     if (param == 3)
-        chn->wTrmTab = wavetab[0];
+        chn->wTrmTab = (uint16_t) wavetab[0];
     else
-        chn->wTrmTab = wavetab[param];
+        chn->wTrmTab = (uint16_t) wavetab[param];
     return true;
 }
 

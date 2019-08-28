@@ -218,12 +218,12 @@ SCRWIN *__near __window_create (bool (*__far init) (SCRWIN *self))
     w = _new (SCRWIN);
     if (!w)
     {
-        DEBUG_ERR_ ("__window_create", "Failed to allocate memory for %s.", "information window");
+        DEBUG_ERR_ ("Failed to allocate %s.", "information window");
         return false;
     }
     if (!init (w))
     {
-        DEBUG_ERR_ ("__window_create", "Failed to initialize %s.", "information window");
+        DEBUG_ERR_ ("Failed to initialize %s.", "information window");
         return NULL;
     }
     return w;
@@ -245,7 +245,7 @@ void __near winlist_add_item (SCRWIN *win)
 
 bool __near winlist_init (void)
 {
-    DEBUG_BEGIN ("winlist_init");
+    DEBUG_BEGIN ();
 
     memset (winlist_list, 0, sizeof (winlist_list));
     winlist_count = 0;
@@ -292,7 +292,7 @@ bool __near winlist_init (void)
         return false;
     winlist_add_item (win_information);
 
-    DEBUG_SUCCESS ("winlist_init");
+    DEBUG_SUCCESS ();
     return true;
 }
 
@@ -402,7 +402,7 @@ void __near winlist_free (void)
     int i;
     SCRWIN *win;
 
-    DEBUG_BEGIN("winlist_free");
+    DEBUG_BEGIN ();
     for (i = 0; i < winlist_count; i++)
     {
         win = winlist_list[i];
@@ -412,7 +412,7 @@ void __near winlist_free (void)
             _delete (winlist_list[i]);
         }
     }
-    DEBUG_END("winlist_free");
+    DEBUG_END ();
 }
 
 /* channels */
@@ -506,14 +506,15 @@ bool __near _opt_check_value_fps(long v)
     return (v >= 2) && (v <= 200);
 }
 
-void __near _opt_bad_value(char *param)
+void __near _opt_bad_value (const char *param)
 {
     printf("Bad value in parameter \"%s\".", param);
 }
 
-bool __near _opt_parse(char *s)
+bool __near _opt_parse(const char *s)
 {
-    char *param, *endptr;
+    const char *param;
+    char *endptr;
     uint8_t b;
     uint16_t w;
     long v;
@@ -521,7 +522,7 @@ bool __near _opt_parse(char *s)
 
     if (s[0] != '-')
     {
-        DEBUG_INFO_("_opt_parse", "opt_filename=\"%s\"", s);
+        DEBUG_INFO_ ("opt_filename=\"%s\"", s);
         strncpy(opt_filename, s, pascal_String_size);
         return true;
     }
@@ -529,28 +530,28 @@ bool __near _opt_parse(char *s)
 
     if (!strcmp(param, "h"))
     {
-        DEBUG_INFO_("_opt_parse", "opt_help=%hu", 1);
+        DEBUG_INFO_ ("opt_help=%hu", 1);
         opt_help = true;
         return true;
     }
 
     if (!strcmp(param, "env"))
     {
-        DEBUG_INFO_("_opt_parse", "opt_devselect=%hu", DEVSEL_ENV);
+        DEBUG_INFO_ ("opt_devselect=%hu", DEVSEL_ENV);
         opt_devselect = DEVSEL_ENV;
         return true;
     }
 
     if (!strcmp(param, "cfg"))
     {
-        DEBUG_INFO_("_opt_parse", "opt_devselect=%hu", DEVSEL_MANUAL);
+        DEBUG_INFO_ ("opt_devselect=%hu", DEVSEL_MANUAL);
         opt_devselect = DEVSEL_MANUAL;
         return true;
     }
 
     if (!strcmp(param, "c"))
     {
-        DEBUG_INFO_("_opt_parse", "opt_dumpconf=%hu", 1);
+        DEBUG_INFO_ ("opt_dumpconf=%hu", 1);
         opt_dumpconf = true;
         return true;
     }
@@ -558,10 +559,10 @@ bool __near _opt_parse(char *s)
     if (*param == 'f')
     {
         errno = 0;
-        v = strtol(param + 1, &endptr, 10);
+        v = strtol (param + 1, &endptr, 10);
         if ((!errno) && _opt_check_value_fps(v))
         {
-            DEBUG_INFO_("_opt_parse", "opt_fps=%hu", (uint8_t)v);
+            DEBUG_INFO_ ("opt_fps=%hu", (uint8_t)v);
             opt_fps = v;
             return true;
         }
@@ -580,7 +581,7 @@ bool __near _opt_parse(char *s)
         {
             if (v < 100)
                 v *= 1000;
-            DEBUG_INFO_("_opt_parse", "opt_mode_rate=%u", (uint16_t)v);
+            DEBUG_INFO_ ("opt_mode_rate=%u", (uint16_t)v);
             opt_mode_rate = v;
             return true;
         }
@@ -593,21 +594,21 @@ bool __near _opt_parse(char *s)
 
     if (!strcmp(param, "m"))
     {
-        DEBUG_INFO_("_opt_parse", "opt_mode_stereo=%hu", 0);
+        DEBUG_INFO_ ("opt_mode_stereo=%hu", 0);
         opt_mode_stereo = false;
         return true;
     }
 
     if (!strcmp(param, "8"))
     {
-        DEBUG_INFO_("_opt_parse", "opt_mode_16bits=%hu", 0);
+        DEBUG_INFO_ ("opt_mode_16bits=%hu", 0);
         opt_mode_16bits = false;
         return true;
     }
 
     if (!strcmp(param, "lq"))
     {
-        DEBUG_INFO_("_opt_parse", "opt_mode_lq=%hu", 1);
+        DEBUG_INFO_ ("opt_mode_lq=%hu", 1);
         opt_mode_lq = true;
         return true;
     }
@@ -618,7 +619,7 @@ bool __near _opt_parse(char *s)
         v = strtol(param + 1, &endptr, 10);
         if ((!errno) && _opt_check_value_mvolume(v))
         {
-            DEBUG_INFO_("_opt_parse", "opt_mvolume=%hu", (uint8_t)v);
+            DEBUG_INFO_ ("opt_mvolume=%hu", (uint8_t)v);
             opt_mvolume = v;
             return true;
         }
@@ -631,7 +632,7 @@ bool __near _opt_parse(char *s)
 
     if (!strcmp(param, "o"))
     {
-        DEBUG_INFO_("_opt_parse", "opt_st3order=%hu", 1);
+        DEBUG_INFO_ ("opt_st3order=%hu", 1);
         opt_st3order = true;
         return true;
     }
@@ -642,7 +643,7 @@ bool __near _opt_parse(char *s)
         v = strtol(param + 1, &endptr, 10);
         if ((!errno) && _opt_check_value_startpos(v))
         {
-            DEBUG_INFO_("_opt_parse", "opt_startpos=%hu", (uint8_t)v);
+            DEBUG_INFO_ ("opt_startpos=%hu", (uint8_t)v);
             opt_startpos = v;
             return true;
         }
@@ -655,7 +656,7 @@ bool __near _opt_parse(char *s)
 
     if (!strcmp(param, "noems"))
     {
-        DEBUG_INFO_("_opt_parse", "opt_em=%hu", 0);
+        DEBUG_INFO_ ("opt_em=%hu", 0);
         opt_em = false;
         return true;
     }
@@ -752,12 +753,10 @@ void __far plays3m_main (void)
     opt_em = true;
     opt_fps = 70;
 
-    count = custom_argc();
-    for (i = 1; i < count; i++)
+    for (i = 1; i < _argc; i++)
     {
-        custom_argv(s, pascal_String_size, i);
-        printf("option=\"%s\"." CRLF, s);
-        if (!_opt_parse(s))
+        printf ("option=\"%s\"." CRLF, _argv [i]);
+        if (!_opt_parse (_argv [i]))
             exit(1);
     }
 
@@ -855,7 +854,7 @@ void __far plays3m_main (void)
 
     if (!winlist_init())
     {
-        DEBUG_FAIL("plays3m_main", "Failed to initialize information windows.");
+        DEBUG_ERR_ ("Failed to initialize %s.", "windows list");
         exit(1);
     }
 
@@ -989,7 +988,7 @@ void __far plays3m_main (void)
     cursor_show();
 
     if (sndbuf->flags & SNDDMABUFFL_SLOW)
-        DEBUG_FAIL ("plays3m_main", "PC is too slow");
+        DEBUG_ERR ("PC is too slow");
 
     player_free (mp);
     player_delete (&mp);
@@ -1005,16 +1004,16 @@ void __far plays3m_main (void)
 
 void __near plays3m_init(void)
 {
-    DEBUG_BEGIN("plays3m_init");
+    DEBUG_BEGIN ();
 
     mp = NULL;
 
-    DEBUG_END("plays3m_init");
+    DEBUG_END ();
 }
 
 void __near plays3m_done(void)
 {
-    DEBUG_BEGIN("plays3m_done");
+    DEBUG_BEGIN ();
 
     winlist_free();
 
@@ -1024,7 +1023,7 @@ void __near plays3m_done(void)
         player_delete (&mp);
     }
 
-    DEBUG_END("plays3m_done");
+    DEBUG_END ();
 }
 
 DEFINE_REGISTRATION (plays3m, plays3m_init, plays3m_done)

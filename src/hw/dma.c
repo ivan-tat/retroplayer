@@ -399,7 +399,7 @@ bool __far dmaBuf_alloc (DMABUF *self, uint32_t size)
             bufSize = dmaSize << 1;
             if (_dos_allocmem(_dos_para(bufSize), &seg))
             {
-                DEBUG_FAIL("dmaBuf_alloc", "Failed to allocate DOS memory.");
+                DEBUG_ERR ("Failed to allocate DOS memory.");
                 return false;
             }
 
@@ -408,8 +408,7 @@ bool __far dmaBuf_alloc (DMABUF *self, uint32_t size)
             bufStart = dma_get_linear_address(self->unaligned);
             bufEnd = bufStart + bufSize - 1;
 
-            DEBUG_MSG_("dmaBuf_alloc",
-                "Allocated %lu bytes of DOS memory for DMA buffer at 0x%05lX-0x%05lX.",
+            DEBUG_MSG_ ("Allocated %lu bytes of DOS memory for DMA buffer at 0x%05lX-0x%05lX.",
                 (uint32_t)bufSize, (uint32_t)bufStart, (uint32_t)bufEnd);
 
             dmaStart = bufStart;
@@ -424,14 +423,12 @@ bool __far dmaBuf_alloc (DMABUF *self, uint32_t size)
             self->size = dmaSize;
             self->data = MK_FP(dmaStart >> 4, 0);
 
-            DEBUG_MSG_("dmaBuf_alloc",
-                "Using %lu bytes for DMA buffer at 0x%05lX-0x%05lX.",
+            DEBUG_MSG_ ("Using %lu bytes for DMA buffer at 0x%05lX-0x%05lX.",
                 (uint32_t)self->size, (uint32_t)dmaStart, (uint32_t)dmaEnd);
 
             if (dmaEnd < bufEnd)
             {
-                DEBUG_MSG_("dmaBuf_alloc",
-                    "Freeing unused trailing %lu bytes of allocated DMA buffer...",
+                DEBUG_MSG_ ("Freeing unused trailing %lu bytes of allocated DMA buffer...",
                     (uint32_t)(bufEnd - dmaEnd));
 
                 bufSize = dmaEnd - bufStart + 1;
@@ -444,13 +441,13 @@ bool __far dmaBuf_alloc (DMABUF *self, uint32_t size)
         }
         else
         {
-            DEBUG_FAIL("dmaBuf_alloc", "Memory is already allocated.");
+            DEBUG_ERR ("Memory is already allocated.");
             return false;
         }
     }
     else
     {
-        DEBUG_FAIL("dmaBuf_alloc", "Self is NULL.");
+        DEBUG_ERR ("Self is NULL.");
         return false;
     }
 }

@@ -40,8 +40,6 @@ static const struct
 
 #define MAX_TAG_LENGTH 64
 
-static const char _hexdigits[16] = "0123456789ABCDEF";
-
 void __far _DEBUG_LOG(const int type, const char *file, int line, const char *method, const char *format, ...)
 {
     va_list ap;
@@ -159,11 +157,6 @@ void __far _DEBUG_END(const char *file, int line, const char *method)
     _DEBUG_LOG(DBGLOG_INFO, file, line, method, "End.");
 }
 
-void __far _DEBUG_FAIL(const char *file, int line, const char *method, const char *msg)
-{
-    _DEBUG_LOG(DBGLOG_ERR, file, line, method, "Return: Failed (%s).", msg);
-}
-
 void __far _DEBUG_SUCCESS(const char *file, int line, const char *method)
 {
     _DEBUG_LOG(DBGLOG_INFO, file, line, method, "Return: Success.");
@@ -177,77 +170,6 @@ void __far _DEBUG_REG(const char *file, const char *method, const char *name)
 void __far _DEBUG_UNREG(const char *file, const char *method, const char *name)
 {
     _DEBUG_LOG(DBGLOG_INFO, file, 0, method, "Unregistering module <%s>...", name);
-}
-
-/*
- * Example:
- *      #define LEN 8
- *      char s [LEN + 1];
- *      _DEBUG_get_xnum (0xBAAD5EED, LEN, s);
- *      // s = "BAAD5EED";
- *
- *  Description:
- *      Destination must be of the size (len + 1) bytes to hold the result.
- */
-void __far _DEBUG_get_xnum (uint32_t value, char len, char *dest)
-{
-    char *c, count;
-
-    c = & (dest [len - 1]);
-    count = len;
-    while (count)
-    {
-        *c = _hexdigits [value & 15];
-        value >>= 4;
-        c--;
-        count--;
-    }
-    dest[len] = 0;
-}
-
-/*
- * Example:
- *      #define MAX 16
- *      char s [MAX * 4 + 1];
- *      _DEBUG_get_xline (_hexdigits, 12, MAX, s);
- *      // s = "30 31 32 33 34 35 36 37 38 39 41 42             0123456789AB";
- *
- *  Description:
- *      Destination must be of the size (max * 4 + 1) bytes to hold the result.
- */
-void __far _DEBUG_get_xline (void *buf, uint8_t size, uint8_t max, char *dest)
-{
-    char *p;
-    int i;
-
-    p = (char *) buf;
-    i = size;
-    while (i)
-    {
-        _DEBUG_get_xnum (*p, 2, dest);
-        dest [2] = ' ';
-        p++;
-        dest += 3;
-        i--;
-    }
-
-    if (max - size)
-    {
-        memset (dest, ' ', (max - size) * 3);
-        dest += (max - size) * 3;
-    }
-
-    p = (char *) buf;
-    i = size;
-    while (i)
-    {
-        *dest = (*p < 32) ? '.' : *p;
-        p++;
-        dest++;
-        i--;
-    }
-
-    *dest = 0;
 }
 
 #define LINE_SIZE 16
@@ -293,11 +215,6 @@ void __far __pascal Debug_Warn (const char *file, const char *method, const char
     _DEBUG_LOG(DBGLOG_WARN, file, 0, method, msg);
 }
 
-void __far __pascal Debug_Err (const char *file, const char *method, const char *msg)
-{
-    _DEBUG_LOG(DBGLOG_ERR, file, 0, method, msg);
-}
-
 void __far __pascal Debug_Begin (const char *file, const char *method)
 {
     _DEBUG_BEGIN(file, 0, method);
@@ -308,14 +225,14 @@ void __far __pascal Debug_End (const char *file, const char *method)
     _DEBUG_END(file, 0, method);
 }
 
-void __far __pascal Debug_Fail (const char *file, const char *method, const char *msg)
-{
-    _DEBUG_FAIL(file, 0, method, msg);
-}
-
 void __far __pascal Debug_Success (const char *file, const char *method)
 {
     _DEBUG_SUCCESS(file, 0, method);
+}
+
+void __far __pascal Debug_Err (const char *file, const char *method, const char *msg)
+{
+    _DEBUG_LOG(DBGLOG_ERR, file, 0, method, msg);
 }
 
 /*** Initialization ***/
@@ -325,12 +242,12 @@ void debug_init (void)
     #if DEBUG_WRITE_LOG == 1
     debuglogfile = fopen ("debug.log", "wb");
     #endif
-    DEBUG_INFO ("debug_init", "Start logging.");
+    DEBUG_INFO ("Start logging.");
 }
 
 void debug_done (void)
 {
-    DEBUG_INFO ("debug_done", "End logging.");
+    DEBUG_INFO ("End logging.");
     #if DEBUG_WRITE_LOG == 1
     if (debuglogfile)
         fclose (debuglogfile);

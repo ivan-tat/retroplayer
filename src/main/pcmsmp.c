@@ -173,9 +173,7 @@ void __far DEBUG_dump_sample_info (PCMSMP *smp, uint8_t index)
             );
         }
         /* hint: s=sample a=available v=volume b=bits r=rate s=size l=loop p=place t=title */
-        DEBUG_INFO_ (
-            "DEBUG_dump_sample_info",
-            "s=%2d, a=%hhu, v=%2hu, b=%hhu, r=%5u, s=%5u, l=%hhu:%5u-%5u, p=%s, t='%s'",
+        DEBUG_INFO_ ("s=%2d, a=%hhu, v=%2hu, b=%hhu, r=%5u, s=%5u, l=%hhu:%5u-%5u, p=%s, t='%s'",
             (uint8_t) index,
             (uint8_t) _pcmsmp_is_available (smp),
             (uint8_t) _pcmsmp_get_volume (smp),

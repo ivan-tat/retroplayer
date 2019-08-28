@@ -278,7 +278,7 @@ void __near player_set_error (MUSPLAYER *self, const char *method, int line, con
     _DEBUG_LOG (DBGLOG_ERR, __FILE__, line, method, "%s", _Self->error);
 }
 
-#define ERROR(m, f, ...) player_set_error (self, m, __LINE__, f, __VA_ARGS__)
+#define ERROR(f, ...) player_set_error (self, __func__, __LINE__, f, __VA_ARGS__)
 
 #else
 
@@ -291,7 +291,7 @@ void __near player_set_error (MUSPLAYER *self, const char *format, ...)
     vsnprintf (_Self->error, _PLAYER_ERROR_LEN, format, ap);
 }
 
-#define ERROR(m, f, ...) player_set_error (self, f, __VA_ARGS__)
+#define ERROR(f, ...) player_set_error (self, f, __VA_ARGS__)
 
 #endif  /* DEBUG */
 
@@ -340,7 +340,7 @@ bool __far player_init (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
 
-    DEBUG_BEGIN ("player_init");
+    DEBUG_BEGIN ();
 
     if (_Self)
     {
@@ -351,7 +351,7 @@ bool __far player_init (MUSPLAYER *self)
         _Self->sndbuf = _new (SNDDMABUF);
         if (!_Self->sndbuf)
         {
-            ERROR ("player_init", "Failed to allocate %s.", "sound buffer object");
+            ERROR ("Failed to allocate %s.", "sound buffer object");
             return false;
         }
         snddmabuf_init (_Self->sndbuf);
@@ -359,7 +359,7 @@ bool __far player_init (MUSPLAYER *self)
         if (!_Self->sndbuf->buf)
             if (!snddmabuf_alloc (_Self->sndbuf, DMA_BUF_SIZE_MAX))
             {
-                ERROR ("player_init", "Failed to initialize %s.", "DMA buffer");
+                ERROR ("Failed to initialize %s.", "DMA buffer");
                 return false;
             }
 
@@ -372,7 +372,7 @@ bool __far player_init (MUSPLAYER *self)
             _Self->EM_map_handle = emsAlloc (1);  // is 1 page enough?
             if (emsEC != E_EMS_SUCCESS)
             {
-                ERROR ("player_init", "%s", "Failed to allocate EM handle for mapping.");
+                ERROR ("Failed to allocate %s.", "EM handle for mapping");
                 return false;
             }
             snprintf (&_Self->EM_map_name, sizeof (EMSNAME), "map%04x", _isr_index);
@@ -386,18 +386,18 @@ bool __far player_init (MUSPLAYER *self)
         {
             if (!voltab_alloc())
             {
-                ERROR ("player_init", "Failed to initialize %s.", "volume table");
+                ERROR ("Failed to initialize %s.", "volume table");
                 return false;
             }
             voltab_calc ();
         }
 
-        DEBUG_SUCCESS ("player_init");
+        DEBUG_SUCCESS ();
         return true;
     }
     else
     {
-        DEBUG_FAIL ("player_init", "Empty object.");
+        DEBUG_ERR ("self is NULL!");
         return false;
     }
 }
@@ -423,7 +423,7 @@ bool __far player_init_device (MUSPLAYER *self, SNDDEVTYPE type, SNDDEVSETMET me
     _MUSPLAYER *_Self = self;
     bool result;
 
-    DEBUG_BEGIN("player_init_device");
+    DEBUG_BEGIN ();
 
     switch (type)
     {
@@ -431,13 +431,13 @@ bool __far player_init_device (MUSPLAYER *self, SNDDEVTYPE type, SNDDEVSETMET me
         _Self->device = sb_new();
         if (!_Self->device)
         {
-            ERROR ("player_init_device", "%s", "Failed to create sound device object.");
+            ERROR ("Failed to create %s.", "sound device object");
             return false;
         }
         sb_init (_Self->device);
         break;
     default:
-        ERROR ("player_init_device", "%s", "Unknown device type.");
+        ERROR ("Unknown %s.", "device type");
         return false;
     }
 
@@ -456,20 +456,20 @@ bool __far player_init_device (MUSPLAYER *self, SNDDEVTYPE type, SNDDEVSETMET me
         result = sb_conf_input (_Self->device);
         break;
     default:
-        ERROR ("player_init_device", "%s", "Unknown method.");
+        ERROR ("Unknown %s.", "method");
         sb_free (_Self->device);
         return false;
     }
 
     if (result)
     {
-        DEBUG_SUCCESS("player_init_device");
+        DEBUG_SUCCESS ();
         _player_set_device_set (_Self, true);
         return true;
     }
     else
     {
-        ERROR ("player_init_device", "%s", "No sound device.");
+        ERROR ("%s", "No sound device.");
         sb_free (_Self->device);
         return false;
     }
@@ -511,7 +511,7 @@ bool __far player_set_mode (MUSPLAYER *self, bool f_16bits, bool f_stereo, uint1
 {
     _MUSPLAYER *_Self = self;
 
-    DEBUG_BEGIN("player_set_mode");
+    DEBUG_BEGIN ();
 
     if (f_16bits)
     {
@@ -533,7 +533,7 @@ bool __far player_set_mode (MUSPLAYER *self, bool f_16bits, bool f_stereo, uint1
     _Self->mode_lq = LQ;
     _Self->mode_set = true;
 
-    DEBUG_SUCCESS("player_set_mode");
+    DEBUG_SUCCESS ();
     return true;
 }
 
@@ -571,7 +571,7 @@ bool __near _player_setup_outbuf(MUSPLAYER *self, SNDDMABUF *outbuf, uint16_t sp
     uint16_t size;
     uint16_t i, count;
 
-    DEBUG_BEGIN("_player_setup_outbuf");
+    DEBUG_BEGIN ();
 
     if (_Self->mode_set)
     {
@@ -602,12 +602,12 @@ bool __near _player_setup_outbuf(MUSPLAYER *self, SNDDMABUF *outbuf, uint16_t sp
 
         outbuf->framesCount = count / 2;
 
-        DEBUG_SUCCESS("_player_setup_outbuf");
+        DEBUG_SUCCESS ();
         return true;
     }
     else
     {
-        ERROR ("_player_setup_outbuf", "%s", "No play mode was set.");
+        ERROR ("No %s was set.", "play mode");
         return false;
     }
 }
@@ -621,30 +621,30 @@ bool __far player_play_start (MUSPLAYER *self)
     SNDDMABUF *outbuf;
     uint16_t frame_size;
 
-    DEBUG_BEGIN("player_play_start");
+    DEBUG_BEGIN ();
 
     if (!_player_is_device_set (_Self))
     {
-        ERROR ("player_play_start", "No %s was set.", "sound device");
+        ERROR ("No %s was set.", "sound device");
         return false;
     }
 
     if (!_Self->mode_set)
     {
-        ERROR ("player_play_start", "No %s was set.", "play mode");
+        ERROR ("No %s was set.", "play mode");
         return false;
     }
 
     if (!_Self->mixer)
     {
-        ERROR ("player_play_start", "No %s was set.", "mixer");
+        ERROR ("No %s was set.", "mixer");
         return false;
     }
 
     ps = _Self->play_state;
     if (!ps)
     {
-        ERROR ("player_play_start", "No %s was set.", "active track");
+        ERROR ("No %s was set.", "active track");
         return false;
     }
 
@@ -683,7 +683,7 @@ bool __far player_play_start (MUSPLAYER *self)
 
     if (!_player_setup_outbuf (self, outbuf, mixbuf_get_samples_per_channel (_Self->mixbuf)))
     {
-        DEBUG_FAIL("player_play_start", "Failed to setup output buffer.");
+        DEBUG_ERR_ ("Failed to setup %s.", "output buffer");
         return false;
     }
 
@@ -712,11 +712,11 @@ bool __far player_play_start (MUSPLAYER *self)
 
     if (!sb_transfer_start (_Self->device))
     {
-        ERROR ("player_play_start", "%s", "Failed to start transfer.");
+        ERROR ("%s", "Failed to start transfer.");
         return false;
     }
 
-    DEBUG_SUCCESS("player_play_start");
+    DEBUG_SUCCESS ();
     return true;
 }
 
@@ -758,7 +758,7 @@ void __far player_free_device (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
 
-    DEBUG_BEGIN("player_free_device");
+    DEBUG_BEGIN ();
 
     if (_Self->device)
     {
@@ -768,7 +768,7 @@ void __far player_free_device (MUSPLAYER *self)
 
     _player_set_device_set (_Self, false);
 
-    DEBUG_END("player_free_device");
+    DEBUG_END ();
 }
 
 /* Mixer */
@@ -780,11 +780,11 @@ bool __far player_init_mixer (MUSPLAYER *self)
     MIXBUF *_mixbuf;
     uint16_t len;
 
-    DEBUG_BEGIN ("player_init_mixer");
+    DEBUG_BEGIN ();
 
     if (!isCPU_i386 ())
     {
-        ERROR ("player_init_mixer", "%s", "CPU is not supported.");
+        ERROR ("%s is not supported.", "CPU");
         return false;
     }
 
@@ -793,7 +793,7 @@ bool __far player_init_mixer (MUSPLAYER *self)
         _Self->mixer = _new (MIXER);
         if (!_Self->mixer)
         {
-            ERROR ("player_init_mixer", "Failed to allocate %s.", "sound mixer object");
+            ERROR ("Failed to allocate %s.", "sound mixer object");
             return false;
         }
         mixer_init (_Self->mixer);
@@ -804,7 +804,7 @@ bool __far player_init_mixer (MUSPLAYER *self)
         _Self->smpbuf = _new (SMPBUF);
         if (!_Self->smpbuf)
         {
-            ERROR ("player_init_mixer", "Failed to allocate %s.", "sample buffer object");
+            ERROR ("Failed to allocate %s.", "sample buffer object");
             return false;
         }
         smpbuf_init (_Self->smpbuf);
@@ -816,7 +816,7 @@ bool __far player_init_mixer (MUSPLAYER *self)
         _Self->mixbuf = _new (MIXBUF);
         if (!_Self->mixbuf)
         {
-            ERROR ("player_init_mixer", "Failed to allocate %s.", "mixing buffer object");
+            ERROR ("Failed to allocate %s.", "mixing buffer object");
             return false;
         }
         mixbuf_init (_Self->mixbuf);
@@ -833,7 +833,7 @@ bool __far player_init_mixer (MUSPLAYER *self)
         if (!smpbuf_get (_smpbuf))
             if (!smpbuf_alloc (_smpbuf, len))
             {
-                ERROR ("player_init_mixer", "Failed to initialize %s.", "sample buffer");
+                ERROR ("Failed to initialize %s.", "sample buffer");
                 return false;
             }
 
@@ -841,17 +841,17 @@ bool __far player_init_mixer (MUSPLAYER *self)
         if (!mixbuf_get (_mixbuf))
             if (!mixbuf_alloc (_mixbuf, len))
             {
-                ERROR ("player_init_mixer", "Failed to initialize %s.", "mixing buffer");
+                ERROR ("Failed to initialize %s.", "mixing buffer");
                 return false;
             }
     }
     else
     {
-        ERROR ("player_init_mixer", "No %s was set.", "sound buffer");
+        ERROR ("No %s was set.", "sound buffer");
         return false;
     }
 
-    DEBUG_SUCCESS ("player_init_mixer");
+    DEBUG_SUCCESS ();
     return true;
 }
 
@@ -866,7 +866,7 @@ void __far player_free_mixer (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
 
-    DEBUG_BEGIN ("player_free_mixer");
+    DEBUG_BEGIN ();
 
     if (_Self->mixer)
     {
@@ -886,7 +886,7 @@ void __far player_free_mixer (MUSPLAYER *self)
         _delete (_Self->mixbuf);
     }
 
-    DEBUG_END ("player_free_mixer");
+    DEBUG_END ();
 }
 
 /* Song */
@@ -900,7 +900,7 @@ bool __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track)
     p = load_s3m_new();
     if (!p)
     {
-        ERROR ("player_load_s3m", "Failed to initialize %s.", "S3M loader");
+        ERROR ("Failed to initialize %s.", "S3M loader");
         return false;
     }
     load_s3m_init(p);
@@ -908,7 +908,7 @@ bool __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track)
     track = load_s3m_load (p, name, _player_is_EM_in_use (_Self));
     if ((!track) || (!musmod_is_loaded (track)))
     {
-        ERROR ("player_load_s3m", "Failed to load S3M file (%s).", load_s3m_get_error (p));
+        ERROR ("Failed to load S3M file (%s).", load_s3m_get_error (p));
         // free partially loaded track
         if (track)
             _free_module (track);
@@ -922,14 +922,14 @@ bool __far player_load_s3m (MUSPLAYER *self, char *name, MUSMOD **_track)
 
     if (!_add_module (track))
     {
-        ERROR ("player_load_s3m", "%s", "Failed to register loaded music module.");
+        ERROR ("%s", "Failed to register loaded music module.");
         _free_module (track);
         return false;
     }
 
     *_track = track;
 
-    DEBUG_SUCCESS("player_load_s3m");
+    DEBUG_SUCCESS ();
     return true;
 }
 
@@ -944,7 +944,7 @@ bool __far player_set_active_track (MUSPLAYER *self, MUSMOD *track)
         ps = _new (PLAYSTATE);
         if (!ps)
         {
-            ERROR ("player_set_active_track", "Failed to allocate memory for %s.", "play state object");
+            ERROR ("Failed to allocate %s.", "play state object");
             return false;
         }
         playstate_init (ps);
@@ -955,7 +955,7 @@ bool __far player_set_active_track (MUSPLAYER *self, MUSMOD *track)
 
     if (!playstate_alloc_channels (ps))
     {
-        ERROR ("player_set_active_track", "Failed to allocate memory for %s.", "mixing channels");
+        ERROR ("Failed to allocate %s.", "mixing channels");
         return false;
     }
 
@@ -979,7 +979,7 @@ uint8_t __far player_get_master_volume (MUSPLAYER *self)
         return ps->master_volume;
     else
     {
-        ERROR ("player_set_master_volume", "%s", "Active track is not set.");
+        ERROR ("No %s was set.", "active track");
         return 0;
     }
 }
@@ -998,7 +998,7 @@ void __far player_set_master_volume (MUSPLAYER *self, uint8_t value)
         amptab_set_volume(value);
     }
     else
-        ERROR ("player_set_master_volume", "%s", "Active track is not set.");
+        ERROR ("No %s was set.", "active track");
 }
 
 void __near player_free_play_state (MUSPLAYER *self)
@@ -1017,7 +1017,7 @@ void __far player_free_module (MUSPLAYER *self, MUSMOD *track)
     _MUSPLAYER *_Self = self;
     PLAYSTATE *ps;
 
-    DEBUG_BEGIN ("player_free_module");
+    DEBUG_BEGIN ();
     if (track)
     {
         ps = _Self->play_state;
@@ -1026,19 +1026,19 @@ void __far player_free_module (MUSPLAYER *self, MUSMOD *track)
                 player_free_play_state (self);
         _free_module (track);
     }
-    DEBUG_END ("player_free_module");
+    DEBUG_END ();
 }
 
 void __far player_free_modules (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
 
-    DEBUG_BEGIN ("player_free_modules");
+    DEBUG_BEGIN ();
 
     player_free_play_state (self);
     _free_modules ();
 
-    DEBUG_END ("player_free_modules");
+    DEBUG_END ();
 }
 
 /* Finalization */
@@ -1047,7 +1047,7 @@ void __far player_free (MUSPLAYER *self)
 {
     _MUSPLAYER *_Self = self;
 
-    DEBUG_BEGIN("player_free");
+    DEBUG_BEGIN ();
 
     player_play_stop (self);
     player_free_modules (self);
@@ -1068,7 +1068,7 @@ void __far player_free (MUSPLAYER *self)
             emsFree (_Self->EM_map_handle);
     }
 
-    DEBUG_END("player_free");
+    DEBUG_END ();
 }
 
 void __far player_delete (MUSPLAYER **self)

@@ -825,7 +825,7 @@ void __far DEBUG_dump_pattern_info (MUSPAT *pattern, uint8_t index)
     {
         if (!muspat_map_EM_data (pattern))
         {
-            DEBUG_ERR_ ("DEBUG_dump_pattern_info", "Failed to map EM for %s.", "pattern");
+            DEBUG_ERR_ ("Failed to map EM for %s.", "pattern");
             return;
         }
         snprintf (s, 64,
@@ -859,8 +859,7 @@ void __far DEBUG_dump_pattern_info (MUSPAT *pattern, uint8_t index)
             muspat_get_channels (pattern) * sizeof (MUSPATCHNEVDATA)
         );
 
-    DEBUG_MSG_ ("DEBUG_dump_pattern_info",
-        "pattern_index=%hu, rows=%hu, mem_size=0x%04X, place=%s, format=%s.",
+    DEBUG_MSG_ ("pattern_index=%hu, rows=%hu, mem_size=0x%04X, place=%s, format=%s.",
         index,
         muspat_get_rows (pattern),
         muspat_get_size (pattern),
@@ -881,7 +880,7 @@ bool __far DEBUG_dump_pattern (MUSPAT *pattern, char *s, uint8_t num_channels)
 
     if ((!pattern) || (!muspatio_open (&f, pattern, MUSPATIOMD_READ)))
     {
-        DEBUG_ERR_ ("DEBUG_dump_pattern", "Failed to read pattern (%s)", f.error);
+        DEBUG_ERR_ ("Failed to read pattern (%s)", f.error);
         return false;
     }
 
