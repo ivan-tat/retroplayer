@@ -103,7 +103,7 @@ unsigned   __far  FileReadString (_cc_iobuf *f, char *dest, uint16_t max);  /* +
 inoutres_t __far  FileSkipToNextLine (_cc_iobuf *f);                        /* +InOutRes+ */
 inoutres_t __far  FileWriteChar (_cc_iobuf *f, char _c, uint16_t _n);       /* +InOutRes+ */
 int32_t    __far  FileReadNumber (_cc_iobuf *f);                            /* -InOutRes+ */
-inoutres_t __far  FileWriteNumber (_cc_iobuf *f, uint32_t value, int n);    /* +InOutRes+ */
+inoutres_t __far  FileWriteNumber (_cc_iobuf *f, uint32_t value, uint16_t padding); /* +InOutRes+ */
 
 void __noreturn __far __stdcall _cc_local_int0 (void __far *addr, uint16_t flags);
 void __noreturn __far __stdcall _cc_local_int23 (void __far *addr, uint16_t flags);

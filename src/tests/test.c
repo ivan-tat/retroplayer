@@ -39,7 +39,7 @@ int main (int argc, const char **argv)
 {
     char s[256];
     int i;
-    long l;
+    int32_t l;
 
     SYSDEBUG_BEGIN ();
     SYSDEBUG_INFO_ ("Arguments count = %i", argc);
@@ -94,6 +94,7 @@ int main (int argc, const char **argv)
     FileWriteChar (&cc_Output, '"', 0);
     FileWriteNewLine (&cc_Output);
     /**/
+    SYSDEBUG_INFO_ ("value=%l", (int32_t) l);
     SYSDEBUG_END ();
     return 0;
 }

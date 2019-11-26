@@ -32,11 +32,11 @@ void (*__far cc_ExitProc) = NULL;
 int16_t      cc_ExitCode = 0;
 inoutres_t   cc_InOutRes = EINOUTRES_SUCCESS;
 uint8_t      cc_Test8086 = 0;
-_cc_iobuf    cc_Input = { 0 };
-_cc_iobuf    cc_Output = { 0 };
+_cc_iobuf    cc_Input;
+_cc_iobuf    cc_Output;
 
-void *__far _cc_ExitList[_CC_ATEXIT_MAX] = { 0 };
 uint8_t     _cc_ExitCount = 0;
+void *__far _cc_ExitList[_CC_ATEXIT_MAX] = { 0 };
 
 #endif
 
@@ -145,7 +145,7 @@ char       __far  FileReadChar (_cc_iobuf *f);                          /* +InOu
 bool       __far  _iostream_read_line (_cc_iobuf_reader *stream);
 bool       __far  _iostream_read_find_printable (_cc_iobuf_reader *stream);
 bool       __far  _iostream_read_printable (_cc_iobuf_reader *stream);
-inoutres_t __far  FileWriteNumber (_cc_iobuf *f, uint32_t value, int n);
+inoutres_t __far  FileWriteNumber (_cc_iobuf *f, uint32_t value, uint16_t padding);
 inoutres_t __far  _sys_file_open (_cc_iobuf *f);                        /* -InOutRes- */
 void       __near _sys_file_append (_cc_iobuf *f);                      /* -InOutRes- */
 uint16_t   __near _sys_store_sint32_decimal (int32_t value, char *endptr, char **startptr);
@@ -509,6 +509,7 @@ inoutres_t __far FileSkipToNextLine (_cc_iobuf *f)
     stream.end = 0;     /* undefined */
     stream.max = 0;     /* undefined */
     stream.dest = NULL;
+    stream.pos = 0;     /* undefined */
     stream.next = _iostream_find_string_end;
 
     if (_iostream_read_string (&stream))
@@ -795,13 +796,14 @@ int32_t __far FileReadNumber (_cc_iobuf *f)
     stream.end = 0;     /* unused */
     stream.max = 32;
     stream.dest = str;
+    stream.pos = 0;
     stream.next = _iostream_read_find_printable;
 
     _iostream_read_string (&stream);
 
-    if (stream.start != stream.end)
+    if (stream.start)
     {
-        if (_sys_strtol (str, stream.end - stream.start, &result, &count))
+        if (_sys_strtol (str, stream.start, &result, &count))
         {
             if (!count)
             {
@@ -909,21 +911,21 @@ bool __far _iostream_read_printable (_cc_iobuf_reader *stream)
     return true;
 }
 
-inoutres_t __far FileWriteNumber (_cc_iobuf *f, uint32_t value, int n)
+inoutres_t __far FileWriteNumber (_cc_iobuf *f, uint32_t value, uint16_t padding)
 {
     inoutres_t status;
     char tmp[32], *startptr;
-    int len;
+    uint16_t len;
 
     SYSDEBUG_BEGIN ();
 
     len = _sys_store_sint32_decimal (value, &(tmp[32]), &startptr);
-    if (len)
-        status = _sysio_write_pad_string (f, len);
+    if (padding > len)
+        status = _sysio_write_pad_string (f, padding - len);
 
     /* FIXME: no check for status in original code */
 
-    status = FileWrite (f, startptr, n);
+    status = FileWrite (f, startptr, len);
     SYSDEBUG_INFO_ ("End (status=%i)", status);
     return status;
 }
@@ -1037,16 +1039,27 @@ void __near _sys_file_append (_cc_iobuf *f)
 uint16_t __near _sys_store_sint32_decimal (int32_t value, char *endptr, char **startptr)
 {
     uint16_t len;
+    bool negate;
 
     if (value < 0)
     {
-        len = _sys_store_uint32 (-value, 10, endptr, startptr);
-        (*startptr)--;
-        **startptr = '-';
-        return len + 1;
+        // FIXME: check for INT_MIN and INT_MAX
+        negate = true;
+        value = -value;
     }
     else
-        return _sys_store_uint32 (value, 10, endptr, startptr);
+        negate = false;
+
+    len = _sys_store_uint32 (value, 10, endptr, startptr);
+
+    if (negate)
+    {
+        len++;
+        (*startptr)--;
+        **startptr = '-';
+    }
+
+    return len;
 }
 
 /*
@@ -1057,21 +1070,25 @@ uint16_t __near _sys_store_sint32_decimal (int32_t value, char *endptr, char **s
  */
 uint16_t __near _sys_store_uint32 (uint32_t value, uint8_t base, char *endptr, char **startptr)
 {
-    char *s;
-    char c;
+    char *s, c;
 
     s = endptr;
-    while (value)
+    do
     {
-        c = value % base;
+        if (value)
+        {
+            c = value % base;
+            value /= base;
+        }
+        else
+            c = 0;
         if (c > 9)
             c += 'A' - 10;
         else
             c += '0';
-        value /= base;
         s--;
         *s = c;
-    }
+    } while (value);
     *startptr = s;
     return endptr - s;
 }
@@ -1170,25 +1187,18 @@ bool __near _sys_strtol (char *s, uint16_t len, int32_t *_n, uint16_t *count)
                 break;
             }
 
-            for (i = 0; i < 4; i++)
+            if (value & (0xfUL << 28))
             {
-                if (value < 0)
-                {
-                    /* error: numeric overflow */
-                    result = false;
-                    break;
-                }
-                value <<= 1;
+                /* error: numeric overflow */
+                result = false;
+                break;
             }
-
-            if (!result)
-                break;  /* exit on numeric overflow */
-
-            value += c;
+            value = value*16 + c;
             s++;
             len--;
         } while (len);
 
+        // FIXME: check for INT_MIN and INT_MAX
         if (ok && result && negate)
             value = -value;
     }
@@ -1206,13 +1216,12 @@ bool __near _sys_strtol (char *s, uint16_t len, int32_t *_n, uint16_t *count)
                 /* not a decimal digit */
                 break;
 
-            if (value >> 28)
+            if (value & (0xfUL << 28))
             {
                 /* error: numeric overflow */
                 result = false;
                 break;
             }
-
             value = value*10 + c;
             s++;
             len--;
@@ -1582,7 +1591,7 @@ void _cc_startup(void)
 
 /* Application shutdown */
 
-void _cc_ExitWithError(int16_t status, void __far *addr)
+void __noreturn _cc_ExitWithError (int16_t status, void __far *addr)
 {
     unsigned i;
 
@@ -1619,7 +1628,7 @@ void _cc_ExitWithError(int16_t status, void __far *addr)
 #endif  /* LINKER_TPC != 1 */
 }
 
-void _cc_Exit(int16_t status)
+void __noreturn _cc_Exit (int16_t status)
 {
     _cc_ExitWithError(status, NULL);
 }
