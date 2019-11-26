@@ -89,14 +89,14 @@ CDEFS_DOS       := $(patsubst %,-d%,$(DEFS))
 endif
 ifeq "$(DEBUG)" "1"
 ifeq "$(LINKER_TPC)" "1"
-CDEBUG_DOS      :=
+CDEBUG_DOS      := -oi -oc -os
 else
-CDEBUG_DOS      := -d3 -hw
+CDEBUG_DOS      := -d3 -hw -od
 endif
 else
-CDEBUG_DOS      :=
+CDEBUG_DOS      := -oi -oc -os
 endif
-CFLAGS_DOS      := $(CDEFS_DOS) $(CDEBUG_DOS) -3 -fp3 -ml -oi -oc -os -q -r -s -we -zdp -zff -zgf -zl -zld -zls -zp=1 -zq -zu -i=$(INCLUDE_DIRS)
+CFLAGS_DOS      := $(CDEFS_DOS) $(CDEBUG_DOS) -3 -fp3 -ml -q -r -s -we -zdp -zff -zgf -zl -zld -zls -zp=1 -zq -zu -i=$(INCLUDE_DIRS)
 else
 $(error_not_known_params)
 endif
@@ -253,24 +253,44 @@ autogenfiles: $(INCS)
 ## Dependency files ##
 ##=----------------=##
 
-## For "C-source -> executable" rules:
+## For "C-source -> native executable" rules:
 ## 1. Convert "main : main.c defs.h" into "main main.$(DEPEXT) : main.c defs.h"
 ## 2. Optionally: Replace "/" with "\" for DOS.
 
+## For "C-source -> DOS executable" rules:
+## 1. Convert "main : main.c defs.h" into "main.exe main.$(DEPEXT) : main.c defs.h"
+## 2. Optionally: Replace "/" with "\" for DOS.
+
 ifeq "$(DEPCC)" "gcc"
+
 define make_c_exec_deps =
 	set -e; $(RM) $@; mkdir -p $(@D); \
 	$(DEPCC) $(DEPCFLAGS) -MT $*.o -MF $@.$$$$ $<; \
 	sed -e 's,\($*\)\.o[ :]*,\1 $@ : $*.c,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
 endef
+define make_c_exec_dos_deps =
+	set -e; $(RM) $@; mkdir -p $(@D); \
+	$(DEPCC) $(DEPCFLAGS) -MT $*.o -MF $@.$$$$ $<; \
+	sed -e 's,\($*\)\.o[ :]*,\1.exe $@ : $*.c,g' < $@.$$$$ > $@; \
+	$(RM) $@.$$$$
+endef
+
 else ifeq "$(DEPCC)" "owcc"
+
 define make_c_exec_deps =
 	set -e; $(RM) $@; mkdir -p $(@D); \
 	$(DEPCC) $(DEPCFLAGS) -MT $*.o -MF $@.$$$$ $< > /dev/null; \
 	sed -e 's,\($*\)\.o[ :]*\($(*F)\)\.c,$(patsubst %.c,%,$<) $@ : $<,g' < $@.$$$$ > $@; \
 	$(RM) $@.$$$$
 endef
+define make_c_exec_dos_deps =
+	set -e; $(RM) $@; mkdir -p $(@D); \
+	$(DEPCC) $(DEPCFLAGS) -MT $*.o -MF $@.$$$$ $< > /dev/null; \
+	sed -e 's,\($*\)\.o[ :]*\($(*F)\)\.c,$(patsubst %.c,%.exe,$<) $@ : $<,g' < $@.$$$$ > $@; \
+	$(RM) $@.$$$$
+endef
+
 else
 $(error_not_known_params)
 endif
@@ -519,6 +539,11 @@ TMPS += $(common_TMPS)
 ## All tests
 
 tests_DIRS := tests
+
+## Dependency generation rules:
+$(DEPDIR)/$(tests_DIRS)/%.$(DEPEXT): $(tests_DIRS)/%.c
+	$(make_c_exec_dos_deps)
+
 tests_SRCS := $(wildcard $(patsubst %,%/*.c,$(tests_DIRS)))
 tests_OBJS := $(patsubst %.c,%.o,$(filter %.c,$(tests_SRCS)))
 tests_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(tests_SRCS)))
@@ -547,12 +572,16 @@ tests_common_OBJS := \
  startup/ints.o \
  hw/cpu.o
 
+## Build rules
+
 ## test.exe
 
 test_exe_SRCS := $(filter %/test.c,$(tests_SRCS))
 test_exe_OBJS := $(patsubst %.c,%.o,$(filter %.c,$(test_exe_SRCS)))
 test_exe_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(test_exe_SRCS)))
 
+## TODO: remove object files dependencies by puttin all object files in libraries and pass them to linker
+$(test_exe_EXES): $(tests_common_OBJS) $(test_exe_OBJS)
 $(test_exe_EXES): $(CCLIB)
 	$(LD) $(LFLAGS) library $< $(patsubst %,file %,$(tests_common_OBJS)) $(patsubst %,file %,$(test_exe_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,map,fullheader name $@
 
