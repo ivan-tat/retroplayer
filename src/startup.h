@@ -35,17 +35,30 @@ typedef cc_inoutres_t inoutres_t;
 
 typedef cc_inoutres_t __far _cc_iobuf_proc_t (_cc_iobuf *f);
 
+#define __IO_OPEN   0
+#define __IO_IN_OUT 1
+#define __IO_FLUSH  2
+#define __IO_CLOSE  3
+
 #pragma pack(push, 1);
 typedef struct _cc_iobuf_t {
     uint16_t handle;
     uint16_t mode;
-    uint16_t rec_size;
+    uint16_t buf_size;
     //char private_data[26];
-    uint16_t unknown;
-    uint16_t pos;
-    uint16_t data_size;
-    void *buffer;
-    _cc_iobuf_proc_t *proc[4];
+    uint16_t private;
+    uint16_t buf_pos;
+    uint16_t buf_end;
+    void *buf_ptr;
+    union {
+        _cc_iobuf_proc_t *by_index[4];
+        struct {
+            _cc_iobuf_proc_t *open;
+            _cc_iobuf_proc_t *in_out;
+            _cc_iobuf_proc_t *flush;
+            _cc_iobuf_proc_t *close;
+        } by_name;
+    } io;
     char user_data[16];
     char name[cc_PathStr_size];
 };

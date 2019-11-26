@@ -79,27 +79,27 @@ void __near _SYSDEBUG_DUMP_FILE (const char *_file, unsigned _line, const char *
     _SYSDEBUG_LOG (DBGLOG_INFO, NULL, 0, NULL,
         "FILE.handle    = %04X" CRLF
         "FILE.mode      = %04X" CRLF
-        "FILE.rec_size  = %04X" CRLF
-        "FILE.unknown   = %04X" CRLF
-        "FILE.pos       = %04X" CRLF
-        "FILE.data_size = %04X" CRLF
-        "FILE.buffer    = %04X:%04X",
-        "FILE.proc[0]   = %04X:%04X" CRLF
-        "FILE.proc[1]   = %04X:%04X" CRLF
-        "FILE.proc[2]   = %04X:%04X" CRLF
-        "FILE.proc[3]   = %04X:%04X" CRLF
+        "FILE.buf_size  = %04X" CRLF
+        "FILE.private   = %04X" CRLF
+        "FILE.buf_pos   = %04X" CRLF
+        "FILE.buf_end   = %04X" CRLF
+        "FILE.buf_ptr   = %04X:%04X",
+        "FILE.io.open   = %04X:%04X" CRLF
+        "FILE.io.in_out = %04X:%04X" CRLF
+        "FILE.io.flush  = %04X:%04X" CRLF
+        "FILE.io.close  = %04X:%04X" CRLF
         "FILE.name      = %s",
         f->handle,
         f->mode,
-        f->rec_size,
-        f->unknown,
-        f->pos,
-        f->data_size,
-        FP_SEG (f->buffer), FP_OFF (f->buffer),
-        FP_SEG (f->proc[0]), FP_OFF (f->proc[0]),
-        FP_SEG (f->proc[1]), FP_OFF (f->proc[1]),
-        FP_SEG (f->proc[2]), FP_OFF (f->proc[2]),
-        FP_SEG (f->proc[3]), FP_OFF (f->proc[3]),
+        f->buf_size,
+        f->private,
+        f->buf_pos,
+        f->buf_end,
+        FP_SEG (f->buf_ptr), FP_OFF (f->buf_ptr),
+        FP_SEG (f->io.by_name.open),   FP_OFF (f->io.by_name.open),
+        FP_SEG (f->io.by_name.in_out), FP_OFF (f->io.by_name.in_out),
+        FP_SEG (f->io.by_name.flush),  FP_OFF (f->io.by_name.flush),
+        FP_SEG (f->io.by_name.close),  FP_OFF (f->io.by_name.close),
         f->name
     );
     SYSDEBUG_dump_mem (&(f->user_data), 16, "FILE.user_data: ");
@@ -117,19 +117,18 @@ void __near _SYSDEBUG_DUMP_InOutRes (const char *_file, unsigned _line, const ch
 # define SYSDEBUG_DUMP_InOutRes()
 #endif  /* SYSDEBUG != 1 */
 
-void __near cc_AssignFile (_cc_iobuf *f, void *buffer, uint16_t size, char *name);
-void __near cc_SetFileBuffer (_cc_iobuf *f, void *buffer, uint16_t size);
-void __near cc_SetFileMode (_cc_iobuf *f, uint16_t mode);
-void __near cc_SetFileInput (_cc_iobuf *f);
-void __near cc_SetFileOutput (_cc_iobuf *f);
-void __near cc_SetFileInOut (_cc_iobuf *f);
-
 /* (+|-)InOutRes(+|-): prefix "+" means IO state check on enter, postfix "+" - on exit. */
 
-inoutres_t __far  _sysio_close_0 (_cc_iobuf *f);                        /* -InOutRes+ */
-inoutres_t __far  _sysio_close_1 (_cc_iobuf *f);                        /* -InOutRes+ */
-inoutres_t __far  _sysio_close (_cc_iobuf *f, bool do_close);           /* -InOutRes+ */
-inoutres_t __far  _sysio_call (_cc_iobuf *f, char num);                 /* -InOutRes+ */
+void       __far  cc_AssignFile (_cc_iobuf *f, void *buffer, uint16_t size, char *name); /* -InOutRes- */
+void       __far  cc_SetFileBuffer (_cc_iobuf *f, void *buffer, uint16_t size); /* -InOutRes- */
+void       __near cc_SetFileMode (_cc_iobuf *f, uint16_t mode);         /* -InOutRes- */
+void       __far  cc_FileReset (_cc_iobuf *f);                          /* -InOutRes- */
+void       __far  cc_FileRewrite (_cc_iobuf *f);                        /* -InOutRes- */
+void       __far  cc_FileAppend (_cc_iobuf *f);                         /* -InOutRes- */
+inoutres_t __far  cc_FileFlush (_cc_iobuf *f);                          /* -InOutRes+ */
+inoutres_t __far  cc_FileClose (_cc_iobuf *f);                          /* -InOutRes+ */
+inoutres_t __far  _cc_FileFlushClose (_cc_iobuf *f, bool do_close);     /* -InOutRes+ */
+inoutres_t __far  _cc_FileIO (_cc_iobuf *f, char index);                /* -InOutRes+ */
 inoutres_t __far  _sysio_file_read (_cc_iobuf *f);                      /* -InOutRes- */
 inoutres_t __far  _sysio_file_write (_cc_iobuf *f);                     /* -InOutRes- */
 inoutres_t __far  _sysio_device_write (_cc_iobuf *f);                   /* -InOutRes- */
@@ -139,8 +138,8 @@ inoutres_t __near _sysio_write_pad_string (_cc_iobuf *f, uint16_t _n);  /* +InOu
 inoutres_t __near FileWrite (_cc_iobuf *f, void *src, uint16_t _n);     /* +InOutRes+ */
 bool       __far  _iostream_find_string_end (_cc_iobuf_reader *stream);
 bool       __far  _iostream_end_of_line (_cc_iobuf_reader *stream);
-inoutres_t __far  _sysio_call_1 (_cc_iobuf *f);                         /* +InOutRes+ */
-inoutres_t __far  _sysio_call_2 (_cc_iobuf *f);                         /* +InOutRes+ */
+inoutres_t __far  _sysio_call_in_out (_cc_iobuf *f);                    /* +InOutRes+ */
+inoutres_t __far  _sysio_call_flush (_cc_iobuf *f);                     /* +InOutRes+ */
 char       __far  FileReadChar (_cc_iobuf *f);                          /* +InOutRes+ */
 bool       __far  _iostream_read_line (_cc_iobuf_reader *stream);
 bool       __far  _iostream_read_find_printable (_cc_iobuf_reader *stream);
@@ -153,31 +152,31 @@ uint16_t   __near _sys_store_uint32 (uint32_t value, uint8_t base, char *endptr,
 bool       __near _sys_strtol (char *s, uint16_t len, int32_t *_n, uint16_t *count);
 void       __near _sys_clear_dataseg (void);
 
-void __near cc_AssignFile (_cc_iobuf *f, void *buffer, uint16_t size, char *name)
+void __far cc_AssignFile (_cc_iobuf *f, void *buffer, uint16_t size, char *name)
 {
     SYSDEBUG_INFO ("Called.");
     f->handle = cc_UnusedHandle;
     f->mode = cc_fmClosed;
-    f->rec_size = size;
-    f->unknown = 0;
-    f->pos = 0;
-    f->data_size = 0;
-    f->buffer = buffer;
-    f->proc[0] = _sys_file_open;
-    f->proc[1] = NULL;
-    f->proc[2] = NULL;
-    f->proc[3] = NULL;
+    f->buf_size = size;
+    f->private = 0;
+    f->buf_pos = 0;
+    f->buf_end = 0;
+    f->buf_ptr = buffer;
+    f->io.by_name.open = _sys_file_open;
+    f->io.by_name.in_out = NULL;
+    f->io.by_name.flush = NULL;
+    f->io.by_name.close = NULL;
     memset (f->user_data, 0, 26);
     strncpy (f->name, name, cc_PathStr_size);
 }
 
-void __near cc_SetFileBuffer (_cc_iobuf *f, void *buffer, uint16_t size)
+void __far cc_SetFileBuffer (_cc_iobuf *f, void *buffer, uint16_t size)
 {
     SYSDEBUG_INFO_ ("buf=%04x:%04x, size=%u", FP_SEG (buffer), FP_OFF (buffer), size);
-    f->rec_size = size;
-    f->buffer = buffer;
-    f->pos = 0;
-    f->data_size = 0;
+    f->buf_size = size;
+    f->buf_ptr = buffer;
+    f->buf_pos = 0;
+    f->buf_end = 0;
     SYSDEBUG_DUMP_FILE (f);
 }
 
@@ -188,14 +187,14 @@ void __near cc_SetFileMode (_cc_iobuf *f, uint16_t mode)
     {
     case cc_fmInput:
     case cc_fmOutput:
-        _sysio_close_1 (f);
+        cc_FileClose (f);
         __attribute__ ((fallthrough));  /* GNU */
 
     case cc_fmClosed:
         f->mode = mode;
-        f->pos = 0;
-        f->data_size = 0;
-        if (_sysio_call (f, 0))
+        f->buf_pos = 0;
+        f->buf_end = 0;
+        if (_cc_FileIO (f, __IO_OPEN) != EINOUTRES_SUCCESS)
             f->mode = cc_fmClosed;
         break;
 
@@ -205,45 +204,45 @@ void __near cc_SetFileMode (_cc_iobuf *f, uint16_t mode)
     }
 }
 
-void __near cc_SetFileInput (_cc_iobuf *f)
+void __far cc_FileReset (_cc_iobuf *f)
 {
     SYSDEBUG_INFO ("Called.");
     cc_SetFileMode (f, cc_fmInput);
 }
 
-void __near cc_SetFileOutput (_cc_iobuf *f)
+void __far cc_FileRewrite (_cc_iobuf *f)
 {
     SYSDEBUG_INFO ("Called.");
     cc_SetFileMode (f, cc_fmOutput);
 }
 
-void __near cc_SetFileInOut (_cc_iobuf *f)
+void __far cc_FileAppend (_cc_iobuf *f)
 {
     SYSDEBUG_INFO ("Called.");
     cc_SetFileMode (f, cc_fmInOut);
 }
 
-inoutres_t __far _sysio_close_0 (_cc_iobuf *f)
+inoutres_t __far cc_FileFlush (_cc_iobuf *f)
 {
     inoutres_t status;
 
     SYSDEBUG_BEGIN ();
-    status = _sysio_close (f, 0);
+    status = _cc_FileFlushClose (f, false);
     SYSDEBUG_INFO_ ("End (status=%i)", status);
     return status;
 }
 
-inoutres_t __far _sysio_close_1 (_cc_iobuf *f)
+inoutres_t __far cc_FileClose (_cc_iobuf *f)
 {
     inoutres_t status;
 
     SYSDEBUG_BEGIN ();
-    status = _sysio_close (f, 1);
+    status = _cc_FileFlushClose (f, true);
     SYSDEBUG_INFO_ ("End (status=%i)", status);
     return status;
 }
 
-inoutres_t __far _sysio_close (_cc_iobuf *f, bool do_close)
+inoutres_t __far _cc_FileFlushClose (_cc_iobuf *f, bool do_close)
 {
     inoutres_t status = EINOUTRES_SUCCESS;
 
@@ -251,13 +250,13 @@ inoutres_t __far _sysio_close (_cc_iobuf *f, bool do_close)
     switch (f->mode)
     {
     case cc_fmOutput:
-        _sysio_call (f, 1);
+        _cc_FileIO (f, __IO_IN_OUT);
         __attribute__ ((fallthrough));  /* GNU */
 
     case cc_fmInput:
         if (do_close)
         {
-            status = _sysio_call (f, 3);
+            status = _cc_FileIO (f, __IO_CLOSE);
             f->mode = cc_fmClosed;
         }
         break;
@@ -272,12 +271,12 @@ inoutres_t __far _sysio_close (_cc_iobuf *f, bool do_close)
     return status;
 }
 
-inoutres_t __far _sysio_call (_cc_iobuf *f, char num)
+inoutres_t __far _cc_FileIO (_cc_iobuf *f, char index)
 {
     inoutres_t status;
 
     SYSDEBUG_BEGIN ();
-    status = f->proc[num](f);
+    status = f->io.by_index[index] (f);
     if (status != EINOUTRES_SUCCESS)
         cc_InOutRes = status;
 
@@ -291,7 +290,7 @@ inoutres_t __far _sysio_file_read (_cc_iobuf *f)
     uint16_t count;
 
     SYSDEBUG_BEGIN ();
-    if (_dos_read (f->handle, f->buffer, f->rec_size, &count) == EZERO)
+    if (_dos_read (f->handle, f->buf_ptr, f->buf_size, &count) == EZERO)
         status = EINOUTRES_SUCCESS;
     else
     {
@@ -299,8 +298,8 @@ inoutres_t __far _sysio_file_read (_cc_iobuf *f)
         count = 0;
     }
 
-    f->data_size = count;
-    f->pos = 0;
+    f->buf_end = count;
+    f->buf_pos = 0;
     SYSDEBUG_INFO_ ("End (status=%i)", status);
     return status;
 }
@@ -311,11 +310,11 @@ inoutres_t __far _sysio_file_write (_cc_iobuf *f)
     uint16_t pos, count;
 
     SYSDEBUG_BEGIN ();
-    pos = f->pos;
-    f->pos = 0;
-    if (_dos_write (f->handle, f->buffer, pos, &count) == EZERO)
+    pos = f->buf_pos;
+    f->buf_pos = 0;
+    if (_dos_write (f->handle, f->buf_ptr, pos, &count) == EZERO)
     {
-        if (f->pos != count)
+        if (f->buf_pos != count)
             status = EINOUTRES_WRITE;
         else
             status = EINOUTRES_SUCCESS;
@@ -333,9 +332,9 @@ inoutres_t __far _sysio_device_write (_cc_iobuf *f)
     uint16_t pos, count;
 
     SYSDEBUG_BEGIN ();
-    pos = f->pos;
-    f->pos = 0;
-    if (_dos_write (f->handle, f->buffer, pos, &count) == EZERO)
+    pos = f->buf_pos;
+    f->buf_pos = 0;
+    if (_dos_write (f->handle, f->buf_ptr, pos, &count) == EZERO)
         status = EINOUTRES_SUCCESS;
     else
         status = map_doserrno_to_inoutres (_doserrno);
@@ -361,7 +360,7 @@ inoutres_t __far _sysio_file_close (_cc_iobuf *f)
  * IN:
  *      stream: start, next.
  * MODIFIES:
- *      stream: f: pos.
+ *      stream: f: buf_pos.
  *      stream: end.
  */
 bool __far _iostream_read_string (_cc_iobuf_reader *stream)
@@ -386,16 +385,16 @@ bool __far _iostream_read_string (_cc_iobuf_reader *stream)
 
     do
     {
-        if (f->pos != f->data_size)
+        if (f->buf_pos != f->buf_end)
         {
-            stream->end = f->data_size;
+            stream->end = f->buf_end;
             stream->next (stream);
-            f->pos = stream->start;
+            f->buf_pos = stream->start;
             if (!stream->next)
                 break;
         }
-        _sysio_call_1 (stream->f);
-    } while (f->pos != f->data_size);
+        _sysio_call_in_out (stream->f);
+    } while (f->buf_pos != f->buf_end);
 
     SYSDEBUG_SUCCESS ();
     return true;
@@ -425,14 +424,14 @@ inoutres_t __near _sysio_write_pad_string (_cc_iobuf *f, uint16_t _n)
         {
             do
             {
-                nf = f->rec_size - f->pos;
+                nf = f->buf_size - f->buf_pos;
                 count = _n;
                 if (count >= nf)
                     count = nf;
-                memset ((char *) f->buffer + f->pos, ' ', count);
-                f->pos += count;
-                if (f->pos == f->rec_size)
-                    status = _sysio_call_1 (f);
+                memset ((char *) f->buf_ptr + f->buf_pos, ' ', count);
+                f->buf_pos += count;
+                if (f->buf_pos == f->buf_size)
+                    status = _sysio_call_in_out (f);
                 /* FIXME: no check for status in original code */
                 _n -= count;
             } while (_n);
@@ -471,21 +470,21 @@ inoutres_t __near FileWrite (_cc_iobuf *f, void *src, uint16_t _n)
             source = (char *) src;
             do
             {
-                nf = f->rec_size - f->pos;
-                SYSDEBUG_INFO_ ("rec_size=%04X, pos=%04X, nf=%04X, _n=%04X.", f->rec_size, f->pos, nf, _n);
+                nf = f->buf_size - f->buf_pos;
+                SYSDEBUG_INFO_ ("buf_size=%04X, pos=%04X, nf=%04X, _n=%04X.", f->buf_size, f->buf_pos, nf, _n);
                 count = _n;
                 if (count >= nf)
                     count = nf;
                 SYSDEBUG_INFO_ ("%04X:%04X->%04X:%04X+%04X(count=%04X,%04X).",
-                    FP_SEG (source), FP_OFF (source), FP_SEG (f->buffer), FP_OFF (f->buffer), f->pos, count, _n
+                    FP_SEG (source), FP_OFF (source), FP_SEG (f->buf_ptr), FP_OFF (f->buf_ptr), f->buf_pos, count, _n
                 );
                 if (count)
                     SYSDEBUG_dump_mem (source, count, "data: ");
-                memcpy ((char *) f->buffer + f->pos, source, count);
+                memcpy ((char *) f->buf_ptr + f->buf_pos, source, count);
                 source += count;
-                f->pos += count;
-                if (f->pos == f->rec_size)
-                    status = _sysio_call_1 (f);
+                f->buf_pos += count;
+                if (f->buf_pos == f->buf_size)
+                    status = _sysio_call_in_out (f);
                 /* FIXME: no check for status in original code */
                 _n -= count;
             } while (_n);
@@ -516,8 +515,8 @@ inoutres_t __far FileSkipToNextLine (_cc_iobuf *f)
         status = cc_InOutRes;
     else
     {
-        if (f->proc[2])
-            status = _sysio_call_2 (f);
+        if (f->io.by_name.flush)
+            status = _sysio_call_flush (f);
         else
             status = cc_InOutRes;
     }
@@ -530,7 +529,7 @@ bool __far _iostream_find_string_end (_cc_iobuf_reader *stream)
 {
     char *buffer, c;
 
-    buffer = (char *)(stream->f->buffer);
+    buffer = (char *)(stream->f->buf_ptr);
     do
     {
         c = buffer [stream->start];
@@ -565,7 +564,7 @@ bool __far _iostream_end_of_line (_cc_iobuf_reader *stream)
 {
     char *buffer;
 
-    buffer = (char *)(stream->f->buffer);
+    buffer = (char *)(stream->f->buf_ptr);
     /* 0x0A - LF - line feed (^J) - '\n' */
     if (buffer [stream->start] == '\n')
         stream->start++;
@@ -582,8 +581,8 @@ inoutres_t __far FileWriteNewLine (_cc_iobuf *f)
     status = FileWrite (f, (void *) NewLine, 2);
 
     if (status == EINOUTRES_SUCCESS)
-        if (f->proc[2])
-            status = _sysio_call_2 (f);
+        if (f->io.by_name.flush)
+            status = _sysio_call_flush (f);
 
     SYSDEBUG_INFO_ ("End (status=%i)", status);
     return status;
@@ -596,21 +595,21 @@ inoutres_t __far FileFlushBuffer (_cc_iobuf *f)
     /* NOTE: in some cases return value is an original AX register value which is not implemented here */
     SYSDEBUG_BEGIN ();
 
-    if (f->proc[2])
+    if (f->io.by_name.flush)
         if (status == EINOUTRES_SUCCESS)
-            status = _sysio_call_2 (f);
+            status = _sysio_call_flush (f);
 
     SYSDEBUG_INFO_ ("End (status=%i)", status);
     return status;
 }
 
-inoutres_t __far _sysio_call_1 (_cc_iobuf *f)
+inoutres_t __far _sysio_call_in_out (_cc_iobuf *f)
 {
     inoutres_t status;
 
     SYSDEBUG_BEGIN ();
 
-    status = f->proc[1](f);
+    status = f->io.by_name.in_out (f);
     if (status != EINOUTRES_SUCCESS)
         cc_InOutRes = status;
 
@@ -618,13 +617,13 @@ inoutres_t __far _sysio_call_1 (_cc_iobuf *f)
     return status;
 }
 
-inoutres_t __far _sysio_call_2 (_cc_iobuf *f)
+inoutres_t __far _sysio_call_flush (_cc_iobuf *f)
 {
     inoutres_t status;
 
     SYSDEBUG_BEGIN ();
 
-    status = f->proc[2](f);
+    status = f->io.by_name.flush (f);
     if (status != EINOUTRES_SUCCESS)
         cc_InOutRes = status;
 
@@ -644,18 +643,18 @@ char __far FileReadChar (_cc_iobuf *f)
             cc_InOutRes = EINOUTRES_NOT_INPUT;
         else
         {
-            if (f->pos == f->data_size)
+            if (f->buf_pos == f->buf_end)
             {
-                _sysio_call_1 (f);
-                if (f->pos != f->data_size)
+                _sysio_call_in_out (f);
+                if (f->buf_pos != f->buf_end)
                     c = 0;
             }
             else
                 c = 0;
             if (!c)
             {
-                c = *((char *)(f->buffer)+ f->pos);
-                f->pos++;
+                c = *((char *)(f->buf_ptr)+ f->buf_pos);
+                f->buf_pos++;
             }
         }
     }
@@ -685,10 +684,10 @@ inoutres_t __far FileWriteChar (_cc_iobuf *f, char _c, uint16_t _n)
         }
         else
         {
-            *((char *) (f->buffer) + f->pos) = _c;
-            f->pos++;
-            if (f->pos == f->rec_size)
-                status = _sysio_call_1 (f);
+            *((char *) (f->buf_ptr) + f->buf_pos) = _c;
+            f->buf_pos++;
+            if (f->buf_pos == f->buf_size)
+                status = _sysio_call_in_out (f);
         }
     }
 
@@ -729,7 +728,7 @@ bool __far _iostream_read_line (_cc_iobuf_reader *stream)
 {
     char *buffer, c;
 
-    buffer = (char *)(stream->f->buffer);
+    buffer = (char *)(stream->f->buf_ptr);
     do
     {
         c = buffer [stream->start];
@@ -822,7 +821,7 @@ bool __far _iostream_read_find_printable (_cc_iobuf_reader *stream)
 {
     char *buffer, c;
 
-    buffer = (char *)(stream->f->buffer);
+    buffer = (char *)(stream->f->buf_ptr);
 
     do
     {
@@ -881,7 +880,7 @@ bool __far _iostream_read_printable (_cc_iobuf_reader *stream)
 {
     char *buffer, c;
 
-    buffer = (char *)(stream->f->buffer);
+    buffer = (char *)(stream->f->buf_ptr);
 
     do
     {
@@ -938,7 +937,7 @@ inoutres_t __far _sys_file_open (_cc_iobuf *f)
     int16_t fd;
     int error;
     cc_ioctl_info_t info;
-    void *p1, *p2;
+    void *p_in_out, *p_flush;
     inoutres_t status;
 
     SYSDEBUG_BEGIN ();
@@ -970,8 +969,8 @@ inoutres_t __far _sys_file_open (_cc_iobuf *f)
 
     if (f->mode == cc_fmInput)
     {
-        p1 = _sysio_file_read;
-        p2 = NULL;
+        p_in_out = _sysio_file_read;
+        p_flush  = NULL;
     }
     else
     {
@@ -979,24 +978,24 @@ inoutres_t __far _sys_file_open (_cc_iobuf *f)
         _dos_ioctl_query_flags (f->handle, &info);
         if (info & 0x80)
         {
-            p1 = _sysio_device_write;
-            p2 = p1;
+            p_in_out = _sysio_device_write;
+            p_flush  = p_in_out;
         }
         else
         {
             if (f->mode == cc_fmInOut)
                 _sys_file_append (f);
 
-            p1 = _sysio_file_write;
-            p2 = NULL;
+            p_in_out = _sysio_file_write;
+            p_flush  = NULL;
         }
 
         f->mode = cc_fmOutput;
     }
 
-    f->proc[1] = p1;
-    f->proc[2] = p2;
-    f->proc[3] = _sysio_file_close;
+    f->io.by_name.in_out = p_in_out;
+    f->io.by_name.flush  = p_flush;
+    f->io.by_name.close  = _sysio_file_close;
     SYSDEBUG_SUCCESS ();
     return EINOUTRES_SUCCESS;
 }
@@ -1011,17 +1010,17 @@ void __near _sys_file_append (_cc_iobuf *f)
 
     _dos_seek (f->handle, 0, SEEK_END_DOS, &newoff);
 
-    if (newoff > f->rec_size)
-        newoff -= f->rec_size;
+    if (newoff > f->buf_size)
+        newoff -= f->buf_size;
     else
         newoff = 0;
 
     _dos_seek (f->handle, newoff, SEEK_SET_DOS, &newoff);
 
-    if (_dos_read (f->handle, f->buffer, f->rec_size, &count) != EZERO)
+    if (_dos_read (f->handle, f->buf_ptr, f->buf_size, &count) != EZERO)
         count = 0;
 
-    buf = (char *) f->buffer;
+    buf = (char *) f->buf_ptr;
     for (i = 0; i < count; i++)
         if (buf [i] == 0x1a)
         {
@@ -1583,10 +1582,10 @@ void _cc_startup(void)
         _cc_argc = data.count;
     else
         _cc_argc = 0;
-    cc_AssignFile(&cc_Input, _stdin_buf, STDINBUF_SIZE, "");
-    cc_SetFileInput(&cc_Input);
-    cc_AssignFile(&cc_Output, _stdout_buf, STDOUTBUF_SIZE, "");
-    cc_SetFileOutput(&cc_Output);
+    cc_AssignFile (&cc_Input, _stdin_buf, STDINBUF_SIZE, "");
+    cc_FileReset (&cc_Input);
+    cc_AssignFile (&cc_Output, _stdout_buf, STDOUTBUF_SIZE, "");
+    cc_FileRewrite (&cc_Output);
 }
 
 /* Application shutdown */
@@ -1608,8 +1607,8 @@ void __noreturn _cc_ExitWithError (int16_t status, void __far *addr)
     if (_cc_argv)
         _cc_dos_freemem (FP_SEG (_cc_argv));
 
-    _sysio_close_1(&cc_Input);
-    _sysio_close_1(&cc_Output);
+    cc_FileClose (&cc_Input);
+    cc_FileClose (&cc_Output);
 
     if (cc_ErrorAddr)
     {

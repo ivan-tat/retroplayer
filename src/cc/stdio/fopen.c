@@ -153,7 +153,7 @@ FILE *cc_fopen(const char *path, const char *mode)
         cc_memset(stream, 0, sizeof(FILE));
         stream->handle = fd;
         stream->mode = FILE_MODES[i].filemode;
-        stream->rec_size = 1;
+        stream->buf_size = 1;
         strncpy(stream->name, path, cc_PathStr_size);
         cc_InOutRes = EINOUTRES_SUCCESS;
         return stream;
