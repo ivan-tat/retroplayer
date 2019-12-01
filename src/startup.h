@@ -109,14 +109,22 @@ extern void     __noreturn __far __pascal pascal_Halt (uint16_t status);
 
 /* (+|-)InOutRes(+|-): prefix "+" means IO state check is done on enter, postfix "+" - on exit. */
 
-inoutres_t __far  FileWriteString (_cc_iobuf *f, char *str, uint16_t _n);   /* +InOutRes+ */
-inoutres_t __far  FileWriteNewLine (_cc_iobuf *f);                          /* +InOutRes+ */
-inoutres_t __far  FileFlushBuffer (_cc_iobuf *f);                           /* +InOutRes+ */
-unsigned   __far  FileReadString (_cc_iobuf *f, char *dest, uint16_t max);  /* +InOutRes? */
-inoutres_t __far  FileSkipToNextLine (_cc_iobuf *f);                        /* +InOutRes+ */
-inoutres_t __far  FileWriteChar (_cc_iobuf *f, char _c, uint16_t _n);       /* +InOutRes+ */
-int32_t    __far  FileReadNumber (_cc_iobuf *f);                            /* -InOutRes+ */
-inoutres_t __far  FileWriteNumber (_cc_iobuf *f, uint32_t value, uint16_t padding); /* +InOutRes+ */
+void       __far  cc_FileAssign (_cc_iobuf *f, void *buffer, uint16_t size, char *name); /* -InOutRes- */
+void       __far  cc_FileSetTextBuf (_cc_iobuf *f, void *buffer, uint16_t size); /* -InOutRes- */
+void       __far  cc_FileReset (_cc_iobuf *f);                              /* -InOutRes- */
+void       __far  cc_FileRewrite (_cc_iobuf *f);                            /* -InOutRes- */
+void       __far  cc_FileAppend (_cc_iobuf *f);                             /* -InOutRes- */
+inoutres_t __far  cc_FileFlush (_cc_iobuf *f);                              /* -InOutRes+ */
+inoutres_t __far  cc_FileClose (_cc_iobuf *f);                              /* -InOutRes+ */
+inoutres_t __far  cc_FileEOL (_cc_iobuf *f);                                /* +InOutRes+ */
+unsigned   __far  cc_FileReadString (_cc_iobuf *f, char *dest, uint16_t max); /* +InOutRes? */
+char       __far  cc_FileReadChar (_cc_iobuf *f);                           /* +InOutRes+ */
+int32_t    __far  cc_FileReadInteger (_cc_iobuf *f);                        /* -InOutRes+ */
+inoutres_t __far  cc_FileWriteString (_cc_iobuf *f, char *str, uint16_t _n);/* +InOutRes+ */
+inoutres_t __far  cc_FileWriteChar (_cc_iobuf *f, char _c, uint16_t _n);    /* +InOutRes+ */
+inoutres_t __far  cc_FileWriteInteger (_cc_iobuf *f, uint32_t value, uint16_t padding); /* +InOutRes+ */
+inoutres_t __far  cc_FileWriteLn (_cc_iobuf *f);                            /* +InOutRes+ */
+inoutres_t __far  cc_FileFlushBuffer (_cc_iobuf *f);                        /* +InOutRes+ */
 
 void __noreturn __far __stdcall _cc_local_int0 (void __far *addr, uint16_t flags);
 void __noreturn __far __stdcall _cc_local_int23 (void __far *addr, uint16_t flags);
@@ -158,14 +166,22 @@ void _cc_startup(void);
 #pragma aux pascal_Halt       "*";
 #endif  /* LINKER_TPC == 1 */
 
-#pragma aux FileWriteString "*";
-#pragma aux FileWriteNewLine "*";
-#pragma aux FileFlushBuffer "*";
-#pragma aux FileReadString "*";
-#pragma aux FileSkipToNextLine "*";
-#pragma aux FileWriteChar "*";
-#pragma aux FileReadNumber "*";
-#pragma aux FileWriteNumber "*";
+#pragma aux cc_FileAssign "*";
+#pragma aux cc_FileSetTextBuf "*";
+#pragma aux cc_FileReset "*";
+#pragma aux cc_FileRewrite "*";
+#pragma aux cc_FileAppend "*";
+#pragma aux cc_FileFlush "*";
+#pragma aux cc_FileClose "*";
+#pragma aux cc_FileEOL "*";
+#pragma aux cc_FileReadString "*";
+#pragma aux cc_FileReadChar "*";
+#pragma aux cc_FileReadInteger "*";
+#pragma aux cc_FileWriteString "*";
+#pragma aux cc_FileWriteChar "*";
+#pragma aux cc_FileWriteInteger "*";
+#pragma aux cc_FileWriteLn "*";
+#pragma aux cc_FileFlushBuffer "*";
 
 #pragma aux _cc_local_int0 "*";
 #pragma aux _cc_local_int23 "*";

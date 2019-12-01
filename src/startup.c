@@ -119,15 +119,8 @@ void __near _SYSDEBUG_DUMP_InOutRes (const char *_file, unsigned _line, const ch
 
 /* (+|-)InOutRes(+|-): prefix "+" means IO state check on enter, postfix "+" - on exit. */
 
-void       __far  cc_AssignFile (_cc_iobuf *f, void *buffer, uint16_t size, char *name); /* -InOutRes- */
-void       __far  cc_SetFileBuffer (_cc_iobuf *f, void *buffer, uint16_t size); /* -InOutRes- */
-void       __near cc_SetFileMode (_cc_iobuf *f, uint16_t mode);         /* -InOutRes- */
-void       __far  cc_FileReset (_cc_iobuf *f);                          /* -InOutRes- */
-void       __far  cc_FileRewrite (_cc_iobuf *f);                        /* -InOutRes- */
-void       __far  cc_FileAppend (_cc_iobuf *f);                         /* -InOutRes- */
-inoutres_t __far  cc_FileFlush (_cc_iobuf *f);                          /* -InOutRes+ */
-inoutres_t __far  cc_FileClose (_cc_iobuf *f);                          /* -InOutRes+ */
-inoutres_t __far  _cc_FileFlushClose (_cc_iobuf *f, bool do_close);     /* -InOutRes+ */
+void       __near _cc_FileSetMode (_cc_iobuf *f, uint16_t mode);        /* -InOutRes- */
+inoutres_t __near _cc_FileFlushClose (_cc_iobuf *f, bool do_close);     /* -InOutRes+ */
 inoutres_t __far  _cc_FileIO (_cc_iobuf *f, char index);                /* -InOutRes+ */
 inoutres_t __far  _sysio_file_read (_cc_iobuf *f);                      /* -InOutRes- */
 inoutres_t __far  _sysio_file_write (_cc_iobuf *f);                     /* -InOutRes- */
@@ -135,16 +128,14 @@ inoutres_t __far  _sysio_device_write (_cc_iobuf *f);                   /* -InOu
 inoutres_t __far  _sysio_file_close (_cc_iobuf *f);                     /* -InOutRes- */
 bool       __far  _iostream_read_string (_cc_iobuf_reader *stream);     /* +InOutRes+ */
 inoutres_t __near _sysio_write_pad_string (_cc_iobuf *f, uint16_t _n);  /* +InOutRes+ */
-inoutres_t __near FileWrite (_cc_iobuf *f, void *src, uint16_t _n);     /* +InOutRes+ */
+inoutres_t __near _cc_FileWrite (_cc_iobuf *f, void *src, uint16_t _n); /* +InOutRes+ */
 bool       __far  _iostream_find_string_end (_cc_iobuf_reader *stream);
 bool       __far  _iostream_end_of_line (_cc_iobuf_reader *stream);
 inoutres_t __far  _sysio_call_in_out (_cc_iobuf *f);                    /* +InOutRes+ */
 inoutres_t __far  _sysio_call_flush (_cc_iobuf *f);                     /* +InOutRes+ */
-char       __far  FileReadChar (_cc_iobuf *f);                          /* +InOutRes+ */
 bool       __far  _iostream_read_line (_cc_iobuf_reader *stream);
 bool       __far  _iostream_read_find_printable (_cc_iobuf_reader *stream);
 bool       __far  _iostream_read_printable (_cc_iobuf_reader *stream);
-inoutres_t __far  FileWriteNumber (_cc_iobuf *f, uint32_t value, uint16_t padding);
 inoutres_t __far  _sys_file_open (_cc_iobuf *f);                        /* -InOutRes- */
 void       __near _sys_file_append (_cc_iobuf *f);                      /* -InOutRes- */
 uint16_t   __near _sys_store_sint32_decimal (int32_t value, char *endptr, char **startptr);
@@ -152,7 +143,7 @@ uint16_t   __near _sys_store_uint32 (uint32_t value, uint8_t base, char *endptr,
 bool       __near _sys_strtol (char *s, uint16_t len, int32_t *_n, uint16_t *count);
 void       __near _sys_clear_dataseg (void);
 
-void __far cc_AssignFile (_cc_iobuf *f, void *buffer, uint16_t size, char *name)
+void __far cc_FileAssign (_cc_iobuf *f, void *buffer, uint16_t size, char *name)
 {
     SYSDEBUG_INFO ("Called.");
     f->handle = cc_UnusedHandle;
@@ -170,7 +161,7 @@ void __far cc_AssignFile (_cc_iobuf *f, void *buffer, uint16_t size, char *name)
     strncpy (f->name, name, cc_PathStr_size);
 }
 
-void __far cc_SetFileBuffer (_cc_iobuf *f, void *buffer, uint16_t size)
+void __far cc_FileSetTextBuf (_cc_iobuf *f, void *buffer, uint16_t size)
 {
     SYSDEBUG_INFO_ ("buf=%04x:%04x, size=%u", FP_SEG (buffer), FP_OFF (buffer), size);
     f->buf_size = size;
@@ -180,7 +171,7 @@ void __far cc_SetFileBuffer (_cc_iobuf *f, void *buffer, uint16_t size)
     SYSDEBUG_DUMP_FILE (f);
 }
 
-void __near cc_SetFileMode (_cc_iobuf *f, uint16_t mode)
+void __near _cc_FileSetMode (_cc_iobuf *f, uint16_t mode)
 {
     SYSDEBUG_INFO ("Called.");
     switch (f->mode)
@@ -207,19 +198,19 @@ void __near cc_SetFileMode (_cc_iobuf *f, uint16_t mode)
 void __far cc_FileReset (_cc_iobuf *f)
 {
     SYSDEBUG_INFO ("Called.");
-    cc_SetFileMode (f, cc_fmInput);
+    _cc_FileSetMode (f, cc_fmInput);
 }
 
 void __far cc_FileRewrite (_cc_iobuf *f)
 {
     SYSDEBUG_INFO ("Called.");
-    cc_SetFileMode (f, cc_fmOutput);
+    _cc_FileSetMode (f, cc_fmOutput);
 }
 
 void __far cc_FileAppend (_cc_iobuf *f)
 {
     SYSDEBUG_INFO ("Called.");
-    cc_SetFileMode (f, cc_fmInOut);
+    _cc_FileSetMode (f, cc_fmInOut);
 }
 
 inoutres_t __far cc_FileFlush (_cc_iobuf *f)
@@ -242,7 +233,7 @@ inoutres_t __far cc_FileClose (_cc_iobuf *f)
     return status;
 }
 
-inoutres_t __far _cc_FileFlushClose (_cc_iobuf *f, bool do_close)
+inoutres_t __near _cc_FileFlushClose (_cc_iobuf *f, bool do_close)
 {
     inoutres_t status = EINOUTRES_SUCCESS;
 
@@ -442,7 +433,7 @@ inoutres_t __near _sysio_write_pad_string (_cc_iobuf *f, uint16_t _n)
     return status;
 }
 
-inoutres_t __near FileWrite (_cc_iobuf *f, void *src, uint16_t _n)
+inoutres_t __near _cc_FileWrite (_cc_iobuf *f, void *src, uint16_t _n)
 {
     inoutres_t status = cc_InOutRes;
     char *source;
@@ -495,7 +486,7 @@ inoutres_t __near FileWrite (_cc_iobuf *f, void *src, uint16_t _n)
     return status;
 }
 
-inoutres_t __far FileSkipToNextLine (_cc_iobuf *f)
+inoutres_t __far cc_FileEOL (_cc_iobuf *f)
 {
     _cc_iobuf_reader stream;
     inoutres_t status;
@@ -573,12 +564,12 @@ bool __far _iostream_end_of_line (_cc_iobuf_reader *stream)
     return true;
 }
 
-inoutres_t __far FileWriteNewLine (_cc_iobuf *f)
+inoutres_t __far cc_FileWriteLn (_cc_iobuf *f)
 {
     inoutres_t status;
 
     SYSDEBUG_BEGIN ();
-    status = FileWrite (f, (void *) NewLine, 2);
+    status = _cc_FileWrite (f, (void *) NewLine, 2);
 
     if (status == EINOUTRES_SUCCESS)
         if (f->io.by_name.flush)
@@ -588,7 +579,7 @@ inoutres_t __far FileWriteNewLine (_cc_iobuf *f)
     return status;
 }
 
-inoutres_t __far FileFlushBuffer (_cc_iobuf *f)
+inoutres_t __far cc_FileFlushBuffer (_cc_iobuf *f)
 {
     inoutres_t status = cc_InOutRes;
 
@@ -631,7 +622,7 @@ inoutres_t __far _sysio_call_flush (_cc_iobuf *f)
     return status;
 }
 
-char __far FileReadChar (_cc_iobuf *f)
+char __far cc_FileReadChar (_cc_iobuf *f)
 {
     char c = 0x1a;
 
@@ -663,7 +654,7 @@ char __far FileReadChar (_cc_iobuf *f)
     return c;
 }
 
-inoutres_t __far FileWriteChar (_cc_iobuf *f, char _c, uint16_t _n)
+inoutres_t __far cc_FileWriteChar (_cc_iobuf *f, char _c, uint16_t _n)
 {
     inoutres_t status;
 
@@ -698,7 +689,7 @@ inoutres_t __far FileWriteChar (_cc_iobuf *f, char _c, uint16_t _n)
 /*
  * Returns length of read string.
  */
-unsigned __far FileReadString (_cc_iobuf *f, char *dest, uint16_t max)
+unsigned __far cc_FileReadString (_cc_iobuf *f, char *dest, uint16_t max)
 {
     _cc_iobuf_reader stream;
 
@@ -761,7 +752,7 @@ bool __far _iostream_read_line (_cc_iobuf_reader *stream)
     }
 }
 
-inoutres_t __far FileWriteString (_cc_iobuf *f, char *str, uint16_t _n)
+inoutres_t __far cc_FileWriteString (_cc_iobuf *f, char *str, uint16_t _n)
 {
     inoutres_t status;
     uint16_t len;
@@ -775,13 +766,13 @@ inoutres_t __far FileWriteString (_cc_iobuf *f, char *str, uint16_t _n)
         status = cc_InOutRes;
 
     if ((status == EINOUTRES_SUCCESS) && len)
-        status = FileWrite (f, str, len);
+        status = _cc_FileWrite (f, str, len);
 
     SYSDEBUG_INFO_ ("End (status=%i)", status);
     return status;
 }
 
-int32_t __far FileReadNumber (_cc_iobuf *f)
+int32_t __far cc_FileReadInteger (_cc_iobuf *f)
 {
     _cc_iobuf_reader stream;
     char str [32];
@@ -910,7 +901,7 @@ bool __far _iostream_read_printable (_cc_iobuf_reader *stream)
     return true;
 }
 
-inoutres_t __far FileWriteNumber (_cc_iobuf *f, uint32_t value, uint16_t padding)
+inoutres_t __far cc_FileWriteInteger (_cc_iobuf *f, uint32_t value, uint16_t padding)
 {
     inoutres_t status;
     char tmp[32], *startptr;
@@ -924,7 +915,7 @@ inoutres_t __far FileWriteNumber (_cc_iobuf *f, uint32_t value, uint16_t padding
 
     /* FIXME: no check for status in original code */
 
-    status = FileWrite (f, startptr, len);
+    status = _cc_FileWrite (f, startptr, len);
     SYSDEBUG_INFO_ ("End (status=%i)", status);
     return status;
 }
@@ -1582,9 +1573,9 @@ void _cc_startup(void)
         _cc_argc = data.count;
     else
         _cc_argc = 0;
-    cc_AssignFile (&cc_Input, _stdin_buf, STDINBUF_SIZE, "");
+    cc_FileAssign (&cc_Input, _stdin_buf, STDINBUF_SIZE, "");
     cc_FileReset (&cc_Input);
-    cc_AssignFile (&cc_Output, _stdout_buf, STDOUTBUF_SIZE, "");
+    cc_FileAssign (&cc_Output, _stdout_buf, STDOUTBUF_SIZE, "");
     cc_FileRewrite (&cc_Output);
 }
 

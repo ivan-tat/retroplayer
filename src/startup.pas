@@ -47,6 +47,23 @@ procedure _cc_startup;
 procedure _cc_ExitWithError;
 procedure _cc_Exit;
 
+procedure cc_FileAssign;
+procedure cc_FileSetTextBuf;
+procedure cc_FileReset;
+procedure cc_FileRewrite;
+procedure cc_FileAppend;
+procedure cc_FileFlush;
+procedure cc_FileClose;
+procedure cc_FileEOL;
+procedure cc_FileReadString;
+procedure cc_FileReadChar;
+procedure cc_FileReadInteger;
+procedure cc_FileWriteString;
+procedure cc_FileWriteChar;
+procedure cc_FileWriteInteger;
+procedure cc_FileWriteLn;
+procedure cc_FileFlushBuffer;
+
 implementation
 
 uses
@@ -86,5 +103,22 @@ procedure _cc_local_int23; external;
 procedure _cc_startup; external;
 procedure _cc_ExitWithError; external;
 procedure _cc_Exit; external;
+
+procedure cc_FileAssign; external;
+procedure cc_FileSetTextBuf; external;
+procedure cc_FileReset; external;
+procedure cc_FileRewrite; external;
+procedure cc_FileAppend; external;
+procedure cc_FileFlush; external;
+procedure cc_FileClose; external;
+procedure cc_FileEOL; external;
+procedure cc_FileReadString; external;
+procedure cc_FileReadChar; external;
+procedure cc_FileReadInteger; external;
+procedure cc_FileWriteString; external;
+procedure cc_FileWriteChar; external;
+procedure cc_FileWriteInteger; external;
+procedure cc_FileWriteLn; external;
+procedure cc_FileFlushBuffer; external;
 
 end.

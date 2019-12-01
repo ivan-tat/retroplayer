@@ -49,12 +49,12 @@ int main (int argc, const char **argv)
     }
 
     /*
-    FileReadString (&cc_Input, &s, 255);
+    cc_FileReadString (&cc_Input, &s, 255);
     SYSDEBUG_INFO_ ("strlen=%i", strlen (&s));
-    FileSkipToNextLine (&cc_Input);
-    FileWriteString (&cc_Output, &s, 0);
-    FileWriteNewLine (&cc_Output);
-    FileFlushBuffer (&cc_Output);
+    cc_FileEOL (&cc_Input);
+    cc_FileWriteString (&cc_Output, &s, 0);
+    cc_FileWriteLn (&cc_Output);
+    cc_FileFlushBuffer (&cc_Output);
     /**/
 
     /*
@@ -73,26 +73,26 @@ int main (int argc, const char **argv)
         WriteLn (Output, 'Value="', l, '"');
     end.
     */
-    FileWriteString (&cc_Output, "This is a simple console application.", 0);
-    FileWriteNewLine (&cc_Output);
-    FileWriteString (&cc_Output, "Yes, it`s true.", 0);
-    FileWriteNewLine (&cc_Output);
-    FileWriteString (&cc_Output, "Enter text: ", 0);
-    FileFlushBuffer (&cc_Output);
-    FileReadString (&cc_Input, &s, 255);
-    FileSkipToNextLine (&cc_Input);
-    FileWriteString (&cc_Output, "Text=\"", 0);
-    FileWriteString (&cc_Output, &s, 0);
-    FileWriteChar (&cc_Output, '"', 0);
-    FileWriteNewLine (&cc_Output);
-    FileWriteString (&cc_Output, "Enter long integer number (-2^32...2^32-1): ", 0);
-    FileFlushBuffer (&cc_Output);
-    l = FileReadNumber (&cc_Input);
-    FileSkipToNextLine (&cc_Input);
-    FileWriteString (&cc_Output, "Value=\"", 0);
-    FileWriteNumber (&cc_Output, l, 0);
-    FileWriteChar (&cc_Output, '"', 0);
-    FileWriteNewLine (&cc_Output);
+    cc_FileWriteString (&cc_Output, "This is a simple console application.", 0);
+    cc_FileWriteLn (&cc_Output);
+    cc_FileWriteString (&cc_Output, "Yes, it`s true.", 0);
+    cc_FileWriteLn (&cc_Output);
+    cc_FileWriteString (&cc_Output, "Enter text: ", 0);
+    cc_FileFlushBuffer (&cc_Output);
+    cc_FileReadString (&cc_Input, &s, 255);
+    cc_FileEOL (&cc_Input);
+    cc_FileWriteString (&cc_Output, "Text=\"", 0);
+    cc_FileWriteString (&cc_Output, &s, 0);
+    cc_FileWriteChar (&cc_Output, '"', 0);
+    cc_FileWriteLn (&cc_Output);
+    cc_FileWriteString (&cc_Output, "Enter long integer number (-2^32...2^32-1): ", 0);
+    cc_FileFlushBuffer (&cc_Output);
+    l = cc_FileReadInteger (&cc_Input);
+    cc_FileEOL (&cc_Input);
+    cc_FileWriteString (&cc_Output, "Value=\"", 0);
+    cc_FileWriteInteger (&cc_Output, l, 0);
+    cc_FileWriteChar (&cc_Output, '"', 0);
+    cc_FileWriteLn (&cc_Output);
     /**/
     SYSDEBUG_INFO_ ("value=%l", (int32_t) l);
     SYSDEBUG_END ();
