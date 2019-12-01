@@ -1,6 +1,6 @@
 #!/bin/bash
 # This script must be run in GNU/Linux.
-# Packages used: coreutils, wget, unzip, grep, sudo.
+# Packages used: coreutils, wget, tar, grep, sudo.
 
 set -e
 . ./setup.conf
@@ -16,11 +16,11 @@ echo_warn() {
 }
 
 if [ ! -e "$SYS_WATCOM_LATEST_DIR" ]; then
-    wget -c 'https://github.com/open-watcom/travis-ci-ow-builds/archive/master.zip' -O "$TMPDIR/watcom.zip"
+    wget -c 'https://github.com/open-watcom/open-watcom-v2/releases/download/Last-CI-build/ow-snapshot.tar.gz' -O "$TMPDIR/watcom.tar.gz"
     rm -rf "$TMPDIR/watcom"
-    unzip -q "$TMPDIR/watcom.zip" -d "$TMPDIR/watcom"
-    sudo mv "$TMPDIR/watcom/travis-ci-ow-builds-master" "$SYS_WATCOM_LATEST_DIR"
-    rm -rf "$TMPDIR/watcom"
+    mkdir -p "$TMPDIR/watcom"
+    tar -xf "$TMPDIR/watcom.tar.gz" -C "$TMPDIR/watcom"
+    sudo mv "$TMPDIR/watcom" "$SYS_WATCOM_LATEST_DIR"
     echo_info "Created '$SYS_WATCOM_LATEST_DIR' directory."
 else
     echo_warn "Skip: Target '$SYS_WATCOM_LATEST_DIR' already exists."
