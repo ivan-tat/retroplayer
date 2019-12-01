@@ -38,12 +38,12 @@ typedef void __near emGetName_t (MIXCHN *chn, char *__s, size_t __maxlen);
 // Effect's methods table
 typedef struct effMethodsTable_t
 {
-    emInit_t   __near *init;
-    emHandle_t __near *handle;
-    emTick_t   __near *tick;
-    emCont_t   __near *cont;
-    emStop_t   __near *stop;
-    emGetName_t __near *get_name;
+    emInit_t   *init;
+    emHandle_t *handle;
+    emTick_t   *tick;
+    emCont_t   *cont;
+    emStop_t   *stop;
+    emGetName_t *get_name;
 };
 typedef struct effMethodsTable_t EFFMT;
 
