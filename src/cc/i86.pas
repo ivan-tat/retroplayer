@@ -12,6 +12,14 @@ interface
 
 (*$I defines.pas*)
 
+(*$ifdef DEFINE_LOCAL_DATA*)
+
+var
+    _cc_delay_base_ticks: array [0..7] of Byte;
+
+(*$endif*)
+
+procedure cc_delay_init;
 procedure cc_delay;
 procedure cc_intr;
 procedure _cc_DoINTR;
@@ -22,13 +30,14 @@ uses
     pascal,
     watcom,
     crt;
-
+(*
 procedure pascal_delay(count: word); far;
 begin
     crt.Delay(count);
 end;
-
+*)
 (*$L i86\delay.obj*)
+procedure cc_delay_init; external;
 procedure cc_delay; external;
 
 (*$L i86\intr.obj*)

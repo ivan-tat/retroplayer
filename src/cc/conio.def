@@ -1,0 +1,10 @@
+ifndef CONIO_DEF_INCLUDED
+CONIO_DEF_INCLUDED equ 1
+
+; private
+extern cc_gotbreak: byte
+
+; public
+extern cc_checkbreak: byte
+
+endif   ; CONIO_DEF_INCLUDED

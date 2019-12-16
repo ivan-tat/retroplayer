@@ -13,6 +13,8 @@
 #include <stdint.h>
 #include "cc/i86.h"
 #include "hw/vbios.h"
+#include "cc/dos.h"
+#include "cc/conio/ints.h"
 #include "cc/conio.h"
 
 #ifdef DEFINE_LOCAL_DATA
@@ -26,7 +28,7 @@ union text_rect_t cc_windmin = { .value = 0 };
 union text_rect_t cc_windmax = { .value = 0 };
 uint8_t cc_textattrorig = 0;
 uint8_t cc_textattr = 0;
-char cc_lastkey = 0;
+char cc_lastscancode = 0;
 bool cc_checkeof = false;
 bool cc_gotbreak = false;
 bool cc_checkbreak = false;
@@ -104,7 +106,7 @@ void _cc_console_on_start(void)
 
     vbios_query_video_info(&video);
 
-    if ((video.mode > _TEXTC80) || (video.mode != _TEXTMONO))
+    if ((video.mode > _TEXTC80) && (video.mode != _TEXTMONO))
         _cc_console_set_mode(_TEXTC80);
 
     _cc_console_on_mode_change();
@@ -112,12 +114,19 @@ void _cc_console_on_start(void)
     cc_textattrorig = (vbios_get_character_and_attribute(0) >> 8) & 0x7f;
     cc_textattr = cc_textattrorig;
     cc_checkeof = false;
-    cc_lastkey = 0;
+    cc_lastscancode = 0;
     cc_gotbreak = false;
     cc_checkbreak = true;
+    _cc_dos_setvect (0x1b, _cc_local_int1b_asm);
 }
 
 void cc_console_init(void)
 {
     _cc_console_on_start();
+#if LINKER_TPC != 1
+    cc_TextAssignCrt (&cc_Input, cc_InputBuf, STDINBUF_SIZE);
+    cc_TextReset (&cc_Input);
+    cc_TextAssignCrt (&cc_Output, cc_OutputBuf, STDOUTBUF_SIZE);
+    cc_TextRewrite (&cc_Output);
+#endif
 }

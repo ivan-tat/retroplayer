@@ -187,6 +187,10 @@ void __near update_osci_stereo(void)
 
 void __far playosci_main (void)
 {
+    system_init ();
+    console_init ();
+    delay_init ();
+
     register_debug ();
     register_hwowner ();
     register_pic ();
@@ -196,8 +200,6 @@ void __far playosci_main (void)
     register_sbctl ();
     register_s3mplay ();
     register_playosci ();
-
-    console_init ();
 
     if (!environ_init ())
     {

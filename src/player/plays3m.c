@@ -711,6 +711,10 @@ void __far plays3m_main (void)
 
     /* TODO: make separate custom_main() */
 
+    system_init ();
+    console_init ();
+    delay_init ();
+
     register_debug ();
     register_hwowner ();
     register_pic ();
@@ -720,8 +724,6 @@ void __far plays3m_main (void)
     register_sbctl ();
     register_s3mplay ();
     register_plays3m ();
-
-    console_init ();
 
     if (!environ_init())
     {

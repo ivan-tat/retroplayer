@@ -430,7 +430,8 @@ endif
 ow_OBJS := \
  i4d.o \
  i4m.o \
- i8d086.o
+ i8d086.o \
+ i8m086.o
 
 ## Build rules
 $(ow_OBJS): $(CLIB_WATCOM)
@@ -446,6 +447,9 @@ i4m.obj: i4m.o
 	cp $< $@
 i8d086.obj: i8d086.o
 	cp $< $@
+i8m086.obj: i8m086.o
+	cp $< $@
+
 
 ow_OBJS += $(ow_OBJS_TP)
 
@@ -567,11 +571,14 @@ tests_common_OBJS := \
  i4d.o \
  i4m.o \
  i8d086.o \
+ i8m086.o \
  commdbg.o \
  sysdbg.o \
  startup.o \
+ startup/chkio.o \
  startup/ints.o \
- hw/cpu.o
+ hw/cpu.o \
+ hw/vbios.o
 
 ## Build rules
 
@@ -585,6 +592,17 @@ test_exe_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(test_exe_SRCS)))
 $(test_exe_EXES): $(tests_common_OBJS) $(test_exe_OBJS)
 $(test_exe_EXES): $(CCLIB)
 	$(LD) $(LFLAGS) library $< $(patsubst %,file %,$(tests_common_OBJS)) $(patsubst %,file %,$(test_exe_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,map,fullheader name $@
+
+## testcrt.exe
+
+testcrt_exe_SRCS := $(filter %/testcrt.c,$(tests_SRCS))
+testcrt_exe_OBJS := $(patsubst %.c,%.o,$(filter %.c,$(testcrt_exe_SRCS)))
+testcrt_exe_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(testcrt_exe_SRCS)))
+
+## TODO: remove object files dependencies by puttin all object files in libraries and pass them to linker
+$(testcrt_exe_EXES): $(tests_common_OBJS) $(testcrt_exe_OBJS)
+$(testcrt_exe_EXES): $(CCLIB)
+	$(LD) $(LFLAGS) library $< $(patsubst %,file %,$(tests_common_OBJS)) $(patsubst %,file %,$(testcrt_exe_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,map,fullheader name $@
 
 ##=------------------------------=##
 ## Include dependency information ##

@@ -8,6 +8,7 @@ uses
     pascal,
     startup,
     strutils,
+    i86,
     conio,
     stdio,
     stdlib,
@@ -55,6 +56,5 @@ uses
 procedure plays3m_main; far; external;
 
 begin
-    _cc_startup;
     plays3m_main;
 end.

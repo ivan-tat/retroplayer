@@ -8,6 +8,7 @@ uses
     pascal,
     startup,
     strutils,
+    i86,
     conio,
     stdio,
     stdlib,
@@ -43,6 +44,5 @@ uses
 procedure smalls3m_main; far; external;
 
 begin
-    _cc_startup;
     smalls3m_main;
 end.

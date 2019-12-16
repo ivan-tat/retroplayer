@@ -15,6 +15,10 @@ interface
 
 (*$ifdef DEFINE_LOCAL_DATA*)
 
+const
+    STDINBUF_SIZE = 128;
+    STDOUTBUF_SIZE = 128;
+
 var
     _cc_psp: Word;          (* absolute System.PrefixSeg; *)
     _cc_argc: Word;
@@ -25,7 +29,9 @@ var
     cc_InOutRes: Integer       absolute System.InOutRes;
     cc_Test8086: Byte;      (* absolute System.Test8086; *)
     cc_Input: File;         (* absolute System.Input; *)
+    cc_InputBuf: array [1..STDINBUF_SIZE] of Byte;
     cc_Output: File;        (* absolute System.Output; *)
+    cc_OutputBuf: array [1..STDOUTBUF_SIZE] of Byte;
 
 const
     _cc_ExitList: array[1..32] of Pointer = (
@@ -43,26 +49,29 @@ procedure pascal_paramstr(var dest: String; i: Byte);
 procedure pascal_Halt(status: Integer);
 
 (*procedure _cc_on_exit;*)
-procedure _cc_startup;
+procedure cc_system_init;
 procedure _cc_ExitWithError;
 procedure _cc_Exit;
 
-procedure cc_FileAssign;
-procedure cc_FileSetTextBuf;
-procedure cc_FileReset;
-procedure cc_FileRewrite;
-procedure cc_FileAppend;
-procedure cc_FileFlush;
-procedure cc_FileClose;
-procedure cc_FileEOL;
-procedure cc_FileReadString;
-procedure cc_FileReadChar;
-procedure cc_FileReadInteger;
-procedure cc_FileWriteString;
-procedure cc_FileWriteChar;
-procedure cc_FileWriteInteger;
-procedure cc_FileWriteLn;
-procedure cc_FileFlushBuffer;
+procedure cc_IOResult;
+procedure _cc_CheckInOutRes;
+
+procedure cc_TextAssign;
+procedure cc_TextSetTextBuf;
+procedure cc_TextReset;
+procedure cc_TextRewrite;
+procedure cc_TextAppend;
+procedure cc_TextFlush;
+procedure cc_TextClose;
+procedure cc_TextEOL;
+procedure cc_TextReadString;
+procedure cc_TextReadChar;
+procedure cc_TextReadInteger;
+procedure cc_TextWriteString;
+procedure cc_TextWriteChar;
+procedure cc_TextWriteInteger;
+procedure cc_TextWriteLn;
+procedure cc_TextSync;
 
 implementation
 
@@ -95,30 +104,36 @@ end;
 procedure _cc_local_int0_asm; external;
 procedure _cc_local_int23_asm; external;
 
+(*$l startup\chkio.obj*)
+
+procedure _cc_CheckInOutRes; external;
+
 (*$l startup.obj*)
 
 procedure _cc_local_int0; external;
 procedure _cc_local_int23; external;
 (*procedure _cc_on_exit; external;*)
-procedure _cc_startup; external;
+procedure cc_system_init; external;
 procedure _cc_ExitWithError; external;
 procedure _cc_Exit; external;
 
-procedure cc_FileAssign; external;
-procedure cc_FileSetTextBuf; external;
-procedure cc_FileReset; external;
-procedure cc_FileRewrite; external;
-procedure cc_FileAppend; external;
-procedure cc_FileFlush; external;
-procedure cc_FileClose; external;
-procedure cc_FileEOL; external;
-procedure cc_FileReadString; external;
-procedure cc_FileReadChar; external;
-procedure cc_FileReadInteger; external;
-procedure cc_FileWriteString; external;
-procedure cc_FileWriteChar; external;
-procedure cc_FileWriteInteger; external;
-procedure cc_FileWriteLn; external;
-procedure cc_FileFlushBuffer; external;
+procedure cc_IOResult; external;
+
+procedure cc_TextAssign; external;
+procedure cc_TextSetTextBuf; external;
+procedure cc_TextReset; external;
+procedure cc_TextRewrite; external;
+procedure cc_TextAppend; external;
+procedure cc_TextFlush; external;
+procedure cc_TextClose; external;
+procedure cc_TextEOL; external;
+procedure cc_TextReadString; external;
+procedure cc_TextReadChar; external;
+procedure cc_TextReadInteger; external;
+procedure cc_TextWriteString; external;
+procedure cc_TextWriteChar; external;
+procedure cc_TextWriteInteger; external;
+procedure cc_TextWriteLn; external;
+procedure cc_TextSync; external;
 
 end.

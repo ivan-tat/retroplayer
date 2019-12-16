@@ -2,7 +2,9 @@ ifndef STARTUP_DEF_INCLUDED
 STARTUP_DEF_INCLUDED equ 1
 
 extern _cc_psp: word
+extern cc_InOutRes: word
 extern _cc_local_int0: far proc
 extern _cc_local_int23: far proc
+extern _cc_ExitWithError: far proc
 
-endif	; STARTUP_DEF_INCLUDED
+endif   ; STARTUP_DEF_INCLUDED

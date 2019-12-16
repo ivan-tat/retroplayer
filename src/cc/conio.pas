@@ -19,7 +19,7 @@ uses
 var
     (* private, hidden in Crt unit *)
     cc_gotbreak: Boolean;
-    cc_lastkey: Char;
+    cc_lastscancode: Byte;
     cc_screenwidth: Word;
     cc_screenheight: Word;
     cc_textattrorig: Byte;
@@ -58,11 +58,15 @@ procedure _cc_console_on_mode_change;
 procedure _cc_console_on_start;
 procedure cc_console_init;
 
+procedure cc_TextAssignCrt;
+
 implementation
 
 uses
+    watcom,
     i86,
-    vbios;
+    vbios,
+    dos_;
 
 (*$L conio\inp.obj*)
 (*
@@ -104,10 +108,16 @@ procedure cc_kbhit; external;
 (*$L conio\getch.obj*)
 procedure cc_getch; external;
 
+(*$L conio\ints.obj*)
+procedure _cc_local_int1b_asm; external;
+
 (*$L conio\init.obj*)
 procedure _cc_console_set_mode; external;
 procedure _cc_console_on_mode_change; external;
 procedure _cc_console_on_start; external;
 procedure cc_console_init; external;
+
+(*$L conio\crt.obj*)
+procedure cc_TextAssignCrt; external;
 
 end.

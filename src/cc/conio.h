@@ -81,7 +81,7 @@ typedef union text_rect_t {
 /* Private */
 
 extern bool     cc_gotbreak;
-extern char     cc_lastkey;
+extern char     cc_lastscancode;
 extern uint16_t cc_screenwidth;
 extern uint16_t cc_screenheight;
 extern uint8_t  cc_textattrorig;
@@ -124,6 +124,8 @@ void _cc_console_on_start(void);
 /* Publics */
 
 void cc_console_init(void);
+
+void __far cc_TextAssignCrt (_cc_iobuf *f, void *buffer, uint16_t size);
 
 /*** Aliases ***/
 
@@ -173,7 +175,7 @@ void cc_console_init(void);
 //#pragma aux cc_outp "*";
 
 #pragma aux cc_gotbreak "*";
-#pragma aux cc_lastkey "*";
+#pragma aux cc_lastscancode "*";
 #pragma aux cc_screenwidth "*";
 #pragma aux cc_screenheight "*";
 #pragma aux cc_textattrorig "*";
@@ -205,6 +207,8 @@ void cc_console_init(void);
 #pragma aux _cc_console_set_mode "*";
 #pragma aux _cc_console_on_start "*";
 #pragma aux cc_console_init "*";
+
+#pragma aux cc_TextAssignCrt "*";
 
 #endif  /* __WATCOMC__ */
 

@@ -76,6 +76,9 @@ typedef struct _cc_iobuf_t {
 
 /* Global variables */
 
+#define STDINBUF_SIZE 128
+#define STDOUTBUF_SIZE 128
+
 extern uint16_t     _cc_psp;
 extern uint16_t     _cc_argc;
 extern const char **_cc_argv;
@@ -85,7 +88,9 @@ extern int16_t      cc_ExitCode;
 extern inoutres_t   cc_InOutRes;
 extern uint8_t      cc_Test8086;
 extern _cc_iobuf    cc_Input;
+extern uint8_t      cc_InputBuf[STDINBUF_SIZE];
 extern _cc_iobuf    cc_Output;
+extern uint8_t      cc_OutputBuf[STDOUTBUF_SIZE];
 
 /* Internal variables */
 #define _CC_ATEXIT_MAX 32
@@ -94,7 +99,7 @@ extern uint8_t _cc_ExitCount;
 
 //void _cc_on_exit(void);   // internal
 
-void __noreturn _cc_ExitWithError (int16_t status, void __far *addr);
+void __noreturn __far __cdecl _cc_ExitWithError (int16_t status, void __far *addr);
 void __noreturn _cc_Exit (int16_t status);
 
 /* Arguments handling */
@@ -107,37 +112,43 @@ extern void     __noreturn __far __pascal pascal_Halt (uint16_t status);
 
 /* System unit */
 
+inoutres_t __far cc_IOResult (void);
+
+extern __far _cc_CheckInOutRes (void);
+
 /* (+|-)InOutRes(+|-): prefix "+" means IO state check is done on enter, postfix "+" - on exit. */
 
-void       __far  cc_FileAssign (_cc_iobuf *f, void *buffer, uint16_t size, char *name); /* -InOutRes- */
-void       __far  cc_FileSetTextBuf (_cc_iobuf *f, void *buffer, uint16_t size); /* -InOutRes- */
-void       __far  cc_FileReset (_cc_iobuf *f);                              /* -InOutRes- */
-void       __far  cc_FileRewrite (_cc_iobuf *f);                            /* -InOutRes- */
-void       __far  cc_FileAppend (_cc_iobuf *f);                             /* -InOutRes- */
-inoutres_t __far  cc_FileFlush (_cc_iobuf *f);                              /* -InOutRes+ */
-inoutres_t __far  cc_FileClose (_cc_iobuf *f);                              /* -InOutRes+ */
-inoutres_t __far  cc_FileEOL (_cc_iobuf *f);                                /* +InOutRes+ */
-unsigned   __far  cc_FileReadString (_cc_iobuf *f, char *dest, uint16_t max); /* +InOutRes? */
-char       __far  cc_FileReadChar (_cc_iobuf *f);                           /* +InOutRes+ */
-int32_t    __far  cc_FileReadInteger (_cc_iobuf *f);                        /* -InOutRes+ */
-inoutres_t __far  cc_FileWriteString (_cc_iobuf *f, char *str, uint16_t _n);/* +InOutRes+ */
-inoutres_t __far  cc_FileWriteChar (_cc_iobuf *f, char _c, uint16_t _n);    /* +InOutRes+ */
-inoutres_t __far  cc_FileWriteInteger (_cc_iobuf *f, uint32_t value, uint16_t padding); /* +InOutRes+ */
-inoutres_t __far  cc_FileWriteLn (_cc_iobuf *f);                            /* +InOutRes+ */
-inoutres_t __far  cc_FileFlushBuffer (_cc_iobuf *f);                        /* +InOutRes+ */
+void       __far  cc_TextAssign (_cc_iobuf *f, void *buffer, uint16_t size, char *name); /* -InOutRes- */
+void       __far  cc_TextSetTextBuf (_cc_iobuf *f, void *buffer, uint16_t size); /* -InOutRes- */
+void       __far  cc_TextReset (_cc_iobuf *f);                              /* -InOutRes- */
+void       __far  cc_TextRewrite (_cc_iobuf *f);                            /* -InOutRes- */
+void       __far  cc_TextAppend (_cc_iobuf *f);                             /* -InOutRes- */
+inoutres_t __far  cc_TextFlush (_cc_iobuf *f);                              /* -InOutRes+ */
+inoutres_t __far  cc_TextClose (_cc_iobuf *f);                              /* -InOutRes+ */
+inoutres_t __far  cc_TextEOL (_cc_iobuf *f);                                /* +InOutRes+ */
+unsigned   __far  cc_TextReadString (_cc_iobuf *f, char *dest, uint16_t max); /* +InOutRes? */
+char       __far  cc_TextReadChar (_cc_iobuf *f);                           /* +InOutRes+ */
+int32_t    __far  cc_TextReadInteger (_cc_iobuf *f);                        /* -InOutRes+ */
+inoutres_t __far  cc_TextWriteString (_cc_iobuf *f, char *str, uint16_t padding); /* +InOutRes+ */
+inoutres_t __far  cc_TextWriteChar (_cc_iobuf *f, char _c, uint16_t padding); /* +InOutRes+ */
+inoutres_t __far  cc_TextWriteInteger (_cc_iobuf *f, uint32_t value, uint16_t padding); /* +InOutRes+ */
+inoutres_t __far  cc_TextWriteLn (_cc_iobuf *f);                            /* +InOutRes+ */
+inoutres_t __far  cc_TextSync (_cc_iobuf *f);                               /* +InOutRes+ */
 
-void __noreturn __far __stdcall _cc_local_int0 (void __far *addr, uint16_t flags);
-void __noreturn __far __stdcall _cc_local_int23 (void __far *addr, uint16_t flags);
+void __noreturn __far __cdecl _cc_local_int0 (void __far *addr, uint16_t flags);
+void __noreturn __far __cdecl _cc_local_int23 (void __far *addr, uint16_t flags);
 
 /* Application startup */
 
-void _cc_startup(void);
+void cc_system_init (void);
 
 /*** Aliases ***/
 
 #define _psp _cc_psp
 #define _argc _cc_argc
 #define _argv _cc_argv
+#define system_init cc_system_init
+#define _checkinoutres _cc_CheckInOutRes
 
 /*** Linking ***/
 
@@ -152,7 +163,9 @@ void _cc_startup(void);
 #pragma aux cc_InOutRes "*";
 #pragma aux cc_Test8086 "*";
 #pragma aux cc_Input "*";
+#pragma aux cc_InputBuf "*";
 #pragma aux cc_Output "*";
+#pragma aux cc_OutputBuf "*";
 
 #pragma aux _cc_ExitList "*";
 #pragma aux _cc_ExitCount "*";
@@ -166,27 +179,30 @@ void _cc_startup(void);
 #pragma aux pascal_Halt       "*";
 #endif  /* LINKER_TPC == 1 */
 
-#pragma aux cc_FileAssign "*";
-#pragma aux cc_FileSetTextBuf "*";
-#pragma aux cc_FileReset "*";
-#pragma aux cc_FileRewrite "*";
-#pragma aux cc_FileAppend "*";
-#pragma aux cc_FileFlush "*";
-#pragma aux cc_FileClose "*";
-#pragma aux cc_FileEOL "*";
-#pragma aux cc_FileReadString "*";
-#pragma aux cc_FileReadChar "*";
-#pragma aux cc_FileReadInteger "*";
-#pragma aux cc_FileWriteString "*";
-#pragma aux cc_FileWriteChar "*";
-#pragma aux cc_FileWriteInteger "*";
-#pragma aux cc_FileWriteLn "*";
-#pragma aux cc_FileFlushBuffer "*";
+#pragma aux cc_IOResult "*";
+#pragma aux _cc_CheckInOutRes "*";
+
+#pragma aux cc_TextAssign "*";
+#pragma aux cc_TextSetTextBuf "*";
+#pragma aux cc_TextReset "*";
+#pragma aux cc_TextRewrite "*";
+#pragma aux cc_TextAppend "*";
+#pragma aux cc_TextFlush "*";
+#pragma aux cc_TextClose "*";
+#pragma aux cc_TextEOL "*";
+#pragma aux cc_TextReadString "*";
+#pragma aux cc_TextReadChar "*";
+#pragma aux cc_TextReadInteger "*";
+#pragma aux cc_TextWriteString "*";
+#pragma aux cc_TextWriteChar "*";
+#pragma aux cc_TextWriteInteger "*";
+#pragma aux cc_TextWriteLn "*";
+#pragma aux cc_TextSync "*";
 
 #pragma aux _cc_local_int0 "*";
 #pragma aux _cc_local_int23 "*";
 
-#pragma aux _cc_startup "*";
+#pragma aux cc_system_init "*";
 
 #endif  /* __WATCOMC__ */
 

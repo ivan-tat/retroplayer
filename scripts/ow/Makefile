@@ -42,7 +42,7 @@ asm_obj_names :=
 c_obj_names :=
 
 # Watcom specific
-noext_obj_names += i4d i4m i8d086
+noext_obj_names += i4d i4m i8d086 i8m086
 c_obj_names += xmsg.c cstart.c
 # <conio.h>
 c_obj_names += inp.c outp.c

@@ -16,18 +16,20 @@ INTS_TEXT segment word public use16 'CODE'
 assume cs:INTS_TEXT,ds:DGROUP
 
 public _cc_local_int0_asm
-; Stack:
-;   SP+0:   IP, CS, FLAGS - to get back to application via IRET
 _cc_local_int0_asm:
+    ; Stack:
+    ;   SS:[SP+0] (dword) = void __far *addr
+    ;   SS:[SP+4] (word)  = int flags
     mov     ax,DGROUP:_DATA
     mov     ds,ax
     call    far ptr _cc_local_int0
 
 public _cc_local_int23_asm
 ; To abort application raise carry flag and perform a far return via "RETF".
-; Stack:
-;   SP+0:   IP, CS, FLAGS - to get back to application via IRET;
 _cc_local_int23_asm:
+    ; Stack:
+    ;   SS:[SP+0] (dword) = void __far *addr
+    ;   SS:[SP+4] (word)  = int flags
     mov     ax,DGROUP:_DATA
     mov     ds,ax
     call    far ptr _cc_local_int23

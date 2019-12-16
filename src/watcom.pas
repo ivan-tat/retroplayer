@@ -25,6 +25,10 @@ procedure __u8dqe;
 procedure __u8dre;
 procedure __i8dqe;
 procedure __i8dre;
+procedure __U8ME;
+procedure __I8ME;
+procedure __U8M;
+procedure __I8M;
 
 implementation
 
@@ -45,5 +49,11 @@ procedure __u8dqe; external;
 procedure __u8dre; external;
 procedure __i8dqe; external;
 procedure __i8dre; external;
+
+(*$L i8m086.obj*)
+procedure __U8ME; external;
+procedure __I8ME; external;
+procedure __U8M; external;
+procedure __I8M; external;
 
 end.

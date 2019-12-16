@@ -72,8 +72,12 @@ enum
 #define INTR_TF CC_INTR_TF
 #define INTR_IF CC_INTR_IF
 #define INTR_DF CC_INTR_DF
-#define INTR_OF CC_INTR_OF
 
+/* Private */
+extern uint64_t _cc_delay_base_ticks;
+
+/* Public */
+extern void cc_delay_init (void);
 extern void cc_delay(unsigned int __milliseconds);
 
 #ifdef __WATCOMC__
@@ -105,6 +109,7 @@ extern void _cc_enable(void);
 
 /*** Aliases ***/
 
+#define delay_init cc_delay_init
 #define delay cc_delay
 #define intr cc_intr
 
@@ -131,6 +136,8 @@ extern void _cc_enable(void);
 
 #ifdef __WATCOMC__
 
+#pragma aux _cc_delay_base_ticks "*";
+#pragma aux cc_delay_init "*";
 #pragma aux cc_delay "*";
 #pragma aux cc_intr "*" parm [ ax ] [ bx cx ] modify [ ax bx cx dx es ];
 
