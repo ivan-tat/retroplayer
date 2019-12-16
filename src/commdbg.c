@@ -10,10 +10,9 @@
 #endif
 
 #include <stdint.h>
+#include "hexdigts.h"
 #include "cc/string.h"
 #include "commdbg.h"
-
-static const char _hexdigits[16] = "0123456789ABCDEF";
 
 /*
  * Example:
@@ -33,7 +32,7 @@ void __far _DEBUG_get_xnum (uint32_t value, char len, char *dest)
     count = len;
     while (count)
     {
-        *c = _hexdigits [value & 15];
+        *c = HEXDIGITS [value & 15];
         value >>= 4;
         c--;
         count--;
@@ -45,7 +44,7 @@ void __far _DEBUG_get_xnum (uint32_t value, char len, char *dest)
  * Example:
  *      #define MAX 16
  *      char s [MAX * 4 + 1];
- *      _DEBUG_get_xline (_hexdigits, 12, MAX, s);
+ *      _DEBUG_get_xline (HEXDIGITS, 12, MAX, s);
  *      // s = "30 31 32 33 34 35 36 37 38 39 41 42             0123456789AB";
  *
  *  Description:

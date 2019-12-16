@@ -28,23 +28,23 @@ function upstr(s: String): String;
 
 implementation
 
-const
-    hex: array [0..15 ] of char = '0123456789ABCDEF';
+uses
+    hexdigts;
 
 function hexb(value: byte): TString2;
 begin
     hexb[0] := #2;
-    hexb[1] := hex[value shr 4];
-    hexb[2] := hex[value and $0f];
+    hexb[1] := HEXDIGITS[value shr 4];
+    hexb[2] := HEXDIGITS[value and $0f];
 end;
 
 function hexw(value: word): TString4;
 begin
     hexw[0] := #4;
-    hexw[1] := hex[hi(value) shr 4];
-    hexw[2] := hex[hi(value) and $0f];
-    hexw[3] := hex[lo(value) shr 4];
-    hexw[4] := hex[lo(value) and $0f];
+    hexw[1] := HEXDIGITS[hi(value) shr 4];
+    hexw[2] := HEXDIGITS[hi(value) and $0f];
+    hexw[3] := HEXDIGITS[lo(value) shr 4];
+    hexw[4] := HEXDIGITS[lo(value) and $0f];
 end;
 
 function hexd(value: longint): TString8;
@@ -53,15 +53,15 @@ var
 begin
     hexd[0] := #8;
     w := value shr 16;
-    hexd[1] := hex[hi(w) shr 4];
-    hexd[2] := hex[hi(w) and $0f];
-    hexd[3] := hex[lo(w) shr 4];
-    hexd[4] := hex[lo(w) and $0f];
+    hexd[1] := HEXDIGITS[hi(w) shr 4];
+    hexd[2] := HEXDIGITS[hi(w) and $0f];
+    hexd[3] := HEXDIGITS[lo(w) shr 4];
+    hexd[4] := HEXDIGITS[lo(w) and $0f];
     w := value and $ffff;
-    hexd[5] := hex[hi(w) shr 4];
-    hexd[6] := hex[hi(w) and $0f];
-    hexd[7] := hex[lo(w) shr 4];
-    hexd[8] := hex[lo(w) and $0f];
+    hexd[5] := HEXDIGITS[hi(w) shr 4];
+    hexd[6] := HEXDIGITS[hi(w) and $0f];
+    hexd[7] := HEXDIGITS[lo(w) shr 4];
+    hexd[8] := HEXDIGITS[lo(w) and $0f];
 end;
 
 

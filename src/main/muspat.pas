@@ -51,6 +51,7 @@ procedure DEBUG_dump_pattern;
 implementation
 
 uses
+    hexdigts,
     i86,
     string_,
     stdio,

@@ -19,6 +19,7 @@ procedure _DEBUG_get_xline;
 implementation
 
 uses
+    hexdigts,
     pascal,
     string_;
 

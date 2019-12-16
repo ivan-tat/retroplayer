@@ -688,9 +688,10 @@ void __far muspatorder_free (MUSPATORDER *self)
 
 #if DEBUG == 1
 
+#include "hexdigts.h"
+
 static const char __halftones[16] = "cCdDefFgGaAb????";
 static const char __octaves[16] = "0123456789??????";
-static const char __hexdigits[16] = "0123456789ABCDEF";
 
 void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event)
 {
@@ -743,8 +744,8 @@ void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event)
         default:
             v = _get_instrument (v);
             v++;
-            s[3] = __hexdigits[v >> 4];
-            s[4] = __hexdigits[v & 0x0f];
+            s[3] = HEXDIGITS[v >> 4];
+            s[4] = HEXDIGITS[v & 0x0f];
             break;
         }
     }

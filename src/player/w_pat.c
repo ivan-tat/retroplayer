@@ -11,6 +11,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "hexdigts.h"
 #include "pascal.h"
 #include "cc/string.h"
 #include "cc/conio.h"
@@ -38,8 +39,6 @@ static const SCRWINVMT __win_pattern_vmt =
 };
 
 /* private data */
-
-static const char _hexdigits[16] = "0123456789ABCDEF";
 
 #define DISPLAY_COLUMNS 5
 
@@ -99,8 +98,8 @@ void __near draw_channel_event (MUSPATCHNEVENT *event)
     if ((_ins >= CHN_INS_MIN) && (_ins <= CHN_INS_MAX))
     {
         _ins = _get_instrument (_ins) + 1;
-        buf[1] = _hexdigits[_ins >> 4];
-        buf[2] = _hexdigits[_ins & 0x0f];
+        buf[1] = HEXDIGITS[_ins >> 4];
+        buf[2] = HEXDIGITS[_ins & 0x0f];
     }
     else
     {
@@ -111,8 +110,8 @@ void __near draw_channel_event (MUSPATCHNEVENT *event)
     buf[3] = ' ';
     if (_vol <= CHN_NOTEVOL_MAX)
     {
-        buf[4] = _hexdigits[_vol >> 4];
-        buf[5] = _hexdigits[_vol & 0x0f];
+        buf[4] = HEXDIGITS[_vol >> 4];
+        buf[5] = HEXDIGITS[_vol & 0x0f];
     }
     else
     if (_vol == CHN_NOTEVOL_NONE)
@@ -140,8 +139,8 @@ void __near draw_channel_event (MUSPATCHNEVENT *event)
         else
             buf[7] = '?';
 
-        buf[8] = _hexdigits[_parm >> 4];
-        buf[9] = _hexdigits[_parm & 0x0f];
+        buf[8] = HEXDIGITS[_parm >> 4];
+        buf[9] = HEXDIGITS[_parm & 0x0f];
     }
     buf[10] = 0;
     printf (

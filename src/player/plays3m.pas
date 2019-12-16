@@ -2,6 +2,7 @@
 program example_for_s3mplay;
 
 uses
+    hexdigts,
     watcom,
     types,
     pascal,

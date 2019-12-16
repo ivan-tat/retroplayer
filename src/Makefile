@@ -562,6 +562,7 @@ TMPS += $(tests_TMPS)
 ## Common objects for all tests
 
 tests_common_OBJS := \
+ hexdigts.o \
  startup/dosexe16.o \
  i4d.o \
  i4m.o \
