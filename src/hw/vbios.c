@@ -13,29 +13,26 @@
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/string.h"
+#include "hw/bios.h"
 #include "hw/vbios.h"
-
-#define Seg0040 0x40
 
 unsigned vbiosda_get_text_width(void)
 {
-    // Byte at 0x0040:0x004a - screen width in text columns
-    uint8_t value;
-    value = *(uint8_t *)(MK_FP(Seg0040, 0x4a));
+    uint16_t value;
+    value = get_BIOS_data_area_ptr ()->text_screen_width;
     return value ? value : 80;
 }
 
 unsigned vbiosda_get_text_height(void)
 {
-    // Byte at 0x0040:0x0084 - EGA text rows-1 (maximum valid row value)
     uint8_t value;
-    value = *(uint8_t *)(MK_FP(Seg0040, 0x84));
+    value = get_BIOS_data_area_ptr ()->EGA_text_rows;
     return value ? value + 1 : 25;
 }
 
 char *vbiosda_get_ega_misc_info(void)
 {
-    return (char *)MK_FP(Seg0040, 0x87);
+    return get_BIOS_data_area_var_ptr (char, EGA_misc_info);
 }
 
 void vbios_set_mode(uint8_t mode)
