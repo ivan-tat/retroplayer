@@ -41,11 +41,6 @@ uses
     printf,
     io;
 
-procedure pascal_write(s: pchar); far;
-begin
-    Write(s);
-end;
-
 (*$L stdio/fclose.obj*)
 procedure cc_fclose; external;
 (*$L stdio/fopen.obj*)

@@ -172,7 +172,43 @@ uint16_t vbios_get_character_and_attribute(uint8_t page)
     regs.h.ah = 8;
     regs.h.bh = page;
     intr(0x10, &regs);
-    return regs.h.al + (regs.h.bh << 8);
+    return regs.w.ax;
+}
+
+/*
+ * Description:
+ *      Write character and attribute at current cursor location.
+ *      In graphics modes "color" is a color number.
+ *      Does not update the cursor position.
+ */
+void vbios_put_character_and_attribute (uint8_t page, char c, uint8_t color, uint16_t count)
+{
+    union REGPACK regs;
+
+    regs.h.ah = 9;
+    regs.h.al = c;
+    regs.h.bl = color;
+    regs.h.bh = page;
+    regs.w.cx = count;
+    intr (0x10, &regs);
+}
+
+/*
+ * Description:
+ *      Write character without attribute at current cursor location and
+ *      update the cursor position. When the cursor advances to the end of
+ *      the last screen line - scroll the text up one line.
+ *      "color" is used only in graphics modes as a foreground color.
+ *      Characters 7, 0x0a, 0x0d are treated specially.
+ */
+void vbios_write_character_as_tty (char c, char color)
+{
+    union REGPACK regs;
+
+    regs.h.ah = 0x0e;
+    regs.h.al = c;
+    regs.h.bl = color;
+    intr(0x10, &regs);
 }
 
 void vbios_query_video_info(struct vbios_video_info_t *info)

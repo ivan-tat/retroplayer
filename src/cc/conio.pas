@@ -10,9 +10,6 @@ unit conio;
 
 interface
 
-uses
-    crt;
-
 (*$I defines.pas*)
 
 (*$ifdef DEFINE_LOCAL_DATA*)
@@ -24,14 +21,16 @@ var
     cc_screenheight: Word;
     cc_textattrorig: Byte;
     (* publics *)
-    cc_checkbreak: Boolean absolute crt.CheckBreak;
-    cc_checkeof: Boolean absolute crt.CheckEOF;
-    cc_checksnow: Boolean absolute crt.CheckSnow;
-    cc_directvideo: Boolean absolute crt.DirectVideo;
-    cc_lastmode: Word absolute crt.LastMode;
-    cc_textattr: Byte absolute crt.TextAttr;
-    cc_windmin: Word absolute crt.WindMin;
-    cc_windmax: Word absolute crt.WindMax;
+    cc_checkbreak: Boolean (*absolute crt.CheckBreak*);
+    cc_checkeof: Boolean (*absolute crt.CheckEOF*);
+    cc_checksnow: Boolean (*absolute crt.CheckSnow*);
+    cc_directvideo: Boolean (*absolute crt.DirectVideo*);
+    cc_lastmode: Word (*absolute crt.LastMode*);
+    cc_textattr: Byte (*absolute crt.TextAttr*);
+    cc_windmin: Word (*absolute crt.WindMin*);
+    cc_windmax: Word (*absolute crt.WindMax*);
+    cc_SegB000: Word (*absolute system.SegB000*);
+    cc_SegB800: Word (*absolute system.SegB800*);
 (*$endif*)
 
 (*
@@ -65,6 +64,7 @@ implementation
 uses
     watcom,
     i86,
+    startup,
     vbios,
     dos_;
 

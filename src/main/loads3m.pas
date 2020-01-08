@@ -28,7 +28,6 @@ uses
     dynarray,
     debug,
     strutils,
-    crt,
     dos,
     dos_,
     ems,

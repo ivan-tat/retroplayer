@@ -22,17 +22,11 @@
 
 bool __far _datastream_flush_console (DATASTREAM *self);
 
-/*** Externals ***/
-
-extern void __far __pascal pascal_write (const char *str);
-
 /*** Linking ***/
 
 #ifdef __WATCOMC__
 
 #pragma aux _datastream_flush_console "*";
-
-#pragma aux pascal_write "*" modify [ ax bx cx dx si di es ];
 
 #endif  /* __WATCOMC__ */
 

@@ -5,7 +5,6 @@ uses
     hexdigts,
     pascal,
     startup,
-    crt,
     dos,
     ems,
     string_,

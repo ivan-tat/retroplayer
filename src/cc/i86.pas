@@ -28,14 +28,8 @@ implementation
 
 uses
     pascal,
-    watcom,
-    crt;
-(*
-procedure pascal_delay(count: word); far;
-begin
-    crt.Delay(count);
-end;
-*)
+    watcom;
+
 (*$L i86\delay.obj*)
 procedure cc_delay_init; external;
 procedure cc_delay; external;

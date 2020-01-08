@@ -63,7 +63,6 @@ uses
     dynarray,
     debug,
     strutils,
-    crt,
     dos,
     ems,
     common,

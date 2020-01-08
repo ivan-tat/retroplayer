@@ -32,6 +32,8 @@ char cc_lastscancode = 0;
 bool cc_checkeof = false;
 bool cc_gotbreak = false;
 bool cc_checkbreak = false;
+uint16_t cc_SegB000 = 0xb000;
+uint16_t cc_SegB800 = 0xb800;
 
 #endif  /* DEFINE_LOCAL_DATA */
 
@@ -104,6 +106,24 @@ void _cc_console_on_start(void)
     struct vbios_video_info_t video;
     uint16_t c;
 
+#if DEFINE_LOCAL_DATA != 1
+    cc_lastmode = 0;
+    cc_screenwidth = 0;
+    cc_screenheight = 0;
+    cc_checksnow = false;
+    cc_directvideo = false;
+    cc_windmin.value = 0;
+    cc_windmax.value = 0;
+    cc_textattrorig = 0;
+    cc_textattr = 0;
+    cc_lastscancode = 0;
+    cc_checkeof = false;
+    cc_gotbreak = false;
+    cc_checkbreak = false;
+    cc_SegB000 = 0xb000;
+    cc_SegB800 = 0xb800;
+#endif  /* DEFINE_LOCAL_DATA */
+
     vbios_query_video_info(&video);
 
     if ((video.mode > _TEXTC80) && (video.mode != _TEXTMONO))
@@ -123,10 +143,8 @@ void _cc_console_on_start(void)
 void cc_console_init(void)
 {
     _cc_console_on_start();
-#if LINKER_TPC != 1
     cc_TextAssignCrt (&cc_Input, cc_InputBuf, STDINBUF_SIZE);
     cc_TextReset (&cc_Input);
     cc_TextAssignCrt (&cc_Output, cc_OutputBuf, STDOUTBUF_SIZE);
     cc_TextRewrite (&cc_Output);
-#endif
 }

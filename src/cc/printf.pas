@@ -19,12 +19,8 @@ implementation
 uses
     watcom,
     string_,
+    startup,
     dstream;
-
-procedure pascal_write(s: pchar); far;
-begin
-    Write(s);
-end;
 
 (*$L _printf.obj*)
 procedure _printf; external;

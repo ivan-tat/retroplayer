@@ -118,6 +118,8 @@ extern __far _cc_CheckInOutRes (void);
 
 /* (+|-)InOutRes(+|-): prefix "+" means IO state check is done on enter, postfix "+" - on exit. */
 
+/* Buffered file I/O */
+
 void       __far  cc_TextAssign (_cc_iobuf *f, void *buffer, uint16_t size, char *name); /* -InOutRes- */
 void       __far  cc_TextSetTextBuf (_cc_iobuf *f, void *buffer, uint16_t size); /* -InOutRes- */
 void       __far  cc_TextReset (_cc_iobuf *f);                              /* -InOutRes- */
@@ -134,6 +136,8 @@ inoutres_t __far  cc_TextWriteChar (_cc_iobuf *f, char _c, uint16_t padding); /*
 inoutres_t __far  cc_TextWriteInteger (_cc_iobuf *f, uint32_t value, uint16_t padding); /* +InOutRes+ */
 inoutres_t __far  cc_TextWriteLn (_cc_iobuf *f);                            /* +InOutRes+ */
 inoutres_t __far  cc_TextSync (_cc_iobuf *f);                               /* +InOutRes+ */
+
+/* System */
 
 void __noreturn __far __cdecl _cc_local_int0 (void __far *addr, uint16_t flags);
 void __noreturn __far __cdecl _cc_local_int23 (void __far *addr, uint16_t flags);

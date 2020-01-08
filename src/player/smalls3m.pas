@@ -14,7 +14,6 @@ uses
     stdlib,
     string_,
     unistd,
-    crt,
     debug,
     errno_,
     dos,

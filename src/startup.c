@@ -165,6 +165,7 @@ void __far cc_TextAssign (_cc_iobuf *f, void *buffer, uint16_t size, char *name)
     f->io.by_name.close = NULL;
     memset (f->user_data, 0, 26);
     strncpy (f->name, name, cc_PathStr_size);
+    f->name [cc_PathStr_size - 1] = 0;
 }
 
 void __far cc_TextSetTextBuf (_cc_iobuf *f, void *buffer, uint16_t size)

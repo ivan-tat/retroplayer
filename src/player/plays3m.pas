@@ -15,7 +15,6 @@ uses
     string_,
     dynarray,
     unistd,
-    crt,
     dos,
     dos_,
     ems,

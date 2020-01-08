@@ -60,8 +60,7 @@ uses
     dma,
     pic,
     sndctl_t,
-    sbio,
-    crt;
+    sbio;
 
 (*$l sbctl.obj*)
 

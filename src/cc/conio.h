@@ -96,6 +96,8 @@ extern uint16_t cc_lastmode;
 extern uint8_t  cc_textattr;
 extern union text_rect_t cc_windmin;
 extern union text_rect_t cc_windmax;
+extern uint16_t cc_SegB000;
+extern uint16_t cc_SegB800;
 
 void cc_clreol(void);
 void cc_clrscr(void);
@@ -144,6 +146,8 @@ void __far cc_TextAssignCrt (_cc_iobuf *f, void *buffer, uint16_t size);
 #define textattr        cc_textattr;
 #define windmin         cc_windmin;
 #define windmax         cc_windmax;
+#define SegB000         cc_SegB000
+#define SegB800         cc_SegB800
 
 /* Text-mode functions */
 
@@ -188,6 +192,8 @@ void __far cc_TextAssignCrt (_cc_iobuf *f, void *buffer, uint16_t size);
 #pragma aux cc_textattr "*";
 #pragma aux cc_windmin "*";
 #pragma aux cc_windmax "*";
+#pragma aux cc_SegB000 "*";
+#pragma aux cc_SegB800 "*";
 
 #pragma aux cc_textmode "*";
 #pragma aux cc_window "*";

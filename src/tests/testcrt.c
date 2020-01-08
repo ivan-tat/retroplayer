@@ -51,32 +51,48 @@ int main (int argc, const char **argv)
         l: LongInt;
 
     begin
+        TextColor (_cyan);
         WriteLn ('This is a simple console application.');
+        TextBackGround (_blue);
         WriteLn (Output, 'Yes, it`s true.');
+        TextBackGround (_black);
+        TextColor (_white);
         Write (Output, 'Enter text: ');
+        TextColor (_red);
         ReadLn (Input, s);
+        TextColor (_lightgray);
         WriteLn (Output, 'Text="', s, '"');
+        TextColor (_lightgreen);
         Write (Output, 'Enter long integer number (-2^32...2^32-1): ');
         ReadLn (Input, l);
+        TextColor (_yellow);
         WriteLn (Output, 'Value="', l, '"');
     end.
     */
+    cc_textcolor (_cyan);
     cc_TextWriteString (&cc_Output, "This is a simple console application.", 0);
     cc_TextWriteLn (&cc_Output);
+    cc_textbackground (_blue);
     cc_TextWriteString (&cc_Output, "Yes, it`s true.", 0);
     cc_TextWriteLn (&cc_Output);
+    cc_textbackground (_black);
+    cc_textcolor (_white);
     cc_TextWriteString (&cc_Output, "Enter text: ", 0);
     cc_TextSync (&cc_Output);
+    cc_textcolor (_red);
     cc_TextReadString (&cc_Input, &s, 255);
+    cc_textcolor (_lightgray);
     cc_TextEOL (&cc_Input);
     cc_TextWriteString (&cc_Output, "Text=\"", 0);
     cc_TextWriteString (&cc_Output, &s, 0);
     cc_TextWriteChar (&cc_Output, '"', 0);
     cc_TextWriteLn (&cc_Output);
+    cc_textcolor (_lightgreen);
     cc_TextWriteString (&cc_Output, "Enter long integer number (-2^32...2^32-1): ", 0);
     cc_TextSync (&cc_Output);
     l = cc_TextReadInteger (&cc_Input);
     cc_TextEOL (&cc_Input);
+    cc_textcolor (_yellow);
     cc_TextWriteString (&cc_Output, "Value=\"", 0);
     cc_TextWriteInteger (&cc_Output, l, 0);
     cc_TextWriteChar (&cc_Output, '"', 0);
