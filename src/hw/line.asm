@@ -9,7 +9,6 @@
 DGROUP group _DATA
 
 _DATA segment word public use16 'DATA'
-extrn drawseg: word
 _DATA ends
 
 LINE_TEXT segment word public use16 'CODE'
@@ -25,10 +24,9 @@ assume cs:LINE_TEXT,ds:DGROUP
 ; weitere optimierung fuer seknrechte und waagerechte linien
 
 public vga_line
-vga_line proc far x1:WORD,y1:WORD,x2:WORD,y2:WORD,farbe:BYTE
+vga_line proc far buf:DWORD,x1:WORD,y1:WORD,x2:WORD,y2:WORD,color:BYTE
 local dabgross: word
-      mov    ax,[drawseg]
-      mov    es,ax
+      les    ax,[buf]
       mov    di,[x1]
       mov    si,[x2]
       mov    cx,[y1]
@@ -46,7 +44,7 @@ l1:
       mov    dx,320
       mul    dx
       add    di,ax
-      mov    al,[farbe]
+      mov    al,[color]
       mov    es:[di],al
       jmp    ende
 not_equal:
@@ -69,7 +67,7 @@ dx_p:
       jge    dx_gr               ; Jump if dx>dy damit ax=x und y = 0 (x ist Laufvariable)
       ;  dy>dx    ....... Y ist Laufvar
       xchg   si,dx
-      mov    al,[farbe]
+      mov    al,[color]
       mov    cx,si               ; cx wird counter
       shl    dx,1
       mov    si,dx
@@ -101,7 +99,7 @@ l4:
       loop   l2
       jmp    ende
 dx_gr: ; X ist Laufvariable
-      mov    al,[farbe]
+      mov    al,[color]
       mov    cx,si               ; cx wird counter
       shl    dx,1
       mov    si,dx

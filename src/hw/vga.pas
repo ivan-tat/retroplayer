@@ -12,13 +12,12 @@ interface
 
 (*$I defines.pas*)
 
-var
-    drawseg: Word;
-
+procedure vga_wait_sync;
 procedure vga_wait_vsync;
+procedure vga_set_text_cursor_position;
 procedure vga_clear_page_320x200x8;
 procedure vga_line;
-procedure vga_bar(o, b, l: Word);
+procedure vga_bar(buf: Pointer; o, b, l: Word);
 
 procedure register_vga;
 
@@ -34,16 +33,17 @@ uses
 
 (*$l vga.obj*)
 
+procedure vga_wait_sync; external;
 procedure vga_wait_vsync; external;
+procedure vga_set_text_cursor_position; external;
 procedure vga_clear_page_320x200x8; external;
 
 (*$L line.obj*)
 procedure vga_line; external;
 
-procedure vga_bar(o, b, l: Word); assembler;
+procedure vga_bar(buf: Pointer; o, b, l: Word); assembler;
 asm
-      mov      ax,[drawseg]
-      mov      es,ax
+      les      ax,[buf]
       mov      di,[o]
       mov      bx,320
       mov      dx,[b]

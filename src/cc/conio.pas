@@ -66,6 +66,7 @@ uses
     i86,
     startup,
     vbios,
+    vga,
     dos_;
 
 (*$L conio\inp.obj*)

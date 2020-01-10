@@ -15,13 +15,13 @@
 #include <stdint.h>
 #include "pascal.h"
 
-extern uint16_t drawseg;
+void vga_wait_sync (uint16_t vid_port, bool disable_irqs);
+void vga_wait_vsync (uint16_t vid_port, bool disable_irqs);
+void vga_set_text_cursor_position (uint16_t vid_port, uint16_t offset);
+void vga_clear_page_320x200x8 (void *buf, char color);
 
-void __far vga_wait_vsync (void);
-void __far vga_clear_page_320x200x8 (char c);
-
-extern void __far __pascal vga_line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t f);
-extern void __far __pascal vga_bar(uint16_t o, uint16_t b, uint16_t l);
+extern void __far __pascal vga_line (void *buf, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t color);
+extern void __far __pascal vga_bar (void *buf, uint16_t o, uint16_t b, uint16_t l);
 
 /*** Initialization ***/
 
@@ -31,9 +31,9 @@ DECLARE_REGISTRATION (vga)
 
 #ifdef __WATCOMC__
 
-#pragma aux drawseg "*";
-
+#pragma aux vga_wait_sync "*";
 #pragma aux vga_wait_vsync "*";
+#pragma aux vga_set_text_cursor_position "*";
 #pragma aux vga_clear_page_320x200x8 "*";
 
 #pragma aux vga_line "*" modify [ ax bx cx dx si di es ];

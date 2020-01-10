@@ -11,7 +11,7 @@ set test_5=plays3m -env -s22050 -m
 set test_6=plays3m -env
 set test_7=plays3m -env -noems
 set test_8=smalls3m
-set test_9=s3mosci
+set test_9=playosci
 set test_10=test
 set test_11=testcrt
 

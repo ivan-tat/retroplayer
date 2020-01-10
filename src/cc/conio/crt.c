@@ -19,6 +19,7 @@
 #include "cc/string.h"
 #include "hw/bios.h"
 #include "hw/vbios.h"
+#include "hw/vga.h"
 #include "sysdbg.h"
 #include "startup.h"
 #include "cc/conio.h"
@@ -261,8 +262,6 @@ void __near _crt_direct_write (const char *s, uint16_t count)
     const char *cur_s;
     bool flushed;
     BIOS_data_area_t *info;
-    uint16_t vid_port;
-    uint16_t curs_off;
 
     page = 0;   /* FIXME: why active page is always zero? */
     vbios_query_cursor_state (page, &curs);
@@ -324,12 +323,8 @@ void __near _crt_direct_write (const char *s, uint16_t count)
     info = get_BIOS_data_area_ptr ();
     info->cursor_pos [page][0] = cur_x;
     info->cursor_pos [page][1] = cur_y;
-    vid_port = info->video_3D4_port;
-    curs_off = info->text_screen_width * cur_y + cur_x;
-    outp (vid_port + 0, 0x0e);  /* 0x0e - cursor position (MSB) */
-    outp (vid_port + 1, curs_off >> 8);
-    outp (vid_port + 0, 0x0f);  /* 0x0f - cursor position (LSB) */
-    outp (vid_port + 1, curs_off & 0xff);
+    vga_set_text_cursor_position (
+        info->video_3D4_port, info->text_screen_width * cur_y + cur_x);
 }
 
 void __near _crt_direct_flush (uint8_t x, uint8_t y, const char *s, const char *end)
@@ -356,14 +351,12 @@ void __near _crt_direct_flush (uint8_t x, uint8_t y, const char *s, const char *
         v.symb.attr = cc_textattr;
         if (cc_checksnow)
         {
-            vid_port = info->video_3D4_port + 6;
+            vid_port = info->video_3D4_port;
             do
             {
                 v.symb.c = *s;
                 s++;
-                while (inp (vid_port) & 1) {}
-                _disable ();
-                while (!(inp (vid_port) & 1)) {}
+                vga_wait_sync (vid_port, true);
                 *p = v.value;
                 p++;
                 _enable ();

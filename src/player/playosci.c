@@ -15,6 +15,7 @@
 #include "cc/stdlib.h"
 #include "cc/string.h"
 #include "cc/conio.h"
+#include "hw/bios.h"
 #include "hw/hwowner.h"
 #include "hw/pic.h"
 #include "hw/dma.h"
@@ -43,6 +44,9 @@ static bool opt_stereo = false;
 static bool opt_16bits = false;
 static bool opt_lq = false;
 static char opt_filename[pascal_String_size] = { 0 };
+static BIOS_data_area_t *bios_info;
+static uint16_t vid_port;
+static void *vid_buf;
 static void *bufdata = NULL;
 static uint8_t scr[2][320] = { 0 };
 
@@ -63,7 +67,9 @@ void __near draw_channels_volume(void)
     for (i = 0; i < mixchnl_get_count (channels); i++)
     {
         chn = mixchnl_get (channels, i);
-        vga_bar (320 * 170 + i * 15 + 10, 10, mixchn_is_playing (chn) ? mixchn_get_note_volume (chn) : 0);
+        vga_bar (vid_buf,
+            320 * 170 + i * 15 + 10, 10,
+            mixchn_is_playing (chn) ? mixchn_get_note_volume (chn) : 0);
     }
 }
 
@@ -130,6 +136,7 @@ void __near update_osci_mono(void)
     for (i = 0; i < 318; i++)
     {
         vga_line (
+            vid_buf,
             i,      (200 - 128) / 2 + scr[0][i],
             i + 1,  (200 - 128) / 2 + scr[0][i + 1],
             COL_BACKGROUND
@@ -138,6 +145,7 @@ void __near update_osci_mono(void)
         get_current_sample1 (&s);
         s = (s >> 9) + 64;
         vga_line (
+            vid_buf,
             i,      (200 - 128) / 2 + scr[0][i],
             i + 1,  (200 - 128) / 2 + s,
             COL_FOREGROUND
@@ -156,11 +164,13 @@ void __near update_osci_stereo(void)
     for (i = 0; i < 318; i++)
     {
         vga_line (
+            vid_buf,
             i,      (200 - 128) / 2 + scr[0][i],
             i + 1,  (200 - 128) / 2 + scr[0][i + 1],
             COL_BACKGROUND
         );
         vga_line (
+            vid_buf,
             i,      (200 - 128) / 2 + 64 + scr[1][i],
             i + 1,  (200 - 128) / 2 + 64 + scr[1][i + 1],
             COL_BACKGROUND
@@ -171,11 +181,13 @@ void __near update_osci_stereo(void)
         s[0] = (s[0] >> 9) + 64;
         s[1] = (s[1] >> 9) + 64;
         vga_line (
+            vid_buf,
             i,      (200 - 128) / 2 + scr[0][i],
             i + 1,  (200 - 128) / 2 + s[0],
             COL_FOREGROUND
         );
         vga_line (
+            vid_buf,
             i,      (200 - 128) / 2 + 64 + scr[1][i],
             i + 1,  (200 - 128) / 2 + 64 + s[1],
             COL_FOREGROUND
@@ -213,7 +225,7 @@ void __far playosci_main (void)
     printf (
         "Simple music player with oscillator for DOS, version %s." CRLF
         "Originally written by Andre Baresel, 1994, 1995." CRLF
-        "Modified by Ivan Tatarinov <ivan-tat@ya.ru>, 2016, 2017, 2018, 2019." CRLF
+        "Modified by Ivan Tatarinov <ivan-tat@ya.ru>, 2016-2020." CRLF
         "This is free and unencumbered software released into the public domain." CRLF
         "For more information, please refer to <http://unlicense.org>." CRLF,
         PLAYER_VERSION
@@ -224,7 +236,9 @@ void __far playosci_main (void)
     opt_16bits = def_16bits;
     opt_lq = def_lq;
 
-    drawseg = 0xa000;
+    bios_info = get_BIOS_data_area_ptr ();
+    vid_port = bios_info->video_3D4_port;
+    vid_buf = MK_FP (0xa000, 0);
 
     strncpy (opt_filename, _argv[1], pascal_String_size);
 
@@ -295,11 +309,12 @@ void __far playosci_main (void)
     getch ();
 
     vbios_set_mode (0x13);
-    vga_clear_page_320x200x8 (COL_BACKGROUND);
+    vga_clear_page_320x200x8 (vid_buf, COL_BACKGROUND);
     bufdata = sndbuf->buf->data;
     while (!kbhit ())
     {
-        vga_wait_vsync ();
+        vga_wait_vsync (vid_port, true);
+        _enable ();
         draw_channels_volume ();
         if (opt_stereo)
             update_osci_stereo ();

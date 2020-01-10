@@ -578,7 +578,8 @@ tests_common_OBJS := \
  startup/chkio.o \
  startup/ints.o \
  hw/cpu.o \
- hw/vbios.o
+ hw/vbios.o \
+ hw/vga.o
 
 ## Build rules
 
