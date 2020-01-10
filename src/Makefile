@@ -506,6 +506,7 @@ common_DIRS := \
  dos \
  hw \
  hw/sb \
+ hw/vga \
  main \
  main/asm \
  player \
