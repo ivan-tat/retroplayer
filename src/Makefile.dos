@@ -17,6 +17,9 @@ info_done = @echo 'Done.'
 SHELL       = bash.exe
 PC          := tpc
 PCDEBUG     := -gd -v -\$$d+,l+
+ifeq "$(SYSDEBUG)" "1"
+PCDEBUG     := $(PCDEBUG) -dSYSDEBUG
+endif
 ifeq "$(DEBUG)" "1"
 PCDEBUG     := $(PCDEBUG) -dDEBUG
 endif

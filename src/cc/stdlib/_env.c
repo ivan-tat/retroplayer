@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include "pascal.h"
 #include "common.h"
+#include "sysdbg.h"
 #include "cc/i86.h"
 #include "cc/string.h"
 #include "cc/dos.h"
@@ -64,7 +65,7 @@ uint16_t _dosenv_find_end(struct dosenvlist_t *self, uint16_t *count)
     do
     {
         if (_dosenv_next(self, &i))
-            *count++;
+            (*count)++;
         else
             stop = true;
     } while (!stop);
@@ -128,7 +129,7 @@ bool _environ_alloc(struct envstrlist_t *self, uint16_t count)
     {
         if (count)
         {
-            if (_dos_allocmem(_dos_para(sizeof(char *) * count), &seg))
+            if (!_dos_allocmem(_dos_para(sizeof(char *) * count), &seg))
             {
                 self->arr = MK_FP(seg, 0);
                 self->size = count;

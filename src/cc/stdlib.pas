@@ -39,6 +39,7 @@ uses
     watcom,
     pascal,
     startup,
+    sysdbg,
     string_,
     ctype,
     errno_,

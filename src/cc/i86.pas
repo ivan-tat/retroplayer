@@ -28,7 +28,8 @@ implementation
 
 uses
     pascal,
-    watcom;
+    watcom,
+    sysdbg;
 
 (*$L i86\delay.obj*)
 procedure cc_delay_init; external;

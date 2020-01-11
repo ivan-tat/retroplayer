@@ -65,6 +65,7 @@ uses
     watcom,
     i86,
     startup,
+    sysdbg,
     vbios,
     vga,
     dos_;
