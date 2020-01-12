@@ -20,6 +20,15 @@ uses
 
 var
     _cc_doserrno: Integer;
+const
+    SAVEINTVEC_COUNT = 19;
+    SaveIntVecIndexes: array [0..SAVEINTVEC_COUNT-1] of Byte =
+    (
+        $00, $02, $1B, $21, $23, $24, $34, $35, $36, $37,
+        $38, $39, $3A, $3B, $3C, $3D, $3E, $3F, $75
+    );
+var
+    SaveIntVecs: array [0..SAVEINTVEC_COUNT-1] of Pointer;
 
 (*$endif*)
 
@@ -63,7 +72,6 @@ type
     data: Byte;
   end;
 
-procedure pascal_swapvectors;
 procedure pascal_exec(Name: PathStr; CmdLine: String);
 
 procedure __cc_set_errno_dos;
@@ -106,6 +114,9 @@ procedure _cc_dos_seek;
 
 procedure _cc_dos_ioctl_query_flags;
 
+procedure cc_dos_savevectors;
+procedure cc_dos_restorevectors;
+procedure cc_dos_swapvectors;
 procedure _cc_dos_terminate;
 
 implementation
@@ -115,7 +126,7 @@ uses
     errno_,
     i86;
 
-procedure pascal_swapvectors;
+procedure pascal_swapvectors; far;
 begin
     Dos.SwapVectors;
 end;
@@ -181,6 +192,13 @@ procedure _cc_dos_seek; external;
 
 (*$L dos\dosioctl.obj*)
 procedure _cc_dos_ioctl_query_flags; external;
+
+(*$L dos\c_init.obj*)
+procedure cc_dos_savevectors; external;
+procedure cc_dos_restorevectors; external;
+
+(*$L dos\c_swap.obj*)
+procedure cc_dos_swapvectors; external;
 
 (*$L dos\dosterm.obj*)
 procedure _cc_dos_terminate; external;

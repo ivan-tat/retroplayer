@@ -45,15 +45,6 @@ void *__far _cc_ExitList[_CC_ATEXIT_MAX] = { 0 };
 
 #define map_doserrno_to_inoutres(x) (x)
 
-// Saved critical interrupt vectors
-#define SAVEINTVEC_COUNT 19
-const static uint8_t SaveIntVecIndexes[SAVEINTVEC_COUNT] =
-{
-    0x00, 0x02, 0x1B, 0x21, 0x23, 0x24, 0x34, 0x35, 0x36, 0x37,
-    0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x75
-};
-static void __far *SaveIntVecs[SAVEINTVEC_COUNT] = { 0 };
-
 static const char NewLine[] = { 13, 10 };
 
 typedef struct _cc_iobuf_reader_t _cc_iobuf_reader;
@@ -1546,7 +1537,6 @@ const char **__near parse_cmdline (bool do_create, struct _cmdline_parser_data_t
 
 void cc_system_init (void)
 {
-    unsigned i;
     struct _cmdline_parser_data_t data;
 
 #if LINKER_TPC == 1
@@ -1556,8 +1546,7 @@ void cc_system_init (void)
     cc_Test8086 = isCPU_8086();
 #if LINKER_TPC == 1
 #else /* LINKER_TPC != 1 */
-    for (i = 0; i < SAVEINTVEC_COUNT; i++)
-        SaveIntVecs[i] = _cc_dos_getvect(SaveIntVecIndexes[i]);
+    cc_dos_savevectors ();
 
     _cc_dos_setvect(0, _cc_local_int0_asm);
     _cc_dos_setvect(0x23, _cc_local_int23_asm);
@@ -1580,23 +1569,21 @@ void cc_system_init (void)
 
 void __noreturn __far __cdecl _cc_ExitWithError (int16_t status, void __far *addr)
 {
-    unsigned i;
-
     cc_ExitCode = status;
 
     cc_ErrorAddr = addr != NULL ? MK_FP (FP_SEG (addr) - _cc_psp - 0x10, FP_OFF (addr)) : addr;
 
     _cc_on_exit();
 
-#if LINKER_TPC != 1
-    for (i = 0; i < SAVEINTVEC_COUNT; i++)
-        _cc_dos_setvect(SaveIntVecIndexes[i], SaveIntVecs[i]);
-#endif  /* LINKER_TPC != 1 */
+    cc_TextClose (&cc_Input);
+    cc_TextClose (&cc_Output);
+
     if (_cc_argv)
         _cc_dos_freemem (FP_SEG (_cc_argv));
 
-    cc_TextClose (&cc_Input);
-    cc_TextClose (&cc_Output);
+#if LINKER_TPC != 1
+    cc_dos_restorevectors ();
+#endif  /* LINKER_TPC != 1 */
 
     if (cc_ErrorAddr)
     {

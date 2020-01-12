@@ -202,10 +202,22 @@ uint16_t __far _cc_dos_seek (int16_t fd, int32_t offset, int16_t kind, int32_t *
 
 uint16_t __far _cc_dos_ioctl_query_flags (int16_t fd, cc_ioctl_info_t __far *info);
 
+/* Context switching */
+
+// Saved critical interrupt vectors
+#define SAVEINTVEC_COUNT 19
+extern const uint8_t SaveIntVecIndexes[SAVEINTVEC_COUNT];
+extern void __far *SaveIntVecs[SAVEINTVEC_COUNT];
+
+void cc_dos_savevectors (void);
+void cc_dos_restorevectors (void);
+void cc_dos_swapvectors (void);
 void _cc_dos_terminate(uint8_t code);
 
+//#if LINKER_TPC == 1
 extern void __far __pascal pascal_swapvectors(void);
 extern void __far __pascal pascal_exec(char *name, char *cmdline);
+//#endif  /* LINKER_TPC == 1 */
 
 /*** Aliases ***/
 
@@ -269,16 +281,19 @@ extern void __far __pascal pascal_exec(char *name, char *cmdline);
 
 #define _dos_ioctl_query_flags _cc_dos_ioctl_query_flags
 
+#define dos_savevectors cc_dos_savevectors
+#define dos_restorevectors cc_dos_restorevectors
+#define dos_swapvectors cc_dos_swapvectors
 #define _dos_terminate _cc_dos_terminate
 
 /*** Linking ***/
 
 #ifdef __WATCOMC__
 
-/* Pascal >>> */
+//#if LINKER_TPC == 1
 #pragma aux pascal_swapvectors "*" modify [ ax bx cx dx si di es ];
 #pragma aux pascal_exec        "*" modify [ ax bx cx dx si di es ];
-/* <<< Pascal */
+//#endif  /* LINKER_TPC == 1 */
 
 #pragma aux _cc_doserrno "*";
 #pragma aux cc_dosexterr "*";
@@ -305,6 +320,11 @@ extern void __far __pascal pascal_exec(char *name, char *cmdline);
 #pragma aux _cc_dos_write "*";
 #pragma aux _cc_dos_seek "*";
 #pragma aux _cc_dos_ioctl_query_flags "*";
+#pragma aux SaveIntVecIndexes "*";
+#pragma aux SaveIntVecs "*";
+#pragma aux cc_dos_savevectors "*";
+#pragma aux cc_dos_restorevectors "*";
+#pragma aux cc_dos_swapvectors "*";
 #pragma aux _cc_dos_terminate "*";
 
 #endif  /* __WATCOMC__ */

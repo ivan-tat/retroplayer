@@ -17,6 +17,7 @@
 #include "cc/unistd.h"
 
 extern int16_t pascal_doserror;
+
 #ifdef __WATCOMC__
 #pragma aux pascal_doserror "*";
 #endif  /* __WATCOMC__ */
@@ -67,9 +68,9 @@ int cc_execv(const char *filename, char *const argv[])
     }
     cmdline[0] = len;
 
-    pascal_swapvectors();
+    cc_dos_swapvectors ();
     pascal_exec(pathstr, cmdline);
-    pascal_swapvectors();
+    cc_dos_swapvectors ();
 
     switch (pascal_doserror)
     {
