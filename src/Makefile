@@ -16,6 +16,12 @@ DEFS :=
 ifeq "$(SYSDEBUG)" "1"
 DEFS += SYSDEBUG=1
 endif
+ifeq "$(SYSDEBUG_IOBUF)" "1"
+DEFS += SYSDEBUG_IOBUF=1
+endif
+ifeq "$(SYSDEBUG_ENV)" "1"
+DEFS += SYSDEBUG_ENV=1
+endif
 ifeq "$(DEBUG)" "1"
 DEFS += DEBUG=1
 endif
@@ -450,7 +456,6 @@ i8d086.obj: i8d086.o
 i8m086.obj: i8m086.o
 	cp $< $@
 
-
 ow_OBJS += $(ow_OBJS_TP)
 
 OBJS += $(ow_OBJS)
@@ -575,6 +580,7 @@ tests_common_OBJS := \
  i8m086.o \
  commdbg.o \
  sysdbg.o \
+ debug.o \
  startup.o \
  startup/chkio.o \
  startup/ints.o \
@@ -593,7 +599,7 @@ test_exe_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(test_exe_SRCS)))
 ## TODO: remove object files dependencies by puttin all object files in libraries and pass them to linker
 $(test_exe_EXES): $(tests_common_OBJS) $(test_exe_OBJS)
 $(test_exe_EXES): $(CCLIB)
-	$(LD) $(LFLAGS) library $< $(patsubst %,file %,$(tests_common_OBJS)) $(patsubst %,file %,$(test_exe_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,map,fullheader name $@
+	$(LD) $(LFLAGS) library $< $(patsubst %,file %,$(tests_common_OBJS)) $(patsubst %,file %,$(test_exe_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 
 ## testcrt.exe
 
@@ -604,7 +610,18 @@ testcrt_exe_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(testcrt_exe_SRCS)))
 ## TODO: remove object files dependencies by puttin all object files in libraries and pass them to linker
 $(testcrt_exe_EXES): $(tests_common_OBJS) $(testcrt_exe_OBJS)
 $(testcrt_exe_EXES): $(CCLIB)
-	$(LD) $(LFLAGS) library $< $(patsubst %,file %,$(tests_common_OBJS)) $(patsubst %,file %,$(testcrt_exe_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,map,fullheader name $@
+	$(LD) $(LFLAGS) library $< $(patsubst %,file %,$(tests_common_OBJS)) $(patsubst %,file %,$(testcrt_exe_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+
+## testexec.exe
+
+testexec_exe_SRCS := $(filter %/testexec.c,$(tests_SRCS))
+testexec_exe_OBJS := $(patsubst %.c,%.o,$(filter %.c,$(testexec_exe_SRCS)))
+testexec_exe_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(testexec_exe_SRCS)))
+
+## TODO: remove object files dependencies by puttin all object files in libraries and pass them to linker
+$(testexec_exe_EXES): $(tests_common_OBJS) $(testexec_exe_OBJS)
+$(testexec_exe_EXES): $(CCLIB)
+	$(LD) $(LFLAGS) library $< $(patsubst %,file %,$(tests_common_OBJS)) $(patsubst %,file %,$(testexec_exe_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 
 ##=------------------------------=##
 ## Include dependency information ##

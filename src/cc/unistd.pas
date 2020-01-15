@@ -28,6 +28,8 @@ uses
     string_,
     errno_,
     i86,
+    sysdbg,
+    startup,
     dos_;
 
 (*$L unistd\exv.obj*)

@@ -13,9 +13,6 @@
 
 void cc_dos_swapvectors (void)
 {
-#if LINKER_TPC == 1
-    pascal_swapvectors ();
-#else
     unsigned i;
     void __far *p;
 
@@ -25,5 +22,4 @@ void cc_dos_swapvectors (void)
         _cc_dos_setvect (SaveIntVecIndexes [i], SaveIntVecs [i]);
         SaveIntVecs [i] = p;
     }
-#endif  /* LINKER_TPC */
 }

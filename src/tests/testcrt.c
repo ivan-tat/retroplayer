@@ -98,7 +98,7 @@ int main (int argc, const char **argv)
     cc_TextWriteChar (&cc_Output, '"', 0);
     cc_TextWriteLn (&cc_Output);
     /**/
-    SYSDEBUG_INFO_ ("value=%l", (int32_t) l);
+    SYSDEBUG_INFO_ ("value=%ld", (int32_t) l);
     SYSDEBUG_END ();
     return 0;
 }

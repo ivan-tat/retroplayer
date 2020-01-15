@@ -20,6 +20,7 @@
 #include "cc/dos.h"
 #include "cc/stdlib.h"
 #include "cc/string.h"
+#include "cc/malloc.h"
 #include "sysdbg.h"
 #include "startup.h"
 
@@ -142,7 +143,9 @@ inoutres_t __far cc_IOResult (void)
 
 void __far cc_TextAssign (_cc_iobuf *f, void *buffer, uint16_t size, char *name)
 {
+#if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO ("Called.");
+#endif
     f->handle = cc_UnusedHandle;
     f->mode = cc_fmClosed;
     f->buf_size = size;
@@ -161,17 +164,23 @@ void __far cc_TextAssign (_cc_iobuf *f, void *buffer, uint16_t size, char *name)
 
 void __far cc_TextSetTextBuf (_cc_iobuf *f, void *buffer, uint16_t size)
 {
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("buf=%04x:%04x, size=%u", FP_SEG (buffer), FP_OFF (buffer), size);
+    #endif
     f->buf_size = size;
     f->buf_ptr = buffer;
     f->buf_pos = 0;
     f->buf_end = 0;
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_DUMP_FILE (f);
+    #endif
 }
 
 void __near _cc_TextSetMode (_cc_iobuf *f, uint16_t mode)
 {
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO ("Called.");
+    #endif
     switch (f->mode)
     {
     case cc_fmInput:
@@ -195,19 +204,25 @@ void __near _cc_TextSetMode (_cc_iobuf *f, uint16_t mode)
 
 void __far cc_TextReset (_cc_iobuf *f)
 {
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO ("Called.");
+    #endif
     _cc_TextSetMode (f, cc_fmInput);
 }
 
 void __far cc_TextRewrite (_cc_iobuf *f)
 {
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO ("Called.");
+    #endif
     _cc_TextSetMode (f, cc_fmOutput);
 }
 
 void __far cc_TextAppend (_cc_iobuf *f)
 {
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO ("Called.");
+    #endif
     _cc_TextSetMode (f, cc_fmInOut);
 }
 
@@ -215,9 +230,13 @@ inoutres_t __far cc_TextFlush (_cc_iobuf *f)
 {
     inoutres_t status;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
     status = _cc_TextFlushClose (f, false);
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -225,9 +244,13 @@ inoutres_t __far cc_TextClose (_cc_iobuf *f)
 {
     inoutres_t status;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
     status = _cc_TextFlushClose (f, true);
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -235,7 +258,9 @@ inoutres_t __near _cc_TextFlushClose (_cc_iobuf *f, bool do_close)
 {
     inoutres_t status = EINOUTRES_SUCCESS;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
     switch (f->mode)
     {
     case cc_fmOutput:
@@ -256,7 +281,9 @@ inoutres_t __near _cc_TextFlushClose (_cc_iobuf *f, bool do_close)
         break;
     }
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -264,12 +291,16 @@ inoutres_t __far _cc_TextIO (_cc_iobuf *f, char index)
 {
     inoutres_t status;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
     status = f->io.by_index[index] (f);
     if (status != EINOUTRES_SUCCESS)
         cc_InOutRes = status;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -278,7 +309,9 @@ inoutres_t __far _buffered_read (_cc_iobuf *f)
     inoutres_t status;
     uint16_t count;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
     if (_dos_read (f->handle, f->buf_ptr, f->buf_size, &count) == EZERO)
         status = EINOUTRES_SUCCESS;
     else
@@ -289,7 +322,9 @@ inoutres_t __far _buffered_read (_cc_iobuf *f)
 
     f->buf_end = count;
     f->buf_pos = 0;
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -298,7 +333,9 @@ inoutres_t __far _buffered_write_file (_cc_iobuf *f)
     inoutres_t status;
     uint16_t old_pos, numbytes;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
     old_pos = f->buf_pos;
     f->buf_pos = 0;
     if (_dos_write (f->handle, f->buf_ptr, old_pos, &numbytes) == EZERO)
@@ -311,7 +348,9 @@ inoutres_t __far _buffered_write_file (_cc_iobuf *f)
     else
         status = map_doserrno_to_inoutres (_doserrno);
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -320,7 +359,9 @@ inoutres_t __far _buffered_write_device (_cc_iobuf *f)
     inoutres_t status;
     uint16_t pos, count;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
     pos = f->buf_pos;
     f->buf_pos = 0;
     if (_dos_write (f->handle, f->buf_ptr, pos, &count) == EZERO)
@@ -328,7 +369,9 @@ inoutres_t __far _buffered_write_device (_cc_iobuf *f)
     else
         status = map_doserrno_to_inoutres (_doserrno);
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -336,12 +379,16 @@ inoutres_t __far _buffered_close (_cc_iobuf *f)
 {
     inoutres_t status = EINOUTRES_SUCCESS;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
     if (f->handle >= 5)
         if (_dos_close (f->handle) != EZERO)
             status = map_doserrno_to_inoutres (_doserrno);
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -356,10 +403,14 @@ bool __far _stream_read (_cc_iobuf_reader *stream)
 {
     _cc_iobuf *f;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
     if (cc_InOutRes != EINOUTRES_SUCCESS)
     {
+        #if SYSDEBUG_IOBUF == 1
         SYSDEBUG_ERR_ ("Failed (InOutRes=%i)", cc_InOutRes);
+        #endif
         return false;
     }
 
@@ -368,7 +419,9 @@ bool __far _stream_read (_cc_iobuf_reader *stream)
     if (f->mode != cc_fmInput)
     {
         cc_InOutRes = EINOUTRES_NOT_INPUT;
+        #if SYSDEBUG_IOBUF == 1
         SYSDEBUG_ERR_ ("Failed (not %s stream)", "input");
+        #endif
         return false;
     }
 
@@ -385,7 +438,9 @@ bool __far _stream_read (_cc_iobuf_reader *stream)
         _buffered_in_out (stream->f);
     } while (f->buf_pos != f->buf_end);
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_SUCCESS ();
+    #endif
     return true;
 }
 
@@ -400,7 +455,9 @@ inoutres_t __near _buffered_write_pad_string (_cc_iobuf *f, uint16_t _n)
      */
 
     /* NOTE: in some cases return value is an original AX register value which is not implemented here */
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     if (status == EINOUTRES_SUCCESS)
     {
@@ -427,7 +484,9 @@ inoutres_t __near _buffered_write_pad_string (_cc_iobuf *f, uint16_t _n)
         }
     }
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -443,14 +502,18 @@ inoutres_t __near _cc_TextWrite (_cc_iobuf *f, void *src, uint16_t _n)
      */
 
     /* NOTE: in some cases return value is an original AX register value which is not implemented here */
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
 
     SYSDEBUG_DUMP_InOutRes ();
+    #endif
     if (status == EINOUTRES_SUCCESS)
     {
         if (f->mode != cc_fmOutput)
         {
+            #if SYSDEBUG_IOBUF == 1
             SYSDEBUG_ERR_ ("Failed (not %s stream)", "output");
+            #endif
             status = EINOUTRES_NOT_OUTPUT;
             cc_InOutRes = status;
         }
@@ -460,15 +523,19 @@ inoutres_t __near _cc_TextWrite (_cc_iobuf *f, void *src, uint16_t _n)
             do
             {
                 nf = f->buf_size - f->buf_pos;
+                #if SYSDEBUG_IOBUF == 1
                 SYSDEBUG_INFO_ ("buf_size=%04X, pos=%04X, nf=%04X, _n=%04X.", f->buf_size, f->buf_pos, nf, _n);
+                #endif
                 count = _n;
                 if (count >= nf)
                     count = nf;
+                #if SYSDEBUG_IOBUF == 1
                 SYSDEBUG_INFO_ ("%04X:%04X->%04X:%04X+%04X(count=%04X,%04X).",
                     FP_SEG (source), FP_OFF (source), FP_SEG (f->buf_ptr), FP_OFF (f->buf_ptr), f->buf_pos, count, _n
                 );
                 if (count)
                     SYSDEBUG_dump_mem (source, count, "data: ");
+                #endif
                 memcpy ((char *) f->buf_ptr + f->buf_pos, source, count);
                 source += count;
                 f->buf_pos += count;
@@ -480,7 +547,9 @@ inoutres_t __near _cc_TextWrite (_cc_iobuf *f, void *src, uint16_t _n)
         }
     }
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -490,7 +559,9 @@ inoutres_t __far cc_TextEOL (_cc_iobuf *f)
     inoutres_t status;
 
     /* NOTE: in some cases return value is an original AX register value which is not implemented here */
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     stream.f = f;
     stream.start = 0;   /* undefined */
@@ -510,7 +581,9 @@ inoutres_t __far cc_TextEOL (_cc_iobuf *f)
             status = cc_InOutRes;
     }
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -566,14 +639,18 @@ inoutres_t __far cc_TextWriteLn (_cc_iobuf *f)
 {
     inoutres_t status;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
     status = _cc_TextWrite (f, (void *) NewLine, 2);
 
     if (status == EINOUTRES_SUCCESS)
         if (f->io.by_name.flush)
             status = _buffered_flush (f);
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -582,13 +659,17 @@ inoutres_t __far cc_TextSync (_cc_iobuf *f)
     inoutres_t status = cc_InOutRes;
 
     /* NOTE: in some cases return value is an original AX register value which is not implemented here */
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     if (f->io.by_name.flush)
         if (status == EINOUTRES_SUCCESS)
             status = _buffered_flush (f);
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -596,13 +677,17 @@ inoutres_t __far _buffered_in_out (_cc_iobuf *f)
 {
     inoutres_t status;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     status = f->io.by_name.in_out (f);
     if (status != EINOUTRES_SUCCESS)
         cc_InOutRes = status;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -610,13 +695,17 @@ inoutres_t __far _buffered_flush (_cc_iobuf *f)
 {
     inoutres_t status;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     status = f->io.by_name.flush (f);
     if (status != EINOUTRES_SUCCESS)
         cc_InOutRes = status;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -624,7 +713,9 @@ char __far cc_TextReadChar (_cc_iobuf *f)
 {
     char c = 0x1a;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     if (cc_InOutRes == EINOUTRES_SUCCESS)
     {
@@ -648,7 +739,9 @@ char __far cc_TextReadChar (_cc_iobuf *f)
         }
     }
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (value=%i)", c);
+    #endif
     return c;
 }
 
@@ -657,7 +750,9 @@ inoutres_t __far cc_TextWriteChar (_cc_iobuf *f, char _c, uint16_t padding)
     inoutres_t status;
 
     /* NOTE: in some cases return value is an original AX register value which is not implemented here */
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     if (padding > 1)
         status = _buffered_write_pad_string (f, padding - 1);
@@ -680,7 +775,9 @@ inoutres_t __far cc_TextWriteChar (_cc_iobuf *f, char _c, uint16_t padding)
         }
     }
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -691,7 +788,9 @@ unsigned __far cc_TextReadString (_cc_iobuf *f, char *dest, uint16_t max)
 {
     _cc_iobuf_reader stream;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     stream.f = f;
     stream.start = 0;   /* original SI */
@@ -705,7 +804,9 @@ unsigned __far cc_TextReadString (_cc_iobuf *f, char *dest, uint16_t max)
     /*dest [0] = stream.pos;*/  /* for Pascal */
     dest [stream.pos] = 0;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (end=%i, pos=%i)", stream.end, stream.pos);
+    #endif
     return stream.end;
 }
 
@@ -746,7 +847,9 @@ inoutres_t __far cc_TextWriteString (_cc_iobuf *f, char *str, uint16_t padding)
     inoutres_t status;
     uint16_t len;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     len = strlen (str);
     if (padding > len)
@@ -757,7 +860,9 @@ inoutres_t __far cc_TextWriteString (_cc_iobuf *f, char *str, uint16_t padding)
     if ((status == EINOUTRES_SUCCESS) && len)
         status = _cc_TextWrite (f, str, len);
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -770,7 +875,9 @@ int32_t __far cc_TextReadInteger (_cc_iobuf *f)
     int32_t result;
     uint16_t count;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     stream.f = f;
     stream.start = 0;
@@ -788,14 +895,18 @@ int32_t __far cc_TextReadInteger (_cc_iobuf *f)
         {
             if (!count)
             {
+                #if SYSDEBUG_IOBUF == 1
                 SYSDEBUG_INFO_ ("End (result=%l)", (int32_t) result);
+                #endif
                 return result;
             }
         }
         cc_InOutRes = EINOUTRES_NOT_NUMBER;
     }
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (result=%l)", (int32_t) 0);
+    #endif
     return 0;
 }
 
@@ -892,7 +1003,9 @@ inoutres_t __far cc_TextWriteInteger (_cc_iobuf *f, uint32_t value, uint16_t pad
     char tmp[BUFSIZE], *startptr;
     uint16_t len;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     len = _sys_store_sint32_decimal (value, &(tmp[BUFSIZE]), &startptr);
     if (padding > len)
@@ -901,7 +1014,9 @@ inoutres_t __far cc_TextWriteInteger (_cc_iobuf *f, uint32_t value, uint16_t pad
     /* FIXME: no check for status in original code */
 
     status = _cc_TextWrite (f, startptr, len);
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO_ ("End (status=%i)", status);
+    #endif
     return status;
 }
 
@@ -918,7 +1033,9 @@ inoutres_t __far _buffered_open (_cc_iobuf *f)
     void *p_in_out, *p_flush;
     inoutres_t status;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     attr = 0;
     mode = CC_O_RDONLY_DOS;
@@ -940,7 +1057,9 @@ inoutres_t __far _buffered_open (_cc_iobuf *f)
         if (error)
         {
             status = map_doserrno_to_inoutres (_doserrno);
+            #if SYSDEBUG_IOBUF == 1
             SYSDEBUG_ERR_ ("Failed (doserrno=%i, status=%i)", _doserrno, status);
+            #endif
             return status;
         }
         f->handle = fd;
@@ -975,7 +1094,9 @@ inoutres_t __far _buffered_open (_cc_iobuf *f)
     f->io.by_name.in_out = p_in_out;
     f->io.by_name.flush  = p_flush;
     f->io.by_name.close  = _buffered_close;
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_SUCCESS ();
+    #endif
     return EINOUTRES_SUCCESS;
 }
 
@@ -985,7 +1106,9 @@ void __near _buffered_append (_cc_iobuf *f)
     uint16_t count, i;
     char *buf;
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_BEGIN ();
+    #endif
 
     _dos_seek (f->handle, 0, SEEK_END_DOS, &newoff);
 
@@ -1006,11 +1129,15 @@ void __near _buffered_append (_cc_iobuf *f)
             _dos_seek (f->handle, - count + i, SEEK_END_DOS, &newoff);
             /* truncate file */
             _dos_write (f->handle, NULL, 0, &count);
+            #if SYSDEBUG_IOBUF == 1
             SYSDEBUG_SUCCESS ();
+            #endif
             return;
         }
 
+    #if SYSDEBUG_IOBUF == 1
     SYSDEBUG_SUCCESS ();
+    #endif
 }
 
 /* Returns length of converted integer. */
@@ -1259,6 +1386,12 @@ void __near _sys_print_hex_word(uint16_t v)
 {
     _sys_print_hex_byte(v >> 8);
     _sys_print_hex_byte(v & 0xff);
+}
+
+void __near _sys_print_hex_dword (uint32_t v)
+{
+    _sys_print_hex_word (v >> 16);
+    _sys_print_hex_word (v & 0xffff);
 }
 
 void __near _sys_print_decimal_byte(uint8_t v)
@@ -1544,13 +1677,13 @@ void cc_system_init (void)
 #endif  /* LINKER_TPC == 1 */
     _sys_clear_dataseg ();
     cc_Test8086 = isCPU_8086();
-#if LINKER_TPC == 1
-#else /* LINKER_TPC != 1 */
+
     cc_dos_savevectors ();
 
     _cc_dos_setvect(0, _cc_local_int0_asm);
     _cc_dos_setvect(0x23, _cc_local_int23_asm);
     _cc_dos_setvect(0x24, _cc_local_int24_asm);
+#if LINKER_TPC != 1
     data.pspseg = _cc_psp;
 #endif  /* LINKER_TPC != 1 */
     parse_cmdline (false, &data);
@@ -1581,9 +1714,7 @@ void __noreturn __far __cdecl _cc_ExitWithError (int16_t status, void __far *add
     if (_cc_argv)
         _cc_dos_freemem (FP_SEG (_cc_argv));
 
-#if LINKER_TPC != 1
     cc_dos_restorevectors ();
-#endif  /* LINKER_TPC != 1 */
 
     if (cc_ErrorAddr)
     {

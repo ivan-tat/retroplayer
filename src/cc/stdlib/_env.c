@@ -19,11 +19,20 @@
 #include "cc/string.h"
 #include "cc/dos.h"
 #include "cc/errno.h"
+#include "cc/malloc.h"
 #include "cc/stdlib.h"
 #include "cc/stdlib/_env.h"
 
 /* For the case if environment is not initialized */
 static char *_env_list_empty = NULL;
+
+#if DEFINE_LOCAL_DATA == 1
+
+struct dosenvlist_t _dos_env;
+struct envstrlist_t _env_list;
+char **cc_environ;
+
+#endif  /* DEFINE_LOCAL_DATA */
 
 /* DOS program segment prefix */
 
@@ -125,6 +134,9 @@ bool _environ_alloc(struct envstrlist_t *self, uint16_t count)
 {
     uint16_t seg;
 
+    #if SYSDEBUG_ENV == 1
+    SYSDEBUG_BEGIN ();
+    #endif
     if (self)
     {
         if (count)
@@ -133,23 +145,35 @@ bool _environ_alloc(struct envstrlist_t *self, uint16_t count)
             {
                 self->arr = MK_FP(seg, 0);
                 self->size = count;
+                #if SYSDEBUG_ENV == 1
+                SYSDEBUG_SUCCESS ();
+                #endif
                 return true;
             }
             else
             {
                 cc_errno = CC_ENOMEM;
+                #if SYSDEBUG_ENV == 1
+                SYSDEBUG_ERR ("_dos_allocmem(): failed.");
+                #endif
                 return false;
             }
         }
         else
         {
             cc_errno = CC_EINVAL;
+            #if SYSDEBUG_ENV == 1
+            SYSDEBUG_ERR ("self is NULL.");
+            #endif
             return false;
         }
     }
     else
     {
         cc_errno = CC_EINVAL;
+        #if SYSDEBUG_ENV == 1
+        SYSDEBUG_ERR ("count is 0.");
+        #endif
         return false;
     }
 }
@@ -166,8 +190,8 @@ void _environ_fill(struct envstrlist_t *self, struct dosenvlist_t *dosenv)
         i = 0;
         do
         {
-            *p[0] = dosenv->arr[i];
-            p = &(p[1]);
+            p[0] = &(dosenv->arr[i]);
+            p++;
             count--;
         } while ((count != 1) && _dosenv_next(dosenv, &i));
         *p = NULL;
@@ -200,37 +224,79 @@ bool cc_environ_build(void)
 {
     uint16_t count;
 
+    #if SYSDEBUG_ENV == 1
+    SYSDEBUG_BEGIN ();
+    #endif
     _dosenv_find_end(&_dos_env, &count);
     if (count)
     {
         count++;
+        #if SYSDEBUG_ENV == 1
+        SYSDEBUG_INFO_ ("count=%d", count);
+        #endif
         if (!_environ_alloc(&_env_list, count))
+        {
+            #if SYSDEBUG_ENV == 1
+            SYSDEBUG_ERR ("Failed.");
+            #endif
             return false;
+        }
         _environ_fill(&_env_list, &_dos_env);
         cc_environ_sync();
     }
     else
         cc_environ_clear();
 
+    #if SYSDEBUG_ENV == 1
+    SYSDEBUG_SUCCESS ();
+    #endif
     return true;
 }
 
 bool cc_environ_rebuild(void)
 {
+    bool status;
+    #if SYSDEBUG_ENV == 1
+    SYSDEBUG_BEGIN ();
+    #endif
     _environ_free(&_env_list);
-    return cc_environ_build();
+    status = cc_environ_build ();
+    #if SYSDEBUG_ENV == 1
+    if (status)
+        SYSDEBUG_SUCCESS ();
+    else
+        SYSDEBUG_ERR ("Failed.");
+    #endif
+    return status;
 }
 
 bool cc_environ_init(void)
 {
+    bool status;
+    #if SYSDEBUG_ENV == 1
+    SYSDEBUG_BEGIN ();
+    #endif
     _environ_clear(&_env_list);
-    return cc_environ_build();
+    status = cc_environ_build ();
+    #if SYSDEBUG_ENV == 1
+    if (status)
+        SYSDEBUG_SUCCESS ();
+    else
+        SYSDEBUG_ERR ("Failed.");
+    #endif
+    return status;
 }
 
 void cc_environ_free(void)
 {
+    #if SYSDEBUG_ENV == 1
+    SYSDEBUG_BEGIN ();
+    #endif
     _environ_free(&_env_list);
     cc_environ_sync();
+    #if SYSDEBUG_ENV == 1
+    SYSDEBUG_END ();
+    #endif
 }
 
 /*** Initialization ***/
@@ -241,16 +307,41 @@ void __far environ_done(void);
 
 bool environ_init(void)
 {
+    bool status;
+    #if SYSDEBUG_ENV == 1
+    SYSDEBUG_BEGIN ();
+    SYSDEBUG_INFO_ ("_memmax()=%ld", (uint32_t) _memmax ());
+    #endif
     cc_atexit(&environ_done);
-
-    _cc_psp = _dos_getmasterpsp ();
+    #if SYSDEBUG_ENV == 1
+    SYSDEBUG_INFO_ ("_psp=%04X, _masterpsp=%04X", _cc_psp, _cc_dos_getmasterpsp ());
+    #endif
+//~ #if LINKER_TPC == 1
+    //~ _cc_psp = _cc_dos_getmasterpsp ();
+//~ #endif
     _psp_get_dosenv (_cc_psp, &_dos_env);
-
-    return cc_environ_init();
+    #if SYSDEBUG_ENV == 1
+    SYSDEBUG_INFO_ ("_dos_env: .arr=%04X:%04X, .size=%d",
+        FP_SEG (_dos_env.arr), FP_OFF (_dos_env.arr), _dos_env.size);
+    #endif
+    status = cc_environ_init ();
+    #if SYSDEBUG_ENV == 1
+    if (status)
+        SYSDEBUG_SUCCESS ();
+    else
+        SYSDEBUG_ERR ("Failed.");
+    #endif
+    return status;
 }
 
 void __far environ_done(void)
 {
+    #if SYSDEBUG_ENV == 1
+    SYSDEBUG_BEGIN ();
+    #endif
     cc_environ_free();
     /*exitproc = _oldexit_environ;*/
+    #if SYSDEBUG_ENV == 1
+    SYSDEBUG_END ();
+    #endif
 }

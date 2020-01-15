@@ -24,24 +24,41 @@ int _cc_doserrno;
 
 #endif
 
-unsigned __cc_doserror(union CC_REGPACK *regs)
+/*
+ * Description:
+ *      This methods checks REGPACK structure before changing "_doserrno"
+ *      variable. Returns "_doserrno" value for known error or -1 if unknown.
+ *      May set "errno" variable.
+ */
+unsigned __cc_doserror (union CC_REGPACK *regs)
 {
-    int olderr;
-    struct CC_DOSERROR err;
-
     if (regs->w.flags & CC_INTR_CF)
-    {
-        olderr = _cc_doserrno;
-        // FIXME: if DOS < 3.0, then use regs.w.ax
-        if (!cc_dosexterr(&err))
-            _cc_doserrno = err.exterror;
-        else
-            _cc_doserrno = olderr;
-        return __cc_set_errno_dos(_cc_doserrno);
-    }
+        return __cc_doserror2 ();
     else
     {
         _cc_doserrno = 0;
         return CC_EZERO;
     }
+}
+
+/*
+ * Description:
+ *      This methods assumes that there was a DOS error and may change
+ *      "_doserrno" variable. Useful when calling DOS services directly
+ *      without the use of REGPACK structure. In this case you should set
+ *      "_doserrno" variable manually before call. If the error code is known
+ *      then it sets "errno" variable.
+ */
+unsigned __cc_doserror2 (void)
+{
+    int olderr;
+    struct CC_DOSERROR err;
+
+    olderr = _cc_doserrno;
+    // FIXME: if DOS < 3.0, then use regs.w.ax
+    if (cc_dosexterr (&err) == CC_EZERO)
+        _cc_doserrno = err.exterror;
+    else
+        _cc_doserrno = olderr;
+    return __cc_set_errno_dos (_cc_doserrno);
 }

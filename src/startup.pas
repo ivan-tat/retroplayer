@@ -82,7 +82,8 @@ uses
     string_,
     stdio,
     sysdbg,
-    dos_;
+    dos_,
+    malloc;
 
 function pascal_paramcount: Word;
 begin

@@ -102,22 +102,25 @@ typedef struct cc_dospsp_t
     uint8_t reserved2[20];
     uint8_t int_21_retf_opcodes[3];
     uint8_t reserved3[9];
-    uint8_t FCB1[16];
-    uint8_t FCB2[20];
-    uint8_t param_str[128];
-};
+    uint8_t FCB1[16];   /* see cc_dos_execparam_t structure */
+    uint8_t FCB2[20];   /* see cc_dos_execparam_t structure */
+    uint8_t param_str[128]; /* first byte is the length of arguments string */
+        /* (not including terminating byte), then "length" bytes of a string */
+        /* (126 bytes at most), and one byte 0x0d (CR) after the end of the string. */
+};  /* 256 bytes */
 
 /* DOS Memory Control Block */
 
 typedef struct cc_dosmcb_t
 {
-    uint8_t ident;
-    uint16_t owner_psp_seg;
-    uint16_t size;
-    uint8_t reserved[11];
-    uint8_t program_name[8];
-    uint8_t data;
-};
+    uint8_t ident;          /* 'M'=valid, 'Z'=last block in list */
+    uint16_t owner_psp_seg; /* segment address of PSP of owner (0=owns self) */
+    uint16_t size;          /* allocation size in paragraphs (16-bytes chunks) */
+    uint8_t reserved[3];
+    uint8_t owner_name[8];  /* NULL-terminated string, name of owner (DOS v4.0+) */
+    /* data follows ("size"*16 bytes) */
+};  /* 16 bytes */
+/* After fn 4Bh Exec, a 'Z' block is stored at (PSP-1):0 of the new process. */
 
 unsigned _cc_dos_getpsp(void);
 unsigned _cc_dos_getmasterpsp(void);
@@ -179,6 +182,39 @@ unsigned _cc_dos_getmasterpsp(void);
 
 typedef uint16_t cc_ioctl_info_t;
 
+/* File Control Block (FCB) */
+
+#pragma pack(push, 1);
+typedef struct cc_dosfcb_t
+{
+    uint8_t drive;      /* Drive ID */
+                        /* Before open: 0=default, 1=A, 2=B, etc. */
+                        /* After open:  0=A, 1=B, etc. */
+    uint8_t name [8];   /* File name, left-justified, padded with spaces if less then 8 characters */
+    uint8_t ext [3];    /* File extension, left-justified, padded with spaces if less then 3 characters */
+    uint16_t cur_blk;   /* Current block number (a block is 128 records) */
+                        /* DOS sets to 0 on open. */
+    uint16_t rec_size;  /* Logical record size (in bytes) */
+                        /* DOS sets to 128 on open. */
+    uint32_t file_size; /* Length of file (in bytes) */
+    uint16_t date;      /* Date created/last modified in packed format */
+    uint16_t time;      /* Time created/last modified in packed format */
+    uint8_t resv [8];   /* Reserved */
+    uint8_t cur_rec;    /* Current position in current block (0-127) */
+    uint32_t rand_rec;  /* Current record number in entire file */
+};  /* 37 bytes */
+#pragma pack(pop);
+
+#pragma pack(push, 1);
+typedef struct cc_dos_execparam_t
+{
+    uint16_t env_seg;           /* segment of environment for child or 0 (current) */
+    const char __far *cmd_tail; /* text to be placed to [PSP:0x80] */
+    struct cc_dosfcb_t __far *fcb[2];
+        /* address of FCB to be placed at [PSP:0x5c] and [PSP:0x6c] */
+};  /* 14 bytes */
+#pragma pack(pop);
+
 /*
 unsigned _cc_dos_creat(const char *fname, unsigned attr, int *fd);
 unsigned _cc_dos_creatnew(const char *fname, unsigned attr, int *fd);
@@ -202,6 +238,15 @@ uint16_t __far _cc_dos_seek (int16_t fd, int32_t offset, int16_t kind, int32_t *
 
 uint16_t __far _cc_dos_ioctl_query_flags (int16_t fd, cc_ioctl_info_t __far *info);
 
+/* "option" for _cc_dos_parsfnm() (bit-field): */
+
+#define CC_FCB_RMPATH   (1 << 0)
+#define CC_FCB_SETDRV   (1 << 1)
+#define CC_FCB_SETNAME  (1 << 2)
+#define CC_FCB_SETEXT   (1 << 3)
+
+char *_cc_dos_parsfnm (const char *fname, struct cc_dosfcb_t *fcb, char option);
+
 /* Context switching */
 
 // Saved critical interrupt vectors
@@ -212,6 +257,7 @@ extern void __far *SaveIntVecs[SAVEINTVEC_COUNT];
 void cc_dos_savevectors (void);
 void cc_dos_restorevectors (void);
 void cc_dos_swapvectors (void);
+unsigned _cc_dos_exec (uint16_t env_seg, const char *fname, const char *cmd);
 void _cc_dos_terminate(uint8_t code);
 
 //#if LINKER_TPC == 1
@@ -281,9 +327,17 @@ extern void __far __pascal pascal_exec(char *name, char *cmdline);
 
 #define _dos_ioctl_query_flags _cc_dos_ioctl_query_flags
 
+#define FCB_RMPATH  CC_FCB_RMPATH
+#define FCB_SETDRV  CC_FCB_SETDRV
+#define FCB_SETNAME CC_FCB_SETNAME
+#define FCB_SETEXT  CC_FCB_SETEXT
+
+#define _dos_parsfnm _cc_dos_parsfnm
+
 #define dos_savevectors cc_dos_savevectors
 #define dos_restorevectors cc_dos_restorevectors
 #define dos_swapvectors cc_dos_swapvectors
+#define _dos_exec _cc_dos_exec
 #define _dos_terminate _cc_dos_terminate
 
 /*** Linking ***/
@@ -320,6 +374,8 @@ extern void __far __pascal pascal_exec(char *name, char *cmdline);
 #pragma aux _cc_dos_write "*";
 #pragma aux _cc_dos_seek "*";
 #pragma aux _cc_dos_ioctl_query_flags "*";
+#pragma aux _cc_dos_parsfnm "*";
+#pragma aux _cc_dos_exec "*";
 #pragma aux SaveIntVecIndexes "*";
 #pragma aux SaveIntVecs "*";
 #pragma aux cc_dos_savevectors "*";

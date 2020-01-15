@@ -2,8 +2,11 @@
 
 #include <stdint.h>
 #include "cc/string.h"
+#include "cc/i86.h"
 #include "cc/io.h"
 #include "cc/stdio.h"
+#include "cc/stdlib.h"
+#include "cc/unistd.h"
 #include "sysdbg.h"
 #include "debug.h"
 #include "startup.h"
@@ -112,6 +115,9 @@ int main (int argc, const char **argv)
     cc_TextWriteLn (&cc_Output); IOCHK
     cc_TextSync (&cc_Output); IOCHK
 
+    SYSDEBUG_INFO_ ("value=%ld", (int32_t) l);
+    SYSDEBUG_END ();
+
     cc_TextAssign (&f, f_buf, 128, "test.txt"); IOCHK
     cc_TextRewrite (&f); IOCHK
     cc_TextWriteString (&f, "Test for an ordinary text file.", 0); IOCHK
@@ -124,8 +130,6 @@ int main (int argc, const char **argv)
         cc_TextWriteLn (&f); IOCHK
     }
     cc_TextClose (&f);
-    /**/
-    SYSDEBUG_INFO_ ("value=%l", (int32_t) l);
-    SYSDEBUG_END ();
+
     return 0;
 }

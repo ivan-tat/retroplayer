@@ -33,9 +33,9 @@ void __far _DEBUG_dump_mem(void *buf, unsigned size, const char *padstr);
  #define DEBUG_INFO_(format, ...)          _DEBUG_LOG (DBGLOG_INFO, __FILE__, __LINE__, __func__, format, __VA_ARGS__)
  #define DEBUG_WARN(text)                  _DEBUG_LOG (DBGLOG_WARN, __FILE__, __LINE__, __func__, "%s", text)
  #define DEBUG_WARN_(format, ...)          _DEBUG_LOG (DBGLOG_WARN, __FILE__, __LINE__, __func__, format, __VA_ARGS__)
- #define DEBUG_BEGIN()                     _DEBUG_BEGIN (__FILE__, __LINE__, __func__);
- #define DEBUG_END()                       _DEBUG_END (__FILE__, __LINE__, __func__);
- #define DEBUG_SUCCESS()                   _DEBUG_SUCCESS (__FILE__, __LINE__, __func__);
+ #define DEBUG_BEGIN()                     _DEBUG_BEGIN (__FILE__, __LINE__, __func__)
+ #define DEBUG_END()                       _DEBUG_END (__FILE__, __LINE__, __func__)
+ #define DEBUG_SUCCESS()                   _DEBUG_SUCCESS (__FILE__, __LINE__, __func__)
  #define DEBUG_ERR(text)                   _DEBUG_LOG (DBGLOG_ERR, __FILE__, __LINE__, __func__, "%s", text)
  #define DEBUG_ERR_(format, ...)           _DEBUG_LOG (DBGLOG_ERR, __FILE__, __LINE__, __func__, format, __VA_ARGS__)
  #define DEBUG_REG(method, name)           _DEBUG_REG (__FILE__, method, name)

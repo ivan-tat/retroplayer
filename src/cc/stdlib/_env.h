@@ -34,7 +34,7 @@ typedef struct envstrlist_t
 /* Global variables */
 
 extern struct dosenvlist_t _dos_env;
-static struct envstrlist_t _env_list;
+extern struct envstrlist_t _env_list;
 
 /* DOS program segment prefix */
 

@@ -11,6 +11,8 @@
 #if SYSDEBUG != 1
 # undef  SYSDEBUG
 # define SYSDEBUG 0
+# define SYSDEBUG_IOBUF 0
+# define SYSDEBUG_ENV 0
 #endif
 
 #undef DEBUG_WRITE_LOG

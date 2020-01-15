@@ -678,7 +678,7 @@ void run_os_shell(void)
     textcolor(_lightgray);
     printf("Starting DOS shell... (to return to player use 'exit' command)" CRLF);
     comspec = getenv("COMSPEC");
-    result = execv(comspec, NULL);
+    result = execv (comspec, NULL);
     c = 0;
     vbios_set_mode(3);  // restore text-mode
     cursor_hide();
@@ -687,10 +687,9 @@ void run_os_shell(void)
         while (kbhit())
             getch();
         printf(
-            "DOS error: %u." CRLF
-            "Error while running command interpreter." CRLF
+            "Error %u (DOS error %u) while running command interpreter." CRLF
             "Press any key to continue...",
-            errno
+            errno, _doserrno
         );
         getch();
     }

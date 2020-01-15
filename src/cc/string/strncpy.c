@@ -40,7 +40,7 @@ char *cc_strncpy(char *dest, const char *src, size_t n)
 
         while (count)
         {
-            ptr1 = 0;
+            *ptr1 = 0;
             ptr1++;
             count--;
         }

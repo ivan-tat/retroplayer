@@ -14,7 +14,7 @@
 
 #include "pascal.h"
 
-int cc_execv(const char *filename, char *const argv[]);
+int cc_execv (const char *filename, char *const argv[]);
 
 /*** Aliases ***/
 

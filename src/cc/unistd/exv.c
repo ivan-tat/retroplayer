@@ -10,100 +10,78 @@
 #endif
 
 #include "pascal.h"
+#include "startup.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
 #include "cc/errno.h"
 #include "cc/string.h"
+#include "sysdbg.h"
 #include "cc/unistd.h"
 
-extern int16_t pascal_doserror;
-
-#ifdef __WATCOMC__
-#pragma aux pascal_doserror "*";
-#endif  /* __WATCOMC__ */
-
-int cc_execv(const char *filename, char *const argv[])
+/*
+ * Description:
+ *      This is not really an "execv()" but more like a "system()" method.
+ *      It stops execution of current program (but background tasks are still
+ *      working if any) and runs a specified one with arguments. After it
+ *      finished the main program is continued.
+ */
+int cc_execv (const char *filename, char *const argv[])
 {
-    char pathstr[cc_PathStr_size];
-    char cmdline[pascal_String_size];
+    char cmdline[126+1];
     int n;
     size_t len, part;
     char *arg;
     bool space;
+    int status;
 
-    strctopas(pathstr, filename, cc_PathStr_size);
     len = 0;
-    n = 0;
-    while ((arg = argv[n]) && (len < pascal_String_size - 1))
+    if (argv)
     {
-        part = strlen(arg);
-        if (part)
+        n = 0;
+        while ((arg = argv[n]) && (len < 126))
         {
-            if (len)
-            {
-                space = true;
-                part++;
-            }
-            else
-                space = false;
-
-            if (part > pascal_String_size - 1 - len)
-                part = pascal_String_size - 1 - len;
-
-            if (space)
-            {
-                cmdline[1 + len] = ' ';
-                len++;
-                part--;
-            }
-
+            part = strlen (arg);
             if (part)
             {
-                memcpy(cmdline + 1 + len, arg, part);
-                len += part;
+                if (len)
+                {
+                    space = true;
+                    part++;
+                }
+                else
+                    space = false;
+
+                if (part > 126 - len)
+                    part = 126 - len;
+
+                if (space)
+                {
+                    cmdline [len] = ' ';
+                    len++;
+                    part--;
+                }
+
+                if (part)
+                {
+                    memcpy (cmdline + len, arg, part);
+                    len += part;
+                }
             }
+            n++;
         }
-
-        n++;
     }
-    cmdline[0] = len;
+    cmdline [len] = 0;
 
+    /* Pascal SwapVectors() must be the last call before executing. */
     cc_dos_swapvectors ();
-    pascal_exec(pathstr, cmdline);
+#if LINKER_TPC == 1
+    pascal_swapvectors ();
+#endif
+    status = _cc_dos_exec (
+        ((struct cc_dospsp_t *) MK_FP (_cc_psp, 0))->env_seg, filename, cmdline);
+#if LINKER_TPC == 1
+    pascal_swapvectors ();
+#endif
     cc_dos_swapvectors ();
-
-    switch (pascal_doserror)
-    {
-    case 0:
-        cc_errno = CC_EZERO;
-        break;
-    case 2:
-        cc_errno = CC_ENOENT;
-        break;
-    case 3:
-        cc_errno = CC_ENOENT;
-        break;
-    case 5:
-        cc_errno = CC_EACCES;
-        break;
-    case 6:
-        cc_errno = CC_EFAULT;
-        break;
-    case 8:
-        cc_errno = CC_ENOMEM;
-        break;
-    case 10:
-        cc_errno = CC_EINVAL;
-        break;
-    case 11:
-        cc_errno = CC_EINVAL;
-        break;
-    case 18:
-        cc_errno = CC_EMFILE;
-        break;
-    default:
-        cc_errno = CC_EZERO;
-        break;
-    }
-    return 0;
+    return status != 0 ? -1 : 0;
 }

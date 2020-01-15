@@ -72,11 +72,13 @@ type
     data: Byte;
   end;
 
+procedure pascal_swapvectors;
 procedure pascal_exec(Name: PathStr; CmdLine: String);
 
 procedure __cc_set_errno_dos;
 
 procedure __cc_doserror;
+procedure __cc_doserror2;
 
 procedure cc_dosexterr;
 
@@ -114,6 +116,10 @@ procedure _cc_dos_seek;
 
 procedure _cc_dos_ioctl_query_flags;
 
+procedure _cc_dos_parsfnm;
+procedure __cc_dos_exec_asm;
+procedure _cc_dos_exec;
+
 procedure cc_dos_savevectors;
 procedure cc_dos_restorevectors;
 procedure cc_dos_swapvectors;
@@ -124,9 +130,10 @@ implementation
 uses
     pascal,
     errno_,
+    string_,
     i86;
 
-procedure pascal_swapvectors; far;
+procedure pascal_swapvectors;
 begin
     Dos.SwapVectors;
 end;
@@ -141,6 +148,7 @@ procedure __cc_set_errno_dos; external;
 
 (*$L dos\error086.obj*)
 procedure __cc_doserror; external;
+procedure __cc_doserror2; external;
 
 (*$L dos\dosexter.obj*)
 procedure cc_dosexterr; external;
@@ -192,6 +200,15 @@ procedure _cc_dos_seek; external;
 
 (*$L dos\dosioctl.obj*)
 procedure _cc_dos_ioctl_query_flags; external;
+
+(*$L dos\parsfnm.obj*)
+procedure _cc_dos_parsfnm; external;
+
+(*$L dos\ex.obj*)
+procedure __cc_dos_exec_asm; external;
+
+(*$L dos\exec.obj*)
+procedure _cc_dos_exec; external;
 
 (*$L dos\c_init.obj*)
 procedure cc_dos_savevectors; external;

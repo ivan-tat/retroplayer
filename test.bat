@@ -14,9 +14,10 @@ set test_8=smalls3m
 set test_9=playosci
 set test_10=test
 set test_11=testcrt
+set test_12=testexec
 
 :_start
-cls
+mode.com co80,50
 echo Choose a test to run (0 to stop test):
 echo.
 echo 0. Exit.
@@ -31,11 +32,13 @@ echo 8. %test_8%
 echo 9. %test_9%
 echo A. %test_10%
 echo B. %test_11%
+echo C. %test_12%
 echo.
 echo (using test song: %PlayTestSong%)
 echo.
-choice /C:0123456789AB
+choice /C:0123456789ABC
 
+if errorlevel 13 goto _12
 if errorlevel 12 goto _11
 if errorlevel 11 goto _10
 if errorlevel 10 goto _9
@@ -125,6 +128,12 @@ goto _repeat
 echo.
 echo Running test 11...
 %MiscTestPath%\%test_11%
+goto _repeat
+
+:_12
+echo.
+echo Running test 12...
+%MiscTestPath%\%test_12%
 goto _repeat
 
 :_end

@@ -32,9 +32,9 @@ void __far _SYSDEBUG_dump_mem (void *buf, unsigned size, const char *padstr);
  #define SYSDEBUG_INFO_(format, ...)          _SYSDEBUG_LOG (DBGLOG_INFO, __FILE__, __LINE__, __func__, format, __VA_ARGS__)
  #define SYSDEBUG_WARN(text)                  _SYSDEBUG_LOG (DBGLOG_WARN, __FILE__, __LINE__, __func__, "%s", text)
  #define SYSDEBUG_WARN_(format, ...)          _SYSDEBUG_LOG (DBGLOG_WARN, __FILE__, __LINE__, __func__, format, __VA_ARGS__)
- #define SYSDEBUG_BEGIN()                     _SYSDEBUG_BEGIN (__FILE__, __LINE__, __func__);
- #define SYSDEBUG_END()                       _SYSDEBUG_END (__FILE__, __LINE__, __func__);
- #define SYSDEBUG_SUCCESS()                   _SYSDEBUG_SUCCESS (__FILE__, __LINE__, __func__);
+ #define SYSDEBUG_BEGIN()                     _SYSDEBUG_BEGIN (__FILE__, __LINE__, __func__)
+ #define SYSDEBUG_END()                       _SYSDEBUG_END (__FILE__, __LINE__, __func__)
+ #define SYSDEBUG_SUCCESS()                   _SYSDEBUG_SUCCESS (__FILE__, __LINE__, __func__)
  #define SYSDEBUG_ERR(text)                   _SYSDEBUG_LOG (DBGLOG_ERR, __FILE__, __LINE__, __func__, "%s", text)
  #define SYSDEBUG_ERR_(format, ...)           _SYSDEBUG_LOG (DBGLOG_ERR, __FILE__, __LINE__, __func__, format, __VA_ARGS__)
  #define SYSDEBUG_dump_mem(buf, size, padstr) _SYSDEBUG_dump_mem (buf, size, padstr)
