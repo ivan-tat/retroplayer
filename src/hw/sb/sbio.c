@@ -29,6 +29,12 @@
 #define DSP_WRITE_BUFFER_STATUS 0x0c // Read
 #define DSP_WRITE_DATA          0x0c // Write
 
+#if DEFINE_LOCAL_DATA == 1
+
+SBIOERR sbioError;
+
+#endif
+
 void __far sbioMixerReset (uint16_t base)
 {
     unsigned int wait;

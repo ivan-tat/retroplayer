@@ -16,6 +16,11 @@
 #include <stdint.h>
 #include "pascal.h"
 
+#if LINKER_TPC != 1
+void __noreturn _start_c (void);
+int main (int argc, const char **argv);
+#endif
+
 void __far playosci_main (void);
 
 /*** Initialization ***/
@@ -25,6 +30,11 @@ DECLARE_REGISTRATION (playosci)
 /*** Linking ***/
 
 #ifdef __WATCOMC__
+
+#if LINKER_TPC != 1
+#pragma aux _start_c "*";
+#pragma aux main "*";
+#endif
 
 #pragma aux playosci_main "*";
 

@@ -233,16 +233,16 @@ void    mixer_free (MIXER *self);
 
 #pragma aux ST3Periods "*";
 
-#pragma aux _play_sample_nearest_8 "*";
-#pragma aux _play_sample_nearest_16 "*";
+#pragma aux _play_sample_nearest_8 "^";
+#pragma aux _play_sample_nearest_16 "^";
 
-#pragma aux _mix_sample "*";
-#pragma aux _mix_sample2 "*";
+#pragma aux _mix_sample "^";
+#pragma aux _mix_sample2 "^";
 
-#pragma aux _MixSampleMono8 "*";
-#pragma aux _MixSampleMono16 "*";
-#pragma aux _MixSampleStereo8 "*";
-#pragma aux _MixSampleStereo16 "*";
+#pragma aux _MixSampleMono8 "^";
+#pragma aux _MixSampleMono16 "^";
+#pragma aux _MixSampleStereo8 "^";
+#pragma aux _MixSampleStereo16 "^";
 
 #pragma aux fill_8 "*";
 #pragma aux fill_16 "*";

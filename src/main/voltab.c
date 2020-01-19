@@ -18,6 +18,12 @@
 #endif
 #include "main/voltab.h"
 
+#if DEFINE_LOCAL_DATA == 1
+
+voltab_t *volumetableptr;
+
+#endif
+
 void voltab_init(void)
 {
     volumetableptr = NULL;

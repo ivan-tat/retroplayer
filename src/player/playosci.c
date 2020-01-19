@@ -197,11 +197,31 @@ void __near update_osci_stereo(void)
     scr[1][319] = s[1];
 }
 
-void __far playosci_main (void)
+#if LINKER_TPC != 1
+
+void __noreturn _start_c (void)
 {
     system_init ();
     console_init ();
     delay_init ();
+    _cc_Exit (main (_argc, _argv));
+}
+
+int main (int argc, const char **argv)
+{
+    playosci_main ();
+    return 0;
+}
+
+#endif  /* LINKER_TPC */
+
+void __far playosci_main (void)
+{
+#if LINKER_TPC == 1
+    system_init ();
+    console_init ();
+    delay_init ();
+#endif
 
     register_debug ();
     register_hwowner ();

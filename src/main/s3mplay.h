@@ -38,7 +38,7 @@ typedef sound_device_setup_method_t SNDDEVSETMET;
 
 /*** Player ***/
 
-extern char *PLAYER_VERSION;
+extern const char *PLAYER_VERSION;
 
 typedef void MUSPLAYER;
 

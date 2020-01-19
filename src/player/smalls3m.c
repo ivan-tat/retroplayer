@@ -64,6 +64,24 @@ show_usage (void)
     );
 }
 
+#if LINKER_TPC != 1
+
+void __noreturn _start_c (void)
+{
+    system_init ();
+    console_init ();
+    delay_init ();
+    _cc_Exit (main (_argc, _argv));
+}
+
+int main (int argc, const char **argv)
+{
+    smalls3m_main ();
+    return 0;
+}
+
+#endif  /* LINKER_TPC */
+
 void __far
 smalls3m_main (void)
 {
@@ -71,9 +89,11 @@ smalls3m_main (void)
     char s[pascal_String_size];
     int result;
 
+#if LINKER_TPC == 1
     system_init ();
     console_init ();
     delay_init ();
+#endif
 
     register_debug ();
     register_hwowner ();

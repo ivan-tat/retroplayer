@@ -697,6 +697,24 @@ void run_os_shell(void)
 
 /*** Main **/
 
+#if LINKER_TPC != 1
+
+void __noreturn _start_c (void)
+{
+    system_init ();
+    console_init ();
+    delay_init ();
+    _cc_Exit (main (_argc, _argv));
+}
+
+int main (int argc, const char **argv)
+{
+    plays3m_main ();
+    return 0;
+}
+
+#endif  /* LINKER_TPC */
+
 void __far plays3m_main (void)
 {
     PLAYSTATE *ps;
@@ -708,11 +726,11 @@ void __far plays3m_main (void)
     bool quit, result;
     char c;
 
-    /* TODO: make separate custom_main() */
-
+#if LINKER_TPC == 1
     system_init ();
     console_init ();
     delay_init ();
+#endif
 
     register_debug ();
     register_hwowner ();

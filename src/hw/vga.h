@@ -36,8 +36,8 @@ DECLARE_REGISTRATION (vga)
 #pragma aux vga_set_text_cursor_position "*";
 #pragma aux vga_clear_page_320x200x8 "*";
 
-#pragma aux vga_line "*" modify [ ax bx cx dx si di es ];
-#pragma aux vga_bar  "*" modify [ ax bx cx dx si di es ];
+#pragma aux vga_line "^" modify [ ax bx cx dx si di es ];
+#pragma aux vga_bar  "^" modify [ ax bx cx dx si di es ];
 
 #pragma aux register_vga "*";
 #pragma aux unregister_vga "*";

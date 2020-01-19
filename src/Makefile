@@ -192,6 +192,7 @@ INCS =
 SRCS =
 OBJS =
 LIBS =
+LIBS_C =
 EXES =
 DEPS =
 TMPS =
@@ -207,6 +208,8 @@ empty:
 	echo '    target: "autogenfiles" | "all" | "clean"'; \
 	echo 'Supported options:'; \
 	echo '    SYSDEBUG=1'; \
+	echo '    SYSDEBUG_IOBUF=1'; \
+	echo '    SYSDEBUG_ENV=1'; \
 	echo '    DEBUG=1'; \
 	echo '    LINKER_TPC=1'
 
@@ -460,15 +463,15 @@ ow_OBJS += $(ow_OBJS_TP)
 
 OBJS += $(ow_OBJS)
 
-##=--------------=##
-## Custom C files ##
-##=--------------=##
+##=----------------------=##
+## Custom C library files ##
+##=----------------------=##
 
 cc_DIR := cc
 
 cc_SRCS := $(shell find $(cc_DIR) -type f \( -name '*.asm' -o -name '*.c' \))
 
-cc_OBJS := \
+cc_OBJS_C := \
  $(patsubst %.asm,%.o,$(filter %.asm,$(cc_SRCS))) \
  $(patsubst %.c,%.o,$(filter %.c,$(cc_SRCS)))
 
@@ -479,8 +482,8 @@ cc_DEPS := \
 cc_TMPS :=
 
 ## Turbo Pascal target files:
-cc_OBJS_TP := $(cc_OBJS:.o=.obj)
-cc_OBJS += $(cc_OBJS_TP)
+cc_OBJS_TP := $(cc_OBJS_C:.o=.obj)
+cc_OBJS := $(cc_OBJS_C) $(cc_OBJS_TP)
 cc_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(cc_SRCS)))
 
 SRCS += $(cc_SRCS)
@@ -492,21 +495,23 @@ TMPS += $(cc_TMPS)
 ## Custom C library ##
 ##=----------------=##
 
-cclib_DIR := $(cc_DIR)
+CCLIB := ./cc.lib
 
-CCLIB := $(cclib_DIR)/cc.lib
-
+ifeq "$(LINKER_TPC)" "1"
+else
+LIBS_C += $(CCLIB)
+endif
 LIBS += $(CCLIB)
 
-$(CCLIB): $(cc_OBJS_TP)
+$(CCLIB): $(cc_OBJS_TP) $(ow_OBJS)
 	$(RM) $@; \
-	$(AR) $(ARFLAGS) -o $@ $(patsubst %,+%,$(cc_OBJS_TP))
+	$(AR) $(ARFLAGS) -o $@ $(patsubst %,+%,$^)
 
-##=------------=##
-## Common files ##
-##=------------=##
+##=--------------------=##
+## Player library files ##
+##=--------------------=##
 
-common_DIRS := \
+p_DIRS := \
  . \
  dos \
  hw \
@@ -514,114 +519,253 @@ common_DIRS := \
  hw/vga \
  main \
  main/asm \
- player \
- player/asm \
  startup
 
-common_SRCS := \
- $(wildcard $(patsubst %,%/*.asm,$(common_DIRS))) \
- $(wildcard $(patsubst %,%/*.c,$(common_DIRS)))
-
-common_OBJS := \
- $(patsubst %.asm,%.o,$(filter %.asm,$(common_SRCS))) \
- $(patsubst %.c,%.o,$(filter %.c,$(common_SRCS)))
-
-common_DEPS := \
- $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(common_SRCS))) \
- $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(common_SRCS)))
-
-common_TMPS :=
+p_SRCS := $(shell find $(p_DIRS) -maxdepth 1 -type f \( -name '*.asm' -o -name '*.c' \))
+p_OBJS_C := \
+ $(patsubst %.asm,%.o,$(filter %.asm,$(p_SRCS))) \
+ $(patsubst %.c,%.o,$(filter %.c,$(p_SRCS)))
+p_DEPS := \
+ $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(p_SRCS))) \
+ $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(p_SRCS)))
+p_TMPS :=
 
 ## Turbo Pascal target files:
-common_OBJS_TP := $(common_OBJS:.o=.obj)
-common_OBJS += $(common_OBJS_TP)
-common_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(common_SRCS)))
+p_OBJS_TP := $(p_OBJS_C:.o=.obj)
+p_OBJS := $(p_OBJS_C) $(p_OBJS_TP)
+p_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(p_SRCS)))
 
-SRCS += $(common_SRCS)
-OBJS += $(common_OBJS)
-DEPS += $(common_DEPS)
-TMPS += $(common_TMPS)
+SRCS += $(p_SRCS)
+OBJS += $(p_OBJS)
+DEPS += $(p_DEPS)
+TMPS += $(p_TMPS)
+
+##=--------------=##
+## Player library ##
+##=--------------=##
+
+PLIB := ./p.lib
+
+ifeq "$(LINKER_TPC)" "1"
+else
+LIBS_C += $(PLIB)
+endif
+LIBS += $(PLIB)
+
+$(PLIB): $(p_OBJS_TP)
+	$(RM) $@; \
+	$(AR) $(ARFLAGS) -o $@ $(patsubst %,+%,$^)
 
 ##=------------------=##
 ## Binary executables ##
 ##=------------------=##
 
-## All tests
+## > test.exe
 
-tests_DIRS := tests
+test_main_SRCS := tests/test.c
+test_extra_SRCS :=
+test_SRCS := $(test_main_SRCS) $(test_extra_SRCS)
+test_OBJS := \
+ $(patsubst %.asm,%.o,$(filter %.asm,$(test_SRCS))) \
+ $(patsubst %.c,%.o,$(filter %.c,$(test_SRCS)))
+test_EXES := $(test_main_SRCS:.c=.exe)
+test_DEPS := \
+ $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(test_SRCS))) \
+ $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(test_SRCS)))
+test_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(test_SRCS)))
 
-## Dependency generation rules:
-$(DEPDIR)/$(tests_DIRS)/%.$(DEPEXT): $(tests_DIRS)/%.c
-	$(make_c_exec_dos_deps)
-
-tests_SRCS := $(wildcard $(patsubst %,%/*.c,$(tests_DIRS)))
-tests_OBJS := $(patsubst %.c,%.o,$(filter %.c,$(tests_SRCS)))
-tests_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(tests_SRCS)))
-tests_DEPS := $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(tests_SRCS)))
-tests_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(tests_SRCS)))
-
-SRCS += $(tests_SRCS)
-OBJS += $(tests_OBJS)
+SRCS += $(test_SRCS)
+OBJS += $(test_OBJS)
 ifeq "$(LINKER_TPC)" "1"
 else
-EXES += $(tests_EXES)
+EXES += $(test_EXES)
 endif
-DEPS += $(tests_DEPS)
-TMPS += $(tests_TMPS)
+DEPS += $(test_DEPS)
+TMPS += $(test_TMPS)
 
-## Common objects for all tests
-
-tests_common_OBJS := \
- hexdigts.o \
- startup/dosexe16.o \
- i4d.o \
- i4m.o \
- i8d086.o \
- i8m086.o \
- commdbg.o \
- sysdbg.o \
- debug.o \
- startup.o \
- startup/chkio.o \
- startup/ints.o \
- hw/cpu.o \
- hw/vbios.o \
- hw/vga.o
+## Dependency generation rules:
+$(DEPDIR)/$(test_main_SRCS:.c=.$(DEPEXT)): $(test_SRCS)
+	$(make_c_exec_dos_deps)
 
 ## Build rules
+$(test_EXES): $(test_OBJS) | $(CCLIB) $(PLIB)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$|) $(patsubst %,file %,$^) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 
-## test.exe
+## > testcrt.exe
 
-test_exe_SRCS := $(filter %/test.c,$(tests_SRCS))
-test_exe_OBJS := $(patsubst %.c,%.o,$(filter %.c,$(test_exe_SRCS)))
-test_exe_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(test_exe_SRCS)))
+testcrt_main_SRCS := tests/testcrt.c
+testcrt_extra_SRCS :=
+testcrt_SRCS := $(testcrt_main_SRCS) $(testcrt_extra_SRCS)
+testcrt_OBJS := \
+ $(patsubst %.asm,%.o,$(filter %.asm,$(testcrt_SRCS))) \
+ $(patsubst %.c,%.o,$(filter %.c,$(testcrt_SRCS)))
+testcrt_EXES := $(testcrt_main_SRCS:.c=.exe)
+testcrt_DEPS := \
+ $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(testcrt_SRCS))) \
+ $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(testcrt_SRCS)))
+testcrt_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(testcrt_SRCS)))
 
-## TODO: remove object files dependencies by puttin all object files in libraries and pass them to linker
-$(test_exe_EXES): $(tests_common_OBJS) $(test_exe_OBJS)
-$(test_exe_EXES): $(CCLIB)
-	$(LD) $(LFLAGS) library $< $(patsubst %,file %,$(tests_common_OBJS)) $(patsubst %,file %,$(test_exe_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+SRCS += $(testcrt_SRCS)
+OBJS += $(testcrt_OBJS)
+ifeq "$(LINKER_TPC)" "1"
+else
+EXES += $(testcrt_EXES)
+endif
+DEPS += $(testcrt_DEPS)
+TMPS += $(testcrt_TMPS)
 
-## testcrt.exe
+## Dependency generation rules:
+$(DEPDIR)/$(testcrt_main_SRCS:.c=.$(DEPEXT)): $(testcrt_SRCS)
+	$(make_c_exec_dos_deps)
 
-testcrt_exe_SRCS := $(filter %/testcrt.c,$(tests_SRCS))
-testcrt_exe_OBJS := $(patsubst %.c,%.o,$(filter %.c,$(testcrt_exe_SRCS)))
-testcrt_exe_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(testcrt_exe_SRCS)))
+## Build rules
+$(testcrt_EXES): $(testcrt_OBJS) | $(CCLIB) $(PLIB)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$|) $(patsubst %,file %,$^) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 
-## TODO: remove object files dependencies by puttin all object files in libraries and pass them to linker
-$(testcrt_exe_EXES): $(tests_common_OBJS) $(testcrt_exe_OBJS)
-$(testcrt_exe_EXES): $(CCLIB)
-	$(LD) $(LFLAGS) library $< $(patsubst %,file %,$(tests_common_OBJS)) $(patsubst %,file %,$(testcrt_exe_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+## > testexec.exe
 
-## testexec.exe
+testexec_main_SRCS := tests/testexec.c
+testexec_extra_SRCS :=
+testexec_SRCS := $(testexec_main_SRCS) $(testexec_extra_SRCS)
+testexec_OBJS := \
+ $(patsubst %.asm,%.o,$(filter %.asm,$(testexec_SRCS))) \
+ $(patsubst %.c,%.o,$(filter %.c,$(testexec_SRCS)))
+testexec_EXES := $(testexec_main_SRCS:.c=.exe)
+testexec_DEPS := \
+ $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(testexec_SRCS))) \
+ $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(testexec_SRCS)))
+testexec_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(testexec_SRCS)))
 
-testexec_exe_SRCS := $(filter %/testexec.c,$(tests_SRCS))
-testexec_exe_OBJS := $(patsubst %.c,%.o,$(filter %.c,$(testexec_exe_SRCS)))
-testexec_exe_EXES := $(patsubst %.c,%.exe,$(filter %.c,$(testexec_exe_SRCS)))
+SRCS += $(testexec_SRCS)
+OBJS += $(testexec_OBJS)
+ifeq "$(LINKER_TPC)" "1"
+else
+EXES += $(testexec_EXES)
+endif
+DEPS += $(testexec_DEPS)
+TMPS += $(testexec_TMPS)
 
-## TODO: remove object files dependencies by puttin all object files in libraries and pass them to linker
-$(testexec_exe_EXES): $(tests_common_OBJS) $(testexec_exe_OBJS)
-$(testexec_exe_EXES): $(CCLIB)
-	$(LD) $(LFLAGS) library $< $(patsubst %,file %,$(tests_common_OBJS)) $(patsubst %,file %,$(testexec_exe_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+## Dependency generation rules:
+$(DEPDIR)/$(testexec_main_SRCS:.c=.$(DEPEXT)): $(testexec_SRCS)
+	$(make_c_exec_dos_deps)
+
+## Build rules
+$(testexec_EXES): $(testexec_OBJS) | $(CCLIB) $(PLIB)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$|) $(patsubst %,file %,$^) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+
+##=------------------=##
+## Player executables ##
+##=------------------=##
+
+## > smalls3m.exe
+
+smalls3m_main_SRCS := player/smalls3m.c
+smalls3m_extra_SRCS :=
+smalls3m_SRCS := $(smalls3m_main_SRCS) $(smalls3m_extra_SRCS)
+smalls3m_OBJS_C := \
+ $(patsubst %.asm,%.o,$(filter %.asm,$(smalls3m_SRCS))) \
+ $(patsubst %.c,%.o,$(filter %.c,$(smalls3m_SRCS)))
+smalls3m_EXES := $(smalls3m_main_SRCS:.c=.exe)
+smalls3m_DEPS := \
+ $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(smalls3m_SRCS))) \
+ $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(smalls3m_SRCS)))
+smalls3m_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(smalls3m_SRCS)))
+
+## Turbo Pascal target files:
+smalls3m_OBJS_TP := $(smalls3m_OBJS_C:.o=.obj)
+smalls3m_OBJS := $(smalls3m_OBJS_C) $(smalls3m_OBJS_TP)
+smalls3m_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(smalls3m_SRCS)))
+
+SRCS += $(smalls3m_SRCS)
+OBJS += $(smalls3m_OBJS)
+ifeq "$(LINKER_TPC)" "1"
+else
+EXES += $(smalls3m_EXES)
+endif
+DEPS += $(smalls3m_DEPS)
+TMPS += $(smalls3m_TMPS)
+
+## Dependency generation rules:
+$(DEPDIR)/$(smalls3m_main_SRCS:.c=.$(DEPEXT)): $(smalls3m_SRCS)
+	$(make_c_exec_dos_deps)
+
+## Build rules
+$(smalls3m_EXES): $(smalls3m_OBJS_TP) | $(CCLIB) $(PLIB)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$|) $(patsubst %,file %,$^) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+
+## > playosci.exe
+
+playosci_main_SRCS := player/playosci.c
+playosci_extra_SRCS :=
+playosci_SRCS := $(playosci_main_SRCS) $(playosci_extra_SRCS)
+playosci_OBJS_C := \
+ $(patsubst %.asm,%.o,$(filter %.asm,$(playosci_SRCS))) \
+ $(patsubst %.c,%.o,$(filter %.c,$(playosci_SRCS)))
+playosci_EXES := $(playosci_main_SRCS:.c=.exe)
+playosci_DEPS := \
+ $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(playosci_SRCS))) \
+ $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(playosci_SRCS)))
+playosci_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(playosci_SRCS)))
+
+## Turbo Pascal target files:
+playosci_OBJS_TP := $(playosci_OBJS_C:.o=.obj)
+playosci_OBJS := $(playosci_OBJS_C) $(playosci_OBJS_TP)
+playosci_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(playosci_SRCS)))
+
+SRCS += $(playosci_SRCS)
+OBJS += $(playosci_OBJS)
+ifeq "$(LINKER_TPC)" "1"
+else
+EXES += $(playosci_EXES)
+endif
+DEPS += $(playosci_DEPS)
+TMPS += $(playosci_TMPS)
+
+## Dependency generation rules:
+$(DEPDIR)/$(playosci_main_SRCS:.c=.$(DEPEXT)): $(playosci_SRCS)
+	$(make_c_exec_dos_deps)
+
+## Build rules
+$(playosci_EXES): $(playosci_OBJS_TP) | $(CCLIB) $(PLIB)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$|) $(patsubst %,file %,$^) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+
+## > plays3m.exe
+
+plays3m_main_SRCS := player/plays3m.c
+plays3m_extra_SRCS := \
+ player/screen.c \
+ $(wildcard player/w_*.c)
+plays3m_SRCS := $(plays3m_main_SRCS) $(plays3m_extra_SRCS)
+plays3m_OBJS_C := \
+ $(patsubst %.asm,%.o,$(filter %.asm,$(plays3m_SRCS))) \
+ $(patsubst %.c,%.o,$(filter %.c,$(plays3m_SRCS)))
+plays3m_EXES := $(plays3m_main_SRCS:.c=.exe)
+plays3m_DEPS := \
+ $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(plays3m_SRCS))) \
+ $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(plays3m_SRCS)))
+plays3m_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(plays3m_SRCS)))
+
+## Turbo Pascal target files:
+plays3m_OBJS_TP := $(plays3m_OBJS_C:.o=.obj)
+plays3m_OBJS := $(plays3m_OBJS_C) $(plays3m_OBJS_TP)
+plays3m_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(plays3m_SRCS)))
+
+SRCS += $(plays3m_SRCS)
+OBJS += $(plays3m_OBJS)
+ifeq "$(LINKER_TPC)" "1"
+else
+EXES += $(plays3m_EXES)
+endif
+DEPS += $(plays3m_DEPS)
+TMPS += $(plays3m_TMPS)
+
+## Dependency generation rules:
+$(DEPDIR)/$(plays3m_main_SRCS:.c=.$(DEPEXT)): $(plays3m_SRCS)
+	$(make_c_exec_dos_deps)
+
+## Build rules
+$(plays3m_EXES): $(plays3m_OBJS_TP) | $(CCLIB) $(PLIB)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$|) $(patsubst %,file %,$^) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 
 ##=------------------------------=##
 ## Include dependency information ##
@@ -636,7 +780,7 @@ endif
 ##=-------=##
 
 .PHONY: all
-all: autogenfiles $(INCS) $(OBJS) $(LIBS) $(EXES)
+all: autogenfiles $(INCS) $(OBJS) $(LIBS_C) $(EXES)
 	$(info_done)
 
 .PHONY: clean

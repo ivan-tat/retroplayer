@@ -19,6 +19,11 @@
 #include "main/mixchn.h"
 #include "main/musmodps.h"
 
+#if LINKER_TPC != 1
+void __noreturn _start_c (void);
+int main (int argc, const char **argv);
+#endif
+
 uint32_t getFreeDOSMemory(void);
 uint32_t getFreeEMMMemory(void);
 
@@ -35,6 +40,11 @@ DECLARE_REGISTRATION (plays3m)
 /*** Linking ***/
 
 #ifdef __WATCOMC__
+
+#if LINKER_TPC != 1
+#pragma aux _start_c "*";
+#pragma aux main "*";
+#endif
 
 #pragma aux getFreeDOSMemory "*";
 #pragma aux getFreeEMMMemory "*";

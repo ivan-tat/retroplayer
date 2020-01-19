@@ -34,6 +34,12 @@
 #include "main/filldma.h"
 #include "main/s3mplay.h"
 
+#if DEFINE_LOCAL_DATA == 1
+
+const char *PLAYER_VERSION = "1.70.1";
+
+#endif
+
 #define _PLAYER_ERROR_LEN 128
 
 // Current index to generate unique EM handle name to save EM mapping while in ISR
