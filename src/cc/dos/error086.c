@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$dos$error086$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stddef.h>
 #include <stdint.h>
@@ -18,11 +18,11 @@
 #include "cc/dos/dosret.h"
 #include "cc/dos/error086.h"
 
-#ifdef DEFINE_LOCAL_DATA
+#if DEFINE_LOCAL_DATA == 1
 
 int _cc_doserrno;
 
-#endif
+#endif  /* DEFINE_LOCAL_DATA == 1 */
 
 /*
  * Description:

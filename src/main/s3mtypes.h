@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef S3MTYPES_H
-#define S3MTYPES_H 1
+#ifndef _S3MTYPES_H_INCLUDED
+#define _S3MTYPES_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -66,4 +66,4 @@ typedef uint8_t order_t;
 
 typedef order_t ordersList_t[MAX_ORDERS];
 
-#endif  /* S3MTYPES_H */
+#endif  /* !_S3MTYPES_H_INCLUDED */

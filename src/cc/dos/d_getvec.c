@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$dos$d_getvec$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "cc/i86.h"
 #include "cc/dos.h"

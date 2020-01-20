@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$stdlib$atexit$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "startup.h"

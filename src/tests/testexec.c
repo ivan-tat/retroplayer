@@ -16,9 +16,9 @@
 
 #if CHECK_IO == 1
 # define IOCHK _cc_CheckInOutRes ();
-#else
+#else   /* CHECK_IO != 1 */
 # define IOCHK
-#endif
+#endif  /* CHECK_IO != 1 */
 
 void __noreturn _start_c (void)
 {
@@ -53,7 +53,7 @@ int main (int argc, const char **argv)
         s++;
         i++;
     }
-    #endif
+    #endif  /* SYSDEBUG == 1 */
 
     cc_TextWriteString (&cc_Output, "Starting DOS shell... (to return use 'exit' command)", 0); IOCHK
     cc_TextWriteLn (&cc_Output); IOCHK

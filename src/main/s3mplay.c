@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$main$s3mplay$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -38,7 +38,7 @@
 
 const char *PLAYER_VERSION = "1.70.1";
 
-#endif
+#endif  /* DEFINE_LOCAL_DATA == 1 */
 
 #define _PLAYER_ERROR_LEN 128
 
@@ -286,7 +286,7 @@ void __near player_set_error (MUSPLAYER *self, const char *method, int line, con
 
 #define ERROR(f, ...) player_set_error (self, __func__, __LINE__, f, __VA_ARGS__)
 
-#else
+#else   /* DEBUG != 1 */
 
 void __near player_set_error (MUSPLAYER *self, const char *format, ...)
 {
@@ -299,7 +299,7 @@ void __near player_set_error (MUSPLAYER *self, const char *format, ...)
 
 #define ERROR(f, ...) player_set_error (self, f, __VA_ARGS__)
 
-#endif  /* DEBUG */
+#endif  /* DEBUG != 1 */
 
 /* Initialization */
 
@@ -1088,7 +1088,7 @@ void __near s3mplay_init(void)
 {
 #if DEBUG_WRITE_OUTPUT_STREAM == 1
     DEBUG_open_output_streams ();
-#endif  /* DEBUG_WRITE_OUTPUT_STREAM */
+#endif  /* DEBUG_WRITE_OUTPUT_STREAM == 1 */
 
     _isr_index = 0;
 }
@@ -1097,7 +1097,7 @@ void __near s3mplay_done(void)
 {
 #if DEBUG_WRITE_OUTPUT_STREAM == 1
     DEBUG_close_output_streams ();
-#endif  /* DEBUG_WRITE_OUTPUT_STREAM */
+#endif  /* DEBUG_WRITE_OUTPUT_STREAM == 1 */
 }
 
 DEFINE_REGISTRATION(s3mplay, s3mplay_init, s3mplay_done)

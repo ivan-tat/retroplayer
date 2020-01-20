@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef MUSINS_H
-#define MUSINS_H 1
+#ifndef _MUSINS_H_INCLUDED
+#define _MUSINS_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -96,11 +96,11 @@ void __far musinsl_free (MUSINSLIST *self);
 
 void __far DEBUG_dump_instrument_info (MUSINS *self, uint8_t index, PCMSMPLIST *samples);
 
-#else
+#else   /* DEBUG != 1 */
 
 #define DEBUG_dump_instrument_info(self, index, samples)
 
-#endif  /* DEBUG */
+#endif  /* DEBUG != 1 */
 
 /*** Linking ***/
 
@@ -117,4 +117,4 @@ void __far DEBUG_dump_instrument_info (MUSINS *self, uint8_t index, PCMSMPLIST *
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* MUSINS_H */
+#endif  /* !_MUSINS_H_INCLUDED */

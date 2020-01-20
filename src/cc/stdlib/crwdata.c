@@ -7,14 +7,14 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$stdlib$crwdata$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "pascal.h"
 #include "cc/stdlib.h"
 
-#ifdef DEFINE_LOCAL_DATA
+#if DEFINE_LOCAL_DATA == 1
 
 const static uint16_t cc_psp = 0;
 
-#endif  /* DEFINE_LOCAL_DATA */
+#endif  /* DEFINE_LOCAL_DATA == 1 */

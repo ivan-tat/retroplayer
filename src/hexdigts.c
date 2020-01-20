@@ -7,12 +7,12 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$hexdigts$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "hexdigts.h"
 
-#ifdef DEFINE_LOCAL_DATA
+#if DEFINE_LOCAL_DATA == 1
 
 const char HEXDIGITS[16] = "0123456789ABCDEF";
 
-#endif  /* DEFINE_LOCAL_DATA */
+#endif  /* DEFINE_LOCAL_DATA == 1 */

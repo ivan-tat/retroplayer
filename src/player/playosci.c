@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$player$playosci$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "pascal.h"
 #include "startup.h"
@@ -213,7 +213,7 @@ int main (int argc, const char **argv)
     return 0;
 }
 
-#endif  /* LINKER_TPC */
+#endif  /* LINKER_TPC != 1 */
 
 void __far playosci_main (void)
 {
@@ -221,7 +221,7 @@ void __far playosci_main (void)
     system_init ();
     console_init ();
     delay_init ();
-#endif
+#endif  /* LINKER_TPC == 1 */
 
     register_debug ();
     register_hwowner ();

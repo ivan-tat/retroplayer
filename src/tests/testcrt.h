@@ -1,9 +1,9 @@
-#ifndef TESTCRT_H_INCLUDED
-#define TESTCRT_H_INCLUDED 1
+#ifndef _TESTCRT_H_INCLUDED
+#define _TESTCRT_H_INCLUDED 1
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "defines.h"
 
@@ -15,6 +15,6 @@ int main (int argc, const char **argv);
 #ifdef __WATCOMC__
 #pragma aux _start_c "*";
 #pragma aux main "*";
-#endif
+#endif  /* __WATCOMC__ */
 
-#endif  /* TESTCRT_H_INCLUDED */
+#endif  /* !_TESTCRT_H_INCLUDED */

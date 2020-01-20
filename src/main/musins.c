@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$main$musins$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -85,8 +85,6 @@ void __far musinsl_free (MUSINSLIST *self)
         dynarr_free (_musinsl_get_list (self));
 }
 
-/*** Debug ***/
-
 #if DEBUG == 1
 
 void __far DEBUG_dump_instrument_info (MUSINS *self, uint8_t index, PCMSMPLIST *samples)
@@ -125,4 +123,4 @@ void __far DEBUG_dump_instrument_info (MUSINS *self, uint8_t index, PCMSMPLIST *
     #undef _BUF_SIZE
 }
 
-#endif  /* DEBUG */
+#endif  /* DEBUG == 1 */

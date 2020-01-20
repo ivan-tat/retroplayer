@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef S3MPLAY_H
-#define S3MPLAY_H 1
+#ifndef _S3MPLAY_H_INCLUDED
+#define _S3MPLAY_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -145,4 +145,4 @@ DECLARE_REGISTRATION (s3mplay)
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* S3MPLAY_H */
+#endif  /* !_S3MPLAY_H_INCLUDED */

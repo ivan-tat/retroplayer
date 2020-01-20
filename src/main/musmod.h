@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef MUSMOD_H
-#define MUSMOD_H 1
+#ifndef _MUSMOD_H_INCLUDED
+#define _MUSMOD_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -165,4 +165,4 @@ void __far musmod_free (MUSMOD *self);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* MUSMOD_H */
+#endif  /* !_MUSMOD_H_INCLUDED */

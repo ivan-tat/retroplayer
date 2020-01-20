@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef VGA_H
-#define VGA_H 1
+#ifndef _VGA_H_INCLUDED
+#define _VGA_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "pascal.h"
@@ -44,4 +44,4 @@ DECLARE_REGISTRATION (vga)
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* VGA_H */
+#endif  /* !_VGA_H_INCLUDED */

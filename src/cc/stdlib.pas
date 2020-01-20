@@ -12,6 +12,13 @@ interface
 
 (*$I defines.pas*)
 
+(*$ifdef DEFINE_LOCAL_DATA*)
+
+var
+    cc_environ: Pointer;
+
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
+
 procedure cc_atexit;
 
 procedure cc_atoi;
@@ -23,9 +30,6 @@ procedure cc_malloc;
 procedure cc_free;
 
 procedure cc_exit;
-
-var
-    cc_environ: Pointer;
 
 procedure cc_getenv;
 procedure cc_unsetenv;
@@ -44,7 +48,8 @@ uses
     ctype,
     errno_,
     dos,
-    dos_;
+    dos_,
+    malloc;
 
 procedure pascal_getmem(var p: pointer; size: word); far;
 begin
@@ -79,6 +84,8 @@ procedure cc_exit; external;
 
 (*$L stdlib/crwdata.obj*)
 
+(*$ifdef DEFINE_LOCAL_DATA*)
+
 type
     dosenvlist_p = ^dosenvlist_t;
     dosenvlist_t = packed record
@@ -95,6 +102,8 @@ type
 var
     _dos_env: dosenvlist_t;
     _env_list: envstrlist_t;
+
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 (* Publics *)
 

@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CC__PRINTF_H
-#define CC__PRINTF_H 1
+#ifndef _CC__PRINTF_H_INCLUDED
+#define _CC__PRINTF_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdarg.h>
@@ -27,4 +27,4 @@ bool __far _printf (DATASTREAM *stream, const char *format, va_list ap);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* CC__PRINTF_H */
+#endif  /* !_CC__PRINTF_H_INCLUDED */

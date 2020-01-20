@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CPU_H
-#define CPU_H 1
+#ifndef _CPU_H_INCLUDED
+#define _CPU_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -28,4 +28,4 @@ extern bool isCPU_i386(void);
 
 #endif  /* __WATCOMC__ */
 
-#endif /* CPU_H */
+#endif /* !_CPU_H_INCLUDED */

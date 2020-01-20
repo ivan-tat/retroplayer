@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$stdlib$ffree$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -19,7 +19,7 @@ extern void __far __pascal pascal_freemem(void *p, uint16_t size);
 
 #ifdef __WATCOMC__
 #pragma aux pascal_freemem "*" modify [ ax bx cx dx si di es ];
-#endif
+#endif  /* __WATCOMC__ */
 
 void cc_free(void *ptr)
 {

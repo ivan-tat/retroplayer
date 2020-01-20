@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef POSTTAB_H
-#define POSTTAB_H 1
+#ifndef _POSTTAB_H_INCLUDED
+#define _POSTTAB_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -56,4 +56,4 @@ void clip_s32_s16_lq_stereo(void *outbuf, int32_t *mb, uint16_t count);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* POSTTAB_H */
+#endif  /* !_POSTTAB_H_INCLUDED */

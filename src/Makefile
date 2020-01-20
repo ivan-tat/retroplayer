@@ -55,7 +55,7 @@ DEPCC_DOS       := $(DEPCC)
 DEPCFLAGS_DOS   := $(DEPCFLAGS)
 ASMTMPEXT_DOS   := as_
 AS_DOS          := wasm
-ifeq "$(DEBUG)" "1"
+ifeq "$(DEBUG_COMPILE)" "1"
 ifeq "$(LINKER_TPC)" "1"
 ADEBUG_DOS      :=
 else
@@ -83,7 +83,7 @@ ifeq "$(CC_DOS)" "gcc"
 ifneq "$(DEFS)" ""
 CDEFS_DOS       := $(patsubst %,-D %,$(DEFS))
 endif
-ifeq "$(DEBUG)" "1"
+ifeq "$(DEBUG_COMPILE)" "1"
 CDEBUG_DOS      := -g
 else
 CDEBUG_DOS      :=
@@ -93,7 +93,7 @@ else ifeq "$(CC_DOS)" "wcc"
 ifneq "$(DEFS)" ""
 CDEFS_DOS       := $(patsubst %,-d%,$(DEFS))
 endif
-ifeq "$(DEBUG)" "1"
+ifeq "$(DEBUG_COMPILE)" "1"
 ifeq "$(LINKER_TPC)" "1"
 CDEBUG_DOS      := -oi -oc -os
 else
@@ -113,7 +113,7 @@ AR              := wlib
 ARFLAGS         := -q -t -zld
 LD              := wlink
 LFLAGS          := option quiet
-ifeq "$(DEBUG)" "1"
+ifeq "$(DEBUG_COMPILE)" "1"
 ifeq "$(LINKER_TPC)" "1"
 else
 LFLAGS          += debug Watcom All

@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef READNOTE_H
-#define READNOTE_H 1
+#ifndef _READNOTE_H_INCLUDED
+#define _READNOTE_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -27,4 +27,4 @@ void __far readnewnotes (PLAYSTATE *ps);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* READNOTE_H */
+#endif  /* !_READNOTE_H_INCLUDED */

@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$dos$c_init$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "cc/dos.h"

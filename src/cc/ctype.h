@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CC_CTYPE_H
-#define CC_CTYPE_H 1
+#ifndef _CC_CTYPE_H_INCLUDED
+#define _CC_CTYPE_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -72,4 +72,4 @@ extern const unsigned char _cc_IsTable[257];
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* CC_CTYPE_H */
+#endif  /* !_CC_CTYPE_H_INCLUDED */

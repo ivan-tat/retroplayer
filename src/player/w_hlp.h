@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef W_HLP_H
-#define W_HLP_H 1
+#ifndef _PLAYER_W_HLP_H_INCLUDED
+#define _PLAYER_W_HLP_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -27,4 +27,4 @@ bool __far win_help_init (SCRWIN *self);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* W_HLP_H */
+#endif  /* !_PLAYER_W_HLP_H_INCLUDED */

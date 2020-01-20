@@ -13,6 +13,7 @@ interface
 (*$I defines.pas*)
 
 (*$ifdef DEFINE_LOCAL_DATA*)
+
 var
     (* private, hidden in Crt unit *)
     cc_gotbreak: Boolean;
@@ -31,7 +32,8 @@ var
     cc_windmax: Word (*absolute crt.WindMax*);
     cc_SegB000: Word (*absolute system.SegB000*);
     cc_SegB800: Word (*absolute system.SegB800*);
-(*$endif*)
+
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 (*
 procedure cc_inp;

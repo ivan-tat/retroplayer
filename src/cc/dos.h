@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CC_DOS_H
-#define CC_DOS_H 1
+#ifndef _CC_DOS_H_INCLUDED
+#define _CC_DOS_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "pascal.h"
@@ -57,18 +57,18 @@ void __far _cc_dos_setvect(unsigned num, void __far *p);
 
 #define __cc_dos_para(size) (((unsigned long)(size) + 15) >> 4)
 
-#ifdef USE_INTRINSICS
+#if USE_INTRINSICS == 1
 
 #define _cc_dos_para(size) __cc_dos_para(size)
 
-#else   /* !USE_INTRINSICS */
+#else   /* USE_INTRINSICS != 1 */
 
 /*
 unsigned _cc_dos_para(unsigned size);
 */
 uint16_t __far _cc_dos_para (uint32_t size);
 
-#endif  /* !USE_INTRINSICS */
+#endif  /* USE_INTRINSICS != 1 */
 
 /*
 unsigned _cc_dos_allocmem(unsigned size, unsigned *seg);
@@ -357,9 +357,9 @@ extern void __far __pascal pascal_exec(char *name, char *cmdline);
 #pragma aux _cc_dos_gettime "*";
 #pragma aux _cc_dos_getvect "*";
 #pragma aux _cc_dos_setvect "*";
-#ifndef USE_INTRINSICS
+#if USE_INTRINSICS != 1
 #pragma aux _cc_dos_para "*";
-#endif
+#endif  /* USE_INTRINSICS != 1 */
 #pragma aux _cc_dos_allocmem "*";
 #pragma aux _cc_dos_freemem "*";
 #pragma aux _cc_dos_setblock "*";
@@ -385,4 +385,4 @@ extern void __far __pascal pascal_exec(char *name, char *cmdline);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* CC_DOS_H */
+#endif  /* !_CC_DOS_H_INCLUDED */

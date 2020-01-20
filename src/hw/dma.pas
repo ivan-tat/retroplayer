@@ -28,14 +28,6 @@ procedure hwowner_get_dma_counter;
 procedure hwowner_release_dma;
 procedure hwowner_release_dma_channels;
 
-type
-    TDMABUF = packed record
-        data: pointer;
-        size: longint;
-        unaligned: pointer;
-    end;
-    PDMABUF = ^TDMABUF;
-
 procedure dmaBuf_init;
 procedure dmaBuf_alloc;
 procedure dmaBuf_free;

@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$main$voltab$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "pascal.h"
 #include "cc/string.h"
@@ -15,14 +15,14 @@
 #include "cc/dos.h"
 #if DEBUG == 1
 # include "cc/stdio.h"
-#endif
+#endif  /* DEBUG == 1 */
 #include "main/voltab.h"
 
 #if DEFINE_LOCAL_DATA == 1
 
 voltab_t *volumetableptr;
 
-#endif
+#endif  /* DEFINE_LOCAL_DATA == 1 */
 
 void voltab_init(void)
 {
@@ -49,7 +49,7 @@ void voltab_calc(void)
     int16_t sample, *p = (int16_t *)volumetableptr;
     #if DEBUG == 1
     FILE *f;
-    #endif
+    #endif  /* DEBUG == 1 */
 
     // MSB (signed)
     for (vol = 1; vol <= 64; vol++)
@@ -80,7 +80,7 @@ void voltab_calc(void)
         fwrite ((uint8_t *)volumetableptr + sizeof (voltab_t) / 2, sizeof (voltab_t) / 2, 1, f);
         fclose (f);
     }
-    #endif  /* DEBUG */
+    #endif  /* DEBUG == 1 */
 }
 
 void voltab_free(void)

@@ -7,14 +7,14 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$main$posttab$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
 #include "pascal.h"
 #if DEBUG == 1
 # include "cc/stdio.h"
-#endif
+#endif  /* DEBUG == 1 */
 #include "main/posttab.h"
 
 #pragma pack(push, 1)
@@ -43,7 +43,7 @@ void amptab_set_volume(uint8_t volume)
     int16_t i;
     #if DEBUG == 1
     FILE *f;
-    #endif
+    #endif  /* DEBUG == 1 */
 
     vol = volume;
     if (vol > MID_VOL)
@@ -112,7 +112,7 @@ void amptab_set_volume(uint8_t volume)
         fwrite (&amptab[2], 256*4, 1, f);
         fclose (f);
     }
-    #endif  /* DEBUG */
+    #endif  /* DEBUG == 1 */
 }
 
 // "mb" is mixing buffer

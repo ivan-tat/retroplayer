@@ -13,13 +13,12 @@ interface
 
 (*$I defines.pas*)
 
+(*$ifdef DEFINE_LOCAL_DATA*)
+
 var
     cc_errno: Integer;
 
-(* Alias *)
-
-var
-    errno: Integer absolute cc_errno;
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 implementation
 

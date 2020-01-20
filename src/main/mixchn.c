@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$main$mixchn$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "main/effvars.h"

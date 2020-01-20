@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$unistd$exv$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "pascal.h"
 #include "startup.h"
@@ -76,12 +76,12 @@ int cc_execv (const char *filename, char *const argv[])
     cc_dos_swapvectors ();
 #if LINKER_TPC == 1
     pascal_swapvectors ();
-#endif
+#endif  /* LINKER_TPC == 1 */
     status = _cc_dos_exec (
         ((struct cc_dospsp_t *) MK_FP (_cc_psp, 0))->env_seg, filename, cmdline);
 #if LINKER_TPC == 1
     pascal_swapvectors ();
-#endif
+#endif  /* LINKER_TPC == 1 */
     cc_dos_swapvectors ();
     return status != 0 ? -1 : 0;
 }

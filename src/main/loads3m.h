@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef LOADS3M_H
-#define LOADS3M_H 1
+#ifndef _LOADS3M_H_INCLUDED
+#define _LOADS3M_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -39,4 +39,4 @@ void        load_s3m_delete (LOADER_S3M **self);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* LOADS3M_H */
+#endif  /* !_LOADS3M_H_INCLUDED */

@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$ctype$istable$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "cc/ctype.h"
 

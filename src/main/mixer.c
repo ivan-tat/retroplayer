@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$main$mixer$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -28,14 +28,14 @@ uint32_t _calc_sample_step(uint16_t period, uint16_t rate)
     return b;
 }
 
-#ifdef DEFINE_LOCAL_DATA
+#if DEFINE_LOCAL_DATA == 1
 
 uint16_t ST3Periods[12] =
 {
     1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
 };
 
-#endif
+#endif  /* DEFINE_LOCAL_DATA == 1 */
 
 /* Filling */
 

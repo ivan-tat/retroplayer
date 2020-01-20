@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$conio$outp$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "cc/conio.h"
 
@@ -23,4 +23,4 @@ void cc_outp(unsigned int port, char value)
     }
 }
 
-#endif  /* __WATCOMC__ */
+#endif  /* !__WATCOMC__ */

@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$dos$dosioctl$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "pascal.h"

@@ -64,6 +64,7 @@ c_obj_names += open.c close.c _clse.c read.c write.c
 # <stdio.h>
 c_obj_names += iob.c iobaddr.c
 c_obj_names += fopen.c fclose.c fread.c fwrite.c
+c_obj_names += printf.c fprtf.c
 # <stdlib.h>
 c_obj_names += atexit.c exit.c _exit.c abort.c
 c_obj_names += atoi.c atol.c istable.c strtol.c errno.c

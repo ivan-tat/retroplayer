@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$dos$coniodos$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "cc/i86.h"

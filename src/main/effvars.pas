@@ -12,6 +12,8 @@ interface
 
 (*$I defines.pas*)
 
+(*$ifdef DEFINE_LOCAL_DATA*)
+
 (* tables for mixing *)
 
 const
@@ -40,6 +42,8 @@ const
         ofs(squarewave)
         (* 'random wave' is not a table, but a call for a random number ! *)
     );
+
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 implementation
 

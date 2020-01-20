@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef MIXCHN_H
-#define MIXCHN_H 1
+#ifndef _MIXCHN_H_INCLUDED
+#define _MIXCHN_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -224,4 +224,4 @@ void        __far mixchnl_free (MIXCHNLIST *self);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* MIXCHN_H */
+#endif  /* !_MIXCHN_H_INCLUDED */

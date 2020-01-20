@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CC_DOS_DOSRET_H
-#define CC_DOS_DOSRET_H 1
+#ifndef _CC_DOS_DOSRET_H_INCLUDED
+#define _CC_DOS_DOSRET_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 unsigned __cc_set_errno_dos(unsigned code);
 
@@ -22,4 +22,4 @@ unsigned __cc_set_errno_dos(unsigned code);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* CC_DOS_DOSRET_H */
+#endif  /* !_CC_DOS_DOSRET_H_INCLUDED */

@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$hw$hwowner$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>

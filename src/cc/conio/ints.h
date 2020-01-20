@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CONIO_INTS_H
-#define CONIO_INTS_H
+#ifndef _CC_CONIO_INTS_H_INCLUDED
+#define _CC_CONIO_INTS_H_INCLUDED
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 /*
  * Ctrl-Break keyboard signal handler.
@@ -26,4 +26,4 @@ extern __far _cc_local_int1b_asm (void);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* CONIO_INTS_H */
+#endif  /* !_CC_CONIO_INTS_H_INCLUDED */

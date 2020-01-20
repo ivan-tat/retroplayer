@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$main$loads3m$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -326,7 +326,7 @@ void __near load_s3m_set_error (LOADER_S3M *self, const char *method, int line, 
 
 #define ERROR(o, f, ...) load_s3m_set_error (o, __func__, __LINE__, f, __VA_ARGS__)
 
-#else
+#else   /* DEBUG != 1 */
 
 void __near load_s3m_set_error (LOADER_S3M *self, const char *format, ...)
 {
@@ -339,7 +339,7 @@ void __near load_s3m_set_error (LOADER_S3M *self, const char *format, ...)
 
 #define ERROR(o, f, ...) load_s3m_set_error (o, f, __VA_ARGS__)
 
-#endif  /* DEBUG */
+#endif  /* DEBUG != 1 */
 
 const char *load_s3m_get_error (LOADER_S3M *self)
 {
@@ -1328,7 +1328,7 @@ bool __near load_s3m_convert_pattern (LOADER_S3M *self, uint8_t *src, uint16_t s
     uint16_t offset;
     #if DEBUG_FILE_S3M_LOAD == 1
     char s[13], *e_str;
-    #endif  /* DEBUG_FILE_S3M_LOAD */
+    #endif  /* DEBUG_FILE_S3M_LOAD == 1 */
 
     muspat_set_data_packed (pattern, pack);
 
@@ -1434,7 +1434,7 @@ bool __near load_s3m_convert_pattern (LOADER_S3M *self, uint8_t *src, uint16_t s
                     }
                     else
                         e_str = "empty";
-                    #endif  /* DEBUG_FILE_S3M_LOAD */
+                    #endif  /* DEBUG_FILE_S3M_LOAD == 1 */
 
                     memcpy (& (events [e.channel]), & (e.event), sizeof (MUSPATCHNEVENT));
                 }
@@ -1442,7 +1442,7 @@ bool __near load_s3m_convert_pattern (LOADER_S3M *self, uint8_t *src, uint16_t s
                 {
                     #if DEBUG_FILE_S3M_LOAD == 1
                     e_str = "empty";
-                    #endif  /* DEBUG_FILE_S3M_LOAD */
+                    #endif  /* DEBUG_FILE_S3M_LOAD == 1 */
                 }
 
                 #if DEBUG_FILE_S3M_LOAD == 1
@@ -1454,7 +1454,7 @@ bool __near load_s3m_convert_pattern (LOADER_S3M *self, uint8_t *src, uint16_t s
                     e.channel,
                     e_str
                 );
-                #endif
+                #endif  /* DEBUG_FILE_S3M_LOAD == 1 */
             }
         }
         else

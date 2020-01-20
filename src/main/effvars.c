@@ -7,14 +7,14 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$main$effvars$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
 #include "cc/i86.h"
 #include "main/effvars.h"
 
-#ifdef DEFINE_LOCAL_DATA
+#if DEFINE_LOCAL_DATA == 1
 
 const int8_t __near sinuswave[64] =
 {
@@ -39,4 +39,4 @@ const void __near * __near wavetab[3] =
     /* 'random wave' is not a table, but a call for a random number ! */
 };
 
-#endif
+#endif  /* DEFINE_LOCAL_DATA == 1 */

@@ -6,8 +6,12 @@ interface
 
 (*$I defines.pas*)
 
+(*$ifdef DEFINE_LOCAL_DATA*)
+
 const
     PLAYER_VERSION: PChar = '1.70.1';
+
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 procedure player_new;
 procedure player_init;

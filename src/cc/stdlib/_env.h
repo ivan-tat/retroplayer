@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CC_STDLIB_ENV_H
-#define CC_STDLIB_ENV_H 1
+#ifndef _CC_STDLIB_ENV_H_INCLUDED
+#define _CC_STDLIB_ENV_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -97,4 +97,4 @@ void environ_free(void);
 
 #endif  /* __WATCOMC__ */
 
-#endif
+#endif  /* !_CC_STDLIB_ENV_H_INCLUDED */

@@ -3,8 +3,8 @@
 ; This is free and unencumbered software released into the public domain.
 ; For more information, please refer to <http://unlicense.org>.
 
-ifndef MIXER_DEF
-MIXER_DEF equ 1
+ifndef _MIXER__DEF_INCLUDED
+_MIXER__DEF_INCLUDED equ 1
 
 MIXSMPFL_16BITS equ 001h
 MIXSMPFL_LOOP   equ 002h
@@ -19,4 +19,4 @@ TPlaySampleInfo struc
     wFlags      dw ?
 TPlaySampleInfo ends
 
-endif   ; MIXER_DEF
+endif   ; !_MIXER__DEF_INCLUDED

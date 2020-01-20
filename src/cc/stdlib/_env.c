@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$stdlib$_env$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -32,7 +32,7 @@ struct dosenvlist_t _dos_env;
 struct envstrlist_t _env_list;
 char **cc_environ;
 
-#endif  /* DEFINE_LOCAL_DATA */
+#endif  /* DEFINE_LOCAL_DATA == 1 */
 
 /* DOS program segment prefix */
 
@@ -136,7 +136,7 @@ bool _environ_alloc(struct envstrlist_t *self, uint16_t count)
 
     #if SYSDEBUG_ENV == 1
     SYSDEBUG_BEGIN ();
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
     if (self)
     {
         if (count)
@@ -147,7 +147,7 @@ bool _environ_alloc(struct envstrlist_t *self, uint16_t count)
                 self->size = count;
                 #if SYSDEBUG_ENV == 1
                 SYSDEBUG_SUCCESS ();
-                #endif
+                #endif  /* SYSDEBUG_ENV == 1 */
                 return true;
             }
             else
@@ -155,7 +155,7 @@ bool _environ_alloc(struct envstrlist_t *self, uint16_t count)
                 cc_errno = CC_ENOMEM;
                 #if SYSDEBUG_ENV == 1
                 SYSDEBUG_ERR ("_dos_allocmem(): failed.");
-                #endif
+                #endif  /* SYSDEBUG_ENV == 1 */
                 return false;
             }
         }
@@ -164,7 +164,7 @@ bool _environ_alloc(struct envstrlist_t *self, uint16_t count)
             cc_errno = CC_EINVAL;
             #if SYSDEBUG_ENV == 1
             SYSDEBUG_ERR ("self is NULL.");
-            #endif
+            #endif  /* SYSDEBUG_ENV == 1 */
             return false;
         }
     }
@@ -173,7 +173,7 @@ bool _environ_alloc(struct envstrlist_t *self, uint16_t count)
         cc_errno = CC_EINVAL;
         #if SYSDEBUG_ENV == 1
         SYSDEBUG_ERR ("count is 0.");
-        #endif
+        #endif  /* SYSDEBUG_ENV == 1 */
         return false;
     }
 }
@@ -226,19 +226,19 @@ bool cc_environ_build(void)
 
     #if SYSDEBUG_ENV == 1
     SYSDEBUG_BEGIN ();
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
     _dosenv_find_end(&_dos_env, &count);
     if (count)
     {
         count++;
         #if SYSDEBUG_ENV == 1
         SYSDEBUG_INFO_ ("count=%d", count);
-        #endif
+        #endif  /* SYSDEBUG_ENV == 1 */
         if (!_environ_alloc(&_env_list, count))
         {
             #if SYSDEBUG_ENV == 1
             SYSDEBUG_ERR ("Failed.");
-            #endif
+            #endif  /* SYSDEBUG_ENV == 1 */
             return false;
         }
         _environ_fill(&_env_list, &_dos_env);
@@ -249,7 +249,7 @@ bool cc_environ_build(void)
 
     #if SYSDEBUG_ENV == 1
     SYSDEBUG_SUCCESS ();
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
     return true;
 }
 
@@ -258,7 +258,7 @@ bool cc_environ_rebuild(void)
     bool status;
     #if SYSDEBUG_ENV == 1
     SYSDEBUG_BEGIN ();
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
     _environ_free(&_env_list);
     status = cc_environ_build ();
     #if SYSDEBUG_ENV == 1
@@ -266,7 +266,7 @@ bool cc_environ_rebuild(void)
         SYSDEBUG_SUCCESS ();
     else
         SYSDEBUG_ERR ("Failed.");
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
     return status;
 }
 
@@ -275,7 +275,7 @@ bool cc_environ_init(void)
     bool status;
     #if SYSDEBUG_ENV == 1
     SYSDEBUG_BEGIN ();
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
     _environ_clear(&_env_list);
     status = cc_environ_build ();
     #if SYSDEBUG_ENV == 1
@@ -283,7 +283,7 @@ bool cc_environ_init(void)
         SYSDEBUG_SUCCESS ();
     else
         SYSDEBUG_ERR ("Failed.");
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
     return status;
 }
 
@@ -291,12 +291,12 @@ void cc_environ_free(void)
 {
     #if SYSDEBUG_ENV == 1
     SYSDEBUG_BEGIN ();
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
     _environ_free(&_env_list);
     cc_environ_sync();
     #if SYSDEBUG_ENV == 1
     SYSDEBUG_END ();
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
 }
 
 /*** Initialization ***/
@@ -311,26 +311,26 @@ bool environ_init(void)
     #if SYSDEBUG_ENV == 1
     SYSDEBUG_BEGIN ();
     SYSDEBUG_INFO_ ("_memmax()=%ld", (uint32_t) _memmax ());
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
     cc_atexit(&environ_done);
     #if SYSDEBUG_ENV == 1
     SYSDEBUG_INFO_ ("_psp=%04X, _masterpsp=%04X", _cc_psp, _cc_dos_getmasterpsp ());
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
 //~ #if LINKER_TPC == 1
     //~ _cc_psp = _cc_dos_getmasterpsp ();
-//~ #endif
+//~ #endif  /* LINKER_TPC == 1 */
     _psp_get_dosenv (_cc_psp, &_dos_env);
     #if SYSDEBUG_ENV == 1
     SYSDEBUG_INFO_ ("_dos_env: .arr=%04X:%04X, .size=%d",
         FP_SEG (_dos_env.arr), FP_OFF (_dos_env.arr), _dos_env.size);
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
     status = cc_environ_init ();
     #if SYSDEBUG_ENV == 1
     if (status)
         SYSDEBUG_SUCCESS ();
     else
         SYSDEBUG_ERR ("Failed.");
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
     return status;
 }
 
@@ -338,10 +338,10 @@ void __far environ_done(void)
 {
     #if SYSDEBUG_ENV == 1
     SYSDEBUG_BEGIN ();
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
     cc_environ_free();
     /*exitproc = _oldexit_environ;*/
     #if SYSDEBUG_ENV == 1
     SYSDEBUG_END ();
-    #endif
+    #endif  /* SYSDEBUG_ENV == 1 */
 }

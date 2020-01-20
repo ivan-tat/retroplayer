@@ -7,14 +7,14 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$errno$errno$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "pascal.h"
 #include "cc/errno.h"
 
-#ifdef DEFINE_LOCAL_DATA
+#if DEFINE_LOCAL_DATA == 1
 
 int16_t cc_errno = EZERO;
 
-#endif
+#endif  /* DEFINE_LOCAL_DATA == 1 */

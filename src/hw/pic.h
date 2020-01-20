@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef PIC_H
-#define PIC_H 1
+#ifndef _PIC_H_INCLUDED
+#define _PIC_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -82,4 +82,4 @@ DECLARE_REGISTRATION (pic)
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* PIC_H */
+#endif  /* !_PIC_H_INCLUDED */

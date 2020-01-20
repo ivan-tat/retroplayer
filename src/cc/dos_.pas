@@ -30,47 +30,7 @@ const
 var
     SaveIntVecs: array [0..SAVEINTVEC_COUNT-1] of Pointer;
 
-(*$endif*)
-
-(* DOS Program Segment Prefix *)
-
-type
-    dospsp_p = ^dospsp_t;
-    dospsp_t = packed record
-        int_20_opcode: Word;
-        mem_size: Word;
-        reserved1: Byte;
-        dos_func_dispatcher: array [0..4] of Byte;
-        int_22_ptr: Pointer;
-        int_23_ptr: Pointer;
-        int_24_ptr: Pointer;
-        parent_seg: Word;
-        file_handles_array: array [0..19] of Byte;
-        env_seg: Word;
-        last_stack_ptr: Pointer;
-        handles_array_size: Word;
-        handles_array_ptr: Pointer;
-        prev_psp_ptr: Pointer;
-        reserved2: array [0..19] of Byte;
-        int_21_retf_opcodes: array [0..2] of Byte;
-        reserved3: array[0..8] of Byte;
-        FCB1: array [0..15] of Byte;
-        FCB2: array [0..19] of Byte;
-        param_str: String [127];
-    end;
-
-(* DOS Memory Control Block *)
-
-type
-  dosmcb_p = ^dosmcb_t;
-  dosmcb_t = packed record
-    ident: Char;
-    owner_psp_seg: Word;
-    size: Word;
-    reserved: array [0..10] of Byte;
-    program_name: array [0..7] of Char;
-    data: Byte;
-  end;
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 procedure pascal_swapvectors;
 procedure pascal_exec(Name: PathStr; CmdLine: String);

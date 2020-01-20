@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef HEXDIGTS_H
-#define HEXDIGTS_H
+#ifndef _HEXDIGTS_H_INCLUDED
+#define _HEXDIGTS_H_INCLUDED
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 extern const char HEXDIGITS[16];
 
@@ -22,4 +22,4 @@ extern const char HEXDIGITS[16];
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* HEXDIGTS_H */
+#endif  /* !_HEXDIGTS_H_INCLUDED */

@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef SBIO_H
-#define SBIO_H 1
+#ifndef _SBIO_H_INCLUDED
+#define _SBIO_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -72,4 +72,4 @@ void __far sbioDSPAcknowledgeIRQ (uint16_t base, bool mode16bit);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* SBIO_H */
+#endif  /* !_SBIO_H_INCLUDED */

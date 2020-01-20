@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef DSTREAM_H
-#define DSTREAM_H 1
+#ifndef _CC_DSTREAM_H_INCLUDED
+#define _CC_DSTREAM_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -75,4 +75,4 @@ bool __far datastream_flush (DATASTREAM *self);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* DSTREAM_H */
+#endif  /* !_CC_DSTREAM_H_INCLUDED */

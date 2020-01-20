@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef STARTUP_H
-#define STARTUP_H
+#ifndef _STARTUP_H_INCLUDED
+#define _STARTUP_H_INCLUDED
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "pascal.h"
@@ -108,7 +108,7 @@ void __noreturn _cc_Exit (int16_t status);
 extern uint16_t __far __pascal pascal_paramcount(void);
 extern void     __far __pascal pascal_paramstr(char *dest, uint8_t i);
 extern void     __noreturn __far __pascal pascal_Halt (uint16_t status);
-#endif
+#endif  /* LINKER_TPC == 1 */
 
 /* System unit */
 
@@ -210,4 +210,4 @@ void cc_system_init (void);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* STARTUP_H */
+#endif  /* !_STARTUP_H_INCLUDED */

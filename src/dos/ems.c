@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$dos$ems$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -22,7 +22,7 @@
 #include "debug.h"
 #include "dos/ems.h"
 
-#ifdef DEFINE_LOCAL_DATA
+#if DEFINE_LOCAL_DATA == 1
 
 bool     emsInstalled;
 EMSERR   emsEC;
@@ -30,7 +30,7 @@ EMSVER   emsVersion;
 uint16_t emsFrameSeg;    /* real memory segment for first page */
 void    *emsFramePtr;    /* real memory pointer for first page */
 
-#endif  /* DEFINE_LOCAL_DATA */
+#endif  /* DEFINE_LOCAL_DATA == 1 */
 
 #define DOS_DRIVER_NAME_OFF 10
 
@@ -281,14 +281,14 @@ void __near _list_free(HANDLESLIST *self)
         }
 }
 
-#ifndef USE_INTRINSICS
+#if USE_INTRINSICS != 1
 
 uint16_t emsCalcPagesCount(uint32_t size)
 {
     return _emsCalcPagesCount(size);
 }
 
-#endif  /* !USE_INTRINSICS */
+#endif  /* USE_INTRINSICS != 1 */
 
 bool __far emsIsInstalled (void)
 {

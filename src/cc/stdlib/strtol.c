@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$stdlib$strtol$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <limits.h>
 #include "cc/ctype.h"

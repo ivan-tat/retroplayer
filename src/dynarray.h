@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef DYNARRAY_H
-#define DYNARRAY_H 1
+#ifndef _DYNARRAY_H_INCLUDED
+#define _DYNARRAY_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -65,4 +65,4 @@ void     __far dynarr_free(DYNARR *self);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* DYNARRAY_H */
+#endif  /* !_DYNARRAY_H_INCLUDED */

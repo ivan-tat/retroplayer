@@ -6,9 +6,6 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. *)
 
-{$B-,D+,E-,F-,G+,L+,O-,Q-,R-,S-,Y+}
-{$M 16384,0,655360}
-
 unit sbctl;
 
 interface

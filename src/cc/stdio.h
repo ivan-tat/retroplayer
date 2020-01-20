@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CC_STDIO_H
-#define CC_STDIO_H 1
+#ifndef _CC_STDIO_H_INCLUDED
+#define _CC_STDIO_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stddef.h>
 #include <stdint.h>
@@ -81,4 +81,4 @@ int cc_vsnprintf(char *str, size_t size, const char *format, va_list ap);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* CC_STDIO_H */
+#endif  /* !_CC_STDIO_H_INCLUDED */

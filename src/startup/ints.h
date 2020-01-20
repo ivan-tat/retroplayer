@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef STARTUP_INTS_H
-#define STARTUP_INTS_H
+#ifndef _STARTUP_INTS_H_INCLUDED
+#define _STARTUP_INTS_H_INCLUDED
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "startup.h"
@@ -36,4 +36,4 @@ extern __far _cc_local_int23_asm(void);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* STARTUP_INTS_H */
+#endif  /* !_STARTUP_INTS_H_INCLUDED */

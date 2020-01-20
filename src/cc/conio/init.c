@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$conio$init$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -17,7 +17,7 @@
 #include "cc/conio/ints.h"
 #include "cc/conio.h"
 
-#ifdef DEFINE_LOCAL_DATA
+#if DEFINE_LOCAL_DATA == 1
 
 uint16_t cc_lastmode = 0;
 uint16_t cc_screenwidth = 0;
@@ -35,7 +35,7 @@ bool cc_checkbreak = false;
 uint16_t cc_SegB000 = 0xb000;
 uint16_t cc_SegB800 = 0xb800;
 
-#endif  /* DEFINE_LOCAL_DATA */
+#endif  /* DEFINE_LOCAL_DATA == 1 */
 
 void _cc_console_set_mode(uint16_t mode)
 {
@@ -122,7 +122,7 @@ void _cc_console_on_start(void)
     cc_checkbreak = false;
     cc_SegB000 = 0xb000;
     cc_SegB800 = 0xb800;
-#endif  /* DEFINE_LOCAL_DATA */
+#endif  /* DEFINE_LOCAL_DATA != 1 */
 
     vbios_query_video_info(&video);
 

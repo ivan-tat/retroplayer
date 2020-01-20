@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$main$muspat$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -944,4 +944,4 @@ bool __far DEBUG_dump_pattern (MUSPAT *pattern, char *s, uint8_t num_channels)
     return true;
 }
 
-#endif  /* DEBUG */
+#endif  /* DEBUG == 1 */

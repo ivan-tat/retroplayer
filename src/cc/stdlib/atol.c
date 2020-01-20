@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$stdlib$atol$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "cc/ctype.h"
 #include "cc/stdlib.h"

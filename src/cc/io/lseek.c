@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$io$lseek$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "cc/dos.h"
 #include "cc/io.h"

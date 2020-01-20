@@ -12,25 +12,12 @@ interface
 
 (*$I defines.pas*)
 
-type
-    TSBIOERR = Word;
-
-const
-    E_SBIO_SUCCESS          = 0;
-    E_SBIO_DSP_RESET_FAILED = 1;
-    E_SBIO_DSP_READ_FAILED  = 2;
-    E_SBIO_DSP_WRITE_FAILED = 3;
+(*$ifdef DEFINE_LOCAL_DATA*)
 
 var
-    sbioError: TSBIOERR;
+    sbioError: Word;
 
-const
-    SBIO_MIXER_DAC_LEVEL     = $04;
-    SBIO_MIXER_MASTER_VOLUME = $22;
-    SBIO_MIXER_MASTER_LEFT   = $30;
-    SBIO_MIXER_MASTER_RIGHT  = $31;
-    SBIO_MIXER_VOICE_LEFT    = $32;
-    SBIO_MIXER_VOICE_RIGHT   = $33;
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 procedure sbioMixerReset;
 procedure sbioMixerRead;

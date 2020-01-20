@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef MUSPAT_H
-#define MUSPAT_H 1
+#ifndef _MUSPAT_H_INCLUDED
+#define _MUSPAT_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -287,13 +287,13 @@ void __far DEBUG_get_pattern_channel_event_str (char *s, MUSPATCHNEVENT *event);
 void __far DEBUG_dump_pattern_info (MUSPAT *pattern, uint8_t index);
 bool __far DEBUG_dump_pattern (MUSPAT *self, char *s, uint8_t num_channels);    // "s" must hold atleast 64 bytes or (num_channels * 13) bytes
 
-#else  /* DEBUG */
+#else  /* DEBUG != 1 */
 
 #define DEBUG_get_pattern_channel_event_str(s, event)
 #define DEBUG_dump_pattern_info(pattern, index)
 #define DEBUG_dump_pattern(self, s, num_channels)
 
-#endif  /* !DEBUG */
+#endif  /* DEBUG != 1 */
 
 /*** Linking ***/
 
@@ -331,8 +331,8 @@ bool __far DEBUG_dump_pattern (MUSPAT *self, char *s, uint8_t num_channels);    
 #pragma aux DEBUG_dump_pattern_info "*";
 #pragma aux DEBUG_dump_pattern "*";
 
-#endif  /* DEBUG */
+#endif  /* DEBUG == 1 */
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* MUSPAT_H */
+#endif  /* !_MUSPAT_H_INCLUDED */

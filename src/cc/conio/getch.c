@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$conio$getch$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include "cc/i86.h"

@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$player$w_chn$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stddef.h>
 #include <stdint.h>

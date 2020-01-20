@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef VOLTAB_H
-#define VOLTAB_H 1
+#ifndef _VOLTAB_H_INCLUDED
+#define _VOLTAB_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -38,4 +38,4 @@ void voltab_free(void);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* VOLTAB_H */
+#endif  /* !_VOLTAB_H_INCLUDED */

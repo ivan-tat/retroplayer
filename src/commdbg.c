@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$commdbg$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "hexdigts.h"

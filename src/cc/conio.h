@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CC_CONIO_H
-#define CC_CONIO_H 1
+#ifndef _CC_CONIO_H_INCLUDED
+#define _CC_CONIO_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -218,4 +218,4 @@ void __far cc_TextAssignCrt (_cc_iobuf *f, void *buffer, uint16_t size);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* CC_CONIO_H */
+#endif  /* !_CC_CONIO_H_INCLUDED */

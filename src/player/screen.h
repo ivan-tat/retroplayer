@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef SCREEN_H
-#define SCREEN_H 1
+#ifndef _PLAYER_SCREEN_H_INCLUDED
+#define _PLAYER_SCREEN_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -124,4 +124,4 @@ void     __far scrwin_close (SCRWIN *self);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* SCREEN_H */
+#endif  /* !_PLAYER_SCREEN_H_INCLUDED */

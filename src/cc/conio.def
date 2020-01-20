@@ -1,5 +1,10 @@
-ifndef CONIO_DEF_INCLUDED
-CONIO_DEF_INCLUDED equ 1
+; conio.def -- declarations for custom "conio" library.
+;
+; This is free and unencumbered software released into the public domain.
+; For more information, please refer to <http://unlicense.org>.
+
+ifndef _CC_CONIO_DEF_INCLUDED
+_CC_CONIO_DEF_INCLUDED equ 1
 
 ; private
 extern cc_gotbreak: byte
@@ -7,4 +12,4 @@ extern cc_gotbreak: byte
 ; public
 extern cc_checkbreak: byte
 
-endif   ; CONIO_DEF_INCLUDED
+endif   ; !_CC_CONIO_DEF_INCLUDED

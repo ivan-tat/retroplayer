@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef PCMSMP_H
-#define PCMSMP_H 1
+#ifndef _PCMSMP_H_INCLUDED
+#define _PCMSMP_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -234,11 +234,11 @@ void __far pcmsmpl_free (PCMSMPLIST *self);
 
 void __far DEBUG_dump_sample_info (PCMSMP *smp, uint8_t index);
 
-#else
+#else   /* DEBUG != 1 */
 
 #define DEBUG_dump_sample_info(smp, index)
 
-#endif  /* DEBUG */
+#endif  /* DEBUG != 1 */
 
 /*** Linking ***/
 
@@ -260,8 +260,8 @@ void __far DEBUG_dump_sample_info (PCMSMP *smp, uint8_t index);
 
 #pragma aux DEBUG_dump_sample_info "*";
 
-#endif  /* DEBUG */
+#endif  /* DEBUG == 1 */
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* PCMSMP_H */
+#endif  /* !_PCMSMP_H_INCLUDED */

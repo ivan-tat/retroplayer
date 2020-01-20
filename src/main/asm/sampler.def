@@ -3,8 +3,8 @@
 ; This is free and unencumbered software released into the public domain.
 ; For more information, please refer to <http://unlicense.org>.
 
-ifndef SAMPLER_DEF
-SAMPLER_DEF equ 1
+ifndef _SAMPLER_DEF_INCLUDED
+_SAMPLER_DEF_INCLUDED equ 1
 
 SAMPLERFL_16BITS equ 001h
 SAMPLERFL_LOOP   equ 002h
@@ -19,4 +19,4 @@ play_sample_info_t struc
     wFlags      dw ?
 play_sample_info_t ends
 
-endif   ; SAMPLER_DEF
+endif   ; !_SAMPLER_DEF_INCLUDED

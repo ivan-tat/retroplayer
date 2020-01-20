@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$i86$disable$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "cc/i86.h"
 
@@ -18,4 +18,4 @@ void _cc_disable(void)
     _asm "cli";
 }
 
-#endif  /* __WATCOMC__ */
+#endif  /* !__WATCOMC__ */

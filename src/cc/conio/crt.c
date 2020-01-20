@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$conio$crt$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -51,7 +51,9 @@ void __near _crt_catch_break (void)
 
 void __far cc_TextAssignCrt (_cc_iobuf *f, void *buffer, uint16_t size)
 {
+#if SYSDEBUG_IOBUF == 1
     SYSDEBUG_INFO ("Called.");
+#endif  /* SYSDEBUG_IOBUF == 1 */
     f->mode = cc_fmClosed;
     f->buf_size = size;
     f->buf_ptr = buffer;

@@ -42,7 +42,7 @@ const
     );
     _cc_ExitCount: Byte = 0;
 
-(*$endif*)
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 function  pascal_paramcount: Word;
 procedure pascal_paramstr(var dest: String; i: Byte);

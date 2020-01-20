@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef VBIOS_H
-#define VBIOS_H 1
+#ifndef _VBIOS_H_INCLUDED
+#define _VBIOS_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "pascal.h"
@@ -45,7 +45,7 @@ typedef struct vbios_cursor_state_t
 };
 #pragma pack(pop);
 
-#ifdef CONFIG_VBIOS_ENABLE_LIGHT_PEN
+#if CONFIG_VBIOS_ENABLE_LIGHT_PEN == 1
 #pragma pack(push, 1);
 typedef struct vbios_light_pen_state_t
 {
@@ -55,7 +55,7 @@ typedef struct vbios_light_pen_state_t
     uint16_t graph_y;
 };
 #pragma pack(pop);
-#endif  /* CONFIG_VBIOS_ENABLE_LIGHT_PEN */
+#endif  /* CONFIG_VBIOS_ENABLE_LIGHT_PEN == 1 */
 
 #pragma pack(push, 1);
 typedef struct vbios_video_info_t {
@@ -86,9 +86,9 @@ void vbios_set_mode(uint8_t mode);
 void vbios_set_cursor_shape(uint8_t start, uint8_t stop);
 void vbios_set_cursor_pos(uint8_t page, uint8_t x, uint8_t y);
 void vbios_query_cursor_state(uint8_t page, struct vbios_cursor_state_t *state);
-#ifdef CONFIG_VBIOS_ENABLE_LIGHT_PEN
+#if CONFIG_VBIOS_ENABLE_LIGHT_PEN == 1
 bool vbios_read_light_pen(struct vbios_light_pen_state_t *state);
-#endif  /* CONFIG_VBIOS_ENABLE_LIGHT_PEN */
+#endif  /* CONFIG_VBIOS_ENABLE_LIGHT_PEN == 1 */
 void vbios_set_active_page(uint8_t page);
 void vbios_scroll_up(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t count, uint8_t color);
 void vbios_scroll_down(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t count, uint8_t color);
@@ -111,9 +111,9 @@ void vbios_use_alternate_print_screen(void);
 #pragma aux vbios_set_cursor_shape "*";
 #pragma aux vbios_set_cursor_pos "*";
 #pragma aux vbios_query_cursor_state "*";
-#ifdef CONFIG_VBIOS_ENABLE_LIGHT_PEN
+#if CONFIG_VBIOS_ENABLE_LIGHT_PEN == 1
 #pragma aux vbios_read_light_pen "*";
-#endif  /* CONFIG_VBIOS_ENABLE_LIGHT_PEN */
+#endif  /* CONFIG_VBIOS_ENABLE_LIGHT_PEN == 1 */
 #pragma aux vbios_set_active_page "*";
 #pragma aux vbios_scroll_up "*";
 #pragma aux vbios_scroll_down "*";
@@ -127,4 +127,4 @@ void vbios_use_alternate_print_screen(void);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* VBIOS_H */
+#endif  /* !_VBIOS_H_INCLUDED */

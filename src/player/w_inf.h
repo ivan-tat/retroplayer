@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef W_INF_H
-#define W_INF_H 1
+#ifndef _PLAYER_W_INF_H_INCLUDED
+#define _PLAYER_W_INF_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -33,4 +33,4 @@ void __far win_information_set_play_state (SCRWIN *self, PLAYSTATE *value);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* W_INF_H */
+#endif  /* !_PLAYER_W_INF_H_INCLUDED */

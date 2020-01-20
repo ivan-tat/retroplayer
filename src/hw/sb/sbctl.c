@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$hw$sb$sbctl$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stddef.h>
 #include <stdbool.h>

@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef EMS_H
-#define EMS_H 1
+#ifndef _EMS_H_INCLUDED
+#define _EMS_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -51,15 +51,15 @@ extern void    *emsFramePtr;    /* real memory pointer for first page */
 
 #define _emsCalcPagesCount(size) (unsigned int)(((unsigned long)(size + 0x3fff) << 2) >> 16)
 
-#ifdef USE_INTRINSICS
+#if USE_INTRINSICS == 1
 
 #define emsCalcPagesCount(size) _emsCalcPagesCount(size)
 
-#else
+#else  /* USE_INTRINSICS != 1 */
 
 uint16_t emsCalcPagesCount(uint32_t size);
 
-#endif
+#endif  /* USE_INTRINSICS != 1 */
 
 bool        __far emsIsInstalled (void);
 const char *__far emsGetErrorMsg (void);
@@ -89,9 +89,9 @@ DECLARE_REGISTRATION (ems)
 #pragma aux emsFrameSeg "*";
 #pragma aux emsFramePtr "*";
 
-#ifndef USE_INTRINSICS
+#if USE_INTRINSICS != 1
 #pragma aux emsCalcPagesCount "*";
-#endif
+#endif  /* USE_INTRINSICS != 1 */
 
 #pragma aux emsIsInstalled "*";
 #pragma aux emsGetErrorMsg "*";
@@ -112,4 +112,4 @@ DECLARE_REGISTRATION (ems)
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* EMS_H */
+#endif  /* !_EMS_H_INCLUDED */

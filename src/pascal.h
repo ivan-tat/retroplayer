@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef PASCAL_H
-#define PASCAL_H 1
+#ifndef _PASCAL_H_INCLUDED
+#define _PASCAL_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -50,7 +50,7 @@ _UNREGMETHOD(name);
 #else
  #define LOG_REGMETHOD(name, init)
  #define LOG_UNREGMETHOD(name, done)
-#endif
+#endif  /* DEBUG == 1 */
 
 #define DEFINE_REGISTRATION(name, init, done) \
 /*static void *_EXITVARNAME(name) = (void *)0;*/\
@@ -91,4 +91,4 @@ void __far __pascal strctopas (char *dest, char const *src, uint16_t maxlen);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* PASCAL_H */
+#endif  /* !_PASCAL_H_INCLUDED */

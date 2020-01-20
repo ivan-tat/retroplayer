@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$stdlib$fmalloc$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -19,7 +19,7 @@ extern void __far __pascal pascal_getmem(void **p, uint16_t size);
 
 #ifdef __WATCOMC__
 #pragma aux pascal_getmem "*" modify [ ax bx cx dx si di es ];
-#endif
+#endif  /* __WATCOMC__ */
 
 void *cc_malloc(size_t size)
 {

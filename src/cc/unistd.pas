@@ -11,13 +11,7 @@ unit
 
 interface
 
-uses
-    dos;
-
 (*$I defines.pas*)
-
-var
-    pascal_DosError: Integer absolute Dos.DosError;
 
 procedure cc_execv;
 

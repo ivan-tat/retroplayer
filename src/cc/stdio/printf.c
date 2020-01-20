@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$stdio$printf$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdarg.h>
 #include "pascal.h"

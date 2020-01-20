@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef SBCTL_H
-#define SBCTL_H 1
+#ifndef _SBCTL_H_INCLUDED
+#define _SBCTL_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -96,4 +96,4 @@ DECLARE_REGISTRATION (sbctl)
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* SBCTL_H */
+#endif  /* !_SBCTL_H_INCLUDED */

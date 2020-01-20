@@ -12,6 +12,15 @@ interface
 
 (*$I defines.pas*)
 
+(*$ifdef DEFINE_LOCAL_DATA*)
+
+const
+    ST3Periods: array [0..11] of Word = (
+        1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
+    );
+
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
+
 procedure _play_sample_nearest_8;
 procedure _play_sample_nearest_16;
 
@@ -26,11 +35,6 @@ procedure _MixSampleStereo16;
 procedure fill_8;
 procedure fill_16;
 procedure fill_32;
-
-const
-    ST3Periods: array [0..11] of word = (
-        1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
-    );
 
 procedure _calc_sample_step;
 

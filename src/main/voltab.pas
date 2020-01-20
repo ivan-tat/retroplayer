@@ -12,12 +12,12 @@ interface
 
 (*$I defines.pas*)
 
-type
-    TVOLTAB = array [0..63, 0..255] of Integer;
-    PVOLTAB = ^TVOLTAB;
+(*$ifdef DEFINE_LOCAL_DATA*)
 
 var
-    VolumeTablePtr: PVOLTAB;
+    VolumeTablePtr: Pointer;
+
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 procedure voltab_init;
 procedure voltab_alloc;
@@ -30,7 +30,7 @@ uses
     string_,
 (*$ifdef DEBUG*)
     stdio,
-(*$endif*)
+(*$endif*)  (* DEBUG *)
     dos_;
 
 (*$l voltab.obj*)

@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CC_UNISTD_H
-#define CC_UNISTD_H 1
+#ifndef _CC_UNISTD_H_INCLUDED
+#define _CC_UNISTD_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "pascal.h"
 
@@ -28,4 +28,4 @@ int cc_execv (const char *filename, char *const argv[]);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* CC_UNISTD_H */
+#endif  /* !_CC_UNISTD_H_INCLUDED */

@@ -16,9 +16,9 @@
 
 #if CHECK_IO == 1
 # define IOCHK _cc_CheckInOutRes ();
-#else
+#else   /* CHECK_IO != 1 */
 # define IOCHK
-#endif
+#endif  /* CHECK_IO != 1 */
 
 /*
 void __near dosprint (const char *s);

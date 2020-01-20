@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef COMMDBG_H
-#define COMMDBG_H 1
+#ifndef _COMMDBG_H_INCLUDED
+#define _COMMDBG_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 
@@ -25,10 +25,10 @@ void __far _DEBUG_get_xline (void *buf, uint8_t size, uint8_t max, char *dest);
 #if DEBUG == 1
  #define DEBUG_get_xnum(value, len, dest)     _DEBUG_get_xnum (value, len, dest)
  #define DEBUG_get_xline(buf, len, max, dest) _DEBUG_get_xline (buf, len, max, dest)
-#else
+#else   /* DEBUG != 1 */
  #define DEBUG_get_xnum(value, len, dest)
  #define DEBUG_get_xline(buf, len, max, dest)
-#endif
+#endif  /* DEBUG != 1 */
 
 /*** Linking ***/
 
@@ -39,4 +39,4 @@ void __far _DEBUG_get_xline (void *buf, uint8_t size, uint8_t max, char *dest);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* COMMDBG_H */
+#endif  /* !_COMMDBG_H_INCLUDED */

@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$main$pcmsmp$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -141,8 +141,6 @@ void __far pcmsmpl_free (PCMSMPLIST *self)
     }
 }
 
-/*** Debug ***/
-
 #if DEBUG == 1
 
 void __far DEBUG_dump_sample_info (PCMSMP *smp, uint8_t index)
@@ -190,4 +188,4 @@ void __far DEBUG_dump_sample_info (PCMSMP *smp, uint8_t index)
     #undef _BUF_SIZE
 }
 
-#endif  /* DEBUG */
+#endif  /* DEBUG == 1 */

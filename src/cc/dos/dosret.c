@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$dos$dosret$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "cc/errno.h"
 #include "cc/dos/dosret.h"

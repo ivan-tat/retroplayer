@@ -17,7 +17,7 @@ interface
 var
     _cc_delay_base_ticks: array [0..7] of Byte;
 
-(*$endif*)
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 procedure cc_delay_init;
 procedure cc_delay;

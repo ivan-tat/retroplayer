@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef EFFVARS_H
-#define EFFVARS_H 1
+#ifndef _EFFVARS_H_INCLUDED
+#define _EFFVARS_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -32,4 +32,4 @@ extern const void __near * __near wavetab[3];
 
 #endif  /* __WATCOMC__ */
 
-#endif /* EFFVARS_H */
+#endif /* !_EFFVARS_H_INCLUDED */

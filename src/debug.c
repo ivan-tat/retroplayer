@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$debug$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stddef.h>
 #include <stdbool.h>
@@ -20,11 +20,11 @@
 #include "cc/string.h"
 #include "debug.h"
 
-#ifdef DEFINE_LOCAL_DATA
+#if DEFINE_LOCAL_DATA == 1
 
 FILE *debuglogfile;
 
-#endif  /* DEFINE_LOCAL_DATA */
+#endif  /* DEFINE_LOCAL_DATA == 1 */
 
 static const struct
 {
@@ -62,9 +62,9 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
             #if DEBUG_WRITE_LOG == 1
             if (!debuglogfile)
                 textcol = msg_tags[type].textcolor;
-            #else
+            #else   /* DEBUG_WRITE_LOG != 1 */
             textcol = msg_tags[type].textcolor;
-            #endif
+            #endif  /* DEBUG_WRITE_LOG != 1 */
             tag = msg_tags[type].tag;
             if (tag)
             {
@@ -108,10 +108,10 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
             textcolor(7);
             cc_printf(s, _tag);
         }
-        #else
+        #else   /* DEBUG_WRITE_LOG != 1 */
         textcolor (7);
         cc_printf (s, _tag);
-        #endif
+        #endif  /* DEBUG_WRITE_LOG != 1 */
     }
 
     if (format)
@@ -124,10 +124,10 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
             textcolor(textcol);
             cc_vprintf(format, ap);
         }
-        #else
+        #else   /* DEBUG_WRITE_LOG != 1 */
         textcolor (textcol);
         cc_vprintf (format, ap);
-        #endif
+        #endif  /* DEBUG_WRITE_LOG != 1 */
     }
 
     va_end(ap);
@@ -141,10 +141,10 @@ void __far _DEBUG_LOG(const int type, const char *file, int line, const char *me
         textcolor(7);
         cc_printf(s);
     }
-    #else
+    #else   /* DEBUG_WRITE_LOG != 1 */
     textcolor (7);
     cc_printf (s);
-    #endif
+    #endif  /* DEBUG_WRITE_LOG != 1 */
 }
 
 void __far _DEBUG_BEGIN(const char *file, int line, const char *method)
@@ -241,7 +241,7 @@ void debug_init (void)
 {
     #if DEBUG_WRITE_LOG == 1
     debuglogfile = fopen ("debug.log", "wb");
-    #endif
+    #endif  /* DEBUG_WRITE_LOG == 1 */
     DEBUG_INFO ("Start logging.");
 }
 
@@ -251,7 +251,7 @@ void debug_done (void)
     #if DEBUG_WRITE_LOG == 1
     if (debuglogfile)
         fclose (debuglogfile);
-    #endif
+    #endif  /* DEBUG_WRITE_LOG == 1 */
 }
 
 DEFINE_REGISTRATION (debug, debug_init, debug_done)

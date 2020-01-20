@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$stdio$sprintf$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdarg.h>
 #include "cc/dstream.h"

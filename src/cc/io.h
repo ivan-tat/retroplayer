@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CC_IO_H
-#define CC_IO_H 1
+#ifndef _CC_IO_H_INCLUDED
+#define _CC_IO_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "pascal.h"
@@ -58,4 +58,4 @@ int32_t cc_write(int fd, void *buf, size_t count);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* CC_IO_H */
+#endif  /* !_CC_IO_H_INCLUDED */

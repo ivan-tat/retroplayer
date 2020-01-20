@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$i86$delay$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -16,11 +16,11 @@
 #include "hw/bios.h"
 #include "cc/i86.h"
 
-#ifdef DEFINE_LOCAL_DATA
+#if DEFINE_LOCAL_DATA == 1
 
 uint64_t _cc_delay_base_ticks;
 
-#endif  /* DEFINE_LOCAL_DATA */
+#endif  /* DEFINE_LOCAL_DATA == 1 */
 
 /* 55 milliseconds per one timer tick (configured by BIOS).
    One IRQ call per 65536 ticks of total 1193180 timer's ticks per second. */

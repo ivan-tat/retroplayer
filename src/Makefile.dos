@@ -12,23 +12,38 @@ $(error This script must be run in DJGPP DOS environment)
 endif
 
 error_unsupported_target = $(error The target '$@' is not supported)
+error_not_known_params = $(error This function is not implemented for selected parameters.)
 info_done = @echo 'Done.'
 
 SHELL       = bash.exe
 PC          := tpc
-PCDEBUG     := -gd -v -\$$d+,l+
+DEFS        :=
 ifeq "$(SYSDEBUG)" "1"
-PCDEBUG     := $(PCDEBUG) -dSYSDEBUG
+DEFS        += SYSDEBUG
+endif
+ifeq "$(SYSDEBUG_IOBUF)" "1"
+DEFS        += SYSDEBUG_IOBUF
+endif
+ifeq "$(SYSDEBUG_ENV)" "1"
+DEFS        += SYSDEBUG_ENV
 endif
 ifeq "$(DEBUG)" "1"
-PCDEBUG     := $(PCDEBUG) -dDEBUG
+DEFS        += DEBUG
 endif
-PCFLAGS     := $(PCDEBUG) -m -\$$e-,g+,n+
+ifneq "$(DEFS)" ""
+PCDEBUG     := $(patsubst %,-d%,$(DEFS))
+else
+PCDEBUG     :=
+endif
+ifeq "$(DEBUG_COMPILE)" "1"
+PCDEBUG     += -gd -v -\$$d+,l+
+endif
+PCFLAGS     := $(PCDEBUG) -m -\$$e-,g+,n+ -\$$m16384,0,0
 
 SRCS        := \
- player/plays3m.pas \
  player/smalls3m.pas \
- player/playosci.pas
+ player/playosci.pas \
+ player/plays3m.pas
 
 EXES        := $(patsubst %.pas,%.exe,$(SRCS))
 
@@ -52,6 +67,13 @@ empty: show_banner
 	echo 'Where:'; \
 	echo '    option: in the form "name=value"'; \
 	echo '    target: "all"'; \
+	echo 'Supported options:'; \
+	echo '    SYSDEBUG=1'; \
+	echo '    SYSDEBUG_IOBUF=1'; \
+	echo '    SYSDEBUG_ENV=1'; \
+	echo '    DEBUG=1'; \
+	echo '    DEBUG_COMPILE=1'; \
+	echo '    LINKER_TPC=1'; \
 	echo 'Note: Pass all options in double quotes "".'
 
 .PHONY: show_banner
@@ -59,7 +81,11 @@ show_banner:
 	@if [[ "$(DEBUG)" == 1 ]]; then echo 'Note: DEBUG is on.'; fi
 
 %.exe: %.pas
+ifeq "$(LINKER_TPC)" "1"
 	$(PC) $(PCFLAGS) $(subst /,\\,$<)
+else
+$(error_not_known_params)
+endif
 
 .PHONY: autogenfiles
 autogenfiles: show_banner

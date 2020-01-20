@@ -22,6 +22,8 @@ const
     _CC_UPPER  = $40;
     _CC_LOWER  = $80;
 
+(*$ifdef DEFINE_LOCAL_DATA*)
+
 const _cc_IsTable: array [0..256] of byte =
 (
     0,
@@ -195,6 +197,8 @@ const
 
 var
     __IsTable: array [0..256] of byte absolute _cc_IsTable;
+
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 implementation
 

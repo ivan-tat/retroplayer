@@ -3,21 +3,21 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CC_STRING_H
-#define CC_STRING_H 1
+#ifndef _CC_STRING_H_INCLUDED
+#define _CC_STRING_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stddef.h>
 #include "pascal.h"
 
 #ifndef NULL
 #define NULL ((void *)0)
-#endif
+#endif  /* !NULL */
 
 int    cc_memcmp(const void *s1, const void *s2, size_t n);
 void  *cc_memcpy(void *dest, const void *src, size_t n);
@@ -60,4 +60,4 @@ int    cc_strnicmp(const char *s1, const char *s2, size_t n);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* CC_STRING_H */
+#endif  /* !_CC_STRING_H_INCLUDED */

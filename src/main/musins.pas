@@ -23,7 +23,7 @@ procedure musinsl_free;
 
 procedure DEBUG_dump_instrument_info;
 
-(*$endif*)
+(*$endif*)  (* DEBUG *)
 
 implementation
 
@@ -50,6 +50,6 @@ procedure musinsl_free; external;
 
 procedure DEBUG_dump_instrument_info; external;
 
-(*$endif*)
+(*$endif*)  (* DEBUG *)
 
 end.

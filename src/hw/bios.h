@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef BIOS_H
-#define BIOS_H 1
+#ifndef _BIOS_H_INCLUDED
+#define _BIOS_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -47,4 +47,4 @@ typedef struct
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* BIOS_H */
+#endif  /* !_BIOS_H_INCLUDED */

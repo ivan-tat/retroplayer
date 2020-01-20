@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef DEBUG_H
-#define DEBUG_H 1
+#ifndef _DEBUG_H_INCLUDED
+#define _DEBUG_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdarg.h>
 #include "commdbg.h"
@@ -41,7 +41,7 @@ void __far _DEBUG_dump_mem(void *buf, unsigned size, const char *padstr);
  #define DEBUG_REG(method, name)           _DEBUG_REG (__FILE__, method, name)
  #define DEBUG_UNREG(method, name)         _DEBUG_UNREG (__FILE__, method, name)
  #define DEBUG_dump_mem(buf, size, padstr) _DEBUG_dump_mem (buf, size, padstr)
-#else
+#else   /* DEBUG != 1 */
  #define DEBUG_LOG(type, text)
  #define DEBUG_LOG_(type, format, ...)
  #define DEBUG_MSG(text)
@@ -58,7 +58,8 @@ void __far _DEBUG_dump_mem(void *buf, unsigned size, const char *padstr);
  #define DEBUG_REG(method, name)
  #define DEBUG_UNREG(method, name)
  #define DEBUG_dump_mem(buf, size, padstr)
-#endif
+#endif  /* DEBUG != 1 */
+
 
 void __far __pascal Debug_Msg (const char *file, const char *method, const char *msg);
 void __far __pascal Debug_Info (const char *file, const char *method, const char *msg);
@@ -74,7 +75,7 @@ void __far __pascal Debug_Err (const char *file, const char *method, const char 
 
 extern FILE *debuglogfile;
 
-#endif  /* DEBUG_WRITE_LOG */
+#endif  /* DEBUG_WRITE_LOG == 1 */
 
 /*** Initialization ***/
 
@@ -96,11 +97,11 @@ DECLARE_REGISTRATION (debug)
 
 #pragma aux debuglogfile "*";
 
-#endif  /* DEBUG_WRITE_LOG */
+#endif  /* DEBUG_WRITE_LOG == 1 */
 
 #pragma aux register_debug "*";
 #pragma aux unregister_debug "*";
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* DEBUG_H */
+#endif  /* !_DEBUG_H_INCLUDED */

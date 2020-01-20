@@ -28,6 +28,21 @@
 (* "implementation" part on second inclusion *)
 
 const
+(*$ifdef SYSDEBUG*)
+    SYSDEBUG = true;
+(*$else*)
+    SYSDEBUG = false;
+(*$endif*)
+(*$ifdef SYSDEBUG_IOBUF*)
+    SYSDEBUG_IOBUF = true;
+(*$else*)
+    SYSDEBUG_IOBUF = false;
+(*$endif*)
+(*$ifdef SYSDEBUG_ENV*)
+    SYSDEBUG_ENV = true;
+(*$else*)
+    SYSDEBUG_ENV = false;
+(*$endif*)
 (*$ifdef DEBUG*)
     DEBUG = true;
 (*$else*)

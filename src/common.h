@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef COMMON_H
-#define COMMON_H
+#ifndef _COMMON_H_INCLUDED
+#define _COMMON_H_INCLUDED
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 
@@ -41,4 +41,4 @@ void  __far __pascal _delete_ (void **p);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* COMMON_H */
+#endif  /* !_COMMON_H_INCLUDED */

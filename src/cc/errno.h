@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CC_ERRNO_H
-#define CC_ERRNO_H
+#ifndef _CC_ERRNO_H_INCLUDED
+#define _CC_ERRNO_H_INCLUDED
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "pascal.h"
@@ -123,4 +123,4 @@ extern int16_t cc_errno;
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* CC_ERRNO_H */
+#endif  /* !_CC_ERRNO_H_INCLUDED */

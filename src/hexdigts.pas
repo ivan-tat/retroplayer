@@ -18,7 +18,7 @@ interface
 const
     HEXDIGITS: array [0..15] of char = '0123456789ABCDEF';
 
-(*$endif*)
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 implementation
 

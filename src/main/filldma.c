@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$main$filldma$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -36,7 +36,7 @@ void __far DEBUG_close_output_streams (void)
         fclose (_debug_stream[1]);
 }
 
-#endif  /* DEBUG_WRITE_OUTPUT_STREAM */
+#endif  /* DEBUG_WRITE_OUTPUT_STREAM == 1 */
 
 typedef void clip_proc_t(void *, int32_t *, uint16_t);
 
@@ -138,7 +138,7 @@ void __near fill_frame (PLAYSTATE *ps, MIXER *mixer, SNDDMABUF *outbuf)
     #if DEBUG_WRITE_OUTPUT_STREAM == 1
     if (_debug_stream[0])
         fwrite (mixbuf, frame_len * sizeof (int32_t), 1, _debug_stream[0]);
-    #endif  /* DEBUG_WRITE_OUTPUT_STREAM */
+    #endif  /* DEBUG_WRITE_OUTPUT_STREAM == 1 */
 
     dstoff = snddmabuf_get_frame_offset(outbuf, outbuf->frameLast);
 
@@ -207,7 +207,7 @@ void __near fill_frame (PLAYSTATE *ps, MIXER *mixer, SNDDMABUF *outbuf)
     #if DEBUG_WRITE_OUTPUT_STREAM == 1
     if (_debug_stream[1])
         fwrite (& (buf[dstoff]), frame_size, 1, _debug_stream[1]);
-    #endif  /* DEBUG_WRITE_OUTPUT_STREAM */
+    #endif  /* DEBUG_WRITE_OUTPUT_STREAM == 1 */
 }
 
 void __far fill_DMAbuffer (PLAYSTATE *ps, MIXER *mixer, SNDDMABUF *outbuf)

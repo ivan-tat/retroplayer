@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef MIXING_H
-#define MIXING_H 1
+#ifndef _MIXING_H_INCLUDED
+#define _MIXING_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -30,4 +30,4 @@ void song_play (PLAYSTATE *ps, MIXER *mixer, uint16_t len);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* MIXING_H */
+#endif  /* !_MIXING_H_INCLUDED */

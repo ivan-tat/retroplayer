@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef W_PAT_H
-#define W_PAT_H 1
+#ifndef _PLAYER_W_PAT_H_INCLUDED
+#define _PLAYER_W_PAT_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -37,4 +37,4 @@ void __far win_pattern_set_start_channel (SCRWIN *self, int value);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* W_PAT_H */
+#endif  /* !_PLAYER_W_PAT_H_INCLUDED */

@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$hw$pic$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>

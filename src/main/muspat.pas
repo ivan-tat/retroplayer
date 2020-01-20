@@ -46,7 +46,7 @@ procedure DEBUG_get_pattern_channel_event_str;
 procedure DEBUG_dump_pattern_info;
 procedure DEBUG_dump_pattern;
 
-(*$endif*)
+(*$endif*)  (* DEBUG *)
 
 implementation
 
@@ -92,6 +92,6 @@ procedure DEBUG_get_pattern_channel_event_str; external;
 procedure DEBUG_dump_pattern_info; external;
 procedure DEBUG_dump_pattern; external;
 
-(*$endif*)
+(*$endif*)  (* DEBUG *)
 
 end.

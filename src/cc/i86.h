@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef CC_I86_H
-#define CC_I86_H 1
+#ifndef _CC_I86_H_INCLUDED
+#define _CC_I86_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -120,17 +120,17 @@ extern void _cc_enable(void);
 
 #ifndef FP_OFF
  #define FP_OFF(__p) ((unsigned)(__p))
-#endif
+#endif  /* !FP_OFF */
 
 #ifndef FP_SEG
  #define FP_SEG(__p) ((unsigned)((unsigned long)(void __far*)(__p) >> 16))
-#endif
+#endif  /* !FP_SEG */
 
 /* make a far pointer from segment and offset */
 
 #ifndef MK_FP
  #define MK_FP(__s,__o) (((unsigned short)(__s)):>((void __near *)(__o)))
-#endif
+#endif  /* !MK_FP */
 
 /*** Linking ***/
 
@@ -143,4 +143,4 @@ extern void _cc_enable(void);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* CC_I86_H */
+#endif  /* !_CC_I86_H_INCLUDED */

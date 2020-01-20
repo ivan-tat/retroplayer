@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$string$memset$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "cc/string.h"

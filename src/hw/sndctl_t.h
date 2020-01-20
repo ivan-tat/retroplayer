@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef SNDCTL_T_H
-#define SNDCTL_T_H 1
+#ifndef _SNDCTL_T_H_INCLUDED
+#define _SNDCTL_T_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -51,4 +51,4 @@ typedef void __far SoundHWISRCallback_t (void *param);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* SNDCTL_T_H */
+#endif  /* !_SNDCTL_T_H_INCLUDED */

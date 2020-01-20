@@ -12,33 +12,21 @@ interface
 
 (*$I defines.pas*)
 
+(*$ifdef DEFINE_LOCAL_DATA*)
+
 type
     TEMSVER = packed record
         Lo, Hi: byte;
     end;
 
-type
-    TEMSERR = integer;
-
-const
-    E_EMS_SUCCESS = 0;
-
-type
-    TEMSHDL = Word;
-
-const
-    EMSBADHDL = $ffff;
-
-type
-    TEMSNAME = array [0..7] of char;
-    PEMSNAME = ^TEMSNAME;
-
 var
     emsInstalled: Boolean;
-    emsEC: TEMSERR;
+    emsEC: Integer;
     emsVersion: TEMSVER;
     emsFrameSeg: Word;
     emsFramePtr: Pointer;
+
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 procedure emsIsInstalled;
 procedure emsGetErrorMsg;

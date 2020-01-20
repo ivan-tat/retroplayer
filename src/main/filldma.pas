@@ -17,12 +17,18 @@ uses
 (*$I defines.pas*)
 
 (*$ifdef DEBUG_WRITE_OUTPUT_STREAM*)
+
+(*$ifdef DEFINE_LOCAL_DATA*)
+
 var
     _debug_stream: array [0..1] of Pointer;
 
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
+
 procedure DEBUG_open_output_streams;
 procedure DEBUG_close_output_streams;
-(*$endif*)  (* DEBUG_WRITE_OUTPUT_STREAM *)
+
+(*$endif*)  (*DEBUG_WRITE_OUTPUT_STREAM*)
 
 procedure fill_DMAbuffer;
 
@@ -32,10 +38,10 @@ uses
     string_,
 (*$ifdef DEBUG*)
     stdio,
-(*$endif*)
+(*$endif*)  (* DEBUG *)
 (*$ifdef DEBUG_WRITE_OUTPUT_STREAM*)
     dos_,
-(*$endif*)
+(*$endif*)  (*DEBUG_WRITE_OUTPUT_STREAM*)
     sndctl_t,
     musmodps,
     mixing,
@@ -44,9 +50,11 @@ uses
 (*$l filldma.obj*)
 
 (*$ifdef DEBUG_WRITE_OUTPUT_STREAM*)
+
 procedure DEBUG_open_output_streams; external;
 procedure DEBUG_close_output_streams; external;
-(*$endif*)  (* DEBUG_WRITE_OUTPUT_STREAM *)
+
+(*$endif*)  (*DEBUG_WRITE_OUTPUT_STREAM*)
 
 procedure fill_DMAbuffer; external;
 

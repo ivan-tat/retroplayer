@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$dos$parsfnm$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "cc/errno.h"
 #include "cc/i86.h"

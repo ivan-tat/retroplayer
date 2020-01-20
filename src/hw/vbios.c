@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$hw$vbios$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdint.h>
 #include "pascal.h"
@@ -90,7 +90,7 @@ void vbios_query_cursor_state(uint8_t page, struct vbios_cursor_state_t *state)
     state->y = regs.h.dh;
 }
 
-#ifdef CONFIG_VBIOS_ENABLE_LIGHT_PEN
+#if CONFIG_VBIOS_ENABLE_LIGHT_PEN == 1
 bool vbios_read_light_pen(struct vbios_light_pen_state_t *state)
 {
     union REGPACK regs;
@@ -103,7 +103,7 @@ bool vbios_read_light_pen(struct vbios_light_pen_state_t *state)
     state->graph_y = regs.w.cx;
     return regs.h.al ? true : false;
 }
-#endif  /* CONFIG_VBIOS_ENABLE_LIGHT_PEN */
+#endif  /* CONFIG_VBIOS_ENABLE_LIGHT_PEN == 1 */
 
 /*
  * Description:

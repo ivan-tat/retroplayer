@@ -35,7 +35,7 @@ uses
     stdio;
 (*$else*)
     watcom;
-(*$endif*)
+(*$endif*)  (* DEBUG *)
 
 (*$l posttab.obj*)
 

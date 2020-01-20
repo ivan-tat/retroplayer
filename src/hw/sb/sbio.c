@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$hw$sb$sbio$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -33,7 +33,7 @@
 
 SBIOERR sbioError;
 
-#endif
+#endif  /* DEFINE_LOCAL_DATA == 1 */
 
 void __far sbioMixerReset (uint16_t base)
 {

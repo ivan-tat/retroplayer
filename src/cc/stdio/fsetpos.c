@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$stdio$fsetpos$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "pascal.h"
 #include "startup.h"

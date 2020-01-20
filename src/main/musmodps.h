@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef MUSMODPS_H
-#define MUSMODPS_H 1
+#ifndef _MUSMODPS_H_INCLUDED
+#define _MUSMODPS_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -104,4 +104,4 @@ void __far playstate_free (PLAYSTATE *self);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* MUSMODPS_H */
+#endif  /* !_MUSMODPS_H_INCLUDED */

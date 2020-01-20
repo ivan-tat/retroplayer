@@ -1,5 +1,4 @@
-{$M 16000,0,1000}
-program example_for_s3mplay;
+program playosci;
 
 uses
     hexdigts,

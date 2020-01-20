@@ -7,14 +7,14 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$dos$mem086$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "pascal.h"
 #include "cc/i86.h"
 #include "cc/dos.h"
 #include "cc/dos/error086.h"
 
-#ifndef USE_INTRINSICS
+#if USE_INTRINSICS != 1
 /*
 unsigned _cc_dos_para(unsigned size)
 */
@@ -23,7 +23,7 @@ uint16_t __far _cc_dos_para (uint32_t size)
     return __cc_dos_para(size);
 }
 
-#endif  /* !USE_INTRINSICS */
+#endif  /* USE_INTRINSICS != 1 */
 
 /*
 unsigned _cc_dos_allocmem(unsigned size, unsigned *seg)

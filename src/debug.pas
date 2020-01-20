@@ -41,8 +41,12 @@ uses
     stdlib,
     conio;
 
+(*$ifdef DEFINE_LOCAL_DATA*)
+
 var
     debuglogfile: file;
+
+(*$endif*)  (* DEFINE_LOCAL_DATA *)
 
 (*$L debug.obj*)
 procedure _DEBUG_LOG; external;

@@ -3,14 +3,14 @@
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef SYSDBG_H
-#define SYSDBG_H 1
+#ifndef _SYSDBG_H_INCLUDED
+#define _SYSDBG_H_INCLUDED 1
 
 #include "defines.h"
 
 #ifdef __WATCOMC__
 #pragma once
-#endif
+#endif  /* __WATCOMC__ */
 
 #include <stdarg.h>
 #include "commdbg.h"
@@ -38,7 +38,7 @@ void __far _SYSDEBUG_dump_mem (void *buf, unsigned size, const char *padstr);
  #define SYSDEBUG_ERR(text)                   _SYSDEBUG_LOG (DBGLOG_ERR, __FILE__, __LINE__, __func__, "%s", text)
  #define SYSDEBUG_ERR_(format, ...)           _SYSDEBUG_LOG (DBGLOG_ERR, __FILE__, __LINE__, __func__, format, __VA_ARGS__)
  #define SYSDEBUG_dump_mem(buf, size, padstr) _SYSDEBUG_dump_mem (buf, size, padstr)
-#else
+#else   /* SYSDEBUG != 1 */
  #define SYSDEBUG_LOG(type, text)
  #define SYSDEBUG_LOG_(type, format, ...)
  #define SYSDEBUG_MSG(text)
@@ -55,7 +55,7 @@ void __far _SYSDEBUG_dump_mem (void *buf, unsigned size, const char *padstr);
  #define SYSDEBUG_ERR(text)
  #define SYSDEBUG_ERR_(format, ...)
  #define SYSDEBUG_dump_mem(buf, size, padstr)
-#endif
+#endif  /* SYSDEBUG != 1 */
 
 /*** Linking ***/
 
@@ -69,4 +69,4 @@ void __far _SYSDEBUG_dump_mem (void *buf, unsigned size, const char *padstr);
 
 #endif  /* __WATCOMC__ */
 
-#endif  /* SYSDBG_H */
+#endif  /* !_SYSDBG_H_INCLUDED */

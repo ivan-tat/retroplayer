@@ -7,7 +7,7 @@
 
 #ifdef __WATCOMC__
 #pragma aux default "$cc$dos$gtime086$*"
-#endif
+#endif  /* __WATCOMC__ */
 
 #include "cc/i86.h"
 #include "cc/dos.h"
