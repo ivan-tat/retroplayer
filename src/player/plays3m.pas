@@ -35,7 +35,7 @@ uses
     effects,
     mixer,
     fillvars,
-    s3mplay,
+    musplay,
     vbios,
     vga,
     screen;

@@ -33,7 +33,7 @@ uses
     effects,
     mixer,
     fillvars,
-    s3mplay;
+    musplay;
 
 (*$I defines.pas*)
 

@@ -26,7 +26,7 @@
 #include "main/mixchn.h"
 #include "main/musmodps.h"
 #include "main/fillvars.h"
-#include "main/s3mplay.h"
+#include "main/musplay.h"
 #include "playosci.h"
 
 #define def_rate 45454
@@ -230,7 +230,7 @@ void __far playosci_main (void)
     register_ems ();
     register_vga ();
     register_sbctl ();
-    register_s3mplay ();
+    register_musplay ();
     register_playosci ();
 
     if (!environ_init ())

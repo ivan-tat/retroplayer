@@ -22,7 +22,7 @@ uses
     mixchn,
     musmodps,
     fillvars,
-    s3mplay;
+    musplay;
 
 (*$I defines.pas*)
 

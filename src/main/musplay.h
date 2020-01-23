@@ -1,4 +1,4 @@
-/* s3mplay.h -- declarations for s3mplay.c.
+/* musplay.h -- declarations for musplay.c.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -93,7 +93,7 @@ void     __far player_delete (MUSPLAYER **self);
 
 /*** Initialization ***/
 
-DECLARE_REGISTRATION (s3mplay)
+DECLARE_REGISTRATION (musplay)
 
 /*** Linking ***/
 
@@ -140,8 +140,8 @@ DECLARE_REGISTRATION (s3mplay)
 #pragma aux player_free "*";
 #pragma aux player_delete "*";
 
-#pragma aux register_s3mplay "*";
-#pragma aux unregister_s3mplay "*";
+#pragma aux register_musplay "*";
+#pragma aux unregister_musplay "*";
 
 #endif  /* __WATCOMC__ */
 

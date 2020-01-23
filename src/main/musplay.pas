@@ -1,6 +1,4 @@
-{$M 16000,0,0}
-{$I-,X+,V-,G+,D+}
-unit s3mplay;
+unit musplay;
 
 interface
 
@@ -52,7 +50,7 @@ procedure player_free_modules;
 procedure player_free;
 procedure player_delete;
 
-procedure register_s3mplay;
+procedure register_musplay;
 
 implementation
 
@@ -90,7 +88,7 @@ uses
     fillvars,
     filldma;
 
-(*$l s3mplay.obj*)
+(*$l musplay.obj*)
 
 procedure player_new; external;
 procedure player_init; external;
@@ -131,6 +129,6 @@ procedure player_free_modules; external;
 procedure player_free; external;
 procedure player_delete; external;
 
-procedure register_s3mplay; external;
+procedure register_musplay; external;
 
 end.

@@ -22,7 +22,7 @@
 #include "main/mixer.h"
 #include "main/musmodps.h"
 #include "main/fillvars.h"
-#include "main/s3mplay.h"
+#include "main/musplay.h"
 #include "player/screen.h"
 #include "player/plays3m.h"
 #include "player/w_dbg.h"

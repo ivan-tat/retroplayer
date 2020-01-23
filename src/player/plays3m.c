@@ -35,7 +35,7 @@
 #include "main/effects.h"
 #include "main/mixer.h"
 #include "main/fillvars.h"
-#include "main/s3mplay.h"
+#include "main/musplay.h"
 #include "player/screen.h"
 #include "player/w_inf.h"
 #include "player/w_hlp.h"
@@ -739,7 +739,7 @@ void __far plays3m_main (void)
     register_ems ();
     register_vga ();
     register_sbctl ();
-    register_s3mplay ();
+    register_musplay ();
     register_plays3m ();
 
     if (!environ_init())

@@ -26,7 +26,7 @@
 #include "main/muspat.h"
 #include "main/musmod.h"
 #include "main/effects.h"
-#include "main/s3mplay.h"
+#include "main/musplay.h"
 #include "main/loads3m.h"
 
 /* Limits */

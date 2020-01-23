@@ -1,4 +1,4 @@
-/* s3mplay.c -- main library for playing music modules.
+/* musplay.c -- main library for playing music modules.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
@@ -6,7 +6,7 @@
 #include "defines.h"
 
 #ifdef __WATCOMC__
-#pragma aux default "$main$s3mplay$*"
+#pragma aux default "$main$musplay$*"
 #endif  /* __WATCOMC__ */
 
 #include <stdbool.h>
@@ -32,7 +32,7 @@
 #include "main/posttab.h"
 #include "main/fillvars.h"
 #include "main/filldma.h"
-#include "main/s3mplay.h"
+#include "main/musplay.h"
 
 #if DEFINE_LOCAL_DATA == 1
 
@@ -1084,7 +1084,7 @@ void __far player_delete (MUSPLAYER **self)
 
 /*** Initialization ***/
 
-void __near s3mplay_init(void)
+void __near musplay_init (void)
 {
 #if DEBUG_WRITE_OUTPUT_STREAM == 1
     DEBUG_open_output_streams ();
@@ -1093,11 +1093,11 @@ void __near s3mplay_init(void)
     _isr_index = 0;
 }
 
-void __near s3mplay_done(void)
+void __near musplay_done (void)
 {
 #if DEBUG_WRITE_OUTPUT_STREAM == 1
     DEBUG_close_output_streams ();
 #endif  /* DEBUG_WRITE_OUTPUT_STREAM == 1 */
 }
 
-DEFINE_REGISTRATION(s3mplay, s3mplay_init, s3mplay_done)
+DEFINE_REGISTRATION (musplay, musplay_init, musplay_done)

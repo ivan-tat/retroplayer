@@ -53,7 +53,9 @@ procedure _cc_dos_gettime;
 procedure _cc_dos_getvect;
 procedure _cc_dos_setvect;
 
+(*$ifndef USE_INTRINSICS*)
 procedure _cc_dos_para;
+(*$endif*)  (* !USE_INTRINSICS *)
 procedure _cc_dos_allocmem;
 procedure _cc_dos_freemem;
 procedure _cc_dos_setblock;
@@ -131,7 +133,9 @@ procedure _cc_dos_getvect; external;
 procedure _cc_dos_setvect; external;
 
 (*$L dos\mem086.obj*)
+(*$ifndef USE_INTRINSICS*)
 procedure _cc_dos_para; external;
+(*$endif*)  (* !USE_INTRINSICS *)
 procedure _cc_dos_allocmem; external;
 procedure _cc_dos_freemem; external;
 procedure _cc_dos_setblock; external;

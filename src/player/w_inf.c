@@ -20,7 +20,7 @@
 #include "main/musmod.h"
 #include "main/musmodps.h"
 #include "main/mixer.h"
-#include "main/s3mplay.h"
+#include "main/musplay.h"
 #include "player/screen.h"
 #include "player/w_inf.h"
 
