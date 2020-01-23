@@ -8,36 +8,33 @@
 #define __attribute__(x)
 #endif  /* __WATCOMC__ */
 
-#if SYSDEBUG != 1
-# undef  SYSDEBUG
-# define SYSDEBUG 0
-# define SYSDEBUG_IOBUF 0
-# define SYSDEBUG_ENV 0
-#endif  /* SYSDEBUG != 1 */
+#include "conf/defs.h"
 
-#undef DEBUG_WRITE_LOG
-#undef DEBUG_FILE_S3M_LOAD
-#undef DEBUG_WRITE_OUTPUT_STREAM
-
-#if DEBUG == 1
-# define DEBUG_WRITE_LOG 1
-# define DEBUG_FILE_S3M_LOAD 1
-# define DEBUG_WRITE_OUTPUT_STREAM 0
-#else   /* DEBUG != 1 */
-# undef  DEBUG
-# define DEBUG 0
-# define DEBUG_WRITE_LOG 0
-# define DEBUG_FILE_S3M_LOAD 0
-# define DEBUG_WRITE_OUTPUT_STREAM 0
-#endif  /* DEBUG != 1 */
-
-#if LINKER_TPC != 1
+#if LINKER_TPC == 1
+# define DEFINE_LOCAL_DATA 0
+#else   /* LINKER_TPC != 1 */
 # define DEFINE_LOCAL_DATA 1
 #endif  /* LINKER_TPC != 1 */
 
-#define USE_INTRINSICS 0
+#if SYSDEBUG != 1
+# undef  SYSDEBUG
+# define SYSDEBUG 0
+# undef  SYSDEBUG_IOBUF
+# define SYSDEBUG_IOBUF 0
+# undef  SYSDEBUG_ENV
+# define SYSDEBUG_ENV 0
+#endif  /* SYSDEBUG != 1 */
 
-#define CONFIG_VBIOS_ENABLE_LIGHT_PEN 1
+#if DEBUG != 1
+# undef  DEBUG
+# define DEBUG 0
+# undef  DEBUG_WRITE_LOG
+# define DEBUG_WRITE_LOG 0
+# undef  DEBUG_FILE_S3M_LOAD
+# define DEBUG_FILE_S3M_LOAD 0
+# undef  DEBUG_WRITE_OUTPUT_STREAM
+# define DEBUG_WRITE_OUTPUT_STREAM 0
+#endif  /* DEBUG != 1 */
 
 #define CRLF "\r\n"
 //#define CRLF "\n"

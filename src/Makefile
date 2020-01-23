@@ -8,26 +8,13 @@ ifneq "$(DJGPP)" ""
 $(error This script does not support DJGPP DOS environment)
 endif
 
+include conf/defs.mk
+
 error_not_implemented = $(error This function is not implemented for current environment.)
 error_not_known_params = $(error This function is not implemented for selected parameters.)
 info_done = @echo Done.
 
 DEFS :=
-ifeq "$(SYSDEBUG)" "1"
-DEFS += SYSDEBUG=1
-endif
-ifeq "$(SYSDEBUG_IOBUF)" "1"
-DEFS += SYSDEBUG_IOBUF=1
-endif
-ifeq "$(SYSDEBUG_ENV)" "1"
-DEFS += SYSDEBUG_ENV=1
-endif
-ifeq "$(DEBUG)" "1"
-DEFS += DEBUG=1
-endif
-ifeq "$(LINKER_TPC)" "1"
-DEFS += LINKER_TPC=1
-endif
 
 HOST_TYPE       := native
 INCLUDE_DIRS    := .
@@ -206,11 +193,8 @@ empty:
 	echo 'Where:'; \
 	echo '    option: in the form "name=value"'; \
 	echo '    target: "autogenfiles" | "all" | "clean"'; \
-	echo 'Supported options:'; \
-	echo '    SYSDEBUG=1'; \
-	echo '    SYSDEBUG_IOBUF=1'; \
-	echo '    SYSDEBUG_ENV=1'; \
-	echo '    DEBUG=1'; \
+	echo 'Supported options (do not use, use "configure" script instead):'; \
+	echo '    DEBUG_COMPILE=1'; \
 	echo '    LINKER_TPC=1'
 
 ##=-------------------------=##
@@ -505,7 +489,7 @@ LIBS += $(CCLIB)
 
 $(CCLIB): $(cc_OBJS_TP) $(ow_OBJS)
 	$(RM) $@; \
-	$(AR) $(ARFLAGS) -o $@ $(patsubst %,+%,$^)
+	$(AR) $(ARFLAGS) -o $@ $(patsubst %,-+%,$^)
 
 ##=--------------------=##
 ## Player library files ##
@@ -554,7 +538,7 @@ LIBS += $(PLIB)
 
 $(PLIB): $(p_OBJS_TP)
 	$(RM) $@; \
-	$(AR) $(ARFLAGS) -o $@ $(patsubst %,+%,$^)
+	$(AR) $(ARFLAGS) -o $@ $(patsubst %,-+%,$^)
 
 ##=------------------=##
 ## Binary executables ##
@@ -568,6 +552,7 @@ test_SRCS := $(test_main_SRCS) $(test_extra_SRCS)
 test_OBJS := \
  $(patsubst %.asm,%.o,$(filter %.asm,$(test_SRCS))) \
  $(patsubst %.c,%.o,$(filter %.c,$(test_SRCS)))
+test_LIBS := $(CCLIB) $(PLIB)
 test_EXES := $(test_main_SRCS:.c=.exe)
 test_DEPS := \
  $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(test_SRCS))) \
@@ -588,8 +573,8 @@ $(DEPDIR)/$(test_main_SRCS:.c=.$(DEPEXT)): $(test_SRCS)
 	$(make_c_exec_dos_deps)
 
 ## Build rules
-$(test_EXES): $(test_OBJS) | $(CCLIB) $(PLIB)
-	$(LD) $(LFLAGS) $(patsubst %,library %,$|) $(patsubst %,file %,$^) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+$(test_EXES): $(test_LIBS) $(test_OBJS)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$(test_LIBS)) $(patsubst %,file %,$(test_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 
 ## > testcrt.exe
 
@@ -599,6 +584,7 @@ testcrt_SRCS := $(testcrt_main_SRCS) $(testcrt_extra_SRCS)
 testcrt_OBJS := \
  $(patsubst %.asm,%.o,$(filter %.asm,$(testcrt_SRCS))) \
  $(patsubst %.c,%.o,$(filter %.c,$(testcrt_SRCS)))
+testcrt_LIBS := $(CCLIB) $(PLIB)
 testcrt_EXES := $(testcrt_main_SRCS:.c=.exe)
 testcrt_DEPS := \
  $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(testcrt_SRCS))) \
@@ -619,8 +605,8 @@ $(DEPDIR)/$(testcrt_main_SRCS:.c=.$(DEPEXT)): $(testcrt_SRCS)
 	$(make_c_exec_dos_deps)
 
 ## Build rules
-$(testcrt_EXES): $(testcrt_OBJS) | $(CCLIB) $(PLIB)
-	$(LD) $(LFLAGS) $(patsubst %,library %,$|) $(patsubst %,file %,$^) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+$(testcrt_EXES): $(testcrt_LIBS) $(testcrt_OBJS)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$(testcrt_LIBS)) $(patsubst %,file %,$(testcrt_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 
 ## > testexec.exe
 
@@ -630,6 +616,7 @@ testexec_SRCS := $(testexec_main_SRCS) $(testexec_extra_SRCS)
 testexec_OBJS := \
  $(patsubst %.asm,%.o,$(filter %.asm,$(testexec_SRCS))) \
  $(patsubst %.c,%.o,$(filter %.c,$(testexec_SRCS)))
+testexec_LIBS := $(CCLIB) $(PLIB)
 testexec_EXES := $(testexec_main_SRCS:.c=.exe)
 testexec_DEPS := \
  $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(testexec_SRCS))) \
@@ -650,8 +637,8 @@ $(DEPDIR)/$(testexec_main_SRCS:.c=.$(DEPEXT)): $(testexec_SRCS)
 	$(make_c_exec_dos_deps)
 
 ## Build rules
-$(testexec_EXES): $(testexec_OBJS) | $(CCLIB) $(PLIB)
-	$(LD) $(LFLAGS) $(patsubst %,library %,$|) $(patsubst %,file %,$^) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+$(testexec_EXES): $(testexec_LIBS) $(testexec_OBJS)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$(testexec_LIBS)) $(patsubst %,file %,$(testexec_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 
 ##=------------------=##
 ## Player executables ##
@@ -665,6 +652,7 @@ smalls3m_SRCS := $(smalls3m_main_SRCS) $(smalls3m_extra_SRCS)
 smalls3m_OBJS_C := \
  $(patsubst %.asm,%.o,$(filter %.asm,$(smalls3m_SRCS))) \
  $(patsubst %.c,%.o,$(filter %.c,$(smalls3m_SRCS)))
+smalls3m_LIBS := $(CCLIB) $(PLIB)
 smalls3m_EXES := $(smalls3m_main_SRCS:.c=.exe)
 smalls3m_DEPS := \
  $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(smalls3m_SRCS))) \
@@ -690,8 +678,8 @@ $(DEPDIR)/$(smalls3m_main_SRCS:.c=.$(DEPEXT)): $(smalls3m_SRCS)
 	$(make_c_exec_dos_deps)
 
 ## Build rules
-$(smalls3m_EXES): $(smalls3m_OBJS_TP) | $(CCLIB) $(PLIB)
-	$(LD) $(LFLAGS) $(patsubst %,library %,$|) $(patsubst %,file %,$^) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+$(smalls3m_EXES): $(smalls3m_LIBS) $(smalls3m_OBJS_TP)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$(smalls3m_LIBS)) $(patsubst %,file %,$(smalls3m_OBJS_TP)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 
 ## > playosci.exe
 
@@ -701,6 +689,7 @@ playosci_SRCS := $(playosci_main_SRCS) $(playosci_extra_SRCS)
 playosci_OBJS_C := \
  $(patsubst %.asm,%.o,$(filter %.asm,$(playosci_SRCS))) \
  $(patsubst %.c,%.o,$(filter %.c,$(playosci_SRCS)))
+playosci_LIBS := $(CCLIB) $(PLIB)
 playosci_EXES := $(playosci_main_SRCS:.c=.exe)
 playosci_DEPS := \
  $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(playosci_SRCS))) \
@@ -726,8 +715,8 @@ $(DEPDIR)/$(playosci_main_SRCS:.c=.$(DEPEXT)): $(playosci_SRCS)
 	$(make_c_exec_dos_deps)
 
 ## Build rules
-$(playosci_EXES): $(playosci_OBJS_TP) | $(CCLIB) $(PLIB)
-	$(LD) $(LFLAGS) $(patsubst %,library %,$|) $(patsubst %,file %,$^) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+$(playosci_EXES): $(playosci_LIBS) $(playosci_OBJS_TP)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$(playosci_LIBS)) $(patsubst %,file %,$(playosci_OBJS_TP)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 
 ## > plays3m.exe
 
@@ -739,6 +728,7 @@ plays3m_SRCS := $(plays3m_main_SRCS) $(plays3m_extra_SRCS)
 plays3m_OBJS_C := \
  $(patsubst %.asm,%.o,$(filter %.asm,$(plays3m_SRCS))) \
  $(patsubst %.c,%.o,$(filter %.c,$(plays3m_SRCS)))
+plays3m_LIBS := $(CCLIB) $(PLIB)
 plays3m_EXES := $(plays3m_main_SRCS:.c=.exe)
 plays3m_DEPS := \
  $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(plays3m_SRCS))) \
@@ -764,8 +754,8 @@ $(DEPDIR)/$(plays3m_main_SRCS:.c=.$(DEPEXT)): $(plays3m_SRCS)
 	$(make_c_exec_dos_deps)
 
 ## Build rules
-$(plays3m_EXES): $(plays3m_OBJS_TP) | $(CCLIB) $(PLIB)
-	$(LD) $(LFLAGS) $(patsubst %,library %,$|) $(patsubst %,file %,$^) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+$(plays3m_EXES): $(plays3m_LIBS) $(plays3m_OBJS_TP)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$(plays3m_LIBS)) $(patsubst %,file %,$(plays3m_OBJS_TP)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 
 ##=------------------------------=##
 ## Include dependency information ##

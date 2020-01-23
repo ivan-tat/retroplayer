@@ -836,7 +836,8 @@ void __near load_s3m_free_unused_samples_pages (LOADER_S3M *self)
             pages++;
         pages_free = _Self->smp_EM_pages - pages;
 
-        DEBUG_INFO_ ("EM pages: %u used, %u free", pages, pages_free);
+        if (DEBUG_FILE_S3M_LOAD)
+            DEBUG_INFO_ ("EM pages: %u used, %u free", pages, pages_free);
 
         // try to free unused pages
         if (pages_free)
@@ -1647,7 +1648,8 @@ void __near load_s3m_free_unused_patterns_pages (LOADER_S3M *self)
             pages++;
         pages_free = _Self->pat_EM_pages - pages;
 
-        DEBUG_INFO_ ("EM pages: %u used, %u free", pages, pages_free);
+        if (DEBUG_FILE_S3M_LOAD)
+            DEBUG_INFO_ ("EM pages: %u used, %u free", pages, pages_free);
 
         // try to free unused pages
         if (pages_free)

@@ -46,6 +46,7 @@
 scripts/ow/tmp/
 src/.deps/
 src/_deps.dos/
+src/conf/
 src/main/wramp.inc
 src/main/wsinus.inc
 src/main/wsquare.inc
