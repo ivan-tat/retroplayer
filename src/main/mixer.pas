@@ -16,7 +16,7 @@ interface
 
 const
     ST3Periods: array [0..11] of Word = (
-        1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,960,907
+    (*$i main\nperiods.inc*)
     );
 
 (*$endif*)  (* DEFINE_LOCAL_DATA *)

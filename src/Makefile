@@ -228,6 +228,7 @@ main/%.inc: $(scripts_DIR)/%
 	./$< > $@
 
 autogen_INCS := \
+ main/nperiods.inc \
  main/wramp.inc \
  main/wsinus.inc \
  main/wsquare.inc

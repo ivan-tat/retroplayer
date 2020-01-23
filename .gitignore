@@ -47,9 +47,11 @@ scripts/ow/tmp/
 src/.deps/
 src/_deps.dos/
 src/conf/
+src/main/nperiods.inc
 src/main/wramp.inc
 src/main/wsinus.inc
 src/main/wsquare.inc
+src/main/scripts/nperiods
 src/main/scripts/wramp
 src/main/scripts/wsinus
 src/main/scripts/wsquare
