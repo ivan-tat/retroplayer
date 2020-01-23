@@ -20,12 +20,12 @@
 #include "cc/dos.h"
 #include "dos/ems.h"
 #include "common.h"
+#include "main/musdefs.h"
 #include "main/pcmsmp.h"
 #include "main/musins.h"
 #include "main/muspat.h"
 #include "main/musmod.h"
 #include "main/effects.h"
-#include "main/s3mtypes.h"
 #include "main/s3mplay.h"
 #include "main/loads3m.h"
 

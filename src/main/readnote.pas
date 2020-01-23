@@ -20,7 +20,7 @@ uses
     string_,
     dynarray,
     ems,
-    s3mtypes,
+    musdefs,
     musins,
     muspat,
     musmod,

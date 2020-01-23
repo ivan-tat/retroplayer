@@ -16,9 +16,9 @@
 #include <stdint.h>
 #include "cc/i86.h"
 #include "dynarray.h"
+#include "main/musdefs.h"
 #include "main/musins.h"
 #include "main/musmod.h"
-#include "main/s3mtypes.h"
 
 /* Mixing channel */
 

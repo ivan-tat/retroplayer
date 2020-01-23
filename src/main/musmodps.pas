@@ -11,7 +11,7 @@ unit musmodps;
 interface
 
 uses
-    s3mtypes;
+    musdefs;
 
 procedure __playstate_set_flags;
 

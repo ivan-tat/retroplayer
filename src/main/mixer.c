@@ -18,7 +18,7 @@
 #include "cc/string.h"
 #include "cc/dos.h"
 #include "debug.h"
-#include "main/s3mtypes.h"
+#include "main/musdefs.h"
 #include "main/mixer.h"
 
 uint32_t _calc_sample_step(uint16_t period, uint16_t rate)

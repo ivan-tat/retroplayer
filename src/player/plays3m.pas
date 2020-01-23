@@ -26,7 +26,7 @@ uses
     dma,
     sbctl,
     sndctl_t,
-    s3mtypes,
+    musdefs,
     musins,
     muspat,
     musmod,

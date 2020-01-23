@@ -32,7 +32,7 @@ uses
     dos_,
     ems,
     common,
-    s3mtypes,
+    musdefs,
     pcmsmp,
     musins,
     muspat,

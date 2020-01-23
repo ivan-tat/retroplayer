@@ -15,7 +15,7 @@
 #include "cc/i86.h"
 #include "cc/string.h"
 #include "dos/ems.h"
-#include "main/s3mtypes.h"
+#include "main/musdefs.h"
 #include "main/muspat.h"
 #include "main/musmod.h"
 #include "main/mixchn.h"

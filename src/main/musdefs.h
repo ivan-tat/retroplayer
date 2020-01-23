@@ -1,10 +1,10 @@
-/* s3mtypes.h -- generic s3m types.
+/* musdefs.h -- musical definitions.
 
    This is free and unencumbered software released into the public domain.
    For more information, please refer to <http://unlicense.org>. */
 
-#ifndef _S3MTYPES_H_INCLUDED
-#define _S3MTYPES_H_INCLUDED 1
+#ifndef _MUSDEFS_H_INCLUDED
+#define _MUSDEFS_H_INCLUDED 1
 
 #include "defines.h"
 
@@ -67,4 +67,4 @@ typedef uint8_t order_t;
 
 typedef order_t ordersList_t[MAX_ORDERS];
 
-#endif  /* !_S3MTYPES_H_INCLUDED */
+#endif  /* !_MUSDEFS_H_INCLUDED */

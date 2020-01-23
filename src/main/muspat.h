@@ -14,11 +14,11 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "s3mtypes.h"
 #include "pascal.h"
 #include "cc/i86.h"
 #include "dos/ems.h"
 #include "dynarray.h"
+#include "main/musdefs.h"
 
 /*** Music pattern channel's event ***/
 

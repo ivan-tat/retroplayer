@@ -16,7 +16,7 @@
 #include "common.h"
 #include "dynarray.h"
 #include "debug.h"
-#include "main/s3mtypes.h"
+#include "main/musdefs.h"
 #include "main/musmod.h"
 #include "main/mixchn.h"
 #include "main/musmodps.h"

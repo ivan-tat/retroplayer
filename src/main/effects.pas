@@ -13,7 +13,7 @@ interface
 (*$I defines.pas*)
 
 uses
-    s3mtypes,
+    musdefs,
     mixchn;
 
 procedure chn_effInit;

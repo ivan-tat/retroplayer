@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "main/s3mtypes.h"
+#include "main/musdefs.h"
 
 #define HALFTONES 12
 

@@ -74,7 +74,7 @@ uses
     pic,
     sndctl_t,
     sbctl,
-    s3mtypes,
+    musdefs,
     musins,
     muspat,
     musmod,

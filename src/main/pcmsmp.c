@@ -18,7 +18,7 @@
 #include "cc/dos.h"
 #include "cc/stdio.h"
 #include "dos/ems.h"
-#include "main/s3mtypes.h"
+#include "main/musdefs.h"
 #include "main/pcmsmp.h"
 
 /*** PCM sample ***/

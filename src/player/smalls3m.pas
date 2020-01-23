@@ -24,7 +24,7 @@ uses
     malloc,
     sbctl,
     vga,
-    s3mtypes,
+    musdefs,
     musins,
     muspat,
     musmod,

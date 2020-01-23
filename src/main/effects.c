@@ -16,7 +16,7 @@
 #include "cc/string.h"
 #include "cc/stdio.h"
 #include "dos/ems.h"
-#include "main/s3mtypes.h"
+#include "main/musdefs.h"
 #include "main/muspat.h"
 #include "main/effvars.h"
 #include "main/effects.h"

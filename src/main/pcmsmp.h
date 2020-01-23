@@ -18,7 +18,7 @@
 #include "cc/dos.h"
 #include "dos/ems.h"
 #include "dynarray.h"
-#include "main/s3mtypes.h"
+#include "main/musdefs.h"
 
 /*** PCM sample ***/
 
