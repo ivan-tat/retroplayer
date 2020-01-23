@@ -84,8 +84,8 @@ endm
 
 _DATA ends
 
-MIXER__TEXT segment word public use16 'CODE'
-assume cs:MIXER__TEXT,ds:DGROUP,ss:DGROUP
+MIXER_TEXT segment word public use16 'CODE'
+assume cs:MIXER_TEXT,ds:DGROUP,ss:DGROUP
 
 public _mix_sample
 _mix_sample proc far _dOutBuf: dword, _dSmpBuf: dword, _wVolTabSeg: word, _bVol: byte, _wCount: word
@@ -591,6 +591,6 @@ endm
 _MixSampleStereo16 endp
 
 
-MIXER__TEXT ends
+MIXER_TEXT ends
 
 end
