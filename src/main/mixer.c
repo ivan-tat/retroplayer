@@ -18,11 +18,12 @@
 #include "cc/string.h"
 #include "cc/dos.h"
 #include "debug.h"
+#include "main/s3mtypes.h"
 #include "main/mixer.h"
 
 uint32_t _calc_sample_step(uint16_t period, uint16_t rate)
 {
-    long long int a = (long long int) 1712 * 8363 << 16;
+    long long int a = (long long int) MID_C_PERIOD * MID_C_RATE << 16;
     long int b = (long int)period * (long int)rate;
     b = a / b;
     return b;

@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "main/s3mtypes.h"
 
-#define BASE_PERIOD 1712
 #define HALFTONES 12
 
 int tab [HALFTONES];
@@ -17,9 +17,9 @@ int main (void)
     int i, n;
     const char *s;
 
-    tab [0] = BASE_PERIOD;
+    tab [0] = MID_C_PERIOD;
     for (i = 1; i < HALFTONES; i++)
-        tab [i] = BASE_PERIOD / pow (2, ((float) i / HALFTONES));
+        tab [i] = MID_C_PERIOD / pow (2, ((float) i / HALFTONES));
 
     n = 0;
     for (i = 0; i < HALFTONES; i++)

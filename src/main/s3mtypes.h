@@ -18,7 +18,8 @@
 
 /* Constants */
 
-#define MID_C_RATE  8363
+#define MID_C_PERIOD 1712
+#define MID_C_RATE 8363
 
 /* Instrument */
 
