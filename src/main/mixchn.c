@@ -199,12 +199,12 @@ void __far chn_setupInstrument (MIXCHN *chn, MUSMOD *track, uint8_t insNum)
                 mixchn_set_sample (chn, smp);
                 flags = 0;
                 if (pcmsmp_get_bits (smp) == 16)
-                    flags |= MIXSMPFL_16BITS;
+                    flags |= PLAYSMPFL_16BITS;
                 if (pcmsmp_get_loop (smp) != PCMSMPLOOP_NONE)
-                    flags |= MIXSMPFL_LOOP;
+                    flags |= PLAYSMPFL_LOOP;
                 chn->bSmpFlags = flags;
                 chn->wSmpLoopStart = pcmsmp_get_loop_start (smp);
-                if (flags & MIXSMPFL_LOOP)
+                if (flags & PLAYSMPFL_LOOP)
                     chn->wSmpLoopEnd = pcmsmp_get_loop_end (smp);
                 else
                     chn->wSmpLoopEnd = pcmsmp_get_length (smp);

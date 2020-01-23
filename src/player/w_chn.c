@@ -136,7 +136,7 @@ void __far win_channels_draw(SCRWIN *self)
                     flagsstr[1] = 'p';
                 if (flags & MIXCHNFL_MIXING)
                     flagsstr[2] = 'm';
-                if (chn->bSmpFlags & MIXSMPFL_LOOP)
+                if (chn->bSmpFlags & PLAYSMPFL_LOOP)
                     flagsstr[3] = 'l';
                 if (chn->bEffFlags & EFFFLAG_CONTINUE)
                     flagsstr[4] = 'c';

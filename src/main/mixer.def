@@ -1,15 +1,15 @@
-; mixer_.def - assembler declarations for mixer library.
+; mixer.def - assembler declarations for mixer.c.
 ;
 ; This is free and unencumbered software released into the public domain.
 ; For more information, please refer to <http://unlicense.org>.
 
-ifndef _MIXER__DEF_INCLUDED
-_MIXER__DEF_INCLUDED equ 1
+ifndef _MIXER_DEF_INCLUDED
+_MIXER_DEF_INCLUDED equ 1
 
-MIXSMPFL_16BITS equ 001h
-MIXSMPFL_LOOP   equ 002h
+PLAYSMPFL_16BITS equ 001h
+PLAYSMPFL_LOOP   equ 002h
 
-TPlaySampleInfo struc
+play_sample_info_t struc
     dData       dd ?
     dPos        dd ?
     dStep       dd ?
@@ -17,6 +17,6 @@ TPlaySampleInfo struc
     wLoopStart  dw ?
     wLoopEnd    dw ?
     wFlags      dw ?
-TPlaySampleInfo ends
+play_sample_info_t ends
 
-endif   ; !_MIXER__DEF_INCLUDED
+endif   ; !_MIXER_DEF_INCLUDED

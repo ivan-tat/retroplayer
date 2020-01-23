@@ -1,4 +1,4 @@
-; mixer_.asm -- mixer functions.
+; mixer.asm -- mixer functions.
 ;
 ; This is free and unencumbered software released into the public domain.
 ; For more information, please refer to <http://unlicense.org>.
@@ -8,7 +8,7 @@
 
 DGROUP group _DATA
 
-include "mixer_.def"
+include "main/mixer.def"
 
 _DATA segment word public use16 'DATA'
 
@@ -270,11 +270,11 @@ _MixSampleMono8@_no0:
     shl     bx,1    ; HINT: 'bx' = n * 4
     sub     di,bx   ; NOTE: mixbuf is 1 channel @ 32 bits
     lgs     bx,[_dSmpInfo]
-    lds     si,dword ptr gs:[bx][TPlaySampleInfo.dData]
-    mov     cx,word ptr gs:[bx][TPlaySampleInfo.dPos]
-    add     si,word ptr gs:[bx][TPlaySampleInfo.dPos+2]
-    mov     ax,word ptr gs:[bx][TPlaySampleInfo.dStep]
-    mov     dx,word ptr gs:[bx][TPlaySampleInfo.dStep+2]
+    lds     si,dword ptr gs:[bx][play_sample_info_t.dData]
+    mov     cx,word ptr gs:[bx][play_sample_info_t.dPos]
+    add     si,word ptr gs:[bx][play_sample_info_t.dPos+2]
+    mov     ax,word ptr gs:[bx][play_sample_info_t.dStep]
+    mov     dx,word ptr gs:[bx][play_sample_info_t.dStep+2]
     mov     [_step_frac],ax
     xor     ebx,ebx
     mov     bh,[_bVol]
@@ -312,11 +312,11 @@ endm
     jnz     loop_mix_8_mono_0
 
     mov     bx,word ptr [_dSmpInfo]
-    sub     si,word ptr gs:[bx][TPlaySampleInfo.dData]
+    sub     si,word ptr gs:[bx][play_sample_info_t.dData]
 
 _MixSample_exit:
-    mov     word ptr gs:[bx][TPlaySampleInfo.dPos],cx
-    mov     word ptr gs:[bx][TPlaySampleInfo.dPos+2],si
+    mov     word ptr gs:[bx][play_sample_info_t.dPos],cx
+    mov     word ptr gs:[bx][play_sample_info_t.dPos+2],si
 
     pop     gs
     pop     fs
@@ -367,12 +367,12 @@ _MixSampleMono16@_no0:
     sub     di,bx   ; NOTE: mixbuf is 1 channel @ 32 bits
     lgs     bx,[_dSmpInfo]
     xor     esi,esi
-    lds     si,dword ptr gs:[bx][TPlaySampleInfo.dData]
-    mov     cx,word ptr gs:[bx][TPlaySampleInfo.dPos]
+    lds     si,dword ptr gs:[bx][play_sample_info_t.dData]
+    mov     cx,word ptr gs:[bx][play_sample_info_t.dPos]
     shr     si,1
-    add     si,word ptr gs:[bx][TPlaySampleInfo.dPos+2]
-    mov     ax,word ptr gs:[bx][TPlaySampleInfo.dStep]
-    mov     dx,word ptr gs:[bx][TPlaySampleInfo.dStep+2]
+    add     si,word ptr gs:[bx][play_sample_info_t.dPos+2]
+    mov     ax,word ptr gs:[bx][play_sample_info_t.dStep]
+    mov     dx,word ptr gs:[bx][play_sample_info_t.dStep+2]
     mov     [_step_frac],ax
     mov     [_step_int],dx
     mov     edx,8000h
@@ -416,7 +416,7 @@ endm
 
     mov     bx,word ptr [_dSmpInfo]
     shl     si,1
-    sub     si,word ptr gs:[bx][TPlaySampleInfo.dData]
+    sub     si,word ptr gs:[bx][play_sample_info_t.dData]
     shr     si,1
     jmp     _MixSample_exit
 _MixSampleMono16 endp
@@ -455,11 +455,11 @@ _MixSampleStereo8@_no0:
     shl     bx,2    ; HINT: 'bx' = n * 8
     sub     di,bx   ; NOTE: mixbuf is 2 channels @ 32 bits
     lgs     bx,[_dSmpInfo]
-    lds     si,dword ptr gs:[bx][TPlaySampleInfo.dData]
-    mov     cx,word ptr gs:[bx][TPlaySampleInfo.dPos]
-    add     si,word ptr gs:[bx][TPlaySampleInfo.dPos+2]
-    mov     ax,word ptr gs:[bx][TPlaySampleInfo.dStep]
-    mov     dx,word ptr gs:[bx][TPlaySampleInfo.dStep+2]
+    lds     si,dword ptr gs:[bx][play_sample_info_t.dData]
+    mov     cx,word ptr gs:[bx][play_sample_info_t.dPos]
+    add     si,word ptr gs:[bx][play_sample_info_t.dPos+2]
+    mov     ax,word ptr gs:[bx][play_sample_info_t.dStep]
+    mov     dx,word ptr gs:[bx][play_sample_info_t.dStep+2]
     mov     [_step_frac],ax
     xor     ebx,ebx
     mov     bh,[_bVol]
@@ -497,7 +497,7 @@ endm
     jnz     loop_mix_8_stereo_0
 
     mov     bx,word ptr [_dSmpInfo]
-    sub     si,word ptr gs:[bx][TPlaySampleInfo.dData]
+    sub     si,word ptr gs:[bx][play_sample_info_t.dData]
     jmp     _MixSample_exit
 _MixSampleStereo8 endp
 
@@ -536,12 +536,12 @@ _MixSampleStereo16@_no0:
     shl     bx,2    ; HINT: 'bx' = n * 8
     sub     di,bx   ; NOTE: mixbuf is 2 channels @ 32 bits
     lgs     bx,[_dSmpInfo]
-    lds     si,dword ptr gs:[bx][TPlaySampleInfo.dData]
-    mov     cx,word ptr gs:[bx][TPlaySampleInfo.dPos]
+    lds     si,dword ptr gs:[bx][play_sample_info_t.dData]
+    mov     cx,word ptr gs:[bx][play_sample_info_t.dPos]
     shr     si,1
-    add     si,word ptr gs:[bx][TPlaySampleInfo.dPos+2]
-    mov     ax,word ptr gs:[bx][TPlaySampleInfo.dStep]
-    mov     dx,word ptr gs:[bx][TPlaySampleInfo.dStep+2]
+    add     si,word ptr gs:[bx][play_sample_info_t.dPos+2]
+    mov     ax,word ptr gs:[bx][play_sample_info_t.dStep]
+    mov     dx,word ptr gs:[bx][play_sample_info_t.dStep+2]
     mov     [_step_frac],ax
     mov     [_step_int],dx
     mov     edx,8000h
@@ -585,7 +585,7 @@ endm
 
     mov     bx,word ptr [_dSmpInfo]
     shl     si,1
-    sub     si,word ptr gs:[bx][TPlaySampleInfo.dData]
+    sub     si,word ptr gs:[bx][play_sample_info_t.dData]
     shr     si,1
     jmp     _MixSample_exit
 _MixSampleStereo16 endp

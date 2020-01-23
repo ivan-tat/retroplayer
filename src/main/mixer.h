@@ -19,11 +19,11 @@
 
 /* Sample playing */
 
-#define MIXSMPFL_16BITS 0x01
-#define MIXSMPFL_LOOP   0x02
+#define PLAYSMPFL_16BITS 0x01
+#define PLAYSMPFL_LOOP   0x02
 
 #pragma pack(push, 1);
-typedef struct playSampleInfo_t
+typedef struct play_sample_info_t
 {
     void    *dData;
     uint32_t dPos;
@@ -37,13 +37,13 @@ typedef struct playSampleInfo_t
 
 extern void __far __pascal _play_sample_nearest_8 (
     void *outbuf,
-    struct playSampleInfo_t *smpInfo,
+    struct play_sample_info_t *smpInfo,
     uint16_t count
 );
 
 extern void __far __pascal _play_sample_nearest_16 (
     void *outbuf,
-    struct playSampleInfo_t *smpInfo,
+    struct play_sample_info_t *smpInfo,
     uint16_t count
 );
 
@@ -65,7 +65,7 @@ extern void __far __pascal _mix_sample2 (
 
 extern void __far __pascal _MixSampleMono8 (
     void *outBuf,
-    struct playSampleInfo_t *smpInfo,
+    struct play_sample_info_t *smpInfo,
     uint16_t volTab,
     uint8_t vol,
     uint16_t count
@@ -73,7 +73,7 @@ extern void __far __pascal _MixSampleMono8 (
 
 extern void __far __pascal _MixSampleMono16 (
     void *outBuf,
-    struct playSampleInfo_t *smpInfo,
+    struct play_sample_info_t *smpInfo,
     uint16_t volTab,
     uint8_t vol,
     uint16_t count
@@ -81,7 +81,7 @@ extern void __far __pascal _MixSampleMono16 (
 
 extern void __far __pascal _MixSampleStereo8 (
     void *outBuf,
-    struct playSampleInfo_t *smpInfo,
+    struct play_sample_info_t *smpInfo,
     uint16_t volTab,
     uint8_t vol,
     uint16_t count
@@ -89,7 +89,7 @@ extern void __far __pascal _MixSampleStereo8 (
 
 extern void __far __pascal _MixSampleStereo16 (
     void *outBuf,
-    struct playSampleInfo_t *smpInfo,
+    struct play_sample_info_t *smpInfo,
     uint16_t volTab,
     uint8_t vol,
     uint16_t count

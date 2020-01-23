@@ -78,7 +78,7 @@ uses
 procedure _play_sample_nearest_8; external;
 procedure _play_sample_nearest_16; external;
 
-(*$l asm\mixer_.obj*)
+(*$l asm\mixer.obj*)
 
 procedure _mix_sample; external;
 procedure _mix_sample2; external;

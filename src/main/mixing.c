@@ -52,7 +52,7 @@ void __near song_play_channel (PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIX
     MIXBUF *mb;
     void *outBuf;
     MIXCHNTYPE chtype;
-    struct playSampleInfo_t smpInfo;
+    struct play_sample_info_t smpInfo;
     unsigned int smpPos;
     MUSINS *ins;
     PCMSMP *smp;
@@ -152,7 +152,7 @@ void __near song_play_channel (PLAYSTATE *ps, MIXCHN *chn, bool callEffects, MIX
     }
     if (smpPos >= chn->wSmpLoopEnd)
     {
-        if (chn->bSmpFlags & MIXSMPFL_LOOP)
+        if (chn->bSmpFlags & PLAYSMPFL_LOOP)
         {
             while (smpPos >= chn->wSmpLoopEnd)
             {
