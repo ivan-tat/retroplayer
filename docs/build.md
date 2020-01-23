@@ -72,25 +72,25 @@ Use script [scripts/dosemu/dosemu](../scripts/dosemu/dosemu) for that.
 
 # Build project
 
-## Debug build
+## Configure
 
 ```sh
 cd ~/Projects/retroplayer
-make all LINKER_TPC=1 DEBUG=1
+./configure
 ```
 
-Start DOSEMU. When you are in DOS project's directory type:
+Select all needed flags and press <Ok>. This will save configuration files to build the project.
 
-```sh
-make all "DEBUG=1"
-```
+**Note**: You must clean project's folder each time you change the build configuration.
 
-## Release build
+## Build
 
 ```sh
 cd ~/Projects/retroplayer
-make all LINKER_TPC=1
+make all
 ```
+
+## Build in DOS DJGPP environment
 
 Start DOSEMU. When you are in DOS project's directory type:
 
@@ -98,7 +98,7 @@ Start DOSEMU. When you are in DOS project's directory type:
 make all
 ```
 
-**Note**: You must clean project's folder each time you want to build other type of target (when switching between *release* and *debug* versions).
+This is only useful if you're using DOS native tools to build the project files.
 
 # Test project
 
