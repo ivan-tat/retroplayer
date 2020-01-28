@@ -15,6 +15,7 @@ set test_9=playosci
 set test_10=test
 set test_11=testcrt
 set test_12=testexec
+set test_13=testheap
 
 :_start
 mode.com co80,50
@@ -33,11 +34,13 @@ echo 9. %test_9%
 echo A. %test_10%
 echo B. %test_11%
 echo C. %test_12%
+echo D. %test_13%
 echo.
 echo (using test song: %PlayTestSong%)
 echo.
-choice /C:0123456789ABC
+choice /C:0123456789ABCD
 
+if errorlevel 14 goto _13
 if errorlevel 13 goto _12
 if errorlevel 12 goto _11
 if errorlevel 11 goto _10
@@ -134,6 +137,12 @@ goto _repeat
 echo.
 echo Running test 12...
 %MiscTestPath%\%test_12%
+goto _repeat
+
+:_13
+echo.
+echo Running test 13...
+%MiscTestPath%\%test_13%
 goto _repeat
 
 :_end

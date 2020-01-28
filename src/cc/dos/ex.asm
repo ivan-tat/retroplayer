@@ -9,7 +9,7 @@
 _DATA segment word public use16 'DATA'
 _DATA ends
 
-_BSS segment word public use16 'DATA'
+_BSS segment word public use16 'BSS'
 saved_stack dd ?
 _BSS ends
 

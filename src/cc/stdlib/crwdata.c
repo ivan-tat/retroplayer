@@ -15,6 +15,6 @@
 
 #if DEFINE_LOCAL_DATA == 1
 
-const static uint16_t cc_psp = 0;
+//static uint16_t _cc_psp = 0;  /* defined in startup.c */
 
 #endif  /* DEFINE_LOCAL_DATA == 1 */

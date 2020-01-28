@@ -270,6 +270,8 @@ bool cc_environ_rebuild(void)
     return status;
 }
 
+/*** Initialization ***/
+
 bool cc_environ_init(void)
 {
     bool status;
@@ -298,8 +300,6 @@ void cc_environ_free(void)
     SYSDEBUG_END ();
     #endif  /* SYSDEBUG_ENV == 1 */
 }
-
-/*** Initialization ***/
 
 /*static void *_oldexit_environ = NULL;*/
 

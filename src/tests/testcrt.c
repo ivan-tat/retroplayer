@@ -9,7 +9,7 @@
 #include "sysdbg.h"
 #include "debug.h"
 #include "startup.h"
-#include "test.h"
+#include "tests/testcrt.h"
 
 void __noreturn _start_c (void)
 {

@@ -169,7 +169,7 @@ endif
 ## <name>_DIR(S) - local directory(s)
 ## <name>_INCS - source files to be included in other source files
 ## <name>_SRCS - source files
-## <name>_OBJS - object files files
+## <name>_OBJS - object files
 ## <name>_LIBS - library files
 ## <name>_EXES - executable files
 ## <name>_DEPS - dependency files
@@ -641,6 +641,37 @@ $(DEPDIR)/$(testexec_main_SRCS:.c=.$(DEPEXT)): $(testexec_SRCS)
 $(testexec_EXES): $(testexec_LIBS) $(testexec_OBJS)
 	$(LD) $(LFLAGS) $(patsubst %,library %,$(testexec_LIBS)) $(patsubst %,file %,$(testexec_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 
+## > testheap.exe
+
+testheap_main_SRCS := tests/testheap.c
+testheap_extra_SRCS :=
+testheap_SRCS := $(testheap_main_SRCS) $(testheap_extra_SRCS)
+testheap_OBJS := \
+ $(patsubst %.asm,%.o,$(filter %.asm,$(testheap_SRCS))) \
+ $(patsubst %.c,%.o,$(filter %.c,$(testheap_SRCS)))
+testheap_LIBS := $(CCLIB) $(PLIB)
+testheap_EXES := $(testheap_main_SRCS:.c=.exe)
+testheap_DEPS := \
+ $(patsubst %.asm,$(DEPDIR)/%.$(DEPEXT),$(filter %.asm,$(testheap_SRCS))) \
+ $(patsubst %.c,$(DEPDIR)/%.$(DEPEXT),$(filter %.c,$(testheap_SRCS)))
+testheap_TMPS += $(patsubst %.c,%.$(ASMTMPEXT_DOS),$(filter %.c,$(testheap_SRCS)))
+
+SRCS += $(testheap_SRCS)
+OBJS += $(testheap_OBJS)
+ifeq "$(LINKER_TPC)" "1"
+else
+EXES += $(testheap_EXES)
+endif
+DEPS += $(testheap_DEPS)
+TMPS += $(testheap_TMPS)
+
+## Dependency generation rules:
+$(DEPDIR)/$(testheap_main_SRCS:.c=.$(DEPEXT)): $(testheap_SRCS)
+	$(make_c_exec_dos_deps)
+
+## Build rules
+$(testheap_EXES): $(testheap_LIBS) $(testheap_OBJS)
+	$(LD) $(LFLAGS) $(patsubst %,library %,$(testheap_LIBS)) $(patsubst %,file %,$(testheap_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
 ##=------------------=##
 ## Player executables ##
 ##=------------------=##

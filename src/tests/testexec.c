@@ -10,7 +10,7 @@
 #include "sysdbg.h"
 #include "debug.h"
 #include "startup.h"
-#include "test.h"
+#include "tests/testexec.h"
 
 #define CHECK_IO 1
 
