@@ -10,7 +10,6 @@
 #
 # Debian packages used: coreutils, bash, dialog | whiptail.
 
-
 set -e
 shopt -s extglob
 
@@ -58,7 +57,7 @@ declare DIALOG
 
 DIALOG="`which dialog`" || true
 if [[ x"$DIALOG" == x ]]; then
-    DIALOG=`which whiptail`
+    DIALOG=`which whiptail` || true
 fi
 if [[ x"$DIALOG" == x ]]; then
     echo 'Error: no "dialog" nor "whiptail" found.' >&2

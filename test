@@ -1,6 +1,57 @@
-#!/bin/sh
-# This script must be run in GNU/Linux
-OLDPWD="$PWD"
-cd scripts/dosbox
-./test
-cd "$OLDPWD"
+#!/bin/bash
+#
+# This script launches test environment.
+#
+# This is free and unencumbered software released into the public domain.
+# For more information, please refer to <http://unlicense.org>.
+#
+# Supported environments:
+#   * GNU/Linux
+#
+# Debian packages used: coreutils, bash, dialog | whiptail.
+
+set -e
+
+DOSEMU_CONF=~/.dosemu/dosemu.conf
+
+declare DIALOG
+
+DIALOG="`which dialog`" || true
+if [[ x"$DIALOG" == x ]]; then
+    DIALOG=`which whiptail` || true
+fi
+if [[ x"$DIALOG" == x ]]; then
+    echo 'Error: no "dialog" nor "whiptail" found.' >&2
+    exit 1
+fi
+
+declare tmp
+declare tool
+
+tmp=`mktemp`
+$DIALOG --notags --separate-output --radiolist 'Select tool to launch' 10 40 3 \
+    dosbox '[good] DOSBox' 1 \
+    dosemu '[bad] DOSEMU in a window' 0 \
+    dosemu_dumb '[bad] DOSEMU in a dumb mode' 0 2> "$tmp" || { rm -f "$tmp"; exit 1; }
+read tool < "$tmp" || true
+rm -f "$tmp"
+
+case "$tool" in
+dosbox)
+    OLDPWD="$PWD"
+    cd scripts/dosbox
+    ./test || true
+    cd "$OLDPWD"
+    ;;
+dosemu)
+    dosemu
+    ;;
+dosemu_dumb)
+    dosemu -t
+    ;;
+*)
+    echo 'Cancelled.' >&2
+    ;;
+esac
+
+echo 'Done.' >&2
