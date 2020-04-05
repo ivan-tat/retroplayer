@@ -1,16 +1,18 @@
 # Overview
 
-This section describes how to prepare a build environment for compiling this project. Some actions must be run as *root* or using `sudo`. I expect that you know what you are doing. And remember – one needs to be a hero to compile this stuff. I will use Debian GNU/Linux as a base OS if you don't mind.
+This section describes how to prepare a build environment to compile this project. Some actions must be run as *root* or using `sudo`. I expect that you know what you are doing. And remember – one needs to be a hero to compile this stuff. I will use Debian GNU/Linux as a base OS if you don't mind.
 
-The compilation is done in two steps:
+Initially the compilation process was done in two steps:
 
-   1) C and assembler files compilation in a GNU/Linux environment using *Open Watcom tools*;
+   1) C and assembler files compilation into object files in a GNU/Linux environment using native GNU/Linux tools and *Open Watcom tools* for GNU/Linux;
 
-   2) Pascal files compilation in a DOS environment using *DOSEMU* and *DJGPP development kit*.
+   2) Pascal files compilation and object files linking in a DOS environment using *QEMU*, *DOSEMU*, *DJGPP development kit* and native Pascal linker.
 
-This split was made because we're going to drop old Pascal compiler and DOS environment and use a clean cross-compiling toolchain in the future. For now it is possible to run the first step in a DOS environment too.
+This split initially was made because we were going to drop old Pascal compiler under DOS environment and use a clean cross-compiling GNU/Linux toolchain in the future. It was possible to run the first step in a DOS environment too, but now you should avoid this, because it needs some modifications to scripts, it's weird, slow and tools used in DOS are heavy and hungry for memory (RAM & HDD).
 
-To test functionality of the player we'll use *DOSBox* because of DOSEMU incompatibility issues.
+For now it is possible to compile the whole project in a GNU/Linux environment (only a first step above) without the use of native Pascal linker.
+
+To test functionality of the player it is better to use *DOSBox* because of DOSEMU incompatibility issues.
 
 # Setup build environment for GNU/Linux
 
@@ -38,13 +40,13 @@ If you want to build using GNU/Linux environment then set needed environment var
 
 Use script [scripts/dosemu/watcom](../scripts/dosemu/watcom) for that.
 
-## 4. Install abandoned Pascal compiler for DOS
+## 4. Install abandoned Pascal compiler for DOS (if you plan to use it)
+
+*NOTE*: This step is not neccessary.
 
    1) Find binary files of it and install them manually (preferrably in `c:\lang\tp` or similar);
 
    2) Create `c:\tp.bat` DOS shell script to update DOS environment variables (usually PATH) to use it.
-
-This step will be removed in the future.
 
 Use script [scripts/dosemu/tp](../scripts/dosemu/tp) for that.
 
