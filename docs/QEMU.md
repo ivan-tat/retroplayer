@@ -1,91 +1,112 @@
-# Using QEMU virtual machine to build project
+# Definitions
 
-Here we setup QEMU virtual machine with NFS support and emulated DOS environment. We hold project specific files on the host and do compilation in to steps:
+* VM - a QEMU virtual machine;
+* If a shell command is preceeded with `#` - it means that this command must be run under user *root* or under normal user using `sudo` command.
+* If a shell command is preceeded with `$` - it means that this command may be run under normal user (not *root*).
 
-1. Compile the first part of project on the host using host's native tools;
+# Using VM to build the project
 
-2. Compile the remaining part of project shared by NFS in SSH session in QEMU virtual machine using native DOS tools.
+Here we setup a VM with NFS support and emulated DOS environment. We hold project specific files on the host and compile in to steps:
+
+1. Compile the first part of the project on the host using host's native tools;
+2. Compile the remaining part of the project shared by NFS in SSH console in a VM using native DOS tools.
 
 **Important**: In recent Debian GNU/Linux (valid for 9/stretch with any kernel from 4.9 and above) the QEMU DPMI functionality is broken because of specific kernel-patches, so we have to use old version (8/jessie) or use a custom build environment using QEMU with appropriate Linux kernel (not even Debian-based). See below for more details.
 
-# 1. Setup build environment for QEMU virtual machine
+# Prepare the VM build environment
 
-## 1.1. Download boot image
-
-Here is an example script to download Debian GNU/Linux 8 (jessie) boot image (works fine with *dosemu*):
+Download boot image. Here is an example script to download Debian GNU/Linux 8 (jessie) boot image (works fine with *dosemu*):
 
 ```sh
-IMAGE_URL='https://cdimage.debian.org/cdimage/archive/8.11.0/i386/iso-cd'
-IMAGE_FILE='debian-8.11.0-i386-netinst.iso'
-wget -c $IMAGE_URL/$IMAGE_FILE
-wget -c $IMAGE_URL/SHA512SUMS
+_URL='https://cdimage.debian.org/cdimage/archive/8.11.0/i386/iso-cd'
+wget -c $_URL/debian-8.11.0-i386-netinst.iso $_URL/SHA512SUMS
 sha512sum --ignore-missing -c SHA512SUMS
 ```
 
-## 1.2. Install QEMU build environment
-
-### 1.2.1. [Client] Install OS in QEMU virtual machine
+## Install OS in VM
 
 You can use [scripts/qemu/build-qemu-install.sh](../scripts/qemu/build-qemu-install.sh) script for that. See configuration file [scripts/qemu/build.conf](../scripts/qemu/build.conf). Change it if needed. You may want to change IPv4 address according to your network configuration. Use `ifconfig` to check current network setup.
 
-### 1.2.2. [Client] Install dosemu in QEMU virtual machine
+You may install `sudo` package if needed.
 
-Launch installed OS in QEMU virtual machine, login and type:
+### How-to: Start VM
 
-```sh
-sudo apt install dosemu
-```
+You can use [scripts/qemu/build-qemu-run.sh](../scripts/qemu/build-qemu-run.sh) script for that.
 
-You can use [scripts/qemu/build-qemu-run.sh](../scripts/qemu/build-qemu-run.sh) script to launch QEMU virtual machine.
+You will be prompted to log in. When the VM is active it must be switched off correctly or you may damage your VM.
 
-## 1.3. Setup NFS server
+### How-to: Stop VM
 
-### 1.3.1. Install NFS server package
+When you logged in as a user in VM or via SSH console to VM, type:
 
 ```sh
-sudo apt install nfs-kernel-server
+# shutdown -h now
 ```
 
-### 1.3.2. Create NFS folder to share project's files
+and wait VM to shutdown. All active SSH sessions (if any) to the VM will be closed automatically.
+
+## Install *dosemu* in VM
+
+Start VM, log in as *root* and type:
 
 ```sh
-mkdir -p /srv/nfs/
-chown 1000:1000 /srv/nfs
+# apt install dosemu
 ```
 
-### 1.3.3. Add this folder to NFS export list
+## Setup NFS server on the host
 
-Edit the file `/etc/exports` - add a line:
+Install NFS server package on the host:
+
+```sh
+# apt install nfs-kernel-server
+```
+
+Create NFS folder on the host to share project's files with VM:
+
+```sh
+# mkdir -p /srv/nfs
+# chown 1000:1000 /srv/nfs
+```
+
+To add this folder to NFS export list open the file `/etc/exports` in editor:
+
+```sh
+# nano /etc/exports
+```
+
+and add a line:
 
 ```
 /srv/nfs 127.0.0.1(rw,sync,no_subtree_check,all_squash,insecure,anonuid=1000,anongid=1000)
 ```
 
-or if above does not works then try this:
+or, if above does not work for some reason, try this line:
 
 ```
 /srv/nfs 127.0.0.1(rw,sync,no_subtree_check,no_root_squash,insecure)
 ```
 
-### 1.3.4. Share all NFS folders
+Save it and close. To share all NFS folders type:
 
 ```sh
-sudo exportfs -av
+# exportfs -av
 ```
 
-## 1.4. [Client] Setup NFS client inside QEMU virtual machine
+## Setup NFS client inside VM
 
-Run QEMU virtual machine. You can use [scripts/qemu/build-qemu-run.sh](../scripts/qemu/build-qemu-run.sh) script for that.
-
-### 1.4.1. [Client] Install NFS client package
+Start VM, log in as *root* and install NFS client package inside it:
 
 ```sh
-sudo apt install nfs-common
+# apt install nfs-common
 ```
 
-### 1.4.2. [Client] Add static NFS mount point
+Open file `/etc/fstab` in editor:
 
-Edit `/etc/fstab` - add a line:
+```sh
+# nano /etc/fstab
+```
+
+and add a line to add static NFS mount point:
 
 ```
 192.168.1.130:/srv/nfs /mnt/nfs nfs hard 0 0
@@ -93,100 +114,57 @@ Edit `/etc/fstab` - add a line:
 
 **Hint**: Change IPv4 address as set in [scripts/qemu/build.conf](../scripts/qemu/build.conf) file.
 
-### 1.4.3. [Client] Mount NFS folder
+Now mount NFS folder in VM:
 
 ```sh
-sudo mount -a
+# mount -a
 ```
 
-## 1.5. Setup shared NFS folder
+## Setup shared NFS folder: move project-specific files into `/srv/nfs`
 
-### 1.5.1. Move project-specific files into `/srv/nfs`
-
-Move *dosemu* configuration and *retroplayer* folder to the shared NFS folder, make symbolic links back to original folders:
+On the host move *dosemu* configuration and *retroplayer* folder to the shared NFS folder (replace `<user>` with normal user's name where *dosemu* configuration is stored):
 
 ```sh
-sudo mv ~/.dosemu /srv/nfs
-sudo mv ~/Projects/retroplayer /srv/nfs
-ln -s /srv/nfs/.dosemu ~/.dosemu
-ln -s /srv/nfs/retroplayer ~/Projects/retroplayer
+# mv /home/<user>/.dosemu /srv/nfs
+# mv /home/<user>/Projects/retroplayer /srv/nfs
 ```
 
-Now everything from `/srv/nfs` host's folder is available in QEMU virtual machine in `/mnt/nfs` folder.
+and make symbolic links back to original folders:
 
-# 2. Using QEMU build environment
+```sh
+$ ln -s /srv/nfs/.dosemu /home/<user>/.dosemu
+$ ln -s /srv/nfs/retroplayer /home/<user>/Projects/retroplayer
+```
 
-## 2.1. Enter QEMU build environment
+Now the content of `/srv/nfs` host's folder is accessible from `/mnt/nfs` VM's folder.
 
-### 2.1.1. Start QEMU virtual machine
+# Using VM build environment
 
-You can use [scripts/qemu/build-qemu-run.sh](../scripts/qemu/build-qemu-run.sh) script for that.
+## Enter VM build environment
 
-### 2.1.2. Log in QEMU virtual machine via SSH from the host
-
-Wait for virtual machine to boot the installed OS then do login to it via SSH.
-
-You can use [scripts/qemu/build-qemu-ssh.sh](../scripts/qemu/build-qemu-ssh.sh) script for that. Enter QEMU virtual machine user's password to login.
-
-### 2.1.3. Start dosemu
+Start VM. Wait for VM to boot the installed OS then log in as normal user to it via SSH from the host. You can use [scripts/qemu/build-qemu-ssh.sh](../scripts/qemu/build-qemu-ssh.sh) script for that. Enter VM user's password to log in.
 
 In SSH session start *dosemu* in dumb mode (text console):
 
 ```sh
-dosemu -t
+$ dosemu -t
 ```
 
-Now we are in a virtual DOS environment. Type `init` to setup current DOS path and all environment variables for current project. This should be done once per *dosemu* console session.
+**Note**: On a virtual DOS environment startup the file `autoexec.bat` is automatically executed. If you used specified scripts earlier to set up DOS environment then `init.bat` script is also executed and the current folder is set to our project's home path. Otherwise you must call `init.bat` script manually. To do so just type `init` and you're done. This should be done once per *dosemu* console session.
 
-## 2.2. Clean the project directory tree on the host
+Now when DOS paths and all environment variables for current project are set we are ready to compile the project.
 
-Type `make clean` in the project's folder:
+## Compile the project in SSH console
 
-```sh
-cd ~/Projects/retroplayer
-make clean
-```
+In the project's folder type `make all` or any other commands you want to.
 
-## 2.3. Compile on the host
+## Stop VM from SSH console
 
-In the project's folder on the host type:
+In SSH console type `exitemu` to close opened *dosemu* session then shutdown VM (use `su` or `sudo` command in SSH console to act as *root*).
 
-```sh
-make all LINKER_TPC=1
-```
+# Links
 
-to compile what is possible on the host using Turbo Pascal linker (*release* version). Add `DEBUG=1` parameter to compile *debug* version:
-
-```sh
-make all LINKER_TPC=1 DEBUG=1
-```
-
-**Note**: You must clean project's folder each time you want to build other type of target (when switching between *release* and *debug* versions).
-
-## 2.4. [Client] Compile in SSH session
-
-In the project's folder type:
-
-```sh
-make all
-```
-
-to compile the rest of the project (*release* version). Add `"DEBUG=1"` parameter (remember to use *double quotes* in DOS for that) to compile *debug* version:
-
-```sh
-make all "DEBUG=1"
-```
-
-## 2.5. Test compiled binaries
-
-In the project's folder on the host type `test`. This will launch DOS environment with tests.
-
-## 2.6. [Client] Close QEMU build environment
-
-### 2.6.1. [Client] Leave dosemu session
-
-In SSH session type `exitemu` to close opened *dosemu* session.
-
-### 2.6.2. [Client] Shutdown QEMU virtual machine
-
-Type `sudo shutdown -h now` and wait QEMU virtual machine to shutdown. Current SSH session will be closed automatically.
+* [Debian GNU/Linux](https://www.debian.org/) - a free operating system for your computer;
+* [sudo](http://www.sudo.ws/) - utility to provide limited super user privileges to specific users ([package](https://pkgs.org/search/?q=sudo));
+* [GNU wget](https://www.gnu.org/software/wget/) - a free software for retrieving files using HTTP, HTTPS, FTP and FTPS the most widely-used Internet protocols ([package](https://pkgs.org/search/?q=wget));
+* [QEMU](https://www.qemu.org/) - a generic and open source machine emulator and virtualizer ([package](https://pkgs.org/search/?q=qemu));
