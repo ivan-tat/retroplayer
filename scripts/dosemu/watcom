@@ -1,6 +1,6 @@
 #!/bin/bash
 # This script must be run in GNU/Linux.
-# Packages used: coreutils, wget, tar, grep, sudo.
+# Packages used: coreutils, wget, tar, grep, sudo, dos2unix.
 
 set -e
 . ./setup.conf
@@ -41,7 +41,7 @@ else
 fi
 
 if [ ! -f "$ENV_WATCOM_INIT" ]; then
-    cat >"$ENV_WATCOM_INIT" <<EOF
+    cat <<EOF | unix2dos > "$ENV_WATCOM_INIT"
 @echo off
 set WATCOM=$DOS_WATCOM_DIR
 set PATH=%WATCOM%\\binw;%PATH%

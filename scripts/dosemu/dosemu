@@ -1,6 +1,6 @@
 #!/bin/bash
 # This script must be run in GNU/Linux.
-# Packages used: coreutils, grep.
+# Packages used: coreutils, grep, dos2unix.
 
 set -e
 . ./setup.conf
@@ -15,8 +15,18 @@ echo_warn() {
     echo -n -e "\e[0m" >&2
 }
 
+if [ ! -f "$SYS_DOSEMU_CONF" ]; then
+    cat <<EOF > "$SYS_DOSEMU_CONF"
+\$_ems_frame = (0xe000)
+\$_sound = (2)
+EOF
+    echo_info "Created '$SYS_DOSEMU_CONF' file."
+else
+    echo_warn "Skip: File '$SYS_DOSEMU_CONF' already exists."
+fi
+
 if [ ! -f "$ENV_PROJECT_INIT" ]; then
-    cat >"$ENV_PROJECT_INIT" <<EOF
+    cat <<EOF | unix2dos > "$ENV_PROJECT_INIT"
 @echo off
 call $DOS_DJGPP_INIT
 call $DOS_WATCOM_INIT
@@ -29,8 +39,8 @@ else
     echo_warn "Skip: File '$ENV_PROJECT_INIT' already exists."
 fi
 
-if ! grep -F -x "call $DOS_PROJECT_INIT" "$ENV_DRIVE_C_DIR/autoexec.bat" >/dev/null; then
-    cat >>"$ENV_DRIVE_C_DIR/autoexec.bat" <<EOT
+if ! dos2unix < "$ENV_DRIVE_C_DIR/autoexec.bat" | grep -F -x "call $DOS_PROJECT_INIT" >/dev/null; then
+    cat <<EOT | unix2dos >> "$ENV_DRIVE_C_DIR/autoexec.bat"
 call $DOS_PROJECT_INIT
 EOT
     echo_info "Updated '$ENV_DRIVE_C_DIR/autoexec.bat' file."

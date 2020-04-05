@@ -1,6 +1,6 @@
 #!/bin/bash
 # This script must be run in GNU/Linux.
-# Packages used: coreutils, wget, unzip.
+# Packages used: coreutils, wget, unzip, dos2unix.
 
 set -e
 . ./setup.conf
@@ -47,7 +47,7 @@ else
 fi
 
 if [ ! -f "$ENV_DJGPP_INIT" ]; then
-    cat >"$ENV_DJGPP_INIT" <<EOF
+    cat <<EOF | unix2dos > "$ENV_DJGPP_INIT"
 @echo off
 set DJGPP=$DOS_DJGPP_DIR\\djgpp.env
 set PATH=%PATH%;$DOS_DJGPP_DIR\\bin

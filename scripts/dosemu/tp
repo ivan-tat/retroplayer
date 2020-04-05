@@ -1,6 +1,6 @@
 #!/bin/bash
 # This script must be run in GNU/Linux.
-# Packages used: coreutils.
+# Packages used: coreutils, dos2unix.
 
 set -e
 . ./setup.conf
@@ -23,7 +23,7 @@ else
 fi
 
 if [ ! -f "$ENV_TP_INIT" ]; then
-    cat >"$ENV_TP_INIT" <<EOF
+    cat <<EOF | unix2dos > "$ENV_TP_INIT"
 @echo off
 set PATH=%PATH%;$DOS_TP_DIR\\bin
 EOF
