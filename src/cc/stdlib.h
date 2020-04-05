@@ -28,7 +28,7 @@ extern void __far *cc_heap_org;
 extern void __far *cc_heap_end;
 extern void __far *cc_heap_ptr;
 extern void __far *cc_heap_free_list;
-extern uint16_t (* __far cc_heap_error) (void);
+extern uint16_t (* __far cc_heap_error) (uint16_t);
 
 /* Environment variables */
 extern char **cc_environ;

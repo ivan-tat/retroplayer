@@ -23,9 +23,14 @@ void __far *cc_heap_org = NULL;
 void __far *cc_heap_end = NULL;
 void __far *cc_heap_ptr = NULL;
 void __far *cc_heap_free_list = NULL;
-uint16_t (* __far cc_heap_error) (void) = NULL;
+uint16_t (* __far cc_heap_error) (uint16_t size) = NULL;
 
 #endif  /* DEFINE_LOCAL_DATA == 1 */
+
+uint16_t __far _heap_error_func (uint16_t size)
+{
+    return 0;
+}
 
 /*** Initialization ***/
 
@@ -37,6 +42,7 @@ void __near _heap_init (uint16_t seg_start, uint16_t size_paras)
     cc_heap_end = MK_FP (seg_start + size_paras, 0);
     cc_heap_ptr = cc_heap_org;
     cc_heap_free_list = cc_heap_org;
+    cc_heap_error = &_heap_error_func;
 }
 
 void __far _heap_done (void)

@@ -18,7 +18,7 @@
 /*
  * Returns maximum free heap's chunk size as far pointer.
  */
-void __far * __far _maxavail (void __far *size, struct cc_heap_free_rec_t __far *rec, uint16_t end_seg)
+void __far * _maxavail (void __far *size, struct cc_heap_free_rec_t __far *rec, uint16_t end_seg)
 {
     while (FP_SEG (rec) != end_seg)
     {
