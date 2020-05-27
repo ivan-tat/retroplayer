@@ -32,6 +32,7 @@ declare -a v_input_sources_user
 declare -a v_sources_real
 declare -a v_sources_base
 declare -a v_sources_user
+declare -a v_sources_parse  # 1 (must be parsed) or 0 (no parsing)
 declare    v_target_name
 declare    v_output_name
 declare -a v_prerequisites
@@ -321,14 +322,16 @@ add_input_source_with_check() {
     return 0
 }
 
-# $1=real file, $2=base path, $3=user file
+# $1=real file, $2=base path, $3=user file, $4=parse flag
 add_source() {
     local -i i
     i=${#v_sources_real[@]}
     v_sources_real[$i]="$1"
     v_sources_base[$i]="$2"
     v_sources_user[$i]="$3"
+    v_sources_parse[$i]="$4"
     _dbg "added new source #$i:"
+    _dbg "source [$i]: parse     = $4"
     _dbg "source [$i]: user name = '$3'"
     _dbg "source [$i]: base path = '$2'"
     _dbg "source [$i]: real name = '$1'"
@@ -474,14 +477,24 @@ parse_source() {
     local src_user=${v_sources_user[$1]}
     local src_base
     local f_loc
+    local -i inc_parse
     _dbg "parsing source #$1 ('$src_user')..."
     if [[ -f "${v_sources_user[$1]}" ]]; then
         tmp=`mktemp`
-        grep -E -e '^[[:space:]]*(include)[[:space:]]+"[^"]+"' "${v_sources_user[$1]}" | \
-        sed -r 's,^[[:space:]]*(include)[[:space:]]+"[[:space:]]*([^"]+)[[:space:]]*".*,\2,' > $tmp
+        grep -E -e '^[[:space:]]*(include|incbin)[[:space:]]+"[^"]+"' "${v_sources_user[$1]}" | \
+        sed -r 's,^[[:space:]]*(include|incbin)[[:space:]]+"[[:space:]]*([^"]+)[[:space:]]*".*,\1 \2,' > $tmp
         N=`wc -l < $tmp | cut -d : -f 1`
         _dbg "parsed '$src_user' with $N entries."
         while read f_loc; do
+            case "${f_loc%% *}" in
+            include)
+                inc_parse=1
+                ;;
+            incbin)
+                inc_parse=0
+                ;;
+            esac
+            f_loc="${f_loc#* }"
             inc_user="$f_loc"
             if [[ "${f_loc:0:1}" == '/' ]]; then
                 # absolute source's path - use it as is
@@ -489,7 +502,7 @@ parse_source() {
                 if [[ -f "$f_loc" ]]; then
                     inc_real="$f_loc"
                     inc_base=`dirname "$f_loc"`
-                    add_source "$inc_real" "$inc_base" "$inc_user"
+                    add_source "$inc_real" "$inc_base" "$inc_user" $inc_parse
                 else
                     rm -f $tmp
                     add_error "Specified '$f_loc' not found."
@@ -511,11 +524,11 @@ parse_source() {
                     fi
                 fi
                 if [[ -f "$inc_real" ]]; then
-                    add_source "$inc_real" "$inc_base" "$inc_user"
+                    add_source "$inc_real" "$inc_base" "$inc_user" $inc_parse
                 else
                     _dbg "'$f_loc' not found, resolving..."
                     if resolve_file "$f_loc" inc_user inc_base inc_real; then
-                        add_source "$inc_real" "$inc_base" "$inc_user"
+                        add_source "$inc_real" "$inc_base" "$inc_user" $inc_parse
                     else
                         rm -f $tmp
                         add_error "Specified '$f_loc' not found."
@@ -548,7 +561,7 @@ make_rule() {
         _real="${v_input_sources_real[$i]}"
         _base="${v_input_sources_base[$i]}"
         _user="${v_input_sources_user[$i]}"
-        add_source "$_real" "$_base" "$_user"
+        add_source "$_real" "$_base" "$_user" 1
         let i=i+1
     done
 
@@ -556,12 +569,19 @@ make_rule() {
     N=${#v_sources_real[@]}
     while [[ $i -lt $N ]]; do
         while [[ $i -lt $N ]]; do
-            if parse_source $i; then
+            case "x${v_sources_parse[$i]}" in
+            x1)
+                if parse_source $i; then
+                    add_prerequisite "${v_sources_user[$i]}"
+                else
+                    show_errors
+                    exit_on_errors
+                fi
+                ;;
+            *)
                 add_prerequisite "${v_sources_user[$i]}"
-            else
-                show_errors
-                exit_on_errors
-            fi
+                ;;
+            esac
             let i=i+1
         done
         i=N
