@@ -3,17 +3,8 @@
 # Packages used: coreutils, wget, tar, grep, sudo, dos2unix.
 
 set -e
+. ./common.shlib
 . ./setup.conf
-
-echo_info() {
-    echo -n -e "\e[0m" >&2
-    echo "$1" >&2
-}
-echo_warn() {
-    echo -n -e "\e[33m" >&2
-    echo "$1" >&2
-    echo -n -e "\e[0m" >&2
-}
 
 if [ ! -e "$SYS_WATCOM_LATEST_DIR" ]; then
     wget -c 'https://github.com/open-watcom/open-watcom-v2/releases/download/Last-CI-build/ow-snapshot.tar.gz' -O "$TMPDIR/watcom.tar.gz"

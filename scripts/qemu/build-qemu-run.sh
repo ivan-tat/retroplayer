@@ -1,5 +1,5 @@
 #!/bin/bash
-# Debian packages used: qemu-system-x86, sudo.
+# Debian packages used: qemu-system-x86.
 
 set -e
 . ./build.conf

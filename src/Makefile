@@ -20,7 +20,7 @@ HOST_TYPE       := native
 INCLUDE_DIRS    := .
 DEPDIR          := .deps
 DEPEXT          := d
-DEPAS_DOS       := ../scripts/aspp/aspp
+DEPAS_DOS       := ../scripts/aspp.sh
 DEPAFLAGS_DOS   := -E -MM -I $(INCLUDE_DIRS)
 #DEPCC           := gcc
 DEPCC           := owcc
@@ -321,9 +321,7 @@ endif
 
 $(DEPDIR)/%.$(DEPEXT): %.asm
 	set -e; $(RM) $@; mkdir -p $(@D); \
-	$(DEPAS_DOS) $(DEPAFLAGS_DOS) -MT $*.o -MF $@.$$$$ $<; \
-	sed -e 's,\($*\)\.o\([ :]*\),\1.o $@\2,' < $@.$$$$ > $@; \
-	$(RM) $@.$$$$
+	$(DEPAS_DOS) $(DEPAFLAGS_DOS) -MT $*.o -MT $@ -MF $@.$$$$ $<
 
 $(DEPDIR)/%.$(DEPEXT): %.c
 	$(make_c_obj_dos_deps)
@@ -672,6 +670,7 @@ $(DEPDIR)/$(testheap_main_SRCS:.c=.$(DEPEXT)): $(testheap_SRCS)
 ## Build rules
 $(testheap_EXES): $(testheap_LIBS) $(testheap_OBJS)
 	$(LD) $(LFLAGS) $(patsubst %,library %,$(testheap_LIBS)) $(patsubst %,file %,$(testheap_OBJS)) format dos option nodefaultlibs,start=_start_asm,dosseg,stack=16k,fullheader,map=$(@:.exe=.map) name $@
+
 ##=------------------=##
 ## Player executables ##
 ##=------------------=##

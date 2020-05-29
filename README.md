@@ -37,6 +37,8 @@ Plans for the future:
 
 * [GNU coding standards](https://www.gnu.org/prep/standards/)
 * [GNU Make](https://www.gnu.org/software/make/) (a tool which controls the generation of executables and other non-source files of a program from the program's source files)
+* [Git](https://git-scm.com/) (fast, scalable, distributed revision control system)
+* [aspp](https://gitlab.com/ivan-tat/aspp) (simple assembler source file preprocessor)
 * [dos2unix](https://waterlan.home.xs4all.nl/dos2unix.html) (convert text file line endings between CRLF and LF)
 * [FreeDOS](http://www.freedos.org/) (a complete, free, DOS-compatible operating system)
 * [GnuDOS](https://www.gnu.org/software/gnudos/) (a library designed to help new users of the GNU system, who are coming from a DOS background)
@@ -48,7 +50,7 @@ Plans for the future:
 * [Open Watcom V2](https://github.com/open-watcom) (fork of Open Watcom compilers for various platforms)
 * [Free Pascal](http://freepascal.org/) (advanced open source Pascal compiler for Pascal and Object Pascal for various platforms)
 * Borland/Turbo Pascal 7.0 compiler for DOS (will be dropped)
-* Sound Blaster Programming Information Version 0.90 (1995) by Andre Baresel & Craig Jackson
+* [Sound Blaster Programming Information Version 0.90 (1995)](http://www.dcee.net/Files/Programm/Sound/sblast09.zip) by Andre Baresel & Craig Jackson
 * [Sound Blaster Series Hardware Programming Guide](https://pdos.csail.mit.edu/6.828/2008/readings/hardware/SoundBlaster.pdf) (1993-1996) by Creative Technology Ltd.
 * [Sound Programming](https://soundprogramming.net/) by Jason Champion (collection of synthesizer, sampler, sequencer, drum machine, keyboard, and guitar synth manuals, specifications, and demos)
 * [TECH Help! 6.0](http://www.techhelpmanual.com/) (1994) by Flambeaux Software (DOS Technical Reference and PC, AT, and PS/2 BIOS and Hardware References)

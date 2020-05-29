@@ -1,19 +1,10 @@
 #!/bin/bash
 # This script must be run in GNU/Linux.
-# Packages used: coreutils, wget, unzip, dos2unix.
+# Packages used: coreutils, wget, unzip, unix2dos.
 
 set -e
+. ./common.shlib
 . ./setup.conf
-
-echo_info() {
-    echo -n -e "\e[0m" >&2
-    echo "$1" >&2
-}
-echo_warn() {
-    echo -n -e "\e[33m" >&2
-    echo "$1" >&2
-    echo -n -e "\e[0m" >&2
-}
 
 if [ ! -d "$ENV_DJGPP_DIR" ]; then
     mkdir -p "$ENV_DJGPP_DIR"

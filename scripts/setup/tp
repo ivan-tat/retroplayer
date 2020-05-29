@@ -3,17 +3,8 @@
 # Packages used: coreutils, dos2unix.
 
 set -e
+. ./common.shlib
 . ./setup.conf
-
-echo_info() {
-    echo -n -e "\e[0m" >&2
-    echo "$1" >&2
-}
-echo_warn() {
-    echo -n -e "\e[33m" >&2
-    echo "$1" >&2
-    echo -n -e "\e[0m" >&2
-}
 
 if [ ! -e "$ENV_TP_DIR" ]; then
     echo_warn "Error: You must manually install TP into '$ENV_TP_DIR' directory."

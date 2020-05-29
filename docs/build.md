@@ -28,7 +28,7 @@ Run DOSEMU and then exit typing `exitemu`. This will create a default DOSEMU con
 
 Install minimal DJGPP development kit into `c:\lang\djgpp` directory and create `c:\djgpp.bat` DOS shell configuration script following instructions in `c:\lang\djgpp\readme.1st` file.
 
-Use script [scripts/dosemu/djgpp](../scripts/dosemu/djgpp) for that.
+Use script [scripts/setup/djgpp](../scripts/setup/djgpp) for that.
 
 ## 3. Install Open Watcom tools
 
@@ -38,7 +38,7 @@ If you want to build using DOS environment then create `c:\watcom.bat` DOS shell
 
 If you want to build using GNU/Linux environment then set needed environment variables in `~/.bashrc` (you must re-login to use them).
 
-Use script [scripts/dosemu/watcom](../scripts/dosemu/watcom) for that.
+Use script [scripts/setup/watcom](../scripts/setup/watcom) for that.
 
 ## 4. Install abandoned Pascal compiler for DOS (if you plan to use it)
 
@@ -48,7 +48,7 @@ Use script [scripts/dosemu/watcom](../scripts/dosemu/watcom) for that.
 
    2) Create `c:\tp.bat` DOS shell script to update DOS environment variables (usually PATH) to use it.
 
-Use script [scripts/dosemu/tp](../scripts/dosemu/tp) for that.
+Use script [scripts/setup/tp](../scripts/setup/tp) for that.
 
 # Setup project files
 
@@ -62,7 +62,17 @@ sudo apt-get install git
 
 Download or clone project to `~/Projects/retroplayer` (or any other at your option) and make a symbolic link `c:\projects\rp` to it.
 
-Use script [scripts/dosemu/project](../scripts/dosemu/project) for that.
+Use script [scripts/setup/project](../scripts/setup/project) for that.
+
+## Download used tools
+
+Download used tools and place them in the project's tree as described below:
+
+File | Source
+--- | ---
+`scripts/aspp.sh` | https://gitlab.com/ivan-tat/aspp
+
+You can do this by typing `make download_all` in the `scripts` folder.
 
 # Prepare to build and test
 
@@ -70,7 +80,7 @@ Use script [scripts/dosemu/project](../scripts/dosemu/project) for that.
 
 Create `c:\init.bat` DOS shell script to set all needed DOS environment variables and to switch to `c:\projects\rp` directory.
 
-Use script [scripts/dosemu/dosemu](../scripts/dosemu/dosemu) for that.
+Use script [scripts/setup/dosemu](../scripts/setup/dosemu) for that.
 
 # Build project
 

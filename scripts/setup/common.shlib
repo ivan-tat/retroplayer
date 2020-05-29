@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# $1=message
+echo_info() {
+    echo -n -e "\e[0m" >&2
+    echo "$1" >&2
+}
+
+# $1=message
+echo_warn() {
+    echo -n -e "\e[33m" >&2
+    echo "$1" >&2
+    echo -n -e "\e[0m" >&2
+}
